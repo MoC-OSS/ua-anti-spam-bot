@@ -69,7 +69,6 @@ const onMessage = async ctx => {
     return;
   
   const rep = await getMessageReputation(ctx);
-  console.log(rep);
 
   if (rep.reputation <= 0 || (rep.userRep <= 0 && env.DISABLE_USER_REP))
     return ctx.deleteMessage();
