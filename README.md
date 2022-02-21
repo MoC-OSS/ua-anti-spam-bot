@@ -26,14 +26,15 @@ CHAT_WHITELIST=777777777,-1000000000000
 
 ## Configuration
 
-There are two kinds of reputation. There is reputation for a user sending the message, which will be saved and updated with each message. The single message also has its own reputation. If the reputation goes bellow 0, the message will be deleted. Everything is configurable in the ```.env``` file.
+There are two kinds of reputation. There is reputation for a user sending the message, which will be saved and updated with each message. The single message also has its own reputation. If the reputation goes bellow 0, the message will be deleted. Everything is configurable in the ```.env``` file. Channel reputation will not be saved.
 
-### USAGE EXAMPLE
+### Usage Example
 
 ```
 ONLY_WORK_IN_COMMENTS=false
 START_REPUTATION=999
 ```
+### Envirenment Variables
 
 **ONLY_WORK_IN_COMMENTS**
 - *If true, the bot will only filter comments and will keep the group chat untouched*
