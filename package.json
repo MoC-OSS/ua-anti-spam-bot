@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./bot.js",
+    "start": "nodemon ./src/bot.js",
     "prepare": "husky install",
     "lint": "npm-run-all --parallel lint:js",
     "lint:branch-name": "branch-name-lint ./.branchlintrc.json",

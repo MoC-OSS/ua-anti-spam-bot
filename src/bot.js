@@ -1,13 +1,12 @@
 const { error, env } = require('typed-dotenv').config();
 const { Telegraf } = require('telegraf');
-
 const GraphemeSplitter = require('grapheme-splitter');
-
 const containsEmoji = require('contains-emoji');
 const lodashGet = require('lodash.get');
-
 const Keyv = require('keyv');
-const rules = require('./rules.json');
+
+const { messageUtil, telegramUtil } = require('./utils');
+const rules = require('../rules.json');
 
 const splitter = new GraphemeSplitter();
 const keyv = new Keyv('sqlite://db.sqlite');
@@ -20,16 +19,8 @@ if (error) {
 
 const CHAT_WHITELIST = [...env.CHAT_WHITELIST];
 
-const isFromChannel = (ctx) => ctx?.message?.from?.first_name === 'Channel' && ctx?.message?.from?.username === 'Channel_Bot';
-
-const isInComments = (ctx) => ctx?.message?.reply_to_message?.from?.id === 777000;
-
-const getMessage = (ctx) => ctx?.message?.text || ctx?.update?.message?.text;
-
-const findInText = (message, searchFor) => message.replace(/ /g, '').toLowerCase().includes(searchFor.toLowerCase());
-
 const isFilteredByRules = (ctx) => {
-  const message = getMessage(ctx);
+  const message = telegramUtil.getMessage(ctx);
 
   if (!message) {
     console.error('Cannot parse the message!!!!', ctx);
@@ -44,11 +35,11 @@ const isFilteredByRules = (ctx) => {
         filterText = lodashGet(rules, filterText.replace('_$', ''));
 
         if (Array.isArray(filterText)) {
-          return filterText.some((nestText) => findInText(message, nestText));
+          return filterText.some((nestText) => messageUtil.findInText(message, nestText));
         }
       }
 
-      return findInText(message, filterText);
+      return messageUtil.findInText(message, filterText);
     });
 
     return andCondition && orCondition;
@@ -56,7 +47,7 @@ const isFilteredByRules = (ctx) => {
 
   return rules.rules.some((rule) => {
     if (rule.and) {
-      const andCondition = !rule.and.some((filterText) => !findInText(message, filterText));
+      const andCondition = !rule.and.some((filterText) => !messageUtil.findInText(message, filterText));
       return isHit(andCondition, rule);
     }
 
@@ -64,7 +55,7 @@ const isFilteredByRules = (ctx) => {
       const andArray = lodashGet(rules, rule.array_and.replace('_$', ''));
 
       return andArray.some((filterText) => {
-        const andCondition = !findInText(message, filterText);
+        const andCondition = !messageUtil.findInText(message, filterText);
         return isHit(andCondition, rule);
       });
     }
@@ -89,7 +80,7 @@ const getMessageReputation = async (ctx) => {
   const emojis = countEmojis(ctx);
   const formattings = formattingsInfo(ctx);
   const urls = countUrls(ctx);
-  const fromChannel = isFromChannel(ctx);
+  const fromChannel = telegramUtil.isFromChannel(ctx);
   const byRules = isFilteredByRules(ctx);
 
   let userRep = fromChannel ? env.CHANNEL_START_REPUTATION : parseInt(await keyv.get(`user_${ctx.from.id}`), 10) || env.START_REPUTATION;
@@ -118,7 +109,7 @@ const onMessage = async (ctx) => {
     return false;
   }
 
-  if (env.ONLY_WORK_IN_COMMENTS && !isInComments(ctx)) {
+  if (env.ONLY_WORK_IN_COMMENTS && !telegramUtil.isInComments(ctx)) {
     return false;
   }
 
