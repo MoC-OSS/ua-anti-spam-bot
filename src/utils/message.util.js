@@ -3,7 +3,7 @@ const rules = require('../../dataset/rules.json');
 
 class MessageUtil {
   findInText(message, searchFor) {
-    return message.replace(/ /g, '').toLowerCase().includes(searchFor.toLowerCase());
+    return message.replace(/ /g, '').toLowerCase().includes(searchFor.replace(/ /g, '').toLowerCase());
   }
 
   isHit(andCondition, rule, message) {
