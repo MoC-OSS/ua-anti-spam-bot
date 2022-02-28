@@ -2,11 +2,16 @@
   "name": "telegram-comments-antibot",
   "version": "1.0.0",
   "private": true,
+  "scripts": {
+    "start": "nodemon ./bot.js"
+  },
   "dependencies": {
     "@keyv/sqlite": "^3.0.0",
     "contains-emoji": "^1.1.0",
     "grapheme-splitter": "^1.0.4",
     "keyv": "^4.1.1",
+    "lodash.get": "^4.4.2",
+    "nodemon": "^2.0.15",
     "telegraf": "^4.7.0",
     "typed-dotenv": "^10.0.1"
   }
