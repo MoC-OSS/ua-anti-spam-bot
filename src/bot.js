@@ -100,9 +100,12 @@ const onMessage = async (ctx) => {
 
   if (rep.byRules) {
     try {
+      const username = ctx?.update?.message?.from?.username;
+      const writeUsername = username ? `@${username}` : username;
+
       await ctx.deleteMessage();
       await ctx.reply(
-        '❗️ Повідомлення видалено.\n\n* Причина: повідомлення стратегічних цілей.\n\nЯкщо ви не впевнені, що це був ворог, був розроблений спеціальний чат-бот для повідомлення таких новин - https://t.me/ne_nashi_bot',
+        `❗️ ${writeUsername}Повідомлення видалено.\n\n* Причина: повідомлення стратегічних цілей.\n\nЯкщо ви не впевнені, що це був ворог, був розроблений спеціальний чат-бот для повідомлення таких новин - https://t.me/ne_nashi_bot`,
       );
     } catch (e) {
       console.error('Cannot delete the message. Reason:', e);
