@@ -7,7 +7,6 @@ const Keyv = require('keyv');
 
 const { messageUtil, telegramUtil } = require('./utils');
 const rules = require('../dataset/rules.json');
-const getChatWhitelist = require('./chat-whitelist');
 
 const splitter = new GraphemeSplitter();
 const keyv = new Keyv('sqlite://db.sqlite');
@@ -19,8 +18,6 @@ if (error) {
 }
 
 const startTime = new Date().toString();
-
-const CHAT_WHITELIST = getChatWhitelist(env);
 
 const isFilteredByRules = (ctx) => {
   const message = telegramUtil.getMessage(ctx);
@@ -126,7 +123,7 @@ const getMessageReputation = async (ctx) => {
 };
 
 const onMessage = async (ctx) => {
-  if (!ctx?.message?.chat?.id || !CHAT_WHITELIST.includes(ctx.message.chat.id)) {
+  if (!ctx?.message?.chat?.id) {
     console.error(Date.toString(), 'Cannot access the chat:', ctx.message.chat);
     return false;
   }
@@ -168,8 +165,8 @@ const onMessage = async (ctx) => {
 };
 
 const bot = new Telegraf(env.BOT_TOKEN);
-bot.start((ctx) => ctx.reply('WIP'));
-bot.help((ctx) => ctx.reply(`Запущений:\n\n${startTime}`));
+bot.start((ctx) => ctx.reply('Зроби мене адміністратором, щоб я міг видаляти повідомлення.'));
+bot.help((ctx) => ctx.reply(`Зроби мене адміністратором, щоб я міг видаляти повідомлення.\nЗапущений:\n\n${startTime}`));
 bot.on('text', onMessage);
 bot.launch().then(() => {
   console.info('Bot started!', new Date().toString());
