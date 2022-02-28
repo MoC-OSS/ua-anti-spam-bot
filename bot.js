@@ -105,12 +105,13 @@ const onMessage = async (ctx) => {
   if (rep.byRules) {
     await ctx.deleteMessage();
     await ctx.reply(
-      '❗️ Повідомлення видалено.\n* Причина: повідомлення стратегічних цілей.\n\nЯкщо ви не впевнені, що це був ворог, був розроблений спеціальний чат-бот для повідомлення таких новин - https://t.me/ne_nashi_bot',
+      '❗️ Повідомлення видалено.\n\n* Причина: повідомлення стратегічних цілей.\n\nЯкщо ви не впевнені, що це був ворог, був розроблений спеціальний чат-бот для повідомлення таких новин - https://t.me/ne_nashi_bot',
     );
   }
 
   if (rep.reputation <= 0 || (rep.userRep <= 0 && !env.DISABLE_USER_REP)) {
-    return ctx.deleteMessage();
+    await ctx.deleteMessage();
+    await ctx.reply('❗️ Повідомлення видалено.\n\n* Причина: спам.\n\n');
   }
 
   return false;
