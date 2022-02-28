@@ -3,6 +3,7 @@ const { Telegraf } = require('telegraf');
 const GraphemeSplitter = require('grapheme-splitter');
 const containsEmoji = require('contains-emoji');
 const lodashGet = require('lodash.get');
+const LocalSession = require('telegraf-session-local');
 const Keyv = require('keyv');
 
 const { messageUtil, telegramUtil } = require('./utils');
@@ -132,6 +133,10 @@ const onMessage = async (ctx) => {
     return false;
   }
 
+  if (ctx.session.isCurrentUserAdmin && !env.DEBUG) {
+    return false;
+  }
+
   const rep = await getMessageReputation(ctx);
   const message = telegramUtil.getMessage(ctx);
 
@@ -181,8 +186,43 @@ const onMessage = async (ctx) => {
 };
 
 const bot = new Telegraf(env.BOT_TOKEN);
+
 bot.start((ctx) => ctx.reply('Зроби мене адміністратором, щоб я міг видаляти повідомлення.'));
 bot.help((ctx) => ctx.reply(`Зроби мене адміністратором, щоб я міг видаляти повідомлення.\nЗапущений:\n\n${startTime}`));
+
+const localSession = new LocalSession({ database: 'telegraf-session.json' });
+
+bot.use(localSession.middleware());
+
+bot.use((ctx, next) => {
+  if (!ctx.session.chats) {
+    ctx.session.chats = {};
+  }
+
+  if (ctx.session.chats[ctx.chat.id]?.expiration > +new Date()) {
+    const { admins } = ctx.session.chats[ctx.chat.id];
+    ctx.session.isCurrentUserAdmin = admins.some((adm) => adm.user.id === ctx.from.id);
+
+    return next();
+  }
+
+  return bot.telegram
+    .getChatAdministrators(ctx.chat.id)
+    .then((data) => {
+      if (!data || !data.length) {
+        return;
+      }
+
+      ctx.session.isCurrentUserAdmin = data.some((adm) => adm.user.id === ctx.from.id);
+      ctx.session.chats[ctx.chat.id] = {
+        admins: data,
+        expiration: Date.now() + 1000 * 60 * 60,
+      };
+    })
+    .catch(console.error)
+    .then(() => next(ctx));
+});
+
 bot.on('text', onMessage);
 bot.launch().then(() => {
   console.info('Bot started!', new Date().toString());
