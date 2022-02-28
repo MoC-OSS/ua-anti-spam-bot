@@ -140,12 +140,28 @@ const onMessage = async (ctx) => {
       const username = ctx?.update?.message?.from?.username;
       const writeUsername = username ? `@${username}` : '';
 
+      let debugMessage = '';
+
+      if (env.DEBUG || true) {
+        debugMessage = [
+          '',
+          '',
+          '',
+          'DEBUG:',
+          'Повідомлення:',
+          message,
+          '',
+          'Правило бану:',
+          JSON.stringify(rep.byRules),
+          '',
+          'Останній деплой:',
+          startTime,
+        ].join('\n');
+      }
+
       await ctx.deleteMessage();
       await ctx.reply(
-        `${
-          `❗️ ${writeUsername} Повідомлення видалено.\n\n* Причина: повідомлення стратегічних цілей.\n\nЯкщо ви не впевнені, що це був ворог, був розроблений спеціальний чат-бот для повідомлення таких новин - https://t.me/ne_nashi_bot` +
-          '\n\n\nDEBUG: \nПовідомлення:\n'
-        }${message}\n\nПравило бана:\n${JSON.stringify(rep.byRules)}\n\nОстанній деплой:\n${startTime}`,
+        `❗️ ${writeUsername} Повідомлення видалено.\n\n* Причина: поширення воєнної таємниці.\n\nЯкщо ви не впевнені, що це був ворог, був розроблений спеціальний чат-бот для повідомлення таких новин - https://t.me/ne_nashi_bot${debugMessage}`,
       );
     } catch (e) {
       console.error('Cannot delete the message. Reason:', e);
