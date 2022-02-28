@@ -3,3 +3,4 @@ node_modules
 *.sqlite
 rules.json
 # See http://help.github.com/ignore-files/ for more about ignoring files.# compiled output/dist/tmp/out-tsc# Only exists if Bazel was run/bazel-out# dependencies/node_modules# profiling fileschrome-profiler-events*.jsonspeed-measure-plugin*.json# IDEs and editors/.idea.project.classpath.c9/*.launch.settings/*.sublime-workspace# IDE - VSCode.vscode/*!.vscode/settings.json!.vscode/tasks.json!.vscode/launch.json!.vscode/extensions.json.history/*# misc/.sass-cache/connect.lock/coverage/libpeerconnection.lognpm-debug.logyarn-error.logtestem.log/typings# System Files.DS_StoreThumbs.db# Project filessecret.ts# Smile Track/.smile-track/.stylelintcache
+.eslintcache
