@@ -36,7 +36,7 @@ const isFilteredByRules = (ctx) => {
     type: '',
   };
 
-  const percent100 = rules.dataset.percent_100.find((percent1000) => message.includes(percent1000));
+  const percent100 = rules.dataset.percent_100.find((percent1000) => messageUtil.findInText(message, percent1000));
 
   if (percent100) {
     deleteRule.rule = '100 процентів бан';
@@ -141,7 +141,7 @@ const onMessage = async (ctx) => {
   if (rep.byRules?.rule) {
     try {
       const username = ctx?.update?.message?.from?.username;
-      const writeUsername = username ? `@${username}` : username;
+      const writeUsername = username ? `@${username}` : '';
 
       await ctx.deleteMessage();
       await ctx.reply(
