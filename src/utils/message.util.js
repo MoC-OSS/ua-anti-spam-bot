@@ -8,25 +8,47 @@ const cyrillicToTranslit = new CyrillicToTranslit();
 
 const options = {
   shouldSort: true,
-  threshold: 0.3,
+  threshold: 0.15,
   location: 0,
   distance: 100,
   maxPatternLength: 32,
-  minMatchCharLength: 1,
+  minMatchCharLength: 6,
 };
 
 class MessageUtil {
   findInText(message, searchFor) {
-    const directHit = message.toLowerCase().includes(searchFor.toLowerCase());
+    /**
+     * Direct hit
+     * */
+    let directHit = false;
+
+    if (searchFor <= 4) {
+      directHit = message.toLowerCase().includes(searchFor.toLowerCase());
+    }
+
+    if (directHit) {
+      return true;
+    }
+
+    /**
+     * Translit hit
+     * */
     const translitHit = cyrillicToTranslit
       .transform(message, ' ')
       .toLowerCase()
-      .includes(cyrillicToTranslit.transform(searchFor, '_').toLowerCase());
+      .includes(cyrillicToTranslit.transform(searchFor, ' ').toLowerCase());
 
-    const fuseInstanse = new Fuse([message], options);
-    const fuseHit = fuseInstanse.search(searchFor);
+    if (translitHit) {
+      return true;
+    }
 
-    return directHit || translitHit || !!fuseHit.length;
+    /**
+     * Fuse hit
+     * */
+    const fuseInstanse = new Fuse([message.toLowerCase()], options);
+    const fuseHit = fuseInstanse.search(searchFor.toLowerCase());
+
+    return !!fuseHit.length;
   }
 
   isHit(andCondition, rule, message) {
