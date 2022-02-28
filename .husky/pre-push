@@ -1,0 +1,26 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "\033[0;33m"
+echo "***************************************************"
+echo ""
+echo "We use branch-name-lint."
+echo "To push a branch, be sure you have right prefix, ticket name in uppercase, and description split by underscore. Example branch name:"
+echo ""
+echo "  * feature/LBAT-8_create_lp_ui_elements"
+echo "  * hotfix/LBAT-11_add_missing_login_routes"
+echo ""
+echo "Read more: https://github.com/barzik/branch-name-lint"
+echo ""
+echo "***************************************************"
+echo "\033[0m"
+
+echo "\033[0;33m"
+echo "***************************************************"
+echo ""
+echo "Lint time can be long for the first time."
+echo ""
+echo "***************************************************"
+echo "\033[0m"
+
+npm run lint

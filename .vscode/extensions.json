@@ -1,0 +1,15 @@
+{
+  "recommendations": [
+    "streetsidesoftware.code-spell-checker",
+    "visualstudioexptteam.vscodeintellicode",
+    "editorconfig.editorconfig",
+    "coenraads.bracket-pair-colorizer-2",
+    "eamodio.gitlens",
+    "christian-kohler.path-intellisense",
+    "christian-kohler.npm-intellisense",
+    "pkief.material-icon-theme",
+    "joshbolduc.commitlint",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode"
+  ]
+}

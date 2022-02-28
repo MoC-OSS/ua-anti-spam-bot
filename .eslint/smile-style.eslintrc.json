@@ -1,0 +1,126 @@
+{
+  "overrides": [
+    {
+      "files": [
+        "*.js",
+        "*.jsx",
+        "*.vue"
+      ],
+      "rules": {
+        "class-methods-use-this": "off",
+        "import/prefer-default-export": "off",
+        "import/extensions": [
+          "error",
+          "never",
+          {
+            "json": "always",
+            "vue": "always",
+            "svg": "always",
+            "jpg": "always",
+            "png": "always",
+            "css": "always",
+            "scss": "always"
+          }
+        ],
+        "quotes": [
+          "error",
+          "single"
+        ],
+        "operator-linebreak": "error",
+        "no-unneeded-ternary": "error",
+        "arrow-body-style": "error",
+        "arrow-parens": [
+          "error",
+          "always"
+        ],
+        "brace-style": [
+          "error",
+          "1tbs"
+        ],
+        "comma-dangle": [
+          "error",
+          "always-multiline"
+        ],
+        "constructor-super": "error",
+        "curly": "error",
+        "dot-notation": "off",
+        "eol-last": "error",
+        "eqeqeq": [
+          "off",
+          "smart"
+        ],
+        "guard-for-in": "error",
+        "id-blacklist": "off",
+        "id-match": "off",
+        "max-len": [
+          "error",
+          {
+            "code": 140
+          }
+        ],
+        "no-bitwise": "off",
+        "no-caller": "error",
+        "no-console": [
+          "error",
+          {
+            "allow": [
+              "info",
+              "warn",
+              "dir",
+              "timeLog",
+              "assert",
+              "clear",
+              "count",
+              "countReset",
+              "group",
+              "groupEnd",
+              "table",
+              "dirxml",
+              "error",
+              "groupCollapsed",
+              "Console",
+              "profile",
+              "profileEnd",
+              "timeStamp",
+              "context"
+            ]
+          }
+        ],
+        "no-debugger": "error",
+        "no-empty": "off",
+        "no-empty-function": "off",
+        "no-eval": "error",
+        "no-fallthrough": "error",
+        "no-new-wrappers": "error",
+        "no-throw-literal": "error",
+        "no-trailing-spaces": "error",
+        "no-undef-init": "error",
+        "no-underscore-dangle": "off",
+        "no-unused-expressions": "error",
+        "no-unused-labels": "error",
+        "no-use-before-define": "error",
+        "no-var": "error",
+        "object-shorthand": "error",
+        "prefer-arrow-callback": "error",
+        "prefer-const": "error",
+        "quote-props": [
+          "error",
+          "as-needed"
+        ],
+        "radix": "error",
+        "semi": "error",
+        "space-before-function-paren": "off",
+        "spaced-comment": [
+          "error",
+          "always",
+          {
+            "markers": [
+              "/"
+            ]
+          }
+        ],
+        "valid-typeof": "error"
+      }
+    }
+  ]
+}

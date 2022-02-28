@@ -1,0 +1,18 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "\033[0;33m"
+echo "***************************************************"
+echo ""
+echo "We use Conversational Commits Conversational."
+echo "To make a commit, be sure you follow it. Example:"
+echo ""
+echo "  * feat(LBAT-20): added the users page"
+echo "  * refactor(LBAT-10): refactored tests"
+echo ""
+echo "Read more: https://www.conventionalcommits.org"
+echo ""
+echo "***************************************************"
+echo "\033[0m"
+
+npx --no-install commitlint --edit

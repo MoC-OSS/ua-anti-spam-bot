@@ -1,0 +1,8 @@
+{
+  "branchNameLinter": {
+    "regex": "^[a-z]+/([A-Z]+-[0-9]+_.{5,70})",
+    "regexOptions": "i",
+    "msgDoesNotMatchRegex": "Branch \"%s\" does not match the allowed pattern: \"%s\"",
+    "msgBranchDisallowed": "Pushing to \"%s\" is not allowed, use git-flow.\n\nExample:\n* feature/TIC-20_branch_name\n\n"
+  }
+}

@@ -3,7 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./bot.js"
+    "start": "nodemon ./bot.js",
+    "prepare": "husky install",
+    "lint": "npm-run-all --parallel lint:branch-name lint:styles lint:js",
+    "lint:branch-name": "branch-name-lint ./.branchlintrc.json",
+    "lint:commit-name": "commitlint --edit",
+    "track-time": "smile-track",
+    "lint:js": "eslint . --cache",
+    "lint:js:fix": "npm run lint:js -- --fix"
   },
   "dependencies": {
     "@keyv/sqlite": "^3.0.0",
@@ -14,5 +21,20 @@
     "nodemon": "^2.0.15",
     "telegraf": "^4.7.0",
     "typed-dotenv": "^10.0.1"
+  },
+  "devDependencies": {
+    "branch-name-lint": "^2.1.1",
+    "husky": "^7.0.2",
+    "npm-run-all": "^4.1.5",
+    "@commitlint/config-conventional": "^13.1.0",
+    "commitlint": "^13.1.0",
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.24.2",
+    "prettier": "^2.3.1",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "lint-staged": "^11.1.2",
+    "smile-track": "^0.17.0"
   }
 }
