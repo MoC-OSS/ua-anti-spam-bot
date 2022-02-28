@@ -23,7 +23,7 @@ const isFilteredByRules = (ctx) => {
   const message = telegramUtil.getMessage(ctx);
 
   if (!message) {
-    console.error('Cannot parse the message!!!!', ctx);
+    console.error('Cannot parse the message!', ctx);
     return false;
   }
 
