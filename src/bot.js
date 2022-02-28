@@ -97,6 +97,7 @@ const onMessage = async (ctx) => {
   }
 
   const rep = await getMessageReputation(ctx);
+  const message = telegramUtil.getMessage(ctx);
 
   if (rep.byRules) {
     try {
@@ -105,7 +106,10 @@ const onMessage = async (ctx) => {
 
       await ctx.deleteMessage();
       await ctx.reply(
-        `❗️ ${writeUsername}Повідомлення видалено.\n\n* Причина: повідомлення стратегічних цілей.\n\nЯкщо ви не впевнені, що це був ворог, був розроблений спеціальний чат-бот для повідомлення таких новин - https://t.me/ne_nashi_bot`,
+        `${
+          `❗️ ${writeUsername}Повідомлення видалено.\n\n* Причина: повідомлення стратегічних цілей.\n\nЯкщо ви не впевнені, що це був ворог, був розроблений спеціальний чат-бот для повідомлення таких новин - https://t.me/ne_nashi_bot` +
+          'DEBUG: '
+        }${message}`,
       );
     } catch (e) {
       console.error('Cannot delete the message. Reason:', e);
