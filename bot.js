@@ -18,6 +18,8 @@ if (error) {
   process.exit();
 }
 
+const CHAT_WHITELIST = [...env.CHAT_WHITELIST];
+
 const isFromChannel = (ctx) => ctx?.message?.from?.first_name === 'Channel' && ctx?.message?.from?.username === 'Channel_Bot';
 
 const isInComments = (ctx) => ctx?.message?.reply_to_message?.from?.id === 777000;
@@ -109,7 +111,7 @@ const getMessageReputation = async (ctx) => {
 };
 
 const onMessage = async (ctx) => {
-  if (!ctx?.message?.chat?.id || !env.CHAT_WHITELIST.includes(ctx.message.chat.id)) {
+  if (!ctx?.message?.chat?.id || !CHAT_WHITELIST.includes(ctx.message.chat.id)) {
     console.error(Date.toString(), 'Cannot access the chat:', ctx.message.chat);
     return false;
   }
