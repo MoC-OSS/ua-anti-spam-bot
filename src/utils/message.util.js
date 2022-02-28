@@ -1,9 +1,19 @@
 const lodashGet = require('lodash.get');
+const CyrillicToTranslit = require('cyrillic-to-translit-js');
+
 const rules = require('../../dataset/rules.json');
+
+const cyrillicToTranslit = new CyrillicToTranslit();
 
 class MessageUtil {
   findInText(message, searchFor) {
-    return message.toLowerCase().includes(searchFor.toLowerCase());
+    const directHit = message.toLowerCase().includes(searchFor.toLowerCase());
+    const translitHit = cyrillicToTranslit
+      .transform(message, ' ')
+      .toLowerCase()
+      .includes(cyrillicToTranslit.transform(searchFor, '_').toLowerCase());
+
+    return directHit || translitHit;
   }
 
   isHit(andCondition, rule, message) {
