@@ -169,7 +169,7 @@ const onMessage = async (ctx) => {
 
 const bot = new Telegraf(env.BOT_TOKEN);
 bot.start((ctx) => ctx.reply('WIP'));
-bot.help((ctx) => ctx.reply('WIP'));
+bot.help((ctx) => ctx.reply(`Запущений:\n\n${startTime}`));
 bot.on('text', onMessage);
 bot.launch().then(() => {
   console.info('Bot started!', new Date().toString());
