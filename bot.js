@@ -32,8 +32,7 @@ const isFilteredByRules = (ctx) => {
     return false;
   }
 
-  return rules.rules.some((rule) => {
-    const andCondition = !rule.and.some((filterText) => !message.toLowerCase().includes(filterText.toLowerCase()));
+  const isHit = (andCondition, rule) => {
     const orCondition = rule.or.some((condition) => {
       let filterText = condition;
 
@@ -49,6 +48,24 @@ const isFilteredByRules = (ctx) => {
     });
 
     return andCondition && orCondition;
+  };
+
+  return rules.rules.some((rule) => {
+    if (rule.and) {
+      const andCondition = !rule.and.some((filterText) => !message.toLowerCase().includes(filterText.toLowerCase()));
+      return isHit(andCondition, rule);
+    }
+
+    if (rule.array_and) {
+      const andArray = lodashGet(rules, rule.array_and.replace('_$', ''));
+
+      return andArray.some((filterText) => {
+        const andCondition = !message.toLowerCase().includes(filterText.toLowerCase());
+        return isHit(andCondition, rule);
+      });
+    }
+
+    return false;
   });
 };
 
@@ -104,15 +121,23 @@ const onMessage = async (ctx) => {
   const rep = await getMessageReputation(ctx);
 
   if (rep.byRules) {
-    await ctx.deleteMessage();
-    await ctx.reply(
-      '❗️ Повідомлення видалено.\n\n* Причина: повідомлення стратегічних цілей.\n\nЯкщо ви не впевнені, що це був ворог, був розроблений спеціальний чат-бот для повідомлення таких новин - https://t.me/ne_nashi_bot',
-    );
+    try {
+      await ctx.deleteMessage();
+      await ctx.reply(
+        '❗️ Повідомлення видалено.\n\n* Причина: повідомлення стратегічних цілей.\n\nЯкщо ви не впевнені, що це був ворог, був розроблений спеціальний чат-бот для повідомлення таких новин - https://t.me/ne_nashi_bot',
+      );
+    } catch (e) {
+      console.error('Cannot delete the message. Reason:', e);
+    }
   }
 
   if (rep.reputation <= 0 || (rep.userRep <= 0 && !env.DISABLE_USER_REP)) {
-    await ctx.deleteMessage();
-    await ctx.reply('❗️ Повідомлення видалено.\n\n* Причина: спам.\n\n');
+    try {
+      await ctx.deleteMessage();
+      await ctx.reply('❗️ Повідомлення видалено.\n\n* Причина: спам.\n\n');
+    } catch (e) {
+      console.error('Cannot delete the message. Reason:', e);
+    }
   }
 
   return false;
