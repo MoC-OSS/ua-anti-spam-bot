@@ -26,6 +26,8 @@ const isInComments = (ctx) => ctx?.message?.reply_to_message?.from?.id === 77700
 
 const getMessage = (ctx) => ctx?.message?.text || ctx?.update?.message?.text;
 
+const findInText = (message, searchFor) => message.replace(/ /g, '').toLowerCase().includes(searchFor.toLowerCase());
+
 const isFilteredByRules = (ctx) => {
   const message = getMessage(ctx);
 
@@ -42,11 +44,11 @@ const isFilteredByRules = (ctx) => {
         filterText = lodashGet(rules, filterText.replace('_$', ''));
 
         if (Array.isArray(filterText)) {
-          return filterText.some((nestText) => message.toLowerCase().includes(nestText.toLowerCase()));
+          return filterText.some((nestText) => findInText(message, nestText));
         }
       }
 
-      return message.toLowerCase().includes(filterText.toLowerCase());
+      return findInText(message, filterText);
     });
 
     return andCondition && orCondition;
@@ -54,7 +56,7 @@ const isFilteredByRules = (ctx) => {
 
   return rules.rules.some((rule) => {
     if (rule.and) {
-      const andCondition = !rule.and.some((filterText) => !message.toLowerCase().includes(filterText.toLowerCase()));
+      const andCondition = !rule.and.some((filterText) => !findInText(message, filterText));
       return isHit(andCondition, rule);
     }
 
@@ -62,7 +64,7 @@ const isFilteredByRules = (ctx) => {
       const andArray = lodashGet(rules, rule.array_and.replace('_$', ''));
 
       return andArray.some((filterText) => {
-        const andCondition = !message.toLowerCase().includes(filterText.toLowerCase());
+        const andCondition = !findInText(message, filterText);
         return isHit(andCondition, rule);
       });
     }
