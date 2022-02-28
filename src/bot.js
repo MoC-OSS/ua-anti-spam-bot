@@ -33,15 +33,35 @@ const isFilteredByRules = (ctx) => {
   const deleteRule = {
     rule: null,
     parsedRule: null,
+    type: '',
   };
+
+  const percent100 = rules.dataset.percent_100.find((percent1000) => message.includes(percent1000));
+
+  if (percent100) {
+    deleteRule.rule = '100 процентів бан';
+    deleteRule.parsedRule = percent100;
+
+    return deleteRule;
+  }
 
   deleteRule.rule = rules.rules.some((rule) => {
     if (rule.and) {
-      const andCondition = !rule.and.some((filterText) => !messageUtil.findInText(message, filterText));
+      deleteRule.type = 'and';
+      const andCondition = !rule.and.some((filterText) => {
+        const da5 = messageUtil.findInText(message, filterText);
+
+        if (da5) {
+          deleteRule.parsedRule = filterText;
+        }
+
+        return da5;
+      });
       return messageUtil.isHit(andCondition, rule, message);
     }
 
     if (rule.array_and) {
+      deleteRule.type = 'array_and';
       const andArray = lodashGet(rules, rule.array_and.replace('_$', ''));
 
       return andArray.some((filterText) => {

@@ -1,6 +1,6 @@
 {
   "dataset": {
-    "100_percent": [
+    "percent_100": [
       "ЗСУ",
       "ПВО",
       "Ракета впала",
@@ -1001,38 +1001,6 @@
   "rules": [
     {
       "array_and": "_$dataset.high_risk",
-      "or": [
-        "_$dataset.locations"
-      ]
-    },
-    {
-      "and": [
-        "постріли"
-      ],
-      "or": [
-        "_$dataset.locations"
-      ]
-    },
-    {
-      "and": [
-        "поліція"
-      ],
-      "or": [
-        "_$dataset.locations"
-      ]
-    },
-    {
-      "and": [
-        "воєнні"
-      ],
-      "or": [
-        "_$dataset.locations"
-      ]
-    },
-    {
-      "and": [
-        "горить"
-      ],
       "or": [
         "_$dataset.locations"
       ]
