@@ -6,7 +6,7 @@ const lodashGet = require('lodash.get');
 const Keyv = require('keyv');
 
 const { messageUtil, telegramUtil } = require('./utils');
-const rules = require('../rules.json');
+const rules = require('../dataset/rules.json');
 
 const splitter = new GraphemeSplitter();
 const keyv = new Keyv('sqlite://db.sqlite');
@@ -27,28 +27,10 @@ const isFilteredByRules = (ctx) => {
     return false;
   }
 
-  const isHit = (andCondition, rule) => {
-    const orCondition = rule.or.some((condition) => {
-      let filterText = condition;
-
-      if (filterText.startsWith('_$')) {
-        filterText = lodashGet(rules, filterText.replace('_$', ''));
-
-        if (Array.isArray(filterText)) {
-          return filterText.some((nestText) => messageUtil.findInText(message, nestText));
-        }
-      }
-
-      return messageUtil.findInText(message, filterText);
-    });
-
-    return andCondition && orCondition;
-  };
-
   return rules.rules.some((rule) => {
     if (rule.and) {
       const andCondition = !rule.and.some((filterText) => !messageUtil.findInText(message, filterText));
-      return isHit(andCondition, rule);
+      return messageUtil.isHit(andCondition, rule, message);
     }
 
     if (rule.array_and) {
@@ -56,7 +38,7 @@ const isFilteredByRules = (ctx) => {
 
       return andArray.some((filterText) => {
         const andCondition = !messageUtil.findInText(message, filterText);
-        return isHit(andCondition, rule);
+        return messageUtil.isHit(andCondition, rule, message);
       });
     }
 
