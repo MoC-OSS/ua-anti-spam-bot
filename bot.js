@@ -33,7 +33,7 @@ const isFilteredByRules = (ctx) => {
   }
 
   return rules.rules.some((rule) => {
-    const andCondition = !rule.and.some((filterText) => !message.includes(filterText));
+    const andCondition = !rule.and.some((filterText) => !message.toLowerCase().includes(filterText.toLowerCase()));
     const orCondition = rule.or.some((condition) => {
       let filterText = condition;
 
@@ -41,11 +41,11 @@ const isFilteredByRules = (ctx) => {
         filterText = lodashGet(rules, filterText.replace('_$', ''));
 
         if (Array.isArray(filterText)) {
-          return filterText.some((nestText) => message.includes(nestText));
+          return filterText.some((nestText) => message.toLowerCase().includes(nestText.toLowerCase()));
         }
       }
 
-      return message.includes(filterText);
+      return message.toLowerCase().includes(filterText.toLowerCase());
     });
 
     return andCondition && orCondition;
@@ -103,7 +103,10 @@ const onMessage = async (ctx) => {
   const rep = await getMessageReputation(ctx);
 
   if (rep.byRules) {
-    return ctx.deleteMessage();
+    await ctx.deleteMessage();
+    await ctx.reply(
+      '❗️ Повідомлення видалено.\n* Причина: повідомлення стратегічних цілей.\n\nЯкщо ви не впевнені, що це був ворог, був розроблений спеціальний чат-бот для повідомлення таких новин - https://t.me/ne_nashi_bot',
+    );
   }
 
   if (rep.reputation <= 0 || (rep.userRep <= 0 && !env.DISABLE_USER_REP)) {
