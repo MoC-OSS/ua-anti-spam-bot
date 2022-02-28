@@ -18,6 +18,8 @@ if (error) {
   process.exit();
 }
 
+const startTime = new Date().toString();
+
 const CHAT_WHITELIST = getChatWhitelist(env);
 
 const isFilteredByRules = (ctx) => {
@@ -108,8 +110,8 @@ const onMessage = async (ctx) => {
       await ctx.reply(
         `${
           `❗️ ${writeUsername} Повідомлення видалено.\n\n* Причина: повідомлення стратегічних цілей.\n\nЯкщо ви не впевнені, що це був ворог, був розроблений спеціальний чат-бот для повідомлення таких новин - https://t.me/ne_nashi_bot` +
-          'DEBUG: '
-        }${message}`,
+          '\n\n\nDEBUG: \nПовідомлення:\n'
+        }${message}\n\nОстанній деплой:\n${startTime}`,
       );
     } catch (e) {
       console.error('Cannot delete the message. Reason:', e);
