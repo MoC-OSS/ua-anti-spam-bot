@@ -1,9 +1,19 @@
 const lodashGet = require('lodash.get');
 const CyrillicToTranslit = require('cyrillic-to-translit-js');
+const Fuse = require('fuse.js');
 
 const rules = require('../../dataset/rules.json');
 
 const cyrillicToTranslit = new CyrillicToTranslit();
+
+const options = {
+  shouldSort: true,
+  threshold: 0.3,
+  location: 0,
+  distance: 100,
+  maxPatternLength: 32,
+  minMatchCharLength: 1,
+};
 
 class MessageUtil {
   findInText(message, searchFor) {
@@ -13,7 +23,10 @@ class MessageUtil {
       .toLowerCase()
       .includes(cyrillicToTranslit.transform(searchFor, '_').toLowerCase());
 
-    return directHit || translitHit;
+    const fuseInstanse = new Fuse([message], options);
+    const fuseHit = fuseInstanse.search(searchFor);
+
+    return directHit || translitHit || !!fuseHit.length;
   }
 
   isHit(andCondition, rule, message) {

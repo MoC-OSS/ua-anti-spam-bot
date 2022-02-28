@@ -16,6 +16,7 @@
     "@keyv/sqlite": "^3.0.0",
     "contains-emoji": "^1.1.0",
     "cyrillic-to-translit-js": "^3.1.0",
+    "fuse.js": "^6.5.3",
     "grapheme-splitter": "^1.0.4",
     "keyv": "^4.1.1",
     "lodash.get": "^4.4.2",
