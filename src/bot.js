@@ -7,6 +7,7 @@ const Keyv = require('keyv');
 
 const { messageUtil, telegramUtil } = require('./utils');
 const rules = require('../dataset/rules.json');
+const getChatWhitelist = require('./chat-whitelist');
 
 const splitter = new GraphemeSplitter();
 const keyv = new Keyv('sqlite://db.sqlite');
@@ -17,7 +18,7 @@ if (error) {
   process.exit();
 }
 
-const CHAT_WHITELIST = [...env.CHAT_WHITELIST];
+const CHAT_WHITELIST = getChatWhitelist(env);
 
 const isFilteredByRules = (ctx) => {
   const message = telegramUtil.getMessage(ctx);
