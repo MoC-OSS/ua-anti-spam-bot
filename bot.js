@@ -93,6 +93,7 @@ const getMessageReputation = async (ctx) => {
 
 const onMessage = async (ctx) => {
   if (!ctx?.message?.chat?.id || !env.CHAT_WHITELIST.includes(ctx.message.chat.id)) {
+    console.error(Date.toString(), 'Cannot access the chat:', ctx.message.chat);
     return false;
   }
 
