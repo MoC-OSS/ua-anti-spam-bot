@@ -7,21 +7,41 @@ class MessageUtil {
   }
 
   isHit(andCondition, rule, message) {
-    const orCondition = rule.or.some((condition) => {
+    let findText = '';
+
+    const orCondition = rule.or.find((condition) => {
       let filterText = condition;
 
       if (filterText.startsWith('_$')) {
         filterText = lodashGet(rules, filterText.replace('_$', ''));
 
         if (Array.isArray(filterText)) {
-          return filterText.some((nestText) => this.findInText(message, nestText));
+          const da3 = filterText.some((nestText) => {
+            const da4 = this.findInText(message, nestText);
+
+            if (da4) {
+              findText = nestText;
+              return da4;
+            }
+
+            return false;
+          });
+
+          return da3;
         }
       }
 
-      return this.findInText(message, filterText);
+      const da2 = this.findInText(message, filterText);
+
+      if (da2) {
+        findText = filterText;
+        return da2;
+      }
+
+      return false;
     });
 
-    return andCondition && orCondition;
+    return { result: andCondition && orCondition, findText };
   }
 }
 

@@ -30,7 +30,12 @@ const isFilteredByRules = (ctx) => {
     return false;
   }
 
-  return rules.rules.some((rule) => {
+  const deleteRule = {
+    rule: null,
+    parsedRule: null,
+  };
+
+  deleteRule.rule = rules.rules.some((rule) => {
     if (rule.and) {
       const andCondition = !rule.and.some((filterText) => !messageUtil.findInText(message, filterText));
       return messageUtil.isHit(andCondition, rule, message);
@@ -40,13 +45,25 @@ const isFilteredByRules = (ctx) => {
       const andArray = lodashGet(rules, rule.array_and.replace('_$', ''));
 
       return andArray.some((filterText) => {
-        const andCondition = !messageUtil.findInText(message, filterText);
-        return messageUtil.isHit(andCondition, rule, message);
+        const andCondition = messageUtil.findInText(message, filterText);
+        const da = messageUtil.isHit(andCondition, rule, message);
+
+        if (da.result) {
+          deleteRule.parsedRule = {
+            andCondition: filterText,
+            orCondition: da.findText,
+          };
+          return true;
+        }
+
+        return false;
       });
     }
 
     return false;
   });
+
+  return deleteRule;
 };
 
 const countEmojis = (ctx) => splitter.splitGraphemes(ctx?.message?.text || '').filter((e) => containsEmoji(e)).length;
@@ -101,7 +118,7 @@ const onMessage = async (ctx) => {
   const rep = await getMessageReputation(ctx);
   const message = telegramUtil.getMessage(ctx);
 
-  if (rep.byRules) {
+  if (rep.byRules?.rule) {
     try {
       const username = ctx?.update?.message?.from?.username;
       const writeUsername = username ? `@${username}` : username;
@@ -111,7 +128,7 @@ const onMessage = async (ctx) => {
         `${
           `❗️ ${writeUsername} Повідомлення видалено.\n\n* Причина: повідомлення стратегічних цілей.\n\nЯкщо ви не впевнені, що це був ворог, був розроблений спеціальний чат-бот для повідомлення таких новин - https://t.me/ne_nashi_bot` +
           '\n\n\nDEBUG: \nПовідомлення:\n'
-        }${message}\n\nОстанній деплой:\n${startTime}`,
+        }${message}\n\nПравило бана:\n${JSON.stringify(rep.byRules)}\n\nОстанній деплой:\n${startTime}`,
       );
     } catch (e) {
       console.error('Cannot delete the message. Reason:', e);
