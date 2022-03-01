@@ -187,7 +187,7 @@ function sleep(time) {
 
         await ctx.deleteMessage();
         await ctx.reply(
-          `❗️ ${writeUsername} Повідомлення видалено.\n\n* Причина: поширення воєнної таємниці.\n\nЯкщо ви не впевнені, що це був ворог, був розроблений спеціальний чат-бот для повідомлення таких новин - https://t.me/ne_nashi_bot${debugMessage}`,
+          `❗️ ${writeUsername} Повідомлення видалено.\n\n* Причина: поширення воєнної таємниці.\n\nЯкщо ви не впевнені, що це був ворог, був розроблений спеціальний чат-бот для повідомлення таких новин - @stop_russian_war_bot${debugMessage}`,
         );
       } catch (e) {
         console.error('Cannot delete the message. Reason:', e);
