@@ -200,7 +200,7 @@ function sleep(time) {
   const bot = new Telegraf(env.BOT_TOKEN);
 
   bot.start((ctx) => ctx.reply('Зроби мене адміністратором, щоб я міг видаляти повідомлення.'));
-  bot.help((ctx) => ctx.reply(`Зроби мене адміністратором, щоб я міг видаляти повідомлення.\nЗапущений:\n\n${startTime}`));
+  bot.help((ctx) => ctx.reply(`Бот був запущений:\n\n${startTime}`));
 
   const localSession = new LocalSession({ database: 'telegraf-session.json' });
 
