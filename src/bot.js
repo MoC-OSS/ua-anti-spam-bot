@@ -193,9 +193,11 @@ function sleep(time) {
           .deleteMessage()
           .catch(console.error)
           .then(() => {
-            ctx.reply(
-              `❗️ ${writeUsername} Повідомлення видалено.\n\n* Причина: поширення потенційно стратегічної інформації.\n\nСповіщайте про ворогів спеціальному боту: @stop_russian_war_bot${debugMessage}`,
-            );
+            ctx
+              .reply(
+                `❗️ ${writeUsername} Повідомлення видалено.\n\n* Причина: поширення потенційно стратегічної інформації.\n\nСповіщайте про ворогів спеціальному боту: @stop_russian_war_bot${debugMessage}`,
+              )
+              .catch(console.error);
           });
       } catch (e) {
         console.error('Cannot delete the message. Reason:', e);
@@ -208,7 +210,7 @@ function sleep(time) {
           .deleteMessage()
           .catch(console.error)
           .then(() => {
-            ctx.reply('❗️ Повідомлення видалено.\n\n* Причина: спам.\n\n');
+            ctx.reply('❗️ Повідомлення видалено.\n\n* Причина: спам.\n\n').catch(console.error);
           });
       } catch (e) {
         console.error('Cannot delete the message. Reason:', e);
@@ -220,76 +222,80 @@ function sleep(time) {
 
   const bot = new Telegraf(env.BOT_TOKEN);
 
-  bot.start((ctx) => ctx.reply('Зроби мене адміністратором, щоб я міг видаляти повідомлення.'));
-  bot.help((ctx) => ctx.reply(`Бот був запущений:\n\n${startTime}`));
+  bot.start((ctx) => ctx.reply('Зроби мене адміністратором, щоб я міг видаляти повідомлення.').catch(console.error));
+  bot.help((ctx) => ctx.reply(`Бот був запущений:\n\n${startTime}`).catch(console.error));
+
+  bot.catch((botError) => {
+    console.error('*** HANDLED ERROR: ***', botError);
+  });
 
   const localSession = new LocalSession({ database: 'telegraf-session.json' });
 
   bot.use(localSession.middleware());
 
-  bot.use((ctx, next) => {
-    if (!ctx.session) {
-      return;
-    }
-
-    if (ctx.botInfo?.id) {
-      ctx.session.botId = ctx.botInfo?.id;
-    }
-
-    const addedMember = ctx?.update?.message?.new_chat_member;
-    if (addedMember?.id === ctx.session.botId) {
-      ctx.reply('Привіт!\nЗроби мене адміністратором, щоб я міг видаляти повідомлення.');
-    }
-
-    const updatePermissionsMember = ctx?.update?.my_chat_member?.new_chat_member;
-    if (updatePermissionsMember?.user?.id === ctx.session.botId && updatePermissionsMember?.status === 'administrator') {
-      ctx.reply('Тепер я адміністратор. Готовий до роботи 😎');
-    }
-
-    if (ctx?.update?.message?.left_chat_participant?.id === ctx.session.botId) {
-      ctx.session.botRemoved = true;
-    } else {
-      ctx.session.botRemoved = false;
-    }
-
-    if (!ctx.session.chats) {
-      ctx.session.chats = {};
-    }
-
-    if (ctx.chat.type === 'private') {
-      return next();
-    }
-
-    try {
-      if (ctx.session.botRemoved || !ctx.message) {
-        return;
-      }
-
-      return ctx.telegram
-        .getChatMember(ctx.message.chat.id, ctx.message.from.id)
-        .catch(console.error)
-        .then((member) => {
-          if (!member) {
-            return next();
-          }
-
-          ctx.session.isCurrentUserAdmin = member.status === 'creator' || member.status === 'administrator';
-          next();
-        });
-    } catch (e) {
-      console.error(e);
-      return next();
-    }
-  });
+  // bot.use((ctx, next) => {
+  //   return next();
+  //
+  //   if (!ctx.session) {
+  //     return;
+  //   }
+  //
+  //   if (ctx.botInfo?.id) {
+  //     ctx.session.botId = ctx.botInfo?.id;
+  //   }
+  //
+  //   const addedMember = ctx?.update?.message?.new_chat_member;
+  //   if (addedMember?.id === ctx.session.botId) {
+  //     ctx.reply('Привіт!\nЗроби мене адміністратором, щоб я міг видаляти повідомлення.').catch(console.error);
+  //   }
+  //
+  //   const updatePermissionsMember = ctx?.update?.my_chat_member?.new_chat_member;
+  //   if (updatePermissionsMember?.user?.id === ctx.session.botId && updatePermissionsMember?.status === 'administrator') {
+  //     ctx.reply('Тепер я адміністратор. Готовий до роботи 😎').catch(console.error);
+  //   }
+  //
+  //   if (ctx?.update?.message?.left_chat_participant?.id === ctx.session.botId) {
+  //     ctx.session.botRemoved = true;
+  //   } else {
+  //     ctx.session.botRemoved = false;
+  //   }
+  //
+  //   if (!ctx.session.chats) {
+  //     ctx.session.chats = {};
+  //   }
+  //
+  //   if (ctx.chat.type === 'private') {
+  //     return next();
+  //   }
+  //
+  //   try {
+  //     if (ctx.session.botRemoved || !ctx.message) {
+  //       return next();
+  //     }
+  //
+  //     return next();
+  //
+  //     // return ctx.telegram
+  //     //   .getChatMember(ctx.message.chat.id, ctx.message.from.id)
+  //     //   .catch(console.error)
+  //     //   .then((member) => {
+  //     //     if (!member) {
+  //     //       return next();
+  //     //     }
+  //     //
+  //     //     ctx.session.isCurrentUserAdmin = member.status === 'creator' || member.status === 'administrator';
+  //     //     next();
+  //     //   });
+  //   } catch (e) {
+  //     console.error(e);
+  //     return next();
+  //   }
+  // });
 
   bot.on('text', onMessage);
   // bot.on('text', () => {});
   bot.launch().then(() => {
     console.info('Bot started!', new Date().toString());
-  });
-
-  bot.catch((botError) => {
-    console.error('*** HANDLED ERROR: ***', botError);
   });
 
   // Enable graceful stop

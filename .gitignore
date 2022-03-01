@@ -6,3 +6,4 @@ node_modules
 .idea
 telegraf-session.json
 .env.prod
+.env.dev
