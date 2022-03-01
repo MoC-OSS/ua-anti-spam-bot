@@ -2,32 +2,21 @@ const fs = require('fs');
 
 const arr = require('./rules.json');
 
-arr.dataset.locations.sort(
-  (a, b) =>
-    // ASC  -> a.length - b.length
-    // DESC -> b.length - a.length
-    b.length - a.length,
-);
+const sortRule = (a, b) => {
+  if (a < b) {
+    return -1;
+  }
 
-arr.dataset.short_locations.sort(
-  (a, b) =>
-    // ASC  -> a.length - b.length
-    // DESC -> b.length - a.length
-    b.length - a.length,
-);
+  if (a > b) {
+    return 1;
+  }
 
-arr.dataset.high_risk.sort(
-  (a, b) =>
-    // ASC  -> a.length - b.length
-    // DESC -> b.length - a.length
-    b.length - a.length,
-);
+  return 0;
+};
 
-arr.dataset.percent_100.sort(
-  (a, b) =>
-    // ASC  -> a.length - b.length
-    // DESC -> b.length - a.length
-    b.length - a.length,
-);
+arr.dataset.locations.sort(sortRule);
+arr.dataset.short_locations.sort(sortRule);
+arr.dataset.high_risk.sort(sortRule);
+arr.dataset.percent_100.sort(sortRule);
 
-fs.writeFileSync('./sort-locations.json', JSON.stringify(arr, null, 2));
+fs.writeFileSync('./rules.json', JSON.stringify(arr, null, 2));
