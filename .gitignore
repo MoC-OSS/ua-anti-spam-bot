@@ -5,3 +5,4 @@ node_modules
 .eslintcache
 .idea
 telegraf-session.json
+.env.prod

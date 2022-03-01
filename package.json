@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "nodemon ./src/bot.js --ignore ./telegraf-session.json",
+    "start:prod": "forever start src/bot.js",
     "prepare": "husky install",
     "lint": "npm-run-all --parallel lint:js",
     "lint:branch-name": "branch-name-lint ./.branchlintrc.json",
@@ -16,6 +17,7 @@
     "@keyv/sqlite": "^3.0.0",
     "contains-emoji": "^1.1.0",
     "cyrillic-to-translit-js": "^3.1.0",
+    "forever": "^4.0.3",
     "fuse.js": "^6.5.3",
     "grapheme-splitter": "^1.0.4",
     "keyv": "^4.1.1",

@@ -248,13 +248,6 @@ function sleep(time) {
       ctx.session.chats = {};
     }
 
-    if (ctx.session.chats[ctx.chat.id]?.expiration > +new Date()) {
-      const { admins } = ctx.session.chats[ctx.chat.id];
-      ctx.session.isCurrentUserAdmin = admins.some((adm) => adm.user.id === ctx.from.id);
-
-      return next();
-    }
-
     if (ctx.chat.type === 'private') {
       return next();
     }
@@ -264,21 +257,17 @@ function sleep(time) {
         return;
       }
 
-      return bot.telegram
-        .getChatAdministrators(ctx.chat.id)
-        .then((data) => {
-          if (!data || !data.length) {
-            return;
+      return ctx.telegram
+        .getChatMember(ctx.message.chat.id, ctx.message.from.id)
+        .catch(console.error)
+        .then((member) => {
+          if (!member) {
+            return next();
           }
 
-          ctx.session.isCurrentUserAdmin = data.some((adm) => adm.user.id === ctx.from.id);
-          ctx.session.chats[ctx.chat.id] = {
-            admins: data,
-            expiration: Date.now() + 1000 * 60 * 60,
-          };
-        })
-        .catch(console.error)
-        .then(() => next(ctx));
+          ctx.session.isCurrentUserAdmin = member.status === 'creator' || member.status === 'administrator';
+          next();
+        });
     } catch (e) {
       console.error(e);
       return next();
@@ -286,8 +275,13 @@ function sleep(time) {
   });
 
   bot.on('text', onMessage);
+  // bot.on('text', () => {});
   bot.launch().then(() => {
     console.info('Bot started!', new Date().toString());
+  });
+
+  bot.catch((botError) => {
+    console.error('*** HANDLED ERROR: ***', botError);
   });
 
   // Enable graceful stop
