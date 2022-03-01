@@ -145,7 +145,7 @@ function sleep(time) {
   };
 
   const onMessage = async (ctx) => {
-    if (ctx.session.botRemoved) {
+    if (ctx.session?.botRemoved) {
       return;
     }
 
@@ -158,7 +158,7 @@ function sleep(time) {
       return false;
     }
 
-    if (ctx.session.isCurrentUserAdmin && !env.DEBUG) {
+    if (ctx.session?.isCurrentUserAdmin && !env.DEBUG) {
       return false;
     }
 
