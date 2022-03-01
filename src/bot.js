@@ -233,64 +233,62 @@ function sleep(time) {
 
   bot.use(localSession.middleware());
 
-  // bot.use((ctx, next) => {
-  //   return next();
-  //
-  //   if (!ctx.session) {
-  //     return;
-  //   }
-  //
-  //   if (ctx.botInfo?.id) {
-  //     ctx.session.botId = ctx.botInfo?.id;
-  //   }
-  //
-  //   const addedMember = ctx?.update?.message?.new_chat_member;
-  //   if (addedMember?.id === ctx.session.botId) {
-  //     ctx.reply('Привіт!\nЗроби мене адміністратором, щоб я міг видаляти повідомлення.').catch(console.error);
-  //   }
-  //
-  //   const updatePermissionsMember = ctx?.update?.my_chat_member?.new_chat_member;
-  //   if (updatePermissionsMember?.user?.id === ctx.session.botId && updatePermissionsMember?.status === 'administrator') {
-  //     ctx.reply('Тепер я адміністратор. Готовий до роботи 😎').catch(console.error);
-  //   }
-  //
-  //   if (ctx?.update?.message?.left_chat_participant?.id === ctx.session.botId) {
-  //     ctx.session.botRemoved = true;
-  //   } else {
-  //     ctx.session.botRemoved = false;
-  //   }
-  //
-  //   if (!ctx.session.chats) {
-  //     ctx.session.chats = {};
-  //   }
-  //
-  //   if (ctx.chat.type === 'private') {
-  //     return next();
-  //   }
-  //
-  //   try {
-  //     if (ctx.session.botRemoved || !ctx.message) {
-  //       return next();
-  //     }
-  //
-  //     return next();
-  //
-  //     // return ctx.telegram
-  //     //   .getChatMember(ctx.message.chat.id, ctx.message.from.id)
-  //     //   .catch(console.error)
-  //     //   .then((member) => {
-  //     //     if (!member) {
-  //     //       return next();
-  //     //     }
-  //     //
-  //     //     ctx.session.isCurrentUserAdmin = member.status === 'creator' || member.status === 'administrator';
-  //     //     next();
-  //     //   });
-  //   } catch (e) {
-  //     console.error(e);
-  //     return next();
-  //   }
-  // });
+  bot.use((ctx, next) => {
+    if (!ctx.session) {
+      return;
+    }
+
+    if (ctx.botInfo?.id) {
+      ctx.session.botId = ctx.botInfo?.id;
+    }
+
+    const addedMember = ctx?.update?.message?.new_chat_member;
+    if (addedMember?.id === ctx.session.botId) {
+      ctx.reply('Привіт!\nЗроби мене адміністратором, щоб я міг видаляти повідомлення.').catch(console.error);
+    }
+
+    const updatePermissionsMember = ctx?.update?.my_chat_member?.new_chat_member;
+    if (updatePermissionsMember?.user?.id === ctx.session.botId && updatePermissionsMember?.status === 'administrator') {
+      ctx.reply('Тепер я адміністратор. Готовий до роботи 😎').catch(console.error);
+    }
+
+    if (ctx?.update?.message?.left_chat_participant?.id === ctx.session.botId) {
+      ctx.session.botRemoved = true;
+    } else {
+      ctx.session.botRemoved = false;
+    }
+
+    if (!ctx.session.chats) {
+      ctx.session.chats = {};
+    }
+
+    if (ctx.chat.type === 'private') {
+      return next();
+    }
+
+    try {
+      if (ctx.session.botRemoved || !ctx.message) {
+        return next();
+      }
+
+      return next();
+
+      // return ctx.telegram
+      //   .getChatMember(ctx.message.chat.id, ctx.message.from.id)
+      //   .catch(console.error)
+      //   .then((member) => {
+      //     if (!member) {
+      //       return next();
+      //     }
+      //
+      //     ctx.session.isCurrentUserAdmin = member.status === 'creator' || member.status === 'administrator';
+      //     next();
+      //   });
+    } catch (e) {
+      console.error(e);
+      return next();
+    }
+  });
 
   bot.on('text', onMessage);
   // bot.on('text', () => {});
