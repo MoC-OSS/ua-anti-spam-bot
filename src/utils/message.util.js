@@ -16,14 +16,18 @@ const options = {
 };
 
 class MessageUtil {
-  findInText(message, searchFor) {
+  findInText(message, searchFor, strict = false) {
     /**
      * Direct hit
      * */
     let directHit = false;
 
     if (searchFor.length <= 4) {
-      directHit = message.split(' ').find((word) => word.toLowerCase() === searchFor.toLowerCase());
+      if (strict) {
+        directHit = message.split(' ').find((word) => word.toLowerCase() === searchFor.toLowerCase());
+      } else {
+        directHit = message.toLowerCase().includes(searchFor.toLowerCase());
+      }
 
       return directHit;
     }
@@ -63,7 +67,7 @@ class MessageUtil {
 
           if (Array.isArray(filterText)) {
             const da3 = filterText.some((nestText) => {
-              const da4 = this.findInText(message, nestText);
+              const da4 = this.findInText(message, nestText, true);
 
               if (da4) {
                 findText = nestText;
