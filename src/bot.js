@@ -18,221 +18,233 @@ if (error) {
   process.exit();
 }
 
-const startTime = new Date().toString();
+function sleep(time) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, time);
+  });
+}
 
-const isFilteredByRules = (ctx) => {
-  const message = telegramUtil.getMessage(ctx);
+(async () => {
+  console.info('Waiting for the old instance to down...');
+  await sleep(5000);
+  console.info('Starting a new instance...');
 
-  if (!message) {
-    console.error('Cannot parse the message!', ctx);
-    return false;
-  }
+  const startTime = new Date().toString();
 
-  const deleteRule = {
-    rule: null,
-    parsedRule: null,
-    type: '',
-  };
+  const isFilteredByRules = (ctx) => {
+    const message = telegramUtil.getMessage(ctx);
 
-  const percent100 = rules.dataset.percent_100.find((percent1000) => messageUtil.findInText(message, percent1000));
+    if (!message) {
+      console.error('Cannot parse the message!', ctx);
+      return false;
+    }
 
-  if (percent100) {
-    deleteRule.rule = '100 процентів бан';
-    deleteRule.parsedRule = percent100;
+    const deleteRule = {
+      rule: null,
+      parsedRule: null,
+      type: '',
+    };
+
+    const percent100 = rules.dataset.percent_100.find((percent1000) => messageUtil.findInText(message, percent1000));
+
+    if (percent100) {
+      deleteRule.rule = '100 процентів бан';
+      deleteRule.parsedRule = percent100;
+
+      return deleteRule;
+    }
+
+    deleteRule.rule = rules.rules.some((rule) => {
+      if (rule.and) {
+        deleteRule.type = 'and';
+        const andCondition = !rule.and.some((filterText) => {
+          const da5 = messageUtil.findInText(message, filterText);
+
+          if (da5) {
+            deleteRule.parsedRule = filterText;
+          }
+
+          return da5;
+        });
+        return messageUtil.isHit(andCondition, rule, message);
+      }
+
+      if (rule.array_and) {
+        deleteRule.type = 'array_and';
+        const andArray = lodashGet(rules, rule.array_and.replace('_$', ''));
+
+        return andArray.some((filterText) => {
+          const andCondition = messageUtil.findInText(message, filterText);
+          const da = messageUtil.isHit(andCondition, rule, message);
+
+          if (da.result) {
+            deleteRule.parsedRule = {
+              andCondition: filterText,
+              orCondition: da.findText,
+              orType: da.orType,
+            };
+            return true;
+          }
+
+          return false;
+        });
+      }
+
+      return false;
+    });
 
     return deleteRule;
-  }
+  };
 
-  deleteRule.rule = rules.rules.some((rule) => {
-    if (rule.and) {
-      deleteRule.type = 'and';
-      const andCondition = !rule.and.some((filterText) => {
-        const da5 = messageUtil.findInText(message, filterText);
+  const countEmojis = (ctx) => splitter.splitGraphemes(ctx?.message?.text || '').filter((e) => containsEmoji(e)).length;
 
-        if (da5) {
-          deleteRule.parsedRule = filterText;
-        }
+  const countUrls = (ctx) => (ctx?.message?.entities || []).filter((e) => e.type === 'url').length;
 
-        return da5;
-      });
-      return messageUtil.isHit(andCondition, rule, message);
+  const formattingsInfo = (ctx) => {
+    const formattings = (ctx?.message?.entities || []).filter((e) => e.type !== 'url');
+    return {
+      length: formattings.reduce((a, e) => a + e.length, 0),
+      count: formattings.length,
+    };
+  };
+
+  const getMessageReputation = async (ctx) => {
+    const emojis = countEmojis(ctx);
+    const formattings = formattingsInfo(ctx);
+    const urls = countUrls(ctx);
+    const fromChannel = telegramUtil.isFromChannel(ctx);
+    const byRules = isFilteredByRules(ctx);
+
+    let userRep = fromChannel ? env.CHANNEL_START_REPUTATION : parseInt(await keyv.get(`user_${ctx.from.id}`), 10) || env.START_REPUTATION;
+
+    userRep +=
+      formattings.count * env.FORMATTINGS_REPUTATION +
+      emojis * env.EMOJI_REPUTATION +
+      urls * env.URLS_REPUTATION +
+      env.NEW_MESSAGE_REPUTATION;
+
+    if (!fromChannel) await keyv.set(`user_${ctx.from.id}`, userRep);
+
+    const reputation =
+      env.START_MSG_REPUTATION +
+      formattings.count * env.FORMATTINGS_MSG_REPUTATION +
+      emojis * env.EMOJI_MSG_REPUTATION +
+      urls * env.URLS_MSG_REPUTATION +
+      (fromChannel ? env.CHANNEL_MSG_REPUTATION : 0);
+
+    return { emojis, formattings, urls, fromChannel, reputation, userRep, byRules };
+  };
+
+  const onMessage = async (ctx) => {
+    if (!ctx?.message?.chat?.id) {
+      console.error(Date.toString(), 'Cannot access the chat:', ctx.message.chat);
+      return false;
     }
 
-    if (rule.array_and) {
-      deleteRule.type = 'array_and';
-      const andArray = lodashGet(rules, rule.array_and.replace('_$', ''));
+    if (env.ONLY_WORK_IN_COMMENTS && !telegramUtil.isInComments(ctx)) {
+      return false;
+    }
 
-      return andArray.some((filterText) => {
-        const andCondition = messageUtil.findInText(message, filterText);
-        const da = messageUtil.isHit(andCondition, rule, message);
+    if (ctx.session.isCurrentUserAdmin && !env.DEBUG) {
+      return false;
+    }
 
-        if (da.result) {
-          deleteRule.parsedRule = {
-            andCondition: filterText,
-            orCondition: da.findText,
-            orType: da.orType,
-          };
-          return true;
+    const rep = await getMessageReputation(ctx);
+    const message = telegramUtil.getMessage(ctx);
+
+    if (rep.byRules?.rule) {
+      try {
+        const username = ctx?.update?.message?.from?.username;
+        const writeUsername = username ? `@${username}` : '';
+
+        let debugMessage = '';
+
+        if (env.DEBUG || true) {
+          debugMessage = [
+            '',
+            '',
+            '',
+            'DEBUG:',
+            'Повідомлення:',
+            message,
+            '',
+            'Правило бану:',
+            JSON.stringify(rep.byRules),
+            '',
+            'Останній деплой:',
+            startTime,
+          ].join('\n');
         }
 
-        return false;
-      });
+        await ctx.deleteMessage();
+        await ctx.reply(
+          `❗️ ${writeUsername} Повідомлення видалено.\n\n* Причина: поширення воєнної таємниці.\n\nЯкщо ви не впевнені, що це був ворог, був розроблений спеціальний чат-бот для повідомлення таких новин - https://t.me/ne_nashi_bot${debugMessage}`,
+        );
+      } catch (e) {
+        console.error('Cannot delete the message. Reason:', e);
+      }
+    }
+
+    if (rep.reputation <= 0 || (rep.userRep <= 0 && !env.DISABLE_USER_REP)) {
+      try {
+        await ctx.deleteMessage();
+        await ctx.reply('❗️ Повідомлення видалено.\n\n* Причина: спам.\n\n');
+      } catch (e) {
+        console.error('Cannot delete the message. Reason:', e);
+      }
     }
 
     return false;
+  };
+
+  const bot = new Telegraf(env.BOT_TOKEN);
+
+  bot.start((ctx) => ctx.reply('Зроби мене адміністратором, щоб я міг видаляти повідомлення.'));
+  bot.help((ctx) => ctx.reply(`Зроби мене адміністратором, щоб я міг видаляти повідомлення.\nЗапущений:\n\n${startTime}`));
+
+  const localSession = new LocalSession({ database: 'telegraf-session.json' });
+
+  bot.use(localSession.middleware());
+
+  bot.use((ctx, next) => {
+    if (!ctx.session.chats) {
+      ctx.session.chats = {};
+    }
+
+    if (ctx.session.chats[ctx.chat.id]?.expiration > +new Date()) {
+      const { admins } = ctx.session.chats[ctx.chat.id];
+      ctx.session.isCurrentUserAdmin = admins.some((adm) => adm.user.id === ctx.from.id);
+
+      return next();
+    }
+
+    if (ctx.chat.type === 'private') {
+      return next();
+    }
+
+    return bot.telegram
+      .getChatAdministrators(ctx.chat.id)
+      .then((data) => {
+        if (!data || !data.length) {
+          return;
+        }
+
+        ctx.session.isCurrentUserAdmin = data.some((adm) => adm.user.id === ctx.from.id);
+        ctx.session.chats[ctx.chat.id] = {
+          admins: data,
+          expiration: Date.now() + 1000 * 60 * 60,
+        };
+      })
+      .catch(console.error)
+      .then(() => next(ctx));
   });
 
-  return deleteRule;
-};
+  bot.on('text', onMessage);
+  bot.launch().then(() => {
+    console.info('Bot started!', new Date().toString());
+  });
 
-const countEmojis = (ctx) => splitter.splitGraphemes(ctx?.message?.text || '').filter((e) => containsEmoji(e)).length;
-
-const countUrls = (ctx) => (ctx?.message?.entities || []).filter((e) => e.type === 'url').length;
-
-const formattingsInfo = (ctx) => {
-  const formattings = (ctx?.message?.entities || []).filter((e) => e.type !== 'url');
-  return {
-    length: formattings.reduce((a, e) => a + e.length, 0),
-    count: formattings.length,
-  };
-};
-
-const getMessageReputation = async (ctx) => {
-  const emojis = countEmojis(ctx);
-  const formattings = formattingsInfo(ctx);
-  const urls = countUrls(ctx);
-  const fromChannel = telegramUtil.isFromChannel(ctx);
-  const byRules = isFilteredByRules(ctx);
-
-  let userRep = fromChannel ? env.CHANNEL_START_REPUTATION : parseInt(await keyv.get(`user_${ctx.from.id}`), 10) || env.START_REPUTATION;
-
-  userRep +=
-    formattings.count * env.FORMATTINGS_REPUTATION +
-    emojis * env.EMOJI_REPUTATION +
-    urls * env.URLS_REPUTATION +
-    env.NEW_MESSAGE_REPUTATION;
-
-  if (!fromChannel) await keyv.set(`user_${ctx.from.id}`, userRep);
-
-  const reputation =
-    env.START_MSG_REPUTATION +
-    formattings.count * env.FORMATTINGS_MSG_REPUTATION +
-    emojis * env.EMOJI_MSG_REPUTATION +
-    urls * env.URLS_MSG_REPUTATION +
-    (fromChannel ? env.CHANNEL_MSG_REPUTATION : 0);
-
-  return { emojis, formattings, urls, fromChannel, reputation, userRep, byRules };
-};
-
-const onMessage = async (ctx) => {
-  if (!ctx?.message?.chat?.id) {
-    console.error(Date.toString(), 'Cannot access the chat:', ctx.message.chat);
-    return false;
-  }
-
-  if (env.ONLY_WORK_IN_COMMENTS && !telegramUtil.isInComments(ctx)) {
-    return false;
-  }
-
-  if (ctx.session.isCurrentUserAdmin && !env.DEBUG) {
-    return false;
-  }
-
-  const rep = await getMessageReputation(ctx);
-  const message = telegramUtil.getMessage(ctx);
-
-  if (rep.byRules?.rule) {
-    try {
-      const username = ctx?.update?.message?.from?.username;
-      const writeUsername = username ? `@${username}` : '';
-
-      let debugMessage = '';
-
-      if (env.DEBUG || true) {
-        debugMessage = [
-          '',
-          '',
-          '',
-          'DEBUG:',
-          'Повідомлення:',
-          message,
-          '',
-          'Правило бану:',
-          JSON.stringify(rep.byRules),
-          '',
-          'Останній деплой:',
-          startTime,
-        ].join('\n');
-      }
-
-      await ctx.deleteMessage();
-      await ctx.reply(
-        `❗️ ${writeUsername} Повідомлення видалено.\n\n* Причина: поширення воєнної таємниці.\n\nЯкщо ви не впевнені, що це був ворог, був розроблений спеціальний чат-бот для повідомлення таких новин - https://t.me/ne_nashi_bot${debugMessage}`,
-      );
-    } catch (e) {
-      console.error('Cannot delete the message. Reason:', e);
-    }
-  }
-
-  if (rep.reputation <= 0 || (rep.userRep <= 0 && !env.DISABLE_USER_REP)) {
-    try {
-      await ctx.deleteMessage();
-      await ctx.reply('❗️ Повідомлення видалено.\n\n* Причина: спам.\n\n');
-    } catch (e) {
-      console.error('Cannot delete the message. Reason:', e);
-    }
-  }
-
-  return false;
-};
-
-const bot = new Telegraf(env.BOT_TOKEN);
-
-bot.start((ctx) => ctx.reply('Зроби мене адміністратором, щоб я міг видаляти повідомлення.'));
-bot.help((ctx) => ctx.reply(`Зроби мене адміністратором, щоб я міг видаляти повідомлення.\nЗапущений:\n\n${startTime}`));
-
-const localSession = new LocalSession({ database: 'telegraf-session.json' });
-
-bot.use(localSession.middleware());
-
-bot.use((ctx, next) => {
-  if (!ctx.session.chats) {
-    ctx.session.chats = {};
-  }
-
-  if (ctx.session.chats[ctx.chat.id]?.expiration > +new Date()) {
-    const { admins } = ctx.session.chats[ctx.chat.id];
-    ctx.session.isCurrentUserAdmin = admins.some((adm) => adm.user.id === ctx.from.id);
-
-    return next();
-  }
-
-  if (ctx.chat.type === 'private') {
-    return next();
-  }
-
-  return bot.telegram
-    .getChatAdministrators(ctx.chat.id)
-    .then((data) => {
-      if (!data || !data.length) {
-        return;
-      }
-
-      ctx.session.isCurrentUserAdmin = data.some((adm) => adm.user.id === ctx.from.id);
-      ctx.session.chats[ctx.chat.id] = {
-        admins: data,
-        expiration: Date.now() + 1000 * 60 * 60,
-      };
-    })
-    .catch(console.error)
-    .then(() => next(ctx));
-});
-
-bot.on('text', onMessage);
-bot.launch().then(() => {
-  console.info('Bot started!', new Date().toString());
-});
-
-// Enable graceful stop
-process.once('SIGINT', () => bot.stop('SIGINT'));
-process.once('SIGTERM', () => bot.stop('SIGTERM'));
+  // Enable graceful stop
+  process.once('SIGINT', () => bot.stop('SIGINT'));
+  process.once('SIGTERM', () => bot.stop('SIGTERM'));
+})();
