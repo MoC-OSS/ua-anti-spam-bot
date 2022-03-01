@@ -145,6 +145,10 @@ function sleep(time) {
   };
 
   const onMessage = async (ctx) => {
+    if (ctx.session.botRemoved) {
+      return;
+    }
+
     if (!ctx?.message?.chat?.id) {
       console.error(Date.toString(), 'Cannot access the chat:', ctx.message.chat);
       return false;
@@ -216,6 +220,26 @@ function sleep(time) {
   bot.use(localSession.middleware());
 
   bot.use((ctx, next) => {
+    if (ctx.botInfo?.id) {
+      ctx.session.botId = ctx.botInfo?.id;
+    }
+
+    const addedMember = ctx?.update?.message?.new_chat_member;
+    if (addedMember?.id === ctx.session.botId) {
+      ctx.reply('Привіт!\nЗроби мене адміністратором, щоб я міг видаляти повідомлення.');
+    }
+
+    const updatePermissionsMember = ctx?.update?.my_chat_member?.new_chat_member;
+    if (updatePermissionsMember?.user?.id === ctx.session.botId && updatePermissionsMember?.status === 'administrator') {
+      ctx.reply('Тепер я адміністратор. Готовий до роботи 😎');
+    }
+
+    if (ctx?.update?.message?.left_chat_participant?.id === ctx.session.botId) {
+      ctx.session.botRemoved = true;
+    } else {
+      ctx.session.botRemoved = false;
+    }
+
     if (!ctx.session.chats) {
       ctx.session.chats = {};
     }
@@ -231,21 +255,30 @@ function sleep(time) {
       return next();
     }
 
-    return bot.telegram
-      .getChatAdministrators(ctx.chat.id)
-      .then((data) => {
-        if (!data || !data.length) {
-          return;
-        }
+    try {
+      if (ctx.session.botRemoved) {
+        return;
+      }
 
-        ctx.session.isCurrentUserAdmin = data.some((adm) => adm.user.id === ctx.from.id);
-        ctx.session.chats[ctx.chat.id] = {
-          admins: data,
-          expiration: Date.now() + 1000 * 60 * 60,
-        };
-      })
-      .catch(console.error)
-      .then(() => next(ctx));
+      return bot.telegram
+        .getChatAdministrators(ctx.chat.id)
+        .then((data) => {
+          if (!data || !data.length) {
+            return;
+          }
+
+          ctx.session.isCurrentUserAdmin = data.some((adm) => adm.user.id === ctx.from.id);
+          ctx.session.chats[ctx.chat.id] = {
+            admins: data,
+            expiration: Date.now() + 1000 * 60 * 60,
+          };
+        })
+        .catch(console.error)
+        .then(() => next(ctx));
+    } catch (e) {
+      console.error(e);
+      return next();
+    }
   });
 
   bot.on('text', onMessage);
