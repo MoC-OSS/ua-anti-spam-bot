@@ -45,6 +45,15 @@ function sleep(time) {
       type: '',
     };
 
+    const strictPercent100 = rules.dataset.strict_percent_100.find((percent1000) => messageUtil.findInText(message, percent1000, true));
+
+    if (strictPercent100) {
+      deleteRule.rule = 'STRICT 100 процентів бан';
+      deleteRule.parsedRule = strictPercent100;
+
+      return deleteRule;
+    }
+
     const percent100 = rules.dataset.percent_100.find((percent1000) => messageUtil.findInText(message, percent1000));
 
     if (percent100) {
@@ -159,7 +168,7 @@ function sleep(time) {
 
         let debugMessage = '';
 
-        if (env.DEBUG || true) {
+        if (env.DEBUG) {
           debugMessage = [
             '',
             '',
