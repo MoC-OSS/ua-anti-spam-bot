@@ -22,12 +22,10 @@ class MessageUtil {
      * */
     let directHit = false;
 
-    if (searchFor <= 4) {
-      directHit = message.toLowerCase().includes(searchFor.toLowerCase());
-    }
+    if (searchFor.length <= 4) {
+      directHit = message.split(' ').find((word) => word.toLowerCase() === searchFor.toLowerCase());
 
-    if (directHit) {
-      return true;
+      return directHit;
     }
 
     /**
@@ -53,6 +51,46 @@ class MessageUtil {
 
   isHit(andCondition, rule, message) {
     let findText = '';
+
+    let strictOrCondition = false;
+
+    if (rule.strict_or) {
+      strictOrCondition = rule.strict_or.find((condition) => {
+        let filterText = condition;
+
+        if (filterText.startsWith('_$')) {
+          filterText = lodashGet(rules, filterText.replace('_$', ''));
+
+          if (Array.isArray(filterText)) {
+            const da3 = filterText.some((nestText) => {
+              const da4 = this.findInText(message, nestText);
+
+              if (da4) {
+                findText = nestText;
+                return da4;
+              }
+
+              return false;
+            });
+
+            return da3;
+          }
+        }
+
+        const da2 = this.findInText(message, filterText);
+
+        if (da2) {
+          findText = filterText;
+          return da2;
+        }
+
+        return false;
+      });
+    }
+
+    if (andCondition && strictOrCondition) {
+      return { result: andCondition && strictOrCondition, findText, orType: 'strictOrCondition' };
+    }
 
     const orCondition = rule.or.find((condition) => {
       let filterText = condition;
@@ -86,7 +124,7 @@ class MessageUtil {
       return false;
     });
 
-    return { result: andCondition && orCondition, findText };
+    return { result: andCondition && orCondition, findText, orType: 'orCondition' };
   }
 }
 

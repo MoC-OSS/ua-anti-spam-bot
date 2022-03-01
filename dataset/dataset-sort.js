@@ -19,4 +19,4 @@ arr.dataset.short_locations.sort(sortRule);
 arr.dataset.high_risk.sort(sortRule);
 arr.dataset.percent_100.sort(sortRule);
 
-fs.writeFileSync('./rules.json', JSON.stringify(arr, null, 2));
+fs.writeFileSync('./rules.json', `${JSON.stringify(arr, null, 2)}\n`);

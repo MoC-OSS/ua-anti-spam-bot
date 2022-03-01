@@ -70,6 +70,7 @@ const isFilteredByRules = (ctx) => {
           deleteRule.parsedRule = {
             andCondition: filterText,
             orCondition: da.findText,
+            orType: da.orType,
           };
           return true;
         }
