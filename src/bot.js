@@ -220,6 +220,10 @@ function sleep(time) {
   bot.use(localSession.middleware());
 
   bot.use((ctx, next) => {
+    if (!ctx.session) {
+      return;
+    }
+
     if (ctx.botInfo?.id) {
       ctx.session.botId = ctx.botInfo?.id;
     }
