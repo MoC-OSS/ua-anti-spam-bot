@@ -189,10 +189,14 @@ function sleep(time) {
           ].join('\n');
         }
 
-        await ctx.deleteMessage();
-        await ctx.reply(
-          `❗️ ${writeUsername} Повідомлення видалено.\n\n* Причина: поширення потенційно стратегічної інформації.\n\nСповіщайте про ворогів спеціальному боту: @stop_russian_war_bot${debugMessage}`,
-        );
+        await ctx
+          .deleteMessage()
+          .catch(console.error)
+          .then(() => {
+            ctx.reply(
+              `❗️ ${writeUsername} Повідомлення видалено.\n\n* Причина: поширення потенційно стратегічної інформації.\n\nСповіщайте про ворогів спеціальному боту: @stop_russian_war_bot${debugMessage}`,
+            );
+          });
       } catch (e) {
         console.error('Cannot delete the message. Reason:', e);
       }
@@ -200,8 +204,12 @@ function sleep(time) {
 
     if (rep.reputation <= 0 || (rep.userRep <= 0 && !env.DISABLE_USER_REP)) {
       try {
-        await ctx.deleteMessage();
-        await ctx.reply('❗️ Повідомлення видалено.\n\n* Причина: спам.\n\n');
+        await ctx
+          .deleteMessage()
+          .catch(console.error)
+          .then(() => {
+            ctx.reply('❗️ Повідомлення видалено.\n\n* Причина: спам.\n\n');
+          });
       } catch (e) {
         console.error('Cannot delete the message. Reason:', e);
       }
@@ -253,7 +261,7 @@ function sleep(time) {
     }
 
     try {
-      if (ctx.session.botRemoved) {
+      if (ctx.session.botRemoved || !ctx.message) {
         return;
       }
 
