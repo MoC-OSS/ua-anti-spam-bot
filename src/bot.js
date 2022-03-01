@@ -206,6 +206,10 @@ bot.use((ctx, next) => {
     return next();
   }
 
+  if (ctx.chat.type === 'private') {
+    return next();
+  }
+
   return bot.telegram
     .getChatAdministrators(ctx.chat.id)
     .then((data) => {
