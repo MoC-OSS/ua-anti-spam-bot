@@ -35,6 +35,13 @@ function handleError(catchedError) {
   console.error('**** HANDLED ERROR ****', catchedError);
 }
 
+function truncateString(str, num) {
+  if (str.length > num) {
+    return `${str.slice(0, num)}..`;
+  }
+  return str;
+}
+
 // eslint-disable-next-line no-unused-vars
 function logCtx(ctx) {
   if (env.DEBUG) {
@@ -234,13 +241,38 @@ function logCtx(ctx) {
           ].join('\n');
         }
 
+        let words = [];
+
+        try {
+          if (typeof rep.byRules.parsedRule === 'string') {
+            words.push(rep.byRules.parsedRule);
+          } else {
+            words.push(rep.byRules.parsedRule.andCondition);
+          }
+        } catch (e) {
+          handleError(e);
+        }
+
+        words = words.map((word) => word.trim()).filter(Boolean);
+        words = words.map((word) => {
+          const newWordArray = word.split('');
+
+          for (let i = 1; i < word.length; i += 2) {
+            newWordArray[i] = '*';
+          }
+
+          return truncateString(newWordArray.join(''), 4);
+        });
+
+        const wordMessage = words.length ? ` (${words.join(', ')})` : '';
+
         await ctx
           .deleteMessage()
           .catch(handleError)
           .then(() => {
             ctx
               .reply(
-                `❗️ ${writeUsername} Повідомлення видалено.\n\n* Причина: поширення потенційно стратегічної інформації.\n\nСповіщайте про ворогів спеціальному боту: @stop_russian_war_bot\n\n${blockMessage}${debugMessage}`,
+                `❗️ ${writeUsername} Повідомлення видалено.\n\n* Причина: поширення потенційно стратегічної інформації${wordMessage}.\n\nСповіщайте про ворогів спеціальному боту: @stop_russian_war_bot\n\n${blockMessage}${debugMessage}`,
               )
               .catch(handleError);
           });
