@@ -150,6 +150,20 @@ function handleError(catchedError) {
   };
 
   const onMessage = async (ctx) => {
+    /**
+     * Skip channel admins message
+     * */
+    if (ctx?.update?.message?.sender_chat?.type === 'channel') {
+      return;
+    }
+
+    /**
+     * Skip channel chat admins message
+     * */
+    if (ctx?.update?.message?.from?.username === 'GroupAnonymousBot') {
+      return;
+    }
+
     if (ctx.session?.botRemoved) {
       return;
     }
