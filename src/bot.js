@@ -25,6 +25,10 @@ function sleep(time) {
   });
 }
 
+function handleError(catchedError) {
+  console.error('**** HANDLED ERROR ****', catchedError);
+}
+
 (async () => {
   console.info('Waiting for the old instance to down...');
   await sleep(5000);
@@ -159,7 +163,7 @@ function sleep(time) {
       return false;
     }
 
-    if (ctx.session?.isCurrentUserAdmin && !env.DEBUG) {
+    if (ctx.session?.isCurrentUserAdmin) {
       return false;
     }
 
@@ -192,13 +196,13 @@ function sleep(time) {
 
         await ctx
           .deleteMessage()
-          .catch(console.error)
+          .catch(handleError)
           .then(() => {
             ctx
               .reply(
                 `❗️ ${writeUsername} Повідомлення видалено.\n\n* Причина: поширення потенційно стратегічної інформації.\n\nСповіщайте про ворогів спеціальному боту: @stop_russian_war_bot\n\n${blockMessage}${debugMessage}`,
               )
-              .catch(console.error);
+              .catch(handleError);
           });
       } catch (e) {
         console.error('Cannot delete the message. Reason:', e);
@@ -209,9 +213,9 @@ function sleep(time) {
       try {
         await ctx
           .deleteMessage()
-          .catch(console.error)
+          .catch(handleError)
           .then(() => {
-            ctx.reply('❗️ Повідомлення видалено.\n\n* Причина: спам.\n\n').catch(console.error);
+            ctx.reply('❗️ Повідомлення видалено.\n\n* Причина: спам.\n\n').catch(handleError);
           });
       } catch (e) {
         console.error('Cannot delete the message. Reason:', e);
@@ -223,12 +227,10 @@ function sleep(time) {
 
   const bot = new Telegraf(env.BOT_TOKEN);
 
-  bot.start((ctx) => ctx.reply('Зроби мене адміністратором, щоб я міг видаляти повідомлення.').catch(console.error));
-  bot.help((ctx) => ctx.reply(`Бот був запущений:\n\n${startTime}`).catch(console.error));
+  bot.start((ctx) => ctx.reply('Зроби мене адміністратором, щоб я міг видаляти повідомлення.').catch(handleError));
+  bot.help((ctx) => ctx.reply(`Бот був запущений:\n\n${startTime}`).catch(handleError));
 
-  bot.catch((botError) => {
-    console.error('*** HANDLED ERROR: ***', botError);
-  });
+  bot.catch(handleError);
 
   const localSession = new LocalSession({ database: 'telegraf-session.json' });
 
@@ -245,12 +247,12 @@ function sleep(time) {
 
     const addedMember = ctx?.update?.message?.new_chat_member;
     if (addedMember?.id === ctx.session.botId) {
-      ctx.reply('Привіт!\nЗроби мене адміністратором, щоб я міг видаляти повідомлення.').catch(console.error);
+      ctx.reply('Привіт!\nЗроби мене адміністратором, щоб я міг видаляти повідомлення.').catch(handleError);
     }
 
     const updatePermissionsMember = ctx?.update?.my_chat_member?.new_chat_member;
     if (updatePermissionsMember?.user?.id === ctx.session.botId && updatePermissionsMember?.status === 'administrator') {
-      ctx.reply('Тепер я адміністратор. Готовий до роботи 😎').catch(console.error);
+      ctx.reply('Тепер я адміністратор. Готовий до роботи 😎').catch(handleError);
     }
 
     if (ctx?.update?.message?.left_chat_participant?.id === ctx.session.botId) {
@@ -272,19 +274,19 @@ function sleep(time) {
         return next();
       }
 
-      return next();
+      // return next();
 
-      // return ctx.telegram
-      //   .getChatMember(ctx.message.chat.id, ctx.message.from.id)
-      //   .catch(console.error)
-      //   .then((member) => {
-      //     if (!member) {
-      //       return next();
-      //     }
-      //
-      //     ctx.session.isCurrentUserAdmin = member.status === 'creator' || member.status === 'administrator';
-      //     next();
-      //   });
+      return ctx.telegram
+        .getChatMember(ctx.message.chat.id, ctx.message.from.id)
+        .catch(handleError)
+        .then((member) => {
+          if (!member) {
+            return next();
+          }
+
+          ctx.session.isCurrentUserAdmin = member.status === 'creator' || member.status === 'administrator';
+          next();
+        });
     } catch (e) {
       console.error(e);
       return next();
