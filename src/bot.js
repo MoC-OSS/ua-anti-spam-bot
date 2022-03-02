@@ -25,6 +25,10 @@ function sleep(time) {
   });
 }
 
+function joinMessage(messages) {
+  return messages.join('\n');
+}
+
 function handleError(catchedError) {
   console.error('**** HANDLED ERROR ****', catchedError);
 }
@@ -151,7 +155,15 @@ function handleError(catchedError) {
 
   const onMessage = async (ctx) => {
     /**
-     * Skip channel admins message
+     * Skip channel post when bot in channel
+     * @deprecated on message doesn't handle user posts
+     * */
+    // if (ctx?.update?.channel_post?.sender_chat?.type === 'channel') {
+    //   return;
+    // }
+
+    /**
+     * Skip channel admins message duplicated in chat
      * */
     if (ctx?.update?.message?.sender_chat?.type === 'channel') {
       return;
@@ -251,6 +263,13 @@ function handleError(catchedError) {
   bot.use(localSession.middleware());
 
   bot.use((ctx, next) => {
+    if (env.DEBUG) {
+      const writeCtx = JSON.parse(JSON.stringify(ctx));
+      // noinspection JSConstantReassignment
+      delete writeCtx.tg;
+      console.info(JSON.stringify(writeCtx, null, 2));
+    }
+
     if (!ctx.session) {
       return next();
     }
@@ -264,9 +283,27 @@ function handleError(catchedError) {
       ctx.reply('Привіт!\nЗроби мене адміністратором, щоб я міг видаляти повідомлення.').catch(handleError);
     }
 
+    const isChannel = ctx?.update?.my_chat_member?.chat?.type === 'channel';
     const updatePermissionsMember = ctx?.update?.my_chat_member?.new_chat_member;
-    if (updatePermissionsMember?.user?.id === ctx.session.botId && updatePermissionsMember?.status === 'administrator') {
-      ctx.reply('Тепер я адміністратор. Готовий до роботи 😎').catch(handleError);
+    const isUpdatedToAdmin = updatePermissionsMember?.user?.id === ctx.session.botId && updatePermissionsMember?.status === 'administrator';
+
+    if (isUpdatedToAdmin) {
+      if (isChannel) {
+        ctx
+          .reply(
+            joinMessage([
+              `Привіт! Повідомлення від офіційного чат-боту @${ctx.botInfo.username}.`,
+              `Ви мене додали в <b>канал</b> як адміністратора, але я не можу перевіряти повідомлення в коментарях.`,
+              '',
+              'Видаліть мене і додайте в <b>чат каналу</b> каналу <b>як адміністратора</b>.',
+              'Якщо є запитання, пишіть @dimkasmile',
+            ]),
+            { parse_mode: 'HTML' },
+          )
+          .catch(handleError);
+      } else {
+        ctx.reply('Тепер я адміністратор. Готовий до роботи 😎').catch(handleError);
+      }
     }
 
     if (ctx?.update?.message?.left_chat_participant?.id === ctx.session.botId) {
