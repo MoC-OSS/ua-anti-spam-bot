@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 const { error, env } = require('typed-dotenv').config();
 const { Telegraf } = require('telegraf');
 const GraphemeSplitter = require('grapheme-splitter');
@@ -31,6 +33,18 @@ function joinMessage(messages) {
 
 function handleError(catchedError) {
   console.error('**** HANDLED ERROR ****', catchedError);
+}
+
+// eslint-disable-next-line no-unused-vars
+function logCtx(ctx) {
+  if (env.DEBUG) {
+    const writeCtx = JSON.parse(JSON.stringify(ctx));
+    // noinspection JSConstantReassignment
+    delete writeCtx.tg;
+    console.info(JSON.stringify(writeCtx, null, 2));
+
+    fs.writeFileSync('./last-ctx.json', `${JSON.stringify(writeCtx, null, 2)}\n`);
+  }
 }
 
 (async () => {
@@ -253,7 +267,29 @@ function handleError(catchedError) {
 
   const bot = new Telegraf(env.BOT_TOKEN);
 
-  bot.start((ctx) => ctx.reply('Зроби мене адміністратором, щоб я міг видаляти повідомлення.').catch(handleError));
+  bot.start((ctx) => {
+    if (ctx?.update?.message?.chat?.type === 'private') {
+      return ctx
+        .reply(
+          joinMessage([
+            'Привіт! 🇺🇦✌️',
+            '',
+            'Я чат-бот, який дозволяє автоматично видаляє повідомлення, що містять назви локацій міста, укриттів, а також ключові слова переміщення військ.',
+            '',
+            '<b>Як мене запустити?</b>',
+            'Додай мене і зроби адміністратором:',
+            '• Або в звичайну групу;',
+            '• Або в чат каналу.',
+            '',
+            'Якщо є запитання або бот не працює, пишіть @dimkasmile',
+          ]),
+          { parse_mode: 'HTML' },
+        )
+        .catch(handleError);
+    }
+
+    ctx.reply('Зроби мене адміністратором, щоб я міг видаляти повідомлення.').catch(handleError);
+  });
   bot.help((ctx) => ctx.reply(`Бот був запущений:\n\n${startTime}`).catch(handleError));
 
   bot.catch(handleError);
@@ -263,12 +299,7 @@ function handleError(catchedError) {
   bot.use(localSession.middleware());
 
   bot.use((ctx, next) => {
-    if (env.DEBUG) {
-      const writeCtx = JSON.parse(JSON.stringify(ctx));
-      // noinspection JSConstantReassignment
-      delete writeCtx.tg;
-      console.info(JSON.stringify(writeCtx, null, 2));
-    }
+    // logCtx(ctx);
 
     if (!ctx.session) {
       return next();

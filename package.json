@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./src/bot.js --ignore ./telegraf-session.json",
+    "start": "nodemon ./src/bot.js --ignore ./telegraf-session.json --ignore ./last-ctx.json",
     "start:prod": "forever start src/bot.js",
     "prepare": "husky install",
     "lint": "npm-run-all --parallel lint:js",
