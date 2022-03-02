@@ -1,4 +1,4 @@
-FROM node:16
+FROM public.ecr.aws/f2g8j8i0/node:16
 
 # Create app directory
 WORKDIR /usr/src/app
