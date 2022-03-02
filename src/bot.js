@@ -8,6 +8,7 @@ const Keyv = require('keyv');
 
 const { messageUtil, telegramUtil } = require('./utils');
 const rules = require('../dataset/rules.json');
+const { blockMessage } = require('./message');
 
 const splitter = new GraphemeSplitter();
 const keyv = new Keyv('sqlite://db.sqlite');
@@ -195,7 +196,7 @@ function sleep(time) {
           .then(() => {
             ctx
               .reply(
-                `❗️ ${writeUsername} Повідомлення видалено.\n\n* Причина: поширення потенційно стратегічної інформації.\n\nСповіщайте про ворогів спеціальному боту: @stop_russian_war_bot${debugMessage}`,
+                `❗️ ${writeUsername} Повідомлення видалено.\n\n* Причина: поширення потенційно стратегічної інформації.\n\nСповіщайте про ворогів спеціальному боту: @stop_russian_war_bot\n\n${blockMessage}${debugMessage}`,
               )
               .catch(console.error);
           });
@@ -235,7 +236,7 @@ function sleep(time) {
 
   bot.use((ctx, next) => {
     if (!ctx.session) {
-      return;
+      return next();
     }
 
     if (ctx.botInfo?.id) {
