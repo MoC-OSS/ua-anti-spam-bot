@@ -2,7 +2,7 @@ const fs = require('fs');
 
 const arr = require('./rules.json');
 
-const newLocations = arr.dataset.high_risk.sort(
+const newLocations = arr.dataset.locations.sort(
   (a, b) =>
     // ASC  -> a.length - b.length
     // DESC -> b.length - a.length
