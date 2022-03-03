@@ -174,7 +174,8 @@ function logCtx(ctx) {
     return { emojis, formattings, urls, fromChannel, reputation, userRep, byRules };
   };
 
-  const onMessage = async (ctx) => {
+  const onMessage = async (ctx, next) => {
+    ctx.session.performanceStart = performance.now();
     /**
      * Skip channel post when bot in channel
      * @deprecated on message doesn't handle user posts
@@ -187,31 +188,31 @@ function logCtx(ctx) {
      * Skip channel admins message duplicated in chat
      * */
     if (ctx?.update?.message?.sender_chat?.type === 'channel') {
-      return;
+      return next();
     }
 
     /**
      * Skip channel chat admins message
      * */
     if (ctx?.update?.message?.from?.username === 'GroupAnonymousBot') {
-      return;
+      return next();
     }
 
     if (ctx.session?.botRemoved) {
-      return;
+      return next();
     }
 
     if (!ctx?.message?.chat?.id) {
       console.error(Date.toString(), 'Cannot access the chat:', ctx.message.chat);
-      return false;
+      return next();
     }
 
     if (env.ONLY_WORK_IN_COMMENTS && !telegramUtil.isInComments(ctx)) {
-      return false;
+      return next();
     }
 
     if (ctx.session?.isCurrentUserAdmin) {
-      return false;
+      return next();
     }
 
     const rep = await getMessageReputation(ctx);
@@ -294,7 +295,7 @@ function logCtx(ctx) {
       }
     }
 
-    return false;
+    return next();
   };
 
   const bot = new Telegraf(env.BOT_TOKEN);
@@ -422,7 +423,14 @@ function logCtx(ctx) {
     }
   });
 
-  bot.on('text', onMessage);
+  bot.on('text', onMessage, (ctx) => {
+    logCtx(ctx);
+    ctx.replyWithMarkdown(
+      `*Time*: ${performance.now() - ctx.session.performanceStart}\n\nStart:\n${
+        ctx.session.performanceStart
+      }\n\nEnd:\n${performance.now()}`,
+    );
+  });
   // bot.on('text', () => {});
   bot.launch().then(() => {
     console.info('Bot started!', new Date().toString());
