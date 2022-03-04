@@ -361,15 +361,18 @@ function logCtx(ctx) {
               { parse_mode: 'HTML' },
             )
             .catch(handleError);
-
-          logCtx(admins);
         })
         .catch(handleError);
     }
 
     const isChannel = ctx?.update?.my_chat_member?.chat?.type === 'channel';
+    const oldPermissionsMember = ctx?.update?.my_chat_member?.old_chat_member;
     const updatePermissionsMember = ctx?.update?.my_chat_member?.new_chat_member;
     const isUpdatedToAdmin = updatePermissionsMember?.user?.id === ctx.session.botId && updatePermissionsMember?.status === 'administrator';
+    const isDemotedToMember =
+      updatePermissionsMember?.user?.id === ctx.session.botId &&
+      updatePermissionsMember?.status === 'member' &&
+      oldPermissionsMember?.status === 'administrator';
 
     if (isUpdatedToAdmin) {
       if (isChannel) {
@@ -388,6 +391,10 @@ function logCtx(ctx) {
       } else {
         ctx.reply('Тепер я адміністратор. Готовий до роботи 😎').catch(handleError);
       }
+    }
+
+    if (isDemotedToMember) {
+      ctx.reply('Тепер я деактивований. Відпочиваю... 😴').catch(handleError);
     }
 
     if (ctx?.update?.message?.left_chat_participant?.id === ctx.session.botId) {
