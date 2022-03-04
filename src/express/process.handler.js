@@ -17,7 +17,7 @@ class ProcessHandler {
     const directHit = words.find((word) => messageUtil.findInText(message, word, strict));
 
     if (directHit) {
-      return true;
+      return directHit;
     }
 
     return messageUtil.fuseInText(message, words);

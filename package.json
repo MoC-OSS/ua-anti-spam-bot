@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start:bot": "nodemon ./src/bot.js --ignore ./telegraf-session.json --ignore ./last-ctx.json",
+    "start:bot": "nodemon ./src/bot.js --ignore ./telegraf-session.json --ignore ./last-ctx.json --max_old_space_size=2048",
     "start:bot:prod": "node ./src/bot.js",
-    "start:server": "pm2 start ./src/express.js -i 3 --watch",
-    "start:server:prod": "pm2 start ./src/express.js -i 3",
+    "start:server": "nodemon ./src/express.js --ignore ./telegraf-session.json --ignore ./last-ctx.json --max_old_space_size=2048",
+    "start:server:prod": "node ./src/express.js",
+    "start:server:cluster": "pm2 start ./src/express.js -i 3 --watch",
     "prepare": "husky install",
     "lint": "npm-run-all --parallel lint:js",
     "lint:branch-name": "branch-name-lint ./.branchlintrc.json",
@@ -17,6 +18,7 @@
   },
   "dependencies": {
     "@keyv/sqlite": "^3.0.0",
+    "axios": "^0.26.0",
     "contains-emoji": "^1.1.0",
     "cyrillic-to-translit-js": "^3.1.0",
     "express": "^4.17.3",

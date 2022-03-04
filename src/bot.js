@@ -4,12 +4,11 @@ const { error, env } = require('typed-dotenv').config();
 const { Telegraf } = require('telegraf');
 const GraphemeSplitter = require('grapheme-splitter');
 const containsEmoji = require('contains-emoji');
-const lodashGet = require('lodash.get');
 const LocalSession = require('telegraf-session-local');
 const Keyv = require('keyv');
 
-const { messageUtil, telegramUtil } = require('./utils');
-const rules = require('../dataset/rules.json');
+const { telegramUtil } = require('./utils');
+const { messageHandler } = require('./bot/message.handler');
 const { blockMessage } = require('./message');
 
 const splitter = new GraphemeSplitter();
@@ -114,70 +113,7 @@ function logCtx(ctx) {
       return false;
     }
 
-    const deleteRule = {
-      rule: null,
-      parsedRule: null,
-      type: '',
-    };
-
-    const strictPercent100 = rules.dataset.strict_percent_100.find((percent1000) => messageUtil.findInText(message, percent1000, true));
-
-    if (strictPercent100) {
-      deleteRule.rule = 'STRICT 100 процентів бан';
-      deleteRule.parsedRule = strictPercent100;
-
-      return deleteRule;
-    }
-
-    const percent100 = rules.dataset.percent_100.find((percent1000) => messageUtil.findInText(message, percent1000));
-
-    if (percent100) {
-      deleteRule.rule = '100 процентів бан';
-      deleteRule.parsedRule = percent100;
-
-      return deleteRule;
-    }
-
-    deleteRule.rule = rules.rules.some((rule) => {
-      if (rule.and) {
-        deleteRule.type = 'and';
-        const andCondition = !rule.and.some((filterText) => {
-          const da5 = messageUtil.findInText(message, filterText);
-
-          if (da5) {
-            deleteRule.parsedRule = filterText;
-          }
-
-          return da5;
-        });
-        return messageUtil.isHit(andCondition, rule, message);
-      }
-
-      if (rule.array_and) {
-        deleteRule.type = 'array_and';
-        const andArray = lodashGet(rules, rule.array_and.replace('_$', ''));
-
-        return andArray.some((filterText) => {
-          const andCondition = messageUtil.findInText(message, filterText);
-          const da = messageUtil.isHit(andCondition, rule, message);
-
-          if (da.result) {
-            deleteRule.parsedRule = {
-              andCondition: filterText,
-              orCondition: da.findText,
-              orType: da.orType,
-            };
-            return true;
-          }
-
-          return false;
-        });
-      }
-
-      return false;
-    });
-
-    return deleteRule;
+    return messageHandler.getDeleteRule(message);
   };
 
   const countEmojis = (ctx) => splitter.splitGraphemes(ctx?.message?.text || '').filter((e) => containsEmoji(e)).length;
@@ -197,7 +133,7 @@ function logCtx(ctx) {
     const formattings = formattingsInfo(ctx);
     const urls = countUrls(ctx);
     const fromChannel = telegramUtil.isFromChannel(ctx);
-    const byRules = isFilteredByRules(ctx);
+    const byRules = await isFilteredByRules(ctx);
 
     let userRep = fromChannel ? env.CHANNEL_START_REPUTATION : parseInt(await keyv.get(`user_${ctx.from.id}`), 10) || env.START_REPUTATION;
 
@@ -287,17 +223,7 @@ function logCtx(ctx) {
           ].join('\n');
         }
 
-        let words = [];
-
-        try {
-          if (typeof rep.byRules.parsedRule === 'string') {
-            words.push(rep.byRules.parsedRule);
-          } else {
-            words.push(rep.byRules.parsedRule.andCondition);
-          }
-        } catch (e) {
-          handleError(e, 'BAN_WORDS');
-        }
+        let words = [rep.byRules.rule];
 
         words = words.map((word) => word.trim()).filter(Boolean);
         words = words.map((word) => {
