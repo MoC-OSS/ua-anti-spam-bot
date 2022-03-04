@@ -1,8 +1,9 @@
 const axios = require('axios');
+const { env } = require('typed-dotenv').config();
 
 const { handleError } = require('../utils');
 
-const host = 'http://localhost:3000';
+const host = `http://${env.HOST}:${env.PORT}`;
 
 class MessageHandler {
   constructor() {

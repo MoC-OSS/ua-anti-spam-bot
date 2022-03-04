@@ -27,6 +27,6 @@ app.post('/process', (req, res) => {
   res.json({ result, time, expressStartTime });
 });
 
-app.listen(env.PORT, () => {
-  console.info(`App started on locahost:${env.PORT}`);
+app.listen(env.PORT, env.HOST, () => {
+  console.info(`App started on http://locahost:${env.PORT}`);
 });
