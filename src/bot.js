@@ -276,7 +276,7 @@ function logCtx(ctx) {
           joinMessage([
             'Привіт! 🇺🇦✌️',
             '',
-            'Я чат-бот, який дозволяє автоматично видаляє повідомлення, що містять назви локацій міста, укриттів, а також ключові слова переміщення військ.',
+            'Я чат-бот, який дозволяє автоматично видаляти повідомлення, що містять назви локацій міста, укриттів, а також ключові слова переміщення військ.',
             '',
             '<b>Як мене запустити?</b>',
             '',
@@ -324,8 +324,6 @@ function logCtx(ctx) {
   bot.use(localSession.middleware());
 
   bot.use((ctx, next) => {
-    // logCtx(ctx);
-
     if (!ctx.session) {
       return next();
     }
@@ -336,7 +334,37 @@ function logCtx(ctx) {
 
     const addedMember = ctx?.update?.message?.new_chat_member;
     if (addedMember?.id === ctx.session.botId) {
-      ctx.reply('Привіт!\nЗроби мене адміністратором, щоб я міг видаляти повідомлення.').catch(handleError);
+      bot.telegram
+        .getChatAdministrators(ctx.chat.id)
+        .then((admins) => {
+          if (!admins || !admins.length) {
+            return;
+          }
+
+          const creator = admins.find((user) => user.status === 'creator' && !!user.user.username);
+          const promoteAdmins = admins.filter((user) => user.can_promote_members && !!user.user.username);
+
+          const finalAdmins = [creator, ...promoteAdmins].filter(Boolean);
+          const adminsString = finalAdmins.length ? `${finalAdmins.map((user) => `@${user.user.username}`).join(', ')} ` : '';
+
+          ctx
+            .reply(
+              joinMessage([
+                'Привіт! 🇺🇦✌️',
+                '',
+                'Я чат-бот, який дозволяє автоматично видаляти повідомлення, що містять назви локацій міста, укриттів, а також ключові слова переміщення військ.',
+                '',
+                '<b>Зроби мене адміністратором, щоб я міг видаляти повідомлення.</b>',
+                '',
+                adminsString ? `Це може зробити: ${adminsString}` : '',
+              ]).trim(),
+              { parse_mode: 'HTML' },
+            )
+            .catch(handleError);
+
+          logCtx(admins);
+        })
+        .catch(handleError);
     }
 
     const isChannel = ctx?.update?.my_chat_member?.chat?.type === 'channel';
@@ -409,7 +437,7 @@ function logCtx(ctx) {
           }\n\nEnd:\n${performance.now()}`,
         )
         .catch(handleError)
-        .then(next);
+        .then(() => next());
     } else {
       return next();
     }
