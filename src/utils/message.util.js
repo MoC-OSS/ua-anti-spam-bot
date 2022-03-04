@@ -1,19 +1,19 @@
 const lodashGet = require('lodash.get');
-const CyrillicToTranslit = require('cyrillic-to-translit-js');
-// const Fuse = require('fuse.js');
+// const CyrillicToTranslit = require('cyrillic-to-translit-js');
+const Fuse = require('fuse.js');
 
 const rules = require('../../dataset/rules.json');
 
-const cyrillicToTranslit = new CyrillicToTranslit();
+// const cyrillicToTranslit = new CyrillicToTranslit();
 
-// const options = {
-//   shouldSort: true,
-//   threshold: 0.15,
-//   location: 0,
-//   distance: 100,
-//   maxPatternLength: 32,
-//   minMatchCharLength: 6,
-// };
+const options = {
+  shouldSort: true,
+  threshold: 0.15,
+  location: 0,
+  distance: 100,
+  maxPatternLength: 32,
+  minMatchCharLength: 6,
+};
 
 class MessageUtil {
   findInText(message, searchFor, strict = false) {
@@ -24,7 +24,10 @@ class MessageUtil {
 
     if (searchFor.length <= 4) {
       if (strict) {
-        directHit = message.split(' ').find((word) => word.toLowerCase() === searchFor.toLowerCase());
+        directHit = message
+          .replace(/[^\w\s]/gi, '')
+          .split(' ')
+          .find((word) => word.toLowerCase() === searchFor.toLowerCase());
       } else {
         directHit = message.toLowerCase().includes(searchFor.toLowerCase());
       }
@@ -35,27 +38,30 @@ class MessageUtil {
     /**
      * Translit hit
      * */
-    const translitHit = cyrillicToTranslit
-      .transform(message, ' ')
-      .toLowerCase()
-      .includes(cyrillicToTranslit.transform(searchFor, ' ').toLowerCase());
-
-    if (translitHit) {
-      return true;
-    }
-
-    /**
-     * Fuse hit
-     * */
-    // const fuseInstanse = new Fuse([message.toLowerCase()], options);
-    // const fuseHit = fuseInstanse.search(searchFor.toLowerCase());
-
-    // return !!fuseHit.length;
+    // const translitHit = cyrillicToTranslit
+    //   .transform(message, ' ')
+    //   .toLowerCase()
+    //   .includes(cyrillicToTranslit.transform(searchFor, ' ').toLowerCase());
+    //
+    // if (translitHit) {
+    //   return true;
+    // }
 
     /**
      * Contains search
      * */
-    return message.toLowerCase().includes(searchFor.toLowerCase());
+    // return message.toLowerCase().includes(searchFor.toLowerCase());
+    return false;
+  }
+
+  fuseInText(message, wordsArray) {
+    /**
+     * Fuse hit
+     * */
+    const fuseInstance = new Fuse(wordsArray, options);
+    const fuseHit = fuseInstance.search(message);
+
+    return !!fuseHit.length;
   }
 
   isHit(andCondition, rule, message) {
