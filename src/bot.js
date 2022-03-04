@@ -4,12 +4,11 @@ const { error, env } = require('typed-dotenv').config();
 const { Telegraf } = require('telegraf');
 const GraphemeSplitter = require('grapheme-splitter');
 const containsEmoji = require('contains-emoji');
-const lodashGet = require('lodash.get');
 const LocalSession = require('telegraf-session-local');
 const Keyv = require('keyv');
 
-const { messageUtil, telegramUtil } = require('./utils');
-const rules = require('../dataset/rules.json');
+const { telegramUtil, handleError } = require('./utils');
+const { messageHandler } = require('./bot/message.handler');
 const { blockMessage } = require('./message');
 
 const splitter = new GraphemeSplitter();
@@ -29,10 +28,6 @@ function sleep(time) {
 
 function joinMessage(messages) {
   return messages.join('\n');
-}
-
-function handleError(catchedError, reason = '') {
-  console.error('**** HANDLED ERROR ****', reason, catchedError);
 }
 
 function truncateString(str, num) {
@@ -59,7 +54,7 @@ function logCtx(ctx) {
   await sleep(5000);
   console.info('Starting a new instance...');
 
-  const startTime = new Date().toString();
+  const startTime = new Date();
 
   const isFilteredByRules = (ctx) => {
     const originMessage = telegramUtil.getMessage(ctx);
@@ -114,70 +109,7 @@ function logCtx(ctx) {
       return false;
     }
 
-    const deleteRule = {
-      rule: null,
-      parsedRule: null,
-      type: '',
-    };
-
-    const strictPercent100 = rules.dataset.strict_percent_100.find((percent1000) => messageUtil.findInText(message, percent1000, true));
-
-    if (strictPercent100) {
-      deleteRule.rule = 'STRICT 100 процентів бан';
-      deleteRule.parsedRule = strictPercent100;
-
-      return deleteRule;
-    }
-
-    const percent100 = rules.dataset.percent_100.find((percent1000) => messageUtil.findInText(message, percent1000));
-
-    if (percent100) {
-      deleteRule.rule = '100 процентів бан';
-      deleteRule.parsedRule = percent100;
-
-      return deleteRule;
-    }
-
-    deleteRule.rule = rules.rules.some((rule) => {
-      if (rule.and) {
-        deleteRule.type = 'and';
-        const andCondition = !rule.and.some((filterText) => {
-          const da5 = messageUtil.findInText(message, filterText);
-
-          if (da5) {
-            deleteRule.parsedRule = filterText;
-          }
-
-          return da5;
-        });
-        return messageUtil.isHit(andCondition, rule, message);
-      }
-
-      if (rule.array_and) {
-        deleteRule.type = 'array_and';
-        const andArray = lodashGet(rules, rule.array_and.replace('_$', ''));
-
-        return andArray.some((filterText) => {
-          const andCondition = messageUtil.findInText(message, filterText);
-          const da = messageUtil.isHit(andCondition, rule, message);
-
-          if (da.result) {
-            deleteRule.parsedRule = {
-              andCondition: filterText,
-              orCondition: da.findText,
-              orType: da.orType,
-            };
-            return true;
-          }
-
-          return false;
-        });
-      }
-
-      return false;
-    });
-
-    return deleteRule;
+    return messageHandler.getDeleteRule(message);
   };
 
   const countEmojis = (ctx) => splitter.splitGraphemes(ctx?.message?.text || '').filter((e) => containsEmoji(e)).length;
@@ -197,7 +129,7 @@ function logCtx(ctx) {
     const formattings = formattingsInfo(ctx);
     const urls = countUrls(ctx);
     const fromChannel = telegramUtil.isFromChannel(ctx);
-    const byRules = isFilteredByRules(ctx);
+    const byRules = await isFilteredByRules(ctx);
 
     let userRep = fromChannel ? env.CHANNEL_START_REPUTATION : parseInt(await keyv.get(`user_${ctx.from.id}`), 10) || env.START_REPUTATION;
 
@@ -219,7 +151,10 @@ function logCtx(ctx) {
     return { emojis, formattings, urls, fromChannel, reputation, userRep, byRules };
   };
 
-  const onMessage = async (ctx) => {
+  const onMessage = async (ctx, next) => {
+    if (env.DEBUG) {
+      ctx.session.performanceStart = performance.now();
+    }
     /**
      * Skip channel post when bot in channel
      * @deprecated on message doesn't handle user posts
@@ -232,31 +167,31 @@ function logCtx(ctx) {
      * Skip channel admins message duplicated in chat
      * */
     if (ctx?.update?.message?.sender_chat?.type === 'channel') {
-      return;
+      return next();
     }
 
     /**
      * Skip channel chat admins message
      * */
     if (ctx?.update?.message?.from?.username === 'GroupAnonymousBot') {
-      return;
+      return next();
     }
 
     if (ctx.session?.botRemoved) {
-      return;
+      return next();
     }
 
     if (!ctx?.message?.chat?.id) {
       console.error(Date.toString(), 'Cannot access the chat:', ctx.message.chat);
-      return false;
+      return next();
     }
 
     if (env.ONLY_WORK_IN_COMMENTS && !telegramUtil.isInComments(ctx)) {
-      return false;
+      return next();
     }
 
     if (ctx.session?.isCurrentUserAdmin && !env.DEBUG) {
-      return false;
+      return next();
     }
 
     const rep = await getMessageReputation(ctx);
@@ -274,29 +209,22 @@ function logCtx(ctx) {
             '',
             '',
             '',
-            'DEBUG:',
-            'Повідомлення:',
+            '***DEBUG***',
+            'Message:',
             message,
             '',
-            'Правило бану:',
+            'Ban reason:',
             JSON.stringify(rep.byRules),
             '',
-            'Останній деплой:',
-            startTime,
+            'Logic type:',
+            env.USE_SERVER ? 'server' : 'local',
+            '',
+            'Last deploy:',
+            startTime.toString(),
           ].join('\n');
         }
 
-        let words = [];
-
-        try {
-          if (typeof rep.byRules.parsedRule === 'string') {
-            words.push(rep.byRules.parsedRule);
-          } else {
-            words.push(rep.byRules.parsedRule.andCondition);
-          }
-        } catch (e) {
-          handleError(e, 'BAN_WORDS');
-        }
+        let words = [rep.byRules.rule];
 
         words = words.map((word) => word.trim()).filter(Boolean);
         words = words.map((word) => {
@@ -339,7 +267,7 @@ function logCtx(ctx) {
       }
     }
 
-    return false;
+    return next();
   };
 
   const bot = new Telegraf(env.BOT_TOKEN);
@@ -351,7 +279,7 @@ function logCtx(ctx) {
           joinMessage([
             'Привіт! 🇺🇦✌️',
             '',
-            'Я чат-бот, який дозволяє автоматично видаляє повідомлення, що містять назви локацій міста, укриттів, а також ключові слова переміщення військ.',
+            'Я чат-бот, який дозволяє автоматично видаляти повідомлення, що містять назви локацій міста, укриттів, а також ключові слова переміщення військ.',
             '',
             '<b>Як мене запустити?</b>',
             '',
@@ -366,9 +294,31 @@ function logCtx(ctx) {
         .catch(handleError);
     }
 
-    ctx.reply('Зроби мене адміністратором, щоб я міг видаляти повідомлення.').catch(handleError);
+    telegramUtil.getChatAdmins(bot, ctx.chat.id).then(({ adminsString }) => {
+      ctx
+        .reply(
+          joinMessage([
+            '<b>Зроби мене адміністратором, щоб я міг видаляти повідомлення.</b>',
+            '',
+            adminsString ? `Це може зробити: ${adminsString}` : 'Це може зробити творець чату',
+          ]).trim(),
+          { parse_mode: 'HTML' },
+        )
+        .catch((getAdminsError) => {
+          handleError(getAdminsError);
+          ctx.reply(joinMessage(['<b>Зроби мене адміністратором, щоб я міг видаляти повідомлення.</b>']), { parse_mode: 'HTML' });
+        });
+    });
   });
-  bot.help((ctx) =>
+  bot.help((ctx) => {
+    const startLocaleTime = startTime.toLocaleDateString('uk-UA', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
     ctx
       .reply(
         joinMessage([
@@ -377,12 +327,16 @@ function logCtx(ctx) {
           '• Попросіть адміністраторів написати його самостійно;',
           '• Пришліть його скріншотом.',
           '',
-          `Останній апдейт боту:\n\n${startTime}`,
+          '<b>Останнє оновлення боту:</b>',
+          '',
+          startLocaleTime,
+          '',
+          'Якщо є запитання, пишіть @dimkasmile',
         ]),
         { parse_mode: 'HTML' },
       )
-      .catch(handleError),
-  );
+      .catch(handleError);
+  });
 
   bot.catch(handleError);
 
@@ -391,7 +345,7 @@ function logCtx(ctx) {
   bot.use(localSession.middleware());
 
   bot.use((ctx, next) => {
-    // logCtx(ctx);
+    logCtx(ctx);
 
     if (!ctx.session) {
       return next();
@@ -403,12 +357,35 @@ function logCtx(ctx) {
 
     const addedMember = ctx?.update?.message?.new_chat_member;
     if (addedMember?.id === ctx.session.botId) {
-      ctx.reply('Привіт!\nЗроби мене адміністратором, щоб я міг видаляти повідомлення.').catch(handleError);
+      telegramUtil
+        .getChatAdmins(bot, ctx.chat.id)
+        .then(({ adminsString }) => {
+          ctx
+            .reply(
+              joinMessage([
+                'Привіт! 🇺🇦✌️',
+                '',
+                'Я чат-бот, який дозволяє автоматично видаляти повідомлення, що містять назви локацій міста, укриттів, а також ключові слова переміщення військ.',
+                '',
+                '<b>Зроби мене адміністратором, щоб я міг видаляти повідомлення.</b>',
+                '',
+                adminsString ? `Це може зробити: ${adminsString}` : 'Це може зробити творець чату',
+              ]).trim(),
+              { parse_mode: 'HTML' },
+            )
+            .catch(handleError);
+        })
+        .catch(handleError);
     }
 
     const isChannel = ctx?.update?.my_chat_member?.chat?.type === 'channel';
+    const oldPermissionsMember = ctx?.update?.my_chat_member?.old_chat_member;
     const updatePermissionsMember = ctx?.update?.my_chat_member?.new_chat_member;
     const isUpdatedToAdmin = updatePermissionsMember?.user?.id === ctx.session.botId && updatePermissionsMember?.status === 'administrator';
+    const isDemotedToMember =
+      updatePermissionsMember?.user?.id === ctx.session.botId &&
+      updatePermissionsMember?.status === 'member' &&
+      oldPermissionsMember?.status === 'administrator';
 
     if (isUpdatedToAdmin) {
       if (isChannel) {
@@ -427,6 +404,10 @@ function logCtx(ctx) {
       } else {
         ctx.reply('Тепер я адміністратор. Готовий до роботи 😎').catch(handleError);
       }
+    }
+
+    if (isDemotedToMember) {
+      ctx.reply('Тепер я деактивований. Відпочиваю... 😴').catch(handleError);
     }
 
     if (ctx?.update?.message?.left_chat_participant?.id === ctx.session.botId) {
@@ -467,7 +448,22 @@ function logCtx(ctx) {
     }
   });
 
-  bot.on('text', onMessage);
+  const perfomanceMiddleware = (ctx, next) => {
+    if (env.DEBUG) {
+      ctx
+        .replyWithMarkdown(
+          `*Time*: ${performance.now() - ctx.session.performanceStart}\n\nStart:\n${
+            ctx.session.performanceStart
+          }\n\nEnd:\n${performance.now()}`,
+        )
+        .catch(handleError)
+        .then(() => next());
+    } else {
+      return next();
+    }
+  };
+
+  bot.on('text', onMessage, perfomanceMiddleware);
   // bot.on('text', () => {});
   bot.launch().then(() => {
     console.info('Bot started!', new Date().toString());

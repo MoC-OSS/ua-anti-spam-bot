@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./src/bot.js --ignore ./telegraf-session.json --ignore ./last-ctx.json",
-    "start:prod": "node ./src/bot.js",
+    "start:bot": "nodemon ./src/bot.js --ignore ./telegraf-session.json --ignore ./last-ctx.json --max_old_space_size=2048",
+    "start:bot:prod": "node ./src/bot.js",
+    "start:server": "nodemon ./src/express.js --ignore ./telegraf-session.json --ignore ./last-ctx.json --max_old_space_size=2048",
+    "start:server:prod": "node ./src/express.js",
+    "start:server:cluster": "pm2 start ./src/express.js -i 3 --watch",
     "prepare": "husky install",
     "lint": "npm-run-all --parallel lint:js",
     "lint:branch-name": "branch-name-lint ./.branchlintrc.json",
@@ -15,14 +18,15 @@
   },
   "dependencies": {
     "@keyv/sqlite": "^3.0.0",
+    "axios": "^0.26.0",
     "contains-emoji": "^1.1.0",
     "cyrillic-to-translit-js": "^3.1.0",
-    "forever": "^4.0.3",
+    "express": "^4.17.3",
     "fuse.js": "^6.5.3",
     "grapheme-splitter": "^1.0.4",
+    "husky": "^7.0.2",
     "keyv": "^4.1.1",
     "lodash.get": "^4.4.2",
-    "nodemon": "^2.0.15",
     "telegraf": "^4.7.0",
     "telegraf-session-local": "^2.1.0",
     "typed-dotenv": "^10.0.1"
@@ -36,9 +40,10 @@
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-import": "^2.24.2",
     "eslint-plugin-prettier": "^4.0.0",
-    "husky": "^7.0.2",
     "lint-staged": "^11.1.2",
+    "nodemon": "^2.0.15",
     "npm-run-all": "^4.1.5",
+    "pm2": "^5.2.0",
     "prettier": "^2.3.1",
     "smile-track": "^0.17.0"
   }
