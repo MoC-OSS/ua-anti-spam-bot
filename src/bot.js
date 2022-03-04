@@ -291,7 +291,21 @@ function logCtx(ctx) {
         .catch(handleError);
     }
 
-    ctx.reply('Зроби мене адміністратором, щоб я міг видаляти повідомлення.').catch(handleError);
+    telegramUtil.getChatAdmins(bot, ctx.chat.id).then(({ adminsString }) => {
+      ctx
+        .reply(
+          joinMessage([
+            '<b>Зроби мене адміністратором, щоб я міг видаляти повідомлення.</b>',
+            '',
+            adminsString ? `Це може зробити: ${adminsString}` : 'Це може зробити творець чату',
+          ]).trim(),
+          { parse_mode: 'HTML' },
+        )
+        .catch((getAdminsError) => {
+          handleError(getAdminsError);
+          ctx.reply(joinMessage(['<b>Зроби мене адміністратором, щоб я міг видаляти повідомлення.</b>']), { parse_mode: 'HTML' });
+        });
+    });
   });
   bot.help((ctx) => {
     const startLocaleTime = startTime.toLocaleDateString('uk-UA', {
@@ -324,6 +338,8 @@ function logCtx(ctx) {
   bot.use(localSession.middleware());
 
   bot.use((ctx, next) => {
+    logCtx(ctx);
+
     if (!ctx.session) {
       return next();
     }
@@ -334,19 +350,9 @@ function logCtx(ctx) {
 
     const addedMember = ctx?.update?.message?.new_chat_member;
     if (addedMember?.id === ctx.session.botId) {
-      bot.telegram
-        .getChatAdministrators(ctx.chat.id)
-        .then((admins) => {
-          if (!admins || !admins.length) {
-            return;
-          }
-
-          const creator = admins.find((user) => user.status === 'creator' && !!user.user.username);
-          const promoteAdmins = admins.filter((user) => user.can_promote_members && !!user.user.username);
-
-          const finalAdmins = [creator, ...promoteAdmins].filter(Boolean);
-          const adminsString = finalAdmins.length ? `${finalAdmins.map((user) => `@${user.user.username}`).join(', ')} ` : '';
-
+      telegramUtil
+        .getChatAdmins(bot, ctx.chat.id)
+        .then(({ adminsString }) => {
           ctx
             .reply(
               joinMessage([
@@ -356,7 +362,7 @@ function logCtx(ctx) {
                 '',
                 '<b>Зроби мене адміністратором, щоб я міг видаляти повідомлення.</b>',
                 '',
-                adminsString ? `Це може зробити: ${adminsString}` : '',
+                adminsString ? `Це може зробити: ${adminsString}` : 'Це може зробити творець чату',
               ]).trim(),
               { parse_mode: 'HTML' },
             )
