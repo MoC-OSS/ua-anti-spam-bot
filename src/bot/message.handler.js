@@ -1,5 +1,7 @@
 const axios = require('axios');
 
+const { handleError } = require('../utils');
+
 const host = 'http://localhost:3000';
 
 class MessageHandler {
@@ -138,17 +140,21 @@ class MessageHandler {
       rule: null,
     };
 
-    const processResult = await axios
-      .post(`${host}/process`, {
-        message,
-        datasetPath,
-        strict,
-      })
-      .then((response) => response.data);
+    try {
+      const processResult = await axios
+        .post(`${host}/process`, {
+          message,
+          datasetPath,
+          strict,
+        })
+        .then((response) => response.data);
 
-    if (processResult) {
-      deleteRule.dataset = datasetPath;
-      deleteRule.rule = processResult.result;
+      if (processResult) {
+        deleteRule.dataset = datasetPath;
+        deleteRule.rule = processResult.result;
+      }
+    } catch (e) {
+      handleError(e, 'API_DOWN');
     }
 
     return deleteRule;

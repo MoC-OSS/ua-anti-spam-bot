@@ -7,7 +7,7 @@ const containsEmoji = require('contains-emoji');
 const LocalSession = require('telegraf-session-local');
 const Keyv = require('keyv');
 
-const { telegramUtil } = require('./utils');
+const { telegramUtil, handleError } = require('./utils');
 const { messageHandler } = require('./bot/message.handler');
 const { blockMessage } = require('./message');
 
@@ -28,10 +28,6 @@ function sleep(time) {
 
 function joinMessage(messages) {
   return messages.join('\n');
-}
-
-function handleError(catchedError, reason = '') {
-  console.error('**** HANDLED ERROR ****', reason, catchedError);
 }
 
 function truncateString(str, num) {
@@ -58,7 +54,7 @@ function logCtx(ctx) {
   await sleep(5000);
   console.info('Starting a new instance...');
 
-  const startTime = new Date().toString();
+  const startTime = new Date();
 
   const isFilteredByRules = (ctx) => {
     const originMessage = telegramUtil.getMessage(ctx);
@@ -156,7 +152,9 @@ function logCtx(ctx) {
   };
 
   const onMessage = async (ctx, next) => {
-    ctx.session.performanceStart = performance.now();
+    if (env.DEBUG) {
+      ctx.session.performanceStart = performance.now();
+    }
     /**
      * Skip channel post when bot in channel
      * @deprecated on message doesn't handle user posts
@@ -211,15 +209,15 @@ function logCtx(ctx) {
             '',
             '',
             '',
-            'DEBUG:',
-            'Повідомлення:',
+            '***DEBUG***',
+            'Message:',
             message,
             '',
-            'Правило бану:',
+            'Ban reason:',
             JSON.stringify(rep.byRules),
             '',
-            'Останній деплой:',
-            startTime,
+            'Last deploy:',
+            startTime.toString(),
           ].join('\n');
         }
 
@@ -295,7 +293,15 @@ function logCtx(ctx) {
 
     ctx.reply('Зроби мене адміністратором, щоб я міг видаляти повідомлення.').catch(handleError);
   });
-  bot.help((ctx) =>
+  bot.help((ctx) => {
+    const startLocaleTime = startTime.toLocaleDateString('uk-UA', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
     ctx
       .reply(
         joinMessage([
@@ -304,12 +310,12 @@ function logCtx(ctx) {
           '• Попросіть адміністраторів написати його самостійно;',
           '• Пришліть його скріншотом.',
           '',
-          `Останній апдейт боту:\n\n${startTime}`,
+          `Останнє оновлення боту:\n\n${startLocaleTime}`,
         ]),
         { parse_mode: 'HTML' },
       )
-      .catch(handleError),
-  );
+      .catch(handleError);
+  });
 
   bot.catch(handleError);
 
@@ -394,14 +400,22 @@ function logCtx(ctx) {
     }
   });
 
-  bot.on('text', onMessage, (ctx) => {
-    logCtx(ctx);
-    ctx.replyWithMarkdown(
-      `*Time*: ${performance.now() - ctx.session.performanceStart}\n\nStart:\n${
-        ctx.session.performanceStart
-      }\n\nEnd:\n${performance.now()}`,
-    );
-  });
+  const perfomanceMiddleware = (ctx, next) => {
+    if (env.DEBUG) {
+      ctx
+        .replyWithMarkdown(
+          `*Time*: ${performance.now() - ctx.session.performanceStart}\n\nStart:\n${
+            ctx.session.performanceStart
+          }\n\nEnd:\n${performance.now()}`,
+        )
+        .catch(handleError)
+        .then(next);
+    } else {
+      return next();
+    }
+  };
+
+  bot.on('text', onMessage, perfomanceMiddleware);
   // bot.on('text', () => {});
   bot.launch().then(() => {
     console.info('Bot started!', new Date().toString());
