@@ -1,6 +1,8 @@
 const axios = require('axios');
 const { env } = require('typed-dotenv').config();
 
+const { processHandler } = require('../express/process.handler');
+
 const { handleError } = require('../utils');
 
 const host = `http://${env.HOST}:${env.PORT}`;
@@ -141,21 +143,29 @@ class MessageHandler {
       rule: null,
     };
 
-    try {
-      const processResult = await axios
-        .post(`${host}/process`, {
-          message,
-          datasetPath,
-          strict,
-        })
-        .then((response) => response.data);
+    let processResult;
 
-      if (processResult) {
-        deleteRule.dataset = datasetPath;
-        deleteRule.rule = processResult.result;
+    try {
+      if (env.USE_SERVER) {
+        processResult = await axios
+          .post(`${host}/process`, {
+            message,
+            datasetPath,
+            strict,
+          })
+          .then((response) => response.data);
+      } else {
+        processResult = {
+          result: processHandler.processHandler(message, datasetPath, strict),
+        };
       }
     } catch (e) {
       handleError(e, 'API_DOWN');
+    }
+
+    if (processResult) {
+      deleteRule.dataset = datasetPath;
+      deleteRule.rule = processResult.result;
     }
 
     return deleteRule;

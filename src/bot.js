@@ -216,6 +216,9 @@ function logCtx(ctx) {
             'Ban reason:',
             JSON.stringify(rep.byRules),
             '',
+            'Logic type:',
+            env.USE_SERVER ? 'server' : 'local',
+            '',
             'Last deploy:',
             startTime.toString(),
           ].join('\n');
