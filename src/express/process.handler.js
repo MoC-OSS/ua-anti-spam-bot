@@ -14,19 +14,13 @@ class ProcessHandler {
      * @type string[]
      * */
     const words = lodashGet(dataset, datasetPath.replace('_$', ''));
-    const directHit = words.some((word) => messageUtil.findInText(message, word, strict));
+    const directHit = words.find((word) => messageUtil.findInText(message, word, strict));
 
     if (directHit) {
       return true;
     }
 
-    const fuseHit = messageUtil.fuseInText(message, words);
-
-    if (fuseHit) {
-      return true;
-    }
-
-    return false;
+    return messageUtil.fuseInText(message, words);
   }
 }
 

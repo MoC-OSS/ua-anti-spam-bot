@@ -25,7 +25,8 @@ class MessageUtil {
     if (searchFor.length <= 4) {
       if (strict) {
         directHit = message
-          .replace(/[^\w\s]/gi, '')
+          .replace(/[^\w\s]/gi, ' ')
+          .replace(/\s\s+/g, ' ')
           .split(' ')
           .find((word) => word.toLowerCase() === searchFor.toLowerCase());
       } else {
@@ -54,14 +55,19 @@ class MessageUtil {
     return false;
   }
 
+  /**
+   * @param {string} message
+   * @param {string[]} wordsArray
+   *
+   * @returns {string | null}
+   * */
   fuseInText(message, wordsArray) {
     /**
      * Fuse hit
      * */
-    const fuseInstance = new Fuse(wordsArray, options);
-    const fuseHit = fuseInstance.search(message);
+    const fuseInstance = new Fuse([message], options);
 
-    return !!fuseHit.length;
+    return wordsArray.find((word) => !!fuseInstance.search(word).length) || null;
   }
 
   isHit(andCondition, rule, message) {
