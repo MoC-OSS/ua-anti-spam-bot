@@ -161,6 +161,9 @@ class MessageHandler {
       }
     } catch (e) {
       handleError(e, 'API_DOWN');
+      processResult = {
+        result: processHandler.processHandler(message, datasetPath, strict),
+      };
     }
 
     if (processResult) {
