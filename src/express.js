@@ -12,6 +12,7 @@ if (error) {
 }
 
 app.use(express.json());
+app.get('/healthcheck', (req, res) => res.json({ status: 'ok' }));
 app.post('/process', (req, res) => {
   const startTime = performance.now();
   const { message, datasetPath, strict } = req.body;
