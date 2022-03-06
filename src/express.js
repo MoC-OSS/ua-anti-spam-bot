@@ -22,7 +22,7 @@ app.post('/process', (req, res) => {
   const time = endTime - startTime;
 
   if (env.DEBUG) {
-    console.info({ result, time, expressStartTime });
+    console.info({ result, datasetPath, time, expressStartTime });
   }
 
   res.json({ result, time, expressStartTime });

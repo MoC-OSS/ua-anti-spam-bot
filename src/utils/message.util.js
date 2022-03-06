@@ -22,7 +22,7 @@ class MessageUtil {
     if (searchFor.length <= 4) {
       if (strict) {
         directHit = message
-          .replace(/[^\w\s]/gi, ' ')
+          .replace(/[^a-z\u0400-\u04FF\d]/gi, ' ')
           .replace(/\s\s+/g, ' ')
           .split(' ')
           .find((word) => word.toLowerCase() === searchFor.toLowerCase());
