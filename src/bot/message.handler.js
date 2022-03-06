@@ -13,6 +13,7 @@ class MessageHandler {
      * Sorted in the call order
      * */
     this.datasetPaths = {
+      immediately: 'immediately',
       strict_percent_100: 'strict_percent_100',
       percent_100: 'percent_100',
       strict_high_risk: 'strict_high_risk',
@@ -29,10 +30,24 @@ class MessageHandler {
    * This function is performance related.
    *
    * @param {string} message - user message
+   * @param {string} originMessage - original user message
    *
    * @returns Delete Rule
    */
-  async getDeleteRule(message) {
+  async getDeleteRule(message, originMessage) {
+    /**
+     * immediately
+     *
+     * @description
+     * Words that should be banned immediately 100% ahaha.
+     * Strict words without fuse search.
+     * */
+    const immediatelyResult = await this.processMessage(originMessage, this.datasetPaths.immediately, false);
+
+    if (immediatelyResult.rule) {
+      return immediatelyResult;
+    }
+
     /**
      * strict_percent_100
      *
@@ -172,6 +187,68 @@ class MessageHandler {
     }
 
     return deleteRule;
+  }
+
+  /**
+   * @description
+   * Removes mentions and extra spaces from the message
+   *
+   * @param {Context} ctx
+   * @param {string} originMessage
+   */
+  sanitizeMessage(ctx, originMessage) {
+    let message = originMessage;
+
+    /**
+     * Remove extra mentions
+     * */
+    try {
+      message = (() => {
+        let result = originMessage;
+
+        /**
+         * Replace all text mentions with spaces
+         * */
+        ctx?.update?.message?.entities
+          ?.filter(Boolean)
+          .filter((entity) => entity.type === 'text_mention')
+          .forEach((entity) => {
+            const mention = result.substr(entity.offset, entity.length);
+            result = result.replace(mention, new Array(mention.length).fill(' ').join(''));
+          });
+
+        /**
+         * Replace all @ mentions with spaces
+         * */
+        const atMentions = originMessage.match(/@[a-zA-Z]+/g);
+
+        if (atMentions && atMentions.length) {
+          atMentions.forEach((mention) => {
+            result = result.replace(mention, new Array(mention.length).fill(' ').join(''));
+          });
+        }
+
+        return result;
+      })();
+    } catch (e) {
+      handleError(e, 'MENTION_REMOVER');
+    }
+
+    /**
+     * Remove extra spaces
+     * */
+    try {
+      message = message.replace(/\s\s+/g, ' ');
+    } catch (e) {
+      handleError(e, 'EXTRA_SPACE_REMOVER');
+    }
+
+    if (!message) {
+      console.error('Cannot parse the message!', message);
+      return false;
+    }
+
+    return message;
   }
 }
 

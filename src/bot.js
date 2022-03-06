@@ -58,58 +58,9 @@ function logCtx(ctx) {
 
   const isFilteredByRules = (ctx) => {
     const originMessage = telegramUtil.getMessage(ctx);
-    let message = originMessage;
+    const message = messageHandler.sanitizeMessage(ctx, originMessage);
 
-    /**
-     * Remove extra mentions
-     * */
-    try {
-      message = (() => {
-        let result = originMessage;
-
-        /**
-         * Replace all text mentions with spaces
-         * */
-        ctx?.update?.message?.entities
-          ?.filter(Boolean)
-          .filter((entity) => entity.type === 'text_mention')
-          .forEach((entity) => {
-            const mention = result.substr(entity.offset, entity.length);
-            result = result.replace(mention, new Array(mention.length).fill(' ').join(''));
-          });
-
-        /**
-         * Replace all @ mentions with spaces
-         * */
-        const atMentions = originMessage.match(/@[a-zA-Z]+/g);
-
-        if (atMentions && atMentions.length) {
-          atMentions.forEach((mention) => {
-            result = result.replace(mention, new Array(mention.length).fill(' ').join(''));
-          });
-        }
-
-        return result;
-      })();
-    } catch (e) {
-      handleError(e, 'MENTION_REMOVER');
-    }
-
-    /**
-     * Remove extra spaces
-     * */
-    try {
-      message = message.replace(/\s\s+/g, ' ');
-    } catch (e) {
-      handleError(e, 'EXTRA_SPACE_REMOVER');
-    }
-
-    if (!message) {
-      console.error('Cannot parse the message!', ctx);
-      return false;
-    }
-
-    return messageHandler.getDeleteRule(message);
+    return messageHandler.getDeleteRule(message, originMessage);
   };
 
   const countEmojis = (ctx) => splitter.splitGraphemes(ctx?.message?.text || '').filter((e) => containsEmoji(e)).length;
@@ -224,7 +175,7 @@ function logCtx(ctx) {
           ].join('\n');
         }
 
-        let words = [rep.byRules.rule];
+        let words = rep.byRules.dataset === 'immediately' ? [] : [rep.byRules.rule];
 
         words = words.map((word) => word.trim()).filter(Boolean);
         words = words.map((word) => {
