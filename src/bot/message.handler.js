@@ -13,12 +13,12 @@ class MessageHandler {
      * Sorted in the call order
      * */
     this.datasetPaths = {
-      strict_percent_100: '_$dataset.strict_percent_100',
-      percent_100: '_$dataset.percent_100',
-      short_high_risk: '_$dataset.short_high_risk',
-      high_risk: '_$dataset.high_risk',
-      short_locations: '_$dataset.short_locations',
-      locations: '_$dataset.locations',
+      strict_percent_100: 'strict_percent_100',
+      percent_100: 'percent_100',
+      short_high_risk: 'short_high_risk',
+      high_risk: 'high_risk',
+      short_locations: 'short_locations',
+      locations: 'locations',
     };
   }
 

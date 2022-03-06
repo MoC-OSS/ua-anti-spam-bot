@@ -1,7 +1,7 @@
 const lodashGet = require('lodash.get');
 
 const { messageUtil } = require('../utils');
-const dataset = require('../../dataset/rules.json');
+const { dataset } = require('../../dataset/dataset');
 
 class ProcessHandler {
   /**
