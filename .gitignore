@@ -7,4 +7,5 @@ node_modules
 telegraf-session.json
 .env.prod
 .env.dev
+.env.stg
 last-ctx.json

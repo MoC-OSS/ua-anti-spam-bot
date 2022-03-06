@@ -15,9 +15,9 @@ class MessageHandler {
     this.datasetPaths = {
       strict_percent_100: 'strict_percent_100',
       percent_100: 'percent_100',
-      short_high_risk: 'short_high_risk',
+      strict_high_risk: 'strict_high_risk',
       high_risk: 'high_risk',
-      short_locations: 'short_locations',
+      strict_locations: 'strict_locations',
       locations: 'locations',
     };
   }
@@ -64,13 +64,13 @@ class MessageHandler {
      * */
 
     /**
-     * short_high_risk
+     * strict_high_risk
      *
      * @description
      * Sensitive words that can be used with locations.
      * Strict words without fuse search.
      * */
-    const shortHighRisk = await this.processMessage(message, this.datasetPaths.short_high_risk, true);
+    const shortHighRisk = await this.processMessage(message, this.datasetPaths.strict_high_risk, true);
     let finalHighRisk = shortHighRisk;
 
     if (!shortHighRisk.rule) {
@@ -92,13 +92,13 @@ class MessageHandler {
     }
 
     /**
-     * short_locations
+     * strict_locations
      *
      * @description
      * Short locations that user can use with a high risk word.
      * Strict words without fuse search.
      * */
-    const shortLocations = await this.processMessage(message, this.datasetPaths.short_locations, true);
+    const shortLocations = await this.processMessage(message, this.datasetPaths.strict_locations, true);
     let finalLocations = shortLocations;
 
     /**
