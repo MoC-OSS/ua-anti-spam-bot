@@ -450,6 +450,7 @@ function logCtx(ctx) {
         getStatisticsMessage({
           adminsChatsCount,
           botRemovedCount,
+          botStartTime: startTime,
           channelCount,
           groupCount,
           memberChatsCount,

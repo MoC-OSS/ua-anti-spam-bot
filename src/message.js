@@ -15,30 +15,36 @@ const blockMessage = `ФОРМАТ:
 Степан 067 777 77 77`;
 
 const getStatisticsMessage = ({
-  totalSessionCount,
-  superGroupsCount,
-  groupCount,
-  privateCount,
-  channelCount,
   adminsChatsCount,
-  memberChatsCount,
   botRemovedCount,
+  botStartTime,
+  channelCount,
+  groupCount,
+  memberChatsCount,
+  privateCount,
+  superGroupsCount,
+  totalSessionCount,
 }) =>
   `
 <b>Кількість всіх чатів: ${totalSessionCount}</b> 🎉
 
 <b>Статистика по групам</b>
-Супер-груп чатів: ${superGroupsCount} 👨‍👩‍👧‍👦
-Груп чатів: ${groupCount} 👩‍👦
 
-Активний адмін: в ${adminsChatsCount} чатах ✅
-Вимкнений адмін: в ${memberChatsCount} чатах ⛔️
+👨‍👩‍👧‍👦 Супер-груп чатів: <b>${superGroupsCount}</b>
+👩‍👦 Груп чатів: <b>${groupCount}</b>
 
-Бота видалили: із ${botRemovedCount} груп 😢
+✅ Активний адмін: в <b>${adminsChatsCount}</b> групах
+⛔️ Вимкнений адмін: в <b>${memberChatsCount}</b> групах
+
+😢 Бота видалили: із <b>${botRemovedCount}</b> груп
 
 <b>Інша статистика</b>
-Приватних чатів: ${privateCount} 💁‍♂️
-Каналів: ${channelCount} 🔔
+
+💁‍♂️ Приватних чатів: <b>${privateCount}</b>
+🔔 Каналів: <b>${channelCount}</b>
+
+<i>Статистика від:
+${botStartTime}</i>
 `.trim();
 
 module.exports = {
