@@ -1,4 +1,5 @@
-const { joinMessage, handleError, formatDate } = require('../../utils');
+const { getHelpMessage } = require('../../message');
+const { handleError, formatDate } = require('../../utils');
 
 class HelpMiddleware {
   /**
@@ -19,25 +20,7 @@ class HelpMiddleware {
     return (ctx) => {
       const startLocaleTime = formatDate(this.startTime);
 
-      ctx
-        .reply(
-          joinMessage([
-            '<b>Якщо повідомлення було видалено помилково:</b>',
-            '',
-            '• Попросіть адміністраторів написати його самостійно;',
-            '• Пришліть його скріншотом.',
-            '',
-            '<b>Останнє оновлення боту:</b>',
-            '',
-            startLocaleTime,
-            '',
-            'Якщо є запитання, пишіть @dimkasmile',
-          ]),
-          {
-            parse_mode: 'HTML',
-          },
-        )
-        .catch(handleError);
+      ctx.replyWithHTML(getHelpMessage({ startLocaleTime })).catch(handleError);
     };
   }
 }

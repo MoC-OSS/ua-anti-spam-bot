@@ -1,6 +1,7 @@
 const { env } = require('typed-dotenv').config();
 
-const { logCtx, handleError, telegramUtil, joinMessage } = require('../../utils');
+const { getBotJoinMessage, getStartChannelMessage, adminReadyMessage, memberReadyMessage } = require('../../message');
+const { logCtx, handleError, telegramUtil } = require('../../utils');
 
 /**
  * @typedef { import("telegraf").Context } TelegrafContext
@@ -42,20 +43,7 @@ class GlobalMiddleware {
         telegramUtil
           .getChatAdmins(this.bot, ctx.chat.id)
           .then(({ adminsString }) => {
-            ctx
-              .reply(
-                joinMessage([
-                  'Привіт! 🇺🇦✌️',
-                  '',
-                  'Я чат-бот, який дозволяє автоматично видаляти повідомлення, що містять назви локацій міста, укриттів, а також ключові слова переміщення військ.',
-                  '',
-                  '<b>Зроби мене адміністратором, щоб я міг видаляти повідомлення.</b>',
-                  '',
-                  adminsString ? `Це може зробити: ${adminsString}` : 'Це може зробити творець чату',
-                ]).trim(),
-                { parse_mode: 'HTML' },
-              )
-              .catch(handleError);
+            ctx.replyWithHTML(getBotJoinMessage({ adminsString })).catch(handleError);
           })
           .catch(handleError);
       }
@@ -83,26 +71,15 @@ class GlobalMiddleware {
       if (isUpdatedToAdmin) {
         ctx.session.isBotAdmin = true;
         if (isChannel) {
-          ctx
-            .reply(
-              joinMessage([
-                `Привіт! Повідомлення від офіційного чат-боту @${ctx.botInfo.username}.`,
-                `Ви мене додали в <b>канал</b> як адміністратора, але я не можу перевіряти повідомлення в коментарях.`,
-                '',
-                'Видаліть мене і додайте в <b>чат каналу</b> каналу <b>як адміністратора</b>.',
-                'Якщо є запитання, пишіть @dimkasmile',
-              ]),
-              { parse_mode: 'HTML' },
-            )
-            .catch(handleError);
+          ctx.replyWithHTML(getStartChannelMessage({ botName: ctx.botInfo.username })).catch(handleError);
         } else {
-          ctx.reply('Тепер я адміністратор. Готовий до роботи 😎').catch(handleError);
+          ctx.reply(adminReadyMessage).catch(handleError);
         }
       }
 
       if (isDemotedToMember) {
         ctx.session.isBotAdmin = false;
-        ctx.reply('Тепер я деактивований. Відпочиваю... 😴').catch(handleError);
+        ctx.reply(memberReadyMessage).catch(handleError);
       }
 
       if (ctx.session.isBotAdmin === undefined) {

@@ -1,7 +1,7 @@
 const { env } = require('typed-dotenv').config();
 
-const { blockMessage } = require('../../message');
 const { telegramUtil, truncateString, handleError } = require('../../utils');
+const { getDeleteMessage, getDebugMessage, spamDeleteMessage } = require('../../message');
 const { getMessageReputation } = require('../spam.handlers');
 
 class OnTextListener {
@@ -76,23 +76,7 @@ class OnTextListener {
           let debugMessage = '';
 
           if (env.DEBUG) {
-            debugMessage = [
-              '',
-              '',
-              '',
-              '***DEBUG***',
-              'Message:',
-              message,
-              '',
-              'Ban reason:',
-              JSON.stringify(rep.byRules),
-              '',
-              'Logic type:',
-              env.USE_SERVER ? 'server' : 'local',
-              '',
-              'Last deploy:',
-              this.startTime.toString(),
-            ].join('\n');
+            debugMessage = getDebugMessage({ message, byRules: rep.byRules, startTime: this.startTime });
           }
 
           let words = rep.byRules.dataset === 'immediately' ? [] : [rep.byRules.rule];
@@ -114,11 +98,7 @@ class OnTextListener {
             .deleteMessage()
             .catch(handleError)
             .then(() => {
-              ctx
-                .reply(
-                  `❗️ ${writeUsername} Повідомлення видалено.\n\n* Причина: поширення потенційно стратегічної інформації${wordMessage}.\n\nСповіщайте про ворогів спеціальному боту: @stop_russian_war_bot\n\n${blockMessage}${debugMessage}`,
-                )
-                .catch(handleError);
+              ctx.reply(getDeleteMessage({ writeUsername, wordMessage, debugMessage })).catch(handleError);
             });
         } catch (e) {
           console.error('Cannot delete the message. Reason:', e);
@@ -131,7 +111,7 @@ class OnTextListener {
             .deleteMessage()
             .catch(handleError)
             .then(() => {
-              ctx.reply('❗️ Повідомлення видалено.\n\n* Причина: спам.\n\n').catch(handleError);
+              ctx.reply(spamDeleteMessage).catch(handleError);
             });
         } catch (e) {
           console.error('Cannot delete the message. Reason:', e);
