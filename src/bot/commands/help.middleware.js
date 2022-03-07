@@ -1,4 +1,4 @@
-const { joinMessage, handleError } = require('../../utils');
+const { joinMessage, handleError, formatDate } = require('../../utils');
 
 class HelpMiddleware {
   /**
@@ -17,13 +17,7 @@ class HelpMiddleware {
      * @param {TelegrafContext} ctx
      * */
     return (ctx) => {
-      const startLocaleTime = this.startTime.toLocaleDateString('uk-UA', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
+      const startLocaleTime = formatDate(this.startTime);
 
       ctx
         .reply(

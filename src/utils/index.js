@@ -38,11 +38,19 @@ function truncateString(str, num) {
   return str;
 }
 
+/**
+ * @param {Date} date
+ * */
+function formatDate(date) {
+  return new Intl.DateTimeFormat('uk-UA', { dateStyle: 'full', timeStyle: 'long', timeZone: 'Europe/Kiev' }).format(date);
+}
+
 module.exports = {
   joinMessage,
   logCtx,
   sleep,
   truncateString,
+  formatDate,
   messageUtil,
   telegramUtil,
   ...errorUtil,

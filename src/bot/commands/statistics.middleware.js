@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const { handleError } = require('../../utils/error.util');
+const { handleError, formatDate } = require('../../utils');
 const { getStatisticsMessage } = require('../../message');
 
 class StatisticsMiddleware {
@@ -51,7 +51,7 @@ class StatisticsMiddleware {
           getStatisticsMessage({
             adminsChatsCount,
             botRemovedCount,
-            botStartTime: this.startTime,
+            botStartTime: formatDate(this.startTime),
             channelCount,
             groupCount,
             memberChatsCount,
