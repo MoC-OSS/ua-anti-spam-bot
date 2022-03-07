@@ -40,12 +40,9 @@ class GlobalMiddleware {
 
       const addedMember = ctx?.update?.message?.new_chat_member;
       if (addedMember?.id === ctx.session.botId) {
-        telegramUtil
-          .getChatAdmins(this.bot, ctx.chat.id)
-          .then(({ adminsString }) => {
-            ctx.replyWithHTML(getBotJoinMessage({ adminsString })).catch(handleError);
-          })
-          .catch(handleError);
+        telegramUtil.getChatAdmins(this.bot, ctx.chat.id).then(({ adminsString }) => {
+          ctx.replyWithHTML(getBotJoinMessage({ adminsString }));
+        });
       }
 
       const chatTitle = ctx?.update?.my_chat_member?.chat?.title || ctx?.update?.message?.chat?.title;
@@ -71,21 +68,21 @@ class GlobalMiddleware {
       if (isUpdatedToAdmin) {
         ctx.session.isBotAdmin = true;
         if (isChannel) {
-          ctx.replyWithHTML(getStartChannelMessage({ botName: ctx.botInfo.username })).catch(handleError);
+          ctx.replyWithHTML(getStartChannelMessage({ botName: ctx.botInfo.username }));
         } else {
-          ctx.reply(adminReadyMessage).catch(handleError);
+          ctx.reply(adminReadyMessage);
         }
       }
 
       if (isDemotedToMember) {
         ctx.session.isBotAdmin = false;
-        ctx.reply(memberReadyMessage).catch(handleError);
+        ctx.reply(memberReadyMessage);
       }
 
       if (ctx.session.isBotAdmin === undefined) {
         ctx.telegram
           .getChatMember(ctx.message.chat.id, ctx.botInfo.id)
-          .catch(handleError)
+
           .then((member) => {
             ctx.session.isBotAdmin = member?.status === 'creator' || member?.status === 'administrator';
           });
@@ -110,7 +107,7 @@ class GlobalMiddleware {
 
         return ctx.telegram
           .getChatMember(ctx.message.chat.id, ctx.message.from.id)
-          .catch(handleError)
+
           .then((member) => {
             if (!member) {
               return next();

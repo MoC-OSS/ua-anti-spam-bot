@@ -5,6 +5,7 @@ const { creatorNick } = require('./creator');
 const adminReadyMessage = 'Тепер я адміністратор. Готовий до роботи 😎';
 const memberReadyMessage = 'Тепер я деактивований. Відпочиваю... 😴';
 const spamDeleteMessage = '❗️ Повідомлення видалено.\n\n* Причина: спам.';
+const somethingWentWrongMessage = 'Сталась якась помилка :(';
 const makeAdminMessage = '<b>Зроби мене адміністратором, щоб я міг видаляти повідомлення.</b>';
 
 const startMessageAtom = `
@@ -189,6 +190,7 @@ module.exports = {
   memberReadyMessage,
   adminReadyMessage,
   spamDeleteMessage,
+  somethingWentWrongMessage,
   getBotJoinMessage,
   getStartMessage,
   getStartChannelMessage,

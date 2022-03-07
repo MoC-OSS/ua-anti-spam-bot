@@ -1,6 +1,5 @@
 const fs = require('fs');
 
-const { handleError } = require('../../utils');
 const { creatorId } = require('../../creator');
 
 class SessionMiddleware {
@@ -24,9 +23,7 @@ class SessionMiddleware {
 
       if (chatId === creatorId) {
         const sessionObjectBuffer = fs.readFileSync('./telegraf-session.json');
-        ctx
-          .replyWithDocument({ source: sessionObjectBuffer, filename: `telegraf-session-${this.startTime.toISOString()}.json` })
-          .catch(handleError);
+        ctx.replyWithDocument({ source: sessionObjectBuffer, filename: `telegraf-session-${this.startTime.toISOString()}.json` });
       }
     };
   }

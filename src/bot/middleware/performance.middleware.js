@@ -1,7 +1,5 @@
 const { env } = require('typed-dotenv').config();
 
-const { handleError } = require('../../utils');
-
 /**
  * Used for performance checking
  *
@@ -16,7 +14,7 @@ function performanceMiddleware(ctx, next) {
           ctx.session.performanceStart
         }\n\nEnd:\n${performance.now()}`,
       )
-      .catch(handleError)
+
       .then(() => next());
   } else {
     return next();

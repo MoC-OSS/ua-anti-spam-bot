@@ -6,7 +6,7 @@ const Keyv = require('keyv');
 const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware } = require('./bot/commands');
 const { OnTextListener } = require('./bot/listeners');
 const { GlobalMiddleware, performanceMiddleware } = require('./bot/middleware');
-const { handleError, sleep } = require('./utils');
+const { handleError, errorHandler, sleep } = require('./utils');
 
 /**
  * @typedef { import("telegraf").Context } TelegrafContext
@@ -47,15 +47,15 @@ if (error) {
   const onTextListener = new OnTextListener(keyv, startTime);
 
   bot.use(localSession.middleware());
-  bot.use(globalMiddleware.middleware());
+  bot.use(errorHandler(globalMiddleware.middleware()));
 
-  bot.start(startMiddleware.middleware());
-  bot.help(helpMiddleware.middleware());
+  bot.start(errorHandler(startMiddleware.middleware()));
+  bot.help(errorHandler(helpMiddleware.middleware()));
 
-  bot.command('/session', sessionMiddleware.middleware());
-  bot.command('/statistics', statisticsMiddleware.middleware());
+  bot.command('/session', errorHandler(sessionMiddleware.middleware()));
+  bot.command('/statistics', errorHandler(statisticsMiddleware.middleware()));
 
-  bot.on('text', onTextListener.middleware(), performanceMiddleware);
+  bot.on('text', errorHandler(onTextListener.middleware()), errorHandler(performanceMiddleware));
   // bot.on('text', () => {});
 
   bot.catch(handleError);

@@ -1,6 +1,6 @@
 const { env } = require('typed-dotenv').config();
 
-const { telegramUtil, truncateString, handleError } = require('../../utils');
+const { telegramUtil, truncateString } = require('../../utils');
 const { getDeleteMessage, getDebugMessage, spamDeleteMessage } = require('../../message');
 const { getMessageReputation } = require('../spam.handlers');
 
@@ -96,9 +96,9 @@ class OnTextListener {
 
           await ctx
             .deleteMessage()
-            .catch(handleError)
+
             .then(() => {
-              ctx.reply(getDeleteMessage({ writeUsername, wordMessage, debugMessage })).catch(handleError);
+              ctx.reply(getDeleteMessage({ writeUsername, wordMessage, debugMessage }));
             });
         } catch (e) {
           console.error('Cannot delete the message. Reason:', e);
@@ -109,9 +109,9 @@ class OnTextListener {
         try {
           await ctx
             .deleteMessage()
-            .catch(handleError)
+
             .then(() => {
-              ctx.reply(spamDeleteMessage).catch(handleError);
+              ctx.reply(spamDeleteMessage);
             });
         } catch (e) {
           console.error('Cannot delete the message. Reason:', e);

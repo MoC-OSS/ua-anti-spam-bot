@@ -4,7 +4,8 @@ const { env } = require('typed-dotenv').config();
 
 const { MessageUtil } = require('./message.util');
 const { TelegramUtil } = require('./telegram.util');
-const errorUtil = require('./error.util');
+const errorUtilExports = require('./error.util');
+const errorHandlerExports = require('./error-handler');
 
 const messageUtil = new MessageUtil();
 const telegramUtil = new TelegramUtil();
@@ -53,5 +54,6 @@ module.exports = {
   formatDate,
   messageUtil,
   telegramUtil,
-  ...errorUtil,
+  ...errorHandlerExports,
+  ...errorUtilExports,
 };

@@ -20,13 +20,13 @@ class StartMiddleware {
      * */
     return (ctx) => {
       if (ctx?.update?.message?.chat?.type === 'private') {
-        return ctx.replyWithHTML(getStartMessage()).catch(handleError);
+        return ctx.replyWithHTML(getStartMessage());
       }
 
       telegramUtil.getChatAdmins(this.bot, ctx.chat.id).then(({ adminsString }) => {
         ctx.replyWithHTML(getGroupStartMessage({ adminsString })).catch((getAdminsError) => {
           handleError(getAdminsError);
-          ctx.replyWithHTML(makeAdminMessage).catch(handleError);
+          ctx.replyWithHTML(makeAdminMessage);
         });
       });
     };

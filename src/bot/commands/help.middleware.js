@@ -1,5 +1,5 @@
 const { getHelpMessage } = require('../../message');
-const { handleError, formatDate } = require('../../utils');
+const { formatDate } = require('../../utils');
 
 class HelpMiddleware {
   /**
@@ -20,7 +20,7 @@ class HelpMiddleware {
     return (ctx) => {
       const startLocaleTime = formatDate(this.startTime);
 
-      ctx.replyWithHTML(getHelpMessage({ startLocaleTime })).catch(handleError);
+      ctx.replyWithHTML(getHelpMessage({ startLocaleTime }));
     };
   }
 }
