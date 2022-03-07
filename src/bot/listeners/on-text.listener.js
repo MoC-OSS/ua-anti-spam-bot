@@ -1,8 +1,10 @@
 const { env } = require('typed-dotenv').config();
 
-const { telegramUtil, truncateString } = require('../../utils');
+const { telegramUtil, truncateString, handleError } = require('../../utils');
 const { getDeleteMessage, getDebugMessage, spamDeleteMessage } = require('../../message');
 const { getMessageReputation } = require('../spam.handlers');
+
+const slavaWords = ['слава україні', 'слава украине', 'слава зсу'];
 
 class OnTextListener {
   /**
@@ -41,6 +43,12 @@ class OnTextListener {
         return next();
       }
 
+      const message = telegramUtil.getMessage(ctx);
+
+      if (slavaWords.some((word) => message.toLowerCase().includes(word.toLowerCase()))) {
+        ctx.reply('Героям Слава! 🇺🇦', { reply_to_message_id: ctx?.update?.message?.message_id }).catch(handleError);
+      }
+
       /**
        * Skip channel chat admins message
        * */
@@ -66,7 +74,6 @@ class OnTextListener {
       }
 
       const rep = await getMessageReputation(ctx, this.keyv);
-      const message = telegramUtil.getMessage(ctx);
 
       if (rep.byRules?.rule) {
         try {
