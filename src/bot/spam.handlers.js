@@ -7,6 +7,9 @@ const { telegramUtil } = require('../utils');
 
 const splitter = new GraphemeSplitter();
 
+/**
+ * @param {TelegrafContext} ctx
+ */
 const isFilteredByRules = (ctx) => {
   const originMessage = telegramUtil.getMessage(ctx);
   const message = messageHandler.sanitizeMessage(ctx, originMessage);
@@ -14,10 +17,19 @@ const isFilteredByRules = (ctx) => {
   return messageHandler.getDeleteRule(message, originMessage);
 };
 
+/**
+ * @param {TelegrafContext} ctx
+ */
 const countEmojis = (ctx) => splitter.splitGraphemes(ctx?.message?.text || '').filter((e) => containsEmoji(e)).length;
 
+/**
+ * @param {TelegrafContext} ctx
+ */
 const countUrls = (ctx) => (ctx?.message?.entities || []).filter((e) => e.type === 'url').length;
 
+/**
+ * @param {TelegrafContext} ctx
+ */
 const formattingsInfo = (ctx) => {
   const formattings = (ctx?.message?.entities || []).filter((e) => e.type !== 'url');
   return {
@@ -26,6 +38,10 @@ const formattingsInfo = (ctx) => {
   };
 };
 
+/**
+ * @param {TelegrafContext} ctx
+ * @param {Keyv} keyv
+ */
 const getMessageReputation = async (ctx, keyv) => {
   const emojis = countEmojis(ctx);
   const formattings = formattingsInfo(ctx);

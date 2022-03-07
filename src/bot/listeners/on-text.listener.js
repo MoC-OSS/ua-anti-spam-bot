@@ -11,7 +11,7 @@ class OnTextListener {
    */
   constructor(keyv, startTime) {
     this.keyv = keyv;
-    this.keyv = startTime;
+    this.startTime = startTime;
   }
 
   /**
