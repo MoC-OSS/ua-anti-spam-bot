@@ -47,20 +47,21 @@ class StatisticsMiddleware {
         const memberChatsCount = [...superGroupsSessions, ...groupSessions].filter((session) => !session.data.isBotAdmin).length;
         const botRemovedCount = [...superGroupsSessions, ...groupSessions].filter((session) => session.data.botRemoved).length;
 
-        ctx.reply(
-          getStatisticsMessage({
-            adminsChatsCount,
-            botRemovedCount,
-            botStartTime: formatDate(this.startTime),
-            channelCount,
-            groupCount,
-            memberChatsCount,
-            privateCount,
-            superGroupsCount,
-            totalSessionCount,
-          }),
-          { parse_mode: 'HTML' },
-        );
+        ctx
+          .replyWithHTML(
+            getStatisticsMessage({
+              adminsChatsCount,
+              botRemovedCount,
+              botStartTime: formatDate(this.startTime),
+              channelCount,
+              groupCount,
+              memberChatsCount,
+              privateCount,
+              superGroupsCount,
+              totalSessionCount,
+            }),
+          )
+          .catch(handleError);
       } catch (e) {
         handleError(e);
         ctx.reply('Cannot get statistics');

@@ -1,5 +1,5 @@
-const { getStartMessage, getGroupStartMessage } = require('../../message');
-const { joinMessage, handleError, telegramUtil } = require('../../utils');
+const { getStartMessage, getGroupStartMessage, makeAdminMessage } = require('../../message');
+const { handleError, telegramUtil } = require('../../utils');
 
 class StartMiddleware {
   /**
@@ -26,7 +26,7 @@ class StartMiddleware {
       telegramUtil.getChatAdmins(this.bot, ctx.chat.id).then(({ adminsString }) => {
         ctx.replyWithHTML(getGroupStartMessage({ adminsString })).catch((getAdminsError) => {
           handleError(getAdminsError);
-          ctx.reply(joinMessage(['<b>Зроби мене адміністратором, щоб я міг видаляти повідомлення.</b>']), { parse_mode: 'HTML' });
+          ctx.replyWithHTML(makeAdminMessage).catch(handleError);
         });
       });
     };
