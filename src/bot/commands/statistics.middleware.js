@@ -30,14 +30,20 @@ class StatisticsMiddleware {
         const sessionObject = JSON.parse(fs.readFileSync('./telegraf-session.json').toString());
         const { sessions } = sessionObject;
 
+        const getChatId = (sessionId) => sessionId.split(':')[0];
+
         const currentBotSessions = sessions.filter((session) => session.data.botId === ctx.botInfo.id);
+        const groupOnlySessions = currentBotSessions.filter(
+          (session, index, self) => index === self.findIndex((t) => getChatId(t.id) === getChatId(session.id)),
+        );
 
-        const superGroupsSessions = currentBotSessions.filter((session) => session.data.chatType === 'supergroup');
-        const groupSessions = currentBotSessions.filter((session) => session.data.chatType === 'group');
-        const privateSessions = currentBotSessions.filter((session) => session.data.chatType === 'private');
-        const channelSessions = currentBotSessions.filter((session) => session.data.chatType === 'channel');
+        const superGroupsSessions = groupOnlySessions.filter((session) => session.data.chatType === 'supergroup');
+        const groupSessions = groupOnlySessions.filter((session) => session.data.chatType === 'group');
+        const privateSessions = groupOnlySessions.filter((session) => session.data.chatType === 'private');
+        const channelSessions = groupOnlySessions.filter((session) => session.data.chatType === 'channel');
 
-        const totalSessionCount = currentBotSessions.length;
+        const totalUserCounts = currentBotSessions.length;
+        const totalSessionCount = groupOnlySessions.length;
         const superGroupsCount = superGroupsSessions.length;
         const groupCount = groupSessions.length;
         const privateCount = privateSessions.length;
@@ -58,6 +64,7 @@ class StatisticsMiddleware {
             privateCount,
             superGroupsCount,
             totalSessionCount,
+            totalUserCounts,
           }),
         );
       } catch (e) {

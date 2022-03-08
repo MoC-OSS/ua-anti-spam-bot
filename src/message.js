@@ -83,9 +83,12 @@ const getStatisticsMessage = ({
   privateCount,
   superGroupsCount,
   totalSessionCount,
+  totalUserCounts,
 }) =>
   `
-<b>Кількість всіх чатів: ${totalSessionCount}</b> 🎉
+<b>Кількість всіх: </b>
+• Чатів - ${totalSessionCount} 🎉
+• Користувачів - ${totalUserCounts} 🎉
 
 <b>Статистика по групам</b>
 

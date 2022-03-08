@@ -11,7 +11,7 @@ export interface SessionData {
 }
 
 export interface Session {
-  id: number;
+  id: string;
   data: SessionData;
 }
 
