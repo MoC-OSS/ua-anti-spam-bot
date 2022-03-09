@@ -1,10 +1,10 @@
 const { env } = require('typed-dotenv').config();
 
-const { telegramUtil, truncateString, handleError } = require('../../utils');
+const { telegramUtil, truncateString } = require('../../utils');
 const { getDeleteMessage, getDebugMessage, spamDeleteMessage } = require('../../message');
 const { getMessageReputation } = require('../spam.handlers');
 
-const slavaWords = ['слава україні', 'слава украине', 'слава зсу'];
+// const slavaWords = ['слава україні', 'слава украине', 'слава зсу'];
 
 class OnTextListener {
   /**
@@ -45,9 +45,12 @@ class OnTextListener {
 
       const message = telegramUtil.getMessage(ctx);
 
-      if (slavaWords.some((word) => message.toLowerCase().includes(word.toLowerCase()))) {
-        ctx.reply('Героям Слава! 🇺🇦', { reply_to_message_id: ctx?.update?.message?.message_id }).catch(handleError);
-      }
+      /**
+       * Removed because Denis Gajda ask to reduce chat messages
+       * */
+      // if (slavaWords.some((word) => message.toLowerCase().includes(word.toLowerCase()))) {
+      //   ctx.reply('Героям Слава! 🇺🇦', { reply_to_message_id: ctx?.update?.message?.message_id });
+      // }
 
       /**
        * Skip channel chat admins message
