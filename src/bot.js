@@ -1,7 +1,7 @@
 const { error, env } = require('typed-dotenv').config();
 const { Telegraf } = require('telegraf');
-const LocalSession = require('telegraf-session-local');
 const Keyv = require('keyv');
+const { RedisSession } = require('./bot/sessionProviders');
 
 const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware } = require('./bot/commands');
 const { OnTextListener } = require('./bot/listeners');
@@ -35,7 +35,7 @@ if (error) {
 
   const bot = new Telegraf(env.BOT_TOKEN);
 
-  const localSession = new LocalSession({ database: 'telegraf-session.json' });
+  const redisSession = new RedisSession(env.REDIS_URL);
 
   const globalMiddleware = new GlobalMiddleware(bot);
 
@@ -46,7 +46,8 @@ if (error) {
 
   const onTextListener = new OnTextListener(keyv, startTime);
 
-  bot.use(localSession.middleware());
+  bot.use(redisSession.middleware());
+
   bot.use(errorHandler(globalMiddleware.middleware()));
 
   bot.start(errorHandler(startMiddleware.middleware()));
@@ -56,7 +57,6 @@ if (error) {
   bot.command('/statistics', errorHandler(statisticsMiddleware.middleware()));
 
   bot.on('text', errorHandler(onTextListener.middleware()), errorHandler(performanceMiddleware));
-  // bot.on('text', () => {});
 
   bot.catch(handleError);
 
