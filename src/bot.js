@@ -35,7 +35,7 @@ if (error) {
 
   const bot = new Telegraf(env.BOT_TOKEN);
 
-  const redisSession = new RedisSession(env.REDIS_URL);
+  const redisSession = new RedisSession();
 
   const globalMiddleware = new GlobalMiddleware(bot);
 

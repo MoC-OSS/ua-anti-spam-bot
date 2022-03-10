@@ -1,8 +1,7 @@
-const redis = require('redis');
+const { redisClient } = require('../../db');
 
 class RedisSession {
-  constructor(redisUrl) {
-    this.client = redis.createClient({ url: redisUrl });
+  constructor() {
     this.options = {
       property: 'session',
       state: {},
@@ -20,28 +19,18 @@ class RedisSession {
         return `${chatInstance}:${ctx.from.id}`;
       },
     };
-    this.client.connect();
   }
 
   getSessionKey(ctx) {
     return this.options.getSessionKey(ctx);
   }
 
-  async getSession(key) {
-    if (!key) return {};
-    try {
-      const sourceSession = await this.client.get(key);
-      return JSON.parse(sourceSession) || {};
-    } catch (error) {
-      console.error(error);
-      return {};
-    }
+  getSession(key) {
+    return redisClient.getValue(key);
   }
 
-  async saveSession(key, data) {
-    if (!key || !data) return;
-
-    return this.client.set(key, JSON.stringify(data));
+  saveSession(key, data) {
+    return redisClient.setValue(key, data);
   }
 
   middleware(property = this.options.property) {
