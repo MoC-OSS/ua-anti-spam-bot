@@ -7,6 +7,7 @@ const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware
 const { OnTextListener } = require('./bot/listeners');
 const { GlobalMiddleware, performanceMiddleware } = require('./bot/middleware');
 const { handleError, errorHandler, sleep } = require('./utils');
+const { logsChat } = require('./creator');
 
 /**
  * @typedef { import("telegraf").Context } TelegrafContext
@@ -62,6 +63,17 @@ if (error) {
 
   bot.launch().then(() => {
     console.info('Bot started!', new Date().toString());
+
+    if (!env.DEBUG) {
+      bot.telegram
+        .sendMessage(logsChat, `🎉 <b>Bot @${bot.botInfo.username} has been started!</b>\n<i>${new Date().toString()}</i>`, {
+          parse_mode: 'HTML',
+        })
+        .catch((e) => {
+          console.error('This bot is not authorised in this LOGS chat!');
+          handleError(e);
+        });
+    }
   });
 
   // Enable graceful stop
