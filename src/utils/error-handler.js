@@ -1,5 +1,4 @@
 const { logsChat } = require('../creator');
-// const { somethingWentWrongMessage } = require('../message');
 const { handleError } = require('./error.util');
 
 /**
@@ -17,7 +16,14 @@ const errorHandler =
       return await fn(ctx, next);
     } catch (error) {
       handleError(error);
-      // await ctx.reply(somethingWentWrongMessage);
+
+      const writeCtx = JSON.parse(JSON.stringify(ctx));
+      // noinspection JSConstantReassignment
+      delete writeCtx.tg;
+      delete writeCtx.telegram;
+
+      console.error('*** CTX ***', writeCtx);
+
       ctx.telegram
         .sendMessage(
           logsChat,
@@ -26,7 +32,16 @@ const errorHandler =
             parse_mode: 'HTML',
           },
         )
+        .then(() =>
+          ctx.telegram
+            .sendDocument(logsChat, {
+              source: Buffer.from(JSON.stringify(writeCtx, null, 2)),
+              filename: `ctx-${new Date().toISOString()}.json`,
+            })
+            .catch(handleError),
+        )
         .catch(handleError);
+
       return next();
     }
   };
