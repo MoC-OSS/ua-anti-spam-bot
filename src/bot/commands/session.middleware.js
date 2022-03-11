@@ -1,4 +1,4 @@
-const fs = require('fs');
+const { redisClient } = require('../../db');
 
 const { creatorId } = require('../../creator');
 
@@ -18,12 +18,15 @@ class SessionMiddleware {
     /**
      * @param {TelegrafContext} ctx
      * */
-    return (ctx) => {
+    return async (ctx) => {
       const chatId = ctx?.update?.message?.chat?.id;
 
       if (chatId === creatorId) {
-        const sessionObjectBuffer = fs.readFileSync('./telegraf-session.json');
-        ctx.replyWithDocument({ source: sessionObjectBuffer, filename: `telegraf-session-${this.startTime.toISOString()}.json` });
+        const sessions = await redisClient.getAllRecords();
+        ctx.replyWithDocument({
+          source: Buffer.from(JSON.stringify({ sessions })),
+          filename: `telegraf-session-${this.startTime.toISOString()}.json`,
+        });
       }
     };
   }
