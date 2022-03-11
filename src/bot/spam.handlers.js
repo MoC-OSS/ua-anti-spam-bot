@@ -11,7 +11,7 @@ const splitter = new GraphemeSplitter();
  * @param {TelegrafContext} ctx
  */
 const isFilteredByRules = (ctx) => {
-  const originMessage = telegramUtil.getMessage(ctx);
+  const originMessage = telegramUtil.getMessageText(ctx);
   const message = messageHandler.sanitizeMessage(ctx, originMessage);
 
   return messageHandler.getDeleteRule(message, originMessage);

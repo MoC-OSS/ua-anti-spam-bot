@@ -43,7 +43,7 @@ class OnTextListener {
         return next();
       }
 
-      const message = telegramUtil.getMessage(ctx);
+      const message = telegramUtil.getMessageText(ctx);
 
       /**
        * Removed because Denis Gajda ask to reduce chat messages

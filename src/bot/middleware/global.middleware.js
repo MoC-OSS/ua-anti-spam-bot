@@ -80,12 +80,9 @@ class GlobalMiddleware {
       }
 
       if (ctx.session.isBotAdmin === undefined) {
-        ctx.telegram
-          .getChatMember(ctx.message.chat.id, ctx.botInfo.id)
-
-          .then((member) => {
-            ctx.session.isBotAdmin = member?.status === 'creator' || member?.status === 'administrator';
-          });
+        ctx.telegram.getChatMember(telegramUtil.getMessage(ctx).chat.id, ctx.botInfo.id).then((member) => {
+          ctx.session.isBotAdmin = member?.status === 'creator' || member?.status === 'administrator';
+        });
       }
 
       if (ctx?.update?.message?.left_chat_participant?.id === ctx.session.botId) {

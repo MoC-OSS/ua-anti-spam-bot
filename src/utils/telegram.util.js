@@ -1,14 +1,34 @@
 class TelegramUtil {
+  /**
+   * @param {TelegrafContext} ctx
+   * @returns {boolean}
+   * */
   isFromChannel(ctx) {
     return ctx?.message?.from?.first_name === 'Channel' && ctx?.message?.from?.username === 'Channel_Bot';
   }
 
+  /**
+   * @param {TelegrafContext} ctx
+   * @returns {boolean}
+   * */
   isInComments(ctx) {
     return ctx?.message?.reply_to_message?.from?.id === 777000;
   }
 
+  /**
+   * @param {TelegrafContext} ctx
+   * @returns {string}
+   * */
+  getMessageText(ctx) {
+    return this.getMessage(ctx).text;
+  }
+
+  /**
+   * @param {TelegrafContext} ctx
+   * @returns {AbstractCallbackQuery}
+   * */
   getMessage(ctx) {
-    return ctx?.message?.text || ctx?.update?.message?.text;
+    return ctx.message || ctx.update?.message || ctx.update?.edited_message;
   }
 
   /**
