@@ -28,6 +28,14 @@ class OnTextListener {
       if (env.DEBUG) {
         ctx.session.performanceStart = performance.now();
       }
+
+      /**
+       * Skip messages before bot became admin
+       * */
+      if (telegramUtil.getMessage(ctx).date * 1000 < +ctx.session.botAdminDate) {
+        return next();
+      }
+
       /**
        * Skip channel post when bot in channel
        * @deprecated on message doesn't handle user posts

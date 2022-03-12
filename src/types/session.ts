@@ -7,6 +7,7 @@ export interface SessionData {
   botRemoved: boolean;
   isPrivate: boolean;
   isBotAdmin: boolean;
+  botAdminDate: Date;
   isCurrentUserAdmin: boolean;
 }
 

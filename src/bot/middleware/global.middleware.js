@@ -4,7 +4,7 @@ const { getBotJoinMessage, getStartChannelMessage, adminReadyMessage, memberRead
 const { logCtx, handleError, telegramUtil } = require('../../utils');
 
 /**
- * @typedef { import("telegraf").Context } TelegrafContext
+ * @typedef { import("../../types").TelegrafContext } TelegrafContext
  */
 
 class GlobalMiddleware {
@@ -67,6 +67,8 @@ class GlobalMiddleware {
 
       if (isUpdatedToAdmin) {
         ctx.session.isBotAdmin = true;
+        ctx.session.botAdminDate = new Date();
+
         if (isChannel) {
           ctx.replyWithHTML(getStartChannelMessage({ botName: ctx.botInfo.username }));
         } else {
@@ -82,14 +84,14 @@ class GlobalMiddleware {
       if (ctx.session.isBotAdmin === undefined) {
         ctx.telegram.getChatMember(telegramUtil.getMessage(ctx).chat.id, ctx.botInfo.id).then((member) => {
           ctx.session.isBotAdmin = member?.status === 'creator' || member?.status === 'administrator';
+
+          if (ctx.session.isBotAdmin && !ctx.session.botAdminDate) {
+            ctx.session.botAdminDate = new Date();
+          }
         });
       }
 
-      if (ctx?.update?.message?.left_chat_participant?.id === ctx.session.botId) {
-        ctx.session.botRemoved = true;
-      } else {
-        ctx.session.botRemoved = false;
-      }
+      ctx.session.botRemoved = ctx?.update?.message?.left_chat_participant?.id === ctx.session.botId;
 
       if (ctx.chat.type === 'private') {
         return next();

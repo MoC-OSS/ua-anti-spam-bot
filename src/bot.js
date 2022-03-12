@@ -10,7 +10,7 @@ const { handleError, errorHandler, sleep } = require('./utils');
 const { logsChat } = require('./creator');
 
 /**
- * @typedef { import("telegraf").Context } TelegrafContext
+ * @typedef { import("./types").TelegrafContext } TelegrafContext
  * @typedef { import("./types").SessionObject } SessionObject
  */
 
