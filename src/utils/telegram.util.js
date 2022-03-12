@@ -28,7 +28,7 @@ class TelegramUtil {
    * @returns {AbstractCallbackQuery}
    * */
   getMessage(ctx) {
-    return ctx.message || ctx.update?.message || ctx.update?.edited_message;
+    return ctx.message || ctx.update?.message || ctx.update?.edited_message || ctx.update?.my_chat_member;
   }
 
   /**

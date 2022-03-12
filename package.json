@@ -28,6 +28,7 @@
     "keyv": "^4.1.1",
     "lodash.get": "^4.4.2",
     "telegraf": "^4.7.0",
+    "telegraf-menu": "^1.7.2",
     "telegraf-session-local": "^2.1.0",
     "typed-dotenv": "^10.0.1"
   },

@@ -7,7 +7,7 @@ const { env } = require('typed-dotenv').config();
  * @param {Next} next
  * */
 function performanceMiddleware(ctx, next) {
-  if (env.DEBUG) {
+  if (env.DEBUG && false) {
     ctx
       .replyWithMarkdown(
         `*Time*: ${performance.now() - ctx.session.performanceStart}\n\nStart:\n${

@@ -2,8 +2,10 @@ const { error, env } = require('typed-dotenv').config();
 const { Telegraf } = require('telegraf');
 const LocalSession = require('telegraf-session-local');
 const Keyv = require('keyv');
+const { GenericMenu } = require('telegraf-menu');
+const { MenuAction } = require('./bot/actions');
 
-const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware } = require('./bot/commands');
+const { HelpMiddleware, SessionMiddleware, SettingsMiddleware, StartMiddleware, StatisticsMiddleware } = require('./bot/commands');
 const { OnTextListener } = require('./bot/listeners');
 const { GlobalMiddleware, performanceMiddleware } = require('./bot/middleware');
 const { handleError, errorHandler, sleep } = require('./utils');
@@ -43,18 +45,25 @@ if (error) {
   const startMiddleware = new StartMiddleware(bot);
   const helpMiddleware = new HelpMiddleware(startTime);
   const sessionMiddleware = new SessionMiddleware(startTime);
+  const settingsMiddleware = new SettingsMiddleware();
   const statisticsMiddleware = new StatisticsMiddleware(startTime);
 
   const onTextListener = new OnTextListener(keyv, startTime);
 
   bot.use(localSession.middleware());
   bot.use(errorHandler(globalMiddleware.middleware()));
+  bot.use(GenericMenu.middleware());
 
   bot.start(errorHandler(startMiddleware.middleware()));
   bot.help(errorHandler(helpMiddleware.middleware()));
 
   bot.command('/session', errorHandler(sessionMiddleware.middleware()));
   bot.command('/statistics', errorHandler(statisticsMiddleware.middleware()));
+  bot.command(MenuAction.SETTINGS, errorHandler(settingsMiddleware.middleware()));
+  bot.action(
+    new RegExp(MenuAction.SETTINGS),
+    GenericMenu.onAction((ctx) => ctx.session.keyboardMenu, errorHandler(settingsMiddleware.middleware())),
+  );
 
   bot.on('text', errorHandler(onTextListener.middleware()), errorHandler(performanceMiddleware));
   // bot.on('text', () => {});

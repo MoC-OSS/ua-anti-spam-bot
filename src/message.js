@@ -2,12 +2,36 @@ const { env } = require('typed-dotenv').config();
 
 const { creatorNick } = require('./creator');
 
+/**
+ * Generic
+ * */
 const adminReadyMessage = 'Тепер я адміністратор. Готовий до роботи 😎';
 const memberReadyMessage = 'Тепер я деактивований. Відпочиваю... 😴';
 const spamDeleteMessage = '❗️ Повідомлення видалено.\n\n* Причина: спам.';
 const somethingWentWrongMessage = 'Сталась якась помилка :(';
 const makeAdminMessage = '<b>Зроби мене адміністратором, щоб я міг видаляти повідомлення.</b>';
 
+/**
+ * Generic - Settings
+ * */
+const settingsDeleteItemMessage = 'Повідомлення про видалення';
+const settingsSubmitMessage = '💾 Зберегти';
+
+/**
+ * Complex - Settings
+ * */
+
+const getSettingsMenuMessage = ({ disableDeleteMessage }) =>
+  `
+🤖 Налаштування бота.
+Тут ви можете регулювати параметри.
+
+${disableDeleteMessage ? '⛔️ Бот не повідомляє про видалені повідомлення' : '✅ Бот повідомляє про видалені повідомлення'}
+`.trim();
+
+/**
+ * Complex
+ * */
 const startMessageAtom = `
 Привіт! 🇺🇦✌️
 
@@ -177,10 +201,13 @@ ${getGroupStartMessage({ adminsString })}
  *
  * */
 module.exports = {
+  settingsDeleteItemMessage,
+  settingsSubmitMessage,
   memberReadyMessage,
   adminReadyMessage,
   spamDeleteMessage,
   somethingWentWrongMessage,
+  getSettingsMenuMessage,
   getBotJoinMessage,
   getStartMessage,
   getStartChannelMessage,
