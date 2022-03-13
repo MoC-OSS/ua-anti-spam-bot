@@ -3,10 +3,6 @@ const { env } = require('typed-dotenv').config();
 const { getBotJoinMessage, getStartChannelMessage, adminReadyMessage, memberReadyMessage } = require('../../message');
 const { logCtx, handleError, telegramUtil } = require('../../utils');
 
-/**
- * @typedef { import("../../types").TelegrafContext } TelegrafContext
- */
-
 class GlobalMiddleware {
   /**
    * @param {Bot} bot

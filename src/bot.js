@@ -1,10 +1,9 @@
-const { error, env } = require('typed-dotenv').config();
-// const { Telegraf } = require('telegraf');
-const LocalSession = require('telegraf-session-local');
-const Keyv = require('keyv');
 const { Bot } = require('grammy');
 const { hydrateReply } = require('@grammyjs/parse-mode');
 const { Menu } = require('@grammyjs/menu');
+const { error, env } = require('typed-dotenv').config();
+const LocalSession = require('telegraf-session-local');
+const Keyv = require('keyv');
 
 const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware } = require('./bot/commands');
 const { OnTextListener } = require('./bot/listeners');
@@ -13,8 +12,7 @@ const { handleError, errorHandler, sleep } = require('./utils');
 const { logsChat } = require('./creator');
 
 /**
- * @typedef { import("./types").TelegrafContext } TelegrafContext
- * @typedef { import("grammy").Context } GrammyContext
+ * @typedef { import("./types").GrammyContext } GrammyContext
  * @typedef { import("./types").SessionObject } SessionObject
  */
 
