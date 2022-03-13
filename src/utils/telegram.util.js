@@ -4,7 +4,7 @@ class TelegramUtil {
    * @returns {boolean}
    * */
   isFromChannel(ctx) {
-    return ctx?.message?.from?.first_name === 'Channel' && ctx?.message?.from?.username === 'Channel_Bot';
+    return ctx.from?.first_name === 'Channel' && ctx.from?.username === 'Channel_Bot';
   }
 
   /**
@@ -12,23 +12,7 @@ class TelegramUtil {
    * @returns {boolean}
    * */
   isInComments(ctx) {
-    return ctx?.message?.reply_to_message?.from?.id === 777000;
-  }
-
-  /**
-   * @param {GrammyContext} ctx
-   * @returns {string}
-   * */
-  getMessageText(ctx) {
-    return this.getMessage(ctx).text;
-  }
-
-  /**
-   * @param {GrammyContext} ctx
-   * @returns {AbstractCallbackQuery}
-   * */
-  getMessage(ctx) {
-    return ctx.message || ctx.update?.message || ctx.update?.edited_message;
+    return ctx.msg?.reply_to_message?.from?.id === 777000;
   }
 
   /**
@@ -38,7 +22,7 @@ class TelegramUtil {
   getChatAdmins(bot, chatId) {
     return bot.api.getChatAdministrators(chatId).then((admins) => {
       if (!admins || !admins.length) {
-        return;
+        return {};
       }
 
       const creator = admins.find((user) => user.status === 'creator' && !!user.user.username);

@@ -32,7 +32,7 @@ class OnTextListener {
       /**
        * Skip messages before bot became admin
        * */
-      if (ctx.message?.date * 1000 < +ctx.session.botAdminDate) {
+      if (ctx.msg?.date * 1000 < +ctx.session.botAdminDate) {
         return next();
       }
 
@@ -47,7 +47,7 @@ class OnTextListener {
       /**
        * Skip channel admins message duplicated in chat
        * */
-      if (ctx.senderChat?.type === 'channel') {
+      if (ctx.chat?.type === 'channel') {
         return next();
       }
 

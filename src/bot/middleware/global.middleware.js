@@ -9,7 +9,7 @@ const { logCtx, handleError, telegramUtil } = require('../../utils');
 
 class GlobalMiddleware {
   /**
-   * @param {Telegraf} bot
+   * @param {Bot} bot
    * */
   constructor(bot) {
     this.bot = bot;
@@ -25,8 +25,11 @@ class GlobalMiddleware {
      * @param {Next} next
      * */
     return (ctx, next) => {
-      const chatTitle = ctx?.update?.my_chat_member?.chat?.title || ctx?.update?.message?.chat?.title;
-      const chatType = ctx?.update?.my_chat_member?.chat?.type || ctx?.update?.message?.chat?.type;
+      const chatType = ctx.chat?.type;
+
+      ctx.session.chatType = chatType;
+      ctx.session.chatTitle = ctx.chat?.title;
+      ctx.session.botRemoved = ctx?.msg?.left_chat_participant?.id === ctx.me.id;
 
       logCtx(ctx);
 
@@ -41,35 +44,26 @@ class GlobalMiddleware {
         return next();
       }
 
-      const addedMember = ctx?.update?.message?.new_chat_member;
+      const addedMember = ctx?.msg?.new_chat_member;
       if (addedMember?.id === ctx.me.id && chatType !== 'private') {
         telegramUtil.getChatAdmins(this.bot, ctx.chat.id).then(({ adminsString }) => {
           ctx.replyWithHTML(getBotJoinMessage({ adminsString }));
         });
       }
 
-      const isChannel = chatType === 'channel';
-      const oldPermissionsMember = ctx?.update?.my_chat_member?.old_chat_member;
-      const updatePermissionsMember = ctx?.update?.my_chat_member?.new_chat_member;
+      const oldPermissionsMember = ctx?.myChatMember?.old_chat_member;
+      const updatePermissionsMember = ctx?.myChatMember?.new_chat_member;
       const isUpdatedToAdmin = updatePermissionsMember?.user?.id === ctx.me.id && updatePermissionsMember?.status === 'administrator';
       const isDemotedToMember =
         updatePermissionsMember?.user?.id === ctx.me.id &&
         updatePermissionsMember?.status === 'member' &&
         oldPermissionsMember?.status === 'administrator';
 
-      if (chatType) {
-        ctx.session.chatType = chatType;
-      }
-
-      if (chatTitle) {
-        ctx.session.chatTitle = chatTitle;
-      }
-
       if (isUpdatedToAdmin) {
         ctx.session.isBotAdmin = true;
         ctx.session.botAdminDate = new Date();
 
-        if (isChannel) {
+        if (chatType === 'channel') {
           ctx.replyWithHTML(getStartChannelMessage({ botName: ctx.me.username }));
         } else {
           ctx.reply(adminReadyMessage);
@@ -82,7 +76,7 @@ class GlobalMiddleware {
       }
 
       if (ctx.session.isBotAdmin === undefined) {
-        ctx.api.getChatMember(telegramUtil.getMessage(ctx).chat.id, ctx.me.id).then((member) => {
+        ctx.api.getChatMember(ctx.chat?.id, ctx.me.id).then((member) => {
           ctx.session.isBotAdmin = member?.status === 'creator' || member?.status === 'administrator';
 
           if (ctx.session.isBotAdmin && !ctx.session.botAdminDate) {
@@ -91,21 +85,19 @@ class GlobalMiddleware {
         });
       }
 
-      ctx.session.botRemoved = ctx?.update?.message?.left_chat_participant?.id === ctx.me.id;
-
       if (ctx.chat.type === 'private') {
         return next();
       }
 
       try {
-        if (ctx.session.botRemoved || !ctx.message) {
+        if (ctx.session.botRemoved || !ctx.msg) {
           return next();
         }
 
         // return next();
 
         return ctx.api
-          .getChatMember(ctx.message.chat.id, ctx.message.from.id)
+          .getChatMember(ctx.chat.id, ctx.from.id)
 
           .then((member) => {
             if (!member) {

@@ -10,9 +10,15 @@ function performanceMiddleware(ctx, next) {
   if (env.DEBUG) {
     ctx
       .replyWithHTML(
-        `<b>Time</b>: ${performance.now() - ctx.state.performanceStart}\n\nStart:\n${
-          ctx.state.performanceStart
-        }\n\nEnd:\n${performance.now()}`,
+        [
+          `<b>Time</b>: ${performance.now() - ctx.state.performanceStart}`,
+          '',
+          'Start:',
+          ctx.state.performanceStart,
+          '',
+          'End:',
+          performance.now(),
+        ].join('\n'),
       )
 
       .then(() => next());
