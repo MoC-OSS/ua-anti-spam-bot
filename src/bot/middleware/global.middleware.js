@@ -81,17 +81,20 @@ class GlobalMiddleware {
         ctx.reply(memberReadyMessage);
       }
 
-      if (ctx.session.isBotAdmin === undefined) {
-        ctx.telegram.getChatMember(telegramUtil.getMessage(ctx).chat.id, ctx.botInfo.id).then((member) => {
-          ctx.session.isBotAdmin = member?.status === 'creator' || member?.status === 'administrator';
-
-          if (ctx.session.isBotAdmin && !ctx.session.botAdminDate) {
-            ctx.session.botAdminDate = new Date();
-          }
-        });
-      }
-
       ctx.session.botRemoved = ctx?.update?.message?.left_chat_participant?.id === ctx.session.botId;
+
+      if (ctx.session.isBotAdmin === undefined && !ctx.session.botRemoved) {
+        ctx.telegram
+          .getChatMember(telegramUtil.getMessage(ctx).chat.id, ctx.botInfo.id)
+          .then((member) => {
+            ctx.session.isBotAdmin = member?.status === 'creator' || member?.status === 'administrator';
+
+            if (ctx.session.isBotAdmin && !ctx.session.botAdminDate) {
+              ctx.session.botAdminDate = new Date();
+            }
+          })
+          .catch(handleError);
+      }
 
       if (ctx.chat.type === 'private') {
         return next();
@@ -106,7 +109,6 @@ class GlobalMiddleware {
 
         return ctx.telegram
           .getChatMember(ctx.message.chat.id, ctx.message.from.id)
-
           .then((member) => {
             if (!member) {
               return next();
@@ -114,7 +116,8 @@ class GlobalMiddleware {
 
             ctx.session.isCurrentUserAdmin = member.status === 'creator' || member.status === 'administrator';
             next();
-          });
+          })
+          .catch(handleError);
       } catch (e) {
         console.error(e);
         return next();
