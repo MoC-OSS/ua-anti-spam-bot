@@ -19,7 +19,7 @@ class StartMiddleware {
      * @param {GrammyContext} ctx
      * */
     return (ctx) => {
-      if (ctx?.update?.message?.chat?.type === 'private') {
+      if (ctx.chat.type === 'private') {
         return ctx.replyWithHTML(getStartMessage());
       }
 

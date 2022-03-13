@@ -30,6 +30,10 @@ class GlobalMiddleware {
 
       logCtx(ctx);
 
+      if (!ctx.state) {
+        ctx.state = {};
+      }
+
       if (!ctx.session) {
         if (env.DEBUG) {
           handleError(new Error('No session'), 'SESSION_ERROR');
@@ -37,12 +41,8 @@ class GlobalMiddleware {
         return next();
       }
 
-      if (ctx.botInfo?.id) {
-        ctx.session.botId = ctx.botInfo?.id;
-      }
-
       const addedMember = ctx?.update?.message?.new_chat_member;
-      if (addedMember?.id === ctx.session.botId && chatType !== 'private') {
+      if (addedMember?.id === ctx.me.id && chatType !== 'private') {
         telegramUtil.getChatAdmins(this.bot, ctx.chat.id).then(({ adminsString }) => {
           ctx.replyWithHTML(getBotJoinMessage({ adminsString }));
         });
@@ -51,10 +51,9 @@ class GlobalMiddleware {
       const isChannel = chatType === 'channel';
       const oldPermissionsMember = ctx?.update?.my_chat_member?.old_chat_member;
       const updatePermissionsMember = ctx?.update?.my_chat_member?.new_chat_member;
-      const isUpdatedToAdmin =
-        updatePermissionsMember?.user?.id === ctx.session.botId && updatePermissionsMember?.status === 'administrator';
+      const isUpdatedToAdmin = updatePermissionsMember?.user?.id === ctx.me.id && updatePermissionsMember?.status === 'administrator';
       const isDemotedToMember =
-        updatePermissionsMember?.user?.id === ctx.session.botId &&
+        updatePermissionsMember?.user?.id === ctx.me.id &&
         updatePermissionsMember?.status === 'member' &&
         oldPermissionsMember?.status === 'administrator';
 
@@ -92,7 +91,7 @@ class GlobalMiddleware {
         });
       }
 
-      ctx.session.botRemoved = ctx?.update?.message?.left_chat_participant?.id === ctx.session.botId;
+      ctx.session.botRemoved = ctx?.update?.message?.left_chat_participant?.id === ctx.me.id;
 
       if (ctx.chat.type === 'private') {
         return next();

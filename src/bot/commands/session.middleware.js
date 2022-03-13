@@ -1,4 +1,5 @@
 const fs = require('fs');
+const { InputFile } = require('grammy');
 
 const { creatorId } = require('../../creator');
 
@@ -23,7 +24,7 @@ class SessionMiddleware {
 
       if (chatId === creatorId) {
         const sessionObjectBuffer = fs.readFileSync('./telegraf-session.json');
-        ctx.replyWithDocument({ source: sessionObjectBuffer, filename: `telegraf-session-${this.startTime.toISOString()}.json` });
+        ctx.replyWithDocument(new InputFile(sessionObjectBuffer, `telegraf-session-${this.startTime.toISOString()}.json`));
       }
     };
   }

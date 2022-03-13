@@ -9,9 +9,9 @@ const { env } = require('typed-dotenv').config();
 function performanceMiddleware(ctx, next) {
   if (env.DEBUG) {
     ctx
-      .replyWithMarkdown(
-        `*Time*: ${performance.now() - ctx.session.performanceStart}\n\nStart:\n${
-          ctx.session.performanceStart
+      .replyWithHTML(
+        `<b>Time</b>: ${performance.now() - ctx.state.performanceStart}\n\nStart:\n${
+          ctx.state.performanceStart
         }\n\nEnd:\n${performance.now()}`,
       )
 
