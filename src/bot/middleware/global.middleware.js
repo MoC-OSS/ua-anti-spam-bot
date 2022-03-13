@@ -21,10 +21,13 @@ class GlobalMiddleware {
    * */
   middleware() {
     /**
-     * @param {TelegrafContext} ctx
+     * @param {GrammyContext} ctx
      * @param {Next} next
      * */
     return (ctx, next) => {
+      const chatTitle = ctx?.update?.my_chat_member?.chat?.title || ctx?.update?.message?.chat?.title;
+      const chatType = ctx?.update?.my_chat_member?.chat?.type || ctx?.update?.message?.chat?.type;
+
       logCtx(ctx);
 
       if (!ctx.session) {
@@ -39,14 +42,12 @@ class GlobalMiddleware {
       }
 
       const addedMember = ctx?.update?.message?.new_chat_member;
-      if (addedMember?.id === ctx.session.botId) {
+      if (addedMember?.id === ctx.session.botId && chatType !== 'private') {
         telegramUtil.getChatAdmins(this.bot, ctx.chat.id).then(({ adminsString }) => {
           ctx.replyWithHTML(getBotJoinMessage({ adminsString }));
         });
       }
 
-      const chatTitle = ctx?.update?.my_chat_member?.chat?.title || ctx?.update?.message?.chat?.title;
-      const chatType = ctx?.update?.my_chat_member?.chat?.type || ctx?.update?.message?.chat?.type;
       const isChannel = chatType === 'channel';
       const oldPermissionsMember = ctx?.update?.my_chat_member?.old_chat_member;
       const updatePermissionsMember = ctx?.update?.my_chat_member?.new_chat_member;
@@ -70,7 +71,7 @@ class GlobalMiddleware {
         ctx.session.botAdminDate = new Date();
 
         if (isChannel) {
-          ctx.replyWithHTML(getStartChannelMessage({ botName: ctx.botInfo.username }));
+          ctx.replyWithHTML(getStartChannelMessage({ botName: ctx.me.username }));
         } else {
           ctx.reply(adminReadyMessage);
         }
@@ -82,7 +83,7 @@ class GlobalMiddleware {
       }
 
       if (ctx.session.isBotAdmin === undefined) {
-        ctx.telegram.getChatMember(telegramUtil.getMessage(ctx).chat.id, ctx.botInfo.id).then((member) => {
+        ctx.api.getChatMember(telegramUtil.getMessage(ctx).chat.id, ctx.me.id).then((member) => {
           ctx.session.isBotAdmin = member?.status === 'creator' || member?.status === 'administrator';
 
           if (ctx.session.isBotAdmin && !ctx.session.botAdminDate) {
@@ -104,7 +105,7 @@ class GlobalMiddleware {
 
         // return next();
 
-        return ctx.telegram
+        return ctx.api
           .getChatMember(ctx.message.chat.id, ctx.message.from.id)
 
           .then((member) => {

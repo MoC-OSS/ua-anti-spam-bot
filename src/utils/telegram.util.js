@@ -1,6 +1,6 @@
 class TelegramUtil {
   /**
-   * @param {TelegrafContext} ctx
+   * @param {GrammyContext} ctx
    * @returns {boolean}
    * */
   isFromChannel(ctx) {
@@ -8,7 +8,7 @@ class TelegramUtil {
   }
 
   /**
-   * @param {TelegrafContext} ctx
+   * @param {GrammyContext} ctx
    * @returns {boolean}
    * */
   isInComments(ctx) {
@@ -16,7 +16,7 @@ class TelegramUtil {
   }
 
   /**
-   * @param {TelegrafContext} ctx
+   * @param {GrammyContext} ctx
    * @returns {string}
    * */
   getMessageText(ctx) {
@@ -24,7 +24,7 @@ class TelegramUtil {
   }
 
   /**
-   * @param {TelegrafContext} ctx
+   * @param {GrammyContext} ctx
    * @returns {AbstractCallbackQuery}
    * */
   getMessage(ctx) {
@@ -32,18 +32,15 @@ class TelegramUtil {
   }
 
   /**
-   * @param {Telegraf} bot
+   * @param {Bot} bot
    * @param {number} chatId
    */
   getChatAdmins(bot, chatId) {
-    return bot.telegram.getChatAdministrators(chatId).then((admins) => {
+    return bot.api.getChatAdministrators(chatId).then((admins) => {
       if (!admins || !admins.length) {
         return;
       }
 
-      /**
-       * @type {ChatMember}
-       * */
       const creator = admins.find((user) => user.status === 'creator' && !!user.user.username);
       const promoteAdmins = admins.filter((user) => user.can_promote_members && !!user.user.username);
 

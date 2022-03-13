@@ -21,7 +21,7 @@ class OnTextListener {
    * */
   middleware() {
     /**
-     * @param {TelegrafContext} ctx
+     * @param {GrammyContext} ctx
      * @param {Next} next
      * */
     return async (ctx, next) => {

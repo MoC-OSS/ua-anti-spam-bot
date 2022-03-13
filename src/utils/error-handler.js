@@ -8,7 +8,7 @@ const { handleError } = require('./error.util');
 const errorHandler =
   (fn) =>
   /**
-   * @param {TelegrafContext} ctx
+   * @param {GrammyContext} ctx
    * @param {Next} next
    * */
   async (ctx, next) => {
@@ -24,7 +24,7 @@ const errorHandler =
 
       console.error('*** CTX ***', writeCtx);
 
-      ctx.telegram
+      ctx.api
         .sendMessage(
           logsChat,
           ['<b>Bot failed with message:</b>', error.message, '', '<b>Stack:</b>', `<code>${error.stack}</code>`].join('\n'),
@@ -33,7 +33,7 @@ const errorHandler =
           },
         )
         .then(() =>
-          ctx.telegram
+          ctx.api
             .sendDocument(logsChat, {
               source: Buffer.from(JSON.stringify(writeCtx, null, 2)),
               filename: `ctx-${new Date().toISOString()}.json`,

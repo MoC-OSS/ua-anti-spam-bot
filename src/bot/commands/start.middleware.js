@@ -3,7 +3,7 @@ const { handleError, telegramUtil } = require('../../utils');
 
 class StartMiddleware {
   /**
-   * @param {Telegraf} bot
+   * @param {Bot} bot
    * */
   constructor(bot) {
     this.bot = bot;
@@ -16,7 +16,7 @@ class StartMiddleware {
    * */
   middleware() {
     /**
-     * @param {TelegrafContext} ctx
+     * @param {GrammyContext} ctx
      * */
     return (ctx) => {
       if (ctx?.update?.message?.chat?.type === 'private') {

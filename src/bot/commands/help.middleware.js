@@ -15,7 +15,7 @@ class HelpMiddleware {
    * */
   middleware() {
     /**
-     * @param {TelegrafContext} ctx
+     * @param {GrammyContext} ctx
      * */
     return (ctx) => {
       const startLocaleTime = formatDate(this.startTime);

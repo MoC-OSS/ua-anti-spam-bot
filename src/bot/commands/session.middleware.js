@@ -16,7 +16,7 @@ class SessionMiddleware {
    * */
   middleware() {
     /**
-     * @param {TelegrafContext} ctx
+     * @param {GrammyContext} ctx
      * */
     return (ctx) => {
       const chatId = ctx?.update?.message?.chat?.id;

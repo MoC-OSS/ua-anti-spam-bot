@@ -3,7 +3,7 @@ const { env } = require('typed-dotenv').config();
 /**
  * Used for performance checking
  *
- * @param {TelegrafContext} ctx
+ * @param {GrammyContext} ctx
  * @param {Next} next
  * */
 function performanceMiddleware(ctx, next) {
