@@ -76,14 +76,17 @@ class GlobalMiddleware {
         ctx.reply(memberReadyMessage);
       }
 
-      if (ctx.session.isBotAdmin === undefined) {
-        ctx.api.getChatMember(ctx.chat?.id, ctx.me.id).then((member) => {
-          ctx.session.isBotAdmin = member?.status === 'creator' || member?.status === 'administrator';
+      if (ctx.session.isBotAdmin === undefined && !ctx.session.botRemoved) {
+        ctx.api
+          .getChatMember(ctx.chat?.id, ctx.me.id)
+          .then((member) => {
+            ctx.session.isBotAdmin = member?.status === 'creator' || member?.status === 'administrator';
 
-          if (ctx.session.isBotAdmin && !ctx.session.botAdminDate) {
-            ctx.session.botAdminDate = new Date();
-          }
-        });
+            if (ctx.session.isBotAdmin && !ctx.session.botAdminDate) {
+              ctx.session.botAdminDate = new Date();
+            }
+          })
+          .catch(handleError);
       }
 
       if (ctx.chat.type === 'private') {
@@ -107,7 +110,8 @@ class GlobalMiddleware {
 
             ctx.session.isCurrentUserAdmin = member.status === 'creator' || member.status === 'administrator';
             next();
-          });
+          })
+          .catch(handleError);
       } catch (e) {
         console.error(e);
         return next();
