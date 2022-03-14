@@ -1,12 +1,11 @@
 import { Chat } from 'typegram/manage'
 
 export interface SessionData {
-  botId: number;
   chatType: Chat['type'];
   chatTitle?: string;
   botRemoved: boolean;
-  isPrivate: boolean;
   isBotAdmin: boolean;
+  botAdminDate: Date;
   isCurrentUserAdmin: boolean;
 }
 

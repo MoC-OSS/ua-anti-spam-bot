@@ -1,5 +1,7 @@
+const { InputFile } = require('grammy');
+const { env } = require('typed-dotenv').config();
+
 const { logsChat } = require('../creator');
-// const { somethingWentWrongMessage } = require('../message');
 const { handleError } = require('./error.util');
 
 /**
@@ -9,7 +11,7 @@ const { handleError } = require('./error.util');
 const errorHandler =
   (fn) =>
   /**
-   * @param {TelegrafContext} ctx
+   * @param {GrammyContext} ctx
    * @param {Next} next
    * */
   async (ctx, next) => {
@@ -17,16 +19,32 @@ const errorHandler =
       return await fn(ctx, next);
     } catch (error) {
       handleError(error);
-      // await ctx.reply(somethingWentWrongMessage);
-      ctx.telegram
-        .sendMessage(
-          logsChat,
-          ['<b>Bot failed with message:</b>', error.message, '', '<b>Stack:</b>', `<code>${error.stack}</code>`].join('\n'),
-          {
-            parse_mode: 'HTML',
-          },
-        )
-        .catch(handleError);
+
+      const writeCtx = JSON.parse(JSON.stringify(ctx));
+      // noinspection JSConstantReassignment
+      delete writeCtx.tg;
+      delete writeCtx.telegram;
+      delete writeCtx.api;
+
+      console.error('*** CTX ***', writeCtx);
+
+      if (!env.DEBUG) {
+        ctx.api
+          .sendMessage(
+            logsChat,
+            ['<b>Bot failed with message:</b>', error.message, '', '<b>Stack:</b>', `<code>${error.stack}</code>`].join('\n'),
+            {
+              parse_mode: 'HTML',
+            },
+          )
+          .then(() =>
+            ctx.api
+              .sendDocument(logsChat, new InputFile(Buffer.from(JSON.stringify(writeCtx, null, 2)), `ctx-${new Date().toISOString()}.json`))
+              .catch(handleError),
+          )
+          .catch(handleError);
+      }
+
       return next();
     }
   };

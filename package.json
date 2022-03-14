@@ -17,18 +17,20 @@
     "lint:js:fix": "npm run lint:js -- --fix"
   },
   "dependencies": {
+    "@grammyjs/menu": "^1.0.4",
+    "@grammyjs/parse-mode": "^1.0.0",
     "@keyv/sqlite": "^3.0.0",
     "axios": "^0.26.0",
     "contains-emoji": "^1.1.0",
     "cyrillic-to-translit-js": "^3.1.0",
     "express": "^4.17.3",
     "fuse.js": "^6.5.3",
+    "grammy": "^1.7.0",
     "grapheme-splitter": "^1.0.4",
     "husky": "^7.0.4",
     "keyv": "^4.1.1",
     "lodash.get": "^4.4.2",
     "redis": "^4.0.4",
-    "telegraf": "^4.7.0",
     "typed-dotenv": "^10.0.1"
   },
   "devDependencies": {

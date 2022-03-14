@@ -17,7 +17,7 @@ class StatisticsMiddleware {
    * */
   middleware() {
     /**
-     * @param {TelegrafContext} ctx
+     * @param {GrammyContext} ctx
      * */
     return async (ctx) => {
       if (ctx.chat.type === 'supergroup') {
@@ -31,8 +31,7 @@ class StatisticsMiddleware {
 
         const getChatId = (sessionId) => sessionId.split(':')[0];
 
-        const currentBotSessions = sessions.filter((session) => session.data.botId === ctx.botInfo.id);
-        const groupOnlySessions = currentBotSessions.filter(
+        const groupOnlySessions = sessions.filter(
           (session, index, self) => index === self.findIndex((t) => getChatId(t.id) === getChatId(session.id)),
         );
 
@@ -41,7 +40,7 @@ class StatisticsMiddleware {
         const privateSessions = groupOnlySessions.filter((session) => session.data.chatType === 'private');
         const channelSessions = groupOnlySessions.filter((session) => session.data.chatType === 'channel');
 
-        const totalUserCounts = currentBotSessions.length;
+        const totalUserCounts = sessions.length;
         const totalSessionCount = groupOnlySessions.length;
         const superGroupsCount = superGroupsSessions.length;
         const groupCount = groupSessions.length;

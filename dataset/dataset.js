@@ -9,8 +9,9 @@ const fileKey = files.map((file) => file.split('.')[0]);
 const dataset = {};
 
 filePaths.forEach((filePath, index) => {
+  const datasetName = fileKey[index];
   // eslint-disable-next-line global-require,import/no-dynamic-require
-  dataset[fileKey[index]] = require(filePath);
+  dataset[datasetName] = require(filePath);
 });
 
 module.exports = {
