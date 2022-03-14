@@ -25,7 +25,7 @@ class SessionMiddleware {
       if (chatId === creatorId) {
         const sessions = await redisClient.getAllRecords();
         const sessionDocument = new InputFile(
-          Buffer.from(JSON.stringify({ sessions })),
+          Buffer.from(JSON.stringify({ sessions }, null, 2)),
           `telegraf-session-${this.startTime.toISOString()}.json`,
         );
         ctx.replyWithDocument(sessionDocument);
