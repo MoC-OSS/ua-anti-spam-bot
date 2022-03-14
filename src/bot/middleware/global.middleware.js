@@ -21,6 +21,17 @@ class GlobalMiddleware {
      * @param {Next} next
      * */
     return (ctx, next) => {
+      /**
+       * Channels doesn't have session.
+       * TODO create a middleware to skip it
+       * */
+      if (!ctx.session) {
+        if (env.DEBUG) {
+          handleError(new Error('No session'), 'SESSION_ERROR');
+        }
+        return next();
+      }
+
       const chatType = ctx.chat?.type;
 
       ctx.session.chatType = chatType;
@@ -31,13 +42,6 @@ class GlobalMiddleware {
 
       if (!ctx.state) {
         ctx.state = {};
-      }
-
-      if (!ctx.session) {
-        if (env.DEBUG) {
-          handleError(new Error('No session'), 'SESSION_ERROR');
-        }
-        return next();
       }
 
       // TODO commented for settings feature
