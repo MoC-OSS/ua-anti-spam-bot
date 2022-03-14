@@ -1,7 +1,5 @@
-import { Context } from "telegraf"
+import { Context, SessionFlavor } from 'grammy';
 
 import { SessionData } from './session';
 
-export interface TelegrafContext extends Omit<Context, 'session'> {
-  session: SessionData;
-}
+export type GrammyContext = Context & SessionFlavor<SessionData>;

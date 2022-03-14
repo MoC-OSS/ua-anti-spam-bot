@@ -8,30 +8,30 @@ const { telegramUtil } = require('../utils');
 const splitter = new GraphemeSplitter();
 
 /**
- * @param {TelegrafContext} ctx
+ * @param {GrammyContext} ctx
  */
 const isFilteredByRules = (ctx) => {
-  const originMessage = telegramUtil.getMessageText(ctx);
+  const originMessage = ctx.msg?.text;
   const message = messageHandler.sanitizeMessage(ctx, originMessage);
 
   return messageHandler.getDeleteRule(message, originMessage);
 };
 
 /**
- * @param {TelegrafContext} ctx
+ * @param {GrammyContext} ctx
  */
-const countEmojis = (ctx) => splitter.splitGraphemes(ctx?.message?.text || '').filter((e) => containsEmoji(e)).length;
+const countEmojis = (ctx) => splitter.splitGraphemes(ctx.msg?.text || '').filter((e) => containsEmoji(e)).length;
 
 /**
- * @param {TelegrafContext} ctx
+ * @param {GrammyContext} ctx
  */
-const countUrls = (ctx) => (ctx?.message?.entities || []).filter((e) => e.type === 'url').length;
+const countUrls = (ctx) => (ctx.msg?.entities || []).filter((e) => e.type === 'url').length;
 
 /**
- * @param {TelegrafContext} ctx
+ * @param {GrammyContext} ctx
  */
 const formattingsInfo = (ctx) => {
-  const formattings = (ctx?.message?.entities || []).filter((e) => e.type !== 'url');
+  const formattings = (ctx.msg?.entities || []).filter((e) => e.type !== 'url');
   return {
     length: formattings.reduce((a, e) => a + e.length, 0),
     count: formattings.length,
@@ -39,7 +39,7 @@ const formattingsInfo = (ctx) => {
 };
 
 /**
- * @param {TelegrafContext} ctx
+ * @param {GrammyContext} ctx
  * @param {Keyv} keyv
  */
 const getMessageReputation = async (ctx, keyv) => {

@@ -3,13 +3,9 @@ const { env } = require('typed-dotenv').config();
 const { getBotJoinMessage, getStartChannelMessage, adminReadyMessage, memberReadyMessage } = require('../../message');
 const { logCtx, handleError, telegramUtil } = require('../../utils');
 
-/**
- * @typedef { import("../../types").TelegrafContext } TelegrafContext
- */
-
 class GlobalMiddleware {
   /**
-   * @param {Telegraf} bot
+   * @param {Bot} bot
    * */
   constructor(bot) {
     this.bot = bot;
@@ -21,11 +17,21 @@ class GlobalMiddleware {
    * */
   middleware() {
     /**
-     * @param {TelegrafContext} ctx
+     * @param {GrammyContext} ctx
      * @param {Next} next
      * */
     return (ctx, next) => {
+      const chatType = ctx.chat?.type;
+
+      ctx.session.chatType = chatType;
+      ctx.session.chatTitle = ctx.chat?.title;
+      ctx.session.botRemoved = ctx?.msg?.left_chat_participant?.id === ctx.me.id;
+
       logCtx(ctx);
+
+      if (!ctx.state) {
+        ctx.state = {};
+      }
 
       if (!ctx.session) {
         if (env.DEBUG) {
@@ -34,43 +40,32 @@ class GlobalMiddleware {
         return next();
       }
 
-      if (ctx.botInfo?.id) {
-        ctx.session.botId = ctx.botInfo?.id;
-      }
+      // TODO commented for settings feature
+      // if (!ctx.session.settings) {
+      //   ctx.session.settings = {};
+      // }
 
-      const addedMember = ctx?.update?.message?.new_chat_member;
-      if (addedMember?.id === ctx.session.botId) {
+      const addedMember = ctx?.msg?.new_chat_member;
+      if (addedMember?.id === ctx.me.id && chatType !== 'private') {
         telegramUtil.getChatAdmins(this.bot, ctx.chat.id).then(({ adminsString }) => {
           ctx.replyWithHTML(getBotJoinMessage({ adminsString }));
         });
       }
 
-      const chatTitle = ctx?.update?.my_chat_member?.chat?.title || ctx?.update?.message?.chat?.title;
-      const chatType = ctx?.update?.my_chat_member?.chat?.type || ctx?.update?.message?.chat?.type;
-      const isChannel = chatType === 'channel';
-      const oldPermissionsMember = ctx?.update?.my_chat_member?.old_chat_member;
-      const updatePermissionsMember = ctx?.update?.my_chat_member?.new_chat_member;
-      const isUpdatedToAdmin =
-        updatePermissionsMember?.user?.id === ctx.session.botId && updatePermissionsMember?.status === 'administrator';
+      const oldPermissionsMember = ctx?.myChatMember?.old_chat_member;
+      const updatePermissionsMember = ctx?.myChatMember?.new_chat_member;
+      const isUpdatedToAdmin = updatePermissionsMember?.user?.id === ctx.me.id && updatePermissionsMember?.status === 'administrator';
       const isDemotedToMember =
-        updatePermissionsMember?.user?.id === ctx.session.botId &&
+        updatePermissionsMember?.user?.id === ctx.me.id &&
         updatePermissionsMember?.status === 'member' &&
         oldPermissionsMember?.status === 'administrator';
-
-      if (chatType) {
-        ctx.session.chatType = chatType;
-      }
-
-      if (chatTitle) {
-        ctx.session.chatTitle = chatTitle;
-      }
 
       if (isUpdatedToAdmin) {
         ctx.session.isBotAdmin = true;
         ctx.session.botAdminDate = new Date();
 
-        if (isChannel) {
-          ctx.replyWithHTML(getStartChannelMessage({ botName: ctx.botInfo.username }));
+        if (chatType === 'channel') {
+          ctx.replyWithHTML(getStartChannelMessage({ botName: ctx.me.username }));
         } else {
           ctx.reply(adminReadyMessage);
         }
@@ -81,11 +76,9 @@ class GlobalMiddleware {
         ctx.reply(memberReadyMessage);
       }
 
-      ctx.session.botRemoved = ctx?.update?.message?.left_chat_participant?.id === ctx.session.botId;
-
       if (ctx.session.isBotAdmin === undefined && !ctx.session.botRemoved) {
-        ctx.telegram
-          .getChatMember(telegramUtil.getMessage(ctx).chat.id, ctx.botInfo.id)
+        ctx.api
+          .getChatMember(ctx.chat?.id, ctx.me.id)
           .then((member) => {
             ctx.session.isBotAdmin = member?.status === 'creator' || member?.status === 'administrator';
 
@@ -101,14 +94,15 @@ class GlobalMiddleware {
       }
 
       try {
-        if (ctx.session.botRemoved || !ctx.message) {
+        if (ctx.session.botRemoved || !ctx.msg) {
           return next();
         }
 
         // return next();
 
-        return ctx.telegram
-          .getChatMember(ctx.message.chat.id, ctx.message.from.id)
+        return ctx.api
+          .getChatMember(ctx.chat.id, ctx.from.id)
+
           .then((member) => {
             if (!member) {
               return next();

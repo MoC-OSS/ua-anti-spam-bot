@@ -21,18 +21,18 @@ class OnTextListener {
    * */
   middleware() {
     /**
-     * @param {TelegrafContext} ctx
+     * @param {GrammyContext} ctx
      * @param {Next} next
      * */
     return async (ctx, next) => {
       if (env.DEBUG) {
-        ctx.session.performanceStart = performance.now();
+        ctx.state.performanceStart = performance.now();
       }
 
       /**
        * Skip messages before bot became admin
        * */
-      if (telegramUtil.getMessage(ctx).date * 1000 < +ctx.session.botAdminDate) {
+      if (ctx.msg?.date * 1000 < +ctx.session.botAdminDate) {
         return next();
       }
 
@@ -47,11 +47,11 @@ class OnTextListener {
       /**
        * Skip channel admins message duplicated in chat
        * */
-      if (ctx?.update?.message?.sender_chat?.type === 'channel') {
+      if (ctx.chat?.type === 'channel') {
         return next();
       }
 
-      const message = telegramUtil.getMessageText(ctx);
+      const message = ctx.msg.text;
 
       /**
        * Removed because Denis Gajda ask to reduce chat messages
@@ -63,16 +63,12 @@ class OnTextListener {
       /**
        * Skip channel chat admins message
        * */
-      if (ctx?.update?.message?.from?.username === 'GroupAnonymousBot') {
+      if (ctx.from?.username === 'GroupAnonymousBot') {
         return next();
       }
 
-      if (ctx.session?.botRemoved) {
-        return next();
-      }
-
-      if (!ctx?.message?.chat?.id) {
-        console.error(Date.toString(), 'Cannot access the chat:', ctx.message.chat);
+      if (!ctx.chat?.id) {
+        console.error(Date.toString(), 'Cannot access the chat:', ctx.chat);
         return next();
       }
 
@@ -88,7 +84,7 @@ class OnTextListener {
 
       if (rep.byRules?.rule) {
         try {
-          const username = ctx?.update?.message?.from?.username;
+          const username = ctx.from?.username;
           const writeUsername = username ? `@${username}` : '';
 
           let debugMessage = '';
