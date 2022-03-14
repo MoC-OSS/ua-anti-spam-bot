@@ -40,6 +40,11 @@ class GlobalMiddleware {
         return next();
       }
 
+      // TODO commented for settings feature
+      // if (!ctx.session.settings) {
+      //   ctx.session.settings = {};
+      // }
+
       const addedMember = ctx?.msg?.new_chat_member;
       if (addedMember?.id === ctx.me.id && chatType !== 'private') {
         telegramUtil.getChatAdmins(this.bot, ctx.chat.id).then(({ adminsString }) => {

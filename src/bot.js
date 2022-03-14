@@ -1,6 +1,7 @@
 const { Bot } = require('grammy');
 const { hydrateReply } = require('@grammyjs/parse-mode');
-const { Menu } = require('@grammyjs/menu');
+// TODO commented for settings feature
+// const { Menu } = require('@grammyjs/menu');
 const { error, env } = require('typed-dotenv').config();
 const LocalSession = require('telegraf-session-local');
 const Keyv = require('keyv');
@@ -10,6 +11,8 @@ const { OnTextListener } = require('./bot/listeners');
 const { GlobalMiddleware, performanceMiddleware, botActiveMiddleware } = require('./bot/middleware');
 const { handleError, errorHandler, sleep } = require('./utils');
 const { logsChat } = require('./creator');
+// TODO commented for settings feature
+// const { getSettingsMenuMessage, settingsSubmitMessage, settingsDeleteItemMessage } = require('./message');
 
 /**
  * @typedef { import("./types").GrammyContext } GrammyContext
@@ -29,10 +32,26 @@ if (error) {
   process.exit();
 }
 
-const menu = new Menu('my-menu-identifier')
-  .text('A', (ctx) => ctx.reply('You pressed A!'))
-  .row()
-  .text('B', (ctx) => ctx.reply('You pressed B!'));
+// TODO commented for settings feature
+// const menu = new Menu('settings')
+//   .text(
+//     (ctx) => (ctx.session.settings.disableDeleteMessage === false ? '⛔️' : '✅') + settingsDeleteItemMessage, // dynamic label
+//     (ctx) => {
+//       console.log('button press', ctx.session.settings.disableDeleteMessage);
+//       if (ctx.session.settings.disableDeleteMessage === false) {
+//         delete ctx.session.settings.disableDeleteMessage;
+//       } else {
+//         ctx.session.settings.disableDeleteMessage = false;
+//       }
+//
+//       ctx.editMessageText(getSettingsMenuMessage(ctx.session.settings));
+//     },
+//   )
+//   .row()
+//   .text(settingsSubmitMessage, (ctx) => {
+//     console.log(ctx);
+//     ctx.deleteMessage();
+//   });
 
 (async () => {
   console.info('Waiting for the old instance to down...');
@@ -54,20 +73,23 @@ const menu = new Menu('my-menu-identifier')
 
   const onTextListener = new OnTextListener(keyv, startTime);
 
-  bot.use(menu);
   bot.use(hydrateReply);
 
   bot.use(localSession.middleware());
   bot.use(errorHandler(globalMiddleware.middleware()));
+
+  // TODO commented for settings feature
+  // bot.use(menu);
 
   bot.command('start', errorHandler(startMiddleware.middleware()));
   bot.command('help', errorHandler(helpMiddleware.middleware()));
 
   bot.command('session', botActiveMiddleware, errorHandler(sessionMiddleware.middleware()));
   bot.command('statistics', botActiveMiddleware, errorHandler(statisticsMiddleware.middleware()));
-  //
+
+  // TODO commented for settings feature
   // bot.command('settings', (ctx) => {
-  //   ctx.reply('Check out this menu:', { reply_markup: menu });
+  //   ctx.reply(getSettingsMenuMessage(ctx.session.settings), { reply_markup: menu });
   // });
 
   bot.on(
