@@ -3,8 +3,8 @@ const { hydrateReply } = require('@grammyjs/parse-mode');
 // TODO commented for settings feature
 // const { Menu } = require('@grammyjs/menu');
 const { error, env } = require('typed-dotenv').config();
-const LocalSession = require('telegraf-session-local');
 const Keyv = require('keyv');
+const { RedisSession } = require('./bot/sessionProviders');
 
 const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware } = require('./bot/commands');
 const { OnTextListener } = require('./bot/listeners');
@@ -62,7 +62,7 @@ if (error) {
 
   const bot = new Bot(env.BOT_TOKEN);
 
-  const localSession = new LocalSession({ database: 'telegraf-session.json' });
+  const redisSession = new RedisSession();
 
   const globalMiddleware = new GlobalMiddleware(bot);
 
@@ -75,7 +75,8 @@ if (error) {
 
   bot.use(hydrateReply);
 
-  bot.use(localSession.middleware());
+  bot.use(redisSession.middleware());
+
   bot.use(errorHandler(globalMiddleware.middleware()));
 
   // TODO commented for settings feature

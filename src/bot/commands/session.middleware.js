@@ -1,6 +1,6 @@
-const fs = require('fs');
 const { InputFile } = require('grammy');
 
+const { redisClient } = require('../../db');
 const { creatorId } = require('../../creator');
 
 class SessionMiddleware {
@@ -19,12 +19,16 @@ class SessionMiddleware {
     /**
      * @param {GrammyContext} ctx
      * */
-    return (ctx) => {
+    return async (ctx) => {
       const chatId = ctx?.update?.message?.chat?.id;
 
       if (chatId === creatorId) {
-        const sessionObjectBuffer = fs.readFileSync('./telegraf-session.json');
-        ctx.replyWithDocument(new InputFile(sessionObjectBuffer, `telegraf-session-${this.startTime.toISOString()}.json`));
+        const sessions = await redisClient.getAllRecords();
+        const sessionDocument = new InputFile(
+          Buffer.from(JSON.stringify({ sessions }, null, 2)),
+          `telegraf-session-${this.startTime.toISOString()}.json`,
+        );
+        ctx.replyWithDocument(sessionDocument);
       }
     };
   }

@@ -1,0 +1,52 @@
+version: "3"
+
+services:
+  bot:
+    container_name: "uaasb_bot"
+    build: .
+    volumes:
+      - ".:/usr/src/app"
+      - "/usr/src/app/node_modules"
+    env_file: ".env"
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      REDIS_URL: redis://redis:6379
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+#
+#  backend:
+#    container_name: "uaasb_backend"
+#    build: ./Dockerfile.backend
+#    volumes:
+#      - ".:/app"
+#      - "/app/node_modules"
+#    ports:
+#      - "${PORT}:${PORT}"
+#    env_file: ".env"
+#    restart: unless-stopped
+#    logging:
+#      driver: "json-file"
+#      options:
+#        max-size: "50m"
+
+  postgres:
+    container_name: "uaasb_postgres"
+    image: "postgres:13.6-alpine"
+    ports:
+      - "${PGPORT}:${PGPORT}"
+    env_file: ".env"
+
+  redis:
+    container_name: "uaasb_redis"
+    image: 'redis:6.0-alpine'
+    ports:
+      - '6379:6379'
+
+volumes:
+  data_backend_libs:
+    driver: local

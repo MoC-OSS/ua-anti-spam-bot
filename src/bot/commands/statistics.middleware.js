@@ -1,4 +1,4 @@
-const fs = require('fs');
+const { redisClient } = require('../../db');
 
 const { handleError, formatDate } = require('../../utils');
 const { getStatisticsMessage } = require('../../message');
@@ -19,7 +19,7 @@ class StatisticsMiddleware {
     /**
      * @param {GrammyContext} ctx
      * */
-    return (ctx) => {
+    return async (ctx) => {
       if (ctx.chat.type === 'supergroup') {
       }
 
@@ -27,8 +27,7 @@ class StatisticsMiddleware {
         /**
          * @type {SessionObject}
          * */
-        const sessionObject = JSON.parse(fs.readFileSync('./telegraf-session.json').toString());
-        const { sessions } = sessionObject;
+        const sessions = await redisClient.getAllRecords();
 
         const getChatId = (sessionId) => sessionId.split(':')[0];
 

@@ -32,7 +32,7 @@ class OnTextListener {
       /**
        * Skip messages before bot became admin
        * */
-      if (ctx.msg?.date * 1000 < +ctx.session.botAdminDate) {
+      if ((ctx.msg?.date || 0) * 1000 < +ctx.session.botAdminDate) {
         return next();
       }
 
