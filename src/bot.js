@@ -4,13 +4,14 @@ const { hydrateReply } = require('@grammyjs/parse-mode');
 // const { Menu } = require('@grammyjs/menu');
 const { error, env } = require('typed-dotenv').config();
 const Keyv = require('keyv');
-const { RedisSession } = require('./bot/sessionProviders');
 
+const { RedisSession } = require('./bot/sessionProviders');
 const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware } = require('./bot/commands');
 const { OnTextListener } = require('./bot/listeners');
 const { GlobalMiddleware, performanceMiddleware, botActiveMiddleware } = require('./bot/middleware');
 const { handleError, errorHandler, sleep } = require('./utils');
 const { logsChat } = require('./creator');
+const runCronJobs = require('./cron-jobs');
 // TODO commented for settings feature
 // const { getSettingsMenuMessage, settingsSubmitMessage, settingsDeleteItemMessage } = require('./message');
 
@@ -58,6 +59,7 @@ if (error) {
   await sleep(5000);
   console.info('Starting a new instance...');
 
+  runCronJobs();
   const startTime = new Date();
 
   const bot = new Bot(env.BOT_TOKEN);

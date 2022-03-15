@@ -1,7 +1,11 @@
+/**
+ * @typedef { import("../types").Session } Session
+ */
+
 const redis = require('redis');
 const { env } = require('typed-dotenv').config();
 
-const client = redis.createClient({ url: env.REDIS_URL });
+const client = redis.createClient({ url: String(env.REDIS_URL) });
 
 client.connect().then(() => console.info('Redis client successfully started'));
 
@@ -21,20 +25,18 @@ function setValue(key, value) {
   return client.set(key, JSON.stringify(value));
 }
 
+/**
+ *
+ * @returns {Promise<Array<Session>>}
+ */
 async function getAllRecords() {
   try {
     const keys = await client.keys('*');
     const sourceRecords = await Promise.all(keys.map((key) => client.get(key)));
-    return sourceRecords.map((record, index) => {
-      try {
-        return {
-          id: keys[index],
-          data: JSON.parse(record),
-        };
-      } catch (error) {
-        return {};
-      }
-    });
+    return sourceRecords.map((record, index) => ({
+      id: keys[index],
+      data: JSON.parse(record),
+    }));
   } catch (error) {
     console.error(error);
     return [];
