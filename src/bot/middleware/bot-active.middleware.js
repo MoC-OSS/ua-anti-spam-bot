@@ -5,7 +5,8 @@
  * @param {Next} next
  * */
 function botActiveMiddleware(ctx, next) {
-  console.info('enter botActiveMiddleware ******', ctx.chat?.title, '******', ctx.msg?.text);
+  // TODO use for ctx prod debug
+  // console.info('enter botActiveMiddleware ******', ctx.chat?.title, '******', ctx.msg?.text);
 
   if (ctx.chat.type !== 'private' && !ctx.session.botRemoved && ctx.session.isBotAdmin) {
     return next();

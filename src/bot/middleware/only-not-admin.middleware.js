@@ -1,4 +1,5 @@
 const TELEGRAM_FORWARD_USER_ID = 777000;
+const CHANNEL_BOT_ID = 136817688;
 
 /**
  * @description
@@ -11,7 +12,8 @@ const TELEGRAM_FORWARD_USER_ID = 777000;
  * @param {Next} next
  * */
 async function onlyNotAdmin(ctx, next) {
-  console.info('enter onlyNotAdmin ******', ctx.chat?.title, '******', ctx.msg?.text);
+  // TODO use for ctx prod debug
+  // console.info('enter onlyNotAdmin ******', ctx.chat?.title, '******', ctx.msg?.text);
 
   /**
    * No chat - process the user
@@ -61,6 +63,14 @@ async function onlyNotAdmin(ctx, next) {
    * */
   const chatMember = await ctx.getChatMember(ctx.from.id);
   if (['creator', 'administrator'].includes(chatMember.status)) {
+    return;
+  }
+
+  /**
+   * For public channels Telegram could send the message from channel as Channel_Bot.
+   * It means an admin wrote the message so we need to skip it.
+   * */
+  if (ctx.from?.id === CHANNEL_BOT_ID || ctx.from?.username === 'Channel_Bot') {
     return;
   }
 

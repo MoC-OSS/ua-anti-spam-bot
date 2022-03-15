@@ -25,7 +25,8 @@ class OnTextListener {
      * @param {Next} next
      * */
     return async (ctx, next) => {
-      console.info('enter onText ******', ctx.chat?.title, '******', ctx.msg?.text);
+      // TODO use for ctx prod debug
+      // console.info('enter onText ******', ctx.chat?.title, '******', ctx.msg?.text);
 
       if (env.DEBUG) {
         ctx.state.performanceStart = performance.now();
@@ -100,7 +101,6 @@ class OnTextListener {
       }
 
       if (rep.reputation <= 0 || (rep.userRep <= 0 && !env.DISABLE_USER_REP)) {
-        console.info('on delete IMPOSSIBLE FOR ADMIN', new Date().toISOString(), JSON.stringify({ rep, ctx }));
         try {
           await ctx
             .deleteMessage()
