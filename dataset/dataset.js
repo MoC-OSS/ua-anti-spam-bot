@@ -8,7 +8,8 @@ const files = fs.readdirSync(datasetPath);
 const filePaths = files.map((filePath) => path.join(datasetPath, filePath));
 const fileKey = files.map((file) => file.split('.')[0]);
 
-const cyrillicToTranslit = new CyrillicToTranslit();
+const translitRus = new CyrillicToTranslit({ preset: 'ru' });
+const translitUa = new CyrillicToTranslit({ preset: 'uk' });
 
 const dataset = {};
 
@@ -27,8 +28,10 @@ filePaths.forEach((filePath, index) => {
  * */
 console.info('*0 Add translit...');
 Object.keys(dataset).forEach((key) => {
-  const translitDataset = dataset[key].map((word) => cyrillicToTranslit.transform(word, ' '));
-  dataset[key] = [...dataset[key], ...translitDataset];
+  const translitRussianDataset = dataset[key].map((word) => translitRus.transform(word, ' '));
+  const translitUkrainianDataset = dataset[key].map((word) => translitUa.transform(word, ' '));
+
+  dataset[key] = [...dataset[key], ...translitUkrainianDataset, ...translitRussianDataset];
 });
 
 console.info('*0 Dataset is ready.');
