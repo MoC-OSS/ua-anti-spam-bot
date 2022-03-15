@@ -69,6 +69,7 @@ async function onlyNotAdmin(ctx, next) {
   /**
    * For public channels Telegram could send the message from channel as Channel_Bot.
    * It means an admin wrote the message so we need to skip it.
+   * https://github.com/42wim/matterbridge/issues/1654
    * */
   if (ctx.from?.id === CHANNEL_BOT_ID || ctx.from?.username === 'Channel_Bot') {
     return;
