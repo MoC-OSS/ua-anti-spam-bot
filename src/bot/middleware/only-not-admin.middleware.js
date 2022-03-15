@@ -11,7 +11,7 @@ const TELEGRAM_FORWARD_USER_ID = 777000;
  * @param {Next} next
  * */
 async function onlyNotAdmin(ctx, next) {
-  console.info('enter onlyNotAdmin');
+  console.info('enter onlyNotAdmin ******', ctx.chat?.title, '******', ctx.msg?.text);
 
   /**
    * No chat - process the user

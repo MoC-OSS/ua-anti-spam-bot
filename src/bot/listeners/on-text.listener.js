@@ -25,7 +25,7 @@ class OnTextListener {
      * @param {Next} next
      * */
     return async (ctx, next) => {
-      console.info('enter onText');
+      console.info('enter onText ******', ctx.chat?.title, '******', ctx.msg?.text);
 
       if (env.DEBUG) {
         ctx.state.performanceStart = performance.now();
