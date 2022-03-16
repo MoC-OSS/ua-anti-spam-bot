@@ -11,7 +11,8 @@ const { OnTextListener } = require('./bot/listeners');
 const { GlobalMiddleware, performanceMiddleware, botActiveMiddleware } = require('./bot/middleware');
 const { handleError, errorHandler, sleep } = require('./utils');
 const { logsChat } = require('./creator');
-const runCronJobs = require('./cron-jobs');
+const { redisClient } = require('./db');
+const { Sessions } = require('./db/models/Sessions');
 // TODO commented for settings feature
 // const { getSettingsMenuMessage, settingsSubmitMessage, settingsDeleteItemMessage } = require('./message');
 
@@ -59,13 +60,22 @@ if (error) {
   await sleep(5000);
   console.info('Starting a new instance...');
 
-  runCronJobs();
   const startTime = new Date();
 
   const bot = new Bot(env.BOT_TOKEN);
 
-  const redisSession = new RedisSession();
+  console.info('init redis connection');
+  try {
+    await redisClient.connect();
+  } catch (redisError) {
+    console.error('system with redis error', redisError);
+    process.exit(1);
+  }
+  console.info('Redis successfully connected');
 
+  const sessions = Sessions(redisClient);
+
+  const redisSession = new RedisSession(sessions);
   const globalMiddleware = new GlobalMiddleware(bot);
 
   const startMiddleware = new StartMiddleware(bot);

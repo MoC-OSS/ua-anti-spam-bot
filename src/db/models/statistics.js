@@ -2,13 +2,19 @@
  * @typedef { import("../../types").Models.StatisticsObject } StatisticsObject
  */
 
-const knex = require('../knex');
+class Statistics {
+  constructor(knex) {
+    this.knex = knex;
+  }
 
-/**
- * @param {Array<StatisticsObject>} statisticsObject
- */
-const createRecords = (statisticsObject) => knex('statistics').insert(statisticsObject);
+  /**
+   * @param {Array<StatisticsObject>} statisticsObject
+   */
+  createRecords(statisticsObject) {
+    return this.knex('statistics').insert(statisticsObject);
+  }
+}
 
 module.exports = {
-  createRecords,
+  Statistics: (knex) => new Statistics(knex),
 };

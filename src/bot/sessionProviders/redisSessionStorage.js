@@ -1,7 +1,6 @@
-const { redisClient } = require('../../db');
-
 class RedisSession {
-  constructor() {
+  constructor(sessionClient) {
+    this.session = sessionClient;
     this.options = {
       property: 'session',
       state: {},
@@ -26,11 +25,11 @@ class RedisSession {
   }
 
   getSession(key) {
-    return redisClient.getValue(key);
+    return this.session.getSession(key);
   }
 
   saveSession(key, data) {
-    return redisClient.setValue(key, data);
+    return this.session.setSession(key, data);
   }
 
   middleware(property = this.options.property) {

@@ -10,6 +10,7 @@
     "start:server:cluster": "pm2 start ./src/express.js -i 3 --watch || echo '*** Install PM2 globally'",
     "migrate:latest": "npx knex migrate:latest",
     "migrate:rollback": "npx knex migrate:rollback",
+    "scripts:session-save": "node src/scripts/sessionsSave.js",
     "prepare": "husky install",
     "lint": "npm-run-all --parallel lint:js",
     "lint:branch-name": "branch-name-lint ./.branchlintrc.json",
@@ -33,7 +34,6 @@
     "keyv": "^4.1.1",
     "knex": "^1.0.4",
     "lodash.get": "^4.4.2",
-    "node-cron": "^3.0.0",
     "pg": "^8.7.3",
     "redis": "^4.0.4",
     "typed-dotenv": "^10.0.1"
