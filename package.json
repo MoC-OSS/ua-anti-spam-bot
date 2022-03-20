@@ -20,6 +20,8 @@
     "@grammyjs/menu": "^1.0.4",
     "@grammyjs/parse-mode": "^1.0.0",
     "@keyv/sqlite": "^3.0.0",
+    "@tensorflow/tfjs": "^3.14.0",
+    "@tensorflow/tfjs-node": "^3.14.0",
     "axios": "^0.26.0",
     "contains-emoji": "^1.1.0",
     "cyrillic-to-translit-js": "^3.1.0",
