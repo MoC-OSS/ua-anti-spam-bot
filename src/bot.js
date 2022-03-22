@@ -4,13 +4,15 @@ const { hydrateReply } = require('@grammyjs/parse-mode');
 // const { Menu } = require('@grammyjs/menu');
 const { error, env } = require('typed-dotenv').config();
 const Keyv = require('keyv');
-const { RedisSession } = require('./bot/sessionProviders');
 
+const { RedisSession } = require('./bot/sessionProviders');
 const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware } = require('./bot/commands');
 const { OnTextListener } = require('./bot/listeners');
 const { GlobalMiddleware, performanceMiddleware, botActiveMiddleware, onlyNotAdmin } = require('./bot/middleware');
 const { handleError, errorHandler, sleep } = require('./utils');
 const { logsChat } = require('./creator');
+const { redisClient } = require('./db');
+const { Sessions } = require('./db/models/Sessions');
 // TODO commented for settings feature
 // const { getSettingsMenuMessage, settingsSubmitMessage, settingsDeleteItemMessage } = require('./message');
 
@@ -62,8 +64,18 @@ if (error) {
 
   const bot = new Bot(env.BOT_TOKEN);
 
-  const redisSession = new RedisSession();
+  console.info('init redis connection');
+  try {
+    await redisClient.connect();
+  } catch (redisError) {
+    console.error('system with redis error', redisError);
+    process.exit(1);
+  }
+  console.info('Redis successfully connected');
 
+  const sessions = Sessions(redisClient);
+
+  const redisSession = new RedisSession(sessions);
   const globalMiddleware = new GlobalMiddleware(bot);
 
   const startMiddleware = new StartMiddleware(bot);

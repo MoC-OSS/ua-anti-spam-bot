@@ -1,6 +1,7 @@
 const { redisClient } = require('../../db');
 
 const { handleError, formatDate } = require('../../utils');
+const { getStatisticsObjectFromSession } = require('../botUtils');
 const { getStatisticsMessage } = require('../../message');
 
 class StatisticsMiddleware {
@@ -17,6 +18,9 @@ class StatisticsMiddleware {
    * */
   middleware() {
     /**
+     * @typedef { import("../../types").GrammyContext } GrammyContext
+     */
+    /**
      * @param {GrammyContext} ctx
      * */
     return async (ctx) => {
@@ -24,45 +28,22 @@ class StatisticsMiddleware {
       }
 
       try {
-        /**
-         * @type {SessionObject}
-         * */
         const sessions = await redisClient.getAllRecords();
+        const statisticsObject = getStatisticsObjectFromSession(sessions);
 
-        const getChatId = (sessionId) => sessionId.split(':')[0];
-
-        const groupOnlySessions = sessions.filter(
-          (session, index, self) => index === self.findIndex((t) => getChatId(t.id) === getChatId(session.id)),
-        );
-
-        const superGroupsSessions = groupOnlySessions.filter((session) => session.data.chatType === 'supergroup');
-        const groupSessions = groupOnlySessions.filter((session) => session.data.chatType === 'group');
-        const privateSessions = groupOnlySessions.filter((session) => session.data.chatType === 'private');
-        const channelSessions = groupOnlySessions.filter((session) => session.data.chatType === 'channel');
-
-        const totalUserCounts = sessions.length;
-        const totalSessionCount = groupOnlySessions.length;
-        const superGroupsCount = superGroupsSessions.length;
-        const groupCount = groupSessions.length;
-        const privateCount = privateSessions.length;
-        const channelCount = channelSessions.length;
-
-        const adminsChatsCount = [...superGroupsSessions, ...groupSessions].filter((session) => session.data.isBotAdmin).length;
-        const memberChatsCount = [...superGroupsSessions, ...groupSessions].filter((session) => !session.data.isBotAdmin).length;
-        const botRemovedCount = [...superGroupsSessions, ...groupSessions].filter((session) => session.data.botRemoved).length;
-
+        // @ts-ignore
         ctx.replyWithHTML(
           getStatisticsMessage({
-            adminsChatsCount,
-            botRemovedCount,
             botStartTime: formatDate(this.startTime),
-            channelCount,
-            groupCount,
-            memberChatsCount,
-            privateCount,
-            superGroupsCount,
-            totalSessionCount,
-            totalUserCounts,
+            adminsChatsCount: statisticsObject.active_admin,
+            botRemovedCount: statisticsObject.bot_removed,
+            channelCount: statisticsObject.channels,
+            groupCount: statisticsObject.groups,
+            memberChatsCount: statisticsObject.inactive_admin,
+            privateCount: statisticsObject.private_chats,
+            superGroupsCount: statisticsObject.super_groups,
+            totalSessionCount: statisticsObject.total_chats,
+            totalUserCounts: statisticsObject.total_users,
           }),
         );
       } catch (e) {
