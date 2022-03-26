@@ -6,10 +6,11 @@ const { creatorNick } = require('./creator');
  * Generic
  * */
 const adminReadyMessage = 'Тепер я адміністратор. Готовий до роботи 😎';
+const startAdminReadyMessage = '✅ Я активований і виконую свою роботу';
 const memberReadyMessage = 'Тепер я деактивований. Відпочиваю... 😴';
 const spamDeleteMessage = '❗️ Повідомлення видалено.\n\n* Причина: спам.';
 const somethingWentWrongMessage = 'Сталась якась помилка :(';
-const makeAdminMessage = '<b>Зроби мене адміністратором, щоб я міг видаляти повідомлення.</b>';
+const makeAdminMessage = '<b>❌ Я не активований.\n\nЗроби мене адміністратором, щоб я міг видаляти повідомлення.</b>';
 
 /**
  * Generic - Settings
@@ -205,6 +206,7 @@ module.exports = {
   settingsSubmitMessage,
   memberReadyMessage,
   adminReadyMessage,
+  startAdminReadyMessage,
   spamDeleteMessage,
   somethingWentWrongMessage,
   getSettingsMenuMessage,
