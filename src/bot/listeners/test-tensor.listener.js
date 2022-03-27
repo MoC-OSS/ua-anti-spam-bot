@@ -2,7 +2,7 @@ const fs = require('fs');
 const { Menu } = require('@grammyjs/menu');
 const { env } = require('typed-dotenv').config();
 
-const { logCtx } = require('../../utils');
+const { trainingChat } = require('../../creator');
 const { getTensorTestResult } = require('../../message');
 
 class TestTensorListener {
@@ -57,7 +57,6 @@ class TestTensorListener {
 
     this.menu = new Menu('spam-menu')
       .text('✅ Це спам', (ctx) => {
-        logCtx(ctx);
         this.writeDataset('positives', ctx.update.callback_query.message.reply_to_message.text);
         finalMiddleware(ctx, true);
       })
@@ -70,9 +69,23 @@ class TestTensorListener {
   }
 
   middleware() {
+    /**
+     * @param {GrammyContext} ctx
+     * @param {Next} next
+     * */
     return async (ctx, next) => {
       if (!env.TEST_TENSOR) {
         return next();
+      }
+
+      if (ctx.chat.type !== 'supergroup') {
+        ctx.reply('В особистих не працюю 😝');
+        return;
+      }
+
+      if (ctx.chat.id !== trainingChat) {
+        ctx.reply('Я працюю тільки в одному супер чаті 😝');
+        return;
       }
 
       if (!ctx.msg.text) {
