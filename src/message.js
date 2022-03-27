@@ -197,6 +197,18 @@ ${getGroupStartMessage({ adminsString })}
 `.trim();
 
 /**
+ * Test messages
+ */
+const getTensorTestResult = ({ chance, isSpam, tokenized }) =>
+  `
+🎲 Шанс спаму - <b>${chance}</b>
+🤔 Я вважаю...<b>${isSpam ? '✅ Це спам' : '⛔️ Це не спам'}</b>
+
+🔐 Токен:
+${JSON.stringify(tokenized)}
+`.trim();
+
+/**
  *
  * Exports
  *
@@ -209,6 +221,7 @@ module.exports = {
   startAdminReadyMessage,
   spamDeleteMessage,
   somethingWentWrongMessage,
+  getTensorTestResult,
   getSettingsMenuMessage,
   getBotJoinMessage,
   getStartMessage,

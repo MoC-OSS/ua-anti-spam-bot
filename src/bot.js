@@ -4,7 +4,8 @@ const { hydrateReply } = require('@grammyjs/parse-mode');
 // const { Menu } = require('@grammyjs/menu');
 const { error, env } = require('typed-dotenv').config();
 const Keyv = require('keyv');
-// const { TensorService } = require('./tensor/tensor.service');
+const { getTensorTestResult } = require('./message');
+const { TensorService } = require('./tensor/tensor.service');
 const { RedisSession } = require('./bot/sessionProviders');
 
 const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware } = require('./bot/commands');
@@ -58,13 +59,12 @@ if (error) {
   console.info('Waiting for the old instance to down...');
   await sleep(5000);
   console.info('Starting a new instance...');
-  //
-  // const tensorService = new TensorService('./temp/model.json', 0.65);
-  //
-  // await tensorService.loadModel();
-  // .then(() => {
-  // tensorService.predict('я сьогодні як прокинувся у нас тут у всьому місті стріляли та літали літаки');
-  // });
+
+  const tensorService = new TensorService('./temp/model.json', 0.65);
+
+  await tensorService.loadModel().then(() => {
+    tensorService.predict('я сьогодні як прокинувся у нас тут у всьому місті стріляли та літали літаки');
+  });
 
   const startTime = new Date();
 
@@ -101,10 +101,21 @@ if (error) {
   //   ctx.reply(getSettingsMenuMessage(ctx.session.settings), { reply_markup: menu });
   // });
 
-  // bot.on(['message', 'edited_message'], async (ctx) => {
-  //   const { numericData, result, tensorRank } = await tensorService.predict(ctx.msg.text);
-  //   ctx.reply(JSON.stringify({ numericData, result, tensorRank: JSON.stringify(tensorRank) }, null, 2));
-  // });
+  bot.on(['message', 'edited_message'], async (ctx) => {
+    if (!ctx.msg.text) {
+      return;
+    }
+
+    try {
+      const { numericData, result, tensorRank } = await tensorService.predict(ctx.msg.text);
+      ctx.replyWithHTML(getTensorTestResult({ chance: `${(numericData[1] * 100).toFixed(4)}%`, isSpam: result, tokenized: tensorRank }), {
+        reply_to_message_id: ctx.msg.message_id,
+      });
+    } catch (e) {
+      console.error(e);
+      ctx.reply(`Cannot parse it: ${ctx?.msg?.text}`);
+    }
+  });
 
   bot.on(
     ['message', 'edited_message'],
