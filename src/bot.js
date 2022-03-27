@@ -4,12 +4,14 @@ const { Router } = require('@grammyjs/router');
 const { Menu } = require('@grammyjs/menu');
 const { error, env } = require('typed-dotenv').config();
 const Keyv = require('keyv');
+
+const { TensorService } = require('./tensor/tensor.service');
 const { RedisSession } = require('./bot/sessionProviders');
 
 const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware, UpdatesMiddleware } = require('./bot/commands');
 const { UpdatesInputMiddleware, UpdatesConfirmationMiddleware } = require('./bot/routers');
-const { OnTextListener } = require('./bot/listeners');
-const { GlobalMiddleware, performanceMiddleware, botActiveMiddleware, onlyNotAdmin } = require('./bot/middleware');
+const { OnTextListener, TestTensorListener } = require('./bot/listeners');
+const { GlobalMiddleware, performanceMiddleware, botActiveMiddleware, onlyNotAdmin, onlyNotForwarded } = require('./bot/middleware');
 const { handleError, errorHandler, sleep } = require('./utils');
 const { logsChat } = require('./creator');
 
@@ -33,6 +35,8 @@ if (error) {
   console.error('Something wrong with env variables');
   process.exit();
 }
+
+const rootMenu = new Menu('root');
 
 // TODO commented for settings feature
 // const menu = new Menu('settings')
@@ -65,6 +69,9 @@ const menu = new Menu('approveUpdatesMenu')
   await sleep(5000);
   console.info('Starting a new instance...');
 
+  const tensorService = new TensorService('./temp/model.json', 0.65);
+  await tensorService.loadModel();
+
   const startTime = new Date();
 
   const bot = new Bot(env.BOT_TOKEN);
@@ -82,6 +89,9 @@ const menu = new Menu('approveUpdatesMenu')
   const updatesConfirmationMiddleware = new UpdatesConfirmationMiddleware();
 
   const onTextListener = new OnTextListener(keyv, startTime);
+  const tensorListener = new TestTensorListener(tensorService, redisSession);
+
+  rootMenu.register(tensorListener.initMenu());
 
   bot.use(hydrateReply);
 
@@ -96,6 +106,7 @@ const menu = new Menu('approveUpdatesMenu')
   bot.use(router);
 
   // TODO commented for settings feature
+  bot.errorBoundary(handleError).use(rootMenu);
 
   bot.command('start', errorHandler(startMiddleware.middleware()));
   bot.command('help', errorHandler(helpMiddleware.middleware()));
@@ -113,13 +124,17 @@ const menu = new Menu('approveUpdatesMenu')
   //   ctx.reply(getSettingsMenuMessage(ctx.session.settings), { reply_markup: menu });
   // });
 
-  bot.on(
-    ['message', 'edited_message'],
-    botActiveMiddleware,
-    onlyNotAdmin,
-    errorHandler(onTextListener.middleware()),
-    errorHandler(performanceMiddleware),
-  );
+  bot
+    .errorBoundary(handleError)
+    .on(
+      ['message', 'edited_message'],
+      botActiveMiddleware,
+      errorHandler(tensorListener.middleware()),
+      onlyNotAdmin,
+      onlyNotForwarded,
+      errorHandler(onTextListener.middleware()),
+      errorHandler(performanceMiddleware),
+    );
 
   bot.catch(handleError);
 
