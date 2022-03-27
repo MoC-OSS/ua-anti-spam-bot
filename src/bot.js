@@ -78,7 +78,7 @@ const rootMenu = new Menu('root');
   const statisticsMiddleware = new StatisticsMiddleware(startTime);
 
   const onTextListener = new OnTextListener(keyv, startTime);
-  const tensorListener = new TestTensorListener(tensorService);
+  const tensorListener = new TestTensorListener(tensorService, redisSession);
 
   rootMenu.register(tensorListener.initMenu());
 

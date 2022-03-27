@@ -2,16 +2,32 @@ const fs = require('fs');
 const { Menu } = require('@grammyjs/menu');
 const { env } = require('typed-dotenv').config();
 
-const { trainingChat } = require('../../creator');
+const { formatDate } = require('../../utils');
+const { creatorId, trainingChat } = require('../../creator');
 const { getTensorTestResult } = require('../../message');
+
+/**
+ * @param {GrammyContext} ctx
+ * */
+const getAnyUsername = (ctx) => {
+  const username = ctx.callbackQuery.from?.username;
+  const fullName = ctx.callbackQuery.from?.last_name
+    ? `${ctx.callbackQuery.from?.first_name} ${ctx.callbackQuery.from?.last_name}`
+    : ctx.callbackQuery.from?.first_name;
+  return username ? `@${username}` : fullName ?? '';
+};
 
 class TestTensorListener {
   /**
    * @param {TensorService} tensorService
+   * @param {RedisSession} redisSession
    */
-  constructor(tensorService) {
+  constructor(tensorService, redisSession) {
     this.tensorService = tensorService;
+    this.redisSession = redisSession;
     this.menu = null;
+    this.messageNodeTimeouts = {};
+    this.storage = {};
   }
 
   writeDataset(state, word) {
@@ -44,28 +60,103 @@ class TestTensorListener {
     /**
      * @param {GrammyContext} ctx
      * */
-    const finalMiddleware = async (ctx, status) => {
-      const username = ctx.from?.username;
-      const fullName = ctx.from?.last_name ? `${ctx.from?.first_name} ${ctx.from?.last_name}` : ctx.from?.first_name;
-      const writeUsername = username ? `@${username}` : fullName ?? '';
+    const finalMiddleware = async (ctx) => {
+      if (this.storage[this.getStorageKey(ctx)].positives.length === this.storage[this.getStorageKey(ctx)].negatives.length) {
+        clearTimeout(this.messageNodeTimeouts[this.getStorageKey(ctx)]);
+        ctx.editMessageText(`${this.storage[this.getStorageKey(ctx)].originalMessage}\n\nЧекаю на більше оцінок...`);
+        return;
+      }
+
+      const status = this.storage[this.getStorageKey(ctx)].positives.length > this.storage[this.getStorageKey(ctx)].negatives.length;
+      const winUsers = status ? this.storage[this.getStorageKey(ctx)].positives : this.storage[this.getStorageKey(ctx)].negatives;
+
+      const winUsersText = winUsers.slice(0, 2).join(', ') + (winUsers.length > 3 ? ' та інші' : '');
+
+      this.writeDataset(status ? 'positives' : 'negatives', ctx.update.callback_query.message.reply_to_message.text);
+
       await ctx
-        .editMessageText(`${ctx.msg.text}\n\n${writeUsername} виділив це як ${status ? '✅ спам' : '⛔️ не спам'}`, {
-          reply_markup: null,
-        })
+        .editMessageText(
+          `${this.storage[this.getStorageKey(ctx)].originalMessage}\n\n${winUsersText} виділив/ли це як ${
+            status ? '✅ спам' : '⛔️ не спам'
+          }`,
+          {
+            parse_mode: 'HTML',
+            reply_markup: null,
+          },
+        )
         .catch(() => {});
+
+      delete this.storage[this.getStorageKey(ctx)].positives;
+      delete this.storage[this.getStorageKey(ctx)].negatives;
+      delete this.storage[this.getStorageKey(ctx)].originalMessage;
+    };
+
+    const processButtonMiddleware = (ctx) => {
+      ctx.editMessageText(`${this.storage[this.getStorageKey(ctx)].originalMessage}\n\nЧекаю 10 сек...${formatDate(new Date())}`, {
+        parse_mode: 'HTML',
+      });
+
+      clearTimeout(this.messageNodeTimeouts[this.getStorageKey(ctx)]);
+      this.messageNodeTimeouts[this.getStorageKey(ctx)] = setTimeout(() => {
+        delete this.messageNodeTimeouts[this.getStorageKey(ctx)];
+
+        finalMiddleware(ctx);
+      }, 10000);
     };
 
     this.menu = new Menu('spam-menu')
-      .text('✅ Це спам', (ctx) => {
-        this.writeDataset('positives', ctx.update.callback_query.message.reply_to_message.text);
-        finalMiddleware(ctx, true);
-      })
-      .text('⛔️ Це не спам', (ctx) => {
-        this.writeDataset('negatives', ctx.update.callback_query.message.reply_to_message.text);
-        finalMiddleware(ctx, false);
-      });
+      .text(
+        (ctx) => `✅ Це спам (${this.storage[this.getStorageKey(ctx)]?.positives.length || 0})`,
+        (ctx) => {
+          this.initTensorSession(ctx, ctx.msg.text);
+
+          const username = getAnyUsername(ctx);
+          this.storage[this.getStorageKey(ctx)].negatives = this.storage[this.getStorageKey(ctx)].negatives.filter(
+            (item) => item !== username,
+          );
+          this.storage[this.getStorageKey(ctx)].positives.push(username);
+
+          ctx.menu.update();
+          processButtonMiddleware(ctx);
+        },
+      )
+      .text(
+        (ctx) => `⛔️ Це не спам (${this.storage[this.getStorageKey(ctx)]?.negatives.length || 0})`,
+        (ctx) => {
+          this.initTensorSession(ctx, ctx.msg.text);
+
+          const username = getAnyUsername(ctx);
+          this.storage[this.getStorageKey(ctx)].positives = this.storage[this.getStorageKey(ctx)].positives.filter(
+            (item) => item !== username,
+          );
+          this.storage[this.getStorageKey(ctx)].negatives.push(username);
+
+          ctx.menu.update();
+          processButtonMiddleware(ctx);
+        },
+      );
 
     return this.menu;
+  }
+
+  /**
+   * @param {GrammyContext} ctx
+   * */
+  initTensorSession(ctx, message) {
+    if (!this.storage[this.getStorageKey(ctx)]?.originalMessage) {
+      this.storage[this.getStorageKey(ctx)] = {
+        positives: [],
+        negatives: [],
+        originalMessage: message,
+      };
+    }
+  }
+
+  /**
+   * @param {GrammyContext} ctx
+   * */
+  getStorageKey(ctx) {
+    return `${this.redisSession.getSessionKey(ctx)}:${ctx.msg.reply_to_message?.message_id || ctx.msg.message_id}`;
   }
 
   middleware() {
@@ -78,27 +169,32 @@ class TestTensorListener {
         return next();
       }
 
-      if (ctx.chat.type !== 'supergroup') {
-        ctx.reply('В особистих не працюю 😝');
-        return;
-      }
+      if (ctx.from.id !== creatorId) {
+        if (ctx.chat.type !== 'supergroup') {
+          ctx.reply('В особистих не працюю 😝');
+          return;
+        }
 
-      if (ctx.chat.id !== trainingChat) {
-        ctx.reply('Я працюю тільки в одному супер чаті 😝');
-        return;
-      }
+        if (ctx.chat.id !== trainingChat) {
+          ctx.reply('Я працюю тільки в одному супер чаті 😝');
+          return;
+        }
 
-      if (!ctx.msg.text) {
-        ctx.reply('Пропускаю це повідомлення, тут немає тексту', { reply_to_message_id: ctx.msg.message_id });
-        return;
+        if (!ctx.msg.text) {
+          ctx.reply('Пропускаю це повідомлення, тут немає тексту', { reply_to_message_id: ctx.msg.message_id });
+          return;
+        }
       }
 
       try {
         const { numericData, isSpam, tensorRank } = await this.tensorService.predict(ctx.msg.text);
 
         const chance = `${(numericData[1] * 100).toFixed(4)}%`;
+        const message = getTensorTestResult({ chance, isSpam, tokenized: tensorRank });
 
-        ctx.replyWithHTML(getTensorTestResult({ chance, isSpam, tokenized: tensorRank }), {
+        this.initTensorSession(ctx, message);
+
+        ctx.replyWithHTML(message, {
           reply_to_message_id: ctx.msg.message_id,
           reply_markup: this.menu,
         });
