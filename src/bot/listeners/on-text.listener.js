@@ -25,6 +25,9 @@ class OnTextListener {
      * @param {Next} next
      * */
     return async (ctx, next) => {
+      // TODO use for ctx prod debug
+      // console.info('enter onText ******', ctx.chat?.title, '******', ctx.msg?.text);
+
       if (env.DEBUG) {
         ctx.state.performanceStart = performance.now();
       }
@@ -36,21 +39,6 @@ class OnTextListener {
         return next();
       }
 
-      /**
-       * Skip channel post when bot in channel
-       * @deprecated on message doesn't handle user posts
-       * */
-      // if (ctx?.update?.channel_post?.sender_chat?.type === 'channel') {
-      //   return;
-      // }
-
-      /**
-       * Skip channel admins message duplicated in chat
-       * */
-      if (ctx.chat?.type === 'channel') {
-        return next();
-      }
-
       const message = ctx.msg.text;
 
       /**
@@ -59,13 +47,6 @@ class OnTextListener {
       // if (slavaWords.some((word) => message.toLowerCase().includes(word.toLowerCase()))) {
       //   ctx.reply('Героям Слава! 🇺🇦', { reply_to_message_id: ctx?.update?.message?.message_id });
       // }
-
-      /**
-       * Skip channel chat admins message
-       * */
-      if (ctx.from?.username === 'GroupAnonymousBot') {
-        return next();
-      }
 
       if (!ctx.chat?.id) {
         console.error(Date.toString(), 'Cannot access the chat:', ctx.chat);
