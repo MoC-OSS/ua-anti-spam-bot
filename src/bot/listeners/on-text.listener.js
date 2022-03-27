@@ -67,7 +67,7 @@ class OnTextListener {
         try {
           const username = ctx.from?.username;
           const fullName = ctx.from?.last_name ? `${ctx.from?.first_name} ${ctx.from?.last_name}` : ctx.from?.first_name;
-          const writeUsername = username ? `@${username}` : fullName;
+          const writeUsername = username ? `@${username}` : fullName ?? '';
 
           let debugMessage = '';
 
