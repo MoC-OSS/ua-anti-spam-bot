@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start:bot": "nodemon ./src/bot.js --ignore ./telegraf-session.json --ignore ./last-ctx.json --max_old_space_size=2048",
+    "start:bot": "nodemon ./src/bot.js --max_old_space_size=2048",
     "start:bot:prod": "node ./src/bot.js",
-    "start:server": "nodemon ./src/express.js --ignore ./telegraf-session.json --ignore ./last-ctx.json --max_old_space_size=2048",
+    "start:server": "nodemon ./src/express.js --max_old_space_size=2048",
     "start:server:prod": "node ./src/express.js",
     "start:server:cluster": "pm2 start ./src/express.js -i 3 --watch || echo '*** Install PM2 globally'",
     "prepare": "husky install",
