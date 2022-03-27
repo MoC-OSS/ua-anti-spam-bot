@@ -42,7 +42,7 @@ class OnTextListener {
       const message = ctx.msg.text;
 
       /**
-       * Removed because Denis Gajda ask to reduce chat messages
+       * Removed because ask to reduce chat messages
        * */
       // if (slavaWords.some((word) => message.toLowerCase().includes(word.toLowerCase()))) {
       //   ctx.reply('Героям Слава! 🇺🇦', { reply_to_message_id: ctx?.update?.message?.message_id });
