@@ -126,7 +126,7 @@ class TestTensorListener {
 
       this.messageNodeTimeouts[this.getStorageKey(ctx)] = setTimeout(() => {
         finalMiddleware(ctx);
-      }, defaultTime * 100);
+      }, defaultTime * 1000);
     });
 
     const initMenu = () => {
