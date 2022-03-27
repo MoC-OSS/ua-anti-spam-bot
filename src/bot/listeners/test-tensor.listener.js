@@ -20,11 +20,9 @@ const getAnyUsername = (ctx) => {
 class TestTensorListener {
   /**
    * @param {TensorService} tensorService
-   * @param {RedisSession} redisSession
    */
-  constructor(tensorService, redisSession) {
+  constructor(tensorService) {
     this.tensorService = tensorService;
-    this.redisSession = redisSession;
     this.menu = null;
     this.messageNodeTimeouts = {};
     this.storage = {};
@@ -63,20 +61,20 @@ class TestTensorListener {
     const finalMiddleware = async (ctx) => {
       if (this.storage[this.getStorageKey(ctx)].positives.length === this.storage[this.getStorageKey(ctx)].negatives.length) {
         clearTimeout(this.messageNodeTimeouts[this.getStorageKey(ctx)]);
-        ctx.editMessageText(`${this.storage[this.getStorageKey(ctx)].originalMessage}\n\nЧекаю на більше оцінок...`);
+        ctx.editMessageText(`${this.storage[this.getStorageKey(ctx)].originalMessage}\n\nЧекаю на більше оцінок...`).catch();
         return;
       }
 
       const status = this.storage[this.getStorageKey(ctx)].positives.length > this.storage[this.getStorageKey(ctx)].negatives.length;
       const winUsers = status ? this.storage[this.getStorageKey(ctx)].positives : this.storage[this.getStorageKey(ctx)].negatives;
 
-      const winUsersText = winUsers.slice(0, 2).join(', ') + (winUsers.length > 3 ? ' та інші' : '');
+      // const winUsersText = winUsers.slice(0, 2).join(', ') + (winUsers.length > 3 ? ' та інші' : '');
 
       this.writeDataset(status ? 'positives' : 'negatives', ctx.update.callback_query.message.reply_to_message.text);
 
       await ctx
         .editMessageText(
-          `${this.storage[this.getStorageKey(ctx)].originalMessage}\n\n${winUsersText} виділив/ли це як ${
+          `${this.storage[this.getStorageKey(ctx)].originalMessage}\n\n${winUsers.join(', ')} виділив/ли це як ${
             status ? '✅ спам' : '⛔️ не спам'
           }`,
           {
@@ -92,9 +90,11 @@ class TestTensorListener {
     };
 
     const processButtonMiddleware = (ctx) => {
-      ctx.editMessageText(`${this.storage[this.getStorageKey(ctx)].originalMessage}\n\nЧекаю 10 сек...${formatDate(new Date())}`, {
-        parse_mode: 'HTML',
-      });
+      ctx
+        .editMessageText(`${this.storage[this.getStorageKey(ctx)].originalMessage}\n\nЧекаю 10 сек...${formatDate(new Date())}`, {
+          parse_mode: 'HTML',
+        })
+        .catch();
 
       clearTimeout(this.messageNodeTimeouts[this.getStorageKey(ctx)]);
       this.messageNodeTimeouts[this.getStorageKey(ctx)] = setTimeout(() => {
@@ -156,7 +156,16 @@ class TestTensorListener {
    * @param {GrammyContext} ctx
    * */
   getStorageKey(ctx) {
-    return `${this.redisSession.getSessionKey(ctx)}:${ctx.msg.reply_to_message?.message_id || ctx.msg.message_id}`;
+    let chatInstance;
+    if (ctx.chat) {
+      chatInstance = ctx.chat.id;
+    } else if (ctx.updateType === 'callback_query') {
+      chatInstance = ctx.callbackQuery.chat_instance;
+    } else {
+      chatInstance = ctx.from.id;
+    }
+
+    return `${chatInstance}:${ctx.msg.reply_to_message?.message_id || ctx.msg.message_id}`;
   }
 
   middleware() {
@@ -179,11 +188,11 @@ class TestTensorListener {
           ctx.reply('Я працюю тільки в одному супер чаті 😝');
           return;
         }
+      }
 
-        if (!ctx.msg.text) {
-          ctx.reply('Пропускаю це повідомлення, тут немає тексту', { reply_to_message_id: ctx.msg.message_id });
-          return;
-        }
+      if (!ctx.msg.text) {
+        ctx.reply('Пропускаю це повідомлення, тут немає тексту', { reply_to_message_id: ctx.msg.message_id });
+        return;
       }
 
       try {
