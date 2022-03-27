@@ -1,7 +1,6 @@
 const { Bot } = require('grammy');
 const { hydrateReply } = require('@grammyjs/parse-mode');
-// TODO commented for settings feature
-// const { Menu } = require('@grammyjs/menu');
+const { Menu } = require('@grammyjs/menu');
 const { error, env } = require('typed-dotenv').config();
 const Keyv = require('keyv');
 
@@ -33,6 +32,8 @@ if (error) {
   console.error('Something wrong with env variables');
   process.exit();
 }
+
+const rootMenu = new Menu('root');
 
 // TODO commented for settings feature
 // const menu = new Menu('settings')
@@ -79,14 +80,15 @@ if (error) {
   const onTextListener = new OnTextListener(keyv, startTime);
   const tensorListener = new TestTensorListener(tensorService);
 
+  rootMenu.register(tensorListener.initMenu());
+
   bot.use(hydrateReply);
 
   bot.use(redisSession.middleware());
 
   bot.use(errorHandler(globalMiddleware.middleware()));
 
-  // TODO commented for settings feature
-  // bot.use(menu);
+  bot.use(rootMenu);
 
   bot.command('start', errorHandler(startMiddleware.middleware()));
   bot.command('help', errorHandler(helpMiddleware.middleware()));

@@ -1,5 +1,8 @@
+const fs = require('fs');
+const { Menu } = require('@grammyjs/menu');
 const { env } = require('typed-dotenv').config();
 
+const { logCtx } = require('../../utils');
 const { getTensorTestResult } = require('../../message');
 
 class TestTensorListener {
@@ -8,6 +11,62 @@ class TestTensorListener {
    */
   constructor(tensorService) {
     this.tensorService = tensorService;
+    this.menu = null;
+  }
+
+  writeDataset(state, word) {
+    const writeFunction = (path) => {
+      if (!fs.existsSync(path)) {
+        fs.writeFileSync(path, '[]');
+      }
+
+      const file = JSON.parse(fs.readFileSync(path));
+      const newFile = [...new Set([...file, word])];
+
+      fs.writeFileSync(path, `${JSON.stringify(newFile, null, 2)}\n`);
+    };
+
+    switch (state) {
+      case 'positives': {
+        return writeFunction('./positives.json');
+      }
+
+      case 'negatives': {
+        return writeFunction('./negatives.json');
+      }
+
+      default:
+        throw new Error(`Invalid state: ${state}`);
+    }
+  }
+
+  initMenu() {
+    /**
+     * @param {GrammyContext} ctx
+     * */
+    const finalMiddleware = async (ctx, status) => {
+      const username = ctx.from?.username;
+      const fullName = ctx.from?.last_name ? `${ctx.from?.first_name} ${ctx.from?.last_name}` : ctx.from?.first_name;
+      const writeUsername = username ? `@${username}` : fullName ?? '';
+      await ctx
+        .editMessageText(`${ctx.msg.text}\n\n${writeUsername} виділив це як ${status ? '✅ спам' : '⛔️ не спам'}`, {
+          reply_markup: null,
+        })
+        .catch(() => {});
+    };
+
+    this.menu = new Menu('spam-menu')
+      .text('✅ Це спам', (ctx) => {
+        logCtx(ctx);
+        this.writeDataset('positives', ctx.update.callback_query.message.reply_to_message.text);
+        finalMiddleware(ctx, true);
+      })
+      .text('⛔️ Це не спам', (ctx) => {
+        this.writeDataset('negatives', ctx.update.callback_query.message.reply_to_message.text);
+        finalMiddleware(ctx, false);
+      });
+
+    return this.menu;
   }
 
   middleware() {
@@ -28,6 +87,7 @@ class TestTensorListener {
 
         ctx.replyWithHTML(getTensorTestResult({ chance, isSpam, tokenized: tensorRank }), {
           reply_to_message_id: ctx.msg.message_id,
+          reply_markup: this.menu,
         });
       } catch (error) {
         console.error(error);
