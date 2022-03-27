@@ -103,7 +103,7 @@ class TestTensorListener {
     const processButtonMiddleware = errorHandler((ctx) => {
       const storage = this.storage[this.getStorageKey(ctx)];
       ctx
-        .editMessageText(`${storage.originalMessage}\n\nЧекаю ${storage.time} сек...`, {
+        .editMessageText(`${storage.originalMessage}\n\nЧекаю ${storage.time} сек...\n${new Date().toISOString()}`, {
           parse_mode: 'HTML',
         })
         .catch();
@@ -117,7 +117,7 @@ class TestTensorListener {
 
         if (storage.time !== 0) {
           ctx
-            .editMessageText(`${storage.originalMessage}\n\nЧекаю ${storage.time} сек...`, {
+            .editMessageText(`${storage.originalMessage}\n\nЧекаю ${storage.time} сек...\n${new Date().toISOString()}`, {
               parse_mode: 'HTML',
             })
             .catch();
