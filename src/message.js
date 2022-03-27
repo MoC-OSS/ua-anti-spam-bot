@@ -199,13 +199,10 @@ ${getGroupStartMessage({ adminsString })}
 /**
  * Test messages
  */
-const getTensorTestResult = ({ chance, isSpam, tokenized }) =>
+const getTensorTestResult = ({ chance, isSpam }) =>
   `
 🎲 Шанс спаму - <b>${chance}</b>
 🤔 Я вважаю...<b>${isSpam ? '✅ Це спам' : '⛔️ Це не спам'}</b>
-
-🔐 Токен:
-${JSON.stringify(tokenized)}
 `.trim();
 
 /**
