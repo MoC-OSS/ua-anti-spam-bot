@@ -1,7 +1,7 @@
 const { env } = require('typed-dotenv').config();
 
 const { telegramUtil, truncateString } = require('../../utils');
-const { getDeleteMessage, getDebugMessage, spamDeleteMessage } = require('../../message');
+const { getDeleteMessage, getDebugMessage } = require('../../message'); // spamDeleteMessage
 const { getMessageReputation } = require('../spam.handlers');
 
 // const slavaWords = ['слава україні', 'слава украине', 'слава зсу'];
@@ -100,6 +100,7 @@ class OnTextListener {
         }
       }
 
+      /*
       if (rep.reputation <= 0 || (rep.userRep <= 0 && !env.DISABLE_USER_REP)) {
         try {
           await ctx
@@ -112,6 +113,7 @@ class OnTextListener {
           console.error('Cannot delete the message. Reason:', e);
         }
       }
+      */
 
       return next();
     };

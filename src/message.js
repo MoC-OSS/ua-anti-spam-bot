@@ -185,6 +185,17 @@ const getStartChannelMessage = ({ botName }) =>
 
 /**
  *
+ * Message that bot sends when user invites it into a channel
+ *
+ * */
+const getUpdatesMessage = () =>
+  `
+Напиши після цього повідомлення те, що ти хочеш відправити по всім активним сесіям:
+
+`.trim();
+
+/**
+ *
  * Message that bot sends when user invites in into a group
  *
  * */
@@ -216,4 +227,5 @@ module.exports = {
   getDebugMessage,
   getDeleteMessage,
   getStatisticsMessage,
+  getUpdatesMessage,
 };

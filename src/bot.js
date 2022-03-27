@@ -1,16 +1,18 @@
 const { Bot } = require('grammy');
 const { hydrateReply } = require('@grammyjs/parse-mode');
-// TODO commented for settings feature
-// const { Menu } = require('@grammyjs/menu');
+const { Router } = require('@grammyjs/router');
+const { Menu } = require('@grammyjs/menu');
 const { error, env } = require('typed-dotenv').config();
 const Keyv = require('keyv');
 const { RedisSession } = require('./bot/sessionProviders');
 
-const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware } = require('./bot/commands');
+const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware, UpdatesMiddleware } = require('./bot/commands');
+const { UpdatesInputMiddleware, UpdatesConfirmationMiddleware } = require('./bot/routers');
 const { OnTextListener } = require('./bot/listeners');
 const { GlobalMiddleware, performanceMiddleware, botActiveMiddleware, onlyNotAdmin } = require('./bot/middleware');
 const { handleError, errorHandler, sleep } = require('./utils');
 const { logsChat } = require('./creator');
+
 // TODO commented for settings feature
 // const { getSettingsMenuMessage, settingsSubmitMessage, settingsDeleteItemMessage } = require('./message');
 
@@ -53,6 +55,11 @@ if (error) {
 //     ctx.deleteMessage();
 //   });
 
+const menu = new Menu('approveUpdatesMenu')
+  .text({ text: 'Піддверджую', payload: 'approve' })
+  .row()
+  .text({ text: 'Відмінити', payload: 'cancel' });
+
 (async () => {
   console.info('Waiting for the old instance to down...');
   await sleep(5000);
@@ -70,6 +77,9 @@ if (error) {
   const helpMiddleware = new HelpMiddleware(startTime);
   const sessionMiddleware = new SessionMiddleware(startTime);
   const statisticsMiddleware = new StatisticsMiddleware(startTime);
+  const updatesMiddleware = new UpdatesMiddleware(startTime);
+  const updatesInputMiddleware = new UpdatesInputMiddleware();
+  const updatesConfirmationMiddleware = new UpdatesConfirmationMiddleware();
 
   const onTextListener = new OnTextListener(keyv, startTime);
 
@@ -79,14 +89,24 @@ if (error) {
 
   bot.use(errorHandler(globalMiddleware.middleware()));
 
+  bot.use(menu);
+
+  const router = new Router((ctx) => ctx.session.step);
+
+  bot.use(router);
+
   // TODO commented for settings feature
-  // bot.use(menu);
 
   bot.command('start', errorHandler(startMiddleware.middleware()));
   bot.command('help', errorHandler(helpMiddleware.middleware()));
 
   bot.command('session', botActiveMiddleware, errorHandler(sessionMiddleware.middleware()));
   bot.command('statistics', botActiveMiddleware, errorHandler(statisticsMiddleware.middleware()));
+
+  bot.command('updates', botActiveMiddleware, errorHandler(updatesMiddleware.middleware()));
+
+  router.route('updatesInput', botActiveMiddleware, errorHandler(updatesInputMiddleware.middleware()));
+  router.route('updatesConfirmation', botActiveMiddleware, errorHandler(updatesConfirmationMiddleware.middleware()));
 
   // TODO commented for settings feature
   // bot.command('settings', (ctx) => {
