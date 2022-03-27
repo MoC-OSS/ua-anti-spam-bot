@@ -1,6 +1,6 @@
 /**
  * @description
- * Allow to execute next middlewares only if the user is not admin
+ * Allow to skip a forwarded message
  *
  * Reversed copy from
  * @see https://github.com/backmeupplz/grammy-middlewares/blob/main/src/middlewares/onlyAdmin.ts
@@ -10,7 +10,7 @@
  * */
 async function onlyNotForwarded(ctx, next) {
   // TODO use for ctx prod debug
-  // console.info('enter onlyNotAdmin ******', ctx.chat?.title, '******', ctx.msg?.text);
+  // console.info('enter onlyNotForwarded ******', ctx.chat?.title, '******', ctx.msg?.text);
 
   /**
    * Skip forwarded messages
