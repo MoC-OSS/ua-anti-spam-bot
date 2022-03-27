@@ -69,7 +69,7 @@ class TestTensorListener {
       delete this.messageNodeIntervals[this.getStorageKey(ctx)];
 
       if (!this.storage[this.getStorageKey(ctx)]) {
-        ctx.editMessageText(ctx.msg.text, { reply_markup: null });
+        ctx.editMessageText(ctx.msg.text, { reply_markup: null }).catch();
         return;
       }
 
@@ -113,7 +113,7 @@ class TestTensorListener {
       storage.time = defaultTime;
 
       this.messageNodeIntervals[this.getStorageKey(ctx)] = setInterval(() => {
-        storage.time -= 3;
+        storage.time -= 5;
 
         if (storage.time !== 0) {
           ctx
@@ -122,7 +122,7 @@ class TestTensorListener {
             })
             .catch();
         }
-      }, 3000);
+      }, 12000);
 
       this.messageNodeTimeouts[this.getStorageKey(ctx)] = setTimeout(() => {
         finalMiddleware(ctx);
@@ -163,11 +163,7 @@ class TestTensorListener {
         );
     };
 
-    try {
-      initMenu();
-    } catch (e) {
-      initMenu();
-    }
+    initMenu();
 
     return this.menu;
   }

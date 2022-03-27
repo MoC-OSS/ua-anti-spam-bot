@@ -88,7 +88,7 @@ const rootMenu = new Menu('root');
 
   bot.use(errorHandler(globalMiddleware.middleware()));
 
-  bot.use(rootMenu);
+  bot.errorBoundary(handleError).use(rootMenu);
 
   bot.command('start', errorHandler(startMiddleware.middleware()));
   bot.command('help', errorHandler(helpMiddleware.middleware()));
