@@ -1,4 +1,4 @@
-const { getStartMessage, getGroupStartMessage, makeAdminMessage } = require('../../message');
+const { getStartMessage, getGroupStartMessage, makeAdminMessage, startAdminReadyMessage } = require('../../message');
 const { handleError, telegramUtil } = require('../../utils');
 
 class StartMiddleware {
@@ -21,6 +21,10 @@ class StartMiddleware {
     return (ctx) => {
       if (ctx.chat.type === 'private') {
         return ctx.replyWithHTML(getStartMessage());
+      }
+
+      if (ctx.session.isBotAdmin) {
+        return ctx.replyWithHTML(startAdminReadyMessage);
       }
 
       telegramUtil.getChatAdmins(this.bot, ctx.chat.id).then(({ adminsString }) => {
