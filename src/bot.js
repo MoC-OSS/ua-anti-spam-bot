@@ -4,12 +4,12 @@ const { hydrateReply } = require('@grammyjs/parse-mode');
 // const { Menu } = require('@grammyjs/menu');
 const { error, env } = require('typed-dotenv').config();
 const Keyv = require('keyv');
-const { getTensorTestResult } = require('./message');
+
 const { TensorService } = require('./tensor/tensor.service');
 const { RedisSession } = require('./bot/sessionProviders');
 
 const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware } = require('./bot/commands');
-const { OnTextListener } = require('./bot/listeners');
+const { OnTextListener, TestTensorListener } = require('./bot/listeners');
 const { GlobalMiddleware, performanceMiddleware, botActiveMiddleware, onlyNotAdmin, onlyNotForwarded } = require('./bot/middleware');
 const { handleError, errorHandler, sleep } = require('./utils');
 const { logsChat } = require('./creator');
@@ -61,10 +61,7 @@ if (error) {
   console.info('Starting a new instance...');
 
   const tensorService = new TensorService('./temp/model.json', 0.65);
-
-  await tensorService.loadModel().then(() => {
-    tensorService.predict('я сьогодні як прокинувся у нас тут у всьому місті стріляли та літали літаки');
-  });
+  await tensorService.loadModel();
 
   const startTime = new Date();
 
@@ -80,6 +77,7 @@ if (error) {
   const statisticsMiddleware = new StatisticsMiddleware(startTime);
 
   const onTextListener = new OnTextListener(keyv, startTime);
+  const tensorListener = new TestTensorListener(tensorService);
 
   bot.use(hydrateReply);
 
@@ -101,25 +99,10 @@ if (error) {
   //   ctx.reply(getSettingsMenuMessage(ctx.session.settings), { reply_markup: menu });
   // });
 
-  bot.on(['message', 'edited_message'], async (ctx) => {
-    if (!ctx.msg.text) {
-      return;
-    }
-
-    try {
-      const { numericData, result, tensorRank } = await tensorService.predict(ctx.msg.text);
-      ctx.replyWithHTML(getTensorTestResult({ chance: `${(numericData[1] * 100).toFixed(4)}%`, isSpam: result, tokenized: tensorRank }), {
-        reply_to_message_id: ctx.msg.message_id,
-      });
-    } catch (e) {
-      console.error(e);
-      ctx.reply(`Cannot parse it: ${ctx?.msg?.text}`);
-    }
-  });
-
   bot.on(
     ['message', 'edited_message'],
     botActiveMiddleware,
+    tensorListener.middleware(),
     onlyNotAdmin,
     onlyNotForwarded,
     errorHandler(onTextListener.middleware()),

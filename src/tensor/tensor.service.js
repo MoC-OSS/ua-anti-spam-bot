@@ -33,7 +33,7 @@ class TensorService {
 
     return tensorPredict.data().then((numericData) => ({
       numericData,
-      result: numericData[1] > this.SPAM_THRESHOLD,
+      isSpam: numericData[1] > this.SPAM_THRESHOLD,
       tensorRank: tensorRank.tokenArray,
     }));
   }
