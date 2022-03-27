@@ -66,7 +66,8 @@ class OnTextListener {
       if (rep.byRules?.rule) {
         try {
           const username = ctx.from?.username;
-          const writeUsername = username ? `@${username}` : '';
+          const fullName = ctx.from?.last_name ? `${ctx.from?.first_name} ${ctx.from?.last_name}` : ctx.from?.first_name;
+          const writeUsername = username ? `@${username}` : fullName;
 
           let debugMessage = '';
 
