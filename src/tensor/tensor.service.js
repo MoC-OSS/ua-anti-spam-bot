@@ -50,7 +50,8 @@ class TensorService {
       .replace(/[^a-zа-яіїєґ\d]/g, ' ')
       .replace(/\s\s+/g, ' ')
       .trim()
-      .split(' ');
+      .split(' ')
+      .slice(0, this.modelLength - 1);
 
     let index = 0;
 
