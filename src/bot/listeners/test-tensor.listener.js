@@ -2,9 +2,11 @@ const fs = require('fs');
 const { Menu } = require('@grammyjs/menu');
 const { env } = require('typed-dotenv').config();
 
-const { formatDate } = require('../../utils');
+const { errorHandler } = require('../../utils');
 const { creatorId, trainingChat } = require('../../creator');
 const { getTensorTestResult } = require('../../message');
+
+const defaultTime = 10;
 
 /**
  * @param {GrammyContext} ctx
@@ -25,6 +27,7 @@ class TestTensorListener {
     this.tensorService = tensorService;
     this.menu = null;
     this.messageNodeTimeouts = {};
+    this.messageNodeIntervals = {};
     this.storage = {};
   }
 
@@ -58,9 +61,19 @@ class TestTensorListener {
     /**
      * @param {GrammyContext} ctx
      * */
-    const finalMiddleware = async (ctx) => {
-      if (this.storage[this.getStorageKey(ctx)].positives.length === this.storage[this.getStorageKey(ctx)].negatives.length) {
-        clearTimeout(this.messageNodeTimeouts[this.getStorageKey(ctx)]);
+    const finalMiddleware = errorHandler(async (ctx) => {
+      clearTimeout(this.messageNodeTimeouts[this.getStorageKey(ctx)]);
+      clearInterval(this.messageNodeIntervals[this.getStorageKey(ctx)]);
+
+      delete this.messageNodeTimeouts[this.getStorageKey(ctx)];
+      delete this.messageNodeIntervals[this.getStorageKey(ctx)];
+
+      if (!this.storage[this.getStorageKey(ctx)]) {
+        ctx.editMessageText(ctx.msg.text, { reply_markup: null });
+        return;
+      }
+
+      if (this.storage[this.getStorageKey(ctx)].positives?.length === this.storage[this.getStorageKey(ctx)].negatives?.length) {
         ctx.editMessageText(`${this.storage[this.getStorageKey(ctx)].originalMessage}\n\nЧекаю на більше оцінок...`).catch();
         return;
       }
@@ -84,57 +97,77 @@ class TestTensorListener {
         )
         .catch(() => {});
 
-      delete this.storage[this.getStorageKey(ctx)].positives;
-      delete this.storage[this.getStorageKey(ctx)].negatives;
-      delete this.storage[this.getStorageKey(ctx)].originalMessage;
-    };
+      delete this.storage[this.getStorageKey(ctx)];
+    });
 
-    const processButtonMiddleware = (ctx) => {
+    const processButtonMiddleware = errorHandler((ctx) => {
+      const storage = this.storage[this.getStorageKey(ctx)];
       ctx
-        .editMessageText(`${this.storage[this.getStorageKey(ctx)].originalMessage}\n\nЧекаю 10 сек...${formatDate(new Date())}`, {
+        .editMessageText(`${storage.originalMessage}\n\nЧекаю ${storage.time} сек...`, {
           parse_mode: 'HTML',
         })
         .catch();
 
       clearTimeout(this.messageNodeTimeouts[this.getStorageKey(ctx)]);
-      this.messageNodeTimeouts[this.getStorageKey(ctx)] = setTimeout(() => {
-        delete this.messageNodeTimeouts[this.getStorageKey(ctx)];
+      clearInterval(this.messageNodeIntervals[this.getStorageKey(ctx)]);
+      storage.time = defaultTime;
 
+      this.messageNodeIntervals[this.getStorageKey(ctx)] = setInterval(() => {
+        storage.time -= 3;
+
+        if (storage.time !== 0) {
+          ctx
+            .editMessageText(`${storage.originalMessage}\n\nЧекаю ${storage.time} сек...`, {
+              parse_mode: 'HTML',
+            })
+            .catch();
+        }
+      }, 3000);
+
+      this.messageNodeTimeouts[this.getStorageKey(ctx)] = setTimeout(() => {
         finalMiddleware(ctx);
-      }, 10000);
+      }, defaultTime * 100);
+    });
+
+    const initMenu = () => {
+      this.menu = new Menu('spam-menu')
+        .text(
+          (ctx) => `✅ Це спам (${this.storage[this.getStorageKey(ctx)]?.positives?.length || 0})`,
+          errorHandler((ctx) => {
+            this.initTensorSession(ctx, ctx.msg.text);
+
+            const username = getAnyUsername(ctx);
+            this.storage[this.getStorageKey(ctx)].negatives = this.storage[this.getStorageKey(ctx)].negatives?.filter(
+              (item) => item !== username,
+            );
+            this.storage[this.getStorageKey(ctx)].positives.push(username);
+
+            ctx.menu.update();
+            processButtonMiddleware(ctx);
+          }),
+        )
+        .text(
+          (ctx) => `⛔️ Це не спам (${this.storage[this.getStorageKey(ctx)]?.negatives?.length || 0})`,
+          errorHandler((ctx) => {
+            this.initTensorSession(ctx, ctx.msg.text);
+
+            const username = getAnyUsername(ctx);
+            this.storage[this.getStorageKey(ctx)].positives = this.storage[this.getStorageKey(ctx)].positives.filter(
+              (item) => item !== username,
+            );
+            this.storage[this.getStorageKey(ctx)].negatives.push(username);
+
+            ctx.menu.update();
+            processButtonMiddleware(ctx);
+          }),
+        );
     };
 
-    this.menu = new Menu('spam-menu')
-      .text(
-        (ctx) => `✅ Це спам (${this.storage[this.getStorageKey(ctx)]?.positives.length || 0})`,
-        (ctx) => {
-          this.initTensorSession(ctx, ctx.msg.text);
-
-          const username = getAnyUsername(ctx);
-          this.storage[this.getStorageKey(ctx)].negatives = this.storage[this.getStorageKey(ctx)].negatives.filter(
-            (item) => item !== username,
-          );
-          this.storage[this.getStorageKey(ctx)].positives.push(username);
-
-          ctx.menu.update();
-          processButtonMiddleware(ctx);
-        },
-      )
-      .text(
-        (ctx) => `⛔️ Це не спам (${this.storage[this.getStorageKey(ctx)]?.negatives.length || 0})`,
-        (ctx) => {
-          this.initTensorSession(ctx, ctx.msg.text);
-
-          const username = getAnyUsername(ctx);
-          this.storage[this.getStorageKey(ctx)].positives = this.storage[this.getStorageKey(ctx)].positives.filter(
-            (item) => item !== username,
-          );
-          this.storage[this.getStorageKey(ctx)].negatives.push(username);
-
-          ctx.menu.update();
-          processButtonMiddleware(ctx);
-        },
-      );
+    try {
+      initMenu();
+    } catch (e) {
+      initMenu();
+    }
 
     return this.menu;
   }
@@ -148,6 +181,7 @@ class TestTensorListener {
         positives: [],
         negatives: [],
         originalMessage: message,
+        time: defaultTime,
       };
     }
   }

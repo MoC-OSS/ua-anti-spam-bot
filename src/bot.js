@@ -101,15 +101,17 @@ const rootMenu = new Menu('root');
   //   ctx.reply(getSettingsMenuMessage(ctx.session.settings), { reply_markup: menu });
   // });
 
-  bot.on(
-    ['message', 'edited_message'],
-    botActiveMiddleware,
-    tensorListener.middleware(),
-    onlyNotAdmin,
-    onlyNotForwarded,
-    errorHandler(onTextListener.middleware()),
-    errorHandler(performanceMiddleware),
-  );
+  bot
+    .errorBoundary(handleError)
+    .on(
+      ['message', 'edited_message'],
+      botActiveMiddleware,
+      errorHandler(tensorListener.middleware()),
+      onlyNotAdmin,
+      onlyNotForwarded,
+      errorHandler(onTextListener.middleware()),
+      errorHandler(performanceMiddleware),
+    );
 
   bot.catch(handleError);
 
