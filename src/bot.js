@@ -4,9 +4,10 @@ const { Menu } = require('@grammyjs/menu');
 const { error, env } = require('typed-dotenv').config();
 const Keyv = require('keyv');
 
-const { TensorService } = require('./tensor/tensor.service');
+const { initTensor } = require('./tensor/tensor.service');
 const { RedisSession } = require('./bot/sessionProviders');
 
+const { MessageHandler } = require('./bot/message.handler');
 const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware } = require('./bot/commands');
 const { OnTextListener, TestTensorListener } = require('./bot/listeners');
 const { GlobalMiddleware, performanceMiddleware, botActiveMiddleware, onlyNotAdmin, onlyNotForwarded } = require('./bot/middleware');
@@ -61,8 +62,7 @@ const rootMenu = new Menu('root');
   await sleep(5000);
   console.info('Starting a new instance...');
 
-  const tensorService = new TensorService('./temp/model.json', 0.65);
-  await tensorService.loadModel();
+  const tensorService = await initTensor();
 
   const startTime = new Date();
 
@@ -77,7 +77,9 @@ const rootMenu = new Menu('root');
   const sessionMiddleware = new SessionMiddleware(startTime);
   const statisticsMiddleware = new StatisticsMiddleware(startTime);
 
-  const onTextListener = new OnTextListener(keyv, startTime);
+  const messageHandler = new MessageHandler(tensorService);
+
+  const onTextListener = new OnTextListener(keyv, startTime, messageHandler);
   const tensorListener = new TestTensorListener(tensorService, redisSession);
 
   rootMenu.register(tensorListener.initMenu());

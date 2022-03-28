@@ -10,10 +10,12 @@ class OnTextListener {
   /**
    * @param {Keyv} keyv
    * @param {Date} startTime
+   * @param {MessageHandler} messageHandler
    */
-  constructor(keyv, startTime) {
+  constructor(keyv, startTime, messageHandler) {
     this.keyv = keyv;
     this.startTime = startTime;
+    this.messageHandler = messageHandler;
   }
 
   /**
@@ -61,7 +63,7 @@ class OnTextListener {
         return next();
       }
 
-      const rep = await getMessageReputation(ctx, this.keyv);
+      const rep = await getMessageReputation(ctx, this.keyv, this.messageHandler);
 
       if (rep.byRules?.rule) {
         try {

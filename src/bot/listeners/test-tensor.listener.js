@@ -230,10 +230,10 @@ class TestTensorListener {
       }
 
       try {
-        const { numericData, isSpam } = await this.tensorService.predict(message);
+        const { numericData, isSpam, fileStat } = await this.tensorService.predict(message);
 
         const chance = `${(numericData[1] * 100).toFixed(4)}%`;
-        const tensorTestMessage = getTensorTestResult({ chance, isSpam });
+        const tensorTestMessage = getTensorTestResult({ chance, isSpam, tensorDate: fileStat?.mtime });
 
         this.initTensorSession(ctx, tensorTestMessage);
 
