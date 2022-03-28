@@ -83,7 +83,9 @@ class TestTensorListener {
 
       // const winUsersText = winUsers.slice(0, 2).join(', ') + (winUsers.length > 3 ? ' та інші' : '');
 
-      this.writeDataset(status ? 'positives' : 'negatives', ctx.update.callback_query.message.reply_to_message.text);
+      const originMessage = ctx.update.callback_query.message.reply_to_message;
+
+      this.writeDataset(status ? 'positives' : 'negatives', originMessage.text || originMessage.caption);
 
       await ctx
         .editMessageText(
@@ -220,20 +222,22 @@ class TestTensorListener {
         }
       }
 
-      if (!ctx.msg.text) {
+      const message = ctx.msg.text || ctx.msg.caption;
+
+      if (!message) {
         ctx.reply('Пропускаю це повідомлення, тут немає тексту', { reply_to_message_id: ctx.msg.message_id });
         return;
       }
 
       try {
-        const { numericData, isSpam } = await this.tensorService.predict(ctx.msg.text);
+        const { numericData, isSpam } = await this.tensorService.predict(message);
 
         const chance = `${(numericData[1] * 100).toFixed(4)}%`;
-        const message = getTensorTestResult({ chance, isSpam });
+        const tensorTestMessage = getTensorTestResult({ chance, isSpam });
 
-        this.initTensorSession(ctx, message);
+        this.initTensorSession(ctx, tensorTestMessage);
 
-        ctx.replyWithHTML(message, {
+        ctx.replyWithHTML(tensorTestMessage, {
           reply_to_message_id: ctx.msg.message_id,
           reply_markup: this.menu,
         });
