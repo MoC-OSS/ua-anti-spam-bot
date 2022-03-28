@@ -61,7 +61,7 @@ class TestTensorListener {
     /**
      * @param {GrammyContext} ctx
      * */
-    const finalMiddleware = errorHandler(async (ctx) => {
+    const finalMiddleware = async (ctx) => {
       clearTimeout(this.messageNodeTimeouts[this.getStorageKey(ctx)]);
       clearInterval(this.messageNodeIntervals[this.getStorageKey(ctx)]);
 
@@ -91,7 +91,7 @@ class TestTensorListener {
         .editMessageText(
           `${this.storage[this.getStorageKey(ctx)].originalMessage}\n\n${winUsers.join(', ')} виділив/ли це як ${
             status ? '✅ спам' : '⛔️ не спам'
-          }`,
+          }\nВидалю обидва повідомлення автоматично через 30 сек...`,
           {
             parse_mode: 'HTML',
             reply_markup: null,
@@ -99,8 +99,15 @@ class TestTensorListener {
         )
         .catch(() => {});
 
+      setTimeout(() => {
+        ctx.api
+          .deleteMessage(originMessage.chat.id, originMessage.message_id)
+          .then(() => ctx.api.deleteMessage(ctx.chat.id, ctx.msg.message_id))
+          .catch(console.error);
+      }, 30000);
+
       delete this.storage[this.getStorageKey(ctx)];
-    });
+    };
 
     const processButtonMiddleware = errorHandler((ctx) => {
       const storage = this.storage[this.getStorageKey(ctx)];
