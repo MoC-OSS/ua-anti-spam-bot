@@ -69,12 +69,12 @@ class TestTensorListener {
       delete this.messageNodeIntervals[this.getStorageKey(ctx)];
 
       if (!this.storage[this.getStorageKey(ctx)]) {
-        ctx.editMessageText(ctx.msg.text, { reply_markup: null }).catch();
+        ctx.editMessageText(ctx.msg.text, { reply_markup: null }).catch(() => {});
         return;
       }
 
       if (this.storage[this.getStorageKey(ctx)].positives?.length === this.storage[this.getStorageKey(ctx)].negatives?.length) {
-        ctx.editMessageText(`${this.storage[this.getStorageKey(ctx)].originalMessage}\n\nЧекаю на більше оцінок...`).catch();
+        ctx.editMessageText(`${this.storage[this.getStorageKey(ctx)].originalMessage}\n\nЧекаю на більше оцінок...`).catch(() => {});
         return;
       }
 
@@ -115,7 +115,7 @@ class TestTensorListener {
         .editMessageText(`${storage.originalMessage}\n\nЧекаю ${storage.time} сек...\n${new Date().toISOString()}`, {
           parse_mode: 'HTML',
         })
-        .catch();
+        .catch(() => {});
 
       clearTimeout(this.messageNodeTimeouts[this.getStorageKey(ctx)]);
       clearInterval(this.messageNodeIntervals[this.getStorageKey(ctx)]);
@@ -129,7 +129,7 @@ class TestTensorListener {
             .editMessageText(`${storage.originalMessage}\n\nЧекаю ${storage.time} сек...\n${new Date().toISOString()}`, {
               parse_mode: 'HTML',
             })
-            .catch();
+            .catch(() => {});
         }
       }, 12000);
 
@@ -232,7 +232,7 @@ class TestTensorListener {
       const message = ctx.msg.text || ctx.msg.caption;
 
       if (!message) {
-        ctx.reply('Пропускаю це повідомлення, тут немає тексту', { reply_to_message_id: ctx.msg.message_id });
+        ctx.reply('Пропускаю це повідомлення, тут немає тексту', { reply_to_message_id: ctx.msg.message_id }).catch(() => {});
         return;
       }
 
@@ -244,13 +244,15 @@ class TestTensorListener {
 
         this.initTensorSession(ctx, tensorTestMessage);
 
-        ctx.replyWithHTML(tensorTestMessage, {
-          reply_to_message_id: ctx.msg.message_id,
-          reply_markup: this.menu,
-        });
+        ctx
+          .replyWithHTML(tensorTestMessage, {
+            reply_to_message_id: ctx.msg.message_id,
+            reply_markup: this.menu,
+          })
+          .catch(() => {});
       } catch (error) {
         console.error(error);
-        ctx.reply(`Cannot parse this message.\nError:\n${error.message}`, { reply_to_message_id: ctx.msg.message_id });
+        ctx.reply(`Cannot parse this message.\nError:\n${error.message}`, { reply_to_message_id: ctx.msg.message_id }).catch(() => {});
       }
     };
   }
