@@ -9,9 +9,10 @@ async function onlyNotForwarded(ctx, next) {
   /**
    * Skip forwarded messages
    * */
-  if (ctx.update.message.forward_from) {
+  if (ctx.update?.message?.forward_from) {
     return;
   }
+
   return next();
 }
 
