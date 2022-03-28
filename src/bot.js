@@ -9,7 +9,6 @@ const { TensorService } = require('./tensor/tensor.service');
 const { RedisSession } = require('./bot/sessionProviders');
 
 const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware, UpdatesMiddleware } = require('./bot/commands');
-const { UpdatesInputMiddleware, UpdatesConfirmationMiddleware } = require('./bot/routers');
 const { OnTextListener, TestTensorListener } = require('./bot/listeners');
 const { GlobalMiddleware, performanceMiddleware, botActiveMiddleware, onlyNotAdmin, onlyNotForwarded } = require('./bot/middleware');
 const { handleError, errorHandler, sleep } = require('./utils');
@@ -59,11 +58,6 @@ const rootMenu = new Menu('root');
 //     ctx.deleteMessage();
 //   });
 
-const approveUpdatesMenu = new Menu('approveUpdatesMenu')
-  .text({ text: 'Піддверджую', payload: 'approve' })
-  .row()
-  .text({ text: 'Відмінити', payload: 'cancel' });
-
 (async () => {
   console.info('Waiting for the old instance to down...');
   await sleep(5000);
@@ -85,18 +79,18 @@ const approveUpdatesMenu = new Menu('approveUpdatesMenu')
   const sessionMiddleware = new SessionMiddleware(startTime);
   const statisticsMiddleware = new StatisticsMiddleware(startTime);
   const updatesMiddleware = new UpdatesMiddleware(startTime);
-  const updatesInputMiddleware = new UpdatesInputMiddleware();
-  const updatesConfirmationMiddleware = new UpdatesConfirmationMiddleware();
 
   const onTextListener = new OnTextListener(keyv, startTime);
   const tensorListener = new TestTensorListener(tensorService, redisSession);
 
   rootMenu.register(tensorListener.initMenu());
-  rootMenu.register(approveUpdatesMenu);
+  rootMenu.register(updatesMiddleware.initMenu());
 
   bot.use(hydrateReply);
 
   bot.use(redisSession.middleware());
+
+  bot.errorBoundary(handleError).use(rootMenu);
 
   bot.use(errorHandler(globalMiddleware.middleware()));
 
@@ -105,7 +99,6 @@ const approveUpdatesMenu = new Menu('approveUpdatesMenu')
   bot.use(router);
 
   // TODO commented for settings feature
-  bot.errorBoundary(handleError).use(rootMenu);
 
   bot.command('start', errorHandler(startMiddleware.middleware()));
   bot.command('help', errorHandler(helpMiddleware.middleware()));
@@ -113,10 +106,9 @@ const approveUpdatesMenu = new Menu('approveUpdatesMenu')
   bot.command('session', botActiveMiddleware, errorHandler(sessionMiddleware.middleware()));
   bot.command('statistics', botActiveMiddleware, errorHandler(statisticsMiddleware.middleware()));
 
-  bot.command('updates', botActiveMiddleware, errorHandler(updatesMiddleware.middleware()));
-
-  router.route('updatesInput', botActiveMiddleware, errorHandler(updatesInputMiddleware.middleware()));
-  router.route('updatesConfirmation', botActiveMiddleware, errorHandler(updatesConfirmationMiddleware.middleware()));
+  bot.command('updates', botActiveMiddleware, errorHandler(updatesMiddleware.initialization()));
+  router.route('confirmation', botActiveMiddleware, errorHandler(updatesMiddleware.confirmation()));
+  router.route('messageSending', botActiveMiddleware, errorHandler(updatesMiddleware.messageSending()));
 
   // TODO commented for settings feature
   // bot.command('settings', (ctx) => {

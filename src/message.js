@@ -17,7 +17,7 @@ const makeAdminMessage = '⛔️ Я не активований.\n<b>☝️Зр�
  * */
 const settingsDeleteItemMessage = 'Повідомлення про видалення';
 const settingsSubmitMessage = '💾 Зберегти';
-
+const cancelMessageSending = 'Розсилка була відмінена!';
 /**
  * Complex - Settings
  * */
@@ -186,12 +186,35 @@ const getStartChannelMessage = ({ botName }) =>
 
 /**
  *
- * Message that bot sends when user invites it into a channel
+ * Message when bot asks user what does he want to send to all private chats
  *
  * */
 const getUpdatesMessage = () =>
   `
 Напиши після цього повідомлення те, що ти хочеш відправити по всім активним сесіям:
+
+`.trim();
+
+/**
+ *
+ * Message that bots sends before confirmation
+ *
+ * */
+const getConfirmationMessage = ({ userInput }) =>
+  `
+Ось що буде надіслано до чатів:\n\n${userInput}
+
+`.trim();
+
+/**
+ *
+ * Message that bots sends before confirmation
+ *
+ * */
+const getSuccessfulMessage = ({ totalCount }) =>
+  `
+
+ Повідомлення було успішно розіслане до ${totalCount} чатів та каналів!
 
 `.trim();
 
@@ -229,6 +252,7 @@ module.exports = {
   startAdminReadyMessage,
   spamDeleteMessage,
   somethingWentWrongMessage,
+  cancelMessageSending,
   getTensorTestResult,
   getSettingsMenuMessage,
   getBotJoinMessage,
@@ -240,4 +264,6 @@ module.exports = {
   getDeleteMessage,
   getStatisticsMessage,
   getUpdatesMessage,
+  getConfirmationMessage,
+  getSuccessfulMessage,
 };
