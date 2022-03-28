@@ -1,9 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 
-const datasetPath = './strings';
-const files = fs.readdirSync(datasetPath).map((filePath) => `./${path.join(datasetPath, filePath)}`);
-
 const types = {
   ALPHABET: 'alphabet',
   SHORTEST: 'shortest',
@@ -11,39 +8,48 @@ const types = {
 
 const type = types.ALPHABET;
 
-const sortShortest = (a, b) =>
-  // ASC  -> a.length - b.length
-  // DESC -> b.length - a.length
-  b.length - a.length;
+const datasetPaths = ['./strings', './cases'];
 
-const sortAlphabet = (a, b) => {
-  if (a < b) {
-    return -1;
-  }
+datasetPaths.forEach((datasetPath) => {
+  const files = fs
+    .readdirSync(datasetPath)
+    .filter((file) => file.split('.').splice(-1)[0] === 'json')
+    .map((filePath) => `./${path.join(datasetPath, filePath)}`);
 
-  if (a > b) {
-    return 1;
-  }
+  const sortShortest = (a, b) =>
+    // ASC  -> a.length - b.length
+    // DESC -> b.length - a.length
+    b.length - a.length;
 
-  return 0;
-};
+  const sortAlphabet = (a, b) => {
+    if (a < b) {
+      return -1;
+    }
 
-files.forEach((filePath) => {
-  // eslint-disable-next-line global-require,import/no-dynamic-require
-  const datasetFile = require(filePath);
+    if (a > b) {
+      return 1;
+    }
 
-  switch (type) {
-    case types.SHORTEST:
-      datasetFile.sort(sortShortest);
-      break;
+    return 0;
+  };
 
-    case types.ALPHABET:
-      datasetFile.sort(sortAlphabet);
-      break;
+  files.forEach((filePath) => {
+    // eslint-disable-next-line global-require,import/no-dynamic-require
+    const datasetFile = require(filePath);
 
-    default:
-      throw new Error(`Unknown type: ${type}. Use one of these: ${Object.values(types)}`);
-  }
+    switch (type) {
+      case types.SHORTEST:
+        datasetFile.sort(sortShortest);
+        break;
 
-  fs.writeFileSync(filePath, `${JSON.stringify(datasetFile, null, 2)}\n`);
+      case types.ALPHABET:
+        datasetFile.sort(sortAlphabet);
+        break;
+
+      default:
+        throw new Error(`Unknown type: ${type}. Use one of these: ${Object.values(types)}`);
+    }
+
+    fs.writeFileSync(filePath, `${JSON.stringify(datasetFile, null, 2)}\n`);
+  });
 });

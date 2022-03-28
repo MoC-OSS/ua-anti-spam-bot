@@ -6,10 +6,11 @@ const { creatorNick } = require('./creator');
  * Generic
  * */
 const adminReadyMessage = 'Тепер я адміністратор. Готовий до роботи 😎';
+const startAdminReadyMessage = '✅ Я активований і виконую свою роботу';
 const memberReadyMessage = 'Тепер я деактивований. Відпочиваю... 😴';
 const spamDeleteMessage = '❗️ Повідомлення видалено.\n\n* Причина: спам.';
 const somethingWentWrongMessage = 'Сталась якась помилка :(';
-const makeAdminMessage = '<b>Зроби мене адміністратором, щоб я міг видаляти повідомлення.</b>';
+const makeAdminMessage = '⛔️ Я не активований.\n<b>☝️Зроби мене адміністратором, щоб я міг видаляти повідомлення.</b>';
 
 /**
  * Generic - Settings
@@ -207,6 +208,15 @@ ${getGroupStartMessage({ adminsString })}
 `.trim();
 
 /**
+ * Test messages
+ */
+const getTensorTestResult = ({ chance, isSpam }) =>
+  `
+🎲 Шанс спаму - <b>${chance}</b>
+🤔 Я вважаю...<b>${isSpam ? '✅ Це спам' : '⛔️ Це не спам'}</b>
+`.trim();
+
+/**
  *
  * Exports
  *
@@ -216,8 +226,10 @@ module.exports = {
   settingsSubmitMessage,
   memberReadyMessage,
   adminReadyMessage,
+  startAdminReadyMessage,
   spamDeleteMessage,
   somethingWentWrongMessage,
+  getTensorTestResult,
   getSettingsMenuMessage,
   getBotJoinMessage,
   getStartMessage,
