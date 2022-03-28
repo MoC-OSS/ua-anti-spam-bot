@@ -59,7 +59,7 @@ const rootMenu = new Menu('root');
 //     ctx.deleteMessage();
 //   });
 
-const menu = new Menu('approveUpdatesMenu')
+const approveUpdatesMenu = new Menu('approveUpdatesMenu')
   .text({ text: 'Піддверджую', payload: 'approve' })
   .row()
   .text({ text: 'Відмінити', payload: 'cancel' });
@@ -92,14 +92,13 @@ const menu = new Menu('approveUpdatesMenu')
   const tensorListener = new TestTensorListener(tensorService, redisSession);
 
   rootMenu.register(tensorListener.initMenu());
+  rootMenu.register(approveUpdatesMenu);
 
   bot.use(hydrateReply);
 
   bot.use(redisSession.middleware());
 
   bot.use(errorHandler(globalMiddleware.middleware()));
-
-  bot.use(menu);
 
   const router = new Router((ctx) => ctx.session.step);
 
