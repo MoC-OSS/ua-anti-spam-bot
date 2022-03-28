@@ -1,5 +1,6 @@
 const { Bot } = require('grammy');
 const { hydrateReply } = require('@grammyjs/parse-mode');
+const { apiThrottler } = require('@grammyjs/transformer-throttler');
 const { Menu } = require('@grammyjs/menu');
 const { error, env } = require('typed-dotenv').config();
 const Keyv = require('keyv');
@@ -67,6 +68,14 @@ const rootMenu = new Menu('root');
   const startTime = new Date();
 
   const bot = new Bot(env.BOT_TOKEN);
+
+  if (env.TEST_TENSOR) {
+    /**
+     * We need to use throttler for Test Tensor because telegram could ban the bot
+     * */
+    const throttler = apiThrottler();
+    bot.api.config.use(throttler);
+  }
 
   const redisSession = new RedisSession();
 
