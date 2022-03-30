@@ -41,6 +41,13 @@ const startMessageAtom = `
 
 /**
  *
+ * Message that bots sends if user has no rights to perform mass sending
+ *
+ * */
+const getDeclinedMassSendingMessage = 'Вибач, але у тебе немає прав робити масову розсилку.'.trim();
+
+/**
+ *
  * Message that bot sends on delete
  *
  * */
@@ -213,8 +220,7 @@ const getConfirmationMessage = ({ userInput }) =>
  * */
 const getSuccessfulMessage = ({ totalCount }) =>
   `
-
- Повідомлення було успішно розіслане до ${totalCount} чатів та каналів!
+Загальна кількість унікальних приватних чатів та супер-груп: ${totalCount}.
 
 `.trim();
 
@@ -253,6 +259,7 @@ module.exports = {
   spamDeleteMessage,
   somethingWentWrongMessage,
   cancelMessageSending,
+  getDeclinedMassSendingMessage,
   getTensorTestResult,
   getSettingsMenuMessage,
   getBotJoinMessage,

@@ -1,8 +1,16 @@
 const { Menu } = require('@grammyjs/menu');
 
 const { redisClient } = require('../../db');
-const { getUpdatesMessage, getConfirmationMessage, getSuccessfulMessage, cancelMessageSending } = require('../../message');
-// const { creatorId } = require('../../creator');
+const {
+  getUpdatesMessage,
+  getConfirmationMessage,
+  getSuccessfulMessage,
+  cancelMessageSending,
+  getDeclinedMassSendingMessage,
+} = require('../../message');
+const { handleError } = require('../../utils');
+const { creatorId } = require('../../creator');
+
 class UpdatesMiddleware {
   constructor() {
     this.menu = null;
@@ -22,10 +30,12 @@ class UpdatesMiddleware {
      * @param {GrammyContext} ctx
      * */
     return (ctx) => {
-      if (ctx.chat.type === 'private' && ctx.chat.id === 143875991) {
-        // creatorId
+      if (ctx.chat.type === 'private' && ctx.chat.id === creatorId) {
+        // id 143875991 for test;
         ctx.session.step = 'confirmation';
-        return ctx.replyWithHTML(getUpdatesMessage());
+        ctx.replyWithHTML(getUpdatesMessage());
+      } else {
+        ctx.reply(getDeclinedMassSendingMessage);
       }
     };
   }
@@ -54,22 +64,19 @@ class UpdatesMiddleware {
       if (payload === 'approve') {
         const updatesMessage = ctx.session.updatesText;
         const sessions = await redisClient.getAllRecords();
-        // console.log(sessions);
         const getChatId = (sessionId) => sessionId.split(':')[0];
-        const groupOnlySessions = sessions.filter(
+        const onlyUniqueSessions = sessions.filter(
           (session, index, self) => index === self.findIndex((t) => getChatId(t.id) === getChatId(session.id)),
         );
-        // console.log(groupOnlySessions);
-        // console.log(groupOnlySessions.length);
-        const privateSessions = groupOnlySessions.filter((session) => session.data.chatType === 'private');
-        const superGroupsSessions = groupOnlySessions.filter((session) => session.data.chatType === 'supergroup');
-        const groupSessions = groupOnlySessions.filter((session) => session.data.chatType === 'group');
-        const channelSessions = groupOnlySessions.filter((session) => session.data.chatType === 'channel');
-
-        const totalCount = privateSessions.length + superGroupsSessions.length + groupSessions.length + channelSessions.length;
-        // console.log(totalCount);
-        privateSessions.forEach((e) => {
-          ctx.api.sendMessage(e.id, updatesMessage);
+        const privateAndSuperGroupsSessions = onlyUniqueSessions.filter(
+          (session) => session.data.chatType === 'private' || session.data.chatType === 'supergroup',
+        );
+        const totalCount = privateAndSuperGroupsSessions.length;
+        privateAndSuperGroupsSessions.forEach(async (e) => {
+          ctx.api.sendMessage(e.id, updatesMessage).catch((error) => {
+            console.error('This bot was blocked or kicked from this chat!');
+            handleError(error);
+          });
         });
         ctx.reply(getSuccessfulMessage({ totalCount }));
       } else {
