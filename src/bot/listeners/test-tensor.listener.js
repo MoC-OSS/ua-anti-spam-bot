@@ -3,7 +3,7 @@ const { Menu } = require('@grammyjs/menu');
 const { env } = require('typed-dotenv').config();
 
 const { errorHandler } = require('../../utils');
-const { creatorId, trainingChat } = require('../../creator');
+const { trainingChat } = require('../../creator'); // creatorId
 const { getTensorTestResult } = require('../../message');
 
 const defaultTime = 10;
@@ -217,7 +217,8 @@ class TestTensorListener {
         return next();
       }
 
-      if (ctx.from.id !== creatorId) {
+      if (ctx.from.id !== 143875991) {
+        // creatorid
         if (ctx.chat.type !== 'supergroup') {
           ctx.reply('В особистих не працюю 😝');
           return;
