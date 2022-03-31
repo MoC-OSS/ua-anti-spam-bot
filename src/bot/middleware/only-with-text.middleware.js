@@ -2,7 +2,7 @@
  * @description
  * Skip messages without text
  * */
-async function onlyWithText(ctx, next) {
+function onlyWithText(ctx, next) {
   /**
    * Skip messages before bot became admin
    * */
