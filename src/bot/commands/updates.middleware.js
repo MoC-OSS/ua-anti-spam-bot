@@ -1,4 +1,5 @@
 const { Menu } = require('@grammyjs/menu');
+const { apiThrottler } = require('@grammyjs/transformer-throttler');
 
 const { redisClient } = require('../../db');
 const {
@@ -31,7 +32,7 @@ class UpdatesMiddleware {
      * */
     return (ctx) => {
       if (ctx.chat.type === 'private' && ctx.chat.id === creatorId) {
-        // id 143875991 for test;
+        // id 143875991 / creatorId for test;
         ctx.session.step = 'confirmation';
         ctx.replyWithHTML(getUpdatesMessage());
       } else {
@@ -62,6 +63,9 @@ class UpdatesMiddleware {
       ctx.session.step = 'idle';
       const payload = ctx.match;
       if (payload === 'approve') {
+        const throttler = apiThrottler();
+        ctx.api.config.use(throttler);
+
         const updatesMessage = ctx.session.updatesText;
         const sessions = await redisClient.getAllRecords();
         const getChatId = (sessionId) => sessionId.split(':')[0];
@@ -72,6 +76,7 @@ class UpdatesMiddleware {
           (session) => session.data.chatType === 'private' || session.data.chatType === 'supergroup',
         );
         const totalCount = privateAndSuperGroupsSessions.length;
+
         privateAndSuperGroupsSessions.forEach(async (e) => {
           ctx.api.sendMessage(e.id, updatesMessage).catch((error) => {
             console.error('This bot was blocked or kicked from this chat!');
