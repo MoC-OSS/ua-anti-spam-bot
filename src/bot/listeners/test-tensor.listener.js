@@ -177,12 +177,13 @@ class TestTensorListener {
           errorHandler((ctx) => {
             this.initTensorSession(ctx, ctx.msg.text);
 
+            const storage = this.storage[this.getStorageKey(ctx)];
             const username = getAnyUsername(ctx);
-            this.storage[this.getStorageKey(ctx)].negatives = this.storage[this.getStorageKey(ctx)].negatives?.filter(
-              (item) => item !== username,
-            );
-            this.storage[this.getStorageKey(ctx)].skips = this.storage[this.getStorageKey(ctx)].skips.filter((item) => item !== username);
-            this.storage[this.getStorageKey(ctx)].positives.push(username);
+            storage.negatives = storage.negatives?.filter((item) => item !== username);
+            storage.skips = storage.skips.filter((item) => item !== username);
+            if (!storage.positives.includes(username)) {
+              storage.positives.push(username);
+            }
 
             ctx.menu.update();
             processButtonMiddleware(ctx);
@@ -193,12 +194,13 @@ class TestTensorListener {
           errorHandler((ctx) => {
             this.initTensorSession(ctx, ctx.msg.text);
 
+            const storage = this.storage[this.getStorageKey(ctx)];
             const username = getAnyUsername(ctx);
-            this.storage[this.getStorageKey(ctx)].positives = this.storage[this.getStorageKey(ctx)].positives.filter(
-              (item) => item !== username,
-            );
-            this.storage[this.getStorageKey(ctx)].skips = this.storage[this.getStorageKey(ctx)].skips.filter((item) => item !== username);
-            this.storage[this.getStorageKey(ctx)].negatives.push(username);
+            storage.positives = storage.positives.filter((item) => item !== username);
+            storage.skips = storage.skips.filter((item) => item !== username);
+            if (!storage.negatives.includes(username)) {
+              storage.negatives.push(username);
+            }
 
             ctx.menu.update();
             processButtonMiddleware(ctx);
@@ -210,14 +212,13 @@ class TestTensorListener {
           errorHandler((ctx) => {
             this.initTensorSession(ctx, ctx.msg.text);
 
+            const storage = this.storage[this.getStorageKey(ctx)];
             const username = getAnyUsername(ctx);
-            this.storage[this.getStorageKey(ctx)].positives = this.storage[this.getStorageKey(ctx)].positives.filter(
-              (item) => item !== username,
-            );
-            this.storage[this.getStorageKey(ctx)].negatives = this.storage[this.getStorageKey(ctx)].negatives?.filter(
-              (item) => item !== username,
-            );
-            this.storage[this.getStorageKey(ctx)].skips.push(username);
+            storage.positives = storage.positives.filter((item) => item !== username);
+            storage.negatives = storage.negatives?.filter((item) => item !== username);
+            if (!storage.skips.includes(username)) {
+              storage.skips.push(username);
+            }
 
             ctx.menu.update();
             processButtonMiddleware(ctx);
