@@ -3,6 +3,7 @@ const globalMiddlewareExports = require('./global.middleware');
 const onlyNotAdminMiddlewareExports = require('./only-not-admin.middleware');
 const onlyNotForwardedMiddlewareExports = require('./only-not-forwarded.middleware');
 const performanceMiddlewareExports = require('./performance.middleware');
+const onlyWithText = require('./only-with-text.middleware');
 
 module.exports = {
   ...botActiveMiddlewareExports,
@@ -10,4 +11,5 @@ module.exports = {
   ...onlyNotAdminMiddlewareExports,
   ...onlyNotForwardedMiddlewareExports,
   ...performanceMiddlewareExports,
+  ...onlyWithText,
 };
