@@ -39,7 +39,7 @@ class OnTextListener {
         return next();
       }
 
-      const message = ctx.msg.text;
+      const message = ctx.state.text;
 
       /**
        * Removed because ask to reduce chat messages
