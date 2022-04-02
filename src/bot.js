@@ -1,16 +1,27 @@
 const { Bot } = require('grammy');
 const { hydrateReply } = require('@grammyjs/parse-mode');
+const { apiThrottler } = require('@grammyjs/transformer-throttler');
 const { Router } = require('@grammyjs/router');
 const { Menu } = require('@grammyjs/menu');
 const { error, env } = require('typed-dotenv').config();
 const Keyv = require('keyv');
 
-const { TensorService } = require('./tensor/tensor.service');
+const { initTensor } = require('./tensor/tensor.service');
 const { RedisSession } = require('./bot/sessionProviders');
 
+const { MessageHandler } = require('./bot/message.handler');
 const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware, UpdatesMiddleware } = require('./bot/commands');
 const { OnTextListener, TestTensorListener } = require('./bot/listeners');
-const { GlobalMiddleware, performanceMiddleware, botActiveMiddleware, onlyNotAdmin, onlyNotForwarded } = require('./bot/middleware');
+const {
+  GlobalMiddleware,
+  onlyWhenBotAdmin,
+  performanceStartMiddleware,
+  performanceEndMiddleware,
+  botActiveMiddleware,
+  onlyNotAdmin,
+  onlyNotForwarded,
+  onlyWithText,
+} = require('./bot/middleware');
 const { handleError, errorHandler, sleep } = require('./utils');
 const { logsChat } = require('./creator');
 
@@ -63,12 +74,27 @@ const rootMenu = new Menu('root');
   await sleep(5000);
   console.info('Starting a new instance...');
 
-  const tensorService = new TensorService('./temp/model.json', 0.65);
-  await tensorService.loadModel();
+  const tensorService = await initTensor();
 
   const startTime = new Date();
 
   const bot = new Bot(env.BOT_TOKEN);
+
+  if (env.TEST_TENSOR) {
+    /**
+     * We need to use throttler for Test Tensor because telegram could ban the bot
+     * */
+    const throttler = apiThrottler({
+      group: {
+        maxConcurrent: 1,
+        minTime: 500,
+        reservoir: 20,
+        reservoirRefreshAmount: 20,
+        reservoirRefreshInterval: 60000,
+      },
+    });
+    bot.api.config.use(throttler);
+  }
 
   const redisSession = new RedisSession();
 
@@ -80,7 +106,9 @@ const rootMenu = new Menu('root');
   const statisticsMiddleware = new StatisticsMiddleware(startTime);
   const updatesMiddleware = new UpdatesMiddleware(startTime);
 
-  const onTextListener = new OnTextListener(keyv, startTime);
+  const messageHandler = new MessageHandler(tensorService);
+
+  const onTextListener = new OnTextListener(keyv, startTime, messageHandler);
   const tensorListener = new TestTensorListener(tensorService, redisSession);
 
   rootMenu.register(tensorListener.initMenu());
@@ -123,8 +151,11 @@ const rootMenu = new Menu('root');
       errorHandler(tensorListener.middleware()),
       onlyNotAdmin,
       onlyNotForwarded,
+      onlyWithText,
+      onlyWhenBotAdmin,
+      errorHandler(performanceStartMiddleware),
       errorHandler(onTextListener.middleware()),
-      errorHandler(performanceMiddleware),
+      errorHandler(performanceEndMiddleware),
     );
 
   bot.catch(handleError);

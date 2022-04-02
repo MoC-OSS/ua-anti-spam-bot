@@ -13,7 +13,7 @@ const CHANNEL_BOT_ID = 136817688;
  * */
 async function onlyNotAdmin(ctx, next) {
   // TODO use for ctx prod debug
-  // console.info('enter onlyNotAdmin ******', ctx.chat?.title, '******', ctx.msg?.text);
+  // console.info('enter onlyNotAdmin ******', ctx.chat?.title, '******', ctx.state.text);
 
   /**
    * No chat - process the user

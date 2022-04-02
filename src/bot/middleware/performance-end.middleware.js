@@ -6,7 +6,7 @@ const { env } = require('typed-dotenv').config();
  * @param {GrammyContext} ctx
  * @param {Next} next
  * */
-function performanceMiddleware(ctx, next) {
+function performanceEndMiddleware(ctx, next) {
   if (env.DEBUG) {
     ctx
       .replyWithHTML(
@@ -28,5 +28,5 @@ function performanceMiddleware(ctx, next) {
 }
 
 module.exports = {
-  performanceMiddleware,
+  performanceEndMiddleware,
 };

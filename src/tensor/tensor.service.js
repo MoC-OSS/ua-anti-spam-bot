@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 
 const tf = require('@tensorflow/tfjs');
@@ -30,11 +31,25 @@ class TensorService {
   predict(word) {
     const tensorRank = this.tokenize(word);
     const tensorPredict = this.model.predict(tensorRank.tensor);
+    const fullModelPath = path.join(__dirname, this.modelPath);
+
+    /**
+     * @type {Stats | null}
+     * */
+    let fileStat = null;
+
+    try {
+      fileStat = fs.statSync(fullModelPath);
+    } catch (e) {
+      fileStat = null;
+    }
 
     return tensorPredict.data().then((numericData) => ({
       numericData,
+      spamRate: numericData[1],
       isSpam: numericData[1] > this.SPAM_THRESHOLD,
       tensorRank: tensorRank.tokenArray,
+      fileStat,
     }));
   }
 
@@ -92,4 +107,10 @@ class TensorService {
 
 module.exports = {
   TensorService,
+  initTensor: async () => {
+    const tensorService = new TensorService('./temp/model.json', 0.65);
+    await tensorService.loadModel();
+
+    return tensorService;
+  },
 };
