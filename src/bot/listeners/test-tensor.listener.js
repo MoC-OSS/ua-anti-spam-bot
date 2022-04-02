@@ -3,7 +3,7 @@ const { Menu } = require('@grammyjs/menu');
 const { env } = require('typed-dotenv').config();
 
 const { errorHandler } = require('../../utils');
-const { trainingChat } = require('../../creator'); // creatorId
+const { creatorId, trainingChat } = require('../../creator');
 const { getTensorTestResult } = require('../../message');
 
 const defaultTime = 30;
@@ -62,27 +62,29 @@ class TestTensorListener {
      * @param {GrammyContext} ctx
      * */
     const finalMiddleware = async (ctx) => {
+      const storage = this.storage[this.getStorageKey(ctx)];
+
       clearTimeout(this.messageNodeTimeouts[this.getStorageKey(ctx)]);
       clearInterval(this.messageNodeIntervals[this.getStorageKey(ctx)]);
 
       delete this.messageNodeTimeouts[this.getStorageKey(ctx)];
       delete this.messageNodeIntervals[this.getStorageKey(ctx)];
 
-      if (!this.storage[this.getStorageKey(ctx)]) {
+      if (!storage) {
         ctx.editMessageText(ctx.msg.text, { reply_markup: null }).catch(() => {});
         return;
       }
 
-      const positivesCount = this.storage[this.getStorageKey(ctx)].positives?.length;
-      const negativesCount = this.storage[this.getStorageKey(ctx)].negatives?.length;
-      const skipsCount = this.storage[this.getStorageKey(ctx)].skips?.length;
+      const positivesCount = storage.positives?.length;
+      const negativesCount = storage.negatives?.length;
+      const skipsCount = storage.skips?.length;
 
       if (
         (positivesCount === negativesCount && positivesCount !== 0) ||
         (positivesCount === skipsCount && skipsCount !== 0) ||
         (negativesCount === skipsCount && negativesCount !== 0)
       ) {
-        ctx.editMessageText(`${this.storage[this.getStorageKey(ctx)].originalMessage}\n\nЧекаю на більше оцінок...`).catch(() => {});
+        ctx.editMessageText(`${storage.originalMessage}\n\nЧекаю на більше оцінок...`).catch(() => {});
         return;
       }
 
@@ -95,11 +97,11 @@ class TestTensorListener {
 
       let winUsers = [];
       if (status === true) {
-        winUsers = this.storage[this.getStorageKey(ctx)].positives;
+        winUsers = storage.positives;
       } else if (status === false) {
-        winUsers = this.storage[this.getStorageKey(ctx)].negatives;
+        winUsers = storage.negatives;
       } else {
-        winUsers = this.storage[this.getStorageKey(ctx)].skips;
+        winUsers = storage.skips;
       }
 
       // const winUsersText = winUsers.slice(0, 2).join(', ') + (winUsers.length > 3 ? ' та інші' : '');
@@ -121,7 +123,7 @@ class TestTensorListener {
 
       await ctx
         .editMessageText(
-          `${this.storage[this.getStorageKey(ctx)].originalMessage}\n\n${winUsers.join(
+          `${storage.originalMessage}\n\n${winUsers.join(
             ', ',
           )} виділив/ли це як ${text}\nВидалю обидва повідомлення автоматично через 30 сек...`,
           {
@@ -272,8 +274,7 @@ class TestTensorListener {
         return next();
       }
 
-      if (ctx.from.id !== 143875991) {
-        // creatorid
+      if (ctx.from.id !== creatorId) {
         if (ctx.chat.type !== 'supergroup') {
           ctx.reply('В особистих не працюю 😝');
           return;
