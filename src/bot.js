@@ -8,7 +8,16 @@ const { RedisSession } = require('./bot/sessionProviders');
 
 const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware } = require('./bot/commands');
 const { OnTextListener } = require('./bot/listeners');
-const { GlobalMiddleware, performanceMiddleware, botActiveMiddleware, onlyNotAdmin, onlyNotForwarded } = require('./bot/middleware');
+const {
+  GlobalMiddleware,
+  onlyWhenBotAdmin,
+  performanceStartMiddleware,
+  performanceEndMiddleware,
+  botActiveMiddleware,
+  onlyNotAdmin,
+  onlyNotForwarded,
+  onlyWithText,
+} = require('./bot/middleware');
 const { handleError, errorHandler, sleep } = require('./utils');
 const { logsChat } = require('./creator');
 // TODO commented for settings feature
@@ -98,8 +107,11 @@ if (error) {
     botActiveMiddleware,
     onlyNotAdmin,
     onlyNotForwarded,
+    onlyWithText,
+    onlyWhenBotAdmin,
+    errorHandler(performanceStartMiddleware),
     errorHandler(onTextListener.middleware()),
-    errorHandler(performanceMiddleware),
+    errorHandler(performanceEndMiddleware),
   );
 
   bot.catch(handleError);
