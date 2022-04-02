@@ -11,7 +11,7 @@ const splitter = new GraphemeSplitter();
  * @param {GrammyContext} ctx
  */
 const isFilteredByRules = (ctx) => {
-  const originMessage = ctx.msg?.text;
+  const originMessage = ctx.state.text;
   const message = messageHandler.sanitizeMessage(ctx, originMessage);
 
   return messageHandler.getDeleteRule(message, originMessage);
@@ -20,7 +20,7 @@ const isFilteredByRules = (ctx) => {
 /**
  * @param {GrammyContext} ctx
  */
-const countEmojis = (ctx) => splitter.splitGraphemes(ctx.msg?.text || '').filter((e) => containsEmoji(e)).length;
+const countEmojis = (ctx) => splitter.splitGraphemes(ctx.state.text || '').filter((e) => containsEmoji(e)).length;
 
 /**
  * @param {GrammyContext} ctx

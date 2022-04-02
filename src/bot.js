@@ -10,7 +10,8 @@ const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware
 const { OnTextListener } = require('./bot/listeners');
 const {
   GlobalMiddleware,
-  performanceMiddleware,
+  performanceStartMiddleware,
+  performanceEndMiddleware,
   botActiveMiddleware,
   onlyNotAdmin,
   onlyNotForwarded,
@@ -106,8 +107,9 @@ if (error) {
     onlyNotAdmin,
     onlyNotForwarded,
     onlyWithText,
+    errorHandler(performanceStartMiddleware),
     errorHandler(onTextListener.middleware()),
-    errorHandler(performanceMiddleware),
+    errorHandler(performanceEndMiddleware),
   );
 
   bot.catch(handleError);

@@ -26,11 +26,7 @@ class OnTextListener {
      * */
     return async (ctx, next) => {
       // TODO use for ctx prod debug
-      // console.info('enter onText ******', ctx.chat?.title, '******', ctx.msg?.text);
-
-      if (env.DEBUG) {
-        ctx.state.performanceStart = performance.now();
-      }
+      // console.info('enter onText ******', ctx.chat?.title, '******', ctx.state.text);
 
       /**
        * Skip messages before bot became admin
