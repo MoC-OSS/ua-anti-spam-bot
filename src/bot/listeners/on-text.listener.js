@@ -28,13 +28,6 @@ class OnTextListener {
       // TODO use for ctx prod debug
       // console.info('enter onText ******', ctx.chat?.title, '******', ctx.state.text);
 
-      /**
-       * Skip messages before bot became admin
-       * */
-      if ((ctx.msg?.date || 0) * 1000 < +ctx.session.botAdminDate) {
-        return next();
-      }
-
       const message = ctx.state.text;
 
       /**

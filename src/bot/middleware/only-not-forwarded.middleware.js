@@ -1,6 +1,9 @@
 /**
  * @description
  * Allow to skip a forwarded message
+ *
+ * @param {GrammyContext} ctx
+ * @param {Next} next
  * */
 async function onlyNotForwarded(ctx, next) {
   // TODO use for ctx prod debug
