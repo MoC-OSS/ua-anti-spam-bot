@@ -9,9 +9,9 @@ const { env } = require('typed-dotenv').config();
 function performanceStartMiddleware(ctx, next) {
   if (env.DEBUG) {
     ctx.state.performanceStart = performance.now();
-  } else {
-    return next();
   }
+
+  return next();
 }
 
 module.exports = {
