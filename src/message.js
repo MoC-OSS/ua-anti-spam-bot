@@ -17,7 +17,7 @@ const makeAdminMessage = '⛔️ Я не активований.\n<b>☝️Зр�
  * */
 const settingsDeleteItemMessage = 'Повідомлення про видалення';
 const settingsSubmitMessage = '💾 Зберегти';
-
+const cancelMessageSending = 'Розсилка була відмінена!';
 /**
  * Complex - Settings
  * */
@@ -38,6 +38,13 @@ const startMessageAtom = `
 
 Я чат-бот, який дозволяє автоматично видаляти повідомлення, що містять назви локацій міста, укриттів, а також ключові слова переміщення військ.
 `.trim();
+
+/**
+ *
+ * Message that bots sends if user has no rights to perform mass sending
+ *
+ * */
+const getDeclinedMassSendingMessage = 'Вибач, але у тебе немає прав робити масову розсилку.'.trim();
 
 /**
  *
@@ -186,6 +193,39 @@ const getStartChannelMessage = ({ botName }) =>
 
 /**
  *
+ * Message when bot asks user what does he want to send to all private chats
+ *
+ * */
+const getUpdatesMessage = () =>
+  `
+Напиши після цього повідомлення те, що ти хочеш відправити по всім активним сесіям:
+
+`.trim();
+
+/**
+ *
+ * Message that bots sends before confirmation
+ *
+ * */
+const getConfirmationMessage = ({ userInput }) =>
+  `
+Ось що буде надіслано до чатів:\n\n${userInput}
+
+`.trim();
+
+/**
+ *
+ * Message that bots sends before confirmation
+ *
+ * */
+const getSuccessfulMessage = ({ totalCount }) =>
+  `
+Загальна кількість унікальних приватних чатів та супер-груп: ${totalCount}.
+
+`.trim();
+
+/**
+ *
  * Message that bot sends when user invites in into a group
  *
  * */
@@ -219,6 +259,8 @@ module.exports = {
   startAdminReadyMessage,
   spamDeleteMessage,
   somethingWentWrongMessage,
+  cancelMessageSending,
+  getDeclinedMassSendingMessage,
   getTensorTestResult,
   getSettingsMenuMessage,
   getBotJoinMessage,
@@ -229,4 +271,7 @@ module.exports = {
   getDebugMessage,
   getDeleteMessage,
   getStatisticsMessage,
+  getUpdatesMessage,
+  getConfirmationMessage,
+  getSuccessfulMessage,
 };

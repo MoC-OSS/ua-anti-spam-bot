@@ -1,6 +1,7 @@
 const { Bot } = require('grammy');
 const { hydrateReply } = require('@grammyjs/parse-mode');
 const { apiThrottler } = require('@grammyjs/transformer-throttler');
+const { Router } = require('@grammyjs/router');
 const { Menu } = require('@grammyjs/menu');
 const { error, env } = require('typed-dotenv').config();
 const Keyv = require('keyv');
@@ -9,7 +10,7 @@ const { initTensor } = require('./tensor/tensor.service');
 const { RedisSession } = require('./bot/sessionProviders');
 
 const { MessageHandler } = require('./bot/message.handler');
-const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware } = require('./bot/commands');
+const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware, UpdatesMiddleware } = require('./bot/commands');
 const { OnTextListener, TestTensorListener } = require('./bot/listeners');
 const {
   GlobalMiddleware,
@@ -23,6 +24,7 @@ const {
 } = require('./bot/middleware');
 const { handleError, errorHandler, sleep } = require('./utils');
 const { logsChat } = require('./creator');
+
 // TODO commented for settings feature
 // const { getSettingsMenuMessage, settingsSubmitMessage, settingsDeleteItemMessage } = require('./message');
 
@@ -102,6 +104,7 @@ const rootMenu = new Menu('root');
   const helpMiddleware = new HelpMiddleware(startTime);
   const sessionMiddleware = new SessionMiddleware(startTime);
   const statisticsMiddleware = new StatisticsMiddleware(startTime);
+  const updatesMiddleware = new UpdatesMiddleware(startTime);
 
   const messageHandler = new MessageHandler(tensorService);
 
@@ -109,20 +112,31 @@ const rootMenu = new Menu('root');
   const tensorListener = new TestTensorListener(tensorService, redisSession);
 
   rootMenu.register(tensorListener.initMenu());
+  rootMenu.register(updatesMiddleware.initMenu());
 
   bot.use(hydrateReply);
 
   bot.use(redisSession.middleware());
 
+  bot.errorBoundary(handleError).use(rootMenu);
+
   bot.use(errorHandler(globalMiddleware.middleware()));
 
-  bot.errorBoundary(handleError).use(rootMenu);
+  const router = new Router((ctx) => ctx.session.step);
+
+  bot.use(router);
+
+  // TODO commented for settings feature
 
   bot.command('start', errorHandler(startMiddleware.middleware()));
   bot.command('help', errorHandler(helpMiddleware.middleware()));
 
   bot.command('session', botActiveMiddleware, errorHandler(sessionMiddleware.middleware()));
   bot.command('statistics', botActiveMiddleware, errorHandler(statisticsMiddleware.middleware()));
+
+  bot.command('updates', botActiveMiddleware, errorHandler(updatesMiddleware.initialization()));
+  router.route('confirmation', botActiveMiddleware, errorHandler(updatesMiddleware.confirmation()));
+  router.route('messageSending', botActiveMiddleware, errorHandler(updatesMiddleware.messageSending()));
 
   // TODO commented for settings feature
   // bot.command('settings', (ctx) => {
