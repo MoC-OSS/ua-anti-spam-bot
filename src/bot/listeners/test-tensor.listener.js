@@ -232,7 +232,7 @@ class TestTensorListener {
       const message = ctx.msg.text || ctx.msg.caption;
 
       if (!message) {
-        ctx.reply('Пропускаю це повідомлення, тут немає тексту', { reply_to_message_id: ctx.msg.message_id }).catch(() => {});
+        ctx.api.deleteMessage(ctx.chat.id, ctx.msg.message_id).catch();
         return;
       }
 
