@@ -73,7 +73,15 @@ const rootMenu = new Menu('root');
     /**
      * We need to use throttler for Test Tensor because telegram could ban the bot
      * */
-    const throttler = apiThrottler();
+    const throttler = apiThrottler({
+      group: {
+        maxConcurrent: 1,
+        minTime: 500,
+        reservoir: 20,
+        reservoirRefreshAmount: 20,
+        reservoirRefreshInterval: 60000,
+      },
+    });
     bot.api.config.use(throttler);
   }
 

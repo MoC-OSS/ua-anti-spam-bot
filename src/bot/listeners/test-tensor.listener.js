@@ -6,7 +6,7 @@ const { errorHandler } = require('../../utils');
 const { creatorId, trainingChat } = require('../../creator');
 const { getTensorTestResult } = require('../../message');
 
-const defaultTime = 10;
+const defaultTime = 30;
 
 /**
  * @param {GrammyContext} ctx
@@ -131,7 +131,7 @@ class TestTensorListener {
             })
             .catch(() => {});
         }
-      }, 12000);
+      }, defaultTime * 1000 + 2000);
 
       this.messageNodeTimeouts[this.getStorageKey(ctx)] = setTimeout(() => {
         finalMiddleware(ctx);
