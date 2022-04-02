@@ -294,7 +294,7 @@ class MessageHandler {
    * @description
    * Removes mentions and extra spaces from the message
    *
-   * @param {Context} ctx
+   * @param {GrammyContext} ctx
    * @param {string} originMessage
    */
   sanitizeMessage(ctx, originMessage) {

@@ -6,7 +6,7 @@ const { errorHandler } = require('../../utils');
 const { trainingChat } = require('../../creator'); // creatorId
 const { getTensorTestResult } = require('../../message');
 
-const defaultTime = 10;
+const defaultTime = 30;
 
 /**
  * @param {GrammyContext} ctx
@@ -163,7 +163,7 @@ class TestTensorListener {
             })
             .catch(() => {});
         }
-      }, 12000);
+      }, defaultTime * 1000 + 2000);
 
       this.messageNodeTimeouts[this.getStorageKey(ctx)] = setTimeout(() => {
         finalMiddleware(ctx);
@@ -288,7 +288,7 @@ class TestTensorListener {
       const message = ctx.msg.text || ctx.msg.caption;
 
       if (!message) {
-        ctx.reply('Пропускаю це повідомлення, тут немає тексту', { reply_to_message_id: ctx.msg.message_id }).catch(() => {});
+        ctx.api.deleteMessage(ctx.chat.id, ctx.msg.message_id).catch();
         return;
       }
 

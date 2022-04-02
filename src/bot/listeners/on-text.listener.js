@@ -28,20 +28,9 @@ class OnTextListener {
      * */
     return async (ctx, next) => {
       // TODO use for ctx prod debug
-      // console.info('enter onText ******', ctx.chat?.title, '******', ctx.msg?.text);
+      // console.info('enter onText ******', ctx.chat?.title, '******', ctx.state.text);
 
-      if (env.DEBUG) {
-        ctx.state.performanceStart = performance.now();
-      }
-
-      /**
-       * Skip messages before bot became admin
-       * */
-      if ((ctx.msg?.date || 0) * 1000 < +ctx.session.botAdminDate) {
-        return next();
-      }
-
-      const message = ctx.msg.text;
+      const message = ctx.state.text;
 
       /**
        * Removed because ask to reduce chat messages
@@ -68,7 +57,8 @@ class OnTextListener {
       if (rep.byRules?.rule) {
         try {
           const username = ctx.from?.username;
-          const writeUsername = username ? `@${username}` : '';
+          const fullName = ctx.from?.last_name ? `${ctx.from?.first_name} ${ctx.from?.last_name}` : ctx.from?.first_name;
+          const writeUsername = username ? `@${username}` : fullName ?? '';
 
           let debugMessage = '';
 

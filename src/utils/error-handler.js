@@ -16,6 +16,10 @@ const errorHandler =
    * */
   async (ctx, next) => {
     try {
+      if (!fn) {
+        console.error('errorHandler received an empty value instead of function.');
+      }
+
       return await fn(ctx, next);
     } catch (error) {
       handleError(error);
