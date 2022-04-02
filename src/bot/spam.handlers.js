@@ -11,7 +11,7 @@ const splitter = new GraphemeSplitter();
  * @param {MessageHandler} messageHandler
  */
 const isFilteredByRules = async (ctx, messageHandler) => {
-  const originMessage = ctx.msg?.text;
+  const originMessage = ctx.state.text;
   const message = messageHandler.sanitizeMessage(ctx, originMessage);
   /**
    * Adapter for tensor
@@ -30,7 +30,7 @@ const isFilteredByRules = async (ctx, messageHandler) => {
 /**
  * @param {GrammyContext} ctx
  */
-const countEmojis = (ctx) => splitter.splitGraphemes(ctx.msg?.text || '').filter((e) => containsEmoji(e)).length;
+const countEmojis = (ctx) => splitter.splitGraphemes(ctx.state.text || '').filter((e) => containsEmoji(e)).length;
 
 /**
  * @param {GrammyContext} ctx
