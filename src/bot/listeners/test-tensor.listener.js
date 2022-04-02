@@ -62,36 +62,70 @@ class TestTensorListener {
      * @param {GrammyContext} ctx
      * */
     const finalMiddleware = async (ctx) => {
+      const storage = this.storage[this.getStorageKey(ctx)];
+
       clearTimeout(this.messageNodeTimeouts[this.getStorageKey(ctx)]);
       clearInterval(this.messageNodeIntervals[this.getStorageKey(ctx)]);
 
       delete this.messageNodeTimeouts[this.getStorageKey(ctx)];
       delete this.messageNodeIntervals[this.getStorageKey(ctx)];
 
-      if (!this.storage[this.getStorageKey(ctx)]) {
+      if (!storage) {
         ctx.editMessageText(ctx.msg.text, { reply_markup: null }).catch(() => {});
         return;
       }
 
-      if (this.storage[this.getStorageKey(ctx)].positives?.length === this.storage[this.getStorageKey(ctx)].negatives?.length) {
-        ctx.editMessageText(`${this.storage[this.getStorageKey(ctx)].originalMessage}\n\nЧекаю на більше оцінок...`).catch(() => {});
+      const positivesCount = storage.positives?.length;
+      const negativesCount = storage.negatives?.length;
+      const skipsCount = storage.skips?.length;
+
+      if (
+        (positivesCount === negativesCount && positivesCount !== 0) ||
+        (positivesCount === skipsCount && skipsCount !== 0) ||
+        (negativesCount === skipsCount && negativesCount !== 0)
+      ) {
+        ctx.editMessageText(`${storage.originalMessage}\n\nЧекаю на більше оцінок...`).catch(() => {});
         return;
       }
 
-      const status = this.storage[this.getStorageKey(ctx)].positives.length > this.storage[this.getStorageKey(ctx)].negatives.length;
-      const winUsers = status ? this.storage[this.getStorageKey(ctx)].positives : this.storage[this.getStorageKey(ctx)].negatives;
+      let status = null;
+      if (positivesCount > negativesCount && positivesCount > skipsCount) {
+        status = true;
+      } else if (negativesCount > positivesCount && negativesCount > skipsCount) {
+        status = false;
+      }
+
+      let winUsers = [];
+      if (status === true) {
+        winUsers = storage.positives;
+      } else if (status === false) {
+        winUsers = storage.negatives;
+      } else {
+        winUsers = storage.skips;
+      }
 
       // const winUsersText = winUsers.slice(0, 2).join(', ') + (winUsers.length > 3 ? ' та інші' : '');
 
       const originMessage = ctx.update.callback_query.message.reply_to_message;
 
-      this.writeDataset(status ? 'positives' : 'negatives', originMessage.text || originMessage.caption);
+      if (status === true) {
+        this.writeDataset('positives', originMessage.text || originMessage.caption);
+      } else if (status === false) {
+        this.writeDataset('negatives', originMessage.text || originMessage.caption);
+      }
+
+      let text = '⏭ пропуск';
+      if (status === true) {
+        text = '✅ спам';
+      } else if (status === false) {
+        text = '⛔️ не спам';
+      }
 
       await ctx
         .editMessageText(
-          `${this.storage[this.getStorageKey(ctx)].originalMessage}\n\n${winUsers.join(', ')} виділив/ли це як ${
-            status ? '✅ спам' : '⛔️ не спам'
-          }\nВидалю обидва повідомлення автоматично через 30 сек...`,
+          `${storage.originalMessage}\n\n${winUsers.join(
+            ', ',
+          )} виділив/ли це як ${text}\nВидалю обидва повідомлення автоматично через 30 сек...`,
           {
             parse_mode: 'HTML',
             reply_markup: null,
@@ -145,11 +179,13 @@ class TestTensorListener {
           errorHandler((ctx) => {
             this.initTensorSession(ctx, ctx.msg.text);
 
+            const storage = this.storage[this.getStorageKey(ctx)];
             const username = getAnyUsername(ctx);
-            this.storage[this.getStorageKey(ctx)].negatives = this.storage[this.getStorageKey(ctx)].negatives?.filter(
-              (item) => item !== username,
-            );
-            this.storage[this.getStorageKey(ctx)].positives.push(username);
+            storage.negatives = storage.negatives?.filter((item) => item !== username);
+            storage.skips = storage.skips.filter((item) => item !== username);
+            if (!storage.positives.includes(username)) {
+              storage.positives.push(username);
+            }
 
             ctx.menu.update();
             processButtonMiddleware(ctx);
@@ -160,11 +196,31 @@ class TestTensorListener {
           errorHandler((ctx) => {
             this.initTensorSession(ctx, ctx.msg.text);
 
+            const storage = this.storage[this.getStorageKey(ctx)];
             const username = getAnyUsername(ctx);
-            this.storage[this.getStorageKey(ctx)].positives = this.storage[this.getStorageKey(ctx)].positives.filter(
-              (item) => item !== username,
-            );
-            this.storage[this.getStorageKey(ctx)].negatives.push(username);
+            storage.positives = storage.positives.filter((item) => item !== username);
+            storage.skips = storage.skips.filter((item) => item !== username);
+            if (!storage.negatives.includes(username)) {
+              storage.negatives.push(username);
+            }
+
+            ctx.menu.update();
+            processButtonMiddleware(ctx);
+          }),
+        )
+        .row()
+        .text(
+          (ctx) => `⏭ Пропустити (${this.storage[this.getStorageKey(ctx)]?.skips?.length || 0})`,
+          errorHandler((ctx) => {
+            this.initTensorSession(ctx, ctx.msg.text);
+
+            const storage = this.storage[this.getStorageKey(ctx)];
+            const username = getAnyUsername(ctx);
+            storage.positives = storage.positives.filter((item) => item !== username);
+            storage.negatives = storage.negatives?.filter((item) => item !== username);
+            if (!storage.skips.includes(username)) {
+              storage.skips.push(username);
+            }
 
             ctx.menu.update();
             processButtonMiddleware(ctx);
@@ -185,6 +241,7 @@ class TestTensorListener {
       this.storage[this.getStorageKey(ctx)] = {
         positives: [],
         negatives: [],
+        skips: [],
         originalMessage: message,
         time: defaultTime,
       };

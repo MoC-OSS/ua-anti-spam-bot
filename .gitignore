@@ -9,3 +9,5 @@ telegraf-session.json
 .env.dev
 .env.stg
 last-ctx.json
+negatives.json
+positives.json
