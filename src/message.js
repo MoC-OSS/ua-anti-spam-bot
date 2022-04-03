@@ -31,6 +31,15 @@ ${disableDeleteMessage === false ? '⛔️ Бот не повідомляє пр
 `.trim();
 
 /**
+ *
+ * Message that bots sends before confirmation
+ *
+ * */
+const confirmationMessage = `
+ Ось що буде надіслано до чатів:
+ `.trim();
+
+/**
  * Complex
  * */
 const startMessageAtom = `
@@ -207,17 +216,6 @@ const getUpdatesMessage = () =>
  * Message that bots sends before confirmation
  *
  * */
-const getConfirmationMessage = ({ userInput }) =>
-  `
-Ось що буде надіслано до чатів:\n\n${userInput}
-
-`.trim();
-
-/**
- *
- * Message that bots sends before confirmation
- *
- * */
 const getSuccessfulMessage = ({ totalCount }) =>
   `
 Загальна кількість унікальних приватних чатів та супер-груп: ${totalCount}.
@@ -261,6 +259,7 @@ module.exports = {
   somethingWentWrongMessage,
   cancelMessageSending,
   getDeclinedMassSendingMessage,
+  confirmationMessage,
   getTensorTestResult,
   getSettingsMenuMessage,
   getBotJoinMessage,
@@ -272,6 +271,5 @@ module.exports = {
   getDeleteMessage,
   getStatisticsMessage,
   getUpdatesMessage,
-  getConfirmationMessage,
   getSuccessfulMessage,
 };

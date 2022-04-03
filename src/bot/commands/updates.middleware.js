@@ -2,7 +2,7 @@ const { Menu } = require('@grammyjs/menu');
 const { apiThrottler } = require('@grammyjs/transformer-throttler');
 
 const { redisClient } = require('../../db');
-const { getUpdatesMessage, getConfirmationMessage, getSuccessfulMessage, cancelMessageSending } = require('../../message');
+const { getUpdatesMessage, getSuccessfulMessage, cancelMessageSending, confirmationMessage } = require('../../message');
 const { handleError } = require('../../utils');
 
 class UpdatesMiddleware {
@@ -33,13 +33,14 @@ class UpdatesMiddleware {
     /**
      * @param {GrammyContext} ctx
      * */
-    return (ctx) => {
+    return async (ctx) => {
       const userInput = ctx.msg?.text;
+      const textEntities = ctx.msg?.entities;
       ctx.session.updatesText = userInput;
+      ctx.session.textEntities = textEntities ?? null;
       ctx.session.step = 'messageSending';
-      ctx.reply(getConfirmationMessage({ userInput }), {
-        reply_markup: this.menu,
-      });
+      await ctx.reply(confirmationMessage);
+      await ctx.reply(userInput, { entities: textEntities ?? null, reply_markup: this.menu });
     };
   }
 
@@ -55,6 +56,7 @@ class UpdatesMiddleware {
         ctx.api.config.use(throttler);
 
         const updatesMessage = ctx.session.updatesText;
+        const updatesMessageEntities = ctx.session.textEntities;
         const sessions = await redisClient.getAllRecords();
         const getChatId = (sessionId) => sessionId.split(':')[0];
         const onlyUniqueSessions = sessions.filter(
@@ -66,7 +68,7 @@ class UpdatesMiddleware {
         const totalCount = privateAndSuperGroupsSessions.length;
 
         privateAndSuperGroupsSessions.forEach(async (e) => {
-          ctx.api.sendMessage(e.id, updatesMessage).catch((error) => {
+          ctx.api.sendMessage(e.id, updatesMessage, { entities: updatesMessageEntities ?? null }).catch((error) => {
             console.error('This bot was blocked or kicked from this chat!');
             handleError(error);
           });
