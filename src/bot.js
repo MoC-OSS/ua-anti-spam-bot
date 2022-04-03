@@ -86,11 +86,11 @@ const rootMenu = new Menu('root');
      * */
     const throttler = apiThrottler({
       group: {
-        maxConcurrent: 1,
+        maxConcurrent: 2,
         minTime: 500,
         reservoir: 20,
         reservoirRefreshAmount: 20,
-        reservoirRefreshInterval: 60000,
+        reservoirRefreshInterval: 10000,
       },
     });
     bot.api.config.use(throttler);
