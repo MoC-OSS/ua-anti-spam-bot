@@ -35,7 +35,8 @@
     "keyv": "^4.1.1",
     "lodash.get": "^4.4.2",
     "redis": "^4.0.4",
-    "typed-dotenv": "^10.0.1"
+    "typed-dotenv": "^10.0.1",
+    "ukrainian-ml-optimizer": "github:DrSmile444/ukrainian-ml-optimizer"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^16.2.1",

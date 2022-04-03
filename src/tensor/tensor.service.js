@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
+const { optimizeText } = require('ukrainian-ml-optimizer');
 const tf = require('@tensorflow/tfjs');
 require('@tensorflow/tfjs-node');
 
@@ -60,11 +61,7 @@ class TensorService {
     // Convert sentence to lower case which ML Model expects
     // Strip all characters that are not alphanumeric or spaces
     // Then split on spaces to create a word array.
-    const wordArray = message
-      .toLowerCase()
-      .replace(/[^a-zа-яіїєґ\d]/g, ' ')
-      .replace(/\s\s+/g, ' ')
-      .trim()
+    const wordArray = optimizeText(message)
       .split(' ')
       .slice(0, this.modelLength - 1);
 
@@ -108,7 +105,7 @@ class TensorService {
 module.exports = {
   TensorService,
   initTensor: async () => {
-    const tensorService = new TensorService('./temp/model.json', 0.65);
+    const tensorService = new TensorService('./temp/model.json', 0.8);
     await tensorService.loadModel();
 
     return tensorService;
