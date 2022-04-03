@@ -109,7 +109,7 @@ const rootMenu = new Menu('root');
   const messageHandler = new MessageHandler(tensorService);
 
   const onTextListener = new OnTextListener(keyv, startTime, messageHandler);
-  const tensorListener = new TestTensorListener(tensorService, redisSession);
+  const tensorListener = new TestTensorListener(tensorService);
 
   rootMenu.register(tensorListener.initMenu());
   rootMenu.register(updatesMiddleware.initMenu());
