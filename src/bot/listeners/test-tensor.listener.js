@@ -7,6 +7,7 @@ const { creatorId, trainingChat } = require('../../creator');
 const { getTensorTestResult } = require('../../message');
 
 const defaultTime = 30;
+const removeTime = 30;
 
 /**
  * @param {GrammyContext} ctx
@@ -37,7 +38,7 @@ class TestTensorListener {
         fs.writeFileSync(path, '[]');
       }
 
-      const file = JSON.parse(fs.readFileSync(path));
+      const file = JSON.parse(fs.readFileSync(path) || '[]');
       const newFile = [...new Set([...file, word])];
 
       fs.writeFileSync(path, `${JSON.stringify(newFile, null, 2)}\n`);
@@ -125,7 +126,7 @@ class TestTensorListener {
         .editMessageText(
           `${storage.originalMessage}\n\n${winUsers.join(
             ', ',
-          )} виділив/ли це як ${text}\nВидалю обидва повідомлення автоматично через 30 сек...`,
+          )} виділив/ли це як ${text}\nВидалю обидва повідомлення автоматично через ${removeTime} сек...`,
           {
             parse_mode: 'HTML',
             reply_markup: null,
@@ -138,7 +139,7 @@ class TestTensorListener {
           .deleteMessage(originMessage.chat.id, originMessage.message_id)
           .then(() => ctx.api.deleteMessage(ctx.chat.id, ctx.msg.message_id))
           .catch(console.error);
-      }, 30000);
+      }, removeTime * 1000);
 
       delete this.storage[this.getStorageKey(ctx)];
     };
