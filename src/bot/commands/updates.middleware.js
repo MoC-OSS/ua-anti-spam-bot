@@ -2,15 +2,8 @@ const { Menu } = require('@grammyjs/menu');
 const { apiThrottler } = require('@grammyjs/transformer-throttler');
 
 const { redisClient } = require('../../db');
-const {
-  getUpdatesMessage,
-  getConfirmationMessage,
-  getSuccessfulMessage,
-  cancelMessageSending,
-  getDeclinedMassSendingMessage,
-} = require('../../message');
+const { getUpdatesMessage, getConfirmationMessage, getSuccessfulMessage, cancelMessageSending } = require('../../message');
 const { handleError } = require('../../utils');
-const { creatorId } = require('../../creator');
 
 class UpdatesMiddleware {
   constructor() {
@@ -31,13 +24,8 @@ class UpdatesMiddleware {
      * @param {GrammyContext} ctx
      * */
     return (ctx) => {
-      if (ctx.chat.type === 'private' && ctx.chat.id === creatorId) {
-        // id 143875991 / creatorId for test;
-        ctx.session.step = 'confirmation';
-        ctx.replyWithHTML(getUpdatesMessage());
-      } else {
-        ctx.reply(getDeclinedMassSendingMessage);
-      }
+      ctx.session.step = 'confirmation';
+      ctx.replyWithHTML(getUpdatesMessage());
     };
   }
 

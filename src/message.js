@@ -44,7 +44,7 @@ const startMessageAtom = `
  * Message that bots sends if user has no rights to perform mass sending
  *
  * */
-const getDeclinedMassSendingMessage = 'Вибач, але у тебе немає прав робити масову розсилку.'.trim();
+const getDeclinedMassSendingMessage = 'Вибач, але у тебе немає прав для цієї команди.😞'.trim();
 
 /**
  *

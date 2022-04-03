@@ -21,6 +21,7 @@ const {
   onlyNotAdmin,
   onlyNotForwarded,
   onlyWithText,
+  onlyCreator,
 } = require('./bot/middleware');
 const { handleError, errorHandler, sleep } = require('./utils');
 const { logsChat } = require('./creator');
@@ -134,9 +135,9 @@ const rootMenu = new Menu('root');
   bot.command('session', botActiveMiddleware, errorHandler(sessionMiddleware.middleware()));
   bot.command('statistics', botActiveMiddleware, errorHandler(statisticsMiddleware.middleware()));
 
-  bot.command('updates', botActiveMiddleware, errorHandler(updatesMiddleware.initialization()));
-  router.route('confirmation', botActiveMiddleware, errorHandler(updatesMiddleware.confirmation()));
-  router.route('messageSending', botActiveMiddleware, errorHandler(updatesMiddleware.messageSending()));
+  bot.command('updates', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.initialization()));
+  router.route('confirmation', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.confirmation()));
+  router.route('messageSending', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.messageSending()));
 
   // TODO commented for settings feature
   // bot.command('settings', (ctx) => {
