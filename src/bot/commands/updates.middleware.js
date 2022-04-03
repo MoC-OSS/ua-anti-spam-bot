@@ -12,9 +12,9 @@ class UpdatesMiddleware {
 
   initMenu() {
     this.menu = new Menu('approveUpdatesMenu')
-      .text({ text: 'Підтвердити', payload: 'approve' })
+      .text({ text: 'Підтвердити ✅', payload: 'approve' })
       .row()
-      .text({ text: 'Відмінити', payload: 'cancel' });
+      .text({ text: 'Відмінити ⛔️', payload: 'cancel' });
 
     return this.menu;
   }
