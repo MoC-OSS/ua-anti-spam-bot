@@ -1,8 +1,8 @@
 const { redisClient } = require('../db');
 const { knexClient } = require('../db');
 
-const { Statistics } = require('../db/models/Statistics');
-const { Sessions } = require('../db/models/Sessions');
+const { Statistics } = require('../db/models/statistics');
+const { Sessions } = require('../db/models/sessions');
 const { getStatisticsObjectFromSession } = require('../bot/botUtils');
 
 const saveDataHandler = async () => {

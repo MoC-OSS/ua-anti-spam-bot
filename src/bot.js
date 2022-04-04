@@ -12,7 +12,7 @@ const { GlobalMiddleware, performanceMiddleware, botActiveMiddleware } = require
 const { handleError, errorHandler, sleep } = require('./utils');
 const { logsChat } = require('./creator');
 const { redisClient } = require('./db');
-const { Sessions } = require('./db/models/Sessions');
+const { Sessions } = require('./db/models/sessions');
 // TODO commented for settings feature
 // const { getSettingsMenuMessage, settingsSubmitMessage, settingsDeleteItemMessage } = require('./message');
 

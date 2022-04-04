@@ -5,7 +5,7 @@
 exports.up = async (knex) =>
   knex.schema.createTable('bot_users', (table) => {
     table.uuid('id').defaultTo(knex.raw('uuid_generate_v4()')).primary();
-    table.integer('chat_id').notNullable();
+    table.string('chat_id', 20).notNullable();
     table.enu('type', ['group', 'super_group', 'channel', 'private']);
     table.boolean('is_admin').notNullable();
     table.boolean('is_removed').notNullable();
