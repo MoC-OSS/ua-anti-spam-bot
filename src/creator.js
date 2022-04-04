@@ -4,7 +4,7 @@ const { env } = require('typed-dotenv').config();
 const creatorId = env.CREATOR_ID ?? 341977297;
 const creatorNick = '@dimkasmile';
 const logsChat = -1001599612617;
-const trainingChat = -1001527463076;
+const trainingChat = env.TRAINING_CHAT_ID ?? -1001527463076;
 
 module.exports = {
   logsChat,
