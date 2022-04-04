@@ -38,7 +38,9 @@ class GlobalMiddleware {
       ctx.session.chatTitle = ctx.chat?.title;
       ctx.session.botRemoved = ctx?.msg?.left_chat_participant?.id === ctx.me.id;
 
-      logCtx(ctx);
+      if (!env.TEST_TENSOR) {
+        logCtx(ctx);
+      }
 
       if (!ctx.state) {
         ctx.state = {};

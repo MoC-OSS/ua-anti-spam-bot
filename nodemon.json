@@ -1,0 +1,9 @@
+{
+  "verbose": true,
+  "ignore": [
+    "./telegraf-session.json",
+    "./last-ctx.json",
+    "./positives.json",
+    "./negatives.json"
+  ]
+}

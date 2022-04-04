@@ -1,13 +1,17 @@
 const { Bot } = require('grammy');
 const { hydrateReply } = require('@grammyjs/parse-mode');
-// TODO commented for settings feature
-// const { Menu } = require('@grammyjs/menu');
+const { apiThrottler } = require('@grammyjs/transformer-throttler');
+const { Router } = require('@grammyjs/router');
+const { Menu } = require('@grammyjs/menu');
 const { error, env } = require('typed-dotenv').config();
 const Keyv = require('keyv');
+
+const { initTensor } = require('./tensor/tensor.service');
 const { RedisSession } = require('./bot/sessionProviders');
 
-const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware } = require('./bot/commands');
-const { OnTextListener } = require('./bot/listeners');
+const { MessageHandler } = require('./bot/message.handler');
+const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware, UpdatesMiddleware } = require('./bot/commands');
+const { OnTextListener, TestTensorListener } = require('./bot/listeners');
 const {
   GlobalMiddleware,
   onlyWhenBotAdmin,
@@ -17,9 +21,11 @@ const {
   onlyNotAdmin,
   onlyNotForwarded,
   onlyWithText,
+  onlyCreator,
 } = require('./bot/middleware');
 const { handleError, errorHandler, sleep } = require('./utils');
 const { logsChat } = require('./creator');
+
 // TODO commented for settings feature
 // const { getSettingsMenuMessage, settingsSubmitMessage, settingsDeleteItemMessage } = require('./message');
 
@@ -40,6 +46,8 @@ if (error) {
   console.error('Something wrong with env variables');
   process.exit();
 }
+
+const rootMenu = new Menu('root');
 
 // TODO commented for settings feature
 // const menu = new Menu('settings')
@@ -67,9 +75,27 @@ if (error) {
   await sleep(5000);
   console.info('Starting a new instance...');
 
+  const tensorService = await initTensor();
+
   const startTime = new Date();
 
   const bot = new Bot(env.BOT_TOKEN);
+
+  if (env.TEST_TENSOR) {
+    /**
+     * We need to use throttler for Test Tensor because telegram could ban the bot
+     * */
+    const throttler = apiThrottler({
+      group: {
+        maxConcurrent: 2,
+        minTime: 500,
+        reservoir: 20,
+        reservoirRefreshAmount: 20,
+        reservoirRefreshInterval: 10000,
+      },
+    });
+    bot.api.config.use(throttler);
+  }
 
   const redisSession = new RedisSession();
 
@@ -79,17 +105,29 @@ if (error) {
   const helpMiddleware = new HelpMiddleware(startTime);
   const sessionMiddleware = new SessionMiddleware(startTime);
   const statisticsMiddleware = new StatisticsMiddleware(startTime);
+  const updatesMiddleware = new UpdatesMiddleware(startTime);
 
-  const onTextListener = new OnTextListener(keyv, startTime);
+  const messageHandler = new MessageHandler(tensorService);
+
+  const onTextListener = new OnTextListener(keyv, startTime, messageHandler);
+  const tensorListener = new TestTensorListener(tensorService);
+
+  rootMenu.register(tensorListener.initMenu());
+  rootMenu.register(updatesMiddleware.initMenu());
 
   bot.use(hydrateReply);
 
   bot.use(redisSession.middleware());
 
+  bot.errorBoundary(handleError).use(rootMenu);
+
   bot.use(errorHandler(globalMiddleware.middleware()));
 
+  const router = new Router((ctx) => ctx.session.step);
+
+  bot.use(router);
+
   // TODO commented for settings feature
-  // bot.use(menu);
 
   bot.command('start', errorHandler(startMiddleware.middleware()));
   bot.command('help', errorHandler(helpMiddleware.middleware()));
@@ -97,22 +135,29 @@ if (error) {
   bot.command('session', botActiveMiddleware, errorHandler(sessionMiddleware.middleware()));
   bot.command('statistics', botActiveMiddleware, errorHandler(statisticsMiddleware.middleware()));
 
+  bot.command('updates', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.initialization()));
+  router.route('confirmation', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.confirmation()));
+  router.route('messageSending', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.messageSending()));
+
   // TODO commented for settings feature
   // bot.command('settings', (ctx) => {
   //   ctx.reply(getSettingsMenuMessage(ctx.session.settings), { reply_markup: menu });
   // });
 
-  bot.on(
-    ['message', 'edited_message'],
-    botActiveMiddleware,
-    onlyNotAdmin,
-    onlyNotForwarded,
-    onlyWithText,
-    onlyWhenBotAdmin,
-    errorHandler(performanceStartMiddleware),
-    errorHandler(onTextListener.middleware()),
-    errorHandler(performanceEndMiddleware),
-  );
+  bot
+    .errorBoundary(handleError)
+    .on(
+      ['message', 'edited_message'],
+      botActiveMiddleware,
+      errorHandler(tensorListener.middleware()),
+      onlyNotAdmin,
+      onlyNotForwarded,
+      onlyWithText,
+      onlyWhenBotAdmin,
+      errorHandler(performanceStartMiddleware),
+      errorHandler(onTextListener.middleware()),
+      errorHandler(performanceEndMiddleware),
+    );
 
   bot.catch(handleError);
 

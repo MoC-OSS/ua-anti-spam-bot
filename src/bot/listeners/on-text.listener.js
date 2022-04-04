@@ -1,7 +1,7 @@
 const { env } = require('typed-dotenv').config();
 
-const { telegramUtil, truncateString } = require('../../utils');
-const { getDeleteMessage, getDebugMessage, spamDeleteMessage } = require('../../message');
+const { telegramUtil } = require('../../utils');
+const { getDeleteMessage, getDebugMessage } = require('../../message'); // spamDeleteMessage
 const { getMessageReputation } = require('../spam.handlers');
 
 // const slavaWords = ['слава україні', 'слава украине', 'слава зсу'];
@@ -10,10 +10,12 @@ class OnTextListener {
   /**
    * @param {Keyv} keyv
    * @param {Date} startTime
+   * @param {MessageHandler} messageHandler
    */
-  constructor(keyv, startTime) {
+  constructor(keyv, startTime, messageHandler) {
     this.keyv = keyv;
     this.startTime = startTime;
+    this.messageHandler = messageHandler;
   }
 
   /**
@@ -50,7 +52,7 @@ class OnTextListener {
         return next();
       }
 
-      const rep = await getMessageReputation(ctx, this.keyv);
+      const rep = await getMessageReputation(ctx, this.keyv, this.messageHandler);
 
       if (rep.byRules?.rule) {
         try {
@@ -64,32 +66,17 @@ class OnTextListener {
             debugMessage = getDebugMessage({ message, byRules: rep.byRules, startTime: this.startTime });
           }
 
-          let words = rep.byRules.dataset === 'immediately' ? [] : [rep.byRules.rule];
-
-          words = words.map((word) => word.trim()).filter(Boolean);
-          words = words.map((word) => {
-            const newWordArray = word.split('');
-
-            for (let i = 1; i < word.length; i += 2) {
-              newWordArray[i] = '*';
-            }
-
-            return truncateString(newWordArray.join(''), 4);
+          await ctx.deleteMessage().then(() => {
+            ctx.replyWithHTML(
+              getDeleteMessage({ writeUsername, wordMessage: '', debugMessage, withLocation: rep.byRules.dataset.location }),
+            );
           });
-
-          const wordMessage = words.length ? ` (${words.join(', ')})` : '';
-
-          await ctx
-            .deleteMessage()
-
-            .then(() => {
-              ctx.reply(getDeleteMessage({ writeUsername, wordMessage, debugMessage }));
-            });
         } catch (e) {
           console.error('Cannot delete the message. Reason:', e);
         }
       }
 
+      /*
       if (rep.reputation <= 0 || (rep.userRep <= 0 && !env.DISABLE_USER_REP)) {
         try {
           await ctx
@@ -102,6 +89,7 @@ class OnTextListener {
           console.error('Cannot delete the message. Reason:', e);
         }
       }
+      */
 
       return next();
     };

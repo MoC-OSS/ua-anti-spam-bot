@@ -1,6 +1,7 @@
 const { env } = require('typed-dotenv').config();
 
 const { creatorNick } = require('./creator');
+const { getRandomItem } = require('./utils');
 
 /**
  * Generic
@@ -17,7 +18,7 @@ const makeAdminMessage = '⛔️ Я не активований.\n<b>☝️Зр�
  * */
 const settingsDeleteItemMessage = 'Повідомлення про видалення';
 const settingsSubmitMessage = '💾 Зберегти';
-
+const cancelMessageSending = 'Розсилка була відмінена!';
 /**
  * Complex - Settings
  * */
@@ -31,6 +32,15 @@ ${disableDeleteMessage === false ? '⛔️ Бот не повідомляє пр
 `.trim();
 
 /**
+ *
+ * Message that bots sends before confirmation
+ *
+ * */
+const confirmationMessage = `
+ Ось що буде надіслано до чатів:
+ `.trim();
+
+/**
  * Complex
  * */
 const startMessageAtom = `
@@ -41,16 +51,28 @@ const startMessageAtom = `
 
 /**
  *
+ * Message that bots sends if user has no rights to perform mass sending
+ *
+ * */
+const getDeclinedMassSendingMessage = 'Вибач, але у тебе немає прав для цієї команди.😞'.trim();
+
+const randomBanEmojis = ['👮🏻‍♀️', '🤦🏼‍♀️', '🙅🏻‍♀️'];
+const randomLocationBanEmojis = ['🏡', '🏘️', '🌳'];
+
+/**
+ *
  * Message that bot sends on delete
  *
  * */
-const getDeleteMessage = ({ writeUsername, wordMessage, debugMessage }) =>
+const getDeleteMessage = ({ writeUsername, wordMessage, debugMessage, withLocation }) =>
   `
-❗️ ${writeUsername} Повідомлення видалено.
+❗️ ${writeUsername ? `${writeUsername}, <b>повідомлення` : '<b>Повідомлення'} видалено</b>.
 
-* Причина: поширення потенційно стратегічної інформації${wordMessage}.
+${getRandomItem(withLocation ? randomLocationBanEmojis : randomBanEmojis)} <b>Причина</b>: поширення потенційно стратегічної інформації${
+    withLocation ? ' з повідомленням локації' : ''
+  }${wordMessage}.
 
-✊🏻 «єВорог» — новий бот від Мінцифри, яким не зможуть скористатися окупанти.
+✊🏻 «<b>єВорог</b>» — новий бот від Мінцифри, яким не зможуть скористатися окупанти.
 Повідомляйте цю інформацію йому.
 
 👉🏻 @evorog_bot
@@ -186,6 +208,28 @@ const getStartChannelMessage = ({ botName }) =>
 
 /**
  *
+ * Message when bot asks user what does he want to send to all private chats
+ *
+ * */
+const getUpdatesMessage = () =>
+  `
+Напиши після цього повідомлення те, що ти хочеш відправити по всім активним сесіям:
+
+`.trim();
+
+/**
+ *
+ * Message that bots sends before confirmation
+ *
+ * */
+const getSuccessfulMessage = ({ totalCount }) =>
+  `
+Загальна кількість унікальних приватних чатів та супер-груп: ${totalCount}.
+
+`.trim();
+
+/**
+ *
  * Message that bot sends when user invites in into a group
  *
  * */
@@ -194,6 +238,16 @@ const getBotJoinMessage = ({ adminsString }) =>
 ${startMessageAtom}
 
 ${getGroupStartMessage({ adminsString })}
+`.trim();
+
+/**
+ * Test messages
+ */
+const getTensorTestResult = ({ chance, isSpam, tensorDate }) =>
+  `
+🎲 Шанс спаму - <b>${chance}</b>
+🤔 Я вважаю...<b>${isSpam ? '✅ Це спам' : '⛔️ Це не спам'}</b>
+📈 Останнє оновлення: ${tensorDate?.toISOString()}
 `.trim();
 
 /**
@@ -209,6 +263,10 @@ module.exports = {
   startAdminReadyMessage,
   spamDeleteMessage,
   somethingWentWrongMessage,
+  cancelMessageSending,
+  getDeclinedMassSendingMessage,
+  confirmationMessage,
+  getTensorTestResult,
   getSettingsMenuMessage,
   getBotJoinMessage,
   getStartMessage,
@@ -218,4 +276,6 @@ module.exports = {
   getDebugMessage,
   getDeleteMessage,
   getStatisticsMessage,
+  getUpdatesMessage,
+  getSuccessfulMessage,
 };
