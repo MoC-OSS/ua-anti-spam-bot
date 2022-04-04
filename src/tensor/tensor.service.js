@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
+const { env } = require('typed-dotenv').config();
 const { optimizeText } = require('ukrainian-ml-optimizer');
 const tf = require('@tensorflow/tfjs');
 require('@tensorflow/tfjs-node');
@@ -39,14 +40,15 @@ class TensorService {
      * */
     let fileStat = null;
 
-    try {
-      fileStat = fs.statSync(fullModelPath);
-    } catch (e) {
-      fileStat = null;
+    if (env.TEST_TENSOR) {
+      try {
+        fileStat = fs.statSync(fullModelPath);
+      } catch (e) {
+        fileStat = null;
+      }
     }
 
     return tensorPredict.data().then((numericData) => ({
-      numericData,
       spamRate: numericData[1],
       isSpam: numericData[1] > this.SPAM_THRESHOLD,
       tensorRank: tensorRank.tokenArray,

@@ -20,7 +20,7 @@ const isFilteredByRules = async (ctx, messageHandler) => {
 
   return {
     rule: result ? 'tensor' : null,
-    dataset: null,
+    dataset: result,
   };
 
   // Hid old logic

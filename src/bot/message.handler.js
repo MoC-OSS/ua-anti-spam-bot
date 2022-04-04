@@ -37,7 +37,7 @@ class MessageHandler {
    * @param {string} message - user message
    * @param {string} originMessage - original user message
    *
-   * @returns {Promise<boolean>} is spam result
+   * @returns {Promise<{ immediately: boolean, tensor: boolean, location: boolean }>} is spam result
    */
   async getTensorRank(message, originMessage) {
     /**
@@ -50,7 +50,9 @@ class MessageHandler {
     const immediatelyResult = await this.processMessage(originMessage, this.datasetPaths.immediately, false);
 
     if (immediatelyResult.rule) {
-      return true;
+      return {
+        immediately: true,
+      };
     }
 
     /**
@@ -62,7 +64,9 @@ class MessageHandler {
      * 90% is very high and it's probably spam
      */
     if (tensorResult.spamRate > 0.9) {
-      return true;
+      return {
+        tensor: tensorResult.spamRate,
+      };
     }
 
     /**
@@ -95,13 +99,16 @@ class MessageHandler {
      * Found location add more rank for testing
      * */
     if (tensorResult.spamRate + locationRank > 0.8) {
-      return true;
+      return {
+        tensor: tensorResult.spamRate,
+        location: true,
+      };
     }
 
     /**
      * Return default
      * */
-    return tensorResult.isSpam;
+    return tensorResult.isSpam ? { tensor: tensorResult.spamRate } : null;
   }
 
   /**

@@ -42,7 +42,7 @@ const { processHandler } = require('./express/process.handler');
     const time = endTime - startTime;
 
     if (env.DEBUG) {
-      console.info(result);
+      console.info({ result, time, expressStartTime });
     }
 
     res.json({ result, time, expressStartTime });
