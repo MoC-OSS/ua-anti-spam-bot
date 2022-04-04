@@ -67,7 +67,9 @@ class OnTextListener {
           }
 
           await ctx.deleteMessage().then(() => {
-            ctx.reply(getDeleteMessage({ writeUsername, wordMessage: '', debugMessage, withLocation: rep.byRules.dataset.location }));
+            ctx.replyWithHTML(
+              getDeleteMessage({ writeUsername, wordMessage: '', debugMessage, withLocation: rep.byRules.dataset.location }),
+            );
           });
         } catch (e) {
           console.error('Cannot delete the message. Reason:', e);
