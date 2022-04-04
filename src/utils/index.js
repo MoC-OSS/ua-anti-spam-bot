@@ -46,12 +46,23 @@ function formatDate(date) {
   return new Intl.DateTimeFormat('uk-UA', { dateStyle: 'full', timeStyle: 'long', timeZone: 'Europe/Kiev' }).format(date);
 }
 
+/**
+ * @template T
+ *
+ * @param {T[]} array
+ * @returns {T} - random item from array
+ * */
+function getRandomItem(array) {
+  return array[Math.floor(Math.random() * array.length)];
+}
+
 module.exports = {
   joinMessage,
   logCtx,
   sleep,
   truncateString,
   formatDate,
+  getRandomItem,
   messageUtil,
   telegramUtil,
   ...errorHandlerExports,

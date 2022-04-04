@@ -1,6 +1,7 @@
 const { env } = require('typed-dotenv').config();
 
 const { creatorNick } = require('./creator');
+const { getRandomItem } = require('./utils');
 
 /**
  * Generic
@@ -55,18 +56,23 @@ const startMessageAtom = `
  * */
 const getDeclinedMassSendingMessage = 'Вибач, але у тебе немає прав для цієї команди.😞'.trim();
 
+const randomBanEmojis = ['👮🏻‍♀️', '🤦🏼‍♀️', '🙅🏻‍♀️'];
+const randomLocationBanEmojis = ['🏡', '🏘️', '🌳'];
+
 /**
  *
  * Message that bot sends on delete
  *
  * */
-const getDeleteMessage = ({ writeUsername, wordMessage, debugMessage }) =>
+const getDeleteMessage = ({ writeUsername, wordMessage, debugMessage, withLocation }) =>
   `
-❗️ ${writeUsername} Повідомлення видалено.
+❗️ ${writeUsername ? `${writeUsername}, <b>повідомлення` : '<b>Повідомлення'} видалено</b>.
 
-* Причина: поширення потенційно стратегічної інформації${wordMessage}.
+${getRandomItem(withLocation ? randomLocationBanEmojis : randomBanEmojis)} <b>Причина</b>: поширення потенційно стратегічної інформації${
+    withLocation ? ' з повідомленням локації' : ''
+  }${wordMessage}.
 
-✊🏻 «єВорог» — новий бот від Мінцифри, яким не зможуть скористатися окупанти.
+✊🏻 «<b>єВорог</b>» — новий бот від Мінцифри, яким не зможуть скористатися окупанти.
 Повідомляйте цю інформацію йому.
 
 👉🏻 @evorog_bot

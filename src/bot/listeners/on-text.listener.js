@@ -1,6 +1,6 @@
 const { env } = require('typed-dotenv').config();
 
-const { telegramUtil, truncateString } = require('../../utils');
+const { telegramUtil } = require('../../utils');
 const { getDeleteMessage, getDebugMessage } = require('../../message'); // spamDeleteMessage
 const { getMessageReputation } = require('../spam.handlers');
 
@@ -66,27 +66,11 @@ class OnTextListener {
             debugMessage = getDebugMessage({ message, byRules: rep.byRules, startTime: this.startTime });
           }
 
-          let words = rep.byRules.dataset === 'immediately' ? [] : [rep.byRules.rule];
-
-          words = words.map((word) => word.trim()).filter(Boolean);
-          words = words.map((word) => {
-            const newWordArray = word.split('');
-
-            for (let i = 1; i < word.length; i += 2) {
-              newWordArray[i] = '*';
-            }
-
-            return truncateString(newWordArray.join(''), 4);
+          await ctx.deleteMessage().then(() => {
+            ctx.replyWithHTML(
+              getDeleteMessage({ writeUsername, wordMessage: '', debugMessage, withLocation: rep.byRules.dataset.location }),
+            );
           });
-
-          const wordMessage = words.length ? ` (${words.join(', ')})` : '';
-
-          await ctx
-            .deleteMessage()
-
-            .then(() => {
-              ctx.reply(getDeleteMessage({ writeUsername, wordMessage, debugMessage }));
-            });
         } catch (e) {
           console.error('Cannot delete the message. Reason:', e);
         }
