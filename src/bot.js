@@ -1,3 +1,6 @@
+/* eslint-disable */
+// noinspection JSUnusedLocalSymbols
+
 const { Bot } = require('grammy');
 const { hydrateReply } = require('@grammyjs/parse-mode');
 const { apiThrottler } = require('@grammyjs/transformer-throttler');
@@ -147,21 +150,21 @@ const rootMenu = new Menu('root');
   //   ctx.reply(getSettingsMenuMessage(ctx.session.settings), { reply_markup: menu });
   // });
 
-  bot
-    .errorBoundary(handleError)
-    .on(
-      ['message', 'edited_message'],
-      ignoreOld(60),
-      botActiveMiddleware,
-      errorHandler(tensorListener.middleware()),
-      onlyNotAdmin,
-      onlyNotForwarded,
-      onlyWithText,
-      onlyWhenBotAdmin,
-      errorHandler(performanceStartMiddleware),
-      errorHandler(onTextListener.middleware()),
-      errorHandler(performanceEndMiddleware),
-    );
+  // bot
+  //   .errorBoundary(handleError)
+  //   .on(
+  //     ['message', 'edited_message'],
+  //     ignoreOld(60),
+  //     botActiveMiddleware,
+  //     errorHandler(tensorListener.middleware()),
+  //     onlyNotAdmin,
+  //     onlyNotForwarded,
+  //     onlyWithText,
+  //     onlyWhenBotAdmin,
+  //     errorHandler(performanceStartMiddleware),
+  //     errorHandler(onTextListener.middleware()),
+  //     errorHandler(performanceEndMiddleware),
+  //   );
 
   bot.catch(handleError);
 
