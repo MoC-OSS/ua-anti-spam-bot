@@ -60,7 +60,7 @@ class GlobalMiddleware {
       .then((count) => {
         ctx.chatSession.chatMembersCount = count;
       })
-      .catch(() => {});
+      .catch(handleError);
   }
 
   /**
