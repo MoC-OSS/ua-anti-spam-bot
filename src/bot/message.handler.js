@@ -63,7 +63,7 @@ class MessageHandler {
     /**
      * 90% is very high and it's probably spam
      */
-    if (tensorResult.spamRate > 0.9) {
+    if (tensorResult.spamRate > env.TENSOR_RANK) {
       return {
         tensor: tensorResult.spamRate,
       };
@@ -98,7 +98,7 @@ class MessageHandler {
     /**
      * Found location add more rank for testing
      * */
-    if (tensorResult.spamRate + locationRank > 0.8) {
+    if (tensorResult.spamRate + locationRank > env.TENSOR_RANK) {
       return {
         tensor: tensorResult.spamRate,
         location: true,
