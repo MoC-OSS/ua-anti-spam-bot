@@ -7,7 +7,7 @@ const { error, env } = require('typed-dotenv').config();
 const Keyv = require('keyv');
 
 const { initTensor } = require('./tensor/tensor.service');
-const { RedisSession } = require('./bot/sessionProviders');
+const { RedisSession, RedisChatSession } = require('./bot/sessionProviders');
 
 const { MessageHandler } = require('./bot/message.handler');
 const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware, UpdatesMiddleware } = require('./bot/commands');
@@ -99,6 +99,7 @@ const rootMenu = new Menu('root');
   }
 
   const redisSession = new RedisSession();
+  const redisChatSession = new RedisChatSession();
 
   const globalMiddleware = new GlobalMiddleware(bot);
 
@@ -119,6 +120,7 @@ const rootMenu = new Menu('root');
   bot.use(hydrateReply);
 
   bot.use(redisSession.middleware());
+  bot.use(redisChatSession.middleware());
 
   bot.errorBoundary(handleError).use(rootMenu);
 
