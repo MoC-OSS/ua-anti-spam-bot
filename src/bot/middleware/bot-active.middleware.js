@@ -8,7 +8,7 @@ function botActiveMiddleware(ctx, next) {
   // TODO use for ctx prod debug
   // console.info('enter botActiveMiddleware ******', ctx.chat?.title, '******', ctx.state.text);
 
-  if (ctx.chat.type !== 'private' && !ctx.session.botRemoved && ctx.session.isBotAdmin) {
+  if (ctx.chat.type !== 'private' && !ctx.chatSession.botRemoved && ctx.chatSession.isBotAdmin) {
     return next();
   }
 

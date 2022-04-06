@@ -122,7 +122,7 @@ class GlobalMiddleware {
     const addedMember = ctx?.msg?.new_chat_member;
     if (addedMember?.id === ctx.me.id && ctx.chat?.type !== 'private') {
       telegramUtil.getChatAdmins(this.bot, ctx.chat.id).then(({ adminsString }) => {
-        ctx.replyWithHTML(getBotJoinMessage({ adminsString }));
+        ctx.replyWithHTML(getBotJoinMessage({ adminsString, isAdmin: ctx.chatSession.isBotAdmin }));
       });
     }
   }

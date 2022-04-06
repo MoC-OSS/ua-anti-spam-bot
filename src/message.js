@@ -185,9 +185,9 @@ ${startMessageAtom}
  * Message that bot sends when user uses /start in the group
  *
  * */
-const getGroupStartMessage = ({ adminsString }) =>
+const getGroupStartMessage = ({ adminsString, isAdmin = false }) =>
   `
-${makeAdminMessage}
+${isAdmin ? startAdminReadyMessage : makeAdminMessage}
 
 ${adminsString ? `Це може зробити: ${adminsString}` : 'Це може зробити творець чату'}
 `.trim();
@@ -233,11 +233,11 @@ const getSuccessfulMessage = ({ totalCount }) =>
  * Message that bot sends when user invites in into a group
  *
  * */
-const getBotJoinMessage = ({ adminsString }) =>
+const getBotJoinMessage = ({ adminsString, isAdmin = false }) =>
   `
 ${startMessageAtom}
 
-${getGroupStartMessage({ adminsString })}
+${getGroupStartMessage({ adminsString, isAdmin })}
 `.trim();
 
 /**

@@ -18,7 +18,13 @@ export interface ChatSessionFlavor<S> {
   set chatSession(session: S | null | undefined);
 }
 
-export interface SessionData {
+export interface UpdatesSessionData {
+  step: string;
+  updatesText: string;
+  textEntities: string;
+}
+
+export interface SessionData extends Partial<UpdatesSessionData> {
   isCurrentUserAdmin: boolean;
 }
 
