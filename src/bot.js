@@ -9,6 +9,8 @@ const { Menu } = require('@grammyjs/menu');
 const { error, env } = require('typed-dotenv').config();
 const Keyv = require('keyv');
 
+const { redisClient } = require('./db');
+
 const { initTensor } = require('./tensor/tensor.service');
 const { RedisSession, RedisChatSession } = require('./bot/sessionProviders');
 
@@ -141,6 +143,26 @@ const rootMenu = new Menu('root');
   bot.command('session', botActiveMiddleware, errorHandler(sessionMiddleware.middleware()));
   bot.command('statistics', botActiveMiddleware, errorHandler(statisticsMiddleware.middleware()));
 
+  const isBotDeactivatedRedisKey = 'isBotDeactivated'
+
+  const botRedisActive = async (ctx, next) => {
+    const isDeactivated = await redisClient.getRawValue(isBotDeactivatedRedisKey);
+
+    if (!isDeactivated) {
+      return next();
+    }
+  }
+
+  bot.command('disable', onlyCreator, errorHandler(async (ctx) => {
+    await redisClient.setRawValue(isBotDeactivatedRedisKey, true);
+    ctx.reply('⛔️ Я виключений глобально');
+  }));
+
+  bot.command('enable', onlyCreator, errorHandler(async (ctx) => {
+    await redisClient.setRawValue(isBotDeactivatedRedisKey, false);
+    ctx.reply('✅ Я включений глобально');
+  }));
+
   bot.command('updates', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.initialization()));
   router.route('confirmation', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.confirmation()));
   router.route('messageSending', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.messageSending()));
@@ -150,21 +172,22 @@ const rootMenu = new Menu('root');
   //   ctx.reply(getSettingsMenuMessage(ctx.session.settings), { reply_markup: menu });
   // });
 
-  // bot
-  //   .errorBoundary(handleError)
-  //   .on(
-  //     ['message', 'edited_message'],
-  //     ignoreOld(60),
-  //     botActiveMiddleware,
-  //     errorHandler(tensorListener.middleware()),
-  //     onlyNotAdmin,
-  //     onlyNotForwarded,
-  //     onlyWithText,
-  //     onlyWhenBotAdmin,
-  //     errorHandler(performanceStartMiddleware),
-  //     errorHandler(onTextListener.middleware()),
-  //     errorHandler(performanceEndMiddleware),
-  //   );
+  bot
+    .errorBoundary(handleError)
+    .on(
+      ['message', 'edited_message'],
+      botRedisActive,
+      ignoreOld(60),
+      botActiveMiddleware,
+      errorHandler(tensorListener.middleware()),
+      onlyNotAdmin,
+      onlyNotForwarded,
+      onlyWithText,
+      onlyWhenBotAdmin,
+      errorHandler(performanceStartMiddleware),
+      errorHandler(onTextListener.middleware()),
+      errorHandler(performanceEndMiddleware),
+    );
 
   bot.catch(handleError);
 
