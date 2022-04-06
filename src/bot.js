@@ -152,6 +152,7 @@ const rootMenu = new Menu('root');
     .on(
       ['message', 'edited_message'],
       ignoreOld(60),
+      botActiveMiddleware,
       errorHandler(tensorListener.middleware()),
       onlyNotAdmin,
       onlyNotForwarded,

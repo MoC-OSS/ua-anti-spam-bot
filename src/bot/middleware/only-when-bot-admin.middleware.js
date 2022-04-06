@@ -10,7 +10,9 @@ async function onlyWhenBotAdmin(ctx, next) {
     return next();
   }
 
-  if (!ctx.chatSession.botRemoved && (ctx.msg?.date || 0) * 1000 < +ctx.chatSession.botAdminDate) {
+  const isMessageAfterBotAdmin = (ctx.msg?.date || 0) * 1000 < +ctx.chatSession.botAdminDate;
+
+  if (!ctx.chatSession.botRemoved && isMessageAfterBotAdmin) {
     return next();
   }
 }
