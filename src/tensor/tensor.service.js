@@ -107,7 +107,7 @@ class TensorService {
 module.exports = {
   TensorService,
   initTensor: async () => {
-    const tensorService = new TensorService('./temp/model.json', 0.8);
+    const tensorService = new TensorService('./temp/model.json', 0.93);
     await tensorService.loadModel();
 
     return tensorService;
