@@ -31,6 +31,7 @@ export interface SessionData extends Partial<UpdatesSessionData> {
 export interface ChatSessionData {
   chatType: Chat['type'];
   chatTitle?: string;
+  chatMembersCount: number;
   botRemoved: boolean;
   isBotAdmin: boolean;
   botAdminDate: Date;
