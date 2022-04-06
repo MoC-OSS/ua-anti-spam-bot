@@ -14,14 +14,15 @@ const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware
 const { OnTextListener, TestTensorListener } = require('./bot/listeners');
 const {
   GlobalMiddleware,
-  onlyWhenBotAdmin,
-  performanceStartMiddleware,
-  performanceEndMiddleware,
   botActiveMiddleware,
+  ignoreOld,
+  onlyCreator,
   onlyNotAdmin,
   onlyNotForwarded,
+  onlyWhenBotAdmin,
   onlyWithText,
-  onlyCreator,
+  performanceEndMiddleware,
+  performanceStartMiddleware,
 } = require('./bot/middleware');
 const { handleError, errorHandler, sleep } = require('./utils');
 const { logsChat } = require('./creator');
@@ -148,7 +149,7 @@ const rootMenu = new Menu('root');
     .errorBoundary(handleError)
     .on(
       ['message', 'edited_message'],
-      botActiveMiddleware,
+      ignoreOld(60),
       errorHandler(tensorListener.middleware()),
       onlyNotAdmin,
       onlyNotForwarded,

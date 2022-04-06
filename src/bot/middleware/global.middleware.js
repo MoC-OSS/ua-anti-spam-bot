@@ -20,7 +20,7 @@ class GlobalMiddleware {
      * @param {GrammyContext} ctx
      * @param {Next} next
      * */
-    return (ctx, next) => {
+    const middleware = async (ctx, next) => {
       /**
        * Channels doesn't have session.
        * TODO create a middleware to skip it
@@ -66,10 +66,22 @@ class GlobalMiddleware {
         updatePermissionsMember?.status === 'member' &&
         oldPermissionsMember?.status === 'administrator';
 
-      if (isUpdatedToAdmin) {
+      if (ctx.chat.type !== 'private') {
+        await ctx
+          .getChatAdministrators()
+          .then((admins) => {
+            ctx.session.isBotAdmin = !!(admins || []).find((member) => member.user?.id === ctx.me.id);
+            ctx.session.botRemoved = false;
+          })
+          .catch(() => {
+            ctx.session.botRemoved = true;
+          });
+      } else {
         ctx.session.isBotAdmin = true;
-        ctx.session.botAdminDate = new Date();
+        ctx.session.botRemoved = false;
+      }
 
+      if (isUpdatedToAdmin) {
         if (chatType === 'channel') {
           ctx.replyWithHTML(getStartChannelMessage({ botName: ctx.me.username }));
         } else {
@@ -78,7 +90,6 @@ class GlobalMiddleware {
       }
 
       if (isDemotedToMember) {
-        ctx.session.isBotAdmin = false;
         ctx.reply(memberReadyMessage);
       }
 
@@ -87,10 +98,6 @@ class GlobalMiddleware {
           .getChatMember(ctx.chat?.id, ctx.me.id)
           .then((member) => {
             ctx.session.isBotAdmin = member?.status === 'creator' || member?.status === 'administrator';
-
-            if (ctx.session.isBotAdmin && !ctx.session.botAdminDate) {
-              ctx.session.botAdminDate = new Date();
-            }
           })
           .catch(handleError);
       }
@@ -123,6 +130,8 @@ class GlobalMiddleware {
         return next();
       }
     };
+
+    return middleware;
   }
 }
 
