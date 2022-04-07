@@ -1,6 +1,3 @@
-/* eslint-disable */
-// noinspection JSUnusedLocalSymbols
-
 const { Bot } = require('grammy');
 const { hydrateReply } = require('@grammyjs/parse-mode');
 const { apiThrottler } = require('@grammyjs/transformer-throttler');
@@ -77,11 +74,15 @@ const rootMenu = new Menu('root');
 //   });
 
 (async () => {
+  const isBotDeactivatedRedisKey = 'isBotDeactivated';
+  const botTensorPercentRedisKey = 'botTensorPercent';
+
   console.info('Waiting for the old instance to down...');
   await sleep(5000);
   console.info('Starting a new instance...');
 
   const tensorService = await initTensor();
+  tensorService.setSpamThreshold(await redisClient.getValue(botTensorPercentRedisKey));
 
   const startTime = new Date();
 
@@ -143,25 +144,51 @@ const rootMenu = new Menu('root');
   bot.command('session', botActiveMiddleware, errorHandler(sessionMiddleware.middleware()));
   bot.command('statistics', botActiveMiddleware, errorHandler(statisticsMiddleware.middleware()));
 
-  const isBotDeactivatedRedisKey = 'isBotDeactivated'
-
   const botRedisActive = async (ctx, next) => {
     const isDeactivated = await redisClient.getRawValue(isBotDeactivatedRedisKey);
 
     if (!isDeactivated) {
       return next();
     }
-  }
+  };
 
-  bot.command('disable', onlyCreator, errorHandler(async (ctx) => {
-    await redisClient.setRawValue(isBotDeactivatedRedisKey, true);
-    ctx.reply('⛔️ Я виключений глобально');
-  }));
+  bot.command(
+    'set_rank',
+    onlyCreator,
+    errorHandler(async (ctx) => {
+      const newPercent = +ctx.match;
 
-  bot.command('enable', onlyCreator, errorHandler(async (ctx) => {
-    await redisClient.setRawValue(isBotDeactivatedRedisKey, false);
-    ctx.reply('✅ Я включений глобально');
-  }));
+      if (!ctx.match) {
+        return ctx.reply(`Current rank is: ${await redisClient.getRawValue(botTensorPercentRedisKey)}`);
+      }
+
+      if (Number.isNaN(newPercent)) {
+        return ctx.reply(`Cannot parse is as a number:\n${ctx.match}`);
+      }
+
+      tensorService.setSpamThreshold(newPercent);
+      await redisClient.setRawValue(botTensorPercentRedisKey, newPercent);
+      ctx.reply(`Set new tensor rank: ${newPercent}`);
+    }),
+  );
+
+  bot.command(
+    'disable',
+    onlyCreator,
+    errorHandler(async (ctx) => {
+      await redisClient.setRawValue(isBotDeactivatedRedisKey, true);
+      ctx.reply('⛔️ Я виключений глобально');
+    }),
+  );
+
+  bot.command(
+    'enable',
+    onlyCreator,
+    errorHandler(async (ctx) => {
+      await redisClient.setRawValue(isBotDeactivatedRedisKey, false);
+      ctx.reply('✅ Я включений глобально');
+    }),
+  );
 
   bot.command('updates', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.initialization()));
   router.route('confirmation', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.confirmation()));

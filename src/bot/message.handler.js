@@ -3,6 +3,7 @@ const { env } = require('typed-dotenv').config();
 
 const { processHandler } = require('../express/process.handler');
 
+const { redisClient } = require('../db');
 const { handleError } = require('../utils');
 
 const host = `http://${env.HOST}:${env.PORT}`;
@@ -37,9 +38,10 @@ class MessageHandler {
    * @param {string} message - user message
    * @param {string} originMessage - original user message
    *
-   * @returns {Promise<{ immediately: boolean, tensor: boolean, location: boolean }>} is spam result
+   * @returns {Promise<{ immediately: boolean, tensor: boolean, location: boolean, isSpam: boolean }>} is spam result
    */
   async getTensorRank(message, originMessage) {
+    const tensorRank = (await redisClient.getRawValue('botTensorPercent')) || env.TENSOR_RANK;
     /**
      * immediately
      *
@@ -51,6 +53,7 @@ class MessageHandler {
 
     if (immediatelyResult.rule) {
       return {
+        isSpam: true,
         immediately: true,
       };
     }
@@ -63,8 +66,10 @@ class MessageHandler {
     /**
      * 90% is very high and it's probably spam
      */
-    if (tensorResult.spamRate > env.TENSOR_RANK) {
+    if (tensorResult.isSpam) {
       return {
+        deleteRank: tensorRank,
+        isSpam: true,
         tensor: tensorResult.spamRate,
       };
     }
@@ -98,9 +103,11 @@ class MessageHandler {
     /**
      * Found location add more rank for testing
      * */
-    if (tensorResult.spamRate + locationRank > env.TENSOR_RANK) {
+    if (tensorResult.spamRate + locationRank > tensorRank) {
       return {
+        deleteRank: tensorRank,
         tensor: tensorResult.spamRate,
+        isSpam: true,
         location: true,
       };
     }
@@ -108,7 +115,10 @@ class MessageHandler {
     /**
      * Return default
      * */
-    return tensorResult.isSpam ? { tensor: tensorResult.spamRate } : null;
+    return {
+      deleteRank: tensorRank,
+      tensor: tensorResult.spamRate,
+    };
   }
 
   /**
