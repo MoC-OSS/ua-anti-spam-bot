@@ -14,8 +14,14 @@ function joinMessage(messages) {
   return messages.join('\n');
 }
 
+/**
+ * @param {GrammyContext} ctx
+ * */
 function logCtx(ctx) {
   if (env.DEBUG) {
+    /**
+     * @type {GrammyContext}
+     * */
     const writeCtx = JSON.parse(JSON.stringify(ctx));
     // noinspection JSConstantReassignment
     delete writeCtx.tg;
@@ -56,7 +62,19 @@ function getRandomItem(array) {
   return array[Math.floor(Math.random() * array.length)];
 }
 
+/**
+ * @param {GrammyContext} ctx
+ * @param {string} reason
+ * @param {any} [extra]
+ * */
+function logSkipMiddleware(ctx, reason, extra) {
+  if (env.DEBUG) {
+    console.info(`Skip due to ${reason} in chat ${ctx.chat.title}`, extra);
+  }
+}
+
 module.exports = {
+  logSkipMiddleware,
   joinMessage,
   logCtx,
   sleep,

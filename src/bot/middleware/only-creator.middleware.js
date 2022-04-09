@@ -9,9 +9,10 @@ const { getDeclinedMassSendingMessage } = require('../../message');
  * @param {Next} next
  * */
 function onlyCreator(ctx, next) {
-  if (ctx.chat.type === 'private' && ctx.chat.id === creatorId) {
+  if (ctx.from.id === creatorId) {
     return next();
   }
+
   ctx.reply(getDeclinedMassSendingMessage);
 }
 

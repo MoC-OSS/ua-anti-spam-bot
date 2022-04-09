@@ -1,3 +1,5 @@
+const { logSkipMiddleware } = require('../../utils');
+
 /**
  * Used for performance checking
  *
@@ -15,6 +17,8 @@ function botActiveMiddleware(ctx, next) {
   if (ctx.chat.type === 'private') {
     return next();
   }
+
+  logSkipMiddleware(ctx, 'bot kicked or not admin', ctx.chatSession);
 }
 
 module.exports = {

@@ -1,5 +1,7 @@
 const { env } = require('typed-dotenv').config();
 
+const { creatorId } = require('../../creator');
+
 const { telegramUtil } = require('../../utils');
 const { getDeleteMessage, getDebugMessage } = require('../../message'); // spamDeleteMessage
 const { getMessageReputation } = require('../spam.handlers');
@@ -53,6 +55,14 @@ class OnTextListener {
       }
 
       const rep = await getMessageReputation(ctx, this.keyv, this.messageHandler);
+
+      if (rep.byRules.dataset) {
+        ctx.state.dataset = rep.byRules.dataset;
+
+        if (ctx.chat.id === creatorId) {
+          ctx.reply(JSON.stringify(rep.byRules.dataset, null, 2));
+        }
+      }
 
       if (rep.byRules?.rule) {
         try {

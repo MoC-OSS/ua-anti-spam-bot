@@ -1,3 +1,5 @@
+const { logSkipMiddleware } = require('../../utils');
+
 /**
  * @description
  * Allow to skip a forwarded message
@@ -13,6 +15,7 @@ async function onlyNotForwarded(ctx, next) {
    * Skip forwarded messages
    * */
   if (ctx.update?.message?.forward_from) {
+    logSkipMiddleware(ctx, 'regular forward');
     return;
   }
 

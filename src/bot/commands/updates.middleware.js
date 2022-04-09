@@ -58,10 +58,7 @@ class UpdatesMiddleware {
         const updatesMessage = ctx.session.updatesText;
         const updatesMessageEntities = ctx.session.textEntities;
         const sessions = await redisClient.getAllRecords();
-        const getChatId = (sessionId) => sessionId.split(':')[0];
-        const onlyUniqueSessions = sessions.filter(
-          (session, index, self) => index === self.findIndex((t) => getChatId(t.id) === getChatId(session.id)),
-        );
+        const onlyUniqueSessions = sessions.filter((session) => Number.isNaN(+session));
         const privateAndSuperGroupsSessions = onlyUniqueSessions.filter(
           (session) => session.data.chatType === 'private' || session.data.chatType === 'supergroup',
         );

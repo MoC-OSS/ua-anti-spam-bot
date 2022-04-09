@@ -19,7 +19,7 @@ const isFilteredByRules = async (ctx, messageHandler) => {
   const result = await messageHandler.getTensorRank(message, originMessage);
 
   return {
-    rule: result ? 'tensor' : null,
+    rule: result.isSpam ? 'tensor' : null,
     dataset: result,
   };
 

@@ -6,6 +6,8 @@ const { Menu } = require('@grammyjs/menu');
 const { error, env } = require('typed-dotenv').config();
 const Keyv = require('keyv');
 
+const { redisClient } = require('./db');
+
 const { initTensor } = require('./tensor/tensor.service');
 const { RedisSession, RedisChatSession } = require('./bot/sessionProviders');
 
@@ -72,11 +74,15 @@ const rootMenu = new Menu('root');
 //   });
 
 (async () => {
+  const isBotDeactivatedRedisKey = 'isBotDeactivated';
+  const botTensorPercentRedisKey = 'botTensorPercent';
+
   console.info('Waiting for the old instance to down...');
   await sleep(5000);
   console.info('Starting a new instance...');
 
   const tensorService = await initTensor();
+  tensorService.setSpamThreshold(await redisClient.getValue(botTensorPercentRedisKey));
 
   const startTime = new Date();
 
@@ -138,6 +144,58 @@ const rootMenu = new Menu('root');
   bot.command('session', botActiveMiddleware, errorHandler(sessionMiddleware.middleware()));
   bot.command('statistics', botActiveMiddleware, errorHandler(statisticsMiddleware.middleware()));
 
+  const botRedisActive = async (ctx, next) => {
+    const isDeactivated = await redisClient.getRawValue(isBotDeactivatedRedisKey);
+
+    if (!isDeactivated) {
+      return next();
+    }
+
+    console.info('Skip due to redis');
+  };
+
+  bot.command(
+    'set_rank',
+    onlyCreator,
+    errorHandler(async (ctx) => {
+      const newPercent = +ctx.match;
+
+      if (!ctx.match) {
+        return ctx.reply(`Current rank is: ${await redisClient.getRawValue(botTensorPercentRedisKey)}`);
+      }
+
+      if (Number.isNaN(newPercent)) {
+        return ctx.reply(`Cannot parse is as a number:\n${ctx.match}`);
+      }
+
+      tensorService.setSpamThreshold(newPercent);
+      await redisClient.setRawValue(botTensorPercentRedisKey, newPercent);
+      ctx.reply(`Set new tensor rank: ${newPercent}`);
+    }),
+  );
+
+  bot.command(
+    'disable',
+    onlyCreator,
+    errorHandler(async (ctx) => {
+      await redisClient.setRawValue(isBotDeactivatedRedisKey, true);
+      ctx.reply('⛔️ Я виключений глобально');
+    }),
+  );
+
+  bot.command(
+    'enable',
+    onlyCreator,
+    errorHandler(async (ctx) => {
+      await redisClient.setRawValue(isBotDeactivatedRedisKey, false);
+      ctx.reply('✅ Я включений глобально');
+    }),
+  );
+
+  bot.command('leave', onlyCreator, (ctx) => {
+    ctx.leaveChat().catch(() => {});
+  });
+
   bot.command('updates', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.initialization()));
   router.route('confirmation', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.confirmation()));
   router.route('messageSending', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.messageSending()));
@@ -151,6 +209,7 @@ const rootMenu = new Menu('root');
     .errorBoundary(handleError)
     .on(
       ['message', 'edited_message'],
+      botRedisActive,
       ignoreOld(60),
       botActiveMiddleware,
       errorHandler(tensorListener.middleware()),
@@ -174,9 +233,8 @@ const rootMenu = new Menu('root');
           .sendMessage(logsChat, `🎉 <b>Bot @${bot.me.username} has been started!</b>\n<i>${new Date().toString()}</i>`, {
             parse_mode: 'HTML',
           })
-          .catch((e) => {
+          .catch(() => {
             console.error('This bot is not authorised in this LOGS chat!');
-            handleError(e);
           });
       }
     },

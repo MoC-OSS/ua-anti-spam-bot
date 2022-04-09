@@ -1,3 +1,5 @@
+const { logSkipMiddleware } = require('../../utils');
+
 const TELEGRAM_FORWARD_USER_ID = 777000;
 const CHANNEL_BOT_ID = 136817688;
 
@@ -26,6 +28,7 @@ async function onlyNotAdmin(ctx, next) {
    * Handle forwarded messages from channel into channel's chat
    * */
   if (ctx.from?.id === TELEGRAM_FORWARD_USER_ID) {
+    logSkipMiddleware(ctx, 'chat channel forward');
     return;
   }
 
@@ -33,6 +36,7 @@ async function onlyNotAdmin(ctx, next) {
    * Skip channel admins message duplicated in chat
    * */
   if (ctx.chat.type === 'channel') {
+    logSkipMiddleware(ctx, 'channel chat type');
     return;
   }
 
@@ -41,6 +45,7 @@ async function onlyNotAdmin(ctx, next) {
    * On message doesn't handle user posts
    * */
   if (ctx.update?.channel_post?.sender_chat?.type === 'channel') {
+    logSkipMiddleware(ctx, 'channel');
     return;
   }
 
@@ -48,6 +53,7 @@ async function onlyNotAdmin(ctx, next) {
    * Anonymous users are always admins
    */
   if (ctx.from?.username === 'GroupAnonymousBot') {
+    logSkipMiddleware(ctx, 'GroupAnonymousBot');
     return;
   }
 
@@ -63,6 +69,7 @@ async function onlyNotAdmin(ctx, next) {
    * */
   const chatMember = await ctx.getChatMember(ctx.from.id);
   if (['creator', 'administrator'].includes(chatMember.status)) {
+    logSkipMiddleware(ctx, 'Admin');
     return;
   }
 
@@ -72,6 +79,7 @@ async function onlyNotAdmin(ctx, next) {
    * https://github.com/42wim/matterbridge/issues/1654
    * */
   if (ctx.from?.id === CHANNEL_BOT_ID || ctx.from?.username === 'Channel_Bot') {
+    logSkipMiddleware(ctx, 'Channel_Bot');
     return;
   }
 

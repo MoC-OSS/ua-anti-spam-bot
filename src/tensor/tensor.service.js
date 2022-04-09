@@ -24,6 +24,12 @@ class TensorService {
     this.modelLength = MODEL.modelTopology.model_config.config.layers[1].config.input_length;
   }
 
+  setSpamThreshold(newThreshold) {
+    if (newThreshold) {
+      this.SPAM_THRESHOLD = newThreshold;
+    }
+  }
+
   async loadModel() {
     const fullModelPath = path.join(__dirname, this.modelPath);
 
@@ -107,7 +113,7 @@ class TensorService {
 module.exports = {
   TensorService,
   initTensor: async () => {
-    const tensorService = new TensorService('./temp/model.json', 0.8);
+    const tensorService = new TensorService('./temp/model.json', env.TENSOR_RANK);
     await tensorService.loadModel();
 
     return tensorService;
