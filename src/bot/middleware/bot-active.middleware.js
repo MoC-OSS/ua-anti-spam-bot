@@ -1,3 +1,5 @@
+const { logSkipMiddleware } = require('../../utils');
+
 /**
  * Used for performance checking
  *
@@ -16,7 +18,7 @@ function botActiveMiddleware(ctx, next) {
     return next();
   }
 
-  console.info('Bot is not active in this chat: ', ctx.chat.id, ctx.chatSession);
+  logSkipMiddleware(ctx, 'bot kicked or not admin', ctx.chatSession);
 }
 
 module.exports = {

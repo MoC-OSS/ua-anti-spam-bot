@@ -29,6 +29,7 @@ class GlobalMiddleware {
         if (env.DEBUG) {
           handleError(new Error('No session'), 'SESSION_ERROR');
         }
+
         return next();
       }
 

@@ -1,3 +1,5 @@
+const { logSkipMiddleware } = require('../../utils');
+
 /**
  * @description
  * Skip messages without text
@@ -13,7 +15,7 @@ function onlyWithText(ctx, next) {
     return next();
   }
 
-  console.info('Skip due to no text');
+  logSkipMiddleware(ctx, 'no text');
 }
 
 module.exports = {

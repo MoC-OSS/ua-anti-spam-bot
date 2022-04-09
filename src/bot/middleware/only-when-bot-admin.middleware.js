@@ -1,3 +1,5 @@
+const { logSkipMiddleware } = require('../../utils');
+
 /**
  * @description
  * Skip messages before bot became admin
@@ -16,7 +18,7 @@ async function onlyWhenBotAdmin(ctx, next) {
     return next();
   }
 
-  console.info('Skip due to not admin');
+  logSkipMiddleware(ctx, 'message is older than bot admin');
 }
 
 module.exports = {
