@@ -15,6 +15,8 @@ function botActiveMiddleware(ctx, next) {
   if (ctx.chat.type === 'private') {
     return next();
   }
+
+  console.info('Bot is not active in this chat: ', ctx.chat.id, ctx.chatSession);
 }
 
 module.exports = {

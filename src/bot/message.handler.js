@@ -112,6 +112,18 @@ class MessageHandler {
       };
     }
 
+    const oldLogicResult = await this.getDeleteRule(message, originMessage);
+    const oldLogicRank = oldLogicResult.rule ? 0.3 : 0;
+
+    if (tensorResult.spamRate + oldLogicRank > tensorRank) {
+      return {
+        deleteRank: tensorRank,
+        tensor: tensorResult.spamRate,
+        isSpam: true,
+        oldLogic: true,
+      };
+    }
+
     /**
      * Return default
      * */
@@ -205,40 +217,6 @@ class MessageHandler {
      * */
     if (!finalHighRisk.rule) {
       return finalHighRisk;
-    }
-
-    /**
-     * strict_locations
-     *
-     * @description
-     * Short locations that user can use with a high risk word.
-     * Strict words without fuse search.
-     * */
-    const shortLocations = await this.processMessage(message, this.datasetPaths.strict_locations, true);
-    let finalLocations = shortLocations;
-
-    /**
-     * If no high risk word, skip locations step
-     * */
-    if (!shortLocations.rule) {
-      /**
-       * locations
-       *
-       * @description
-       * Locations that user can use with a high risk word.
-       * Fuse search, allow to find similar.
-       * */
-      finalLocations = await this.processMessage(message, this.datasetPaths.locations);
-    }
-
-    /**
-     * If no locations, message is safe
-     * */
-    if (!finalLocations.rule) {
-      return {
-        dataset: null,
-        rule: null,
-      };
     }
 
     return finalHighRisk;
