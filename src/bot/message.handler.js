@@ -20,6 +20,7 @@ class MessageHandler {
      * */
     this.datasetPaths = {
       immediately: 'immediately',
+      one_word: 'one_word',
       strict_percent_100: 'strict_percent_100',
       percent_100: 'percent_100',
       strict_high_risk: 'strict_high_risk',
@@ -55,6 +56,22 @@ class MessageHandler {
       return {
         isSpam: true,
         immediately: true,
+      };
+    }
+
+    /**
+     * one_word
+     *
+     * @description
+     * Words that should be banned immediately 100% ahaha.
+     * Strict words without fuse search.
+     * */
+    const oneWordResult = await this.processMessage(originMessage, this.datasetPaths.one_word, false);
+
+    if (oneWordResult.rule) {
+      return {
+        isSpam: true,
+        oneWord: true,
       };
     }
 
