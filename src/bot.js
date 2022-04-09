@@ -192,6 +192,10 @@ const rootMenu = new Menu('root');
     }),
   );
 
+  bot.command('leave', onlyCreator, (ctx) => {
+    ctx.leaveChat().catch(() => {});
+  });
+
   bot.command('updates', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.initialization()));
   router.route('confirmation', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.confirmation()));
   router.route('messageSending', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.messageSending()));
