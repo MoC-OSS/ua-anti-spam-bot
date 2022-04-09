@@ -150,6 +150,8 @@ const rootMenu = new Menu('root');
     if (!isDeactivated) {
       return next();
     }
+
+    console.info('Skip due to redis');
   };
 
   bot.command(
@@ -227,9 +229,8 @@ const rootMenu = new Menu('root');
           .sendMessage(logsChat, `🎉 <b>Bot @${bot.me.username} has been started!</b>\n<i>${new Date().toString()}</i>`, {
             parse_mode: 'HTML',
           })
-          .catch((e) => {
+          .catch(() => {
             console.error('This bot is not authorised in this LOGS chat!');
-            handleError(e);
           });
       }
     },

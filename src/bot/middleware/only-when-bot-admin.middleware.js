@@ -15,6 +15,8 @@ async function onlyWhenBotAdmin(ctx, next) {
   if (!ctx.chatSession.botRemoved && isMessageAfterBotAdmin) {
     return next();
   }
+
+  console.info('Skip due to not admin');
 }
 
 module.exports = {

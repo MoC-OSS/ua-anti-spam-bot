@@ -13,6 +13,7 @@ async function onlyNotForwarded(ctx, next) {
    * Skip forwarded messages
    * */
   if (ctx.update?.message?.forward_from) {
+    console.info('Skip due to regular forward');
     return;
   }
 
