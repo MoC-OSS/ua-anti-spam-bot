@@ -6,6 +6,7 @@ const { optimizeText } = require('ukrainian-ml-optimizer');
 const tf = require('@tensorflow/tfjs');
 require('@tensorflow/tfjs-node');
 
+const { redisClient } = require('../db');
 // eslint-disable-next-line import/no-unresolved
 const DICTIONARY = require('./temp/vocab.json');
 // eslint-disable-next-line import/no-unresolved
@@ -25,7 +26,7 @@ class TensorService {
   }
 
   setSpamThreshold(newThreshold) {
-    if (newThreshold) {
+    if (newThreshold && +newThreshold) {
       this.SPAM_THRESHOLD = newThreshold;
     }
   }
@@ -36,10 +37,13 @@ class TensorService {
     this.model = await tf.loadLayersModel(`file://${fullModelPath}`);
   }
 
-  predict(word) {
+  async predict(word) {
     const tensorRank = this.tokenize(word);
     const tensorPredict = this.model.predict(tensorRank.tensor);
     const fullModelPath = path.join(__dirname, this.modelPath);
+
+    const redisTensorKey = await redisClient.getRawValue('botTensorPercent');
+    const deleteRank = redisTensorKey || this.SPAM_THRESHOLD;
 
     /**
      * @type {Stats | null}
@@ -56,8 +60,8 @@ class TensorService {
 
     return tensorPredict.data().then((numericData) => ({
       spamRate: numericData[1],
-      deleteRank: this.SPAM_THRESHOLD,
-      isSpam: numericData[1] > this.SPAM_THRESHOLD,
+      deleteRank,
+      isSpam: numericData[1] > deleteRank,
       tensorRank: tensorRank.tokenArray,
       fileStat,
     }));
