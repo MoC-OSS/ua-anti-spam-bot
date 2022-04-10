@@ -6,7 +6,6 @@ const { optimizeText } = require('ukrainian-ml-optimizer');
 const tf = require('@tensorflow/tfjs');
 require('@tensorflow/tfjs-node');
 
-const { redisClient } = require('../db');
 // eslint-disable-next-line import/no-unresolved
 const DICTIONARY = require('./temp/vocab.json');
 // eslint-disable-next-line import/no-unresolved
@@ -37,13 +36,12 @@ class TensorService {
     this.model = await tf.loadLayersModel(`file://${fullModelPath}`);
   }
 
-  async predict(word) {
+  async predict(word, rate) {
     const tensorRank = this.tokenize(word);
     const tensorPredict = this.model.predict(tensorRank.tensor);
     const fullModelPath = path.join(__dirname, this.modelPath);
 
-    const redisTensorKey = await redisClient.getRawValue('botTensorPercent');
-    const deleteRank = redisTensorKey || this.SPAM_THRESHOLD;
+    const deleteRank = rate || this.SPAM_THRESHOLD;
 
     /**
      * @type {Stats | null}
