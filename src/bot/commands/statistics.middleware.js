@@ -28,12 +28,14 @@ class StatisticsMiddleware {
         const privateSessions = chatSessions.filter((session) => session.data.chatType === 'private');
         const channelSessions = chatSessions.filter((session) => session.data.chatType === 'channel');
 
-        const totalUserCounts = chatSessions.reduce((accumulator, session) => accumulator + (session.data.chatMembersCount || 1), 0);
         const totalSessionCount = chatSessions.length;
         const superGroupsCount = superGroupsSessions.length;
         const groupCount = groupSessions.length;
         const privateCount = privateSessions.length;
         const channelCount = channelSessions.length;
+        const totalUserCounts = chatSessions
+          .filter((session) => !session.data.botRemoved)
+          .reduce((accumulator, session) => accumulator + (session.data.chatMembersCount || 1), 0);
 
         const adminsChatsCount = [...superGroupsSessions, ...groupSessions].filter((session) => session.data.isBotAdmin).length;
         const memberChatsCount = [...superGroupsSessions, ...groupSessions].filter((session) => !session.data.isBotAdmin).length;

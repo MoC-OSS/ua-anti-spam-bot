@@ -86,7 +86,9 @@ const rootMenu = new Menu('root');
   const bot = new Bot(env.BOT_TOKEN);
 
   // eslint-disable-next-line global-require
-  require('./20220406204759-migrate-redis-user-session')(bot, new Date());
+  require('./20220406204759-migrate-redis-user-session')(bot, startTime).then(() => {
+    console.info('*** 20220406204759 Migration run successfully!!!');
+  });
 
   if (env.TEST_TENSOR) {
     /**
