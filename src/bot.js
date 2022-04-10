@@ -6,7 +6,7 @@ const { Menu } = require('@grammyjs/menu');
 const { error, env } = require('typed-dotenv').config();
 const Keyv = require('keyv');
 
-const { redisClient } = require('./db');
+const { redisService } = require('./services/redis.service');
 
 const { initTensor } = require('./tensor/tensor.service');
 const { RedisSession, RedisChatSession } = require('./bot/sessionProviders');
@@ -74,19 +74,21 @@ const rootMenu = new Menu('root');
 //   });
 
 (async () => {
-  const isBotDeactivatedRedisKey = 'isBotDeactivated';
-  const botTensorPercentRedisKey = 'botTensorPercent';
-
   console.info('Waiting for the old instance to down...');
-  await sleep(5000);
+  await sleep(0);
   console.info('Starting a new instance...');
 
   const tensorService = await initTensor();
-  tensorService.setSpamThreshold(await redisClient.getValue(botTensorPercentRedisKey));
+  tensorService.setSpamThreshold(await redisService.getBotTensorPercent());
 
   const startTime = new Date();
 
   const bot = new Bot(env.BOT_TOKEN);
+
+  // eslint-disable-next-line global-require
+  require('./20220406204759-migrate-redis-user-session')(bot, startTime).then(() => {
+    console.info('*** 20220406204759 Migration run successfully!!!');
+  });
 
   if (env.TEST_TENSOR) {
     /**
@@ -145,7 +147,7 @@ const rootMenu = new Menu('root');
   bot.command('statistics', botActiveMiddleware, errorHandler(statisticsMiddleware.middleware()));
 
   const botRedisActive = async (ctx, next) => {
-    const isDeactivated = await redisClient.getRawValue(isBotDeactivatedRedisKey);
+    const isDeactivated = await redisService.getIsBotDeactivated();
     const isInLocal = ctx.chat.type === 'private' && ctx.chat.id === creatorId;
 
     if (!isDeactivated || isInLocal) {
@@ -162,7 +164,7 @@ const rootMenu = new Menu('root');
       const newPercent = +ctx.match;
 
       if (!ctx.match) {
-        return ctx.reply(`Current rank is: ${await redisClient.getRawValue(botTensorPercentRedisKey)}`);
+        return ctx.reply(`Current rank is: ${await redisService.getBotTensorPercent()}`);
       }
 
       if (Number.isNaN(newPercent)) {
@@ -170,7 +172,7 @@ const rootMenu = new Menu('root');
       }
 
       tensorService.setSpamThreshold(newPercent);
-      await redisClient.setRawValue(botTensorPercentRedisKey, newPercent);
+      await redisService.setBotTensorPercent(newPercent);
       ctx.reply(`Set new tensor rank: ${newPercent}`);
     }),
   );
@@ -179,7 +181,7 @@ const rootMenu = new Menu('root');
     'disable',
     onlyCreator,
     errorHandler(async (ctx) => {
-      await redisClient.setRawValue(isBotDeactivatedRedisKey, true);
+      await redisService.setIsBotDeactivated(true);
       ctx.reply('⛔️ Я виключений глобально');
     }),
   );
@@ -188,7 +190,7 @@ const rootMenu = new Menu('root');
     'enable',
     onlyCreator,
     errorHandler(async (ctx) => {
-      await redisClient.setRawValue(isBotDeactivatedRedisKey, false);
+      await redisService.setIsBotDeactivated(false);
       ctx.reply('✅ Я включений глобально');
     }),
   );

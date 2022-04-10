@@ -1,7 +1,7 @@
 const { Menu } = require('@grammyjs/menu');
 const { apiThrottler } = require('@grammyjs/transformer-throttler');
 
-const { redisClient } = require('../../db');
+const { redisService } = require('../../services/redis.service');
 const { getUpdatesMessage, getSuccessfulMessage, cancelMessageSending, confirmationMessage } = require('../../message');
 const { handleError } = require('../../utils');
 
@@ -39,7 +39,11 @@ class UpdatesMiddleware {
       ctx.session.updatesText = userInput;
       ctx.session.textEntities = textEntities ?? null;
       ctx.session.step = 'messageSending';
-      await ctx.reply(confirmationMessage);
+      const sessions = (await redisService.getChatSessions()).filter(
+        (session) => session.data.chatType === 'private' || session.data.chatType === 'supergroup',
+      );
+
+      await ctx.reply(`${confirmationMessage}\nВсього чатів: ${sessions.length}`);
       await ctx.reply(userInput, { entities: textEntities ?? null, reply_markup: this.menu });
     };
   }
@@ -57,15 +61,14 @@ class UpdatesMiddleware {
 
         const updatesMessage = ctx.session.updatesText;
         const updatesMessageEntities = ctx.session.textEntities;
-        const sessions = await redisClient.getAllRecords();
-        const onlyUniqueSessions = sessions.filter((session) => Number.isNaN(+session));
-        const privateAndSuperGroupsSessions = onlyUniqueSessions.filter(
+        const sessions = await redisService.getChatSessions();
+        const privateAndSuperGroupsSessions = sessions.filter(
           (session) => session.data.chatType === 'private' || session.data.chatType === 'supergroup',
         );
         const totalCount = privateAndSuperGroupsSessions.length;
 
         privateAndSuperGroupsSessions.forEach(async (e) => {
-          ctx.api.sendMessage(e.id, updatesMessage, { entities: updatesMessageEntities ?? null }).catch((error) => {
+          await ctx.api.sendMessage(e.id, updatesMessage, { entities: updatesMessageEntities ?? null }).catch((error) => {
             console.error('This bot was blocked or kicked from this chat!');
             handleError(error);
           });

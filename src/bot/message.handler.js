@@ -3,7 +3,7 @@ const { env } = require('typed-dotenv').config();
 
 const { processHandler } = require('../express/process.handler');
 
-const { redisClient } = require('../db');
+const { redisService } = require('../services/redis.service');
 const { handleError } = require('../utils');
 
 const host = `http://${env.HOST}:${env.PORT}`;
@@ -42,7 +42,7 @@ class MessageHandler {
    * @returns {Promise<{ immediately: boolean, tensor: boolean, location: boolean, isSpam: boolean }>} is spam result
    */
   async getTensorRank(message, originMessage) {
-    const tensorRank = (await redisClient.getRawValue('botTensorPercent')) || env.TENSOR_RANK;
+    const tensorRank = (await redisService.getBotTensorPercent()) || env.TENSOR_RANK;
     /**
      * immediately
      *
@@ -83,7 +83,7 @@ class MessageHandler {
     /**
      * 90% is very high and it's probably spam
      */
-    if (tensorResult.isSpam) {
+    if (tensorResult.spamRate > tensorRank) {
       return {
         deleteRank: tensorResult.deleteRank,
         isSpam: true,
