@@ -12,9 +12,9 @@ const { redisService } = require('./services/redis.service');
  * @param {Date} botStartDate
  * */
 module.exports = async (bot, botStartDate) => {
-  const compareDate = `${botStartDate.getFullYear()}-${botStartDate.getMonth() + 1}-${botStartDate.getDate()}-${botStartDate.getHours()}`;
+  const compareDate = `${botStartDate.getFullYear()}-${botStartDate.getMonth() + 1}-${botStartDate.getDate()}`;
 
-  if (compareDate === '2022-4-10-14') {
+  if (compareDate === '2022-4-10') {
     /**
      * @type {Session[]}
      * */
@@ -74,5 +74,7 @@ module.exports = async (bot, botStartDate) => {
           redisService.updateChatSession(chatId, chatSessionRecord).then(() => redisClient.removeKey(record1.id));
         });
     }
+  } else {
+    console.info('Skip migration: ', __filename);
   }
 };
