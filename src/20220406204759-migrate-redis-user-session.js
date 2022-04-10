@@ -30,18 +30,33 @@ module.exports = async (bot, botStartDate) => {
     start: false,
   });
 
+  const getChatId = (sessionId) => sessionId.split(':')[0];
+
   /**
    * @type {Session[]}
    * */
   const userRecords = await redisService.getUserSessions();
+  const uniqueUserRecords = userRecords.filter(
+    (session, index, self) => index === self.findIndex((t) => getChatId(t.id) === getChatId(session.id)),
+  );
 
-  const getChatId = (sessionId) => sessionId.split(':')[0];
+  const nonUniqueUserRecords = userRecords.filter((session) => uniqueUserRecords.some((record) => session.id !== record.id));
 
-  bot.api.sendMessage(logsChat, JSON.stringify({ userRecords: userRecords.length })).catch(() => {});
-  console.info({ userRecords: userRecords.length });
+  console.info({ uniqueUserRecords: uniqueUserRecords.length, nonUniqueUserRecords: nonUniqueUserRecords.length });
+
+  bot.api
+    .sendMessage(
+      logsChat,
+      JSON.stringify({ uniqueUserRecords: uniqueUserRecords.length, nonUniqueUserRecords: nonUniqueUserRecords.length }),
+    )
+    .catch(() => {});
+
+  nonUniqueUserRecords.forEach((record) => {
+    redisClient.removeKey(record.id);
+  });
 
   // eslint-disable-next-line no-restricted-syntax
-  userRecords.forEach((record) => {
+  uniqueUserRecords.forEach((record) => {
     const chatId = getChatId(record.id);
 
     /**
