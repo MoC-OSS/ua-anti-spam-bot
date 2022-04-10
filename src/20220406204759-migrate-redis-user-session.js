@@ -86,19 +86,37 @@ module.exports = async (bot, botStartDate) => {
 
         console.info(`** Chat id has been migrated: ${record.id}`);
       } catch (e) {
-        console.info('Bot probably kicked: ', e);
-        chatSessionRecord = {
-          ...chatSessionRecord,
-          ...record.data,
-        };
+        // noinspection UnnecessaryLocalVariableJS
+        /**
+         * @type {GrammyError} e
+         * */
+        const error = e;
 
-        chatSessionRecord.botRemoved = true;
-        chatSessionRecord.isBotAdmin = false;
-        delete chatSessionRecord.botAdminDate;
+        switch (error.description) {
+          case 'Bad Request: chat not found':
+          case 'Bad Request: group chat was upgraded to a supergroup chat':
+            return redisClient.removeKey(record.id);
 
-        clearObject(chatSessionRecord);
+          case 'Forbidden: bot was kicked from the supergroup chat':
+          case 'Forbidden: bot was kicked from the group chat':
+            chatSessionRecord = {
+              ...chatSessionRecord,
+              ...record.data,
+            };
 
-        redisService.updateChatSession(chatId, chatSessionRecord).then(() => redisClient.removeKey(record.id));
+            chatSessionRecord.botRemoved = true;
+            chatSessionRecord.isBotAdmin = false;
+            delete chatSessionRecord.botAdminDate;
+
+            redisService.updateChatSession(chatId, chatSessionRecord).then(() => redisClient.removeKey(record.id));
+            break;
+
+          case /Too Many Requests: retry after/.test(error.description):
+            throw new Error(error);
+
+          default:
+            throw new Error(error);
+        }
       }
     });
   });
