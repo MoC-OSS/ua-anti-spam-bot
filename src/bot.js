@@ -84,11 +84,11 @@ const rootMenu = new Menu('root');
 
   const bot = new Bot(env.BOT_TOKEN);
 
-  bot.api.sendMessage(logsChat, '*** 20220406204759 Migration started...').catch();
+  bot.api.sendMessage(logsChat, '*** 20220406204759 Migration started...').catch(() => {});
   // eslint-disable-next-line global-require
   require('./20220406204759-migrate-redis-user-session')(bot, startTime).then(() => {
     console.info('*** 20220406204759 Migration run successfully!!!');
-    bot.api.sendMessage(logsChat, '*** 20220406204759 Migration run successfully!!!').catch();
+    bot.api.sendMessage(logsChat, '*** 20220406204759 Migration run successfully!!!').catch(() => {});
   });
 
   const redisSession = new RedisSession();
