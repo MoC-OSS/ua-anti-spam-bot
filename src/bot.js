@@ -32,6 +32,7 @@ const { logsChat, creatorId } = require('./creator');
 // const { getSettingsMenuMessage, settingsSubmitMessage, settingsDeleteItemMessage } = require('./message');
 
 /**
+ * @typedef { import("grammy").GrammyError } GrammyError
  * @typedef { import("./types").GrammyContext } GrammyContext
  * @typedef { import("./types").SessionObject } SessionObject
  */
@@ -74,7 +75,7 @@ const rootMenu = new Menu('root');
 
 (async () => {
   console.info('Waiting for the old instance to down...');
-  await sleep(0);
+  await sleep(5000);
   console.info('Starting a new instance...');
 
   const tensorService = await initTensor();
@@ -86,10 +87,15 @@ const rootMenu = new Menu('root');
 
   bot.api.sendMessage(logsChat, '*** 20220406204759 Migration started...').catch(() => {});
   // eslint-disable-next-line global-require
-  require('./20220406204759-migrate-redis-user-session')(bot, startTime).then(() => {
-    console.info('*** 20220406204759 Migration run successfully!!!');
-    bot.api.sendMessage(logsChat, '*** 20220406204759 Migration run successfully!!!').catch(() => {});
-  });
+  require('./20220406204759-migrate-redis-user-session')(bot, startTime)
+    .then(() => {
+      console.info('*** 20220406204759 Migration run successfully!!!');
+      bot.api.sendMessage(logsChat, '*** 20220406204759 Migration run successfully!!!').catch(() => {});
+    })
+    .catch(async (migrationError) => {
+      await bot.api.sendMessage(logsChat, `Migration failed! Reason: ${migrationError.reason}`).catch(() => {});
+      await bot.api.sendMessage(logsChat, JSON.stringify(migrationError)).catch(() => {});
+    });
 
   const redisSession = new RedisSession();
   const redisChatSession = new RedisChatSession();
