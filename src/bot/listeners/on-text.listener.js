@@ -60,7 +60,7 @@ class OnTextListener {
         ctx.state.dataset = rep.byRules.dataset;
 
         if (ctx.chat.id === creatorId) {
-          ctx.reply(JSON.stringify(rep.byRules.dataset, null, 2));
+          ctx.reply(JSON.stringify({ ...rep.byRules.dataset, message }, null, 2));
         }
       }
 

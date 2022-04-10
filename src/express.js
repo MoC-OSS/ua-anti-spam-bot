@@ -1,11 +1,13 @@
 const express = require('express');
 const { error, env } = require('typed-dotenv').config();
 
+const { redisClient } = require('./db');
 const { initTensor } = require('./tensor/tensor.service');
 const { processHandler } = require('./express/process.handler');
 
 (async () => {
   const tensorService = await initTensor();
+  tensorService.setSpamThreshold(await redisClient.getValue('botTensorPercent'));
 
   const app = express();
   const expressStartTime = new Date().toString();
