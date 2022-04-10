@@ -1,8 +1,11 @@
+/* eslint-disable no-param-reassign */
 /**
  * @deprecated
  * @description
  * This migration is created for prod from user sessions and chat info to chat based sessions.
  * */
+
+const Queue = require('queue-promise');
 
 const { redisClient } = require('./db');
 const { redisService } = require('./services/redis.service');
@@ -19,6 +22,12 @@ module.exports = async (bot, botStartDate) => {
     return;
   }
 
+  const queue = new Queue({
+    concurrent: 1,
+    interval: 100,
+    start: false,
+  });
+
   /**
    * @type {Session[]}
    * */
@@ -29,16 +38,29 @@ module.exports = async (bot, botStartDate) => {
     (session, index, self) => index === self.findIndex((t) => getChatId(t.id) === getChatId(session.id)),
   );
 
+  console.info({ uniqueUserRecords: uniqueUserRecords.length });
+
   // eslint-disable-next-line no-restricted-syntax
-  for (const record1 of uniqueUserRecords) {
-    const chatId = record1.id.split(':')[0];
+  uniqueUserRecords.forEach((record) => {
+    const chatId = record.id.split(':')[0];
 
     /**
      * @type {ChatSessionData & SessionData}
      * */
     let chatSessionRecord = {};
 
-    (async () => {
+    /**
+     * @param {ChatSessionData & SessionData} obj
+     * */
+    const clearObject = (obj) => {
+      delete obj.step;
+      delete obj.textEntities;
+      delete obj.updatesText;
+      delete obj.isCurrentUserAdmin;
+    };
+
+    // eslint-disable-next-line no-await-in-loop
+    queue.enqueue(async () => {
       try {
         const chat = await bot.api.getChat(chatId);
         chatSessionRecord.chatType = chat.type;
@@ -58,22 +80,33 @@ module.exports = async (bot, botStartDate) => {
         }
 
         await redisService.updateChatSession(chatId, chatSessionRecord);
-        await redisClient.removeKey(record1.id);
+        await redisClient.removeKey(record.id);
 
-        console.info(`** Chat id has been migrated: ${record1.id}`);
+        clearObject(chatSessionRecord);
+
+        console.info(`** Chat id has been migrated: ${record.id}`);
       } catch (e) {
         console.info('Bot probably kicked: ', e);
         chatSessionRecord = {
           ...chatSessionRecord,
-          ...record1.data,
+          ...record.data,
         };
 
         chatSessionRecord.botRemoved = true;
         chatSessionRecord.isBotAdmin = false;
         delete chatSessionRecord.botAdminDate;
 
-        redisService.updateChatSession(chatId, chatSessionRecord).then(() => redisClient.removeKey(record1.id));
+        clearObject(chatSessionRecord);
+
+        redisService.updateChatSession(chatId, chatSessionRecord).then(() => redisClient.removeKey(record.id));
       }
-    })().then();
+    });
+  });
+
+  while (queue.shouldRun) {
+    // eslint-disable-next-line no-await-in-loop
+    await queue.dequeue();
   }
+
+  return true;
 };

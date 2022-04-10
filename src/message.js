@@ -243,11 +243,10 @@ ${getGroupStartMessage({ adminsString, isAdmin })}
 /**
  * Test messages
  */
-const getTensorTestResult = ({ chance, isSpam, tensorDate }) =>
+const getTensorTestResult = ({ chance, isSpam }) =>
   `
 🎲 Шанс спаму - <b>${chance}</b>
 🤔 Я вважаю...<b>${isSpam ? '✅ Це спам' : '⛔️ Це не спам'}</b>
-📈 Останнє оновлення: ${tensorDate?.toISOString()}
 `.trim();
 
 /**

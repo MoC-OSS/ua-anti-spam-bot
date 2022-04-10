@@ -1,7 +1,9 @@
 const fs = require('fs');
 const { Menu } = require('@grammyjs/menu');
+const { apiThrottler } = require('@grammyjs/transformer-throttler');
 const { env } = require('typed-dotenv').config();
 
+const { redisService } = require('../../services/redis.service');
 const { errorHandler } = require('../../utils');
 const { creatorId, trainingChat } = require('../../creator');
 const { getTensorTestResult } = require('../../message');
@@ -33,25 +35,38 @@ class TestTensorListener {
   }
 
   writeDataset(state, word) {
-    const writeFunction = (path) => {
-      if (!fs.existsSync(path)) {
-        fs.writeFileSync(path, '[]');
+    // eslint-disable-next-line no-unused-vars
+    const writeInFileFunction = () => {
+      const fileName = `./${state}.json`;
+
+      if (!fs.existsSync(fileName)) {
+        fs.writeFileSync(fileName, '[]');
       }
 
-      const file = JSON.parse(fs.readFileSync(path) || '[]');
+      const file = JSON.parse(fs.readFileSync(fileName) || '[]');
       const newFile = [...new Set([...file, word])];
 
-      fs.writeFileSync(path, `${JSON.stringify(newFile, null, 2)}\n`);
+      fs.writeFileSync(fileName, `${JSON.stringify(newFile, null, 2)}\n`);
+    };
+
+    const writeInRedisFunction = () => {
+      switch (state) {
+        case 'negatives':
+          return redisService.updateNegatives(word);
+
+        case 'positives':
+          return redisService.updatePositives(word);
+
+        default:
+          throw new Error(`Invalid state: ${state}`);
+      }
     };
 
     switch (state) {
-      case 'positives': {
-        return writeFunction('./positives.json');
-      }
-
-      case 'negatives': {
-        return writeFunction('./negatives.json');
-      }
+      case 'negatives':
+      case 'positives':
+        // return writeInFileFunction();
+        return writeInRedisFunction();
 
       default:
         throw new Error(`Invalid state: ${state}`);
@@ -271,9 +286,23 @@ class TestTensorListener {
      * @param {Next} next
      * */
     return async (ctx, next) => {
-      if (!env.TEST_TENSOR) {
+      if (ctx.chat.id !== trainingChat && !env.TEST_TENSOR) {
         return next();
       }
+
+      /**
+       * We need to use throttler for Test Tensor because telegram could ban the bot
+       * */
+      const throttler = apiThrottler({
+        group: {
+          maxConcurrent: 2,
+          minTime: 500,
+          reservoir: 20,
+          reservoirRefreshAmount: 20,
+          reservoirRefreshInterval: 10000,
+        },
+      });
+      ctx.api.config.use(throttler);
 
       if (ctx.from.id !== creatorId) {
         if (ctx.chat.type !== 'supergroup') {
