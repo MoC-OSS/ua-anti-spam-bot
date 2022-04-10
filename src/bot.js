@@ -1,6 +1,5 @@
 const { Bot } = require('grammy');
 const { hydrateReply } = require('@grammyjs/parse-mode');
-const { apiThrottler } = require('@grammyjs/transformer-throttler');
 const { Router } = require('@grammyjs/router');
 const { Menu } = require('@grammyjs/menu');
 const { error, env } = require('typed-dotenv').config();
@@ -90,22 +89,6 @@ const rootMenu = new Menu('root');
     console.info('*** 20220406204759 Migration run successfully!!!');
   });
 
-  if (env.TEST_TENSOR) {
-    /**
-     * We need to use throttler for Test Tensor because telegram could ban the bot
-     * */
-    const throttler = apiThrottler({
-      group: {
-        maxConcurrent: 2,
-        minTime: 500,
-        reservoir: 20,
-        reservoirRefreshAmount: 20,
-        reservoirRefreshInterval: 10000,
-      },
-    });
-    bot.api.config.use(throttler);
-  }
-
   const redisSession = new RedisSession();
   const redisChatSession = new RedisChatSession();
 
@@ -154,7 +137,7 @@ const rootMenu = new Menu('root');
       return next();
     }
 
-    console.info('Skip due to redis');
+    console.info('Skip due to redis: ', ctx.chat.id);
   };
 
   bot.command(
