@@ -1,4 +1,4 @@
-const { Bot } = require('grammy');
+const { Bot, InputFile } = require('grammy');
 const { hydrateReply } = require('@grammyjs/parse-mode');
 const { Router } = require('@grammyjs/router');
 const { Menu } = require('@grammyjs/menu');
@@ -128,6 +128,25 @@ const rootMenu = new Menu('root');
 
   bot.command('session', botActiveMiddleware, errorHandler(sessionMiddleware.middleware()));
   bot.command('statistics', botActiveMiddleware, errorHandler(statisticsMiddleware.middleware()));
+
+  bot.errorBoundary(handleError).command('get_tensor', onlyCreator, async (ctx) => {
+    let positives = await redisService.getNegatives();
+    let negatives = await redisService.getPositives();
+
+    positives = positives.map((singleCase) => singleCase.replace(/\n/g, ' '));
+    negatives = negatives.map((singleCase) => singleCase.replace(/\n/g, ' '));
+
+    if (positives.length) {
+      await ctx.api.sendDocument(creatorId, new InputFile(Buffer.from(positives.join('\n')), `positives-${new Date().toISOString()}.csv`));
+    }
+
+    if (negatives.length) {
+      await ctx.api.sendDocument(creatorId, new InputFile(Buffer.from(negatives.join('\n')), `negatives-${new Date().toISOString()}.csv`));
+    }
+
+    await redisService.deletePositives();
+    await redisService.deleteNegatives();
+  });
 
   const botRedisActive = async (ctx, next) => {
     const isDeactivated = await redisService.getIsBotDeactivated();

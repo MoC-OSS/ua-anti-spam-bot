@@ -5,8 +5,8 @@ class RedisService {
     this.redisSelectors = {
       isBotDeactivated: 'isBotDeactivated',
       botTensorPercent: 'botTensorPercent',
-      positives: 'positives',
-      negatives: 'negatives',
+      positives: 'training:positives',
+      negatives: 'training:negatives',
       userSessions: /^-?\d+:-?\d+$/,
       chatSessions: /^-?\d+$/,
     };
