@@ -34,6 +34,7 @@
     "husky": "^7.0.4",
     "keyv": "^4.2.1",
     "lodash.get": "^4.4.2",
+    "queue-promise": "^2.2.1",
     "redis": "^4.0.6",
     "typed-dotenv": "^10.0.1",
     "typegram": "^3.8.0",
