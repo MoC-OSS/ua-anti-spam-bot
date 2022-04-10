@@ -36,6 +36,14 @@ function setValue(key, value) {
   return client.set(key, JSON.stringify(value));
 }
 
+function removeKey(key) {
+  if (!key) {
+    return null;
+  }
+
+  return client.del(key);
+}
+
 /**
  * @returns {Promise<(Session | ChatSession)[]>}
  * */
@@ -60,9 +68,10 @@ async function getAllRecords() {
 }
 
 module.exports = {
-  setRawValue,
+  getAllRecords,
   getRawValue,
   getValue,
+  removeKey,
+  setRawValue,
   setValue,
-  getAllRecords,
 };

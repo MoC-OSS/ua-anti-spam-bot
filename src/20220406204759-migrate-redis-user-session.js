@@ -4,6 +4,7 @@
  * This migration is created for prod from user sessions and chat info to chat based sessions.
  * */
 
+const { redisClient } = require('./db');
 const { redisService } = require('./services/redis.service');
 
 /**
@@ -13,7 +14,7 @@ const { redisService } = require('./services/redis.service');
 module.exports = async (bot, botStartDate) => {
   const compareDate = `${botStartDate.getFullYear()}-${botStartDate.getMonth() + 1}-${botStartDate.getDate()}-${botStartDate.getHours()}`;
 
-  if (compareDate === '2022-4-10-13') {
+  if (compareDate === '2022-4-10-14') {
     /**
      * @type {Session[]}
      * */
@@ -53,9 +54,8 @@ module.exports = async (bot, botStartDate) => {
             chatSessionRecord.botAdminDate = new Date();
           }
         })
-        .then(() => {
-          redisService.updateChatSession(chatId, chatSessionRecord);
-        })
+        .then(() => redisService.updateChatSession(chatId, chatSessionRecord))
+        .then(() => redisClient.removeKey(record1.id))
         .catch(() => {
           chatSessionRecord = {
             ...record1.data,
@@ -65,7 +65,7 @@ module.exports = async (bot, botStartDate) => {
           chatSessionRecord.isBotAdmin = false;
           delete chatSessionRecord.botAdminDate;
 
-          redisService.updateChatSession(chatId, chatSessionRecord);
+          redisService.updateChatSession(chatId, chatSessionRecord).then(() => redisClient.removeKey(record1.id));
         });
     }
   }
