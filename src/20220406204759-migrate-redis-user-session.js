@@ -18,10 +18,15 @@ module.exports = async (bot, botStartDate) => {
     /**
      * @type {Session[]}
      * */
-    const chatRecords = await redisService.getUserSessions();
+    const userRecords = await redisService.getUserSessions();
+
+    const getChatId = (sessionId) => sessionId.split(':')[0];
+    const uniqueUserRecords = userRecords.filter(
+      (session, index, self) => index === self.findIndex((t) => getChatId(t.id) === getChatId(session.id)),
+    );
 
     // eslint-disable-next-line no-restricted-syntax
-    for (const record1 of chatRecords) {
+    for (const record1 of uniqueUserRecords) {
       const chatId = record1.id.split(':')[0];
 
       /**
@@ -56,6 +61,7 @@ module.exports = async (bot, botStartDate) => {
         })
         .then(() => redisService.updateChatSession(chatId, chatSessionRecord))
         .then(() => redisClient.removeKey(record1.id))
+        .then(() => console.info(`** Chat id has been migrated: ${record1.id}`))
         .catch(() => {
           chatSessionRecord = {
             ...record1.data,

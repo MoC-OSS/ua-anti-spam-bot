@@ -61,7 +61,10 @@ class RedisService {
       ...newSession,
     };
 
-    return redisClient.setRawValue(chatId, writeSession);
+    return redisClient.setRawValue(chatId, writeSession).then((res) => {
+      console.info(`Chat id has been updated: ${chatId}`, writeSession);
+      return res;
+    });
   }
 
   /**
