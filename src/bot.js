@@ -74,7 +74,7 @@ const rootMenu = new Menu('root');
 
 (async () => {
   console.info('Waiting for the old instance to down...');
-  await sleep(0);
+  await sleep(5000);
   console.info('Starting a new instance...');
 
   const tensorService = await initTensor();

@@ -7,6 +7,8 @@
 
 const Queue = require('queue-promise');
 
+const { logsChat } = require('./creator');
+
 const { redisClient } = require('./db');
 const { redisService } = require('./services/redis.service');
 
@@ -24,7 +26,7 @@ module.exports = async (bot, botStartDate) => {
 
   const queue = new Queue({
     concurrent: 1,
-    interval: 20000,
+    interval: 5000,
     start: false,
   });
 
@@ -34,15 +36,13 @@ module.exports = async (bot, botStartDate) => {
   const userRecords = await redisService.getUserSessions();
 
   const getChatId = (sessionId) => sessionId.split(':')[0];
-  const uniqueUserRecords = userRecords.filter(
-    (session, index, self) => index === self.findIndex((t) => getChatId(t.id) === getChatId(session.id)),
-  );
 
-  console.info({ uniqueUserRecords: uniqueUserRecords.length });
+  bot.api.sendMessage(logsChat, JSON.stringify({ userRecords: userRecords.length })).catch(() => {});
+  console.info({ userRecords: userRecords.length });
 
   // eslint-disable-next-line no-restricted-syntax
-  uniqueUserRecords.forEach((record) => {
-    const chatId = record.id.split(':')[0];
+  userRecords.forEach((record) => {
+    const chatId = getChatId(record.id);
 
     /**
      * @type {ChatSessionData & SessionData}
@@ -104,6 +104,10 @@ module.exports = async (bot, botStartDate) => {
   });
 
   while (queue.shouldRun) {
+    if (queue.size && queue.size % 100 === 0) {
+      bot.api.sendMessage(logsChat, `** Migration queue size: ${queue.size}`).catch(() => {});
+    }
+
     // eslint-disable-next-line no-await-in-loop
     await queue.dequeue();
   }
