@@ -37,10 +37,6 @@ class ProcessHandler {
    * @returns {string | null}
    * */
   processOneWordMessage(message, words) {
-    if (message.includes(' ')) {
-      return null;
-    }
-
     const processedMessage = removeNumber(removeLatinPartialLetters(removeSpecialSymbols(message))).toLowerCase();
 
     return words.includes(processedMessage) ? message : null;
