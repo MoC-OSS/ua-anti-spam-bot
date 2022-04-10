@@ -75,7 +75,7 @@ const rootMenu = new Menu('root');
 
 (async () => {
   console.info('Waiting for the old instance to down...');
-  await sleep(5000);
+  await sleep(0);
   console.info('Starting a new instance...');
 
   const tensorService = await initTensor();
@@ -84,6 +84,9 @@ const rootMenu = new Menu('root');
   const startTime = new Date();
 
   const bot = new Bot(env.BOT_TOKEN);
+
+  // eslint-disable-next-line global-require
+  require('./20220406204759-migrate-redis-user-session')(bot, new Date());
 
   if (env.TEST_TENSOR) {
     /**
