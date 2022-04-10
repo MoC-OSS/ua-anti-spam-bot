@@ -24,7 +24,7 @@ module.exports = async (bot, botStartDate) => {
 
   const queue = new Queue({
     concurrent: 1,
-    interval: 100,
+    interval: 20000,
     start: false,
   });
 
