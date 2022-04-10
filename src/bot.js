@@ -27,7 +27,7 @@ const {
   performanceStartMiddleware,
 } = require('./bot/middleware');
 const { handleError, errorHandler, sleep } = require('./utils');
-const { logsChat } = require('./creator');
+const { logsChat, creatorId } = require('./creator');
 
 // TODO commented for settings feature
 // const { getSettingsMenuMessage, settingsSubmitMessage, settingsDeleteItemMessage } = require('./message');
@@ -146,8 +146,9 @@ const rootMenu = new Menu('root');
 
   const botRedisActive = async (ctx, next) => {
     const isDeactivated = await redisClient.getRawValue(isBotDeactivatedRedisKey);
+    const isInLocal = ctx.chat.type === 'private' && ctx.chat.id === creatorId;
 
-    if (!isDeactivated) {
+    if (!isDeactivated || isInLocal) {
       return next();
     }
 
