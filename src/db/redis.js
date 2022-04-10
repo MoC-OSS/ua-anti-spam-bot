@@ -36,6 +36,9 @@ function setValue(key, value) {
   return client.set(key, JSON.stringify(value));
 }
 
+/**
+ * @returns {Promise<(Session | ChatSession)[]>}
+ * */
 async function getAllRecords() {
   try {
     const keys = await client.keys('*');

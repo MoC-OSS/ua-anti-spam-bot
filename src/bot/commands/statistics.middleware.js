@@ -1,4 +1,4 @@
-const { redisClient } = require('../../db');
+const { redisService } = require('../../services/redis.service');
 
 const { handleError, formatDate } = require('../../utils');
 const { getStatisticsMessage } = require('../../message');
@@ -20,28 +20,16 @@ class StatisticsMiddleware {
      * @param {GrammyContext} ctx
      * */
     return async (ctx) => {
-      if (ctx.chat.type === 'supergroup') {
-      }
-
       try {
-        /**
-         * @type {SessionObject}
-         * */
-        const sessions = await redisClient.getAllRecords();
+        const chatSessions = await redisService.getChatSessions();
 
-        const getChatId = (sessionId) => sessionId.split(':')[0];
+        const superGroupsSessions = chatSessions.filter((session) => session.data.chatType === 'supergroup');
+        const groupSessions = chatSessions.filter((session) => session.data.chatType === 'group');
+        const privateSessions = chatSessions.filter((session) => session.data.chatType === 'private');
+        const channelSessions = chatSessions.filter((session) => session.data.chatType === 'channel');
 
-        const groupOnlySessions = sessions.filter(
-          (session, index, self) => index === self.findIndex((t) => getChatId(t.id) === getChatId(session.id)),
-        );
-
-        const superGroupsSessions = groupOnlySessions.filter((session) => session.data.chatType === 'supergroup');
-        const groupSessions = groupOnlySessions.filter((session) => session.data.chatType === 'group');
-        const privateSessions = groupOnlySessions.filter((session) => session.data.chatType === 'private');
-        const channelSessions = groupOnlySessions.filter((session) => session.data.chatType === 'channel');
-
-        const totalUserCounts = sessions.length;
-        const totalSessionCount = groupOnlySessions.length;
+        const totalUserCounts = chatSessions.reduce((accumulator, session) => accumulator + (session.data.chatMembersCount || 1), 0);
+        const totalSessionCount = chatSessions.length;
         const superGroupsCount = superGroupsSessions.length;
         const groupCount = groupSessions.length;
         const privateCount = privateSessions.length;
@@ -67,7 +55,7 @@ class StatisticsMiddleware {
         );
       } catch (e) {
         handleError(e);
-        ctx.reply('Cannot get statistics');
+        await ctx.reply('Cannot get statistics');
       }
     };
   }
