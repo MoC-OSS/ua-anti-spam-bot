@@ -85,7 +85,7 @@ class MessageHandler {
      */
     if (tensorResult.isSpam) {
       return {
-        deleteRank: tensorRank,
+        deleteRank: tensorResult.deleteRank,
         isSpam: true,
         tensor: tensorResult.spamRate,
       };
