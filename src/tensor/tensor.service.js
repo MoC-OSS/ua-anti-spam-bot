@@ -25,7 +25,7 @@ class TensorService {
   }
 
   setSpamThreshold(newThreshold) {
-    if (newThreshold) {
+    if (newThreshold && +newThreshold) {
       this.SPAM_THRESHOLD = newThreshold;
     }
   }
@@ -36,10 +36,12 @@ class TensorService {
     this.model = await tf.loadLayersModel(`file://${fullModelPath}`);
   }
 
-  predict(word) {
+  async predict(word, rate) {
     const tensorRank = this.tokenize(word);
     const tensorPredict = this.model.predict(tensorRank.tensor);
     const fullModelPath = path.join(__dirname, this.modelPath);
+
+    const deleteRank = rate || this.SPAM_THRESHOLD;
 
     /**
      * @type {Stats | null}
@@ -56,7 +58,8 @@ class TensorService {
 
     return tensorPredict.data().then((numericData) => ({
       spamRate: numericData[1],
-      isSpam: numericData[1] > this.SPAM_THRESHOLD,
+      deleteRank,
+      isSpam: numericData[1] > deleteRank,
       tensorRank: tensorRank.tokenArray,
       fileStat,
     }));

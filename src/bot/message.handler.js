@@ -3,7 +3,7 @@ const { env } = require('typed-dotenv').config();
 
 const { processHandler } = require('../express/process.handler');
 
-const { redisClient } = require('../db');
+const { redisService } = require('../services/redis.service');
 const { handleError } = require('../utils');
 
 const host = `http://${env.HOST}:${env.PORT}`;
@@ -42,7 +42,7 @@ class MessageHandler {
    * @returns {Promise<{ immediately: boolean, tensor: boolean, location: boolean, isSpam: boolean }>} is spam result
    */
   async getTensorRank(message, originMessage) {
-    const tensorRank = (await redisClient.getRawValue('botTensorPercent')) || env.TENSOR_RANK;
+    const tensorRank = (await redisService.getBotTensorPercent()) || env.TENSOR_RANK;
     /**
      * immediately
      *
@@ -78,14 +78,14 @@ class MessageHandler {
     /**
      * Get tensor result.
      * */
-    const tensorResult = (await this.processTensorMessage(message)).result;
+    const tensorResult = (await this.processTensorMessage(message, tensorRank)).result;
 
     /**
      * 90% is very high and it's probably spam
      */
-    if (tensorResult.isSpam) {
+    if (tensorResult.spamRate > tensorRank) {
       return {
-        deleteRank: tensorRank,
+        deleteRank: tensorResult.deleteRank,
         isSpam: true,
         tensor: tensorResult.spamRate,
       };
@@ -239,19 +239,19 @@ class MessageHandler {
     return finalHighRisk;
   }
 
-  async processTensorMessage(message) {
+  async processTensorMessage(message, rate) {
     try {
       if (env.USE_SERVER) {
-        return await axios.post(`${host}/tensor`, { message }).then((response) => response.data);
+        return await axios.post(`${host}/tensor`, { message, rate }).then((response) => response.data);
       }
 
       return {
-        result: await this.tensorService.predict(message),
+        result: await this.tensorService.predict(message, rate),
       };
     } catch (e) {
       handleError(e, 'API_DOWN');
       return {
-        result: await this.tensorService.predict(message),
+        result: await this.tensorService.predict(message, rate),
       };
     }
   }

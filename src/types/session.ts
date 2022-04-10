@@ -42,6 +42,11 @@ export interface Session {
   data: SessionData;
 }
 
+export interface ChatSession {
+  id: string;
+  data: ChatSessionData;
+}
+
 export interface SessionObject {
   sessions: Session[];
 }

@@ -34,9 +34,9 @@ const { processHandler } = require('./express/process.handler');
 
   app.post('/tensor', async (req, res) => {
     const startTime = performance.now();
-    const { message } = req.body;
+    const { message, rate } = req.body;
 
-    const result = await tensorService.predict(message);
+    const result = await tensorService.predict(message, rate);
     const endTime = performance.now();
 
     const time = endTime - startTime;
