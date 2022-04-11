@@ -73,6 +73,7 @@ class OnTextListener {
 
       if (rep.byRules?.rule) {
         try {
+          const trainingChatWhitelist = await redisService.getTrainingChatWhitelist();
           const username = ctx.from?.username;
           const fullName = ctx.from?.last_name ? `${ctx.from?.first_name} ${ctx.from?.last_name}` : ctx.from?.first_name;
           const writeUsername = username ? `@${username}` : fullName ?? '';
@@ -81,6 +82,10 @@ class OnTextListener {
 
           if (env.DEBUG) {
             debugMessage = getDebugMessage({ message, byRules: rep.byRules, startTime: this.startTime });
+          }
+
+          if (trainingChatWhitelist && trainingChatWhitelist.includes(String(ctx.chat.id))) {
+            ctx.api.sendMessage(privateTrainingChat, ctx.state.text).catch(() => {});
           }
 
           await ctx.deleteMessage().then(() => {

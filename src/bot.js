@@ -207,6 +207,36 @@ const rootMenu = new Menu('root');
   );
 
   bot.command(
+    'set_training_chat_whitelist',
+    onlyCreator,
+    errorHandler(async (ctx) => {
+      const newChats = ctx.match;
+
+      if (!ctx.match) {
+        return ctx.reply(`Current training chat whitelist is:\n\n${(await redisService.getTrainingChatWhitelist()).join(',')}`);
+      }
+
+      await redisService.setTrainingStartRank(newChats);
+      ctx.reply(`Set training chat whitelist is:\n\n${newChats}`);
+    }),
+  );
+
+  bot.command(
+    'update_training_chat_whitelist',
+    onlyCreator,
+    errorHandler(async (ctx) => {
+      const newChats = ctx.match;
+
+      if (!ctx.match) {
+        return ctx.reply(`Current training chat whitelist is:\n\n${(await redisService.getTrainingChatWhitelist()).join(',')}`);
+      }
+
+      await redisService.updateTrainingChatWhitelist(newChats);
+      ctx.reply(`Set training chat whitelist is:\n\n${newChats}`);
+    }),
+  );
+
+  bot.command(
     'disable',
     onlyCreator,
     errorHandler(async (ctx) => {
