@@ -138,8 +138,8 @@ const rootMenu = new Menu('root');
   bot.command('statistics', botActiveMiddleware, errorHandler(statisticsMiddleware.middleware()));
 
   bot.errorBoundary(handleError).command('get_tensor', onlyCreator, async (ctx) => {
-    let positives = await redisService.getNegatives();
-    let negatives = await redisService.getPositives();
+    let positives = await redisService.getPositives();
+    let negatives = await redisService.getNegatives();
 
     positives = positives.map((singleCase) => singleCase.replace(/\n/g, ' '));
     negatives = negatives.map((singleCase) => singleCase.replace(/\n/g, ' '));
