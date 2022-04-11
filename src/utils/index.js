@@ -68,7 +68,7 @@ function getRandomItem(array) {
  * @param {any} [extra]
  * */
 function logSkipMiddleware(ctx, reason, extra) {
-  if (env.DEBUG) {
+  if (env.DEBUG || env.DEBUG_MIDDLEWARE) {
     console.info(`Skip due to ${reason} in chat ${ctx.chat.title}`, extra);
   }
 }

@@ -7,9 +7,53 @@ class RedisService {
       botTensorPercent: 'botTensorPercent',
       positives: 'training:positives',
       negatives: 'training:negatives',
+      trainingChatWhitelist: 'training:chatWhiteList',
+      trainingStartRank: 'training:startRank',
       userSessions: /^-?\d+:-?\d+$/,
       chatSessions: /^-?\d+$/,
     };
+  }
+
+  /**
+   * @returns {Promise<string[]>}
+   * */
+  async getTrainingChatWhitelist() {
+    return (await redisClient.getRawValue(this.redisSelectors.trainingChatWhitelist)) || [];
+  }
+
+  /**
+   * @param {string} newChatIds
+   * */
+  setTrainingChatWhitelist(newChatIds) {
+    return redisClient.setRawValue(this.redisSelectors.trainingChatWhitelist, newChatIds.replace(/ /g, '').split(','));
+  }
+
+  /**
+   * @param {string} newChatId
+   * */
+  async updateTrainingChatWhitelist(newChatId) {
+    const currentChats = await this.getTrainingChatWhitelist();
+    currentChats.push(newChatId);
+
+    return this.setTrainingChatWhitelist(currentChats.join(','));
+  }
+
+  /**
+   * @returns {Promise<number>}
+   * */
+  getTrainingStartRank() {
+    return redisClient.getRawValue(this.redisSelectors.trainingStartRank);
+  }
+
+  /**
+   * @param {number} newValue
+   * */
+  setTrainingStartRank(newValue) {
+    if (newValue && +newValue) {
+      return redisClient.setRawValue(this.redisSelectors.trainingStartRank, newValue);
+    }
+
+    console.error(`setBotTensorPercent error: ${newValue} is not a number`);
   }
 
   /**
