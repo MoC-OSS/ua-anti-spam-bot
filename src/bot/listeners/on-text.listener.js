@@ -2,6 +2,7 @@ const { env } = require('typed-dotenv').config();
 
 const { creatorId, privateTrainingChat } = require('../../creator');
 
+const { redisService } = require('../../services/redis.service');
 const { telegramUtil } = require('../../utils');
 const { getDeleteMessage, getDebugMessage } = require('../../message'); // spamDeleteMessage
 const { getMessageReputation } = require('../spam.handlers');
@@ -59,8 +60,9 @@ class OnTextListener {
       if (rep.byRules.dataset) {
         ctx.state.dataset = rep.byRules.dataset;
         const { deleteRank, tensor } = rep.byRules.dataset;
+        const startRank = (await redisService.getTrainingStartRank()) || 0.6;
 
-        if (tensor > 0.6 && tensor < deleteRank) {
+        if (tensor > startRank && tensor < deleteRank) {
           ctx.api.sendMessage(privateTrainingChat, ctx.state.text).catch(() => {});
         }
 

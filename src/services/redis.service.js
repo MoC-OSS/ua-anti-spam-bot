@@ -7,9 +7,28 @@ class RedisService {
       botTensorPercent: 'botTensorPercent',
       positives: 'training:positives',
       negatives: 'training:negatives',
+      trainingStartRank: 'training:startRank',
       userSessions: /^-?\d+:-?\d+$/,
       chatSessions: /^-?\d+$/,
     };
+  }
+
+  /**
+   * @returns {Promise<number>}
+   * */
+  getTrainingStartRank() {
+    return redisClient.getRawValue(this.redisSelectors.trainingStartRank);
+  }
+
+  /**
+   * @param {number} newValue
+   * */
+  setTrainingStartRank(newValue) {
+    if (newValue && +newValue) {
+      return redisClient.setRawValue(this.redisSelectors.trainingStartRank, newValue);
+    }
+
+    console.error(`setBotTensorPercent error: ${newValue} is not a number`);
   }
 
   /**
