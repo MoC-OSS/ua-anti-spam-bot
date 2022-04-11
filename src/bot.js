@@ -188,6 +188,55 @@ const rootMenu = new Menu('root');
   );
 
   bot.command(
+    'set_training_start_rank',
+    onlyCreator,
+    errorHandler(async (ctx) => {
+      const newPercent = +ctx.match;
+
+      if (!ctx.match) {
+        return ctx.reply(`Current training start rank is: ${await redisService.getTrainingStartRank()}`);
+      }
+
+      if (Number.isNaN(newPercent)) {
+        return ctx.reply(`Cannot parse is as a number:\n${ctx.match}`);
+      }
+
+      await redisService.setTrainingStartRank(newPercent);
+      ctx.reply(`Set new training start rank rank: ${newPercent}`);
+    }),
+  );
+
+  bot.command(
+    'set_training_chat_whitelist',
+    onlyCreator,
+    errorHandler(async (ctx) => {
+      const newChats = ctx.match;
+
+      if (!ctx.match) {
+        return ctx.reply(`Current training chat whitelist is:\n\n${(await redisService.getTrainingChatWhitelist()).join(',')}`);
+      }
+
+      await redisService.setTrainingChatWhitelist(newChats);
+      ctx.reply(`Set training chat whitelist is:\n\n${newChats}`);
+    }),
+  );
+
+  bot.command(
+    'update_training_chat_whitelist',
+    onlyCreator,
+    errorHandler(async (ctx) => {
+      const newChats = ctx.match;
+
+      if (!ctx.match) {
+        return ctx.reply(`Current training chat whitelist is:\n\n${(await redisService.getTrainingChatWhitelist()).join(',')}`);
+      }
+
+      await redisService.updateTrainingChatWhitelist(newChats);
+      ctx.reply(`Set training chat whitelist is:\n\n${newChats}`);
+    }),
+  );
+
+  bot.command(
     'disable',
     onlyCreator,
     errorHandler(async (ctx) => {

@@ -1,7 +1,8 @@
 const { env } = require('typed-dotenv').config();
 
-const { creatorId } = require('../../creator');
+const { creatorId, privateTrainingChat } = require('../../creator');
 
+const { redisService } = require('../../services/redis.service');
 const { telegramUtil } = require('../../utils');
 const { getDeleteMessage, getDebugMessage } = require('../../message'); // spamDeleteMessage
 const { getMessageReputation } = require('../spam.handlers');
@@ -58,6 +59,12 @@ class OnTextListener {
 
       if (rep.byRules.dataset) {
         ctx.state.dataset = rep.byRules.dataset;
+        const { deleteRank, tensor } = rep.byRules.dataset;
+        const startRank = (await redisService.getTrainingStartRank()) || 0.6;
+
+        if (tensor > startRank && tensor < deleteRank) {
+          ctx.api.sendMessage(privateTrainingChat, ctx.state.text).catch(() => {});
+        }
 
         if (ctx.chat.id === creatorId) {
           ctx.reply(JSON.stringify({ ...rep.byRules.dataset, message }, null, 2));
@@ -66,6 +73,7 @@ class OnTextListener {
 
       if (rep.byRules?.rule) {
         try {
+          const trainingChatWhitelist = await redisService.getTrainingChatWhitelist();
           const username = ctx.from?.username;
           const fullName = ctx.from?.last_name ? `${ctx.from?.first_name} ${ctx.from?.last_name}` : ctx.from?.first_name;
           const writeUsername = username ? `@${username}` : fullName ?? '';
@@ -74,6 +82,10 @@ class OnTextListener {
 
           if (env.DEBUG) {
             debugMessage = getDebugMessage({ message, byRules: rep.byRules, startTime: this.startTime });
+          }
+
+          if (trainingChatWhitelist && trainingChatWhitelist.includes(String(ctx.chat.id))) {
+            ctx.api.sendMessage(privateTrainingChat, ctx.state.text).catch(() => {});
           }
 
           await ctx.deleteMessage().then(() => {
