@@ -216,7 +216,7 @@ const rootMenu = new Menu('root');
         return ctx.reply(`Current training chat whitelist is:\n\n${(await redisService.getTrainingChatWhitelist()).join(',')}`);
       }
 
-      await redisService.setTrainingStartRank(newChats);
+      await redisService.setTrainingChatWhitelist(newChats);
       ctx.reply(`Set training chat whitelist is:\n\n${newChats}`);
     }),
   );
