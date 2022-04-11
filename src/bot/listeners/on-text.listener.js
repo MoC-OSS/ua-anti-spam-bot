@@ -1,6 +1,6 @@
 const { env } = require('typed-dotenv').config();
 
-const { creatorId } = require('../../creator');
+const { creatorId, privateTrainingChat } = require('../../creator');
 
 const { telegramUtil } = require('../../utils');
 const { getDeleteMessage, getDebugMessage } = require('../../message'); // spamDeleteMessage
@@ -58,6 +58,11 @@ class OnTextListener {
 
       if (rep.byRules.dataset) {
         ctx.state.dataset = rep.byRules.dataset;
+        const { deleteRank, tensor } = rep.byRules.dataset;
+
+        if (tensor > 0.6 && tensor < deleteRank) {
+          ctx.api.sendMessage(privateTrainingChat, ctx.state.text).catch(() => {});
+        }
 
         if (ctx.chat.id === creatorId) {
           ctx.reply(JSON.stringify({ ...rep.byRules.dataset, message }, null, 2));
