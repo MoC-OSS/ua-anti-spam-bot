@@ -288,7 +288,7 @@ const rootMenu = new Menu('root');
 
   bot.start({
     onStart: () => {
-      console.info('Bot started!', new Date().toString());
+      console.info(`Bot @${bot.me.username} started!`, new Date().toString());
 
       if (!env.DEBUG) {
         bot.api

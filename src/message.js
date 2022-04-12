@@ -178,6 +178,7 @@ ${startMessageAtom}
 • Або в чат каналу.
 
 Якщо є запитання або бот не працює, пишіть ${creatorNick}.
+
 Дивись відео з інструкцією нижче:
 https://youtu.be/RX0cZYf1Lm4
 `.trim();
