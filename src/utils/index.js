@@ -14,8 +14,14 @@ function joinMessage(messages) {
   return messages.join('\n');
 }
 
+/**
+ * @param {GrammyContext} ctx
+ * */
 function logCtx(ctx) {
   if (env.DEBUG) {
+    /**
+     * @type {GrammyContext}
+     * */
     const writeCtx = JSON.parse(JSON.stringify(ctx));
     // noinspection JSConstantReassignment
     delete writeCtx.tg;
@@ -46,12 +52,35 @@ function formatDate(date) {
   return new Intl.DateTimeFormat('uk-UA', { dateStyle: 'full', timeStyle: 'long', timeZone: 'Europe/Kiev' }).format(date);
 }
 
+/**
+ * @template T
+ *
+ * @param {T[]} array
+ * @returns {T} - random item from array
+ * */
+function getRandomItem(array) {
+  return array[Math.floor(Math.random() * array.length)];
+}
+
+/**
+ * @param {GrammyContext} ctx
+ * @param {string} reason
+ * @param {any} [extra]
+ * */
+function logSkipMiddleware(ctx, reason, extra) {
+  if (env.DEBUG || env.DEBUG_MIDDLEWARE) {
+    console.info(`Skip due to ${reason} in chat ${ctx.chat.title}`, extra);
+  }
+}
+
 module.exports = {
+  logSkipMiddleware,
   joinMessage,
   logCtx,
   sleep,
   truncateString,
   formatDate,
+  getRandomItem,
   messageUtil,
   telegramUtil,
   ...errorHandlerExports,

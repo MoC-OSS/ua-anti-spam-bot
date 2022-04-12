@@ -2,19 +2,29 @@ const { env } = require('typed-dotenv').config();
 const containsEmoji = require('contains-emoji');
 const GraphemeSplitter = require('grapheme-splitter');
 
-const { messageHandler } = require('./message.handler');
 const { telegramUtil } = require('../utils');
 
 const splitter = new GraphemeSplitter();
 
 /**
  * @param {GrammyContext} ctx
+ * @param {MessageHandler} messageHandler
  */
-const isFilteredByRules = (ctx) => {
+const isFilteredByRules = async (ctx, messageHandler) => {
   const originMessage = ctx.state.text;
   const message = messageHandler.sanitizeMessage(ctx, originMessage);
+  /**
+   * Adapter for tensor
+   * */
+  const result = await messageHandler.getTensorRank(message, originMessage);
 
-  return messageHandler.getDeleteRule(message, originMessage);
+  return {
+    rule: result.isSpam ? 'tensor' : null,
+    dataset: result,
+  };
+
+  // Hid old logic
+  // return messageHandler.getDeleteRule(message, originMessage);
 };
 
 /**
@@ -41,13 +51,14 @@ const formattingsInfo = (ctx) => {
 /**
  * @param {GrammyContext} ctx
  * @param {Keyv} keyv
+ * @param {MessageHandler} messageHandler
  */
-const getMessageReputation = async (ctx, keyv) => {
+const getMessageReputation = async (ctx, keyv, messageHandler) => {
   const emojis = countEmojis(ctx);
   const formattings = formattingsInfo(ctx);
   const urls = countUrls(ctx);
   const fromChannel = telegramUtil.isFromChannel(ctx);
-  const byRules = await isFilteredByRules(ctx);
+  const byRules = await isFilteredByRules(ctx, messageHandler);
 
   let userRep = fromChannel ? env.CHANNEL_START_REPUTATION : parseInt(await keyv.get(`user_${ctx.from.id}`), 10) || env.START_REPUTATION;
 

@@ -23,7 +23,7 @@ class StartMiddleware {
         return ctx.replyWithHTML(getStartMessage());
       }
 
-      if (ctx.session.isBotAdmin) {
+      if (ctx.chatSession.isBotAdmin) {
         return ctx.replyWithHTML(startAdminReadyMessage);
       }
 

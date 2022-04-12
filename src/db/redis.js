@@ -5,6 +5,16 @@ const client = redis.createClient({ url: env.REDIS_URL });
 
 client.connect().then(() => console.info('Redis client successfully started'));
 
+async function getRawValue(key) {
+  if (!key) return {};
+  try {
+    const sourceSession = await client.get(key);
+    return JSON.parse(sourceSession);
+  } catch (error) {
+    return null;
+  }
+}
+
 async function getValue(key) {
   if (!key) return {};
   try {
@@ -15,12 +25,28 @@ async function getValue(key) {
     return {};
   }
 }
+
+function setRawValue(key, value) {
+  return client.set(key, JSON.stringify(value));
+}
+
 function setValue(key, value) {
   if (!key || !value) return;
 
   return client.set(key, JSON.stringify(value));
 }
 
+function removeKey(key) {
+  if (!key) {
+    return null;
+  }
+
+  return client.del(key);
+}
+
+/**
+ * @returns {Promise<(Session | ChatSession)[]>}
+ * */
 async function getAllRecords() {
   try {
     const keys = await client.keys('*');
@@ -42,7 +68,10 @@ async function getAllRecords() {
 }
 
 module.exports = {
-  getValue,
-  setValue,
   getAllRecords,
+  getRawValue,
+  getValue,
+  removeKey,
+  setRawValue,
+  setValue,
 };

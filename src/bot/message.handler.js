@@ -3,17 +3,24 @@ const { env } = require('typed-dotenv').config();
 
 const { processHandler } = require('../express/process.handler');
 
+const { redisService } = require('../services/redis.service');
 const { handleError } = require('../utils');
 
 const host = `http://${env.HOST}:${env.PORT}`;
 
 class MessageHandler {
-  constructor() {
+  /**
+   * @param {TensorService} tensorService
+   * */
+  constructor(tensorService) {
+    this.tensorService = tensorService;
+
     /**
      * Sorted in the call order
      * */
     this.datasetPaths = {
       immediately: 'immediately',
+      one_word: 'one_word',
       strict_percent_100: 'strict_percent_100',
       percent_100: 'percent_100',
       strict_high_risk: 'strict_high_risk',
@@ -26,8 +33,131 @@ class MessageHandler {
   /**
    * @description
    * Check the message for the spam.
-   * The fastest methods should as earlier as possible.
-   * This function is performance related.
+   * The fastest methods should as early as possible.
+   * This function is performance-related.
+   *
+   * @param {string} message - user message
+   * @param {string} originMessage - original user message
+   *
+   * @returns {Promise<{ immediately: boolean, tensor: boolean, location: boolean, isSpam: boolean }>} is spam result
+   */
+  async getTensorRank(message, originMessage) {
+    const tensorRank = (await redisService.getBotTensorPercent()) || env.TENSOR_RANK;
+    /**
+     * immediately
+     *
+     * @description
+     * Words that should be banned immediately 100% ahaha.
+     * Strict words without fuse search.
+     * */
+    const immediatelyResult = await this.processMessage(originMessage, this.datasetPaths.immediately, false);
+
+    if (immediatelyResult.rule) {
+      return {
+        isSpam: true,
+        immediately: true,
+      };
+    }
+
+    /**
+     * one_word
+     *
+     * @description
+     * Words that should be banned immediately 100% ahaha.
+     * Strict words without fuse search.
+     * */
+    const oneWordResult = await this.processMessage(originMessage, this.datasetPaths.one_word, false);
+
+    if (oneWordResult.rule) {
+      return {
+        isSpam: true,
+        oneWord: true,
+      };
+    }
+
+    /**
+     * Get tensor result.
+     * */
+    const tensorResult = (await this.processTensorMessage(message, tensorRank)).result;
+
+    /**
+     * 90% is very high and it's probably spam
+     */
+    if (tensorResult.spamRate > tensorRank) {
+      return {
+        deleteRank: tensorResult.deleteRank,
+        isSpam: true,
+        tensor: tensorResult.spamRate,
+      };
+    }
+
+    /**
+     * strict_locations
+     *
+     * @description
+     * Short locations that user can use with a high risk word.
+     * Strict words without fuse search.
+     * */
+    const shortLocations = await this.processMessage(message, this.datasetPaths.strict_locations, true);
+    let finalLocations = shortLocations;
+
+    /**
+     * If no high risk word, skip locations step
+     * */
+    if (!shortLocations.rule) {
+      /**
+       * locations
+       *
+       * @description
+       * Locations that user can use with a high risk word.
+       * Fuse search, allow to find similar.
+       * */
+      finalLocations = await this.processMessage(message, this.datasetPaths.locations);
+    }
+
+    const locationRank = finalLocations.rule ? 0.2 : 0;
+
+    /**
+     * Found location add more rank for testing
+     * */
+    if (tensorResult.spamRate + locationRank > tensorRank) {
+      return {
+        deleteRank: tensorRank,
+        tensor: tensorResult.spamRate,
+        isSpam: true,
+        location: true,
+      };
+    }
+
+    const oldLogicResult = await this.getDeleteRule(message, originMessage);
+    const oldLogicRank = oldLogicResult.rule ? 0.3 : 0;
+
+    if (tensorResult.spamRate + oldLogicRank > tensorRank) {
+      return {
+        deleteRank: tensorRank,
+        tensor: tensorResult.spamRate,
+        isSpam: true,
+        oldLogic: true,
+      };
+    }
+
+    /**
+     * Return default
+     * */
+    return {
+      deleteRank: tensorRank,
+      tensor: tensorResult.spamRate,
+    };
+  }
+
+  /**
+   * @deprecated
+   * NOTE: Deprecated since tensor logic
+   *
+   * @description
+   * Check the message for the spam.
+   * The fastest methods should as early as possible.
+   * This function is performance-related.
    *
    * @param {string} message - user message
    * @param {string} originMessage - original user message
@@ -106,41 +236,24 @@ class MessageHandler {
       return finalHighRisk;
     }
 
-    /**
-     * strict_locations
-     *
-     * @description
-     * Short locations that user can use with a high risk word.
-     * Strict words without fuse search.
-     * */
-    const shortLocations = await this.processMessage(message, this.datasetPaths.strict_locations, true);
-    let finalLocations = shortLocations;
+    return finalHighRisk;
+  }
 
-    /**
-     * If no high risk word, skip locations step
-     * */
-    if (!shortLocations.rule) {
-      /**
-       * locations
-       *
-       * @description
-       * Locations that user can use with a high risk word.
-       * Fuse search, allow to find similar.
-       * */
-      finalLocations = await this.processMessage(message, this.datasetPaths.locations);
-    }
+  async processTensorMessage(message, rate) {
+    try {
+      if (env.USE_SERVER) {
+        return await axios.post(`${host}/tensor`, { message, rate }).then((response) => response.data);
+      }
 
-    /**
-     * If no locations, message is safe
-     * */
-    if (!finalLocations.rule) {
       return {
-        dataset: null,
-        rule: null,
+        result: await this.tensorService.predict(message, rate),
+      };
+    } catch (e) {
+      handleError(e, 'API_DOWN');
+      return {
+        result: await this.tensorService.predict(message, rate),
       };
     }
-
-    return finalHighRisk;
   }
 
   /**
@@ -252,8 +365,6 @@ class MessageHandler {
   }
 }
 
-const messageHandler = new MessageHandler();
-
 module.exports = {
-  messageHandler,
+  MessageHandler,
 };
