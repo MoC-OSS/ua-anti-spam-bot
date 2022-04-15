@@ -3,6 +3,7 @@ const { hydrateReply } = require('@grammyjs/parse-mode');
 const { Router } = require('@grammyjs/router');
 const { Menu } = require('@grammyjs/menu');
 const { error, env } = require('typed-dotenv').config();
+const { apiThrottler } = require('@grammyjs/transformer-throttler');
 const Keyv = require('keyv');
 
 const { redisService } = require('./services/redis.service');
@@ -267,6 +268,16 @@ const rootMenu = new Menu('root');
   //   ctx.reply(getSettingsMenuMessage(ctx.session.settings), { reply_markup: menu });
   // });
 
+  const trainingThrottler = apiThrottler({
+    group: {
+      maxConcurrent: 2,
+      minTime: 500,
+      reservoir: 20,
+      reservoirRefreshAmount: 20,
+      reservoirRefreshInterval: 10000,
+    },
+  });
+
   bot
     .errorBoundary(handleError)
     .on(
@@ -274,7 +285,7 @@ const rootMenu = new Menu('root');
       botRedisActive,
       ignoreOld(60),
       botActiveMiddleware,
-      errorHandler(tensorListener.middleware()),
+      errorHandler(tensorListener.middleware(trainingThrottler)),
       onlyNotAdmin,
       onlyNotForwarded,
       onlyWithText,
