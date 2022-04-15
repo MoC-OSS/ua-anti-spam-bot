@@ -3,6 +3,7 @@ const { hydrateReply } = require('@grammyjs/parse-mode');
 const { Router } = require('@grammyjs/router');
 const { Menu } = require('@grammyjs/menu');
 const { error, env } = require('typed-dotenv').config();
+const { apiThrottler } = require('@grammyjs/transformer-throttler');
 const Keyv = require('keyv');
 
 const { redisService } = require('./services/redis.service');
@@ -97,6 +98,16 @@ const rootMenu = new Menu('root');
       await bot.api.sendMessage(logsChat, JSON.stringify(migrationError)).catch(() => {});
     });
 
+  const trainingThrottler = apiThrottler({
+    // group: {
+    //   maxConcurrent: 2,
+    //   minTime: 500,
+    //   reservoir: 20,
+    //   reservoirRefreshAmount: 20,
+    //   reservoirRefreshInterval: 10000,
+    // },
+  });
+
   const redisSession = new RedisSession();
   const redisChatSession = new RedisChatSession();
 
@@ -113,7 +124,7 @@ const rootMenu = new Menu('root');
   const onTextListener = new OnTextListener(keyv, startTime, messageHandler);
   const tensorListener = new TestTensorListener(tensorService);
 
-  rootMenu.register(tensorListener.initMenu());
+  rootMenu.register(tensorListener.initMenu(trainingThrottler));
   rootMenu.register(updatesMiddleware.initMenu());
 
   bot.use(hydrateReply);
@@ -274,7 +285,7 @@ const rootMenu = new Menu('root');
       botRedisActive,
       ignoreOld(60),
       botActiveMiddleware,
-      errorHandler(tensorListener.middleware()),
+      errorHandler(tensorListener.middleware(trainingThrottler)),
       onlyNotAdmin,
       onlyNotForwarded,
       onlyWithText,
@@ -288,7 +299,7 @@ const rootMenu = new Menu('root');
 
   bot.start({
     onStart: () => {
-      console.info('Bot started!', new Date().toString());
+      console.info(`Bot @${bot.me.username} started!`, new Date().toString());
 
       if (!env.DEBUG) {
         bot.api
