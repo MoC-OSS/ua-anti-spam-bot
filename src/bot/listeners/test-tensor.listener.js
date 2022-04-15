@@ -1,6 +1,5 @@
 const fs = require('fs');
 const { Menu } = require('@grammyjs/menu');
-const { apiThrottler } = require('@grammyjs/transformer-throttler');
 const { env } = require('typed-dotenv').config();
 
 const { redisService } = require('../../services/redis.service');
@@ -280,7 +279,11 @@ class TestTensorListener {
     return `${chatInstance}:${ctx.msg.reply_to_message?.message_id || ctx.msg.message_id}`;
   }
 
-  middleware() {
+  /**
+   * @param {Transformer} throttler - throttler need to be defined once to work.
+   * So we can't init it each time in middleware because it has new instance, and it doesn't throttle,
+   * */
+  middleware(throttler) {
     /**
      * @param {GrammyContext} ctx
      * @param {Next} next
@@ -293,15 +296,6 @@ class TestTensorListener {
       /**
        * We need to use throttler for Test Tensor because telegram could ban the bot
        * */
-      const throttler = apiThrottler({
-        group: {
-          maxConcurrent: 2,
-          minTime: 500,
-          reservoir: 20,
-          reservoirRefreshAmount: 20,
-          reservoirRefreshInterval: 10000,
-        },
-      });
       ctx.api.config.use(throttler);
 
       if (ctx.from.id !== creatorId) {
