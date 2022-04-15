@@ -269,13 +269,13 @@ const rootMenu = new Menu('root');
   // });
 
   const trainingThrottler = apiThrottler({
-    group: {
-      maxConcurrent: 2,
-      minTime: 500,
-      reservoir: 20,
-      reservoirRefreshAmount: 20,
-      reservoirRefreshInterval: 10000,
-    },
+    // group: {
+    //   maxConcurrent: 2,
+    //   minTime: 500,
+    //   reservoir: 20,
+    //   reservoirRefreshAmount: 20,
+    //   reservoirRefreshInterval: 10000,
+    // },
   });
 
   bot
