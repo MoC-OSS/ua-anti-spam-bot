@@ -72,7 +72,11 @@ class TestTensorListener {
     }
   }
 
-  initMenu() {
+  /**
+   * @param {Transformer<RawApi>} throttler - throttler need to be defined once to work.
+   * So we can't init it each time in middleware because it has new instance, and it doesn't throttle,
+   * */
+  initMenu(throttler) {
     /**
      * @param {GrammyContext} ctx
      * */
@@ -135,6 +139,11 @@ class TestTensorListener {
       } else if (status === false) {
         text = '⛔️ не спам';
       }
+
+      /**
+       * We need to use throttler for Test Tensor because telegram could ban the bot
+       * */
+      ctx.api.config.use(throttler);
 
       await ctx
         .editMessageText(

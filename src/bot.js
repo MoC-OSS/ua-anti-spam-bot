@@ -98,6 +98,16 @@ const rootMenu = new Menu('root');
       await bot.api.sendMessage(logsChat, JSON.stringify(migrationError)).catch(() => {});
     });
 
+  const trainingThrottler = apiThrottler({
+    // group: {
+    //   maxConcurrent: 2,
+    //   minTime: 500,
+    //   reservoir: 20,
+    //   reservoirRefreshAmount: 20,
+    //   reservoirRefreshInterval: 10000,
+    // },
+  });
+
   const redisSession = new RedisSession();
   const redisChatSession = new RedisChatSession();
 
@@ -114,7 +124,7 @@ const rootMenu = new Menu('root');
   const onTextListener = new OnTextListener(keyv, startTime, messageHandler);
   const tensorListener = new TestTensorListener(tensorService);
 
-  rootMenu.register(tensorListener.initMenu());
+  rootMenu.register(tensorListener.initMenu(trainingThrottler));
   rootMenu.register(updatesMiddleware.initMenu());
 
   bot.use(hydrateReply);
@@ -267,16 +277,6 @@ const rootMenu = new Menu('root');
   // bot.command('settings', (ctx) => {
   //   ctx.reply(getSettingsMenuMessage(ctx.session.settings), { reply_markup: menu });
   // });
-
-  const trainingThrottler = apiThrottler({
-    // group: {
-    //   maxConcurrent: 2,
-    //   minTime: 500,
-    //   reservoir: 20,
-    //   reservoirRefreshAmount: 20,
-    //   reservoirRefreshInterval: 10000,
-    // },
-  });
 
   bot
     .errorBoundary(handleError)
