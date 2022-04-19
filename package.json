@@ -5,6 +5,7 @@
   "scripts": {
     "start:bot": "nodemon ./src/bot.js --max_old_space_size=2048",
     "start:bot:prod": "node ./src/bot.js",
+    "start:userbot:prod": "node ./src/userbot",
     "start:server": "nodemon ./src/express.js --max_old_space_size=2048",
     "start:server:prod": "node ./src/express.js",
     "start:server:cluster": "pm2 start ./src/express.js -i 3 --watch || echo '*** Install PM2 globally'",
@@ -22,6 +23,7 @@
     "@grammyjs/router": "^1.1.1",
     "@grammyjs/transformer-throttler": "^1.1.1",
     "@keyv/sqlite": "^3.0.1",
+    "@mtproto/core": "6.2.0",
     "@tensorflow/tfjs": "^3.15.0",
     "@tensorflow/tfjs-node": "^3.15.0",
     "axios": "^0.26.1",
