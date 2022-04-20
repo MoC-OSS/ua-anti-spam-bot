@@ -1,5 +1,6 @@
 const diff = require('diff');
 const { removeSpecialSymbols, removeExtraSpaces } = require('ukrainian-ml-optimizer');
+const { redisService } = require('../services/redis.service');
 
 const compareResult = {
   DIFFERENT_LENGTH: 'DIFFERENT_LENGTH',
@@ -8,7 +9,7 @@ const compareResult = {
 };
 
 const limits = {
-  STORAGE: 3,
+  STORAGE: 1000,
   LENGTH_RATE: 0.5,
   DIFFERENCES_RATE: 20,
 };
@@ -16,6 +17,10 @@ const limits = {
 class UserbotStorage {
   constructor() {
     this.lastMessages = [];
+    redisService.getTrainingTempMessages().then((messages) => {
+      console.info('got TrainingTempMessages');
+      this.lastMessages = messages;
+    });
   }
 
   handleMessage(str) {
@@ -27,6 +32,7 @@ class UserbotStorage {
       }
 
       this.lastMessages.push(str);
+      redisService.setTrainingTempMessages(this.lastMessages);
       return true;
     }
 

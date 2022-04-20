@@ -9,6 +9,7 @@ class RedisService {
       negatives: 'training:negatives',
       trainingChatWhitelist: 'training:chatWhiteList',
       trainingStartRank: 'training:startRank',
+      trainingTempMessages: 'training:tempMessages',
       userSessions: /^-?\d+:-?\d+$/,
       chatSessions: /^-?\d+$/,
     };
@@ -169,6 +170,20 @@ class RedisService {
   async getChatSessions() {
     const allSessions = await redisClient.getAllRecords();
     return allSessions.filter((session) => this.redisSelectors.chatSessions.test(session.id));
+  }
+
+  /**
+   * @returns {Promise<string[]>}
+   * */
+  async getTrainingTempMessages() {
+    return (await redisClient.getRawValue(this.redisSelectors.trainingTempMessages)) || [];
+  }
+
+  /**
+   * @param {string[]} messages
+   * */
+  setTrainingTempMessages(messages) {
+    return redisClient.setRawValue(this.redisSelectors.trainingTempMessages, messages);
   }
 }
 
