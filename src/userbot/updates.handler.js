@@ -34,7 +34,7 @@ module.exports = async (api, chatPeer, tensorService, updateInfo) => {
       if (isNew) {
         await api.call('messages.sendMessage', {
           message: update.message.message,
-          // random_id: Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff),
+          random_id: Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff),
           peer: chatPeer,
         });
       }
