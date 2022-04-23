@@ -4,7 +4,7 @@ const { env } = require('typed-dotenv').config();
 
 const { redisService } = require('../../services/redis.service');
 const { errorHandler } = require('../../utils');
-const { trainingChat } = require('../../creator');
+const { creatorId, trainingChat } = require('../../creator');
 const { getTensorTestResult } = require('../../message');
 const { googleService } = require('../../services/google.service');
 
@@ -326,17 +326,17 @@ class TestTensorListener {
        * */
       ctx.api.config.use(throttler);
 
-      // if (ctx.from.id !== creatorId) {
-      //   if (ctx.chat.type !== 'supergroup') {
-      //     ctx.reply('В особистих не працюю 😝');
-      //     return;
-      //   }
-      //
-      //   if (ctx.chat.id !== trainingChat) {
-      //     ctx.reply('Я працюю тільки в одному супер чаті 😝');
-      //     return;
-      //   }
-      // }
+      if (ctx.from.id !== creatorId) {
+        if (ctx.chat.type !== 'supergroup') {
+          ctx.reply('В особистих не працюю 😝');
+          return;
+        }
+
+        if (ctx.chat.id !== trainingChat) {
+          ctx.reply('Я працюю тільки в одному супер чаті 😝');
+          return;
+        }
+      }
 
       const message = ctx.msg.text || ctx.msg.caption;
 
