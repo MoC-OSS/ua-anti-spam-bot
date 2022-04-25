@@ -21,12 +21,16 @@ module.exports = async (api, chatPeer, tensorService, updateInfo) => {
   }
 
   for (const update of newMessageUpdates) {
-    const messageText = update.message.message;
-    let clearMessageText = messageText;
+    let clearMessageText = update.message.message;
 
     deleteFromMessage.forEach((deleteWord) => {
       clearMessageText = clearMessageText.replace(deleteWord, ' ').trim();
     });
+
+    if (clearMessageText.split(' ').length > 50) {
+      console.info(null, 'Skip', clearMessageText);
+      return;
+    }
 
     const { isSpam } = await tensorService.predict(clearMessageText, 0.7);
     console.info(isSpam, update.message.message);
