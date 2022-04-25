@@ -1,6 +1,8 @@
 /* eslint-disable no-restricted-syntax,no-await-in-loop */
-
 const { userbotStorage } = require('./storage.handler');
+// eslint-disable-next-line import/no-unresolved
+const deleteFromMessage = require('./from-entities.json');
+
 /**
  * @param {API} api
  * @param {any} chatPeer - TODO add defined type
@@ -8,8 +10,6 @@ const { userbotStorage } = require('./storage.handler');
  * @param {ProtoUpdate} updateInfo
  * */
 module.exports = async (api, chatPeer, tensorService, updateInfo) => {
-  console.info('New updates', updateInfo.updates);
-
   const allowedTypes = ['updateEditChannelMessage', 'updateNewChannelMessage'];
 
   const newMessageUpdates = updateInfo.updates.filter(
@@ -20,20 +20,23 @@ module.exports = async (api, chatPeer, tensorService, updateInfo) => {
     return;
   }
 
-  console.info('Filtered updates', updateInfo.updates);
-
   for (const update of newMessageUpdates) {
     const messageText = update.message.message;
+    let clearMessageText = messageText;
 
-    const { isSpam } = await tensorService.predict(messageText, 0.7);
+    deleteFromMessage.forEach((deleteWord) => {
+      clearMessageText = clearMessageText.replace(deleteWord, ' ').trim();
+    });
+
+    const { isSpam } = await tensorService.predict(clearMessageText, 0.7);
     console.info(isSpam, update.message.message);
 
     if (isSpam) {
-      const isNew = userbotStorage.handleMessage(messageText);
+      const isNew = userbotStorage.handleMessage(clearMessageText);
 
       if (isNew) {
         await api.call('messages.sendMessage', {
-          message: update.message.message,
+          message: clearMessageText,
           random_id: Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff),
           peer: chatPeer,
         });
