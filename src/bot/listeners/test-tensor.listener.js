@@ -6,6 +6,7 @@ const { redisService } = require('../../services/redis.service');
 const { errorHandler } = require('../../utils');
 const { creatorId, trainingChat } = require('../../creator');
 const { getTensorTestResult } = require('../../message');
+const { googleService } = require('../../services/google.service');
 
 const defaultTime = 30;
 const removeTime = 30;
@@ -48,6 +49,7 @@ class TestTensorListener {
       fs.writeFileSync(fileName, `${JSON.stringify(newFile, null, 2)}\n`);
     };
 
+    // eslint-disable-next-line no-unused-vars
     const writeInRedisFunction = () => {
       switch (state) {
         case 'negatives':
@@ -61,11 +63,28 @@ class TestTensorListener {
       }
     };
 
+    const writeInGoogleSheetFunction = () => {
+      const sheetId = env.GOOGLE_SPREADSHEET_ID;
+      const sheetPositiveName = env.GOOGLE_POSITIVE_SHEET_NAME;
+      const sheetNegativeName = env.GOOGLE_NEGATIVE_SHEET_NAME;
+      switch (state) {
+        case 'negatives':
+          return googleService.appendToSheet(sheetId, sheetNegativeName, word);
+
+        case 'positives':
+          return googleService.appendToSheet(sheetId, sheetPositiveName, word);
+
+        default:
+          throw new Error(`Invalid state: ${state}`);
+      }
+    };
+
     switch (state) {
       case 'negatives':
       case 'positives':
         // return writeInFileFunction();
-        return writeInRedisFunction();
+        // return writeInRedisFunction();
+        return writeInGoogleSheetFunction();
 
       default:
         throw new Error(`Invalid state: ${state}`);

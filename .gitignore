@@ -11,3 +11,4 @@ telegraf-session.json
 last-ctx.json
 negatives.json
 positives.json
+creds.json
