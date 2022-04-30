@@ -1,8 +1,10 @@
 /* eslint-disable no-restricted-syntax,no-await-in-loop */
-const { mentionRegexp, urlRegexp, removeExtraSpaces } = require('ukrainian-ml-optimizer');
+const { mentionRegexp, urlRegexp } = require('ukrainian-ml-optimizer');
 
 // eslint-disable-next-line import/no-unresolved
 const deleteFromMessage = require('./from-entities.json');
+
+const sentMentionsFromStart = [];
 
 /**
  * @param {API} api
@@ -34,13 +36,10 @@ module.exports = async (api, chatPeer, tensorService, updateInfo, userbotStorage
     clearMessageText = clearMessageText.replace(urlRegexp, ' ');
 
     deleteFromMessage.forEach((deleteWord) => {
-      clearMessageText = removeExtraSpaces(clearMessageText.replace(deleteWord, ' '));
+      clearMessageText = clearMessageText.replace(deleteWord, ' ');
     });
 
-    if (clearMessageText.split(' ').length > 50) {
-      console.info(null, 'Skip', clearMessageText);
-      return;
-    }
+    clearMessageText = clearMessageText.replace(/  +/g, ' ').split(' ').slice(0, 50).join(' ');
 
     const { isSpam, spamRate } = await tensorService.predict(clearMessageText, 0.5);
     console.info(isSpam, spamRate, update.message.message);
@@ -50,7 +49,8 @@ module.exports = async (api, chatPeer, tensorService, updateInfo, userbotStorage
 
       if (telegramLinks.length) {
         telegramLinks.forEach((mention) => {
-          if (!deleteFromMessage.includes(mention)) {
+          if (!deleteFromMessage.includes(mention) && !sentMentionsFromStart.includes(mention)) {
+            sentMentionsFromStart.push(mention);
             api.call('messages.sendMessage', {
               message: mention,
               random_id: Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff),
