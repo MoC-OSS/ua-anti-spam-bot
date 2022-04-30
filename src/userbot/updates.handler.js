@@ -1,5 +1,4 @@
 /* eslint-disable no-restricted-syntax,no-await-in-loop */
-const { userbotStorage } = require('./storage.handler');
 // eslint-disable-next-line import/no-unresolved
 const deleteFromMessage = require('./from-entities.json');
 
@@ -8,8 +7,9 @@ const deleteFromMessage = require('./from-entities.json');
  * @param {any} chatPeer - TODO add defined type
  * @param {TensorService} tensorService
  * @param {ProtoUpdate} updateInfo
+ * @param {UserbotStorage} userbotStorage
  * */
-module.exports = async (api, chatPeer, tensorService, updateInfo) => {
+module.exports = async (api, chatPeer, tensorService, updateInfo, userbotStorage) => {
   const allowedTypes = ['updateEditChannelMessage', 'updateNewChannelMessage'];
 
   const newMessageUpdates = updateInfo.updates.filter(

@@ -1,11 +1,15 @@
 const { env } = require('typed-dotenv').config();
 
+const { redisClient } = require('../db');
 const auth = require('./auth');
+const { UserbotStorage } = require('./storage.handler');
 const updatesHandler = require('./updates.handler');
 const { initTensor } = require('../tensor/tensor.service');
 
 console.info('Start listener application');
 auth().then(async (api) => {
+  await redisClient.client.connect().then(() => console.info('Redis client successfully started'));
+  const userbotStorage = new UserbotStorage();
   console.info('Application is listening new messages.');
 
   const tensorService = await initTensor();
@@ -25,7 +29,7 @@ auth().then(async (api) => {
     access_hash: testChannel.access_hash,
   };
 
-  api.mtproto.updates.on('updates', (updateInfo) => updatesHandler(api, chatPeer, tensorService, updateInfo));
+  api.mtproto.updates.on('updates', (updateInfo) => updatesHandler(api, chatPeer, tensorService, updateInfo, userbotStorage));
 
   setInterval(async () => {
     try {

@@ -79,8 +79,6 @@ class UserbotStorage {
   }
 }
 
-const userbotStorage = new UserbotStorage();
-
 module.exports = {
-  userbotStorage,
+  UserbotStorage,
 };
