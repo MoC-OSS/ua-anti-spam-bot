@@ -1,4 +1,6 @@
 /* eslint-disable no-restricted-syntax,no-await-in-loop */
+const { mentionRegexp, urlRegexp, removeExtraSpaces } = require('ukrainian-ml-optimizer');
+
 // eslint-disable-next-line import/no-unresolved
 const deleteFromMessage = require('./from-entities.json');
 
@@ -23,8 +25,16 @@ module.exports = async (api, chatPeer, tensorService, updateInfo, userbotStorage
   for (const update of newMessageUpdates) {
     let clearMessageText = update.message.message;
 
+    const mentions = clearMessageText.match(mentionRegexp);
+    const urls = clearMessageText.match(urlRegexp);
+
+    const telegramLinks = [...(mentions || []), ...(urls || [])];
+
+    clearMessageText = clearMessageText.replace(mentionRegexp, ' ');
+    clearMessageText = clearMessageText.replace(urlRegexp, ' ');
+
     deleteFromMessage.forEach((deleteWord) => {
-      clearMessageText = clearMessageText.replace(deleteWord, ' ').trim();
+      clearMessageText = removeExtraSpaces(clearMessageText.replace(deleteWord, ' '));
     });
 
     if (clearMessageText.split(' ').length > 50) {
@@ -32,11 +42,25 @@ module.exports = async (api, chatPeer, tensorService, updateInfo, userbotStorage
       return;
     }
 
-    const { isSpam } = await tensorService.predict(clearMessageText, 0.7);
-    console.info(isSpam, update.message.message);
+    const { isSpam, spamRate } = await tensorService.predict(clearMessageText, 0.5);
+    console.info(isSpam, spamRate, update.message.message);
 
     if (isSpam) {
       const isNew = userbotStorage.handleMessage(clearMessageText);
+
+      if (telegramLinks.length) {
+        telegramLinks.forEach((mention) => {
+          if (!deleteFromMessage.includes(mention)) {
+            api.call('messages.sendMessage', {
+              message: mention,
+              random_id: Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff),
+              peer: {
+                _: 'inputPeerSelf',
+              },
+            });
+          }
+        });
+      }
 
       if (isNew) {
         await api.call('messages.sendMessage', {
