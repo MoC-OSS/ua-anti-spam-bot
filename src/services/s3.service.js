@@ -7,6 +7,9 @@ const S3 = require('aws-sdk/clients/s3');
 
 class S3Service {
   constructor() {
+    /**
+     * Update global config
+     * */
     AWS.config.update({
       accessKeyId: env.AWS_ACCESS_KEY_ID,
       secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
