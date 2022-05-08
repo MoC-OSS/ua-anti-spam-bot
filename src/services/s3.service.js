@@ -6,6 +6,9 @@ const S3 = require('aws-sdk/clients/s3');
 
 class S3Service {
   constructor() {
+    /**
+     * Init S3
+     * */
     this.s3 = new S3({
       apiVersion: '2006-03-01',
       accessKeyId: env.AWS_ACCESS_KEY_ID,
