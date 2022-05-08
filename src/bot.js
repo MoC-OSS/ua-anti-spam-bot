@@ -8,6 +8,7 @@ const Keyv = require('keyv');
 
 const { redisClient } = require('./db');
 const { redisService } = require('./services/redis.service');
+const { S3Service } = require('./services/s3.service');
 
 const { initTensor } = require('./tensor/tensor.service');
 const { RedisSession, RedisChatSession } = require('./bot/sessionProviders');
@@ -82,7 +83,8 @@ const rootMenu = new Menu('root');
 
   await redisClient.client.connect().then(() => console.info('Redis client successfully started'));
 
-  const tensorService = await initTensor();
+  const s3Service = new S3Service();
+  const tensorService = await initTensor(s3Service);
   tensorService.setSpamThreshold(await redisService.getBotTensorPercent());
 
   const startTime = new Date();

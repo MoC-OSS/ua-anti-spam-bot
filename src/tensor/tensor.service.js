@@ -115,7 +115,21 @@ class TensorService {
 
 module.exports = {
   TensorService,
-  initTensor: async () => {
+  /**
+   * @param {S3Service} [s3Service]
+   * */
+  initTensor: async (s3Service) => {
+    if (env.S3_BUCKET && s3Service) {
+      try {
+        await s3Service.downloadTensorFlowModel(path.join(__dirname, 'temp'));
+      } catch (e) {
+        console.error('Cannot download tensor flow model from S3.\nReason: ', e);
+        console.error('Use the legacy model.');
+      }
+    } else {
+      console.info('Skip loading model from S3 due to no S3_BUCKET or no s3Service.');
+    }
+
     const tensorService = new TensorService('./temp/model.json', env.TENSOR_RANK);
     await tensorService.loadModel();
 
