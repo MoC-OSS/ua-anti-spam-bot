@@ -6,6 +6,12 @@ const S3 = require('aws-sdk/clients/s3');
 
 class S3Service {
   constructor() {
+    S3.config.update({
+      accessKeyId: env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
+      region: env.AWS_REGION,
+    });
+
     this.s3 = new S3({ apiVersion: '2006-03-01' });
     this.mlFiles = ['group1-shard1of1.bin', 'model.json', 'vocab.json'];
 
