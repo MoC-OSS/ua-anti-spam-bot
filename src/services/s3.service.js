@@ -2,11 +2,12 @@ const fs = require('fs');
 const path = require('path');
 
 const { env } = require('typed-dotenv').config();
+const AWS = require('aws-sdk');
 const S3 = require('aws-sdk/clients/s3');
 
 class S3Service {
   constructor() {
-    S3.config.update({
+    AWS.config.update({
       accessKeyId: env.AWS_ACCESS_KEY_ID,
       secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
       region: env.AWS_REGION,
