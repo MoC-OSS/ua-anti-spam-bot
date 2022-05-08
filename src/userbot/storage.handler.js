@@ -9,7 +9,7 @@ const compareResult = {
 };
 
 const limits = {
-  STORAGE: 1000,
+  STORAGE: 10000,
   LENGTH_RATE: 0.5,
   DIFFERENCES_RATE: 20,
 };
@@ -79,8 +79,6 @@ class UserbotStorage {
   }
 }
 
-const userbotStorage = new UserbotStorage();
-
 module.exports = {
-  userbotStorage,
+  UserbotStorage,
 };
