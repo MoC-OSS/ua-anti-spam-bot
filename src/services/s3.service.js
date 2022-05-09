@@ -11,8 +11,6 @@ class S3Service {
      * */
     this.s3 = new S3({
       apiVersion: '2006-03-01',
-      accessKeyId: env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
       region: env.AWS_REGION,
     });
     this.mlFiles = ['group1-shard1of1.bin', 'model.json', 'vocab.json'];
