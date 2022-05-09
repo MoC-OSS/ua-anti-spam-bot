@@ -10,7 +10,6 @@ class S3Service {
      * Init S3
      * */
     this.s3 = new S3({
-      apiVersion: '2006-03-01',
       region: env.AWS_REGION,
     });
     this.mlFiles = ['group1-shard1of1.bin', 'model.json', 'vocab.json'];
