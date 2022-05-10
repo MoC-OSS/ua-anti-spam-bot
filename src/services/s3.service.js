@@ -33,7 +33,7 @@ class S3Service {
         .promise()
         .then(async (response) => {
           console.info(path.join(fsFolderPath, fileName));
-          fs.writeFileSync(path.join(fsFolderPath, fileName), await response.Body.arrayBuffer());
+          fs.writeFileSync(path.join(fsFolderPath, fileName), response.Body);
         }),
     );
 
