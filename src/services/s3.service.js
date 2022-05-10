@@ -31,8 +31,9 @@ class S3Service {
       this.s3
         .getObject({ Bucket: this.config.bucket, Key: path.join(this.config.path, fileName) })
         .promise()
-        .then((response) => {
-          fs.writeFileSync(path.join(fsFolderPath, fileName), response.Body.toString());
+        .then(async (response) => {
+          console.info(path.join(fsFolderPath, fileName));
+          fs.writeFileSync(path.join(fsFolderPath, fileName), await response.Body.arrayBuffer());
         }),
     );
 
