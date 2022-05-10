@@ -122,6 +122,7 @@ module.exports = {
     if (env.S3_BUCKET && s3Service) {
       try {
         await s3Service.downloadTensorFlowModel(path.join(__dirname, 'temp'));
+        console.info('Tensor flow model has been loaded from S3.');
       } catch (e) {
         console.error('Cannot download tensor flow model from S3.\nReason: ', e);
         console.error('Use the legacy model.');
