@@ -2,14 +2,14 @@ const fs = require('fs');
 const path = require('path');
 
 const { env } = require('typed-dotenv').config();
-const S3 = require('aws-sdk/clients/s3');
+const AWS = require('aws-sdk');
 
 class S3Service {
   constructor() {
     /**
      * Init S3
      * */
-    this.s3 = new S3({
+    this.s3 = new AWS.S3({
       region: env.AWS_REGION,
     });
     this.mlFiles = ['group1-shard1of1.bin', 'model.json', 'vocab.json'];
