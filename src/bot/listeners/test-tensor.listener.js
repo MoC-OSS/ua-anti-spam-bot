@@ -168,7 +168,7 @@ class TestTensorListener {
         .editMessageText(
           `${storage.originalMessage}\n\n${winUsers.join(
             ', ',
-          )} виділив/ли це як ${text}\nВидалю обидва повідомлення автоматично через ${removeTime} сек...`,
+          )} виділив/ли це як ${text}\nВидалю обидва повідомлення автоматично через ${removeTime} сек...\n${new Date().toISOString()}`,
           {
             parse_mode: 'HTML',
             reply_markup: null,
