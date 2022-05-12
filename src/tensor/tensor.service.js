@@ -121,6 +121,7 @@ module.exports = {
   initTensor: async (s3Service) => {
     if (env.S3_BUCKET && s3Service) {
       try {
+        console.info('* Staring new tensorflow S3 logic...');
         await s3Service.downloadTensorFlowModel(path.join(__dirname, 'temp'));
         console.info('Tensor flow model has been loaded from S3.');
       } catch (e) {

@@ -47,7 +47,7 @@ module.exports = async (api, chatPeer, tensorService, updateInfo, userbotStorage
     const { isSpam, spamRate } = await tensorService.predict(clearMessageText, 0.5);
     console.info(isSpam, spamRate, update.message.message);
 
-    if (isSpam && spamRate < 0.6) {
+    if (isSpam && spamRate < 0.55) {
       const isNew = userbotStorage.handleMessage(clearMessageText);
 
       if (telegramLinks.length) {
