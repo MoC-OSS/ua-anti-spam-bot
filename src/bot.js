@@ -6,7 +6,9 @@ const { error, env } = require('typed-dotenv').config();
 const { apiThrottler } = require('@grammyjs/transformer-throttler');
 const Keyv = require('keyv');
 
+const { redisClient } = require('./db');
 const { redisService } = require('./services/redis.service');
+const { S3Service } = require('./services/s3.service');
 
 const { initTensor } = require('./tensor/tensor.service');
 const { RedisSession, RedisChatSession } = require('./bot/sessionProviders');
@@ -79,7 +81,10 @@ const rootMenu = new Menu('root');
   await sleep(5000);
   console.info('Starting a new instance...');
 
-  const tensorService = await initTensor();
+  await redisClient.client.connect().then(() => console.info('Redis client successfully started'));
+
+  const s3Service = new S3Service();
+  const tensorService = await initTensor(s3Service);
   tensorService.setSpamThreshold(await redisService.getBotTensorPercent());
 
   const startTime = new Date();

@@ -1,11 +1,15 @@
 const express = require('express');
 const { error, env } = require('typed-dotenv').config();
 
+const { S3Service } = require('./services/s3.service');
+
 const { initTensor } = require('./tensor/tensor.service');
 const { processHandler } = require('./express/process.handler');
 
 (async () => {
-  const tensorService = await initTensor();
+  const s3Service = new S3Service();
+
+  const tensorService = await initTensor(s3Service);
 
   const app = express();
   const expressStartTime = new Date().toString();

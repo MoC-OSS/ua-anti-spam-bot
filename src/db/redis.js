@@ -3,8 +3,6 @@ const { env } = require('typed-dotenv').config();
 
 const client = redis.createClient({ url: env.REDIS_URL });
 
-client.connect().then(() => console.info('Redis client successfully started'));
-
 async function getRawValue(key) {
   if (!key) return {};
   try {
@@ -68,6 +66,7 @@ async function getAllRecords() {
 }
 
 module.exports = {
+  client,
   getAllRecords,
   getRawValue,
   getValue,
