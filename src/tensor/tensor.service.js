@@ -6,11 +6,6 @@ const { optimizeText } = require('ukrainian-ml-optimizer');
 const tf = require('@tensorflow/tfjs');
 require('@tensorflow/tfjs-node');
 
-// eslint-disable-next-line import/no-unresolved
-const DICTIONARY = require('./temp/vocab.json');
-// eslint-disable-next-line import/no-unresolved
-const MODEL = require('./temp/model.json');
-
 class TensorService {
   constructor(modelPath, spamThreshold) {
     /**
@@ -20,8 +15,16 @@ class TensorService {
     this.SPAM_THRESHOLD = spamThreshold;
     this.modelPath = modelPath;
 
+    try {
+      this.DICTIONARY = JSON.parse(fs.readFileSync(path.join(__dirname, './temp/vocab.json')).toString());
+      this.MODEL = JSON.parse(fs.readFileSync(path.join(__dirname, './temp/model.json')).toString());
+    } catch (e) {
+      console.error('Cannot parse model! Reason:');
+      console.error(e);
+    }
+
     this.DICTIONARY_EXTRAS = this.getDictionaryExtras();
-    this.modelLength = MODEL.modelTopology.model_config.config.layers[1].config.input_length;
+    this.modelLength = this.MODEL.modelTopology.model_config.config.layers[1].config.input_length;
   }
 
   setSpamThreshold(newThreshold) {
@@ -82,7 +85,7 @@ class TensorService {
     // If word is found in dictionary, add that number else
     // you add the UNKNOWN token.
     wordArray.forEach((word) => {
-      const encoding = DICTIONARY.indexOf(word);
+      const encoding = this.DICTIONARY.indexOf(word);
       returnArray.push(encoding === -1 ? this.DICTIONARY_EXTRAS.UNKNOWN : encoding);
       index += 1;
     });
