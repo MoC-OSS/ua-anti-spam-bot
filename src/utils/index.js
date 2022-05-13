@@ -73,11 +73,23 @@ function logSkipMiddleware(ctx, reason, extra) {
   }
 }
 
+/**
+ * @param {Date} initialDate
+ * @param {Date} compareDate
+ * @param {number} hours
+ * */
+function compareDatesWithOffset(initialDate, compareDate, hours) {
+  const additionalTime = 1000 * 60 * 60 * hours;
+
+  return +initialDate + additionalTime < +compareDate;
+}
+
 module.exports = {
   logSkipMiddleware,
   joinMessage,
   logCtx,
   sleep,
+  compareDatesWithOffset,
   truncateString,
   formatDate,
   getRandomItem,

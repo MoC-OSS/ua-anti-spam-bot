@@ -126,7 +126,7 @@ const rootMenu = new Menu('root');
 
   const messageHandler = new MessageHandler(tensorService);
 
-  const onTextListener = new OnTextListener(keyv, startTime, messageHandler);
+  const onTextListener = new OnTextListener(bot, keyv, startTime, messageHandler);
   const tensorListener = new TestTensorListener(tensorService);
 
   rootMenu.register(tensorListener.initMenu(trainingThrottler));

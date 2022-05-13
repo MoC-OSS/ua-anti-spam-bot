@@ -60,6 +60,38 @@ class MessageHandler {
     }
 
     /**
+     * strict_percent_100
+     *
+     * @description
+     * Words that should be banned immediately.
+     * Strict words without fuse search.
+     * */
+    const strictPercent100Result = await this.processMessage(message, this.datasetPaths.strict_percent_100, true);
+
+    if (strictPercent100Result.rule) {
+      return {
+        isSpam: true,
+        percent100: true,
+      };
+    }
+
+    /**
+     * percent_100
+     *
+     * @description
+     * Words that should be banned immediately.
+     * Fuse search, allow to find similar.
+     * */
+    const percent100Result = await this.processMessage(message, this.datasetPaths.percent_100);
+
+    if (percent100Result.rule) {
+      return {
+        isSpam: true,
+        percent100: true,
+      };
+    }
+
+    /**
      * one_word
      *
      * @description
@@ -129,7 +161,7 @@ class MessageHandler {
       };
     }
 
-    const oldLogicResult = await this.getDeleteRule(message, originMessage);
+    const oldLogicResult = await this.getDeleteRule(message);
     const oldLogicRank = oldLogicResult.rule ? 0.3 : 0;
 
     if (tensorResult.spamRate + oldLogicRank > tensorRank) {
@@ -160,50 +192,10 @@ class MessageHandler {
    * This function is performance-related.
    *
    * @param {string} message - user message
-   * @param {string} originMessage - original user message
    *
    * @returns Delete Rule
    */
-  async getDeleteRule(message, originMessage) {
-    /**
-     * immediately
-     *
-     * @description
-     * Words that should be banned immediately 100% ahaha.
-     * Strict words without fuse search.
-     * */
-    const immediatelyResult = await this.processMessage(originMessage, this.datasetPaths.immediately, false);
-
-    if (immediatelyResult.rule) {
-      return immediatelyResult;
-    }
-
-    /**
-     * strict_percent_100
-     *
-     * @description
-     * Words that should be banned immediately.
-     * Strict words without fuse search.
-     * */
-    const strictPercent100Result = await this.processMessage(message, this.datasetPaths.strict_percent_100, true);
-
-    if (strictPercent100Result.rule) {
-      return strictPercent100Result;
-    }
-
-    /**
-     * percent_100
-     *
-     * @description
-     * Words that should be banned immediately.
-     * Fuse search, allow to find similar.
-     * */
-    const percent100Result = await this.processMessage(message, this.datasetPaths.percent_100);
-
-    if (percent100Result.rule) {
-      return percent100Result;
-    }
-
+  async getDeleteRule(message) {
     /**
      * Combined rules
      * */

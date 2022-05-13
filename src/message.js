@@ -195,6 +195,15 @@ ${isAdmin ? startAdminReadyMessage : makeAdminMessage}
 ${adminsString ? `Це може зробити: ${adminsString}` : 'Це може зробити творець чату'}
 `.trim();
 
+const getCannotDeleteMessage = ({ adminsString }) =>
+  `
+<b>😢 Не можу видалити це повідомлення.</b>
+Я не маю прав на видалення або в Telegram стався збій.
+
+🧐 Перевірте права чи зробіть мене адміністратором знову.
+${adminsString ? `З цим може допомогти: ${adminsString}` : 'З цим може допомогти творець чату'}
+`.trim();
+
 /**
  *
  * Message that bot sends when user invites it into a channel
@@ -268,16 +277,17 @@ module.exports = {
   cancelMessageSending,
   getDeclinedMassSendingMessage,
   confirmationMessage,
-  getTensorTestResult,
-  getSettingsMenuMessage,
   getBotJoinMessage,
-  getStartMessage,
-  getStartChannelMessage,
-  getGroupStartMessage,
-  getHelpMessage,
+  getCannotDeleteMessage,
   getDebugMessage,
   getDeleteMessage,
+  getGroupStartMessage,
+  getHelpMessage,
+  getSettingsMenuMessage,
+  getStartChannelMessage,
+  getStartMessage,
   getStatisticsMessage,
-  getUpdatesMessage,
   getSuccessfulMessage,
+  getTensorTestResult,
+  getUpdatesMessage,
 };
