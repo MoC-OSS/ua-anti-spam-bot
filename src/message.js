@@ -12,6 +12,8 @@ const memberReadyMessage = 'Тепер я деактивований. Відпо
 const spamDeleteMessage = '❗️ Повідомлення видалено.\n\n* Причина: спам.';
 const somethingWentWrongMessage = 'Сталась якась помилка :(';
 const makeAdminMessage = '⛔️ Я не активований.\n<b>☝️Зроби мене адміністратором, щоб я міг видаляти повідомлення.</b>';
+const hasDeletePermissionMessage = '✅ Я маю права на видалення повідомлень';
+const hasNoDeletePermissionMessage = '⛔ Я не маю права на видалення повідомлень';
 
 /**
  * Generic - Settings
@@ -148,8 +150,11 @@ ${botStartTime}</i>
  * Help handler
  *
  * */
-const getHelpMessage = ({ startLocaleTime }) =>
+const getHelpMessage = ({ startLocaleTime, isAdmin, canDelete }) =>
   `
+${isAdmin ? startAdminReadyMessage : makeAdminMessage}
+${canDelete ? hasDeletePermissionMessage : hasNoDeletePermissionMessage}
+
 <b>Якщо повідомлення було видалено помилково:</b>
 
 • Попросіть адміністраторів написати його самостійно;
@@ -188,11 +193,12 @@ https://youtu.be/RX0cZYf1Lm4
  * Message that bot sends when user uses /start in the group
  *
  * */
-const getGroupStartMessage = ({ adminsString, isAdmin = false }) =>
+const getGroupStartMessage = ({ adminsString, isAdmin = false, canDelete }) =>
   `
 ${isAdmin ? startAdminReadyMessage : makeAdminMessage}
+${canDelete ? hasDeletePermissionMessage : hasNoDeletePermissionMessage}
 
-${adminsString ? `Це може зробити: ${adminsString}` : 'Це може зробити творець чату'}
+${((!isAdmin || !canDelete) && (adminsString ? `З цим може допомогти: ${adminsString}` : 'З цим може допомогти творець чату')) || ''}
 `.trim();
 
 const getCannotDeleteMessage = ({ adminsString }) =>

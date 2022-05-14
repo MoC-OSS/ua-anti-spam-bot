@@ -1,4 +1,4 @@
-const { getStartMessage, getGroupStartMessage, makeAdminMessage, startAdminReadyMessage } = require('../../message');
+const { getStartMessage, getGroupStartMessage, makeAdminMessage } = require('../../message');
 const { handleError, telegramUtil } = require('../../utils');
 
 class StartMiddleware {
@@ -18,17 +18,23 @@ class StartMiddleware {
     /**
      * @param {GrammyContext} ctx
      * */
-    return (ctx) => {
+    return async (ctx) => {
       if (ctx.chat.type === 'private') {
         return ctx.replyWithHTML(getStartMessage());
       }
 
-      if (ctx.chatSession.isBotAdmin) {
-        return ctx.replyWithHTML(startAdminReadyMessage);
+      const isAdmin = ctx.chatSession.isBotAdmin;
+      const canDelete = await ctx
+        .deleteMessage()
+        .then(() => true)
+        .catch(() => false);
+
+      if (!isAdmin || !canDelete) {
+        return ctx.replyWithHTML(getGroupStartMessage({ isAdmin, canDelete }));
       }
 
       telegramUtil.getChatAdmins(this.bot, ctx.chat.id).then(({ adminsString }) => {
-        ctx.replyWithHTML(getGroupStartMessage({ adminsString })).catch((getAdminsError) => {
+        ctx.replyWithHTML(getGroupStartMessage({ adminsString, isAdmin, canDelete })).catch((getAdminsError) => {
           handleError(getAdminsError);
           ctx.replyWithHTML(makeAdminMessage);
         });
