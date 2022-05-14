@@ -7,6 +7,7 @@ const { getRandomItem } = require('./utils');
  * Generic
  * */
 const adminReadyMessage = 'Тепер я адміністратор. Готовий до роботи 😎';
+const adminReadyHasNoDeletePermissionMessage = 'Тепер я адміністратор. Але не маю права на видалення повідомлень 😢';
 const startAdminReadyMessage = '✅ Я активований і виконую свою роботу';
 const memberReadyMessage = 'Тепер я деактивований. Відпочиваю... 😴';
 const spamDeleteMessage = '❗️ Повідомлення видалено.\n\n* Причина: спам.';
@@ -277,6 +278,7 @@ module.exports = {
   settingsSubmitMessage,
   memberReadyMessage,
   adminReadyMessage,
+  adminReadyHasNoDeletePermissionMessage,
   startAdminReadyMessage,
   spamDeleteMessage,
   somethingWentWrongMessage,
