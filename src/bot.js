@@ -78,7 +78,7 @@ const rootMenu = new Menu('root');
 
 (async () => {
   console.info('Waiting for the old instance to down...');
-  await sleep(5000);
+  await sleep(env.DEBUG ? 0 : 5000);
   console.info('Starting a new instance...');
 
   await redisClient.client.connect().then(() => console.info('Redis client successfully started'));
@@ -91,12 +91,16 @@ const rootMenu = new Menu('root');
 
   const bot = new Bot(env.BOT_TOKEN);
 
-  bot.api.sendMessage(logsChat, '*** 20220406204759 Migration started...').catch(() => {});
+  if (!env.DEBUG) {
+    bot.api.sendMessage(logsChat, '*** 20220406204759 Migration started...').catch(() => {});
+  }
   // eslint-disable-next-line global-require
   require('./20220406204759-migrate-redis-user-session')(bot, startTime)
     .then(() => {
       console.info('*** 20220406204759 Migration run successfully!!!');
-      bot.api.sendMessage(logsChat, '*** 20220406204759 Migration run successfully!!!').catch(() => {});
+      if (!env.DEBUG) {
+        bot.api.sendMessage(logsChat, '*** 20220406204759 Migration run successfully!!!').catch(() => {});
+      }
     })
     .catch(async (migrationError) => {
       await bot.api.sendMessage(logsChat, `Migration failed! Reason: ${migrationError.reason}`).catch(() => {});
@@ -126,7 +130,7 @@ const rootMenu = new Menu('root');
 
   const messageHandler = new MessageHandler(tensorService);
 
-  const onTextListener = new OnTextListener(keyv, startTime, messageHandler);
+  const onTextListener = new OnTextListener(bot, keyv, startTime, messageHandler);
   const tensorListener = new TestTensorListener(tensorService);
 
   rootMenu.register(tensorListener.initMenu(trainingThrottler));

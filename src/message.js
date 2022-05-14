@@ -7,11 +7,14 @@ const { getRandomItem } = require('./utils');
  * Generic
  * */
 const adminReadyMessage = 'Тепер я адміністратор. Готовий до роботи 😎';
+const adminReadyHasNoDeletePermissionMessage = 'Тепер я адміністратор. Але не маю права на видалення повідомлень 😢';
 const startAdminReadyMessage = '✅ Я активований і виконую свою роботу';
 const memberReadyMessage = 'Тепер я деактивований. Відпочиваю... 😴';
 const spamDeleteMessage = '❗️ Повідомлення видалено.\n\n* Причина: спам.';
 const somethingWentWrongMessage = 'Сталась якась помилка :(';
 const makeAdminMessage = '⛔️ Я не активований.\n<b>☝️Зроби мене адміністратором, щоб я міг видаляти повідомлення.</b>';
+const hasDeletePermissionMessage = '✅ Я маю права на видалення повідомлень';
+const hasNoDeletePermissionMessage = '⛔ Я не маю права на видалення повідомлень';
 
 /**
  * Generic - Settings
@@ -148,8 +151,11 @@ ${botStartTime}</i>
  * Help handler
  *
  * */
-const getHelpMessage = ({ startLocaleTime }) =>
+const getHelpMessage = ({ startLocaleTime, isAdmin, canDelete }) =>
   `
+${isAdmin ? startAdminReadyMessage : makeAdminMessage}
+${canDelete ? hasDeletePermissionMessage : hasNoDeletePermissionMessage}
+
 <b>Якщо повідомлення було видалено помилково:</b>
 
 • Попросіть адміністраторів написати його самостійно;
@@ -188,11 +194,21 @@ https://youtu.be/RX0cZYf1Lm4
  * Message that bot sends when user uses /start in the group
  *
  * */
-const getGroupStartMessage = ({ adminsString, isAdmin = false }) =>
+const getGroupStartMessage = ({ adminsString, isAdmin = false, canDelete }) =>
   `
 ${isAdmin ? startAdminReadyMessage : makeAdminMessage}
+${canDelete ? hasDeletePermissionMessage : hasNoDeletePermissionMessage}
 
-${adminsString ? `Це може зробити: ${adminsString}` : 'Це може зробити творець чату'}
+${((!isAdmin || !canDelete) && (adminsString ? `З цим може допомогти: ${adminsString}` : 'З цим може допомогти творець чату')) || ''}
+`.trim();
+
+const getCannotDeleteMessage = ({ adminsString }) =>
+  `
+<b>😢 Не можу видалити це повідомлення.</b>
+Я не маю прав на видалення або в Telegram стався збій.
+
+🧐 Перевірте права чи зробіть мене адміністратором знову.
+${adminsString ? `З цим може допомогти: ${adminsString}` : 'З цим може допомогти творець чату'}
 `.trim();
 
 /**
@@ -262,22 +278,24 @@ module.exports = {
   settingsSubmitMessage,
   memberReadyMessage,
   adminReadyMessage,
+  adminReadyHasNoDeletePermissionMessage,
   startAdminReadyMessage,
   spamDeleteMessage,
   somethingWentWrongMessage,
   cancelMessageSending,
   getDeclinedMassSendingMessage,
   confirmationMessage,
-  getTensorTestResult,
-  getSettingsMenuMessage,
   getBotJoinMessage,
-  getStartMessage,
-  getStartChannelMessage,
-  getGroupStartMessage,
-  getHelpMessage,
+  getCannotDeleteMessage,
   getDebugMessage,
   getDeleteMessage,
+  getGroupStartMessage,
+  getHelpMessage,
+  getSettingsMenuMessage,
+  getStartChannelMessage,
+  getStartMessage,
   getStatisticsMessage,
-  getUpdatesMessage,
   getSuccessfulMessage,
+  getTensorTestResult,
+  getUpdatesMessage,
 };
