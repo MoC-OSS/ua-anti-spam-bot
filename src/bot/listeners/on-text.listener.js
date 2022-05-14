@@ -1,6 +1,7 @@
 const { env } = require('typed-dotenv').config();
+const { InputFile } = require('grammy');
 
-const { creatorId, privateTrainingChat } = require('../../creator');
+const { creatorId, privateTrainingChat, logsChat } = require('../../creator');
 
 const { redisService } = require('../../services/redis.service');
 const { telegramUtil, handleError, compareDatesWithOffset } = require('../../utils');
@@ -105,12 +106,30 @@ class OnTextListener {
                 ctx.chatSession.isLimitedDeletion = true;
                 ctx.chatSession.lastLimitedDeletionDate = new Date();
 
-                telegramUtil.getChatAdmins(this.bot, ctx.chat.id).then(({ adminsString }) => {
+                telegramUtil.getChatAdmins(this.bot, ctx.chat.id).then(({ adminsString, admins }) => {
                   ctx
                     .replyWithHTML(getCannotDeleteMessage({ adminsString }), { reply_to_message_id: ctx.msg.message_id })
-                    .catch((getAdminsError) => {
-                      handleError(getAdminsError);
-                    });
+                    .catch(handleError);
+
+                  ctx.state.admins = admins;
+
+                  this.bot.api
+                    .sendMessage(
+                      logsChat,
+                      `Cannot delete the following message from chat\n\n<code>${ctx.chat.title}</code>\n${ctx.msg.text}`,
+                      {
+                        parse_mode: 'HTML',
+                      },
+                    )
+                    .then(() => {
+                      ctx.api
+                        .sendDocument(
+                          logsChat,
+                          new InputFile(Buffer.from(JSON.stringify(ctx, null, 2)), `ctx-${new Date().toISOString()}.json`),
+                        )
+                        .catch(handleError);
+                    })
+                    .catch(handleError);
                 });
               }
             });
