@@ -1,21 +1,24 @@
 const { env } = require('typed-dotenv').config();
+const { InputFile } = require('grammy');
 
-const { creatorId, privateTrainingChat } = require('../../creator');
+const { creatorId, privateTrainingChat, logsChat } = require('../../creator');
 
 const { redisService } = require('../../services/redis.service');
-const { telegramUtil } = require('../../utils');
-const { getDeleteMessage, getDebugMessage } = require('../../message'); // spamDeleteMessage
+const { telegramUtil, handleError, compareDatesWithOffset } = require('../../utils');
+const { getDeleteMessage, getDebugMessage, getCannotDeleteMessage } = require('../../message'); // spamDeleteMessage
 const { getMessageReputation } = require('../spam.handlers');
 
 // const slavaWords = ['слава україні', 'слава украине', 'слава зсу'];
 
 class OnTextListener {
   /**
+   * @param {Bot} bot
    * @param {Keyv} keyv
    * @param {Date} startTime
    * @param {MessageHandler} messageHandler
    */
-  constructor(keyv, startTime, messageHandler) {
+  constructor(bot, keyv, startTime, messageHandler) {
+    this.bot = bot;
     this.keyv = keyv;
     this.startTime = startTime;
     this.messageHandler = messageHandler;
@@ -88,11 +91,48 @@ class OnTextListener {
             ctx.api.sendMessage(privateTrainingChat, ctx.state.text).catch(() => {});
           }
 
-          await ctx.deleteMessage().then(() => {
-            ctx.replyWithHTML(
-              getDeleteMessage({ writeUsername, wordMessage: '', debugMessage, withLocation: rep.byRules.dataset.location }),
-            );
-          });
+          await ctx
+            .deleteMessage()
+            .then(() => {
+              ctx.replyWithHTML(
+                getDeleteMessage({ writeUsername, wordMessage: '', debugMessage, withLocation: rep.byRules.dataset.location }),
+              );
+            })
+            .catch(() => {
+              if (
+                !ctx.chatSession.isLimitedDeletion ||
+                compareDatesWithOffset(new Date(ctx.chatSession.lastLimitedDeletionDate), new Date(), 1)
+              ) {
+                ctx.chatSession.isLimitedDeletion = true;
+                ctx.chatSession.lastLimitedDeletionDate = new Date();
+
+                telegramUtil.getChatAdmins(this.bot, ctx.chat.id).then(({ adminsString, admins }) => {
+                  ctx
+                    .replyWithHTML(getCannotDeleteMessage({ adminsString }), { reply_to_message_id: ctx.msg.message_id })
+                    .catch(handleError);
+
+                  ctx.state.admins = admins;
+
+                  this.bot.api
+                    .sendMessage(
+                      logsChat,
+                      `Cannot delete the following message from chat\n\n<code>${ctx.chat.title}</code>\n${ctx.msg.text}`,
+                      {
+                        parse_mode: 'HTML',
+                      },
+                    )
+                    .then(() => {
+                      ctx.api
+                        .sendDocument(
+                          logsChat,
+                          new InputFile(Buffer.from(JSON.stringify(ctx, null, 2)), `ctx-${new Date().toISOString()}.json`),
+                        )
+                        .catch(handleError);
+                    })
+                    .catch(handleError);
+                });
+              }
+            });
         } catch (e) {
           console.error('Cannot delete the message. Reason:', e);
         }
