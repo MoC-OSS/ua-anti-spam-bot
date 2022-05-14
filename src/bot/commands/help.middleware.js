@@ -17,10 +17,16 @@ class HelpMiddleware {
     /**
      * @param {GrammyContext} ctx
      * */
-    return (ctx) => {
+    return async (ctx) => {
       const startLocaleTime = formatDate(this.startTime);
 
-      ctx.replyWithHTML(getHelpMessage({ startLocaleTime }));
+      const isAdmin = ctx.chatSession.isBotAdmin;
+      const canDelete = await ctx
+        .deleteMessage()
+        .then(() => true)
+        .catch(() => false);
+
+      ctx.replyWithHTML(getHelpMessage({ startLocaleTime, isAdmin, canDelete }));
     };
   }
 }

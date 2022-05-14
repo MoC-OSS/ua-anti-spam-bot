@@ -91,12 +91,16 @@ const rootMenu = new Menu('root');
 
   const bot = new Bot(env.BOT_TOKEN);
 
-  bot.api.sendMessage(logsChat, '*** 20220406204759 Migration started...').catch(() => {});
+  if (!env.DEBUG) {
+    bot.api.sendMessage(logsChat, '*** 20220406204759 Migration started...').catch(() => {});
+  }
   // eslint-disable-next-line global-require
   require('./20220406204759-migrate-redis-user-session')(bot, startTime)
     .then(() => {
       console.info('*** 20220406204759 Migration run successfully!!!');
-      bot.api.sendMessage(logsChat, '*** 20220406204759 Migration run successfully!!!').catch(() => {});
+      if (!env.DEBUG) {
+        bot.api.sendMessage(logsChat, '*** 20220406204759 Migration run successfully!!!').catch(() => {});
+      }
     })
     .catch(async (migrationError) => {
       await bot.api.sendMessage(logsChat, `Migration failed! Reason: ${migrationError.reason}`).catch(() => {});

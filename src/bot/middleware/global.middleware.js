@@ -1,6 +1,12 @@
 const { env } = require('typed-dotenv').config();
 
-const { getBotJoinMessage, getStartChannelMessage, adminReadyMessage, memberReadyMessage } = require('../../message');
+const {
+  adminReadyHasNoDeletePermissionMessage,
+  adminReadyMessage,
+  getBotJoinMessage,
+  getStartChannelMessage,
+  memberReadyMessage,
+} = require('../../message');
 const { logCtx, handleError, telegramUtil } = require('../../utils');
 
 class GlobalMiddleware {
@@ -156,7 +162,7 @@ class GlobalMiddleware {
       } else {
         ctx.chatSession.botAdminDate = new Date();
         ctx.chatSession.isBotAdmin = true;
-        ctx.reply(adminReadyMessage);
+        ctx.reply(updatePermissionsMember.can_delete_messages ? adminReadyMessage : adminReadyHasNoDeletePermissionMessage);
       }
     }
 
