@@ -5,6 +5,7 @@ const auth = require('./auth');
 const { UserbotStorage } = require('./storage.handler');
 const updatesHandler = require('./updates.handler');
 const { initTensor } = require('../tensor/tensor.service');
+// const { findChannelAdmins } = require('./find-channel-admins');
 
 console.info('Start listener application');
 auth().then(async (api) => {
@@ -14,6 +15,9 @@ auth().then(async (api) => {
 
   const tensorService = await initTensor();
   console.info('Tensor is ready.');
+
+  // findChannelAdmins(api);
+  // return;
 
   const resolvedPeer = await api.call('contacts.search', {
     q: env.USERBOT_TRAING_CHAT_NAME,
