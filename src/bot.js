@@ -78,7 +78,7 @@ const rootMenu = new Menu('root');
 
 (async () => {
   console.info('Waiting for the old instance to down...');
-  await sleep(5000);
+  await sleep(env.DEBUG ? 0 : 5000);
   console.info('Starting a new instance...');
 
   await redisClient.client.connect().then(() => console.info('Redis client successfully started'));
