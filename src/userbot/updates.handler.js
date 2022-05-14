@@ -44,10 +44,10 @@ module.exports = async (api, chatPeer, tensorService, updateInfo, userbotStorage
 
     clearMessageText = clearMessageText.replace(/  +/g, ' ').split(' ').slice(0, 30).join(' ');
 
-    const { isSpam, spamRate } = await tensorService.predict(clearMessageText, 0.5);
+    const { isSpam, spamRate } = await tensorService.predict(clearMessageText, 0.7);
     console.info(isSpam, spamRate, update.message.message);
 
-    if (isSpam && spamRate < 0.55) {
+    if (isSpam && spamRate < 1) {
       const isNew = userbotStorage.handleMessage(clearMessageText);
 
       if (telegramLinks.length) {
