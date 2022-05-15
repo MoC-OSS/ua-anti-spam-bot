@@ -151,8 +151,10 @@ ${botStartTime}</i>
  * Help handler
  *
  * */
-const getHelpMessage = ({ startLocaleTime, isAdmin, canDelete }) =>
+const getHelpMessage = ({ startLocaleTime, isAdmin, canDelete, user }) =>
   `
+${user}
+
 ${isAdmin ? startAdminReadyMessage : makeAdminMessage}
 ${canDelete ? hasDeletePermissionMessage : hasNoDeletePermissionMessage}
 
@@ -194,8 +196,10 @@ https://youtu.be/RX0cZYf1Lm4
  * Message that bot sends when user uses /start in the group
  *
  * */
-const getGroupStartMessage = ({ adminsString, isAdmin = false, canDelete }) =>
+const getGroupStartMessage = ({ adminsString, isAdmin = false, canDelete, user }) =>
   `
+${user}
+
 ${isAdmin ? startAdminReadyMessage : makeAdminMessage}
 ${canDelete ? hasDeletePermissionMessage : hasNoDeletePermissionMessage}
 
