@@ -1,5 +1,5 @@
 const { getHelpMessage } = require('../../message');
-const { formatDate } = require('../../utils');
+const { formatDate, handleError } = require('../../utils');
 
 class HelpMiddleware {
   /**
@@ -21,12 +21,18 @@ class HelpMiddleware {
       const startLocaleTime = formatDate(this.startTime);
 
       const isAdmin = ctx.chatSession.isBotAdmin;
-      const canDelete = await ctx
-        .deleteMessage()
-        .then(() => true)
-        .catch(() => false);
+      let canDelete = false;
 
-      ctx.replyWithHTML(getHelpMessage({ startLocaleTime, isAdmin, canDelete }));
+      try {
+        canDelete = await ctx
+          .deleteMessage()
+          .then(() => true)
+          .catch(() => false);
+      } catch (e) {
+        handleError(e);
+      }
+
+      ctx.replyWithHTML(getHelpMessage({ startLocaleTime, isAdmin, canDelete })).catch(handleError);
     };
   }
 }

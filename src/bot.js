@@ -151,11 +151,11 @@ const rootMenu = new Menu('root');
 
   // TODO commented for settings feature
 
-  bot.command('start', errorHandler(startMiddleware.middleware()));
-  bot.command('help', errorHandler(helpMiddleware.middleware()));
+  bot.errorBoundary(handleError).command('start', errorHandler(startMiddleware.middleware()));
+  bot.errorBoundary(handleError).command('help', errorHandler(helpMiddleware.middleware()));
 
-  bot.command('session', botActiveMiddleware, errorHandler(sessionMiddleware.middleware()));
-  bot.command('statistics', botActiveMiddleware, errorHandler(statisticsMiddleware.middleware()));
+  bot.errorBoundary(handleError).command('session', botActiveMiddleware, errorHandler(sessionMiddleware.middleware()));
+  bot.errorBoundary(handleError).command('statistics', botActiveMiddleware, errorHandler(statisticsMiddleware.middleware()));
 
   bot.errorBoundary(handleError).command('get_tensor', onlyCreator, async (ctx) => {
     let positives = await redisService.getPositives();
