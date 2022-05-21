@@ -28,7 +28,7 @@ class GoogleService {
    * @param {string} spreadsheetId
    * @param {string} sheetName
    *
-   * @returns {Promise<string[] | null>}
+   * @returns {Promise<Record<string, any>[] | null>}
    * */
   async getSheet(spreadsheetId, sheetName) {
     try {

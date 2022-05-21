@@ -11,6 +11,7 @@ console.info('Start listener application');
 auth().then(async (api) => {
   await redisClient.client.connect().then(() => console.info('Redis client successfully started'));
   const userbotStorage = new UserbotStorage();
+  await userbotStorage.init();
   console.info('Application is listening new messages.');
 
   const tensorService = await initTensor();

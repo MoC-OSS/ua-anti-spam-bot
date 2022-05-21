@@ -42,7 +42,7 @@ module.exports = async (api, chatPeer, tensorService, updateInfo, userbotStorage
       clearMessageText = clearMessageText.replace(deleteWord, ' ');
     });
 
-    clearMessageText = clearMessageText.replace(/  +/g, ' ').split(' ').slice(0, 30).join(' ');
+    clearMessageText = clearMessageText.replace(/  +/g, ' ').split(' ').slice(0, 15).join(' ');
 
     const { isSpam, spamRate } = await tensorService.predict(clearMessageText, 0.7);
     console.info(isSpam, spamRate, update.message.message);
