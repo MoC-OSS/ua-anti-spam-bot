@@ -8,11 +8,11 @@ const stringSimilarity = require('string-similarity');
 const { googleService } = require('../src/services/google.service');
 
 /**
- * @param {string[]} positives
- * @param {string[]} negatives
+ * @param {any[]} positives
+ * @param {any[]} negatives
  * */
 function processCases(positives, negatives) {
-  console.info({ positives, negatives, positivesLength: positives.length, negativesLength: negatives.length });
+  // console.info({ positives, negatives, positivesLength: positives.length, negativesLength: negatives.length });
 
   // Used "for" for better performance
   // It saves around 4 seconds for 12,000 * 8,000 * 2 callback calls
@@ -22,7 +22,7 @@ function processCases(positives, negatives) {
 
     for (let negativeIndex = 0; negativeIndex < negatives.length; negativeIndex += 1) {
       const negative = negatives[negativeIndex];
-      if (stringSimilarity.compareTwoStrings(positive || '', negative || '') > 0.7) {
+      if (stringSimilarity.compareTwoStrings(positive.value || '', negative.value || '') > 0.7) {
         negativesMatch.push(negative);
       }
     }

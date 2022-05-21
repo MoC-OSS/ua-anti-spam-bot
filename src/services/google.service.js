@@ -37,7 +37,24 @@ class GoogleService {
           spreadsheetId,
           range: `${sheetName}!${RANGE}`,
         })
-        .then((data) => data?.data?.values?.map((row) => row[0])?.filter(Boolean) || null);
+        .then((response) => {
+          const shortRange = response.data.range.replace(sheetName, '').replace('!', '');
+          const sheetKey = shortRange.split(':')[0].replace(/\d/g, '');
+          const sheetStartFrom = +shortRange.split(':')[0].replace(/\D/g, '');
+
+          console.info({ sheetName, sheetKey, sheetStartFrom, length: response.data.values.length });
+
+          return (
+            response.data.values
+              .map((row, index) => ({
+                value: row[0],
+                index: sheetStartFrom + index,
+                sheetKey,
+                fullPath: `${sheetName}!${sheetKey}${sheetStartFrom + index}`,
+              }))
+              .filter((item) => !!item.value) || null
+          );
+        });
     } catch (e) {
       handleError(e, `GOOGLE API ERROR: ${e.message}`);
       return Promise.resolve(null);
