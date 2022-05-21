@@ -27,9 +27,14 @@ axios.get('http://localhost:3050/optimize').then((response) => {
   console.info(optimizeCases);
 
   optimizeCases.forEach((optimize, index) => {
+    if (optimize.resolved) {
+      return;
+    }
+
     const optimizeItemEl = optimizeItemTemplateEl.content.cloneNode(true);
     const optimizeItemPositivesEl = optimizeItemEl.querySelector('[data-positives]');
     const optimizeItemNegativesEl = optimizeItemEl.querySelector('[data-negatives]');
+    const optimizeItemRemoveEl = optimizeItemEl.querySelector('[data-remove]');
 
     if (!optimize.positive.resolved) {
       const positiveCaseEl = createCase(optimize.positive, 'positive', (element) => {
@@ -50,6 +55,10 @@ axios.get('http://localhost:3050/optimize').then((response) => {
 
         optimizeItemNegativesEl.appendChild(negativeCaseEl);
       });
+
+    optimizeItemRemoveEl.addEventListener('click', () => {
+      handleDelete('', 'full', optimizeItemRemoveEl.parentElement, index, -1);
+    });
 
     optimizeListEl.appendChild(optimizeItemEl);
   });

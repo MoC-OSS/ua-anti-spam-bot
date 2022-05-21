@@ -23,10 +23,17 @@ app.get('/optimize', (req, res) => {
 app.post('/remove', (req, res) => {
   const { range, index, negativeIndex, type } = req.body;
 
-  if (type === 'positive') {
-    optimizeResult[index].positive.resolved = true;
-  } else {
-    optimizeResult[index].negativesMatch[negativeIndex].resolved = true;
+  switch (type) {
+    case 'positive':
+      optimizeResult[index].positive.resolved = true;
+      break;
+
+    case 'negative':
+      optimizeResult[index].negativesMatch[negativeIndex].resolved = true;
+      break;
+
+    default:
+      optimizeResult[index].resolved = true;
   }
 
   fs.writeFileSync(path.join(__dirname, './temp/optimize-result.json'), JSON.stringify(optimizeResult, null, 2));
