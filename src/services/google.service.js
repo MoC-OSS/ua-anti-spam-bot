@@ -63,6 +63,24 @@ class GoogleService {
 
   /**
    * @param {string} spreadsheetId
+   * @param {string} range
+   *
+   * @returns {Promise< null>}
+   * */
+  async removeSheetRange(spreadsheetId, range) {
+    try {
+      return await sheets.spreadsheets.values.clear({
+        spreadsheetId,
+        range,
+      });
+    } catch (e) {
+      handleError(e, `GOOGLE API ERROR: ${e.message}`);
+      return Promise.resolve(null);
+    }
+  }
+
+  /**
+   * @param {string} spreadsheetId
    * @param {string} sheetName
    * @param {string} value
    * */
