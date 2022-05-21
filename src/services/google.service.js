@@ -27,6 +27,26 @@ class GoogleService {
   /**
    * @param {string} spreadsheetId
    * @param {string} sheetName
+   *
+   * @returns {Promise<string[] | null>}
+   * */
+  async getSheet(spreadsheetId, sheetName) {
+    try {
+      return await sheets.spreadsheets.values
+        .get({
+          spreadsheetId,
+          range: `${sheetName}!${RANGE}`,
+        })
+        .then((data) => data?.data?.values?.map((row) => row[0])?.filter(Boolean) || null);
+    } catch (e) {
+      handleError(e, `GOOGLE API ERROR: ${e.message}`);
+      return Promise.resolve(null);
+    }
+  }
+
+  /**
+   * @param {string} spreadsheetId
+   * @param {string} sheetName
    * @param {string} value
    * */
   async appendToSheet(spreadsheetId, sheetName, value) {
