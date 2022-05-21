@@ -1,5 +1,6 @@
 /* eslint-disable global-require */
 const fs = require('fs');
+const path = require('path');
 
 const { env } = require('typed-dotenv').config();
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -13,6 +14,7 @@ const { googleService } = require('../src/services/google.service');
  * */
 function processCases(positives, negatives) {
   // console.info({ positives, negatives, positivesLength: positives.length, negativesLength: negatives.length });
+  const results = [];
 
   // Used "for" for better performance
   // It saves around 4 seconds for 12,000 * 8,000 * 2 callback calls
@@ -28,7 +30,10 @@ function processCases(positives, negatives) {
     }
 
     if (negativesMatch.length) {
+      results.push({ positive, negativesMatch });
       console.info({ positive, negativesMatch });
+
+      fs.writeFileSync(path.join(__dirname, './temp/optimize-result.json'), JSON.stringify(results, null, 2));
     }
   }
 }
@@ -55,6 +60,10 @@ function processFromLocal() {
 
   processCases(positivesLocal, negativesLocal);
 }
+
+// googleService.removeSheetRange(env.GOOGLE_SPREADSHEET_ID, `${env.GOOGLE_POSITIVE_SHEET_NAME}!A8`).then(() => {
+//   console.info('removed!');
+// });
 
 processFromGoogle();
 // processFromLocal();
