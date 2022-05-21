@@ -1,0 +1,43 @@
+body {
+  font-family: 'Roboto', sans-serif;
+}
+
+h4, ul {
+  padding: 0;
+  margin: 0;
+}
+
+.optimize-list {
+  padding-left: 0;
+}
+
+.optimize-item {
+  display: flex;
+  position: relative;
+  padding-bottom: 24px;
+  margin-bottom: 48px;
+  border-bottom: 1px solid #ccc;
+}
+
+.optimize-item-list {
+  width: 50%;
+}
+
+.optimize-item__remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+}
+
+.optimize-item__case {
+  padding: 4px;
+  margin-bottom: 16px;
+}
+
+.positive {
+  background: #fcc;
+}
+
+.negative {
+  background: #cfc;
+}
