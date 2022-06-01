@@ -13,22 +13,25 @@ const limits = {
 class UserbotStorage {
   constructor() {
     this.lastMessages = [];
+    this.swindlerMessages = [];
   }
 
   async init() {
     const cases = Promise.all([
       googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_POSITIVE_SHEET_NAME),
       googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_NEGATIVE_SHEET_NAME),
+      googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, 'B6:B'),
     ]);
 
-    return cases.then(([positives, negatives]) => {
+    return cases.then(([positives, negatives, swindlerPositives]) => {
       console.info('got TrainingTempMessages');
       this.lastMessages = [...positives.map((positive) => positive.value), ...negatives.map((negative) => negative.value)];
+      this.swindlerMessages = swindlerPositives.map((positive) => positive.value);
     });
   }
 
   handleMessage(str) {
-    const isUniqueText = this.isUniqueText(str);
+    const isUniqueText = this.isUniqueText(str, this.lastMessages);
 
     if (isUniqueText) {
       if (this.lastMessages.length > limits.STORAGE) {
@@ -43,20 +46,25 @@ class UserbotStorage {
     return false;
   }
 
-  isUniqueText(str) {
+  /**
+   * @param {string} str
+   * @param {string[]} dataset
+   * @param {number} [rate]
+   * */
+  isUniqueText(str, dataset, rate) {
     const isEmpty = !this.lastMessages.length;
 
     if (isEmpty) {
       return true;
     }
 
-    const isStrictCompare = this.lastMessages.some((lastMessage) => lastMessage === str);
+    const isStrictCompare = dataset.some((lastMessage) => lastMessage === str);
 
     if (isStrictCompare) {
       return false;
     }
 
-    const isDifferent = !this.lastMessages.some((lastMessage) => stringSimilarity.compareTwoStrings(str, lastMessage) > limits.LENGTH_RATE);
+    const isDifferent = !dataset.some((lastMessage) => stringSimilarity.compareTwoStrings(str, lastMessage) > (rate || limits.LENGTH_RATE));
 
     return isDifferent;
   }

@@ -2,6 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 
+// const { env } = require('typed-dotenv').config();
 const stringSimilarity = require('string-similarity');
 const { mentionRegexp, urlRegexp, optimizeText } = require('ukrainian-ml-optimizer');
 
@@ -9,6 +10,7 @@ const { mentionRegexp, urlRegexp, optimizeText } = require('ukrainian-ml-optimiz
 const deleteFromMessage = require('./from-entities.json');
 const { dataset } = require('../../dataset/dataset');
 const { swindlersRegex } = require('../creator');
+// const { googleService } = require('../services/google.service');
 
 const sentMentionsFromStart = [];
 
@@ -36,7 +38,8 @@ module.exports = async (api, chatPeer, tensorService, updateInfo, userbotStorage
   }
 
   for (const update of newMessageUpdates) {
-    let clearMessageText = update.message.message;
+    const { message } = update.message;
+    let clearMessageText = message;
 
     const mentions = clearMessageText.match(mentionRegexp);
     const urls = clearMessageText.match(urlRegexp);
@@ -53,7 +56,7 @@ module.exports = async (api, chatPeer, tensorService, updateInfo, userbotStorage
     clearMessageText = clearMessageText.replace(/  +/g, ' ').split(' ').slice(0, 15).join(' ');
 
     const { isSpam, spamRate } = await tensorService.predict(clearMessageText, 0.7);
-    console.info(isSpam, spamRate, update.message.message);
+    console.info(isSpam, spamRate, message);
 
     let lastChance = 0;
     let maxChance = 0;
@@ -72,13 +75,18 @@ module.exports = async (api, chatPeer, tensorService, updateInfo, userbotStorage
     const isSwindlersSite = swindlersRegex.test(clearMessageText.toLowerCase());
 
     if (foundSwindler || isHelp || isSwindlersSite) {
-      api.call('messages.sendMessage', {
-        message: update.message.message,
-        random_id: Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff),
-        peer: {
-          _: 'inputPeerSelf',
-        },
-      });
+      const isUniqueSwindler = userbotStorage.isUniqueText(message, userbotStorage.swindlerMessages, 0.9);
+
+      if (isUniqueSwindler) {
+        // googleService.appendToSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, message, 'B6:B');
+        api.call('messages.sendMessage', {
+          message,
+          random_id: Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff),
+          peer: {
+            _: 'inputPeerSelf',
+          },
+        });
+      }
     }
 
     if (isSpam && spamRate < 0.9) {
