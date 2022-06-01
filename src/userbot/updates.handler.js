@@ -63,7 +63,7 @@ module.exports = async (api, chatPeer, tensorService, updateInfo, userbotStorage
         maxChance = lastChance;
       }
 
-      return lastChance >= SWINDLER_SETTINGS.DELETE_CHANCE;
+      return lastChance >= SWINDLER_SETTINGS.LOG_CHANGE;
     });
 
     const isHelp = clearMessageText.toLowerCase().includes('допомог');
