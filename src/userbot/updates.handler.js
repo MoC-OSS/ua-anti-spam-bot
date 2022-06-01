@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 
-// const { env } = require('typed-dotenv').config();
+const { env } = require('typed-dotenv').config();
 const stringSimilarity = require('string-similarity');
 const { mentionRegexp, urlRegexp, optimizeText } = require('ukrainian-ml-optimizer');
 
@@ -10,7 +10,7 @@ const { mentionRegexp, urlRegexp, optimizeText } = require('ukrainian-ml-optimiz
 const deleteFromMessage = require('./from-entities.json');
 const { dataset } = require('../../dataset/dataset');
 const { swindlersRegex } = require('../creator');
-// const { googleService } = require('../services/google.service');
+const { googleService } = require('../services/google.service');
 
 const sentMentionsFromStart = [];
 
@@ -79,7 +79,7 @@ module.exports = async (api, chatPeer, tensorService, updateInfo, userbotStorage
 
       if (isUniqueSwindler) {
         const finalMessage = message.includes("Looks like swindler's message") ? message.split('\n').slice(3).join('\n') : message;
-        // googleService.appendToSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, message, 'B6:B');
+        googleService.appendToSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, finalMessage, 'B6:B');
         api.call('messages.sendMessage', {
           message: finalMessage,
           random_id: Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff),
