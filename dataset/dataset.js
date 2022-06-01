@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const CyrillicToTranslit = require('cyrillic-to-translit-js');
+const { optimizeText } = require('ukrainian-ml-optimizer');
 
 const datasetPath = path.join(__dirname, './strings');
 const files = fs.readdirSync(datasetPath);
@@ -33,6 +34,18 @@ Object.keys(dataset).forEach((key) => {
 
   dataset[key] = [...dataset[key], ...translitUkrainianDataset, ...translitRussianDataset];
 });
+
+/**
+ * Optimize swindlers
+ * */
+if (dataset.swindlers) {
+  dataset.swindlers = dataset.swindlers.map(optimizeText);
+}
+
+/**
+ * Freeze the object
+ * */
+Object.freeze(dataset);
 
 console.info('*0 Dataset is ready.');
 
