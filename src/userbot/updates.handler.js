@@ -75,11 +75,12 @@ module.exports = async (api, chatPeer, tensorService, updateInfo, userbotStorage
     const isSwindlersSite = swindlersRegex.test(clearMessageText.toLowerCase());
 
     if (foundSwindler || isSwindlersSite) {
-      const isUniqueSwindler = userbotStorage.isUniqueText(message, userbotStorage.swindlerMessages, 0.9);
+      const finalMessage = message.includes("Looks like swindler's message") ? message.split('\n').slice(3).join('\n') : message;
+      const isUniqueSwindler = userbotStorage.isUniqueText(finalMessage, userbotStorage.swindlerMessages, 0.9);
 
       if (isUniqueSwindler) {
-        const finalMessage = message.includes("Looks like swindler's message") ? message.split('\n').slice(3).join('\n') : message;
         googleService.appendToSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, finalMessage, 'B6:B');
+        userbotStorage.swindlerMessages.push(finalMessage);
         api.call('messages.sendMessage', {
           message: finalMessage,
           random_id: Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff),
