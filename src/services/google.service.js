@@ -27,6 +27,61 @@ class GoogleService {
   /**
    * @param {string} spreadsheetId
    * @param {string} sheetName
+   *
+   * @returns {Promise<Record<string, any>[] | null>}
+   * */
+  async getSheet(spreadsheetId, sheetName) {
+    try {
+      return await sheets.spreadsheets.values
+        .get({
+          spreadsheetId,
+          range: `${sheetName}!${RANGE}`,
+        })
+        .then((response) => {
+          const shortRange = response.data.range.replace(sheetName, '').replace('!', '');
+          const sheetKey = shortRange.split(':')[0].replace(/\d/g, '');
+          const sheetStartFrom = +shortRange.split(':')[0].replace(/\D/g, '');
+
+          console.info({ sheetName, sheetKey, sheetStartFrom, length: response.data.values.length });
+
+          return (
+            response.data.values
+              .map((row, index) => ({
+                value: row[0],
+                index: sheetStartFrom + index,
+                sheetKey,
+                fullPath: `${sheetName}!${sheetKey}${sheetStartFrom + index}`,
+              }))
+              .filter((item) => !!item.value) || null
+          );
+        });
+    } catch (e) {
+      handleError(e, `GOOGLE API ERROR: ${e.message}`);
+      return Promise.resolve(null);
+    }
+  }
+
+  /**
+   * @param {string} spreadsheetId
+   * @param {string} range
+   *
+   * @returns {Promise< null>}
+   * */
+  async removeSheetRange(spreadsheetId, range) {
+    try {
+      return await sheets.spreadsheets.values.clear({
+        spreadsheetId,
+        range,
+      });
+    } catch (e) {
+      handleError(e, `GOOGLE API ERROR: ${e.message}`);
+      return Promise.resolve(null);
+    }
+  }
+
+  /**
+   * @param {string} spreadsheetId
+   * @param {string} sheetName
    * @param {string} value
    * */
   async appendToSheet(spreadsheetId, sheetName, value) {

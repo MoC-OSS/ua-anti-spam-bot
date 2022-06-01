@@ -1,25 +1,29 @@
-const diff = require('diff');
-const { removeSpecialSymbols, removeExtraSpaces } = require('ukrainian-ml-optimizer');
-const { redisService } = require('../services/redis.service');
+const { env } = require('typed-dotenv').config();
+// eslint-disable-next-line import/no-extraneous-dependencies
+const stringSimilarity = require('string-similarity');
 
-const compareResult = {
-  DIFFERENT_LENGTH: 'DIFFERENT_LENGTH',
-  SAME: 'SAME',
-  NOT_SAME: 'NOT_SAME',
-};
+const { redisService } = require('../services/redis.service');
+const { googleService } = require('../services/google.service');
 
 const limits = {
-  STORAGE: 10000,
+  STORAGE: 999999999,
   LENGTH_RATE: 0.5,
-  DIFFERENCES_RATE: 20,
 };
 
 class UserbotStorage {
   constructor() {
     this.lastMessages = [];
-    redisService.getTrainingTempMessages().then((messages) => {
+  }
+
+  async init() {
+    const cases = Promise.all([
+      googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_POSITIVE_SHEET_NAME),
+      googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_NEGATIVE_SHEET_NAME),
+    ]);
+
+    return cases.then(([positives, negatives]) => {
       console.info('got TrainingTempMessages');
-      this.lastMessages = messages;
+      this.lastMessages = [...positives.map((positive) => positive.value), ...negatives.map((negative) => negative.value)];
     });
   }
 
@@ -52,30 +56,9 @@ class UserbotStorage {
       return false;
     }
 
-    const isDifferent = !this.lastMessages.some((lastMessage) => this.compareText(str, lastMessage) === compareResult.SAME);
+    const isDifferent = !this.lastMessages.some((lastMessage) => stringSimilarity.compareTwoStrings(str, lastMessage) > limits.LENGTH_RATE);
 
     return isDifferent;
-  }
-
-  compareText(oldStr, newStr) {
-    const processStr = (str) => removeExtraSpaces(removeSpecialSymbols(str));
-
-    const a = processStr(oldStr);
-    const b = processStr(newStr);
-
-    const lengthDifference = a.length / b.length;
-
-    /**
-     * Text bigger in 50% or less in 50%
-     * */
-    if (lengthDifference >= 1.0 + limits.LENGTH_RATE || lengthDifference <= limits.LENGTH_RATE) {
-      return compareResult.DIFFERENT_LENGTH;
-    }
-
-    const differences = diff.diffWords(a, b);
-    const differencesNumber = a.length / differences.length;
-
-    return differencesNumber <= limits.DIFFERENCES_RATE ? compareResult.NOT_SAME : compareResult.SAME;
   }
 }
 
