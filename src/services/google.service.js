@@ -27,15 +27,16 @@ class GoogleService {
   /**
    * @param {string} spreadsheetId
    * @param {string} sheetName
+   * @param {string} [range]
    *
    * @returns {Promise<Record<string, any>[] | null>}
    * */
-  async getSheet(spreadsheetId, sheetName) {
+  async getSheet(spreadsheetId, sheetName, range) {
     try {
       return await sheets.spreadsheets.values
         .get({
           spreadsheetId,
-          range: `${sheetName}!${RANGE}`,
+          range: `${sheetName}!${range || RANGE}`,
         })
         .then((response) => {
           const shortRange = response.data.range.replace(sheetName, '').replace('!', '');
@@ -83,12 +84,13 @@ class GoogleService {
    * @param {string} spreadsheetId
    * @param {string} sheetName
    * @param {string} value
+   * @param {string} [range]
    * */
-  async appendToSheet(spreadsheetId, sheetName, value) {
+  async appendToSheet(spreadsheetId, sheetName, value, range) {
     try {
       await sheets.spreadsheets.values.append({
         spreadsheetId,
-        range: `${sheetName}!${RANGE}`,
+        range: `${sheetName}!${range || RANGE}`,
         valueInputOption: 'USER_ENTERED',
         requestBody: {
           values: [[value]],

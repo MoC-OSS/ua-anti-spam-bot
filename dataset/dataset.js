@@ -39,7 +39,7 @@ Object.keys(dataset).forEach((key) => {
  * Optimize swindlers
  * */
 if (dataset.swindlers) {
-  dataset.swindlers = dataset.swindlers.map(optimizeText);
+  dataset.swindlers = dataset.swindlers.map(optimizeText).filter(Boolean);
 }
 
 /**
