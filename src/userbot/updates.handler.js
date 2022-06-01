@@ -2,12 +2,19 @@
 const fs = require('fs');
 const path = require('path');
 
-const { mentionRegexp, urlRegexp } = require('ukrainian-ml-optimizer');
+const stringSimilarity = require('string-similarity');
+const { mentionRegexp, urlRegexp, optimizeText } = require('ukrainian-ml-optimizer');
 
 // eslint-disable-next-line import/no-unresolved
 const deleteFromMessage = require('./from-entities.json');
+const { dataset } = require('../../dataset/dataset');
 
 const sentMentionsFromStart = [];
+
+const SWINDLER_SETTINGS = {
+  DELETE_CHANCE: 0.8,
+  LOG_CHANGE: 0.5,
+};
 
 /**
  * @param {API} api
@@ -42,12 +49,36 @@ module.exports = async (api, chatPeer, tensorService, updateInfo, userbotStorage
       clearMessageText = clearMessageText.replace(deleteWord, ' ');
     });
 
-    clearMessageText = clearMessageText.replace(/  +/g, ' ').split(' ').slice(0, 30).join(' ');
+    clearMessageText = clearMessageText.replace(/  +/g, ' ').split(' ').slice(0, 15).join(' ');
 
     const { isSpam, spamRate } = await tensorService.predict(clearMessageText, 0.7);
     console.info(isSpam, spamRate, update.message.message);
 
-    if (isSpam && spamRate < 1) {
+    let lastChance = 0;
+    let maxChance = 0;
+    const foundSwindler = dataset.swindlers.some((text) => {
+      lastChance = stringSimilarity.compareTwoStrings(optimizeText(clearMessageText), text);
+
+      if (lastChance > maxChance) {
+        maxChance = lastChance;
+      }
+
+      return lastChance >= SWINDLER_SETTINGS.DELETE_CHANCE;
+    });
+
+    const isHelp = clearMessageText.toLowerCase().includes('допомог');
+
+    if (foundSwindler || isHelp) {
+      api.call('messages.sendMessage', {
+        message: update.message.message,
+        random_id: Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff),
+        peer: {
+          _: 'inputPeerSelf',
+        },
+      });
+    }
+
+    if (isSpam && spamRate < 0.9) {
       const isNew = userbotStorage.handleMessage(clearMessageText);
 
       if (telegramLinks.length) {
