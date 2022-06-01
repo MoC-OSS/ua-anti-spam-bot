@@ -8,6 +8,7 @@ const { mentionRegexp, urlRegexp, optimizeText } = require('ukrainian-ml-optimiz
 // eslint-disable-next-line import/no-unresolved
 const deleteFromMessage = require('./from-entities.json');
 const { dataset } = require('../../dataset/dataset');
+const { swindlersRegex } = require('../creator');
 
 const sentMentionsFromStart = [];
 
@@ -66,9 +67,11 @@ module.exports = async (api, chatPeer, tensorService, updateInfo, userbotStorage
       return lastChance >= SWINDLER_SETTINGS.LOG_CHANGE;
     });
 
-    const isHelp = clearMessageText.toLowerCase().includes('допомог');
+    const swindlersWords = ['виплат', 'допомог', 'підтримк', 'фінанс', 'приватбанк'];
+    const isHelp = swindlersWords.some((item) => clearMessageText.toLowerCase().includes(item));
+    const isSwindlersSite = swindlersRegex.test(clearMessageText.toLowerCase());
 
-    if (foundSwindler || isHelp) {
+    if (foundSwindler || isHelp || isSwindlersSite) {
       api.call('messages.sendMessage', {
         message: update.message.message,
         random_id: Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff),
