@@ -8,6 +8,11 @@ const { logsChat } = require('../../creator');
 const { handleError, compareDatesWithOffset, telegramUtil } = require('../../utils');
 const { getCannotDeleteMessage } = require('../../message');
 
+const SWINDLER_SETTINGS = {
+  DELETE_CHANCE: 0.8,
+  LOG_CHANGE: 0.5,
+};
+
 /**
  * Delete messages that looks like from swindlers
  *
@@ -26,10 +31,10 @@ function deleteSwindlersMiddleware(ctx, next) {
       maxChance = lastChance;
     }
 
-    return lastChance >= 0.8;
+    return lastChance >= SWINDLER_SETTINGS.DELETE_CHANCE;
   });
 
-  if (maxChance > 0.5) {
+  if (maxChance > SWINDLER_SETTINGS.LOG_CHANGE) {
     ctx.api.sendMessage(
       logsChat,
       `Looks like swindler's message (${(maxChance * 100).toFixed(2)}%):\n\n<code>${ctx.chat.title}</code>\n${ctx.state.text}`,
