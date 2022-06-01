@@ -20,6 +20,11 @@ const SWINDLER_SETTINGS = {
  * @param {Next} next
  * */
 function deleteSwindlersMiddleware(ctx, next) {
+  const notSwindlers = ['@Diia_help_bot'];
+  if (notSwindlers.some((item) => ctx.state.text.includes(item))) {
+    return next();
+  }
+
   const processedMessage = optimizeText(ctx.state.text);
 
   let lastChance = 0;
