@@ -1,5 +1,6 @@
 const { optimizeText } = require('ukrainian-ml-optimizer');
 const stringSimilarity = require('string-similarity');
+const { env } = require('typed-dotenv').config();
 
 const { InputFile } = require('grammy');
 const { dataset } = require('../../../dataset/dataset');
@@ -36,6 +37,10 @@ function deleteSwindlersMiddleware(ctx, next) {
         parse_mode: 'HTML',
       },
     );
+  }
+
+  if (env.DEBUG) {
+    ctx.reply([foundSwindler, processedMessage, maxChance].join('\n')).catch(handleError);
   }
 
   if (foundSwindler) {
