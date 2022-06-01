@@ -74,19 +74,30 @@ module.exports = async (api, chatPeer, tensorService, updateInfo, userbotStorage
     const isHelp = swindlersWords.some((item) => clearMessageText.toLowerCase().includes(item));
     const isSwindlersSite = swindlersRegex.test(clearMessageText.toLowerCase());
 
-    if (foundSwindler || isHelp || isSwindlersSite) {
+    if (foundSwindler || isSwindlersSite) {
       const isUniqueSwindler = userbotStorage.isUniqueText(message, userbotStorage.swindlerMessages, 0.9);
 
       if (isUniqueSwindler) {
+        const finalMessage = message.includes("Looks like swindler's message") ? message.split('\n').slice(3).join('\n') : message;
         // googleService.appendToSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, message, 'B6:B');
         api.call('messages.sendMessage', {
-          message,
+          message: finalMessage,
           random_id: Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff),
           peer: {
             _: 'inputPeerSelf',
           },
         });
       }
+    }
+
+    if (isHelp) {
+      api.call('messages.sendMessage', {
+        message,
+        random_id: Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff),
+        peer: {
+          _: 'inputPeerSelf',
+        },
+      });
     }
 
     if (isSpam && spamRate < 0.9) {
