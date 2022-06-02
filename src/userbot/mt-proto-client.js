@@ -17,6 +17,10 @@ class MtProtoClient {
       return null;
     }
 
+    if (peer.migrated_to) {
+      return { ...peer.migrated_to, _: 'inputPeerChannel' };
+    }
+
     switch (peer._) {
       case 'chat':
         return {

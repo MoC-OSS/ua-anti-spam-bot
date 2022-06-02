@@ -21,11 +21,12 @@ const SWINDLER_SETTINGS = {
 
 /**
  * @param {MtProtoClient} mtProtoClient
+ * @param {any} chatPeers - TODO add defined type
  * @param {SwindlersTensorService} swindlersTensorService
  * @param {UserbotStorage} userbotStorage
  * @param {string} message
  * */
-const handleSwindlers = async (mtProtoClient, swindlersTensorService, userbotStorage, message) => {
+const handleSwindlers = async (mtProtoClient, chatPeers, swindlersTensorService, userbotStorage, message) => {
   const finalMessage = message.includes("Looks like swindler's message") ? message.split('\n').slice(3).join('\n') : message;
 
   const processFoundSwindler = () => {
@@ -35,7 +36,7 @@ const handleSwindlers = async (mtProtoClient, swindlersTensorService, userbotSto
     if (isUniqueSwindler) {
       googleService.appendToSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, finalMessage, 'B6:B');
       userbotStorage.swindlerMessages.push(finalMessage);
-      mtProtoClient.sendSelfMessage(finalMessage);
+      mtProtoClient.sendPeerMessage(finalMessage, chatPeers.swindlersChat);
     }
   };
 
@@ -86,7 +87,7 @@ const handleSwindlers = async (mtProtoClient, swindlersTensorService, userbotSto
   const isHelp = swindlersWords.some((item) => finalMessage.toLowerCase().includes(item));
 
   if (isHelp) {
-    mtProtoClient.sendSelfMessage(message);
+    mtProtoClient.sendPeerMessage(message, chatPeers.helpChat);
   }
 };
 
@@ -132,7 +133,7 @@ module.exports = async (mtProtoClient, chatPeers, tensorService, swindlersTensor
     const { isSpam, spamRate } = await tensorService.predict(clearMessageText, 0.7);
     console.info(isSpam, spamRate, message);
 
-    await handleSwindlers(mtProtoClient, swindlersTensorService, userbotStorage, message);
+    await handleSwindlers(mtProtoClient, chatPeers, swindlersTensorService, userbotStorage, message);
 
     if (isSpam && spamRate < 0.9) {
       const isNew = userbotStorage.handleMessage(clearMessageText);
