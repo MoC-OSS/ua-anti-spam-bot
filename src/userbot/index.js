@@ -5,6 +5,7 @@ const auth = require('./auth');
 const { UserbotStorage } = require('./storage.handler');
 const updatesHandler = require('./updates.handler');
 const { initTensor } = require('../tensor/tensor.service');
+const { initSwindlersTensor } = require('../tensor/swindlers-tensor.service');
 // const { findChannelAdmins } = require('./find-channel-admins');
 
 console.info('Start listener application');
@@ -15,6 +16,7 @@ auth().then(async (api) => {
   console.info('Application is listening new messages.');
 
   const tensorService = await initTensor();
+  const swindlersTensorService = await initSwindlersTensor();
   console.info('Tensor is ready.');
 
   // findChannelAdmins(api);
@@ -34,7 +36,9 @@ auth().then(async (api) => {
     access_hash: testChannel.access_hash,
   };
 
-  api.mtproto.updates.on('updates', (updateInfo) => updatesHandler(api, chatPeer, tensorService, updateInfo, userbotStorage));
+  api.mtproto.updates.on('updates', (updateInfo) =>
+    updatesHandler(api, chatPeer, tensorService, swindlersTensorService, updateInfo, userbotStorage),
+  );
 
   setInterval(async () => {
     try {
