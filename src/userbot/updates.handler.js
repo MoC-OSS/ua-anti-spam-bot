@@ -20,18 +20,93 @@ const SWINDLER_SETTINGS = {
 };
 
 /**
- * @param {API} api
- * @param {any} chatPeer - TODO add defined type
+ * @param {MtProtoClient} mtProtoClient
+ * @param {any} chatPeers - TODO add defined type
+ * @param {SwindlersTensorService} swindlersTensorService
+ * @param {UserbotStorage} userbotStorage
+ * @param {string} message
+ * */
+const handleSwindlers = async (mtProtoClient, chatPeers, swindlersTensorService, userbotStorage, message) => {
+  const finalMessage = message.includes("Looks like swindler's message") ? message.split('\n').slice(3).join('\n') : message;
+
+  const processFoundSwindler = () => {
+    userbotStorage.swindlerMessages.push(finalMessage, message);
+    const isUniqueSwindler = userbotStorage.isUniqueText(finalMessage, userbotStorage.swindlerMessages, 0.9);
+
+    if (isUniqueSwindler) {
+      googleService.appendToSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, finalMessage, 'B6:B');
+      userbotStorage.swindlerMessages.push(finalMessage);
+      mtProtoClient.sendPeerMessage(finalMessage, chatPeers.swindlersChat);
+    }
+  };
+
+  /**
+   * Tensor try
+   * The fastest
+   * */
+  const { isSpam } = await swindlersTensorService.predict(finalMessage, 0.8);
+
+  if (isSpam) {
+    return processFoundSwindler();
+  }
+
+  /**
+   * Regex try
+   * The fastest
+   * */
+  const isSwindlersSite = swindlersRegex.test(finalMessage.toLowerCase());
+
+  if (isSwindlersSite) {
+    return processFoundSwindler();
+  }
+
+  /**
+   * Compare try
+   * The slowest
+   * */
+  let lastChance = 0;
+  let maxChance = 0;
+  const foundSwindler = dataset.swindlers.some((text) => {
+    lastChance = stringSimilarity.compareTwoStrings(optimizeText(finalMessage), text);
+
+    if (lastChance > maxChance) {
+      maxChance = lastChance;
+    }
+
+    return lastChance >= SWINDLER_SETTINGS.LOG_CHANGE;
+  });
+
+  if (foundSwindler) {
+    return processFoundSwindler();
+  }
+
+  /**
+   * Help try
+   * */
+  const swindlersWords = ['виплат', 'допомог', 'підтримк', 'фінанс', 'приватбанк', 'приват банк', 'єпідтри', 'дія', 'дії'];
+  const isHelp = swindlersWords.some((item) => finalMessage.toLowerCase().includes(item));
+
+  if (isHelp) {
+    mtProtoClient.sendPeerMessage(message, chatPeers.helpChat);
+  }
+};
+
+/**
+ * @param {MtProtoClient} mtProtoClient
+ * @param {any} chatPeers - TODO add defined type
  * @param {TensorService} tensorService
+ * @param {SwindlersTensorService} swindlersTensorService
  * @param {ProtoUpdate} updateInfo
  * @param {UserbotStorage} userbotStorage
  * */
-module.exports = async (api, chatPeer, tensorService, updateInfo, userbotStorage) => {
+const updatesHandler = async (mtProtoClient, chatPeers, tensorService, swindlersTensorService, updateInfo, userbotStorage) => {
   const allowedTypes = ['updateEditChannelMessage', 'updateNewChannelMessage'];
 
   const newMessageUpdates = updateInfo.updates.filter(
     (anUpdate) =>
-      allowedTypes.includes(anUpdate._) && anUpdate.message?.message && anUpdate.message.peer_id?.channel_id !== chatPeer.channel_id,
+      allowedTypes.includes(anUpdate._) &&
+      anUpdate.message?.message &&
+      anUpdate.message.peer_id?.channel_id !== chatPeers.trainingChat.channel_id,
   );
   if (!newMessageUpdates || newMessageUpdates.length === 0) {
     return;
@@ -58,48 +133,7 @@ module.exports = async (api, chatPeer, tensorService, updateInfo, userbotStorage
     const { isSpam, spamRate } = await tensorService.predict(clearMessageText, 0.7);
     console.info(isSpam, spamRate, message);
 
-    let lastChance = 0;
-    let maxChance = 0;
-    const foundSwindler = dataset.swindlers.some((text) => {
-      lastChance = stringSimilarity.compareTwoStrings(optimizeText(clearMessageText), text);
-
-      if (lastChance > maxChance) {
-        maxChance = lastChance;
-      }
-
-      return lastChance >= SWINDLER_SETTINGS.LOG_CHANGE;
-    });
-
-    const swindlersWords = ['виплат', 'допомог', 'підтримк', 'фінанс', 'приватбанк'];
-    const isHelp = swindlersWords.some((item) => clearMessageText.toLowerCase().includes(item));
-    const isSwindlersSite = swindlersRegex.test(clearMessageText.toLowerCase());
-
-    if (foundSwindler || isSwindlersSite) {
-      const finalMessage = message.includes("Looks like swindler's message") ? message.split('\n').slice(3).join('\n') : message;
-      const isUniqueSwindler = userbotStorage.isUniqueText(finalMessage, userbotStorage.swindlerMessages, 0.9);
-
-      if (isUniqueSwindler) {
-        googleService.appendToSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, finalMessage, 'B6:B');
-        userbotStorage.swindlerMessages.push(finalMessage);
-        api.call('messages.sendMessage', {
-          message: finalMessage,
-          random_id: Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff),
-          peer: {
-            _: 'inputPeerSelf',
-          },
-        });
-      }
-    }
-
-    if (isHelp) {
-      api.call('messages.sendMessage', {
-        message,
-        random_id: Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff),
-        peer: {
-          _: 'inputPeerSelf',
-        },
-      });
-    }
+    await handleSwindlers(mtProtoClient, chatPeers, swindlersTensorService, userbotStorage, message);
 
     if (isSpam && spamRate < 0.9) {
       const isNew = userbotStorage.handleMessage(clearMessageText);
@@ -112,26 +146,19 @@ module.exports = async (api, chatPeer, tensorService, updateInfo, userbotStorage
 
             fs.writeFileSync(path.join(__dirname, './from-entities.json'), JSON.stringify(deleteFromMessage, null, 2));
 
-            api.call('messages.sendMessage', {
-              message: mention,
-              random_id: Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff),
-              peer: {
-                _: 'inputPeerSelf',
-              },
-            });
+            mtProtoClient.sendSelfMessage(mention);
           }
         });
       }
 
       if (isNew) {
-        await api
-          .call('messages.sendMessage', {
-            message: clearMessageText,
-            random_id: Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff),
-            peer: chatPeer,
-          })
-          .catch(() => console.error('send message error'));
+        mtProtoClient.sendPeerMessage(clearMessageText, chatPeers.trainingChat).catch(() => console.error('send message error'));
       }
     }
   }
+};
+
+module.exports = {
+  updatesHandler,
+  handleSwindlers,
 };
