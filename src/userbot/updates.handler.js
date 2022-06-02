@@ -83,7 +83,7 @@ const handleSwindlers = async (mtProtoClient, chatPeers, swindlersTensorService,
   /**
    * Help try
    * */
-  const swindlersWords = ['виплат', 'допомог', 'підтримк', 'фінанс', 'приватбанк'];
+  const swindlersWords = ['виплат', 'допомог', 'підтримк', 'фінанс', 'приватбанк', 'приват банк', 'єпідтри', 'дія', 'дії'];
   const isHelp = swindlersWords.some((item) => finalMessage.toLowerCase().includes(item));
 
   if (isHelp) {
