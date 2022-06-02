@@ -158,18 +158,20 @@ class GlobalMiddleware {
 
     if (isUpdatedToAdmin) {
       if (ctx.chat.type === 'channel') {
-        ctx.replyWithHTML(getStartChannelMessage({ botName: ctx.me.username }));
+        ctx.replyWithHTML(getStartChannelMessage({ botName: ctx.me.username })).catch(handleError);
       } else {
         ctx.chatSession.botAdminDate = new Date();
         ctx.chatSession.isBotAdmin = true;
-        ctx.reply(updatePermissionsMember.can_delete_messages ? adminReadyMessage : adminReadyHasNoDeletePermissionMessage);
+        ctx
+          .reply(updatePermissionsMember.can_delete_messages ? adminReadyMessage : adminReadyHasNoDeletePermissionMessage)
+          .catch(handleError);
       }
     }
 
     if (isDemotedToMember) {
       delete ctx.chatSession.botAdminDate;
       ctx.chatSession.isBotAdmin = false;
-      ctx.reply(memberReadyMessage);
+      ctx.reply(memberReadyMessage).catch(handleError);
     }
   }
 }
