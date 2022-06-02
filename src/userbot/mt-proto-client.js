@@ -42,20 +42,11 @@ class MtProtoClient {
 
   /**
    * @param {string} query
-   * @param {string} [fullName]
    * */
-  async contactsSearch(query, fullName) {
-    const resolvedPeer = await this.api.call('contacts.search', {
+  contactsSearch(query) {
+    return this.api.call('contacts.search', {
       q: query,
     });
-
-    const testChannel = fullName ? resolvedPeer.chats.find((chat) => chat.title === fullName) : resolvedPeer.chats[0];
-
-    return {
-      _: 'inputPeerChannel',
-      channel_id: testChannel.id,
-      access_hash: testChannel.access_hash,
-    };
   }
 
   /**

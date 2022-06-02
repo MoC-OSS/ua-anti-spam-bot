@@ -99,7 +99,7 @@ const handleSwindlers = async (mtProtoClient, chatPeers, swindlersTensorService,
  * @param {ProtoUpdate} updateInfo
  * @param {UserbotStorage} userbotStorage
  * */
-module.exports = async (mtProtoClient, chatPeers, tensorService, swindlersTensorService, updateInfo, userbotStorage) => {
+const updatesHandler = async (mtProtoClient, chatPeers, tensorService, swindlersTensorService, updateInfo, userbotStorage) => {
   const allowedTypes = ['updateEditChannelMessage', 'updateNewChannelMessage'];
 
   const newMessageUpdates = updateInfo.updates.filter(
@@ -156,4 +156,9 @@ module.exports = async (mtProtoClient, chatPeers, tensorService, swindlersTensor
       }
     }
   }
+};
+
+module.exports = {
+  updatesHandler,
+  handleSwindlers,
 };
