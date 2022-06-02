@@ -21,6 +21,89 @@ const SWINDLER_SETTINGS = {
 
 /**
  * @param {API} api
+ * @param {SwindlersTensorService} swindlersTensorService
+ * @param {UserbotStorage} userbotStorage
+ * @param {string} message
+ * */
+const handleSwindlers = async (api, swindlersTensorService, userbotStorage, message) => {
+  const finalMessage = message.includes("Looks like swindler's message") ? message.split('\n').slice(3).join('\n') : message;
+
+  const processFoundSwindler = () => {
+    userbotStorage.swindlerMessages.push(finalMessage, message);
+    const isUniqueSwindler = userbotStorage.isUniqueText(finalMessage, userbotStorage.swindlerMessages, 0.9);
+
+    if (isUniqueSwindler) {
+      googleService.appendToSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, finalMessage, 'B6:B');
+      userbotStorage.swindlerMessages.push(finalMessage);
+      api.call('messages.sendMessage', {
+        message: finalMessage,
+        random_id: Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff),
+        peer: {
+          _: 'inputPeerSelf',
+        },
+      });
+    }
+  };
+
+  /**
+   * Tensor try
+   * The fastest
+   * */
+  const { isSpam } = await swindlersTensorService.predict(finalMessage, 0.8);
+
+  if (isSpam) {
+    return processFoundSwindler();
+  }
+
+  /**
+   * Regex try
+   * The fastest
+   * */
+  const isSwindlersSite = swindlersRegex.test(finalMessage.toLowerCase());
+
+  if (isSwindlersSite) {
+    return processFoundSwindler();
+  }
+
+  /**
+   * Compare try
+   * The slowest
+   * */
+  let lastChance = 0;
+  let maxChance = 0;
+  const foundSwindler = dataset.swindlers.some((text) => {
+    lastChance = stringSimilarity.compareTwoStrings(optimizeText(finalMessage), text);
+
+    if (lastChance > maxChance) {
+      maxChance = lastChance;
+    }
+
+    return lastChance >= SWINDLER_SETTINGS.LOG_CHANGE;
+  });
+
+  if (foundSwindler) {
+    return processFoundSwindler();
+  }
+
+  /**
+   * Help try
+   * */
+  const swindlersWords = ['виплат', 'допомог', 'підтримк', 'фінанс', 'приватбанк'];
+  const isHelp = swindlersWords.some((item) => finalMessage.toLowerCase().includes(item));
+
+  if (isHelp) {
+    api.call('messages.sendMessage', {
+      message,
+      random_id: Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff),
+      peer: {
+        _: 'inputPeerSelf',
+      },
+    });
+  }
+};
+
+/**
+ * @param {API} api
  * @param {any} chatPeer - TODO add defined type
  * @param {TensorService} tensorService
  * @param {SwindlersTensorService} swindlersTensorService
@@ -59,49 +142,7 @@ module.exports = async (api, chatPeer, tensorService, swindlersTensorService, up
     const { isSpam, spamRate } = await tensorService.predict(clearMessageText, 0.7);
     console.info(isSpam, spamRate, message);
 
-    let lastChance = 0;
-    let maxChance = 0;
-    const foundSwindler = dataset.swindlers.some((text) => {
-      lastChance = stringSimilarity.compareTwoStrings(optimizeText(clearMessageText), text);
-
-      if (lastChance > maxChance) {
-        maxChance = lastChance;
-      }
-
-      return lastChance >= SWINDLER_SETTINGS.LOG_CHANGE;
-    });
-
-    const swindlersTensor = await swindlersTensorService.predict(clearMessageText, 0.8);
-    const swindlersWords = ['виплат', 'допомог', 'підтримк', 'фінанс', 'приватбанк'];
-    const isHelp = swindlersWords.some((item) => clearMessageText.toLowerCase().includes(item));
-    const isSwindlersSite = swindlersRegex.test(clearMessageText.toLowerCase());
-
-    if (foundSwindler || isSwindlersSite || swindlersTensor.isSpam) {
-      const finalMessage = message.includes("Looks like swindler's message") ? message.split('\n').slice(3).join('\n') : message;
-      userbotStorage.swindlerMessages.push(finalMessage, message);
-      const isUniqueSwindler = userbotStorage.isUniqueText(finalMessage, userbotStorage.swindlerMessages, 0.9);
-
-      if (isUniqueSwindler) {
-        googleService.appendToSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, finalMessage, 'B6:B');
-        api.call('messages.sendMessage', {
-          message: finalMessage,
-          random_id: Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff),
-          peer: {
-            _: 'inputPeerSelf',
-          },
-        });
-      }
-    }
-
-    if (isHelp) {
-      api.call('messages.sendMessage', {
-        message,
-        random_id: Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff),
-        peer: {
-          _: 'inputPeerSelf',
-        },
-      });
-    }
+    await handleSwindlers(api, swindlersTensorService, userbotStorage, message);
 
     if (isSpam && spamRate < 0.9) {
       const isNew = userbotStorage.handleMessage(clearMessageText);
