@@ -31,7 +31,7 @@ const handleSwindlers = async (mtProtoClient, chatPeers, swindlersTensorService,
 
   const processFoundSwindler = () => {
     userbotStorage.swindlerMessages.push(finalMessage, message);
-    const isUniqueSwindler = userbotStorage.isUniqueText(finalMessage, userbotStorage.swindlerMessages, 0.9);
+    const isUniqueSwindler = userbotStorage.isUniqueText(finalMessage, userbotStorage.swindlerMessages, 0.7);
 
     if (isUniqueSwindler) {
       googleService.appendToSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, finalMessage, 'B6:B');
@@ -87,7 +87,10 @@ const handleSwindlers = async (mtProtoClient, chatPeers, swindlersTensorService,
   const isHelp = swindlersWords.some((item) => finalMessage.toLowerCase().includes(item));
 
   if (isHelp) {
-    mtProtoClient.sendPeerMessage(message, chatPeers.helpChat);
+    const isUnique = userbotStorage.handleHelpMessage(finalMessage);
+    if (isUnique) {
+      mtProtoClient.sendPeerMessage(message, chatPeers.helpChat);
+    }
   }
 };
 
