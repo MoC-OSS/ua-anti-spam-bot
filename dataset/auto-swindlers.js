@@ -1,18 +1,24 @@
 const fs = require('fs');
 
-const { mentionRegexp, urlRegexp } = require('ukrainian-ml-optimizer');
+const { urlRegexp } = require('ukrainian-ml-optimizer');
 
 const { swindlersRegex } = require('../src/creator');
 const swindlers = require('./strings/swindlers.json');
 const immediately = require('./strings/immediately.json');
 const swindlersBots = require('./strings/swindlers_bots.json');
 
+const notSwindlers = ['@all', '@alinaaaawwaa'];
+
+const mentionRegexp = /\B@\w+/g;
+
 function removeDuplicates(array) {
   return [...new Set(array)];
 }
 
 function findSwindlersByPattern(items, pattern) {
-  return removeDuplicates([...items, ...swindlers.map((message) => message.match(pattern) || []).flat()]).sort();
+  return removeDuplicates([...items, ...swindlers.map((message) => message.match(pattern) || []).flat()])
+    .filter((item) => !notSwindlers.includes(item))
+    .sort();
 }
 
 const newImmediately = findSwindlersByPattern(immediately, urlRegexp);
@@ -23,5 +29,5 @@ const notMatchedUrls = newImmediately.filter((item) => urlRegexp.test(item)).fil
 console.info('notMatchedUrls\n');
 console.info(notMatchedUrls.join('\n'));
 
-fs.writeFileSync('./strings/immediately.json', JSON.stringify(newImmediately, null, 2));
-fs.writeFileSync('./strings/swindlers_bots.json', JSON.stringify(newSwindlersBots, null, 2));
+fs.writeFileSync('./strings/immediately.json', `${JSON.stringify(newImmediately, null, 2)}\n`);
+fs.writeFileSync('./strings/swindlers_bots.json', `${JSON.stringify(newSwindlersBots, null, 2)}\n`);
