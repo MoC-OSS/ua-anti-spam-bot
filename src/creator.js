@@ -8,7 +8,7 @@ const trainingChat = env.TRAINING_CHAT_ID ?? -1001527463076;
 const privateTrainingChat = -788538459;
 
 const swindlersRegex =
-  /(?:https?:\/\/)?(privat24\.|privatpay|privatbank.my-payment|app-raiffeisen|mono-bank|login24|privat\.|privat24.ua-|privatbank.u-|privatbank.m|privatbank.a|privatpay|e-pidtrimka|perekazprivat|privatbank.|privatapp|da-pay|goo.su|p24.)(?!ua).+/;
+  /(?:https?:\/\/)?(privat24\.|privatpay|privatbank.my-payment|app-raiffeisen|mono-bank|login24|privat\.|privat24.ua-|privatbank.u-|privatbank.m|privatbank.a|privatpay|e-pidtrimka|perekazprivat|privatbank.|privatapp|da-pay|goo.su|p24.|8-pay)(?!ua).+/;
 
 module.exports = {
   logsChat,
