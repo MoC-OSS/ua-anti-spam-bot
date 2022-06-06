@@ -2,6 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 
+const FuzzySet = require('fuzzyset');
 const { env } = require('typed-dotenv').config();
 const stringSimilarity = require('string-similarity');
 const { mentionRegexp, urlRegexp, optimizeText } = require('ukrainian-ml-optimizer');
@@ -13,6 +14,9 @@ const { swindlersRegex } = require('../creator');
 const { googleService } = require('../services/google.service');
 
 const sentMentionsFromStart = [];
+const originalDiiaBots = ['@Diia_help_bot'];
+
+const swindlersBotsFuzzySet = FuzzySet(dataset.swindlers_bots);
 
 const SWINDLER_SETTINGS = {
   DELETE_CHANCE: 0.8,
@@ -58,6 +62,20 @@ const handleSwindlers = async (mtProtoClient, chatPeers, swindlersTensorService,
 
   if (isSwindlersSite) {
     return processFoundSwindler();
+  }
+
+  const mentions = message.match(mentionRegexp);
+  if (mentions) {
+    // Not a swindler, official dia bot
+    if (mentions.includes(originalDiiaBots[0])) {
+      return;
+    }
+
+    const foundSwindlerMention = mentions.find((value) => (swindlersBotsFuzzySet.get(value) || [0])[0] > 0.9);
+
+    if (foundSwindlerMention) {
+      return processFoundSwindler();
+    }
   }
 
   /**
