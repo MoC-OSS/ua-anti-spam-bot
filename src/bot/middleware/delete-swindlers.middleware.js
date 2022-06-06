@@ -1,6 +1,7 @@
 const { optimizeText } = require('ukrainian-ml-optimizer');
 const stringSimilarity = require('string-similarity');
 const { env } = require('typed-dotenv').config();
+const FuzzySet = require('fuzzyset');
 
 const { InputFile } = require('grammy');
 const { dataset } = require('../../../dataset/dataset');
@@ -12,6 +13,11 @@ const SWINDLER_SETTINGS = {
   DELETE_CHANCE: 0.8,
   LOG_CHANGE: 0.5,
 };
+
+const mentionRegexp = /\B@\w+/g;
+const originalDiiaBots = ['@Diia_help_bot'];
+
+const swindlersBotsFuzzySet = FuzzySet(dataset.swindlers_bots);
 
 const saveSwindlersMessage = (ctx, maxChance) =>
   ctx.api.sendMessage(
@@ -59,17 +65,34 @@ const removeMessage = (ctx) =>
  * @param {Next} next
  * */
 function deleteSwindlersMiddleware(ctx, next) {
+  const message = ctx.state.text;
+
   const notSwindlers = ['@Diia_help_bot'];
-  if (notSwindlers.some((item) => ctx.state.text.includes(item))) {
+  if (notSwindlers.some((item) => message.includes(item))) {
     return next();
   }
 
-  if (swindlersRegex.test(ctx.state.text)) {
+  if (swindlersRegex.test(message)) {
     saveSwindlersMessage(ctx, 200);
     return removeMessage(ctx);
   }
 
-  const processedMessage = optimizeText(ctx.state.text);
+  const mentions = message.match(mentionRegexp);
+  if (mentions) {
+    // Not a swindler, official dia bot
+    if (mentions.includes(originalDiiaBots[0])) {
+      return;
+    }
+
+    const foundSwindlerMention = mentions.find((value) => (swindlersBotsFuzzySet.get(value) || [0])[0] > 0.9);
+
+    if (foundSwindlerMention) {
+      saveSwindlersMessage(ctx, 300);
+      return removeMessage(ctx);
+    }
+  }
+
+  const processedMessage = optimizeText(message);
 
   let lastChance = 0;
   let maxChance = 0;
