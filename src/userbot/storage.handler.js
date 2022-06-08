@@ -36,9 +36,9 @@ class UserbotStorage {
   }
 
   handleMessage(str) {
-    const isUniqueText = this.isUniqueText(str, this.lastMessages);
+    const { isDifferent } = this.isUniqueText(str, this.lastMessages);
 
-    if (isUniqueText) {
+    if (isDifferent) {
       if (this.lastMessages.length > limits.STORAGE) {
         this.lastMessages = this.lastMessages.slice(this.lastMessages.length - limits.STORAGE + 1);
       }
@@ -52,9 +52,9 @@ class UserbotStorage {
   }
 
   handleHelpMessage(str) {
-    const isUniqueText = this.isUniqueText(str, this.helpMessages, 0.8);
+    const { isDifferent } = this.isUniqueText(str, this.helpMessages, 0.8);
 
-    if (isUniqueText) {
+    if (isDifferent) {
       if (this.helpMessages.length > limits.STORAGE) {
         this.helpMessages = this.helpMessages.slice(this.helpMessages.length - limits.STORAGE + 1);
       }
@@ -73,21 +73,31 @@ class UserbotStorage {
    * @param {number} [rate]
    * */
   isUniqueText(str, dataset, rate) {
-    const isEmpty = !this.lastMessages.length;
+    const isEmpty = !dataset.length;
 
     if (isEmpty) {
-      return true;
+      return { isDifferent: true, maxChance: 1 };
     }
 
-    const isStrictCompare = dataset.some((lastMessage) => lastMessage === str);
+    const isStrictCompare = dataset.find((lastMessage) => lastMessage === str);
 
     if (isStrictCompare) {
-      return false;
+      return { isDifferent: false, maxChance: 0 };
     }
 
-    const isDifferent = !dataset.some((lastMessage) => stringSimilarity.compareTwoStrings(str, lastMessage) > (rate || limits.LENGTH_RATE));
+    let lastChance = 0;
+    let maxChance = 0;
+    const isDifferent = !dataset.some((lastMessage) => {
+      lastChance = stringSimilarity.compareTwoStrings(str, lastMessage);
 
-    return isDifferent;
+      if (lastChance > maxChance) {
+        maxChance = lastChance;
+      }
+
+      return lastChance >= (rate || limits.LENGTH_RATE);
+    });
+
+    return { isDifferent, maxChance };
   }
 }
 
