@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax,no-await-in-loop */
+/* eslint-disable no-restricted-syntax,no-await-in-loop,no-unreachable */
 const fs = require('fs');
 const path = require('path');
 
@@ -33,9 +33,15 @@ const SWINDLER_SETTINGS = {
 const handleSwindlers = async (mtProtoClient, chatPeers, swindlersTensorService, userbotStorage, message) => {
   const finalMessage = message.includes("Looks like swindler's message") ? message.split('\n').slice(3).join('\n') : message;
 
-  const processFoundSwindler = () => {
+  if (!mentionRegexp.test(finalMessage) && !urlRegexp.test(finalMessage)) {
+    return;
+  }
+
+  const processFoundSwindler = (spamRate) => {
+    console.info(true, spamRate, message);
+
     userbotStorage.swindlerMessages.push(finalMessage, message);
-    const isUniqueSwindler = userbotStorage.isUniqueText(finalMessage, userbotStorage.swindlerMessages, 0.7);
+    const isUniqueSwindler = userbotStorage.isUniqueText(finalMessage, userbotStorage.swindlerMessages, 0.95);
 
     if (isUniqueSwindler) {
       googleService.appendToSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, finalMessage, 'B6:B');
@@ -48,10 +54,10 @@ const handleSwindlers = async (mtProtoClient, chatPeers, swindlersTensorService,
    * Tensor try
    * The fastest
    * */
-  const { isSpam } = await swindlersTensorService.predict(finalMessage, 0.8);
+  const { isSpam, spamRate } = await swindlersTensorService.predict(finalMessage, 0.8);
 
   if (isSpam) {
-    return processFoundSwindler();
+    return processFoundSwindler(spamRate);
   }
 
   /**
@@ -108,8 +114,12 @@ const handleSwindlers = async (mtProtoClient, chatPeers, swindlersTensorService,
     const isUnique = userbotStorage.handleHelpMessage(finalMessage);
     if (isUnique) {
       mtProtoClient.sendPeerMessage(message, chatPeers.helpChat);
+      console.info(null, spamRate, message);
+      return;
     }
   }
+
+  console.info(false, spamRate, message);
 };
 
 /**
@@ -135,6 +145,10 @@ const updatesHandler = async (mtProtoClient, chatPeers, tensorService, swindlers
 
   for (const update of newMessageUpdates) {
     const { message } = update.message;
+    await handleSwindlers(mtProtoClient, chatPeers, swindlersTensorService, userbotStorage, message);
+    // eslint-disable-next-line no-continue
+    continue;
+
     let clearMessageText = message;
 
     const mentions = clearMessageText.match(mentionRegexp);
@@ -153,8 +167,6 @@ const updatesHandler = async (mtProtoClient, chatPeers, tensorService, swindlers
 
     const { isSpam, spamRate } = await tensorService.predict(clearMessageText, 0.7);
     console.info(isSpam, spamRate, message);
-
-    await handleSwindlers(mtProtoClient, chatPeers, swindlersTensorService, userbotStorage, message);
 
     if (isSpam && spamRate < 0.9) {
       const isNew = userbotStorage.handleMessage(clearMessageText);
