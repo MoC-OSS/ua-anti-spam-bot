@@ -23,132 +23,150 @@ const SWINDLER_SETTINGS = {
   LOG_CHANGE: 0.5,
 };
 
-/**
- * @param {MtProtoClient} mtProtoClient
- * @param {any} chatPeers - TODO add defined type
- * @param {SwindlersTensorService} swindlersTensorService
- * @param {UserbotStorage} userbotStorage
- * @param {string} message
- * */
-const handleSwindlers = async (mtProtoClient, chatPeers, swindlersTensorService, userbotStorage, message) => {
-  const finalMessage = message.includes("Looks like swindler's message") ? message.split('\n').slice(3).join('\n') : message;
-
-  if (!mentionRegexp.test(finalMessage) && !urlRegexp.test(finalMessage)) {
-    return;
-  }
-
-  const processFoundSwindler = (spamRate) => {
-    console.info(true, spamRate, message);
-
-    userbotStorage.swindlerMessages.push(finalMessage, message);
-    const isUniqueSwindler = userbotStorage.isUniqueText(finalMessage, userbotStorage.swindlerMessages, 0.95);
-
-    if (isUniqueSwindler) {
-      googleService.appendToSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, finalMessage, 'B6:B');
-      userbotStorage.swindlerMessages.push(finalMessage);
-      mtProtoClient.sendPeerMessage(finalMessage, chatPeers.swindlersChat);
-    }
-  };
-
+class UpdatesHandler {
   /**
-   * Tensor try
-   * The fastest
+   * @param {MtProtoClient} mtProtoClient
+   * @param {any} chatPeers - TODO add defined type
+   * @param {TensorService} tensorService
+   * @param {SwindlersTensorService} swindlersTensorService
+   * @param {ProtoUpdate} updateInfo
+   * @param {UserbotStorage} userbotStorage
    * */
-  const { isSpam, spamRate } = await swindlersTensorService.predict(finalMessage, 0.8);
-
-  if (isSpam) {
-    return processFoundSwindler(spamRate);
+  constructor(mtProtoClient, chatPeers, tensorService, swindlersTensorService, userbotStorage) {
+    this.mtProtoClient = mtProtoClient;
+    this.chatPeers = chatPeers;
+    this.tensorService = tensorService;
+    this.swindlersTensorService = swindlersTensorService;
+    this.userbotStorage = userbotStorage;
   }
 
   /**
-   * Regex try
-   * The fastest
+   * @param {ProtoUpdate} updateInfo
+   * @param {(string: string) => any} callback
    * */
-  const isSwindlersSite = swindlersRegex.test(finalMessage.toLowerCase());
+  filterUpdate(updateInfo, callback) {
+    const allowedTypes = ['updateEditChannelMessage', 'updateNewChannelMessage'];
 
-  if (isSwindlersSite) {
-    return processFoundSwindler();
-  }
-
-  const mentions = message.match(mentionRegexp);
-  if (mentions) {
-    // Not a swindler, official dia bot
-    if (mentions.includes(originalDiiaBots[0])) {
+    const newMessageUpdates = updateInfo.updates.filter(
+      (anUpdate) =>
+        allowedTypes.includes(anUpdate._) &&
+        anUpdate.message?.message &&
+        anUpdate.message.peer_id?.channel_id !== this.chatPeers.trainingChat.channel_id,
+    );
+    if (!newMessageUpdates || newMessageUpdates.length === 0) {
       return;
     }
 
-    const foundSwindlerMention = mentions.find((value) => (swindlersBotsFuzzySet.get(value) || [0])[0] > 0.9);
-
-    if (foundSwindlerMention) {
-      return processFoundSwindler();
+    for (const update of newMessageUpdates) {
+      const { message } = update.message;
+      callback(message);
     }
   }
 
   /**
-   * Compare try
-   * The slowest
+   * @param {string} message
    * */
-  let lastChance = 0;
-  let maxChance = 0;
-  const foundSwindler = dataset.swindlers.some((text) => {
-    lastChance = stringSimilarity.compareTwoStrings(optimizeText(finalMessage), text);
+  async handleSwindlers(message) {
+    const finalMessage = message.includes("Looks like swindler's message") ? message.split('\n').slice(3).join('\n') : message;
 
-    if (lastChance > maxChance) {
-      maxChance = lastChance;
+    if (!mentionRegexp.test(finalMessage) && !urlRegexp.test(finalMessage)) {
+      return { spam: false, reason: 'doesnt have url' };
     }
 
-    return lastChance >= SWINDLER_SETTINGS.LOG_CHANGE;
-  });
+    const processFoundSwindler = (spamRate) => {
+      console.info(true, spamRate, message);
 
-  if (foundSwindler) {
-    return processFoundSwindler();
+      const { isDifferent } = this.userbotStorage.isUniqueText(finalMessage, this.userbotStorage.swindlerMessages, 0.95);
+      // const { maxChance, isDifferent } = this.userbotStorage.isUniqueText(finalMessage, this.userbotStorage.swindlerMessages, 0.95);
+      // console.log({ maxChance, isDifferent, swindlerMessages: this.userbotStorage.swindlerMessages.length });
+
+      if (isDifferent) {
+        googleService.appendToSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, finalMessage, 'B6:B');
+        this.userbotStorage.swindlerMessages.push(finalMessage);
+        this.mtProtoClient.sendPeerMessage(finalMessage, this.chatPeers.swindlersChat);
+      }
+    };
+
+    /**
+     * Tensor try
+     * The fastest
+     * */
+    const { isSpam, spamRate } = await this.swindlersTensorService.predict(finalMessage, 0.8);
+
+    if (isSpam) {
+      processFoundSwindler(spamRate);
+      return { spam: true, reason: 'tensor spam', spamRate };
+    }
+
+    /**
+     * Regex try
+     * The fastest
+     * */
+    const isSwindlersSite = swindlersRegex.test(finalMessage.toLowerCase());
+
+    if (isSwindlersSite) {
+      processFoundSwindler();
+      return { spam: true, reason: 'site match' };
+    }
+
+    const mentions = message.match(mentionRegexp);
+    if (mentions) {
+      // Not a swindler, official dia bot
+      if (mentions.includes(originalDiiaBots[0])) {
+        return { spam: false, reason: 'dia bot' };
+      }
+
+      const foundSwindlerMention = mentions.find((value) => (swindlersBotsFuzzySet.get(value) || [0])[0] > 0.8);
+
+      if (foundSwindlerMention) {
+        processFoundSwindler();
+        return { spam: true, reason: 'mention match' };
+      }
+    }
+
+    /**
+     * Compare try
+     * The slowest
+     * */
+    let lastChance = 0;
+    let maxChance = 0;
+    const foundSwindler = dataset.swindlers.some((text) => {
+      lastChance = stringSimilarity.compareTwoStrings(optimizeText(finalMessage), text);
+
+      if (lastChance > maxChance) {
+        maxChance = lastChance;
+      }
+
+      return lastChance >= SWINDLER_SETTINGS.LOG_CHANGE;
+    });
+
+    if (foundSwindler) {
+      processFoundSwindler();
+      return { spam: true, reason: 'compareTwoStrings match', maxChance };
+    }
+
+    /**
+     * Help try
+     * */
+    const swindlersWords = ['виплат', 'допомог', 'підтримк', 'фінанс', 'приватбанк', 'приват банк', 'єпідтри', 'дія', 'дії'];
+    const isHelp = swindlersWords.some((item) => finalMessage.toLowerCase().includes(item));
+
+    if (isHelp) {
+      const isUnique = this.userbotStorage.handleHelpMessage(finalMessage);
+      if (isUnique) {
+        this.mtProtoClient.sendPeerMessage(message, this.chatPeers.helpChat);
+        console.info(null, spamRate, message);
+        return { spam: false, reason: 'help message' };
+      }
+    }
+
+    return { spam: false, reason: 'default return', maxChance };
   }
 
   /**
-   * Help try
+   * @param {string} message
    * */
-  const swindlersWords = ['виплат', 'допомог', 'підтримк', 'фінанс', 'приватбанк', 'приват банк', 'єпідтри', 'дія', 'дії'];
-  const isHelp = swindlersWords.some((item) => finalMessage.toLowerCase().includes(item));
-
-  if (isHelp) {
-    const isUnique = userbotStorage.handleHelpMessage(finalMessage);
-    if (isUnique) {
-      mtProtoClient.sendPeerMessage(message, chatPeers.helpChat);
-      console.info(null, spamRate, message);
-      return;
-    }
-  }
-
-  console.info(false, spamRate, message);
-};
-
-/**
- * @param {MtProtoClient} mtProtoClient
- * @param {any} chatPeers - TODO add defined type
- * @param {TensorService} tensorService
- * @param {SwindlersTensorService} swindlersTensorService
- * @param {ProtoUpdate} updateInfo
- * @param {UserbotStorage} userbotStorage
- * */
-const updatesHandler = async (mtProtoClient, chatPeers, tensorService, swindlersTensorService, updateInfo, userbotStorage) => {
-  const allowedTypes = ['updateEditChannelMessage', 'updateNewChannelMessage'];
-
-  const newMessageUpdates = updateInfo.updates.filter(
-    (anUpdate) =>
-      allowedTypes.includes(anUpdate._) &&
-      anUpdate.message?.message &&
-      anUpdate.message.peer_id?.channel_id !== chatPeers.trainingChat.channel_id,
-  );
-  if (!newMessageUpdates || newMessageUpdates.length === 0) {
-    return;
-  }
-
-  for (const update of newMessageUpdates) {
-    const { message } = update.message;
-    await handleSwindlers(mtProtoClient, chatPeers, swindlersTensorService, userbotStorage, message);
-    // eslint-disable-next-line no-continue
-    continue;
-
+  async handleTraining(message) {
     let clearMessageText = message;
 
     const mentions = clearMessageText.match(mentionRegexp);
@@ -165,11 +183,11 @@ const updatesHandler = async (mtProtoClient, chatPeers, tensorService, swindlers
 
     clearMessageText = clearMessageText.replace(/  +/g, ' ').split(' ').slice(0, 15).join(' ');
 
-    const { isSpam, spamRate } = await tensorService.predict(clearMessageText, 0.7);
+    const { isSpam, spamRate } = await this.tensorService.predict(clearMessageText, 0.7);
     console.info(isSpam, spamRate, message);
 
     if (isSpam && spamRate < 0.9) {
-      const isNew = userbotStorage.handleMessage(clearMessageText);
+      const isNew = this.userbotStorage.handleMessage(clearMessageText);
 
       if (telegramLinks.length) {
         telegramLinks.forEach((mention) => {
@@ -179,19 +197,18 @@ const updatesHandler = async (mtProtoClient, chatPeers, tensorService, swindlers
 
             fs.writeFileSync(path.join(__dirname, './from-entities.json'), JSON.stringify(deleteFromMessage, null, 2));
 
-            mtProtoClient.sendSelfMessage(mention);
+            this.mtProtoClient.sendSelfMessage(mention);
           }
         });
       }
 
       if (isNew) {
-        mtProtoClient.sendPeerMessage(clearMessageText, chatPeers.trainingChat).catch(() => console.error('send message error'));
+        this.mtProtoClient.sendPeerMessage(clearMessageText, this.chatPeers.trainingChat).catch(() => console.error('send message error'));
       }
     }
   }
-};
+}
 
 module.exports = {
-  updatesHandler,
-  handleSwindlers,
+  UpdatesHandler,
 };
