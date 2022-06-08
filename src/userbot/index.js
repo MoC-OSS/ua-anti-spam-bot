@@ -3,11 +3,14 @@ const { env } = require('typed-dotenv').config();
 const { redisClient } = require('../db');
 const auth = require('./auth');
 const { UserbotStorage } = require('./storage.handler');
-const { updatesHandler } = require('./updates.handler');
+const { UpdatesHandler } = require('./updates.handler');
 const { initTensor } = require('../tensor/tensor.service');
 const { initSwindlersTensor } = require('../tensor/swindlers-tensor.service');
 // const { findChannelAdmins } = require('./find-channel-admins');
 const { MtProtoClient } = require('./mt-proto-client');
+// const { googleService } = require('../services/google.service');
+
+// const testMessage = ``.trim();
 
 console.info('Start listener application');
 auth().then(async (api) => {
@@ -31,8 +34,16 @@ auth().then(async (api) => {
     swindlersChat: mtProtoClient.resolvePeer(allChats.chats, 'UA Anti Spam Bot - Swindlers'),
   };
 
+  const updatesHandler = new UpdatesHandler(mtProtoClient, chatPeers, tensorService, swindlersTensorService, userbotStorage);
+
+  // const testSwindlerResult = await updatesHandler.handleSwindlers(testMessage);
+  // console.log(testSwindlerResult);
+
   api.mtproto.updates.on('updates', (updateInfo) =>
-    updatesHandler(mtProtoClient, chatPeers, tensorService, swindlersTensorService, updateInfo, userbotStorage),
+    updatesHandler.filterUpdate(updateInfo, async (message) => {
+      // updatesHandler.handleTraining(message);
+      await updatesHandler.handleSwindlers(message);
+    }),
   );
 
   setInterval(async () => {
