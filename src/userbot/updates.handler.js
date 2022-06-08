@@ -21,6 +21,8 @@ const swindlersBotsFuzzySet = FuzzySet(dataset.swindlers_bots);
 const SWINDLER_SETTINGS = {
   DELETE_CHANCE: 0.8,
   LOG_CHANGE: 0.5,
+  SAME_CHECK: 0.95,
+  APPEND_TO_SHEET: 0.85,
 };
 
 class UpdatesHandler {
@@ -76,12 +78,17 @@ class UpdatesHandler {
     const processFoundSwindler = (spamRate) => {
       console.info(true, spamRate, message);
 
-      const { isDifferent } = this.userbotStorage.isUniqueText(finalMessage, this.userbotStorage.swindlerMessages, 0.95);
-      // const { maxChance, isDifferent } = this.userbotStorage.isUniqueText(finalMessage, this.userbotStorage.swindlerMessages, 0.95);
+      const { maxChance, isDifferent } = this.userbotStorage.isUniqueText(
+        finalMessage,
+        this.userbotStorage.swindlerMessages,
+        SWINDLER_SETTINGS.SAME_CHECK,
+      );
       // console.log({ maxChance, isDifferent, swindlerMessages: this.userbotStorage.swindlerMessages.length });
 
       if (isDifferent) {
-        googleService.appendToSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, finalMessage, 'B6:B');
+        if (maxChance > SWINDLER_SETTINGS.APPEND_TO_SHEET) {
+          googleService.appendToSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, finalMessage, 'B6:B');
+        }
         this.userbotStorage.swindlerMessages.push(finalMessage);
         this.mtProtoClient.sendPeerMessage(finalMessage, this.chatPeers.swindlersChat);
       }
@@ -91,7 +98,7 @@ class UpdatesHandler {
      * Tensor try
      * The fastest
      * */
-    const { isSpam, spamRate } = await this.swindlersTensorService.predict(finalMessage, 0.8);
+    const { isSpam, spamRate } = await this.swindlersTensorService.predict(finalMessage, SWINDLER_SETTINGS.DELETE_CHANCE);
 
     if (isSpam) {
       processFoundSwindler(spamRate);
@@ -116,7 +123,7 @@ class UpdatesHandler {
         return { spam: false, reason: 'dia bot' };
       }
 
-      const foundSwindlerMention = mentions.find((value) => (swindlersBotsFuzzySet.get(value) || [0])[0] > 0.8);
+      const foundSwindlerMention = mentions.find((value) => (swindlersBotsFuzzySet.get(value) || [0])[0] > SWINDLER_SETTINGS.DELETE_CHANCE);
 
       if (foundSwindlerMention) {
         processFoundSwindler();
