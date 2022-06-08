@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 
 const { urlRegexp } = require('ukrainian-ml-optimizer');
 
@@ -29,5 +30,5 @@ const notMatchedUrls = newImmediately.filter((item) => urlRegexp.test(item)).fil
 console.info('notMatchedUrls\n');
 console.info(notMatchedUrls.join('\n'));
 
-fs.writeFileSync('./strings/immediately.json', `${JSON.stringify(newImmediately, null, 2)}\n`);
-fs.writeFileSync('./strings/swindlers_bots.json', `${JSON.stringify(newSwindlersBots, null, 2)}\n`);
+fs.writeFileSync(path.join(__dirname, './strings/immediately.json'), `${JSON.stringify(newImmediately, null, 2)}\n`);
+fs.writeFileSync(path.join(__dirname, './strings/swindlers_bots.json'), `${JSON.stringify(newSwindlersBots, null, 2)}\n`);
