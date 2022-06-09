@@ -88,9 +88,11 @@ class UpdatesHandler {
       if (isDifferent) {
         if (maxChance > SWINDLER_SETTINGS.APPEND_TO_SHEET) {
           googleService.appendToSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, finalMessage, 'B6:B');
+        } else {
+          this.mtProtoClient.sendPeerMessage(finalMessage, this.chatPeers.swindlersChat);
         }
+
         this.userbotStorage.swindlerMessages.push(finalMessage);
-        this.mtProtoClient.sendPeerMessage(finalMessage, this.chatPeers.swindlersChat);
       }
     };
 
