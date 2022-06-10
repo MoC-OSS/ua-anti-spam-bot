@@ -8,7 +8,7 @@ const swindlers = require('./strings/swindlers.json');
 const immediately = require('./strings/immediately.json');
 const swindlersBots = require('./strings/swindlers_bots.json');
 
-const notSwindlers = ['@all', '@alinaaaawwaa'];
+const notSwindlers = ['@all', '@alinaaaawwaa', 'https://redcross.org.ua/)'];
 
 const mentionRegexp = /\B@\w+/g;
 
