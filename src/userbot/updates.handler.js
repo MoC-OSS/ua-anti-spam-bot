@@ -25,6 +25,8 @@ const SWINDLER_SETTINGS = {
   APPEND_TO_SHEET: 0.85,
 };
 
+const swindlersTopUsed = Object.keys(dataset.swindlers_top_used);
+
 class UpdatesHandler {
   /**
    * @param {MtProtoClient} mtProtoClient
@@ -157,8 +159,7 @@ class UpdatesHandler {
     /**
      * Help try
      * */
-    const swindlersWords = ['виплат', 'допомог', 'підтримк', 'фінанс', 'приватбанк', 'приват банк', 'єпідтри', 'дія', 'дії'];
-    const isHelp = swindlersWords.some((item) => finalMessage.toLowerCase().includes(item));
+    const isHelp = swindlersTopUsed.some((item) => finalMessage.toLowerCase().includes(item));
 
     if (isHelp) {
       const isUnique = this.userbotStorage.handleHelpMessage(finalMessage);

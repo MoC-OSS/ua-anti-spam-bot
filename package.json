@@ -9,7 +9,7 @@
     "start:server": "nodemon ./src/express.js --max_old_space_size=2048",
     "start:server:prod": "node ./src/express.js",
     "start:server:cluster": "pm2 start ./src/express.js -i 3 --watch || echo '*** Install PM2 globally'",
-    "download-swindler": "node ./dataset/download-swindler-dataset.js && node ./dataset/auto-swindlers.js",
+    "download-swindler": "node ./dataset/download-swindler-dataset.js && node ./dataset/auto-swindlers.js && node ./dataset/get-swindlers-top-used.js",
     "prepare": "husky install",
     "lint": "npm-run-all --parallel lint:js",
     "lint:branch-name": "branch-name-lint ./.branchlintrc.json",
