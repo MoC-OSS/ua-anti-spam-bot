@@ -99,7 +99,7 @@ const deleteSwindlersMiddleware = (swindlersService) => {
     const { isSpam, spamRate } = await swindlersService.predict(message);
 
     if (isSpam) {
-      saveSwindlersMessage(ctx, 400, 'tensor');
+      saveSwindlersMessage(ctx, spamRate, 'tensor');
       return removeMessage(ctx);
     }
 
