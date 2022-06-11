@@ -19,10 +19,10 @@ const originalDiiaBots = ['@Diia_help_bot'];
 
 const swindlersBotsFuzzySet = FuzzySet(dataset.swindlers_bots);
 
-const saveSwindlersMessage = (ctx, maxChance) =>
+const saveSwindlersMessage = (ctx, maxChance, from) =>
   ctx.api.sendMessage(
     logsChat,
-    `Looks like swindler's message (${(maxChance * 100).toFixed(2)}%):\n\n<code>${ctx.chat.title}</code>\n${ctx.state.text}`,
+    `Looks like swindler's message (${(maxChance * 100).toFixed(2)}%) from ${from}:\n\n<code>${ctx.chat.title}</code>\n${ctx.state.text}`,
     {
       parse_mode: 'HTML',
     },
@@ -77,7 +77,7 @@ const deleteSwindlersMiddleware = (swindlersService) => {
     }
 
     if (swindlersRegex.test(message)) {
-      saveSwindlersMessage(ctx, 200);
+      saveSwindlersMessage(ctx, 200, 'site');
       return removeMessage(ctx);
     }
 
@@ -91,7 +91,7 @@ const deleteSwindlersMiddleware = (swindlersService) => {
       const foundSwindlerMention = mentions.find((value) => (swindlersBotsFuzzySet.get(value) || [0])[0] > 0.9);
 
       if (foundSwindlerMention) {
-        saveSwindlersMessage(ctx, 300);
+        saveSwindlersMessage(ctx, 300, 'mention');
         return removeMessage(ctx);
       }
     }
@@ -99,7 +99,7 @@ const deleteSwindlersMiddleware = (swindlersService) => {
     const { isSpam, spamRate } = await swindlersService.predict(message);
 
     if (isSpam) {
-      saveSwindlersMessage(ctx, 400);
+      saveSwindlersMessage(ctx, 400, 'tensor');
       return removeMessage(ctx);
     }
 
@@ -122,7 +122,7 @@ const deleteSwindlersMiddleware = (swindlersService) => {
     });
 
     if (maxChance > SWINDLER_SETTINGS.LOG_CHANGE) {
-      saveSwindlersMessage(ctx, maxChance);
+      saveSwindlersMessage(ctx, maxChance, 'compare');
     }
 
     if (env.DEBUG) {
