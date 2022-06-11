@@ -77,8 +77,8 @@ class UpdatesHandler {
       return { spam: false, reason: 'doesnt have url' };
     }
 
-    const processFoundSwindler = (spamRate) => {
-      console.info(true, spamRate, message);
+    const processFoundSwindler = (spamRate, from) => {
+      console.info(true, from, spamRate, message);
 
       const { maxChance, isDifferent } = this.userbotStorage.isUniqueText(
         finalMessage,
@@ -88,6 +88,10 @@ class UpdatesHandler {
       // console.log({ maxChance, isDifferent, swindlerMessages: this.userbotStorage.swindlerMessages.length });
 
       if (isDifferent) {
+        if (from === 'tensor') {
+          this.mtProtoClient.sendSelfMessage([spamRate, message, 'swindlerTensor: true'].join('\n'));
+        }
+
         if (maxChance > SWINDLER_SETTINGS.APPEND_TO_SHEET) {
           googleService.appendToSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, finalMessage, 'B6:B');
         } else {
@@ -105,7 +109,7 @@ class UpdatesHandler {
     const { isSpam, spamRate } = await this.swindlersTensorService.predict(finalMessage, SWINDLER_SETTINGS.DELETE_CHANCE);
 
     if (isSpam) {
-      processFoundSwindler(spamRate);
+      processFoundSwindler(spamRate, 'tensor');
       return { spam: true, reason: 'tensor spam', spamRate };
     }
 
@@ -116,7 +120,7 @@ class UpdatesHandler {
     const isSwindlersSite = swindlersRegex.test(finalMessage.toLowerCase());
 
     if (isSwindlersSite) {
-      processFoundSwindler();
+      processFoundSwindler(200, 'site');
       return { spam: true, reason: 'site match' };
     }
 
@@ -130,7 +134,7 @@ class UpdatesHandler {
       const foundSwindlerMention = mentions.find((value) => (swindlersBotsFuzzySet.get(value) || [0])[0] > SWINDLER_SETTINGS.DELETE_CHANCE);
 
       if (foundSwindlerMention) {
-        processFoundSwindler();
+        processFoundSwindler(300, 'mention');
         return { spam: true, reason: 'mention match' };
       }
     }
@@ -152,7 +156,7 @@ class UpdatesHandler {
     });
 
     if (foundSwindler) {
-      processFoundSwindler();
+      processFoundSwindler(maxChance, 'compare');
       return { spam: true, reason: 'compareTwoStrings match', maxChance };
     }
 

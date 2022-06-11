@@ -59,67 +59,85 @@ const removeMessage = (ctx) =>
   });
 
 /**
- * Delete messages that looks like from swindlers
- *
- * @param {GrammyContext} ctx
- * @param {Next} next
+ * @param {SwindlersTensorService} swindlersService
  * */
-function deleteSwindlersMiddleware(ctx, next) {
-  const message = ctx.state.text;
+const deleteSwindlersMiddleware = (swindlersService) => {
+  /**
+   * Delete messages that looks like from swindlers
+   *
+   * @param {GrammyContext} ctx
+   * @param {Next} next
+   * */
+  const middleware = async (ctx, next) => {
+    const message = ctx.state.text;
 
-  const notSwindlers = ['@Diia_help_bot'];
-  if (notSwindlers.some((item) => message.includes(item))) {
-    return next();
-  }
-
-  if (swindlersRegex.test(message)) {
-    saveSwindlersMessage(ctx, 200);
-    return removeMessage(ctx);
-  }
-
-  const mentions = message.match(mentionRegexp);
-  if (mentions) {
-    // Not a swindler, official dia bot
-    if (mentions.includes(originalDiiaBots[0])) {
-      return;
+    const notSwindlers = ['@Diia_help_bot'];
+    if (notSwindlers.some((item) => message.includes(item))) {
+      return next();
     }
 
-    const foundSwindlerMention = mentions.find((value) => (swindlersBotsFuzzySet.get(value) || [0])[0] > 0.9);
-
-    if (foundSwindlerMention) {
-      saveSwindlersMessage(ctx, 300);
+    if (swindlersRegex.test(message)) {
+      saveSwindlersMessage(ctx, 200);
       return removeMessage(ctx);
     }
-  }
 
-  const processedMessage = optimizeText(message);
+    const mentions = message.match(mentionRegexp);
+    if (mentions) {
+      // Not a swindler, official dia bot
+      if (mentions.includes(originalDiiaBots[0])) {
+        return;
+      }
 
-  let lastChance = 0;
-  let maxChance = 0;
-  const foundSwindler = dataset.swindlers.some((text) => {
-    lastChance = stringSimilarity.compareTwoStrings(processedMessage, text);
+      const foundSwindlerMention = mentions.find((value) => (swindlersBotsFuzzySet.get(value) || [0])[0] > 0.9);
 
-    if (lastChance > maxChance) {
-      maxChance = lastChance;
+      if (foundSwindlerMention) {
+        saveSwindlersMessage(ctx, 300);
+        return removeMessage(ctx);
+      }
     }
 
-    return lastChance >= SWINDLER_SETTINGS.DELETE_CHANCE;
-  });
+    const { isSpam, spamRate } = await swindlersService.predict(message);
 
-  if (maxChance > SWINDLER_SETTINGS.LOG_CHANGE) {
-    saveSwindlersMessage(ctx, maxChance);
-  }
+    if (isSpam) {
+      saveSwindlersMessage(ctx, 400);
+      return removeMessage(ctx);
+    }
 
-  if (env.DEBUG) {
-    ctx.reply([foundSwindler, processedMessage, maxChance].join('\n')).catch(handleError);
-  }
+    if (spamRate < 0.5) {
+      return next();
+    }
 
-  if (foundSwindler) {
-    return removeMessage(ctx);
-  }
+    const processedMessage = optimizeText(message);
 
-  next();
-}
+    let lastChance = 0;
+    let maxChance = 0;
+    const foundSwindler = dataset.swindlers.some((text) => {
+      lastChance = stringSimilarity.compareTwoStrings(processedMessage, text);
+
+      if (lastChance > maxChance) {
+        maxChance = lastChance;
+      }
+
+      return lastChance >= SWINDLER_SETTINGS.DELETE_CHANCE;
+    });
+
+    if (maxChance > SWINDLER_SETTINGS.LOG_CHANGE) {
+      saveSwindlersMessage(ctx, maxChance);
+    }
+
+    if (env.DEBUG) {
+      ctx.reply([foundSwindler, processedMessage, maxChance].join('\n')).catch(handleError);
+    }
+
+    if (foundSwindler) {
+      return removeMessage(ctx);
+    }
+
+    next();
+  };
+
+  return middleware;
+};
 
 module.exports = {
   deleteSwindlersMiddleware,
