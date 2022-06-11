@@ -11,6 +11,7 @@ const { redisService } = require('./services/redis.service');
 const { S3Service } = require('./services/s3.service');
 
 const { initTensor } = require('./tensor/tensor.service');
+const { initSwindlersTensor } = require('./tensor/swindlers-tensor.service');
 const { RedisSession, RedisChatSession } = require('./bot/sessionProviders');
 
 const { MessageHandler } = require('./bot/message.handler');
@@ -86,7 +87,9 @@ const rootMenu = new Menu('root');
 
   const s3Service = new S3Service();
   const tensorService = await initTensor(s3Service);
+  const swindlersService = await initSwindlersTensor();
   tensorService.setSpamThreshold(await redisService.getBotTensorPercent());
+  swindlersService.setSpamThreshold(0.87);
 
   const startTime = new Date();
 
@@ -300,7 +303,7 @@ const rootMenu = new Menu('root');
       onlyNotForwarded,
       onlyWithText,
       onlyWhenBotAdmin,
-      deleteSwindlersMiddleware,
+      deleteSwindlersMiddleware(swindlersService),
       errorHandler(performanceStartMiddleware),
       errorHandler(onTextListener.middleware()),
       errorHandler(performanceEndMiddleware),
