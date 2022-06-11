@@ -149,7 +149,7 @@ const rootMenu = new Menu('root');
 
   bot.use(errorHandler(globalMiddleware.middleware()));
 
-  const router = new Router((ctx) => ctx.session.step);
+  const router = new Router((ctx) => ctx.session?.step || 'idle');
 
   bot.use(router);
 
