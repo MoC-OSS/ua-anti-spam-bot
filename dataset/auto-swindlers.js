@@ -12,7 +12,7 @@ const notSwindlers = [
   '@alinaaaawwaa',
   '@all',
   '@geLIKhr25',
-  'GLORY_TO_UKRAINE_22',
+  '@GLORY_TO_UKRAINE_22',
   'https://redcross.org.ua/)',
   'https://www.nrc.no/countries/europe/ukraine/',
 ];
