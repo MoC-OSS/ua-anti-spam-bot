@@ -6,9 +6,14 @@ const { error, env } = require('typed-dotenv').config();
 const { apiThrottler } = require('@grammyjs/transformer-throttler');
 const Keyv = require('keyv');
 
+const { dataset } = require('../dataset/dataset');
+
 const { redisClient } = require('./db');
 const { redisService } = require('./services/redis.service');
 const { S3Service } = require('./services/s3.service');
+const { DynamicStorageService } = require('./services/dynamic-storage.service');
+const { SwindlersBotsService } = require('./services/swindlers-bots.service');
+const { googleService } = require('./services/google.service');
 
 const { initTensor } = require('./tensor/tensor.service');
 const { initSwindlersTensor } = require('./tensor/swindlers-tensor.service');
@@ -18,10 +23,10 @@ const { MessageHandler } = require('./bot/message.handler');
 const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware, UpdatesMiddleware } = require('./bot/commands');
 const { OnTextListener, TestTensorListener } = require('./bot/listeners');
 const {
+  DeleteSwindlersMiddleware,
   GlobalMiddleware,
   botActiveMiddleware,
   ignoreOld,
-  deleteSwindlersMiddleware,
   onlyCreator,
   onlyNotAdmin,
   onlyNotForwarded,
@@ -87,9 +92,9 @@ const rootMenu = new Menu('root');
 
   const s3Service = new S3Service();
   const tensorService = await initTensor(s3Service);
-  const swindlersService = await initSwindlersTensor();
+  const swindlersTensorService = await initSwindlersTensor();
   tensorService.setSpamThreshold(await redisService.getBotTensorPercent());
-  swindlersService.setSpamThreshold(0.87);
+  swindlersTensorService.setSpamThreshold(0.87);
 
   const startTime = new Date();
 
@@ -123,6 +128,10 @@ const rootMenu = new Menu('root');
 
   const redisSession = new RedisSession();
   const redisChatSession = new RedisChatSession();
+  const dynamicStorageService = new DynamicStorageService(googleService, dataset);
+  await dynamicStorageService.init();
+
+  const swindlersBotsService = new SwindlersBotsService(dynamicStorageService, 0.6);
 
   const globalMiddleware = new GlobalMiddleware(bot);
 
@@ -131,6 +140,7 @@ const rootMenu = new Menu('root');
   const sessionMiddleware = new SessionMiddleware(startTime);
   const statisticsMiddleware = new StatisticsMiddleware(startTime);
   const updatesMiddleware = new UpdatesMiddleware(startTime);
+  const deleteSwindlersMiddleware = new DeleteSwindlersMiddleware(swindlersTensorService, swindlersBotsService);
 
   const messageHandler = new MessageHandler(tensorService);
 
@@ -303,7 +313,7 @@ const rootMenu = new Menu('root');
       onlyNotForwarded,
       onlyWithText,
       onlyWhenBotAdmin,
-      deleteSwindlersMiddleware(swindlersService),
+      deleteSwindlersMiddleware.middleware(),
       errorHandler(performanceStartMiddleware),
       errorHandler(onTextListener.middleware()),
       errorHandler(performanceEndMiddleware),
