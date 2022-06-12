@@ -11,6 +11,7 @@
     "start:server:cluster": "pm2 start ./src/express.js -i 3 --watch || echo '*** Install PM2 globally'",
     "download-swindler": "node ./dataset/download-swindler-dataset.js && node ./dataset/auto-swindlers.js && node ./dataset/get-swindlers-top-used.js",
     "prepare": "husky install",
+    "test": "jest",
     "lint": "npm-run-all --parallel lint:js",
     "lint:branch-name": "branch-name-lint ./.branchlintrc.json",
     "lint:commit-name": "commitlint --edit",
