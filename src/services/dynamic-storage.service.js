@@ -3,19 +3,18 @@ const EventEmitter = require('events');
 
 class DynamicStorageService {
   /**
-   * @param {GoogleService} localGoogleService
-   * @param {any} localDataset
+   * @param {GoogleService} googleService
+   * @param {any} dataset
    * */
-  constructor(localGoogleService, localDataset) {
-    this.googleService = localGoogleService;
+  constructor(googleService, dataset) {
+    this.googleService = googleService;
     this.swindlerMessages = [];
-    this.swindlerBots = localDataset.swindlers_bots;
+    this.swindlerBots = dataset.swindlers_bots;
     this.fetchEmmiter = new EventEmitter();
-    // this.immediately = localDataset.immediately;
   }
 
   async init() {
-    this.updateSwindlers();
+    await this.updateSwindlers();
     setInterval(() => {
       this.updateSwindlers();
     }, 1000 * 60 * 60);
@@ -30,10 +29,10 @@ class DynamicStorageService {
     const cases = Promise.all(sheetRequests);
 
     return cases.then(([swindlerPositives, swindlerBots]) => {
-      console.info('got DynamicStorageService messages', new Date());
       this.swindlerMessages = this.smartAppend(this.swindlerMessages, swindlerPositives);
       this.swindlerBots = this.smartAppend(this.swindlerBots, swindlerBots);
       this.fetchEmmiter.emit('fetch');
+      console.info('got DynamicStorageService messages', new Date());
     });
   }
 
