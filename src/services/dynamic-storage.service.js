@@ -1,4 +1,5 @@
 const { env } = require('typed-dotenv').config();
+const EventEmitter = require('events');
 
 class DynamicStorageService {
   /**
@@ -9,6 +10,7 @@ class DynamicStorageService {
     this.googleService = localGoogleService;
     this.swindlerMessages = [];
     this.swindlerBots = localDataset.swindlers_bots;
+    this.fetchEmmiter = new EventEmitter();
     // this.immediately = localDataset.immediately;
   }
 
@@ -31,6 +33,7 @@ class DynamicStorageService {
       console.info('got DynamicStorageService messages', new Date());
       this.swindlerMessages = this.smartAppend(this.swindlerMessages, swindlerPositives);
       this.swindlerBots = this.smartAppend(this.swindlerBots, swindlerBots);
+      this.fetchEmmiter.emit('fetch');
     });
   }
 

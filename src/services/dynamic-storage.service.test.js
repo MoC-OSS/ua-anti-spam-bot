@@ -1,24 +1,5 @@
 const { DynamicStorageService } = require('./dynamic-storage.service');
-
-/**
- * @type {GoogleService}
- * */
-const mockGoogleService = {
-  getSheet: () =>
-    Promise.resolve([
-      {
-        value: 'mock_value',
-        index: 0,
-        sheetKey: 'mock_key',
-        fullPath: `mock_path`,
-      },
-    ]),
-};
-
-const mockDataset = {
-  swindlers_bots: ['@test'],
-  immediately: ['test'],
-};
+const { mockGoogleService, mockDataset } = require('./_mocks/index.mocks');
 
 /**
  * @type {DynamicStorageService}
@@ -39,6 +20,15 @@ describe('DynamicStorageService', () => {
     await dynamicStorageService.updateSwindlers();
 
     expect(dynamicStorageService.swindlerMessages).toHaveLength(1);
-    expect(dynamicStorageService.swindlerBots).toEqual(['@test', 'mock_value']);
+    expect(dynamicStorageService.swindlerBots).toEqual([...mockDataset.swindlers_bots, '@Diia_move_bot']);
+  });
+
+  it('should emit event on fetch dataset', async () => {
+    dynamicStorageService.fetchEmmiter.on('fetch', () => {
+      console.info('emmited');
+      expect(true).toBeTruthy();
+    });
+
+    await dynamicStorageService.updateSwindlers();
   });
 });
