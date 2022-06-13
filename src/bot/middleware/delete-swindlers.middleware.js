@@ -13,7 +13,6 @@ const SWINDLER_SETTINGS = {
   LOG_CHANGE: 0.5,
 };
 
-const mentionRegexp = /\B@\w+/g;
 const originalDiiaBots = ['@Diia_help_bot'];
 
 class DeleteSwindlersMiddleware {
@@ -46,7 +45,7 @@ class DeleteSwindlersMiddleware {
         return this.removeMessage(ctx);
       }
 
-      const mentions = message.match(mentionRegexp);
+      const mentions = this.swindlersBotsService.parseMentions(message);
       if (mentions) {
         // Not a swindler, official dia bot
         if (mentions.includes(originalDiiaBots[0])) {
@@ -60,7 +59,7 @@ class DeleteSwindlersMiddleware {
         });
 
         if (foundSwindlerMention) {
-          this.saveSwindlersMessage(ctx, lastResult.rate, 'mention');
+          this.saveSwindlersMessage(ctx, lastResult.rate, `mention (${lastResult.nearestName})`);
           return this.removeMessage(ctx);
         }
       }
