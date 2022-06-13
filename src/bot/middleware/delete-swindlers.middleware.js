@@ -59,7 +59,7 @@ class DeleteSwindlersMiddleware {
         });
 
         if (foundSwindlerMention) {
-          this.saveSwindlersMessage(ctx, lastResult.rate, 'mention');
+          this.saveSwindlersMessage(ctx, lastResult.rate, `mention (${lastResult.nearestName})`);
           return this.removeMessage(ctx);
         }
       }
