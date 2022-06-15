@@ -182,6 +182,7 @@ ${startMessageAtom}
 • Додайте бот в чат;
 • Зробіть бота адміністратором.
 
+Розробник бота – @dimkasmile за підтримки Master of Code Global.
 Якщо бот не працює, пишіть ${creatorNick}.
 
 Дивись відео з інструкцією нижче:
@@ -193,7 +194,7 @@ https://youtu.be/RX0cZYf1Lm4
  * Message that bot sends when user uses /start in the group
  *
  * */
-const getGroupStartMessage = ({ adminsString, isAdmin = false, canDelete, user }) =>
+const getGroupStartMessage = ({ adminsString, isAdmin = false, canDelete, user = '' }) =>
   `
 ${user}
 
