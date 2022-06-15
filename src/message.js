@@ -26,13 +26,23 @@ const cancelMessageSending = 'Розсилка була відмінена!';
  * Complex - Settings
  * */
 
-const getSettingsMenuMessage = ({ disableDeleteMessage }) =>
+const getSettingsMenuMessage = ({ enableDeleteMessage }) =>
   `
-🤖 Налаштування бота.
+🤖 Налаштування бота в поточному чаті.
 Тут ви можете регулювати параметри.
 
-${disableDeleteMessage === false ? '⛔️ Бот не повідомляє про видалені повідомлення' : '✅ Бот повідомляє про видалені повідомлення'}
+${enableDeleteMessage === false ? '⛔️ Бот не повідомляє про видалені повідомлення.' : '✅ Бот повідомляє про видалені повідомлення.'}
+
+Для зміни налаштувань, натисніть на відповідну кнопку.
 `.trim();
+
+const settingsDescriptionButton = '📋 Опис налаштувань бота в поточному чаті';
+
+const deleteMessageButton = '❗ Повідомлення про причину видалення';
+
+const goBackButton = '⬅ Повернутись назад';
+
+const detailedSettingsDescription = '📋 Детальний опиc всіх налаштувань';
 
 /**
  *
@@ -274,6 +284,10 @@ const getTensorTestResult = ({ chance, isSpam }) =>
  *
  * */
 module.exports = {
+  goBackButton,
+  deleteMessageButton,
+  detailedSettingsDescription,
+  settingsDescriptionButton,
   settingsDeleteItemMessage,
   settingsSubmitMessage,
   memberReadyMessage,

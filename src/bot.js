@@ -14,7 +14,14 @@ const { initTensor } = require('./tensor/tensor.service');
 const { RedisSession, RedisChatSession } = require('./bot/sessionProviders');
 
 const { MessageHandler } = require('./bot/message.handler');
-const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware, UpdatesMiddleware } = require('./bot/commands');
+const {
+  HelpMiddleware,
+  SessionMiddleware,
+  StartMiddleware,
+  StatisticsMiddleware,
+  UpdatesMiddleware,
+  SettingsMiddleware,
+} = require('./bot/commands');
 const { OnTextListener, TestTensorListener } = require('./bot/listeners');
 const {
   GlobalMiddleware,
@@ -27,12 +34,10 @@ const {
   onlyWithText,
   performanceEndMiddleware,
   performanceStartMiddleware,
+  onlyAdmin,
 } = require('./bot/middleware');
 const { handleError, errorHandler, sleep } = require('./utils');
 const { logsChat, creatorId } = require('./creator');
-
-// TODO commented for settings feature
-// const { getSettingsMenuMessage, settingsSubmitMessage, settingsDeleteItemMessage } = require('./message');
 
 /**
  * @typedef { import("grammy").GrammyError } GrammyError
@@ -54,27 +59,6 @@ if (error) {
 }
 
 const rootMenu = new Menu('root');
-
-// TODO commented for settings feature
-// const menu = new Menu('settings')
-//   .text(
-//     (ctx) => (ctx.session.settings.disableDeleteMessage === false ? '⛔️' : '✅') + settingsDeleteItemMessage, // dynamic label
-//     (ctx) => {
-//       console.log('button press', ctx.session.settings.disableDeleteMessage);
-//       if (ctx.session.settings.disableDeleteMessage === false) {
-//         delete ctx.session.settings.disableDeleteMessage;
-//       } else {
-//         ctx.session.settings.disableDeleteMessage = false;
-//       }
-//
-//       ctx.editMessageText(getSettingsMenuMessage(ctx.session.settings));
-//     },
-//   )
-//   .row()
-//   .text(settingsSubmitMessage, (ctx) => {
-//     console.log(ctx);
-//     ctx.deleteMessage();
-//   });
 
 (async () => {
   console.info('Waiting for the old instance to down...');
@@ -127,6 +111,7 @@ const rootMenu = new Menu('root');
   const sessionMiddleware = new SessionMiddleware(startTime);
   const statisticsMiddleware = new StatisticsMiddleware(startTime);
   const updatesMiddleware = new UpdatesMiddleware(startTime);
+  const settingsMiddleware = new SettingsMiddleware();
 
   const messageHandler = new MessageHandler(tensorService);
 
@@ -135,6 +120,8 @@ const rootMenu = new Menu('root');
 
   rootMenu.register(tensorListener.initMenu(trainingThrottler));
   rootMenu.register(updatesMiddleware.initMenu());
+  rootMenu.register(settingsMiddleware.settingsMenu());
+  rootMenu.register(settingsMiddleware.settingsDescriptionSubmenu(), 'settingsMenu');
 
   bot.use(hydrateReply);
 
@@ -149,7 +136,7 @@ const rootMenu = new Menu('root');
 
   bot.use(router);
 
-  // TODO commented for settings feature
+  bot.command('settings', onlyAdmin, errorHandler(settingsMiddleware.sendSettingsMenu()));
 
   bot.command('start', errorHandler(startMiddleware.middleware()));
   bot.command('help', errorHandler(helpMiddleware.middleware()));
@@ -281,11 +268,6 @@ const rootMenu = new Menu('root');
   bot.command('updates', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.initialization()));
   router.route('confirmation', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.confirmation()));
   router.route('messageSending', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.messageSending()));
-
-  // TODO commented for settings feature
-  // bot.command('settings', (ctx) => {
-  //   ctx.reply(getSettingsMenuMessage(ctx.session.settings), { reply_markup: menu });
-  // });
 
   bot
     .errorBoundary(handleError)

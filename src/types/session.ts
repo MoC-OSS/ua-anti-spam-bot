@@ -37,6 +37,9 @@ export interface ChatSessionData {
   botAdminDate: Date;
   isLimitedDeletion?: boolean;
   lastLimitedDeletionDate?: Date;
+  chatSettings: {
+    enableDeleteMessage: boolean;
+  }
 }
 
 export interface Session {
