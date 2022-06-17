@@ -20,7 +20,14 @@ const { initSwindlersTensor } = require('./tensor/swindlers-tensor.service');
 const { RedisSession, RedisChatSession } = require('./bot/sessionProviders');
 
 const { MessageHandler } = require('./bot/message.handler');
-const { HelpMiddleware, SessionMiddleware, StartMiddleware, StatisticsMiddleware, UpdatesMiddleware } = require('./bot/commands');
+const {
+  HelpMiddleware,
+  SessionMiddleware,
+  StartMiddleware,
+  StatisticsMiddleware,
+  UpdatesMiddleware,
+  SwindlersUpdateMiddleware,
+} = require('./bot/commands');
 const { OnTextListener, TestTensorListener } = require('./bot/listeners');
 const {
   DeleteSwindlersMiddleware,
@@ -138,6 +145,7 @@ const rootMenu = new Menu('root');
   const startMiddleware = new StartMiddleware(bot);
   const helpMiddleware = new HelpMiddleware(startTime);
   const sessionMiddleware = new SessionMiddleware(startTime);
+  const swindlersUpdateMiddleware = new SwindlersUpdateMiddleware(dynamicStorageService);
   const statisticsMiddleware = new StatisticsMiddleware(startTime);
   const updatesMiddleware = new UpdatesMiddleware(startTime);
   const deleteSwindlersMiddleware = new DeleteSwindlersMiddleware(swindlersTensorService, swindlersBotsService);
@@ -167,6 +175,7 @@ const rootMenu = new Menu('root');
 
   bot.errorBoundary(handleError).command('start', errorHandler(startMiddleware.middleware()));
   bot.errorBoundary(handleError).command('help', errorHandler(helpMiddleware.middleware()));
+  bot.errorBoundary(handleError).command('swindlers_update', errorHandler(swindlersUpdateMiddleware.middleware()));
 
   bot.errorBoundary(handleError).command('session', botActiveMiddleware, errorHandler(sessionMiddleware.middleware()));
   bot.errorBoundary(handleError).command('statistics', botActiveMiddleware, errorHandler(statisticsMiddleware.middleware()));
