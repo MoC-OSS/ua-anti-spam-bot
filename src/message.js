@@ -73,9 +73,9 @@ const randomLocationBanEmojis = ['🏡', '🏘️', '🌳'];
  * Message that bot sends on delete
  *
  * */
-const getDeleteMessage = ({ writeUsername, wordMessage, debugMessage, withLocation }) =>
+const getDeleteMessage = ({ writeUsername, userId, wordMessage, debugMessage, withLocation }) =>
   `
-❗️ ${writeUsername ? `${writeUsername}, <b>повідомлення` : '<b>Повідомлення'} видалено</b>.
+❗️ ${writeUsername ? `<a href="tg://user?id=${userId}">${writeUsername}</a> <b>повідомлення` : '<b>Повідомлення'} видалено</b>.
 
 ${getRandomItem(withLocation ? randomLocationBanEmojis : randomBanEmojis)} <b>Причина</b>: поширення потенційно стратегічної інформації${
     withLocation ? ' з повідомленням локації' : ''
@@ -157,9 +157,9 @@ ${botStartTime}</i>
  * Help handler
  *
  * */
-const getHelpMessage = ({ startLocaleTime, isAdmin, canDelete, user }) =>
+const getHelpMessage = ({ startLocaleTime, isAdmin, canDelete, user, userId }) =>
   `
-${user}
+<a href="tg://user?id=${userId}">${user}</a>
 
 ${isAdmin ? startAdminReadyMessage : makeAdminMessage}
 ${canDelete ? hasDeletePermissionMessage : hasNoDeletePermissionMessage}
@@ -202,9 +202,9 @@ https://youtu.be/RX0cZYf1Lm4
  * Message that bot sends when user uses /start in the group
  *
  * */
-const getGroupStartMessage = ({ adminsString, isAdmin = false, canDelete, user }) =>
+const getGroupStartMessage = ({ adminsString, isAdmin = false, canDelete, user, userId }) =>
   `
-${user}
+<a href="tg://user?id=${userId}">${user}</a>
 
 ${isAdmin ? startAdminReadyMessage : makeAdminMessage}
 ${canDelete ? hasDeletePermissionMessage : hasNoDeletePermissionMessage}
