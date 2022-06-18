@@ -88,7 +88,10 @@ class UpdatesHandler {
     const processFoundSwindler = (spamRate, from) => {
       console.info(true, from, spamRate, message);
 
-      if (['tensor', 'site', 'mention'].includes(from)) {
+      const isGoodMatch = ['tensor', 'site', 'mention'].includes(from);
+      const isRateGood = from !== 'tensor' || spamRate > 0.95;
+
+      if (isGoodMatch && isRateGood) {
         const allMentions = this.swindlersBotsService.parseMentions(message);
         const newMentions = (allMentions || []).filter((item) => !this.dynamicStorageService.swindlerBots.includes(item));
 
