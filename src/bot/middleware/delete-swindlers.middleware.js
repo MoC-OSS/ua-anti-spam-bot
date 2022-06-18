@@ -43,18 +43,11 @@ class DeleteSwindlersMiddleware {
         return this.removeMessage(ctx);
       }
 
-      const mentions = this.swindlersBotsService.parseMentions(message);
-      if (mentions) {
-        let lastResult = null;
-        const foundSwindlerMention = mentions.some((value) => {
-          lastResult = this.swindlersBotsService.isSpamBot(value);
-          return lastResult.isSpam;
-        });
+      const foundSwindlerMention = this.swindlersBotsService.processMessage(message);
 
-        if (foundSwindlerMention) {
-          this.saveSwindlersMessage(ctx, lastResult.rate, `mention (${lastResult.nearestName})`);
-          return this.removeMessage(ctx);
-        }
+      if (foundSwindlerMention) {
+        this.saveSwindlersMessage(ctx, foundSwindlerMention.rate, `mention (${foundSwindlerMention.nearestName})`);
+        return this.removeMessage(ctx);
       }
 
       const { isSpam, spamRate } = await this.swindlersTensorService.predict(message);

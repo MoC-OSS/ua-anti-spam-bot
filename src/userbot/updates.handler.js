@@ -135,7 +135,7 @@ class UpdatesHandler {
 
     /**
      * Regex try
-     * The fastest
+     * Fast
      * */
     const isSwindlersSite = swindlersRegex.test(finalMessage.toLowerCase());
 
@@ -144,18 +144,15 @@ class UpdatesHandler {
       return { spam: true, reason: 'site match' };
     }
 
-    const mentions = this.swindlersBotsService.parseMentions(message);
-    if (mentions) {
-      let lastResult = null;
-      const foundSwindlerMention = mentions.some((value) => {
-        lastResult = this.swindlersBotsService.isSpamBot(value);
-        return lastResult.isSpam;
-      });
+    /**
+     * Mention try
+     * Medium speed
+     * */
+    const foundSwindlerMention = this.swindlersBotsService.processMessage(message);
 
-      if (foundSwindlerMention) {
-        processFoundSwindler(lastResult.rate, 'mention');
-        return { spam: true, reason: 'mention match' };
-      }
+    if (foundSwindlerMention) {
+      processFoundSwindler(foundSwindlerMention.rate, 'mention');
+      return { spam: true, reason: 'mention match' };
     }
 
     /**

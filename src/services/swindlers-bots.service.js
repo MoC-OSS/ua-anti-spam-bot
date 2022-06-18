@@ -31,6 +31,27 @@ class SwindlersBotsService {
   }
 
   /**
+   * @param {string} message - raw message from user to parse
+   */
+  processMessage(message) {
+    const mentions = this.parseMentions(message);
+    if (mentions) {
+      let lastResult = null;
+      const foundSwindlerMention = mentions.some((value) => {
+        lastResult = this.isSpamBot(value);
+        return lastResult.isSpam;
+      });
+
+      if (foundSwindlerMention) {
+        const { isSpam, rate, nearestName, currentName } = lastResult;
+        return { isSpam, rate, nearestName, currentName };
+      }
+    }
+
+    return null;
+  }
+
+  /**
    * @description
    * Create and saves FuzzySet based on latest data from dynamic storage
    * */
