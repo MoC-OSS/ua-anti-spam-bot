@@ -13,8 +13,6 @@ const SWINDLER_SETTINGS = {
   LOG_CHANGE: 0.5,
 };
 
-const originalDiiaBots = ['@Diia_help_bot'];
-
 class DeleteSwindlersMiddleware {
   /**
    * @param {SwindlersTensorService} swindlersTensorService
@@ -47,11 +45,6 @@ class DeleteSwindlersMiddleware {
 
       const mentions = this.swindlersBotsService.parseMentions(message);
       if (mentions) {
-        // Not a swindler, official dia bot
-        if (mentions.includes(originalDiiaBots[0])) {
-          return;
-        }
-
         let lastResult = null;
         const foundSwindlerMention = mentions.some((value) => {
           lastResult = this.swindlersBotsService.isSpamBot(value);

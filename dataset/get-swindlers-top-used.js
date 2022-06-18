@@ -44,7 +44,7 @@ swindlers.forEach((item) =>
 const sorted = Array.from(words.entries()).sort((a, b) => b[1] - a[1]);
 const sortedTwo = Array.from(twoWords.entries()).sort((a, b) => b[1] - a[1]);
 const result = {};
-sorted.slice(0, 20).forEach((item) => {
+sorted.slice(0, 9).forEach((item) => {
   const [word, count] = item;
   result[word] = count;
 });
