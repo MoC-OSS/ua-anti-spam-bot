@@ -45,4 +45,13 @@ describe('SwindlersUrlsService', () => {
 
     expect(result).toEqual(false);
   });
+
+  it('should not match excluded url', () => {
+    const text = `https://${swindlersUrlsService.exceptionDomains.join(' https://')}`;
+    const result = swindlersUrlsService.parseUrls(text);
+
+    console.info(text);
+
+    expect(result).toEqual([]);
+  });
 });

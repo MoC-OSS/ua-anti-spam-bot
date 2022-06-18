@@ -13,6 +13,28 @@ class SwindlersUrlsService {
         '(\\#[-a-z\\d_]*)?$',
       'i',
     );
+    this.exceptionDomains = ['next.privat24.ua', 'monobank.ua', 'paypal.com', 'pay.vn.ua', 'liqpay.ua', 'irs.gov', 'payoneer.com'];
+  }
+
+  /**
+   * @param {string} message - raw message from user to parse
+   */
+  processMessage(message) {
+    const urls = this.parseUrls(message);
+    if (urls) {
+      let lastResult = null;
+      const foundSwindlerUrl = urls.some((value) => {
+        lastResult = this.isSpamUrl(value);
+        return lastResult.isSpam;
+      });
+
+      if (foundSwindlerUrl) {
+        const { isSpam, rate, nearestName, currentName } = lastResult;
+        return { isSpam, rate, nearestName, currentName };
+      }
+    }
+
+    return null;
   }
 
   /**
@@ -24,7 +46,8 @@ class SwindlersUrlsService {
     return (message.match(this.urlRegexp) || []).filter((url) => {
       const validUrl = url.slice(0, 4) === 'http' ? url : `https://${url}`;
       try {
-        return !!new URL(validUrl) && this.validUrlRegexp.test(validUrl);
+        const urlInstance = new URL(validUrl);
+        return urlInstance && !this.exceptionDomains.includes(urlInstance.host) && this.validUrlRegexp.test(validUrl);
       } catch (e) {
         return false;
       }
