@@ -8,7 +8,10 @@ const { initTensor } = require('../tensor/tensor.service');
 const { initSwindlersTensor } = require('../tensor/swindlers-tensor.service');
 // const { findChannelAdmins } = require('./find-channel-admins');
 const { MtProtoClient } = require('./mt-proto-client');
-// const { googleService } = require('../services/google.service');
+const { googleService } = require('../services/google.service');
+const { DynamicStorageService } = require('../services/dynamic-storage.service');
+const { SwindlersBotsService } = require('../services/swindlers-bots.service');
+const { dataset } = require('../../dataset/dataset');
 
 // const testMessage = ``.trim();
 
@@ -16,6 +19,9 @@ console.info('Start listener application');
 auth().then(async (api) => {
   await redisClient.client.connect().then(() => console.info('Redis client successfully started'));
   const mtProtoClient = new MtProtoClient(api);
+  const dynamicStorageService = new DynamicStorageService(googleService, dataset);
+  await dynamicStorageService.init();
+
   const userbotStorage = new UserbotStorage();
   await userbotStorage.init();
   console.info('Application is listening new messages.');
@@ -23,6 +29,8 @@ auth().then(async (api) => {
   const tensorService = await initTensor();
   const swindlersTensorService = await initSwindlersTensor();
   console.info('Tensor is ready.');
+
+  const swindlersBotsService = new SwindlersBotsService(dynamicStorageService, 0.6);
 
   // findChannelAdmins(api);
   // return;
@@ -34,7 +42,15 @@ auth().then(async (api) => {
     swindlersChat: mtProtoClient.resolvePeer(allChats.chats, 'UA Anti Spam Bot - Swindlers'),
   };
 
-  const updatesHandler = new UpdatesHandler(mtProtoClient, chatPeers, tensorService, swindlersTensorService, userbotStorage);
+  const updatesHandler = new UpdatesHandler(
+    mtProtoClient,
+    chatPeers,
+    tensorService,
+    swindlersTensorService,
+    dynamicStorageService,
+    swindlersBotsService,
+    userbotStorage,
+  );
 
   // const testSwindlerResult = await updatesHandler.handleSwindlers(testMessage);
   // console.log(testSwindlerResult);

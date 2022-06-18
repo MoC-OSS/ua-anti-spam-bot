@@ -66,5 +66,14 @@ describe('SwindlersBotsService', () => {
 
       expect(result).toEqual(['@another_test', '@another_mention', '@test_mention']);
     });
+
+    it('should exclude mentions from exclude list', () => {
+      const text = `@another_test ${swindlersBotsService.exceptionMentions[0]}`;
+      const result = swindlersBotsService.parseMentions(text);
+
+      console.info(text);
+
+      expect(result).toEqual(['@another_test']);
+    });
   });
 });
