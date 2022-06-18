@@ -7,6 +7,9 @@ const { swindlersRegex } = require('../src/creator');
 const swindlers = require('./strings/swindlers.json');
 const immediately = require('./strings/immediately.json');
 const swindlersBots = require('./strings/swindlers_bots.json');
+const { SwindlersUrlsService } = require('../src/services/swindlers-urls.service');
+
+const swindlersUrlsService = new SwindlersUrlsService();
 
 const notSwindlers = [
   '@alinaaaawwaa',
@@ -28,6 +31,24 @@ function findSwindlersByPattern(items, pattern) {
     .filter((item) => !notSwindlers.includes(item))
     .sort();
 }
+
+const notMatchedDomains = [];
+const swindlersUrls = removeDuplicates(swindlers.map((message) => swindlersUrlsService.parseUrls(message)).flat())
+  .filter((url) => {
+    const isSwindler = swindlersUrlsService.isSpamUrl(`${url}/`);
+
+    if (!isSwindler) {
+      notMatchedDomains.push(url);
+    }
+
+    return isSwindler;
+  })
+  .sort();
+
+const swindlersDomains = removeDuplicates(swindlersUrls.map((url) => swindlersUrlsService.getUrlDomain(url))).sort();
+
+fs.writeFileSync(path.join(__dirname, './temp/swindlers_domains.txt'), swindlersDomains.join('\n'));
+fs.writeFileSync(path.join(__dirname, './temp/swindlers_url.txt'), swindlersUrls.join('\n'));
 
 const newImmediately = findSwindlersByPattern(immediately, urlRegexp);
 const newSwindlersBots = findSwindlersByPattern(swindlersBots, mentionRegexp);
