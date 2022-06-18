@@ -1,4 +1,5 @@
 const helpMiddlewareExports = require('./help.middleware');
+const swindlersUpdateMiddlewareExports = require('./swindlersUpdate.middleware');
 const sessionMiddlewareExports = require('./session.middleware');
 const startMiddlewareExports = require('./start.middleware');
 const statisticsMiddlewareExports = require('./statistics.middleware');
@@ -10,4 +11,5 @@ module.exports = {
   ...startMiddlewareExports,
   ...statisticsMiddlewareExports,
   ...UpdatesMiddleware,
+  ...swindlersUpdateMiddlewareExports,
 };
