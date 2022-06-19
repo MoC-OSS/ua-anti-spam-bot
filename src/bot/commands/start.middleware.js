@@ -31,11 +31,12 @@ class StartMiddleware {
 
       const username = ctx.from?.username;
       const fullName = ctx.from?.last_name ? `${ctx.from?.first_name} ${ctx.from?.last_name}` : ctx.from?.first_name;
-      const writeUsername = username ? `@${username}` : fullName ?? '';
+      const writeUsername = username ? `${username}` : fullName ?? '';
+      const userId = ctx.from?.id;
 
       if (!isAdmin || !canDelete) {
         return ctx.replyWithHTML(
-          getGroupStartMessage({ isAdmin, canDelete, user: writeUsername !== '@GroupAnonymousBot' ? writeUsername : '' }),
+          getGroupStartMessage({ isAdmin, canDelete, user: writeUsername !== '@GroupAnonymousBot' ? writeUsername : '', userId }),
         );
       }
 
