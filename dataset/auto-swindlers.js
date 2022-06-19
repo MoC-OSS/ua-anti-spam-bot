@@ -50,7 +50,7 @@ function findSwindlersByPattern(items, pattern) {
     .filter((url) => {
       const isSwindler = swindlersUrlsService.isSpamUrl(`${url}/`);
 
-      if (!isSwindler) {
+      if (!isSwindler.isSpam) {
         notMatchedDomains.push(url);
       }
 

@@ -29,7 +29,7 @@ class SwindlersUrlsService {
       });
 
       if (foundSwindlerUrl) {
-        return { isSpam: true, rate: 200 };
+        return lastResult;
       }
     }
 
@@ -64,10 +64,9 @@ class SwindlersUrlsService {
 
   /**
    * @param {string} url
-   * @returns {boolean}
    */
   isSpamUrl(url) {
-    return swindlersRegex.test(url);
+    return { isSpam: swindlersRegex.test(url), rate: 200 };
   }
 }
 
