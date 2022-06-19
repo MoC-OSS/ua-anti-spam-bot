@@ -36,7 +36,7 @@ describe('SwindlersUrlsService', () => {
     const text = 'https://www.orpay.me';
     const result = swindlersUrlsService.isSpamUrl(text);
 
-    expect(result).toEqual(true);
+    expect(result.isSpam).toEqual(true);
   });
 
   it('should parse domain', () => {
@@ -50,7 +50,7 @@ describe('SwindlersUrlsService', () => {
     const text = 'https://next.privat24.ua/';
     const result = swindlersUrlsService.isSpamUrl(text);
 
-    expect(result).toEqual(false);
+    expect(result.isSpam).toEqual(false);
   });
 
   it('should not match excluded url', () => {
@@ -60,5 +60,18 @@ describe('SwindlersUrlsService', () => {
     console.info(text);
 
     expect(result).toEqual([]);
+  });
+
+  it('should process messages', () => {
+    const text = `https://da-pay.me/ тест`;
+    const result = swindlersUrlsService.processMessage(text);
+
+    const parsedUrl = swindlersUrlsService.parseUrls(text)[0];
+    const isUrlSpam = swindlersUrlsService.isSpamUrl(parsedUrl);
+
+    expect(parsedUrl).toEqual('https://da-pay.me/');
+    expect(isUrlSpam.isSpam).toEqual(true);
+    expect(result.isSpam).toEqual(true);
+    expect(result.rate).toEqual(200);
   });
 });
