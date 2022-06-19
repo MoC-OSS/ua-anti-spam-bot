@@ -24,6 +24,7 @@ class SwindlersBotsService {
       '@Ebenz_lpg_bot',
       '@Odinfo_bot',
       '@all',
+      '@UNISEFF_OOH',
       '@botsbaseru',
       '@realukraine_bot',
     ];

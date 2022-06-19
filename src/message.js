@@ -75,7 +75,7 @@ const randomLocationBanEmojis = ['🏡', '🏘️', '🌳'];
  * */
 const getDeleteMessage = ({ writeUsername, userId, wordMessage, debugMessage, withLocation }) =>
   `
-❗️ ${writeUsername ? `<a href="tg://user?id=${userId}">${writeUsername}</a> <b>повідомлення` : '<b>Повідомлення'} видалено</b>.
+❗️ ${userId && writeUsername ? `<a href="tg://user?id=${userId}">${writeUsername}</a>, <b>повідомлення` : '<b>Повідомлення'} видалено</b>.
 
 ${getRandomItem(withLocation ? randomLocationBanEmojis : randomBanEmojis)} <b>Причина</b>: поширення потенційно стратегічної інформації${
     withLocation ? ' з повідомленням локації' : ''
