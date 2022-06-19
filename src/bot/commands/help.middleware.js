@@ -34,11 +34,18 @@ class HelpMiddleware {
 
       const username = ctx.from?.username;
       const fullName = ctx.from?.last_name ? `${ctx.from?.first_name} ${ctx.from?.last_name}` : ctx.from?.first_name;
-      const writeUsername = username ? `@${username}` : fullName ?? '';
+      const writeUsername = username ? `${username}` : fullName ?? '';
+      const userId = ctx.from?.id;
 
       ctx
         .replyWithHTML(
-          getHelpMessage({ startLocaleTime, isAdmin, canDelete, user: writeUsername !== '@GroupAnonymousBot' ? writeUsername : '' }),
+          getHelpMessage({
+            startLocaleTime,
+            isAdmin,
+            canDelete,
+            user: writeUsername !== '@GroupAnonymousBot' ? writeUsername : '',
+            userId,
+          }),
         )
         .catch(handleError);
     };
