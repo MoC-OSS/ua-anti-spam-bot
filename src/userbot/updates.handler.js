@@ -2,7 +2,6 @@
 const fs = require('fs');
 const path = require('path');
 
-const FuzzySet = require('fuzzyset');
 const { env } = require('typed-dotenv').config();
 const stringSimilarity = require('string-similarity');
 const { mentionRegexp, urlRegexp, optimizeText } = require('ukrainian-ml-optimizer');
@@ -14,13 +13,10 @@ const { swindlersRegex } = require('../creator');
 const { googleService } = require('../services/google.service');
 
 const sentMentionsFromStart = [];
-const originalDiiaBots = ['@Diia_help_bot'];
-
-const swindlersBotsFuzzySet = FuzzySet(dataset.swindlers_bots);
 
 const SWINDLER_SETTINGS = {
   DELETE_CHANCE: 0.8,
-  LOG_CHANGE: 0.5,
+  LOG_CHANGE: 0.8,
   SAME_CHECK: 0.95,
   APPEND_TO_SHEET: 0.85,
 };
@@ -34,13 +30,25 @@ class UpdatesHandler {
    * @param {TensorService} tensorService
    * @param {SwindlersTensorService} swindlersTensorService
    * @param {ProtoUpdate} updateInfo
+   * @param {DynamicStorageService} dynamicStorageService
+   * @param {SwindlersBotsService} swindlersBotsService
    * @param {UserbotStorage} userbotStorage
    * */
-  constructor(mtProtoClient, chatPeers, tensorService, swindlersTensorService, userbotStorage) {
+  constructor(
+    mtProtoClient,
+    chatPeers,
+    tensorService,
+    swindlersTensorService,
+    dynamicStorageService,
+    swindlersBotsService,
+    userbotStorage,
+  ) {
     this.mtProtoClient = mtProtoClient;
     this.chatPeers = chatPeers;
     this.tensorService = tensorService;
     this.swindlersTensorService = swindlersTensorService;
+    this.dynamicStorageService = dynamicStorageService;
+    this.swindlersBotsService = swindlersBotsService;
     this.userbotStorage = userbotStorage;
   }
 
@@ -80,6 +88,18 @@ class UpdatesHandler {
     const processFoundSwindler = (spamRate, from) => {
       console.info(true, from, spamRate, message);
 
+      const isGoodMatch = ['tensor', 'site', 'mention'].includes(from);
+      const isRateGood = from !== 'tensor' || spamRate > 0.95;
+
+      if (isGoodMatch && isRateGood) {
+        const allMentions = this.swindlersBotsService.parseMentions(message);
+        const newMentions = (allMentions || []).filter((item) => !this.dynamicStorageService.swindlerBots.includes(item));
+
+        if (newMentions.length) {
+          this.mtProtoClient.sendSelfMessage(newMentions.join('\n'));
+        }
+      }
+
       const { maxChance, isDifferent } = this.userbotStorage.isUniqueText(
         finalMessage,
         this.userbotStorage.swindlerMessages,
@@ -115,7 +135,7 @@ class UpdatesHandler {
 
     /**
      * Regex try
-     * The fastest
+     * Fast
      * */
     const isSwindlersSite = swindlersRegex.test(finalMessage.toLowerCase());
 
@@ -124,19 +144,15 @@ class UpdatesHandler {
       return { spam: true, reason: 'site match' };
     }
 
-    const mentions = message.match(mentionRegexp);
-    if (mentions) {
-      // Not a swindler, official dia bot
-      if (mentions.includes(originalDiiaBots[0])) {
-        return { spam: false, reason: 'dia bot' };
-      }
+    /**
+     * Mention try
+     * Medium speed
+     * */
+    const foundSwindlerMention = this.swindlersBotsService.processMessage(message);
 
-      const foundSwindlerMention = mentions.find((value) => (swindlersBotsFuzzySet.get(value) || [0])[0] > SWINDLER_SETTINGS.DELETE_CHANCE);
-
-      if (foundSwindlerMention) {
-        processFoundSwindler(300, 'mention');
-        return { spam: true, reason: 'mention match' };
-      }
+    if (foundSwindlerMention) {
+      processFoundSwindler(foundSwindlerMention.rate, 'mention');
+      return { spam: true, reason: 'mention match' };
     }
 
     /**

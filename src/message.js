@@ -17,6 +17,12 @@ const hasDeletePermissionMessage = '✅ Я маю права на видален
 const hasNoDeletePermissionMessage = '⛔ Я не маю права на видалення повідомлень';
 
 /**
+ * Generic - SwindlersUpdate
+ * */
+const swindlersUpdateStartMessage = 'Починаю оновлення списку шахраїв...';
+const swindlersUpdateEndMessage = 'Оновлення спіску шахраїв завершено.';
+
+/**
  * Generic - Settings
  * */
 const settingsDeleteItemMessage = 'Повідомлення про видалення';
@@ -47,9 +53,7 @@ const confirmationMessage = `
  * Complex
  * */
 const startMessageAtom = `
-Привіт! 🇺🇦✌️
-
-Я чат-бот, який дозволяє автоматично видаляти повідомлення, що містять назви локацій міста, укриттів, а також ключові слова переміщення військ.
+UA Anti Spam Bot запобігає поширенню стратегічної інформації про переміщення ЗСУ, локації ворожих обстрілів та блокує фішингові повідомлення.
 `.trim();
 
 /**
@@ -179,13 +183,13 @@ const getStartMessage = () =>
   `
 ${startMessageAtom}
 
-<b>Як мене запустити?</b>
+<b>Щоб бот запрацював в чаті:</b>
 
-Додай мене і зроби адміністратором:
-• Або в звичайну групу;
-• Або в чат каналу.
+• Додайте бот в чат;
+• Зробіть бота адміністратором.
 
-Якщо є запитання або бот не працює, пишіть в <a href="${helpChat}">чат підтримки</a>.
+Розробник бота – @dimkasmile за підтримки Master of Code Global.
+Якщо бот не працює, пишіть <a href="${helpChat}">чат підтримки</a>.
 
 Дивись відео з інструкцією нижче:
 https://youtu.be/RX0cZYf1Lm4
@@ -196,7 +200,7 @@ https://youtu.be/RX0cZYf1Lm4
  * Message that bot sends when user uses /start in the group
  *
  * */
-const getGroupStartMessage = ({ adminsString, isAdmin = false, canDelete, user }) =>
+const getGroupStartMessage = ({ adminsString, isAdmin = false, canDelete, user = '' }) =>
   `
 ${user}
 
@@ -289,6 +293,8 @@ module.exports = {
   cancelMessageSending,
   getDeclinedMassSendingMessage,
   confirmationMessage,
+  swindlersUpdateStartMessage,
+  swindlersUpdateEndMessage,
   getBotJoinMessage,
   getCannotDeleteMessage,
   getDebugMessage,
