@@ -66,5 +66,29 @@ describe('SwindlersBotsService', () => {
 
       expect(result).toEqual(['@another_test', '@another_mention', '@test_mention']);
     });
+
+    it('should exclude mentions from exclude list', () => {
+      const text = `@another_test ${swindlersBotsService.exceptionMentions[0]}`;
+      const result = swindlersBotsService.parseMentions(text);
+
+      console.info(text);
+
+      expect(result).toEqual(['@another_test']);
+    });
+  });
+
+  describe('processMessage', () => {
+    it('should process message any find swindlers bots', () => {
+      const result = swindlersBotsService.processMessage(`test message ${mockNewBot} with swindler bot`);
+
+      expect(result).toBeTruthy();
+      expect(result.isSpam).toBeTruthy();
+    });
+
+    it('should not process regular message', () => {
+      const result = swindlersBotsService.processMessage(`test message without @test_bot swindler bot `);
+
+      expect(result).toBeFalsy();
+    });
   });
 });
