@@ -29,8 +29,7 @@ class SwindlersUrlsService {
       });
 
       if (foundSwindlerUrl) {
-        const { isSpam, rate, nearestName, currentName } = lastResult;
-        return { isSpam, rate, nearestName, currentName };
+        return { isSpam: true, rate: 200 };
       }
     }
 

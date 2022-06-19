@@ -25,6 +25,13 @@ describe('SwindlersUrlsService', () => {
     expect(result).toEqual([]);
   });
 
+  it('should not match no url', () => {
+    const text = 'бездротові Bluetooth Air3Ye XM-050';
+    const result = swindlersUrlsService.parseUrls(text);
+
+    expect(result).toEqual([]);
+  });
+
   it('should match swindlers url', () => {
     const text = 'https://www.orpay.me';
     const result = swindlersUrlsService.isSpamUrl(text);

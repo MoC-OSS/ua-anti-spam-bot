@@ -13,6 +13,7 @@ const { redisService } = require('./services/redis.service');
 const { S3Service } = require('./services/s3.service');
 const { DynamicStorageService } = require('./services/dynamic-storage.service');
 const { SwindlersBotsService } = require('./services/swindlers-bots.service');
+const { SwindlersUrlsService } = require('./services/swindlers-urls.service');
 const { googleService } = require('./services/google.service');
 
 const { initTensor } = require('./tensor/tensor.service');
@@ -132,6 +133,7 @@ const rootMenu = new Menu('root');
   await dynamicStorageService.init();
 
   const swindlersBotsService = new SwindlersBotsService(dynamicStorageService, 0.6);
+  const swindlersUrlsService = new SwindlersUrlsService();
 
   const globalMiddleware = new GlobalMiddleware(bot);
 
@@ -140,7 +142,7 @@ const rootMenu = new Menu('root');
   const sessionMiddleware = new SessionMiddleware(startTime);
   const statisticsMiddleware = new StatisticsMiddleware(startTime);
   const updatesMiddleware = new UpdatesMiddleware(startTime);
-  const deleteSwindlersMiddleware = new DeleteSwindlersMiddleware(swindlersTensorService, swindlersBotsService);
+  const deleteSwindlersMiddleware = new DeleteSwindlersMiddleware(swindlersTensorService, swindlersBotsService, swindlersUrlsService);
 
   const messageHandler = new MessageHandler(tensorService);
 

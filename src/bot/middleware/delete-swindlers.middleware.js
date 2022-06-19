@@ -4,7 +4,7 @@ const { env } = require('typed-dotenv').config();
 
 const { InputFile } = require('grammy');
 const { dataset } = require('../../../dataset/dataset');
-const { logsChat, swindlersRegex } = require('../../creator');
+const { logsChat } = require('../../creator');
 const { handleError, compareDatesWithOffset, telegramUtil } = require('../../utils');
 const { getCannotDeleteMessage } = require('../../message');
 
@@ -17,10 +17,12 @@ class DeleteSwindlersMiddleware {
   /**
    * @param {SwindlersTensorService} swindlersTensorService
    * @param {SwindlersBotsService} swindlersBotsService
+   * @param {SwindlersUrlsService} swindlersUrlsService
    * */
-  constructor(swindlersTensorService, swindlersBotsService) {
+  constructor(swindlersTensorService, swindlersBotsService, swindlersUrlsService) {
     this.swindlersTensorService = swindlersTensorService;
     this.swindlersBotsService = swindlersBotsService;
+    this.swindlersUrlsService = swindlersUrlsService;
   }
 
   middleware() {
@@ -38,8 +40,10 @@ class DeleteSwindlersMiddleware {
         return next();
       }
 
-      if (swindlersRegex.test(message)) {
-        this.saveSwindlersMessage(ctx, 200, 'site');
+      const foundSwindlerUrl = this.swindlersUrlsService.processMessage(message);
+
+      if (foundSwindlerUrl) {
+        this.saveSwindlersMessage(ctx, foundSwindlerUrl.rate, 'site');
         return this.removeMessage(ctx);
       }
 
