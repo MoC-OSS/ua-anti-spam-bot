@@ -1,6 +1,6 @@
 const { env } = require('typed-dotenv').config();
 
-const { creatorNick } = require('./creator');
+const { helpChat } = require('./creator');
 const { getRandomItem } = require('./utils');
 
 /**
@@ -171,7 +171,7 @@ ${canDelete ? hasDeletePermissionMessage : hasNoDeletePermissionMessage}
 
 ${startLocaleTime},
 
-Якщо є запитання, пишіть ${creatorNick}
+Якщо є запитання, пишіть в <a href="${helpChat}">чат підтримки</a>.
 `.trim();
 
 /**
@@ -189,7 +189,7 @@ ${startMessageAtom}
 • Зробіть бота адміністратором.
 
 Розробник бота – @dimkasmile за підтримки Master of Code Global.
-Якщо бот не працює, пишіть ${creatorNick}.
+Якщо бот не працює, пишіть <a href="${helpChat}">чат підтримки</a>.
 
 Дивись відео з інструкцією нижче:
 https://youtu.be/RX0cZYf1Lm4
@@ -230,7 +230,7 @@ const getStartChannelMessage = ({ botName }) =>
 Ви мене додали в <b>канал</b> як адміністратора, але я не можу перевіряти повідомлення в коментарях.
 
 Видаліть мене і додайте в <b>чат каналу</b> каналу <b>як адміністратора</b>.
-Якщо є запитання, пишіть ${creatorNick}
+Якщо є запитання, пишіть в <a href="${helpChat}">чат підтримки</a>
 `.trim();
 
 /**
