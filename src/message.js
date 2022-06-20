@@ -17,10 +17,12 @@ const hasDeletePermissionMessage = '✅ Я маю права на видален
 const hasNoDeletePermissionMessage = '⛔ Я не маю права на видалення повідомлень';
 
 /**
- * Generic - SwindlersUpdate
+ * Generic - Swindlers
  * */
 const swindlersUpdateStartMessage = 'Починаю оновлення списку шахраїв...';
 const swindlersUpdateEndMessage = 'Оновлення спіску шахраїв завершено.';
+const swindlersWarningMessage =
+  'Увага! В цьому чаті помічені повідомлення від шахраів. Будьте обачні та не довіряйте неперевіреній інформації!';
 
 /**
  * Generic - Settings
@@ -297,6 +299,7 @@ module.exports = {
   confirmationMessage,
   swindlersUpdateStartMessage,
   swindlersUpdateEndMessage,
+  swindlersWarningMessage,
   getBotJoinMessage,
   getCannotDeleteMessage,
   getDebugMessage,

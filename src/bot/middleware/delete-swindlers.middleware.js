@@ -6,11 +6,12 @@ const { InputFile } = require('grammy');
 const { dataset } = require('../../../dataset/dataset');
 const { logsChat, swindlersRegex } = require('../../creator');
 const { handleError, compareDatesWithOffset, telegramUtil } = require('../../utils');
-const { getCannotDeleteMessage } = require('../../message');
+const { getCannotDeleteMessage, swindlersWarningMessage } = require('../../message');
 
 const SWINDLER_SETTINGS = {
   DELETE_CHANCE: 0.8,
   LOG_CHANGE: 0.5,
+  WARNING_DELAY: 86400000,
 };
 
 class DeleteSwindlersMiddleware {
@@ -39,8 +40,7 @@ class DeleteSwindlersMiddleware {
       }
 
       if (swindlersRegex.test(message)) {
-        this.saveSwindlersMessage(ctx, 200, 'site');
-        return this.removeMessage(ctx);
+        return this.processSwindlersMessage(ctx, 200, 'site');
       }
 
       const mentions = this.swindlersBotsService.parseMentions(message);
@@ -52,16 +52,14 @@ class DeleteSwindlersMiddleware {
         });
 
         if (foundSwindlerMention) {
-          this.saveSwindlersMessage(ctx, lastResult.rate, `mention (${lastResult.nearestName})`);
-          return this.removeMessage(ctx);
+          return this.processSwindlersMessage(ctx, lastResult.rate, `mention (${lastResult.nearestName})`);
         }
       }
 
       const { isSpam, spamRate } = await this.swindlersTensorService.predict(message);
 
       if (isSpam) {
-        this.saveSwindlersMessage(ctx, spamRate, 'tensor');
-        return this.removeMessage(ctx);
+        return this.processSwindlersMessage(ctx, spamRate, 'tensor');
       }
 
       if (spamRate < 0.5) {
@@ -100,6 +98,42 @@ class DeleteSwindlersMiddleware {
     return middleware;
   }
 
+  /**
+   * Process messages that looks like from swindlers
+   *
+   * @param {GrammyContext} ctx
+   * @param {Number} maxChance
+   * @param {Number} from
+   * */
+  processSwindlersMessage(ctx, maxChance, from) {
+    this.saveSwindlersMessage(ctx, maxChance, from);
+    this.processWarningMessage(ctx);
+    return this.removeMessage(ctx);
+  }
+
+  /**
+   * Sends warning to the chat, or skips if it was sent
+   *
+   * @param {GrammyContext} ctx
+   * */
+  processWarningMessage(ctx) {
+    const shouldSend =
+      !ctx.chatSession.lastWarningDate ||
+      (ctx.chatSession.lastWarningDate &&
+        Date.now() > new Date(ctx.chatSession.lastWarningDate).getTime() + SWINDLER_SETTINGS.WARNING_DELAY);
+    if (shouldSend) {
+      ctx.chatSession.lastWarningDate = new Date();
+      return ctx.api.sendMessage(ctx.update.message.chat.id, swindlersWarningMessage);
+    }
+  }
+
+  /**
+   * Save message case
+   *
+   * @param {GrammyContext} ctx
+   * @param {Number} maxChance
+   * @param {Number} from
+   * */
   saveSwindlersMessage(ctx, maxChance, from) {
     return ctx.api.sendMessage(
       logsChat,
