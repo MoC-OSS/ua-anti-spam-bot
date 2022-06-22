@@ -1,5 +1,5 @@
 const { SwindlersUrlsService } = require('./swindlers-urls.service');
-const { mockDynamicStorageService } = require('./_mocks/index.mocks');
+const { mockDynamicStorageService, mockNewUrl } = require('./_mocks/index.mocks');
 
 /**
  * @type {SwindlersUrlsService}
@@ -66,6 +66,13 @@ describe('SwindlersUrlsService', () => {
       const result = swindlersUrlsService.isSpamUrl(text);
 
       expect(result.isSpam).toEqual(false);
+    });
+
+    it('should match similar url', () => {
+      const result = swindlersUrlsService.isSpamUrl(mockNewUrl);
+
+      expect(result.isSpam).toEqual(true);
+      expect(result.rate).toBeGreaterThan(0.6);
     });
   });
 
