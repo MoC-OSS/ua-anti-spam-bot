@@ -8,10 +8,13 @@ const { swindlersRegex } = require('../src/creator');
 const swindlers = require('./strings/swindlers.json');
 const immediately = require('./strings/immediately.json');
 const swindlersBots = require('./strings/swindlers_bots.json');
+const { DynamicStorageService } = require('../src/services/dynamic-storage.service');
 const { SwindlersUrlsService } = require('../src/services/swindlers-urls.service');
 const { googleService } = require('../src/services/google.service');
+const { dataset } = require('./dataset');
 
-const swindlersUrlsService = new SwindlersUrlsService();
+const dynamicStorageService = new DynamicStorageService(googleService, dataset);
+const swindlersUrlsService = new SwindlersUrlsService(dynamicStorageService, 0.6);
 
 const notSwindlers = [
   '@alinaaaawwaa',
@@ -35,6 +38,7 @@ function findSwindlersByPattern(items, pattern) {
 }
 
 (async () => {
+  await dynamicStorageService.init();
   const [savedSwindlerDomains, savedSwindlersUrls] = await Promise.all(
     [
       googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, 'D6:D'),
@@ -78,4 +82,5 @@ function findSwindlersByPattern(items, pattern) {
 
   fs.writeFileSync(path.join(__dirname, './strings/immediately.json'), `${JSON.stringify(newImmediately, null, 2)}\n`);
   fs.writeFileSync(path.join(__dirname, './strings/swindlers_bots.json'), `${JSON.stringify(newSwindlersBots, null, 2)}\n`);
+  process.exit(0);
 })();
