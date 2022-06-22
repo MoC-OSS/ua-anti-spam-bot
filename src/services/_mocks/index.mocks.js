@@ -1,6 +1,7 @@
 const { DynamicStorageService } = require('../dynamic-storage.service');
 
 const mockNewBot = '@Diia_move_bot';
+const mockNewUrl = 'https://olx.new-darpay.site/some/234234234';
 
 /**
  * @type {GoogleService}
@@ -29,12 +30,14 @@ const mockDataset = {
     '@Diia_helpps_bot',
   ],
   immediately: ['test'],
+  swindlers_domains: ['olx-ua.darpays.site', 'olx-ua.europe-pays.site', 'olx-ua.glob-payments.site', 'olx-ua.lightpays.online'],
 };
 
 const mockDynamicStorageService = new DynamicStorageService(mockGoogleService, mockDataset);
 
 module.exports = {
   mockDataset,
+  mockNewUrl,
   mockDynamicStorageService,
   mockGoogleService,
   mockNewBot,
