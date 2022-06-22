@@ -16,6 +16,7 @@ class SwindlersBotsService {
     this.exceptionMentions = [
       '@46311',
       '@Diia_help_bot',
+      '@get_help_ua_bot',
       '@Dopomoga_vzpbot',
       '@EKamenskoetopchip_bot',
       '@dytyna_ne_sama_bot',
@@ -26,6 +27,8 @@ class SwindlersBotsService {
       '@all',
       '@UNISEFF_OOH',
       '@botsbaseru',
+      '@InfoHelp_Ukraine',
+      '@finhelp4ua',
       '@realukraine_bot',
     ];
 

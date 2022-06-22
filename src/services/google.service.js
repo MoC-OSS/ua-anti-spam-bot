@@ -100,6 +100,27 @@ class GoogleService {
       handleError(e, `GOOGLE API ERROR: ${e.message}`);
     }
   }
+
+  /**
+   * @param {string} spreadsheetId
+   * @param {string} sheetName
+   * @param {string[]} value
+   * @param {string} [range]
+   * */
+  async updateSheet(spreadsheetId, sheetName, value, range) {
+    try {
+      await sheets.spreadsheets.values.update({
+        spreadsheetId,
+        range: `${sheetName}!${range || RANGE}`,
+        valueInputOption: 'USER_ENTERED',
+        requestBody: {
+          values: value.map((item) => [item]),
+        },
+      });
+    } catch (e) {
+      handleError(e, `GOOGLE API ERROR: ${e.message}`);
+    }
+  }
 }
 const googleService = new GoogleService();
 

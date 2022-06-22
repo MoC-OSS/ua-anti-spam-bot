@@ -10,6 +10,7 @@ class DynamicStorageService {
     this.googleService = googleService;
     this.swindlerMessages = [];
     this.swindlerBots = dataset.swindlers_bots;
+    this.swindlerDomains = dataset.swindlers_domains || [];
     this.fetchEmmiter = new EventEmitter();
   }
 
@@ -24,13 +25,15 @@ class DynamicStorageService {
     const sheetRequests = [
       this.googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, 'B6:B'),
       this.googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, 'C6:C'),
+      this.googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, 'D6:D'),
     ].map((request) => request.then((response) => response.map((positive) => positive.value)));
 
     const cases = Promise.all(sheetRequests);
 
-    return cases.then(([swindlerPositives, swindlerBots]) => {
+    return cases.then(([swindlerPositives, swindlerBots, swindlerDomains]) => {
       this.swindlerMessages = this.smartAppend(this.swindlerMessages, swindlerPositives);
       this.swindlerBots = this.smartAppend(this.swindlerBots, swindlerBots);
+      this.swindlerDomains = this.smartAppend(this.swindlerDomains, swindlerDomains);
       this.fetchEmmiter.emit('fetch');
       console.info('got DynamicStorageService messages', new Date());
     });
