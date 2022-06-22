@@ -1,7 +1,16 @@
+const FuzzySet = require('fuzzyset');
+
 const { swindlersRegex } = require('../creator');
 
 class SwindlersUrlsService {
-  constructor() {
+  /**
+   * @param {DynamicStorageService} dynamicStorageService
+   * @param {number} [rate]
+   * */
+  constructor(dynamicStorageService, rate = 0.9) {
+    this.dynamicStorageService = dynamicStorageService;
+    this.rate = rate;
+
     this.urlRegexp =
       /(https?:\/\/(?:www\.|(?!www))?[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|(https?:\/\/(?:www\.|(?!www)))?[a-zA-Z0-9-]+\.[^\s]{2,}|www\.?[a-zA-Z0-9]+\.[^\s]{2,})/g;
     this.validUrlRegexp = new RegExp(
@@ -14,6 +23,19 @@ class SwindlersUrlsService {
       'i',
     );
     this.exceptionDomains = ['next.privat24.ua', 'monobank.ua', 'paypal.com', 'pay.vn.ua', 'liqpay.ua', 'irs.gov', 'payoneer.com'];
+
+    this.initFuzzySet();
+    this.dynamicStorageService.fetchEmmiter.on('fetch', () => {
+      this.initFuzzySet();
+    });
+  }
+
+  /**
+   * @description
+   * Create and saves FuzzySet based on latest data from dynamic storage
+   * */
+  initFuzzySet() {
+    this.swindlersFuzzySet = FuzzySet(this.dynamicStorageService.swindlerDomains);
   }
 
   /**
@@ -64,9 +86,23 @@ class SwindlersUrlsService {
 
   /**
    * @param {string} url
+   * @param {number} [customRate]
    */
-  isSpamUrl(url) {
-    return { isSpam: swindlersRegex.test(url), rate: 200 };
+  isSpamUrl(url, customRate) {
+    const isRegexpMatch = swindlersRegex.test(url);
+    if (isRegexpMatch) {
+      return { isSpam: isRegexpMatch, rate: 200 };
+    }
+
+    const domain = this.getUrlDomain(url);
+    const [[rate, nearestName]] = this.swindlersFuzzySet.get(domain) || [[0]];
+
+    return {
+      isSpam: rate > (customRate || this.rate),
+      rate,
+      nearestName,
+      currentName: domain,
+    };
   }
 }
 

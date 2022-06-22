@@ -140,7 +140,7 @@ const rootMenu = new Menu('root');
   await dynamicStorageService.init();
 
   const swindlersBotsService = new SwindlersBotsService(dynamicStorageService, 0.6);
-  const swindlersUrlsService = new SwindlersUrlsService();
+  const swindlersUrlsService = new SwindlersUrlsService(dynamicStorageService, 0.6);
 
   const globalMiddleware = new GlobalMiddleware(bot);
 

@@ -29,6 +29,7 @@ const mockDataset = {
     '@Diia_helpps_bot',
   ],
   immediately: ['test'],
+  swindlers_domains: ['olx-ua.darpays.site', 'olx-ua.europe-pays.site', 'olx-ua.glob-payments.site', 'olx-ua.lightpays.online'],
 };
 
 const mockDynamicStorageService = new DynamicStorageService(mockGoogleService, mockDataset);
