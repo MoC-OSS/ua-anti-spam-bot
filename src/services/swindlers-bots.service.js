@@ -27,6 +27,8 @@ class SwindlersBotsService {
       '@all',
       '@UNISEFF_OOH',
       '@botsbaseru',
+      '@InfoHelp_Ukraine',
+      '@finhelp4ua',
       '@realukraine_bot',
     ];
 
