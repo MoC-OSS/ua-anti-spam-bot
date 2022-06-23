@@ -20,7 +20,7 @@ describe('DynamicStorageService', () => {
     await dynamicStorageService.updateSwindlers();
 
     expect(dynamicStorageService.swindlerMessages).toHaveLength(1);
-    expect(dynamicStorageService.swindlerBots).toEqual([...mockDataset.swindlers_bots, '@Diia_move_bot']);
+    expect(dynamicStorageService.swindlerBots).toEqual(['@Diia_move_bot']);
   });
 
   it('should emit event on fetch dataset', async () => {

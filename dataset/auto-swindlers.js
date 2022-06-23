@@ -65,7 +65,9 @@ function findSwindlersByPattern(items, pattern) {
   const swindlersDomains = removeDuplicates([
     ...savedSwindlerDomains,
     ...swindlersUrls.map((url) => swindlersUrlsService.getUrlDomain(url)),
-  ]).sort();
+  ])
+    .sort()
+    .filter((item) => item !== 't.me');
 
   // fs.writeFileSync(path.join(__dirname, './temp/swindlers_domains.txt'), swindlersDomains.join('\n'));
   // fs.writeFileSync(path.join(__dirname, './temp/swindlers_url.txt'), swindlersUrls.join('\n'));
