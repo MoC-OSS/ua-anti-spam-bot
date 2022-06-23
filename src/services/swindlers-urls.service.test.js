@@ -74,18 +74,44 @@ describe('SwindlersUrlsService', () => {
       expect(result.isSpam).toEqual(true);
       expect(result.rate).toBeGreaterThan(0.6);
     });
+
+    it('should not match telegram url', () => {
+      const result = swindlersUrlsService.isSpamUrl('https://t.me/+5v9SixsjZ9ZmMjBs');
+
+      expect(result.isSpam).toEqual(false);
+    });
   });
 
-  it('should process messages', () => {
-    const text = `https://da-pay.me/ тест`;
-    const result = swindlersUrlsService.processMessage(text);
+  describe('processMessage', () => {
+    it('should process messages', () => {
+      const text = `https://da-pay.me/ тест`;
+      const result = swindlersUrlsService.processMessage(text);
 
-    const parsedUrl = swindlersUrlsService.parseUrls(text)[0];
-    const isUrlSpam = swindlersUrlsService.isSpamUrl(parsedUrl);
+      const parsedUrl = swindlersUrlsService.parseUrls(text)[0];
+      const isUrlSpam = swindlersUrlsService.isSpamUrl(parsedUrl);
 
-    expect(parsedUrl).toEqual('https://da-pay.me/');
-    expect(isUrlSpam.isSpam).toEqual(true);
-    expect(result.isSpam).toEqual(true);
-    expect(result.rate).toEqual(200);
+      expect(parsedUrl).toEqual('https://da-pay.me/');
+      expect(isUrlSpam.isSpam).toEqual(true);
+      expect(result.isSpam).toEqual(true);
+      expect(result.rate).toEqual(200);
+    });
+
+    it('should not process telegram message', () => {
+      const text = `Плохие новости 18+👇👇👇
+
+https://t.me/+5v9SixsjZ9ZmMjBs
+
+https://t.me/+5v9SixsjZ9ZmMjBs
+
+https://t.me/+5v9SixsjZ9ZmMjBs`;
+      const result = swindlersUrlsService.processMessage(text);
+
+      const parsedUrl = swindlersUrlsService.parseUrls(text)[0];
+      const isUrlSpam = swindlersUrlsService.isSpamUrl(parsedUrl);
+
+      expect(parsedUrl).toEqual('https://t.me/+5v9SixsjZ9ZmMjBs');
+      expect(isUrlSpam.isSpam).toEqual(false);
+      expect(result).toEqual(null);
+    });
   });
 });

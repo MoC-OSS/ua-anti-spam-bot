@@ -31,9 +31,9 @@ class DynamicStorageService {
     const cases = Promise.all(sheetRequests);
 
     return cases.then(([swindlerPositives, swindlerBots, swindlerDomains]) => {
-      this.swindlerMessages = this.smartAppend(this.swindlerMessages, swindlerPositives);
-      this.swindlerBots = this.smartAppend(this.swindlerBots, swindlerBots);
-      this.swindlerDomains = this.smartAppend(this.swindlerDomains, swindlerDomains);
+      this.swindlerMessages = this.removeDuplicates(swindlerPositives);
+      this.swindlerBots = this.removeDuplicates(swindlerBots);
+      this.swindlerDomains = this.removeDuplicates(swindlerDomains);
       this.fetchEmmiter.emit('fetch');
       console.info('got DynamicStorageService messages', new Date());
     });
