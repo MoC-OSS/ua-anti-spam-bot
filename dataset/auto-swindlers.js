@@ -5,7 +5,6 @@ const { env } = require('typed-dotenv').config();
 const { urlRegexp } = require('ukrainian-ml-optimizer');
 
 const { swindlersRegex } = require('../src/creator');
-const swindlers = require('./strings/swindlers.json');
 const swindlersBots = require('./strings/swindlers_bots.json');
 const { DynamicStorageService } = require('../src/services/dynamic-storage.service');
 const { SwindlersUrlsService } = require('../src/services/swindlers-urls.service');
@@ -30,13 +29,13 @@ function removeDuplicates(array) {
   return [...new Set(array)];
 }
 
-function findSwindlersByPattern(items, pattern) {
-  return removeDuplicates([...items, ...swindlers.map((message) => message.match(pattern) || []).flat()])
-    .filter((item) => !notSwindlers.includes(item))
-    .sort();
-}
+const autoSwindlers = async (swindlers) => {
+  function findSwindlersByPattern(items, pattern) {
+    return removeDuplicates([...items, ...swindlers.map((message) => message.match(pattern) || []).flat()])
+      .filter((item) => !notSwindlers.includes(item))
+      .sort();
+  }
 
-(async () => {
   await dynamicStorageService.init();
   const [savedSwindlerDomains, savedSwindlersUrls] = await Promise.all(
     [
@@ -84,4 +83,8 @@ function findSwindlersByPattern(items, pattern) {
   await googleService.updateSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, swindlersUrls, 'G6:G');
 
   process.exit(0);
-})();
+};
+
+module.exports = {
+  autoSwindlers,
+};

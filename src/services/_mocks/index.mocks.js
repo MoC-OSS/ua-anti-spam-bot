@@ -3,19 +3,33 @@ const { DynamicStorageService } = require('../dynamic-storage.service');
 const mockNewBot = '@Diia_move_bot';
 const mockNewUrl = 'https://olx.new-darpay.site/some/234234234';
 
+const getSheet = jest.fn(() =>
+  Promise.resolve([
+    {
+      value: mockNewBot,
+      index: 0,
+      sheetKey: 'mock_key',
+      fullPath: `mock_path`,
+    },
+  ]),
+);
+
+getSheet.mockReturnValueOnce(
+  Promise.resolve([
+    {
+      value: 'test message from swindler',
+      index: 0,
+      sheetKey: 'mock_key',
+      fullPath: `mock_path`,
+    },
+  ]),
+);
+
 /**
  * @type {GoogleService}
  * */
 const mockGoogleService = {
-  getSheet: () =>
-    Promise.resolve([
-      {
-        value: mockNewBot,
-        index: 0,
-        sheetKey: 'mock_key',
-        fullPath: `mock_path`,
-      },
-    ]),
+  getSheet,
 };
 
 const mockDataset = {

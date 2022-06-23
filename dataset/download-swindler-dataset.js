@@ -5,6 +5,7 @@ const { env } = require('typed-dotenv').config();
 const { googleService } = require('../src/services/google.service');
 const swindlersBots = require('./strings/swindlers_bots.json');
 const { getSwindlersTopUsed } = require('./get-swindlers-top-used');
+const { autoSwindlers } = require('./auto-swindlers');
 
 function removeDuplicates(array) {
   return [...new Set(array)];
@@ -20,10 +21,11 @@ const cases = Promise.all(
 
 console.info('Loading training messages...');
 
-cases.then(([positives, newSwindlersBots, testPositives]) => {
+cases.then(async ([positives, newSwindlersBots, testPositives]) => {
   console.info('Received training messages.');
 
   getSwindlersTopUsed([...positives, ...testPositives]);
+  await autoSwindlers([...positives, ...testPositives]);
 
   fs.writeFileSync(path.join(__dirname, './strings/swindlers.json'), `${JSON.stringify(removeDuplicates(positives), null, 2)}\n`);
   fs.writeFileSync(
