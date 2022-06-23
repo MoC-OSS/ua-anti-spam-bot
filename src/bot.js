@@ -22,6 +22,7 @@ const { RedisSession, RedisChatSession } = require('./bot/sessionProviders');
 
 const { MessageHandler } = require('./bot/message.handler');
 const {
+  CommandSetter,
   HelpMiddleware,
   SessionMiddleware,
   StartMiddleware,
@@ -51,6 +52,7 @@ const { logsChat, creatorId } = require('./creator');
 
 /**
  * @typedef { import("grammy").GrammyError } GrammyError
+ * @typedef { import("@grammyjs/types/manage").BotCommand } BotCommand
  * @typedef { import("./types").GrammyContext } GrammyContext
  * @typedef { import("./types").SessionObject } SessionObject
  */
@@ -124,6 +126,8 @@ const rootMenu = new Menu('root');
       await bot.api.sendMessage(logsChat, JSON.stringify(migrationError)).catch(() => {});
     });
 
+  const commandSetter = new CommandSetter(bot, startTime, !(await redisService.getIsBotDeactivated()));
+
   const trainingThrottler = apiThrottler({
     // group: {
     //   maxConcurrent: 2,
@@ -181,7 +185,7 @@ const rootMenu = new Menu('root');
   // TODO commented for settings feature
 
   bot.errorBoundary(handleError).command('start', errorHandler(startMiddleware.middleware()));
-  bot.errorBoundary(handleError).command('help', errorHandler(helpMiddleware.middleware()));
+  bot.errorBoundary(handleError).command(['help', 'status'], errorHandler(helpMiddleware.middleware()));
   bot.errorBoundary(handleError).command('swindlers_update', errorHandler(swindlersUpdateMiddleware.middleware()));
 
   bot.errorBoundary(handleError).command('session', botActiveMiddleware, errorHandler(sessionMiddleware.middleware()));
@@ -291,6 +295,8 @@ const rootMenu = new Menu('root');
     onlyCreator,
     errorHandler(async (ctx) => {
       await redisService.setIsBotDeactivated(true);
+      commandSetter.setActive(false);
+      commandSetter.updateCommands();
       ctx.reply('⛔️ Я виключений глобально');
     }),
   );
@@ -300,6 +306,8 @@ const rootMenu = new Menu('root');
     onlyCreator,
     errorHandler(async (ctx) => {
       await redisService.setIsBotDeactivated(false);
+      commandSetter.setActive(true);
+      commandSetter.updateCommands();
       ctx.reply('✅ Я включений глобально');
     }),
   );
