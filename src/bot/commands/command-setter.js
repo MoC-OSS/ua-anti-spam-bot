@@ -1,5 +1,9 @@
 const { formatDate } = require('../../utils');
 
+/**
+ * Handles bot public available commands
+ * @see https://grammy.dev/guide/commands.html#usage
+ * */
 class CommandSetter {
   /**
    * @param {Bot} bot
@@ -13,6 +17,12 @@ class CommandSetter {
     this.updateCommands();
   }
 
+  /**
+   * @description
+   * Returns status depending on bot active status
+   *
+   * @returns {string}
+   * */
   buildStatus() {
     const activeStatus = this.active ? '🟢 Онлайн' : '🔴 Офлайн';
     return `${activeStatus}, оновлений у ${formatDate(this.startTime).replace(/GMT\+\d/, '')}`;
@@ -26,6 +36,10 @@ class CommandSetter {
     this.updateCommands();
   }
 
+  /**
+   * @description
+   * Build new commands and set them into the bot
+   * */
   updateCommands() {
     /**
      * @param {BotCommand[]}

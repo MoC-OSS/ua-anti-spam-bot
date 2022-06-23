@@ -127,7 +127,6 @@ const rootMenu = new Menu('root');
     });
 
   const commandSetter = new CommandSetter(bot, startTime, !(await redisService.getIsBotDeactivated()));
-  commandSetter.updateCommands();
 
   const trainingThrottler = apiThrottler({
     // group: {
