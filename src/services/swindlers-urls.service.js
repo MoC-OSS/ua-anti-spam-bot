@@ -22,7 +22,18 @@ class SwindlersUrlsService {
         '(\\#[-a-z\\d_]*)?$',
       'i',
     );
-    this.exceptionDomains = ['next.privat24.ua', 'monobank.ua', 'paypal.com', 'pay.vn.ua', 'liqpay.ua', 'irs.gov', 'payoneer.com'];
+    this.exceptionDomains = [
+      'next.privat24.ua',
+      'www.google.com',
+      'google.com',
+      'privat24.ua',
+      'monobank.ua',
+      'paypal.com',
+      'pay.vn.ua',
+      'liqpay.ua',
+      'irs.gov',
+      'payoneer.com',
+    ];
 
     this.initFuzzySet();
     this.dynamicStorageService.fetchEmmiter.on('fetch', () => {

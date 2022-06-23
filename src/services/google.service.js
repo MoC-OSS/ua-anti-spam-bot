@@ -121,6 +121,22 @@ class GoogleService {
       handleError(e, `GOOGLE API ERROR: ${e.message}`);
     }
   }
+
+  /**
+   * @param {string} spreadsheetId
+   * @param {string} sheetName
+   * @param {string} [range]
+   * */
+  async clearSheet(spreadsheetId, sheetName, range) {
+    try {
+      await sheets.spreadsheets.values.clear({
+        spreadsheetId,
+        range: `${sheetName}!${range || RANGE}`,
+      });
+    } catch (e) {
+      handleError(e, `GOOGLE API ERROR: ${e.message}`);
+    }
+  }
 }
 const googleService = new GoogleService();
 
