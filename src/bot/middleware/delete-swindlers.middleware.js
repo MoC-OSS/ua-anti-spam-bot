@@ -3,7 +3,6 @@ const stringSimilarity = require('string-similarity');
 const { env } = require('typed-dotenv').config();
 
 const { InputFile } = require('grammy');
-const { dataset } = require('../../../dataset/dataset');
 const { logsChat } = require('../../creator');
 const { handleError, compareDatesWithOffset, telegramUtil } = require('../../utils');
 const { getCannotDeleteMessage } = require('../../message');
@@ -15,11 +14,14 @@ const SWINDLER_SETTINGS = {
 
 class DeleteSwindlersMiddleware {
   /**
+   * @param {DynamicStorageService} dynamicStorageService
    * @param {SwindlersTensorService} swindlersTensorService
    * @param {SwindlersBotsService} swindlersBotsService
    * @param {SwindlersUrlsService} swindlersUrlsService
    * */
-  constructor(swindlersTensorService, swindlersBotsService, swindlersUrlsService) {
+  constructor(dynamicStorageService, swindlersTensorService, swindlersBotsService, swindlersUrlsService) {
+    this.dynamicStorageService = dynamicStorageService;
+    this.swindlersTensorService = swindlersTensorService;
     this.swindlersTensorService = swindlersTensorService;
     this.swindlersBotsService = swindlersBotsService;
     this.swindlersUrlsService = swindlersUrlsService;
@@ -69,7 +71,7 @@ class DeleteSwindlersMiddleware {
 
       let lastChance = 0;
       let maxChance = 0;
-      const foundSwindler = dataset.swindlers.some((text) => {
+      const foundSwindler = this.dynamicStorageService.swindlerMessages.some((text) => {
         lastChance = stringSimilarity.compareTwoStrings(processedMessage, text);
 
         if (lastChance > maxChance) {

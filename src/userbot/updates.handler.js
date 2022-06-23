@@ -161,7 +161,7 @@ class UpdatesHandler {
      * */
     let lastChance = 0;
     let maxChance = 0;
-    const foundSwindler = dataset.swindlers.some((text) => {
+    const foundSwindler = this.dynamicStorageService.swindlerMessages.some((text) => {
       lastChance = stringSimilarity.compareTwoStrings(optimizeText(finalMessage), text);
 
       if (lastChance > maxChance) {

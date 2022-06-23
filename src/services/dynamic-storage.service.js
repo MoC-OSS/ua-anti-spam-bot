@@ -1,4 +1,5 @@
 const { env } = require('typed-dotenv').config();
+const { optimizeText } = require('ukrainian-ml-optimizer');
 const EventEmitter = require('events');
 
 class DynamicStorageService {
@@ -31,7 +32,7 @@ class DynamicStorageService {
     const cases = Promise.all(sheetRequests);
 
     return cases.then(([swindlerPositives, swindlerBots, swindlerDomains]) => {
-      this.swindlerMessages = this.removeDuplicates(swindlerPositives);
+      this.swindlerMessages = this.removeDuplicates(swindlerPositives).map(optimizeText).filter(Boolean);
       this.swindlerBots = this.removeDuplicates(swindlerBots);
       this.swindlerDomains = this.removeDuplicates(swindlerDomains);
       this.fetchEmmiter.emit('fetch');
