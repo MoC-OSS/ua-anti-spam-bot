@@ -150,7 +150,12 @@ const rootMenu = new Menu('root');
   const swindlersUpdateMiddleware = new SwindlersUpdateMiddleware(dynamicStorageService);
   const statisticsMiddleware = new StatisticsMiddleware(startTime);
   const updatesMiddleware = new UpdatesMiddleware(startTime);
-  const deleteSwindlersMiddleware = new DeleteSwindlersMiddleware(swindlersTensorService, swindlersBotsService, swindlersUrlsService);
+  const deleteSwindlersMiddleware = new DeleteSwindlersMiddleware(
+    dynamicStorageService,
+    swindlersTensorService,
+    swindlersBotsService,
+    swindlersUrlsService,
+  );
 
   const messageHandler = new MessageHandler(tensorService);
 
