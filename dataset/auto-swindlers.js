@@ -6,7 +6,6 @@ const { urlRegexp } = require('ukrainian-ml-optimizer');
 
 const { swindlersRegex } = require('../src/creator');
 const swindlers = require('./strings/swindlers.json');
-const immediately = require('./strings/immediately.json');
 const swindlersBots = require('./strings/swindlers_bots.json');
 const { DynamicStorageService } = require('../src/services/dynamic-storage.service');
 const { SwindlersUrlsService } = require('../src/services/swindlers-urls.service');
@@ -69,20 +68,15 @@ function findSwindlersByPattern(items, pattern) {
     .sort()
     .filter((item) => item !== 't.me');
 
-  // fs.writeFileSync(path.join(__dirname, './temp/swindlers_domains.txt'), swindlersDomains.join('\n'));
-  // fs.writeFileSync(path.join(__dirname, './temp/swindlers_url.txt'), swindlersUrls.join('\n'));
-
-  const newImmediately = findSwindlersByPattern(immediately, urlRegexp);
   const newSwindlersBots = findSwindlersByPattern(swindlersBots, mentionRegexp);
 
-  const notMatchedUrls = newImmediately.filter((item) => urlRegexp.test(item)).filter((item) => !swindlersRegex.test(item));
+  const notMatchedUrls = swindlersUrls.filter((item) => urlRegexp.test(item)).filter((item) => !swindlersRegex.test(item));
 
   console.info('notMatchedUrls\n');
   console.info(notMatchedUrls.join('\n'));
   console.info('notMatchedDomains\n');
   console.info(notMatchedDomains.join('\n'));
 
-  fs.writeFileSync(path.join(__dirname, './strings/immediately.json'), `${JSON.stringify(newImmediately, null, 2)}\n`);
   fs.writeFileSync(path.join(__dirname, './strings/swindlers_bots.json'), `${JSON.stringify(newSwindlersBots, null, 2)}\n`);
 
   await googleService.updateSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, newSwindlersBots, 'C6:C');

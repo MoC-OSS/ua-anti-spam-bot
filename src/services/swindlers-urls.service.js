@@ -24,6 +24,8 @@ class SwindlersUrlsService {
     );
     this.exceptionDomains = [
       'next.privat24.ua',
+      'www.google.com',
+      'google.com',
       'privat24.ua',
       'monobank.ua',
       'paypal.com',
