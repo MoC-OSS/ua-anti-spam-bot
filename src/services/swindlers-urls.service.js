@@ -23,16 +23,17 @@ class SwindlersUrlsService {
       'i',
     );
     this.exceptionDomains = [
-      'next.privat24.ua',
-      'www.google.com',
+      'gmail.com',
       'google.com',
-      'privat24.ua',
-      'monobank.ua',
-      'paypal.com',
-      'pay.vn.ua',
-      'liqpay.ua',
       'irs.gov',
+      'liqpay.ua',
+      'monobank.ua',
+      'next.privat24.ua',
+      'pay.vn.ua',
       'payoneer.com',
+      'paypal.com',
+      'privat24.ua',
+      'www.google.com',
     ];
 
     this.initFuzzySet();

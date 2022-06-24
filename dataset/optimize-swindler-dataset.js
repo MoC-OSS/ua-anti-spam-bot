@@ -62,11 +62,14 @@ const processPromise = (response) =>
   }
 
   const uniqueTrainSwindlers = await removeSimilar(trainData, 0.9);
-  const newTrainData = uniqueTrainSwindlers.filter((item) => item[0].unique).map((item) => item[0].first.label);
+  const newTrainData = uniqueTrainSwindlers
+    .filter((item) => item[0].unique)
+    .map((item) => item[0].first.label)
+    .filter((item) => item.replace(urlRegexp, '').replace(mentionRegexp, '').trim());
   const newTestData = [
     ...testData.map((item) => item.label),
     ...uniqueTrainSwindlers.filter((item) => !item[0].unique).map((item) => item[0].first.label),
-  ];
+  ].filter((item) => item.replace(urlRegexp, '').replace(mentionRegexp, '').trim());
 
   const uniqueTestSwindlers = removeDuplicates(newTestData);
 
