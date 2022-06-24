@@ -17,7 +17,7 @@ const sentMentionsFromStart = [];
 const SWINDLER_SETTINGS = {
   DELETE_CHANCE: 0.8,
   LOG_CHANGE: 0.8,
-  SAME_CHECK: 0.95,
+  SAME_CHECK: 0.9,
   APPEND_TO_SHEET: 0.85,
 };
 
