@@ -5,7 +5,7 @@ const Fuse = require('fuse.js');
 
 const options = {
   shouldSort: true,
-  threshold: 0.15,
+  threshold: 0.1,
   location: 0,
   distance: 100000,
   maxPatternLength: 32,

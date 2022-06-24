@@ -29,15 +29,26 @@ class StartMiddleware {
         .then(() => true)
         .catch(() => false);
 
+      const username = ctx.from?.username;
+      const fullName = ctx.from?.last_name ? `${ctx.from?.first_name} ${ctx.from?.last_name}` : ctx.from?.first_name;
+      const writeUsername = username ? `${username}` : fullName ?? '';
+      const userId = ctx.from?.id;
+
       if (!isAdmin || !canDelete) {
-        return ctx.replyWithHTML(getGroupStartMessage({ isAdmin, canDelete }));
+        return ctx.replyWithHTML(
+          getGroupStartMessage({ isAdmin, canDelete, user: writeUsername !== '@GroupAnonymousBot' ? writeUsername : '', userId }),
+        );
       }
 
       telegramUtil.getChatAdmins(this.bot, ctx.chat.id).then(({ adminsString }) => {
-        ctx.replyWithHTML(getGroupStartMessage({ adminsString, isAdmin, canDelete })).catch((getAdminsError) => {
-          handleError(getAdminsError);
-          ctx.replyWithHTML(makeAdminMessage);
-        });
+        ctx
+          .replyWithHTML(
+            getGroupStartMessage({ adminsString, isAdmin, canDelete, user: writeUsername !== '@GroupAnonymousBot' ? writeUsername : '' }),
+          )
+          .catch((getAdminsError) => {
+            handleError(getAdminsError);
+            ctx.replyWithHTML(makeAdminMessage);
+          });
       });
     };
   }

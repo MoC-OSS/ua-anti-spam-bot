@@ -35,13 +35,4 @@ module.exports = {
 
     return `eslint ${relativePaths.join(' ')}`;
   },
-  '**/*.{css,scss}': (absolutePaths) => {
-    const { filePathLengthLimit, isTooManyFilesToLint, relativePaths } = getLintFlags(absolutePaths);
-
-    if (filePathLengthLimit || isTooManyFilesToLint) {
-      return 'npm run lint:styles';
-    }
-
-    return `stylelint ${relativePaths.join(' ')}`;
-  },
 };

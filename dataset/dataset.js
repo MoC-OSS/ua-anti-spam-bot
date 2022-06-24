@@ -28,11 +28,18 @@ filePaths.forEach((filePath, index) => {
  * */
 console.info('*0 Add translit...');
 Object.keys(dataset).forEach((key) => {
-  const translitRussianDataset = dataset[key].map((word) => translitRus.transform(word, ' '));
-  const translitUkrainianDataset = dataset[key].map((word) => translitUa.transform(word, ' '));
+  if (Array.isArray(dataset[key])) {
+    const translitRussianDataset = dataset[key].map((word) => translitRus.transform(word, ' '));
+    const translitUkrainianDataset = dataset[key].map((word) => translitUa.transform(word, ' '));
 
-  dataset[key] = [...dataset[key], ...translitUkrainianDataset, ...translitRussianDataset];
+    dataset[key] = [...dataset[key], ...translitUkrainianDataset, ...translitRussianDataset];
+  }
 });
+
+/**
+ * Freeze the object
+ * */
+Object.freeze(dataset);
 
 console.info('*0 Dataset is ready.');
 

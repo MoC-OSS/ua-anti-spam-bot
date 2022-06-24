@@ -3,37 +3,64 @@ const { env } = require('typed-dotenv').config();
 const { redisClient } = require('../db');
 const auth = require('./auth');
 const { UserbotStorage } = require('./storage.handler');
-const updatesHandler = require('./updates.handler');
+const { UpdatesHandler } = require('./updates.handler');
 const { initTensor } = require('../tensor/tensor.service');
+const { initSwindlersTensor } = require('../tensor/swindlers-tensor.service');
 // const { findChannelAdmins } = require('./find-channel-admins');
+const { MtProtoClient } = require('./mt-proto-client');
+const { googleService } = require('../services/google.service');
+const { DynamicStorageService } = require('../services/dynamic-storage.service');
+const { SwindlersBotsService } = require('../services/swindlers-bots.service');
+const { dataset } = require('../../dataset/dataset');
+
+// const testMessage = ``.trim();
 
 console.info('Start listener application');
 auth().then(async (api) => {
   await redisClient.client.connect().then(() => console.info('Redis client successfully started'));
+  const mtProtoClient = new MtProtoClient(api);
+  const dynamicStorageService = new DynamicStorageService(googleService, dataset);
+  await dynamicStorageService.init();
+
   const userbotStorage = new UserbotStorage();
+  await userbotStorage.init();
   console.info('Application is listening new messages.');
 
   const tensorService = await initTensor();
+  const swindlersTensorService = await initSwindlersTensor();
   console.info('Tensor is ready.');
+
+  const swindlersBotsService = new SwindlersBotsService(dynamicStorageService, 0.6);
 
   // findChannelAdmins(api);
   // return;
 
-  const resolvedPeer = await api.call('contacts.search', {
-    q: env.USERBOT_TRAING_CHAT_NAME,
-  });
-
-  const testChannel = resolvedPeer.chats[0];
-
-  console.info('Test Channel Found: ', testChannel);
-
-  const chatPeer = {
-    _: 'inputPeerChannel',
-    channel_id: testChannel.id,
-    access_hash: testChannel.access_hash,
+  const allChats = await mtProtoClient.messagesGetAllChats();
+  const chatPeers = {
+    trainingChat: mtProtoClient.resolvePeer(allChats.chats, env.USERBOT_TRAING_CHAT_NAME),
+    helpChat: mtProtoClient.resolvePeer(allChats.chats, 'UA Anti Spam Bot - Help'),
+    swindlersChat: mtProtoClient.resolvePeer(allChats.chats, 'UA Anti Spam Bot - Swindlers'),
   };
 
-  api.mtproto.updates.on('updates', (updateInfo) => updatesHandler(api, chatPeer, tensorService, updateInfo, userbotStorage));
+  const updatesHandler = new UpdatesHandler(
+    mtProtoClient,
+    chatPeers,
+    tensorService,
+    swindlersTensorService,
+    dynamicStorageService,
+    swindlersBotsService,
+    userbotStorage,
+  );
+
+  // const testSwindlerResult = await updatesHandler.handleSwindlers(testMessage);
+  // console.log(testSwindlerResult);
+
+  api.mtproto.updates.on('updates', (updateInfo) =>
+    updatesHandler.filterUpdate(updateInfo, async (message) => {
+      // updatesHandler.handleTraining(message);
+      await updatesHandler.handleSwindlers(message);
+    }),
+  );
 
   setInterval(async () => {
     try {

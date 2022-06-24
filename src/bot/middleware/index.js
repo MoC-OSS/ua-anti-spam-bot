@@ -1,4 +1,5 @@
 const botActiveMiddlewareExports = require('./bot-active.middleware');
+const deleteSwindlersMiddlewareExports = require('./delete-swindlers.middleware');
 const globalMiddlewareExports = require('./global.middleware');
 const ignoreOldExports = require('./ignore-old.middleware');
 const onlyCreator = require('./only-creator.middleware');
@@ -13,6 +14,7 @@ const onlyAdmin = require('./only-admin.middleware');
 module.exports = {
   ...onlyAdmin,
   ...botActiveMiddlewareExports,
+  ...deleteSwindlersMiddlewareExports,
   ...globalMiddlewareExports,
   ...ignoreOldExports,
   ...onlyCreator,

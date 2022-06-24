@@ -2,6 +2,7 @@ const { redisClient } = require('../db');
 
 class RedisService {
   constructor() {
+    this.redisClient = redisClient;
     this.redisSelectors = {
       isBotDeactivated: 'isBotDeactivated',
       botTensorPercent: 'botTensorPercent',

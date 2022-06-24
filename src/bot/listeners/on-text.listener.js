@@ -79,7 +79,8 @@ class OnTextListener {
           const trainingChatWhitelist = await redisService.getTrainingChatWhitelist();
           const username = ctx.from?.username;
           const fullName = ctx.from?.last_name ? `${ctx.from?.first_name} ${ctx.from?.last_name}` : ctx.from?.first_name;
-          const writeUsername = username ? `@${username}` : fullName ?? '';
+          const writeUsername = username ? `${username}` : fullName ?? '';
+          const userId = ctx.from?.id;
 
           let debugMessage = '';
 
@@ -96,7 +97,7 @@ class OnTextListener {
             .then(() => {
               if (ctx.chatSession.chatSettings.enableDeleteMessage === true) {
                 ctx.replyWithHTML(
-                  getDeleteMessage({ writeUsername, wordMessage: '', debugMessage, withLocation: rep.byRules.dataset.location }),
+                  getDeleteMessage({ writeUsername, userId, wordMessage: '', debugMessage, withLocation: rep.byRules.dataset.location }),
                 );
               }
             })

@@ -1,32 +1,44 @@
-const diff = require('diff');
-const { removeSpecialSymbols, removeExtraSpaces } = require('ukrainian-ml-optimizer');
-const { redisService } = require('../services/redis.service');
+const { env } = require('typed-dotenv').config();
+// eslint-disable-next-line import/no-extraneous-dependencies
+const stringSimilarity = require('string-similarity');
 
-const compareResult = {
-  DIFFERENT_LENGTH: 'DIFFERENT_LENGTH',
-  SAME: 'SAME',
-  NOT_SAME: 'NOT_SAME',
-};
+const { redisService } = require('../services/redis.service');
+const { googleService } = require('../services/google.service');
 
 const limits = {
-  STORAGE: 10000,
+  STORAGE: 999999999,
   LENGTH_RATE: 0.5,
-  DIFFERENCES_RATE: 20,
 };
 
 class UserbotStorage {
   constructor() {
     this.lastMessages = [];
-    redisService.getTrainingTempMessages().then((messages) => {
+    this.swindlerMessages = [];
+    this.helpMessages = [];
+  }
+
+  async init() {
+    const sheetRequests = [
+      googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_POSITIVE_SHEET_NAME),
+      googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_NEGATIVE_SHEET_NAME),
+      googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, 'B6:B'),
+      googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, 'A6:A'),
+    ].map((request) => request.then((response) => response.map((positive) => positive.value)));
+
+    const cases = Promise.all([...sheetRequests, redisService.redisClient.getRawValue('training:help', this.helpMessages)]);
+
+    return cases.then(([positives, negatives, swindlerPositives, helpMessages, redisHelp]) => {
       console.info('got TrainingTempMessages');
-      this.lastMessages = messages;
+      this.lastMessages = [...positives, ...negatives];
+      this.swindlerMessages = swindlerPositives;
+      this.helpMessages = [...helpMessages, ...(redisHelp || [])].filter(Boolean);
     });
   }
 
   handleMessage(str) {
-    const isUniqueText = this.isUniqueText(str);
+    const { isDifferent } = this.isUniqueText(str, this.lastMessages);
 
-    if (isUniqueText) {
+    if (isDifferent) {
       if (this.lastMessages.length > limits.STORAGE) {
         this.lastMessages = this.lastMessages.slice(this.lastMessages.length - limits.STORAGE + 1);
       }
@@ -39,43 +51,53 @@ class UserbotStorage {
     return false;
   }
 
-  isUniqueText(str) {
-    const isEmpty = !this.lastMessages.length;
+  handleHelpMessage(str) {
+    const { isDifferent } = this.isUniqueText(str, this.helpMessages, 0.8);
 
-    if (isEmpty) {
+    if (isDifferent) {
+      if (this.helpMessages.length > limits.STORAGE) {
+        this.helpMessages = this.helpMessages.slice(this.helpMessages.length - limits.STORAGE + 1);
+      }
+
+      this.helpMessages.push(str);
+      redisService.redisClient.setRawValue('training:help', this.helpMessages);
       return true;
     }
 
-    const isStrictCompare = this.lastMessages.some((lastMessage) => lastMessage === str);
-
-    if (isStrictCompare) {
-      return false;
-    }
-
-    const isDifferent = !this.lastMessages.some((lastMessage) => this.compareText(str, lastMessage) === compareResult.SAME);
-
-    return isDifferent;
+    return false;
   }
 
-  compareText(oldStr, newStr) {
-    const processStr = (str) => removeExtraSpaces(removeSpecialSymbols(str));
+  /**
+   * @param {string} str
+   * @param {string[]} dataset
+   * @param {number} [rate]
+   * */
+  isUniqueText(str, dataset, rate) {
+    const isEmpty = !dataset.length;
 
-    const a = processStr(oldStr);
-    const b = processStr(newStr);
-
-    const lengthDifference = a.length / b.length;
-
-    /**
-     * Text bigger in 50% or less in 50%
-     * */
-    if (lengthDifference >= 1.0 + limits.LENGTH_RATE || lengthDifference <= limits.LENGTH_RATE) {
-      return compareResult.DIFFERENT_LENGTH;
+    if (isEmpty) {
+      return { isDifferent: true, maxChance: 1 };
     }
 
-    const differences = diff.diffWords(a, b);
-    const differencesNumber = a.length / differences.length;
+    const isStrictCompare = dataset.find((lastMessage) => lastMessage === str);
 
-    return differencesNumber <= limits.DIFFERENCES_RATE ? compareResult.NOT_SAME : compareResult.SAME;
+    if (isStrictCompare) {
+      return { isDifferent: false, maxChance: 0 };
+    }
+
+    let lastChance = 0;
+    let maxChance = 0;
+    const isDifferent = !dataset.some((lastMessage) => {
+      lastChance = stringSimilarity.compareTwoStrings(str, lastMessage);
+
+      if (lastChance > maxChance) {
+        maxChance = lastChance;
+      }
+
+      return lastChance >= (rate || limits.LENGTH_RATE);
+    });
+
+    return { isDifferent, maxChance };
   }
 }
 

@@ -6,24 +6,34 @@ const { error, env } = require('typed-dotenv').config();
 const { apiThrottler } = require('@grammyjs/transformer-throttler');
 const Keyv = require('keyv');
 
+const { dataset } = require('../dataset/dataset');
+
 const { redisClient } = require('./db');
 const { redisService } = require('./services/redis.service');
 const { S3Service } = require('./services/s3.service');
+const { DynamicStorageService } = require('./services/dynamic-storage.service');
+const { SwindlersBotsService } = require('./services/swindlers-bots.service');
+const { SwindlersUrlsService } = require('./services/swindlers-urls.service');
+const { googleService } = require('./services/google.service');
 
 const { initTensor } = require('./tensor/tensor.service');
+const { initSwindlersTensor } = require('./tensor/swindlers-tensor.service');
 const { RedisSession, RedisChatSession } = require('./bot/sessionProviders');
 
 const { MessageHandler } = require('./bot/message.handler');
 const {
+  CommandSetter,
   HelpMiddleware,
   SessionMiddleware,
   StartMiddleware,
   StatisticsMiddleware,
   UpdatesMiddleware,
   SettingsMiddleware,
+  SwindlersUpdateMiddleware,
 } = require('./bot/commands');
 const { OnTextListener, TestTensorListener } = require('./bot/listeners');
 const {
+  DeleteSwindlersMiddleware,
   GlobalMiddleware,
   botActiveMiddleware,
   ignoreOld,
@@ -41,6 +51,7 @@ const { logsChat, creatorId } = require('./creator');
 
 /**
  * @typedef { import("grammy").GrammyError } GrammyError
+ * @typedef { import("@grammyjs/types/manage").BotCommand } BotCommand
  * @typedef { import("./types").GrammyContext } GrammyContext
  * @typedef { import("./types").SessionObject } SessionObject
  */
@@ -69,7 +80,9 @@ const rootMenu = new Menu('root');
 
   const s3Service = new S3Service();
   const tensorService = await initTensor(s3Service);
+  const swindlersTensorService = await initSwindlersTensor();
   tensorService.setSpamThreshold(await redisService.getBotTensorPercent());
+  swindlersTensorService.setSpamThreshold(0.87);
 
   const startTime = new Date();
 
@@ -91,6 +104,8 @@ const rootMenu = new Menu('root');
       await bot.api.sendMessage(logsChat, JSON.stringify(migrationError)).catch(() => {});
     });
 
+  const commandSetter = new CommandSetter(bot, startTime, !(await redisService.getIsBotDeactivated()));
+
   const trainingThrottler = apiThrottler({
     // group: {
     //   maxConcurrent: 2,
@@ -103,15 +118,27 @@ const rootMenu = new Menu('root');
 
   const redisSession = new RedisSession();
   const redisChatSession = new RedisChatSession();
+  const dynamicStorageService = new DynamicStorageService(googleService, dataset);
+  await dynamicStorageService.init();
+
+  const swindlersBotsService = new SwindlersBotsService(dynamicStorageService, 0.6);
+  const swindlersUrlsService = new SwindlersUrlsService(dynamicStorageService, 0.8);
 
   const globalMiddleware = new GlobalMiddleware(bot);
 
   const startMiddleware = new StartMiddleware(bot);
   const helpMiddleware = new HelpMiddleware(startTime);
   const sessionMiddleware = new SessionMiddleware(startTime);
+  const swindlersUpdateMiddleware = new SwindlersUpdateMiddleware(dynamicStorageService);
   const statisticsMiddleware = new StatisticsMiddleware(startTime);
   const updatesMiddleware = new UpdatesMiddleware(startTime);
   const settingsMiddleware = new SettingsMiddleware();
+  const deleteSwindlersMiddleware = new DeleteSwindlersMiddleware(
+    dynamicStorageService,
+    swindlersTensorService,
+    swindlersBotsService,
+    swindlersUrlsService,
+  );
 
   const messageHandler = new MessageHandler(tensorService);
 
@@ -132,17 +159,18 @@ const rootMenu = new Menu('root');
 
   bot.use(errorHandler(globalMiddleware.middleware()));
 
-  const router = new Router((ctx) => ctx.session.step);
+  const router = new Router((ctx) => ctx.session?.step || 'idle');
 
   bot.use(router);
 
   bot.command('settings', onlyAdmin, errorHandler(settingsMiddleware.sendSettingsMenu()));
 
-  bot.command('start', errorHandler(startMiddleware.middleware()));
-  bot.command('help', errorHandler(helpMiddleware.middleware()));
+  bot.errorBoundary(handleError).command('start', errorHandler(startMiddleware.middleware()));
+  bot.errorBoundary(handleError).command(['help', 'status'], errorHandler(helpMiddleware.middleware()));
+  bot.errorBoundary(handleError).command('swindlers_update', errorHandler(swindlersUpdateMiddleware.middleware()));
 
-  bot.command('session', botActiveMiddleware, errorHandler(sessionMiddleware.middleware()));
-  bot.command('statistics', botActiveMiddleware, errorHandler(statisticsMiddleware.middleware()));
+  bot.errorBoundary(handleError).command('session', botActiveMiddleware, errorHandler(sessionMiddleware.middleware()));
+  bot.errorBoundary(handleError).command('statistics', botActiveMiddleware, errorHandler(statisticsMiddleware.middleware()));
 
   bot.errorBoundary(handleError).command('get_tensor', onlyCreator, async (ctx) => {
     let positives = await redisService.getPositives();
@@ -248,6 +276,8 @@ const rootMenu = new Menu('root');
     onlyCreator,
     errorHandler(async (ctx) => {
       await redisService.setIsBotDeactivated(true);
+      commandSetter.setActive(false);
+      commandSetter.updateCommands();
       ctx.reply('⛔️ Я виключений глобально');
     }),
   );
@@ -257,6 +287,8 @@ const rootMenu = new Menu('root');
     onlyCreator,
     errorHandler(async (ctx) => {
       await redisService.setIsBotDeactivated(false);
+      commandSetter.setActive(true);
+      commandSetter.updateCommands();
       ctx.reply('✅ Я включений глобально');
     }),
   );
@@ -281,6 +313,7 @@ const rootMenu = new Menu('root');
       onlyNotForwarded,
       onlyWithText,
       onlyWhenBotAdmin,
+      deleteSwindlersMiddleware.middleware(),
       errorHandler(performanceStartMiddleware),
       errorHandler(onTextListener.middleware()),
       errorHandler(performanceEndMiddleware),
