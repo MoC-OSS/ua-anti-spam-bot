@@ -8,6 +8,7 @@ const {
   detailedSettingsDescription,
   goBackButton,
 } = require('../../message');
+const { onlyAdmin } = require('../middleware');
 
 class SettingsMiddleware {
   constructor() {
@@ -15,9 +16,9 @@ class SettingsMiddleware {
     this.settingsDescriptionObj = null;
   }
 
-  settingsMenu() {
+  initMenu() {
     this.settingsMenuObj = new Menu('settingsMenu')
-      .text(deleteMessageButton, (ctx) => {
+      .text(deleteMessageButton, onlyAdmin, (ctx) => {
         if (ctx.chatSession.chatSettings.enableDeleteMessage === false) {
           ctx.chatSession.chatSettings.enableDeleteMessage = true;
         } else {
@@ -27,18 +28,18 @@ class SettingsMiddleware {
         ctx.editMessageText(getSettingsMenuMessage(ctx.chatSession.chatSettings));
       })
       .row()
-      .submenu(settingsDescriptionButton, 'settingsDescriptionSubmenu', (ctx) => {
+      .submenu(settingsDescriptionButton, 'settingsDescriptionSubmenu', onlyAdmin, (ctx) => {
         ctx.editMessageText(detailedSettingsDescription);
       })
       .row()
-      .text(settingsSubmitMessage, (ctx) => {
+      .text(settingsSubmitMessage, onlyAdmin, (ctx) => {
         ctx.deleteMessage();
       });
 
     return this.settingsMenuObj;
   }
 
-  settingsDescriptionSubmenu() {
+  initDescriptionSubmenu() {
     this.settingsDescriptionObj = new Menu('settingsDescriptionSubmenu').back(goBackButton, (ctx) => {
       ctx.editMessageText(getSettingsMenuMessage(ctx.chatSession.chatSettings));
     });
@@ -47,9 +48,14 @@ class SettingsMiddleware {
   }
 
   sendSettingsMenu() {
-    return (ctx) => {
-      ctx.reply(getSettingsMenuMessage(ctx.chatSession.chatSettings), { reply_markup: this.settingsMenuObj });
+    /**
+     * @param {GrammyContext} ctx
+     * */
+    const middleware = async (ctx) => {
+      ctx.reply(getSettingsMenuMessage(ctx.chatSession.chatSettings), { reply_markup: this.settingsMenuObj }).catch(() => {});
     };
+
+    return middleware;
   }
 }
 

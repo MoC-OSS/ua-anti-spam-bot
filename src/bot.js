@@ -36,7 +36,9 @@ const {
   DeleteSwindlersMiddleware,
   GlobalMiddleware,
   botActiveMiddleware,
+  deleteMessageMiddleware,
   ignoreOld,
+  onlyAdmin,
   onlyCreator,
   onlyNotAdmin,
   onlyNotForwarded,
@@ -44,7 +46,6 @@ const {
   onlyWithText,
   performanceEndMiddleware,
   performanceStartMiddleware,
-  onlyAdmin,
 } = require('./bot/middleware');
 const { handleError, errorHandler, sleep } = require('./utils');
 const { logsChat, creatorId } = require('./creator');
@@ -147,8 +148,8 @@ const rootMenu = new Menu('root');
 
   rootMenu.register(tensorListener.initMenu(trainingThrottler));
   rootMenu.register(updatesMiddleware.initMenu());
-  rootMenu.register(settingsMiddleware.settingsMenu());
-  rootMenu.register(settingsMiddleware.settingsDescriptionSubmenu(), 'settingsMenu');
+  rootMenu.register(settingsMiddleware.initMenu());
+  rootMenu.register(settingsMiddleware.initDescriptionSubmenu(), 'settingsMenu');
 
   bot.use(hydrateReply);
 
@@ -163,7 +164,9 @@ const rootMenu = new Menu('root');
 
   bot.use(router);
 
-  bot.command('settings', onlyAdmin, errorHandler(settingsMiddleware.sendSettingsMenu()));
+  bot
+    .errorBoundary(handleError)
+    .command('settings', deleteMessageMiddleware, onlyAdmin, errorHandler(settingsMiddleware.sendSettingsMenu()));
 
   bot.errorBoundary(handleError).command('start', errorHandler(startMiddleware.middleware()));
   bot.errorBoundary(handleError).command(['help', 'status'], errorHandler(helpMiddleware.middleware()));

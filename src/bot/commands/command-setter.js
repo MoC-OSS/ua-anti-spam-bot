@@ -47,6 +47,7 @@ class CommandSetter {
     this.commands = [
       { command: 'start', description: '🇺🇦 Почати роботу' },
       { command: 'help', description: '🙋🏻 Отримати допомогу' },
+      { command: 'settings', description: '⚙️ Налаштування' },
       { command: 'status', description: this.buildStatus() },
     ];
 
