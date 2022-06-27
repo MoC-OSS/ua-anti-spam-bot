@@ -15,6 +15,7 @@ class SwindlersBotsService {
     this.telegramDomainRegexp = /^(https?:\/\/)?(www\.)?t\.me\/(.{1,256})/g;
     this.exceptionMentions = [
       '@46311',
+      '@monobankbot',
       '@Diia_help_bot',
       '@get_help_ua_bot',
       '@Dopomoga_vzpbot',
