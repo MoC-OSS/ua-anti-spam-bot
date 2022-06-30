@@ -25,11 +25,23 @@ getSheet.mockReturnValueOnce(
   ]),
 );
 
+const getCompactSheet = jest.fn(() => Promise.resolve([mockNewBot]));
+getCompactSheet.mockReturnValueOnce(Promise.resolve(['test message from swindler']));
+
 /**
  * @type {GoogleService}
  * */
 const mockGoogleService = {
   getSheet,
+};
+
+/**
+ * @type {SwindlersGoogleService}
+ * */
+const mockSwindlersGoogleService = {
+  getTrainingPositives: getCompactSheet,
+  getBots: getCompactSheet,
+  getDomains: getCompactSheet,
 };
 
 const mockDataset = {
@@ -47,12 +59,13 @@ const mockDataset = {
   swindlers_domains: ['olx-ua.darpays.site', 'olx-ua.europe-pays.site', 'olx-ua.glob-payments.site', 'olx-ua.lightpays.online'],
 };
 
-const mockDynamicStorageService = new DynamicStorageService(mockGoogleService, mockDataset);
+const mockDynamicStorageService = new DynamicStorageService(mockSwindlersGoogleService, mockDataset);
 
 module.exports = {
   mockDataset,
   mockNewUrl,
   mockDynamicStorageService,
   mockGoogleService,
+  mockSwindlersGoogleService,
   mockNewBot,
 };
