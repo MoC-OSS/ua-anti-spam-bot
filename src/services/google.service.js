@@ -58,7 +58,7 @@ class GoogleService {
                       fullPath: `${sheetName}!${sheetKey}${sheetStartFrom + index}`,
                     },
               )
-              .filter((item) => !!item.value) || null
+              .filter((item) => (compact ? !!item : !!item.value)) || null
           );
         });
     } catch (e) {
