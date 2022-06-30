@@ -1,8 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const { env } = require('typed-dotenv').config();
-const { googleService } = require('../src/services/google.service');
+const { swindlersGoogleService } = require('../src/services/swindlers-google.service');
 const swindlersBots = require('./strings/swindlers_bots.json');
 const { getSwindlersTopUsed } = require('./get-swindlers-top-used');
 const { autoSwindlers } = require('./auto-swindlers');
@@ -11,13 +10,11 @@ function removeDuplicates(array) {
   return [...new Set(array)];
 }
 
-const cases = Promise.all(
-  [
-    googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, 'B6:B'),
-    googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, 'C6:C'),
-    googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, 'F6:F'),
-  ].map((request) => request.then((response) => response.map((positive) => positive.value))),
-);
+const cases = Promise.all([
+  swindlersGoogleService.getTrainingPositives(),
+  swindlersGoogleService.getBots(),
+  swindlersGoogleService.getTestingPositives(),
+]);
 
 console.info('Loading training messages...');
 

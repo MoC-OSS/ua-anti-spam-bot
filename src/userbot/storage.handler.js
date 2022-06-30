@@ -4,6 +4,7 @@ const stringSimilarity = require('string-similarity');
 
 const { redisService } = require('../services/redis.service');
 const { googleService } = require('../services/google.service');
+const { swindlersGoogleService } = require('../services/swindlers-google.service');
 
 const limits = {
   STORAGE: 999999999,
@@ -21,11 +22,14 @@ class UserbotStorage {
     const sheetRequests = [
       googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_POSITIVE_SHEET_NAME),
       googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_NEGATIVE_SHEET_NAME),
-      googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, 'B6:B'),
-      googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, 'A6:A'),
     ].map((request) => request.then((response) => response.map((positive) => positive.value)));
 
-    const cases = Promise.all([...sheetRequests, redisService.redisClient.getRawValue('training:help', this.helpMessages)]);
+    const cases = Promise.all([
+      ...sheetRequests,
+      swindlersGoogleService.getTrainingPositives(),
+      swindlersGoogleService.getTrainingNegatives(),
+      redisService.redisClient.getRawValue('training:help', this.helpMessages),
+    ]);
 
     return cases.then(([positives, negatives, swindlerPositives, helpMessages, redisHelp]) => {
       console.info('got TrainingTempMessages');

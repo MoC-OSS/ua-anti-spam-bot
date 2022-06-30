@@ -2,7 +2,6 @@
 const fs = require('fs');
 const path = require('path');
 
-const { env } = require('typed-dotenv').config();
 const stringSimilarity = require('string-similarity');
 const { mentionRegexp, urlRegexp, optimizeText } = require('ukrainian-ml-optimizer');
 
@@ -10,7 +9,7 @@ const { mentionRegexp, urlRegexp, optimizeText } = require('ukrainian-ml-optimiz
 const deleteFromMessage = require('./from-entities.json');
 const { dataset } = require('../../dataset/dataset');
 const { swindlersRegex } = require('../creator');
-const { googleService } = require('../services/google.service');
+const { swindlersGoogleService } = require('../services/swindlers-google.service');
 
 const sentMentionsFromStart = [];
 
@@ -113,7 +112,7 @@ class UpdatesHandler {
         }
 
         if (maxChance > SWINDLER_SETTINGS.APPEND_TO_SHEET) {
-          googleService.appendToSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, finalMessage, 'B6:B');
+          swindlersGoogleService.appendTraingPositives(finalMessage);
         } else {
           this.mtProtoClient.sendPeerMessage(finalMessage, this.chatPeers.swindlersChat);
         }

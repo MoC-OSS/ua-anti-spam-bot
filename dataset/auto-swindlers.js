@@ -1,17 +1,16 @@
 const fs = require('fs');
 const path = require('path');
 
-const { env } = require('typed-dotenv').config();
 const { urlRegexp } = require('ukrainian-ml-optimizer');
 
 const { swindlersRegex } = require('../src/creator');
 const swindlersBots = require('./strings/swindlers_bots.json');
 const { DynamicStorageService } = require('../src/services/dynamic-storage.service');
 const { SwindlersUrlsService } = require('../src/services/swindlers-urls.service');
-const { googleService } = require('../src/services/google.service');
+const { swindlersGoogleService } = require('../src/services/swindlers-google.service');
 const { dataset } = require('./dataset');
 
-const dynamicStorageService = new DynamicStorageService(googleService, dataset);
+const dynamicStorageService = new DynamicStorageService(swindlersGoogleService, dataset);
 const swindlersUrlsService = new SwindlersUrlsService(dynamicStorageService, 0.6);
 
 const notSwindlers = [
@@ -37,12 +36,10 @@ const autoSwindlers = async (swindlers) => {
   }
 
   await dynamicStorageService.init();
-  const [savedSwindlerDomains, savedSwindlersUrls] = await Promise.all(
-    [
-      googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, 'D6:D'),
-      googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, 'G6:G'),
-    ].map((request) => request.then((response) => response.map((positive) => positive.value))),
-  );
+  const [savedSwindlerDomains, savedSwindlersUrls] = await Promise.all([
+    swindlersGoogleService.getDomains(),
+    swindlersGoogleService.getSites(),
+  ]);
 
   const notMatchedDomains = [];
   const swindlersUrls = removeDuplicates([
@@ -78,9 +75,9 @@ const autoSwindlers = async (swindlers) => {
 
   fs.writeFileSync(path.join(__dirname, './strings/swindlers_bots.json'), `${JSON.stringify(newSwindlersBots, null, 2)}\n`);
 
-  await googleService.updateSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, newSwindlersBots, 'C6:C');
-  await googleService.updateSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, swindlersDomains, 'D6:D');
-  await googleService.updateSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, swindlersUrls, 'G6:G');
+  await swindlersGoogleService.updateBots(newSwindlersBots);
+  await swindlersGoogleService.updateDomains(swindlersDomains);
+  await swindlersGoogleService.updateSites(swindlersUrls);
 
   process.exit(0);
 };
