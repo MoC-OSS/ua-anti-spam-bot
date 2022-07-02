@@ -16,17 +16,18 @@ class SettingsMiddleware {
   }
 
   initMenu() {
+    /**
+     * @param {GrammyContext} ctx
+     * @param {keyof ChatSessionData['chatSettings']} key
+     * */
+    const toggleSetting = (ctx, key) => {
+      ctx.chatSession.chatSettings[key] = ctx.chatSession.chatSettings[key] === false;
+      ctx.editMessageText(getSettingsMenuMessage(ctx.chatSession.chatSettings));
+    };
+
     this.settingsMenuObj = new MiddlewareMenu('settingsMenu')
       .addGlobalMiddlewares(onlyAdmin)
-      .text(deleteMessageButton, (ctx) => {
-        if (ctx.chatSession.chatSettings.enableDeleteMessage === false) {
-          ctx.chatSession.chatSettings.enableDeleteMessage = true;
-        } else {
-          ctx.chatSession.chatSettings.enableDeleteMessage = false;
-        }
-
-        ctx.editMessageText(getSettingsMenuMessage(ctx.chatSession.chatSettings));
-      })
+      .text(deleteMessageButton, (ctx) => toggleSetting(ctx, 'enableDeleteMessage'))
       .row()
       .submenu(settingsDescriptionButton, 'settingsDescriptionSubmenu', (ctx) => {
         ctx.editMessageText(detailedSettingsDescription);
