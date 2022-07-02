@@ -1,14 +1,13 @@
-const { env } = require('typed-dotenv').config();
 const { optimizeText } = require('ukrainian-ml-optimizer');
 const EventEmitter = require('events');
 
 class DynamicStorageService {
   /**
-   * @param {GoogleService} googleService
+   * @param {SwindlersGoogleService} swindlersGoogleService
    * @param {any} dataset
    * */
-  constructor(googleService, dataset) {
-    this.googleService = googleService;
+  constructor(swindlersGoogleService, dataset) {
+    this.swindlersGoogleService = swindlersGoogleService;
     this.swindlerMessages = [];
     this.swindlerBots = dataset.swindlers_bots;
     this.swindlerDomains = dataset.swindlers_domains || [];
@@ -23,13 +22,11 @@ class DynamicStorageService {
   }
 
   async updateSwindlers() {
-    const sheetRequests = [
-      this.googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, 'B6:B'),
-      this.googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, 'C6:C'),
-      this.googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, 'D6:D'),
-    ].map((request) => request.then((response) => response.map((positive) => positive.value)));
-
-    const cases = Promise.all(sheetRequests);
+    const cases = Promise.all([
+      this.swindlersGoogleService.getTrainingPositives(),
+      this.swindlersGoogleService.getBots(),
+      this.swindlersGoogleService.getDomains(),
+    ]);
 
     return cases.then(([swindlerPositives, swindlerBots, swindlerDomains]) => {
       this.swindlerMessages = this.removeDuplicates(swindlerPositives).map(optimizeText).filter(Boolean);
