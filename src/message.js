@@ -3,6 +3,9 @@ const { env } = require('typed-dotenv').config();
 const { helpChat } = require('./creator');
 const { getRandomItem } = require('./utils');
 
+const randomBanEmojis = ['👮🏻‍♀️', '🤦🏼‍♀️', '🙅🏻‍♀️'];
+const randomLocationBanEmojis = ['🏡', '🏘️', '🌳'];
+
 /**
  * Generic
  * */
@@ -32,18 +35,27 @@ const cancelMessageSending = 'Розсилка була відмінена!';
  * Complex - Settings
  * */
 
-const getSettingsMenuMessage = ({ enableDeleteMessage }) =>
+/**
+ * @param {ChatSessionData['chatSettings']} settings
+ * */
+const getSettingsMenuMessage = (settings) =>
   `
 🤖 Налаштування бота в поточному чаті.
 Тут ви можете регулювати параметри.
 
-${enableDeleteMessage === false ? '⛔️ Бот не повідомляє про видалені повідомлення.' : '✅ Бот повідомляє про видалені повідомлення.'}
+${settings.disableStrategicInfo === true ? '⛔️ Бот не видаляє стратегічну інформацію.' : '✅ Бот видаляє стратегічну інформацію.'}
+👉 ${
+    settings.disableStrategicInfo === true || settings.disableDeleteMessage === true
+      ? '⛔️ Бот не повідомляє про видалені повідомлення.'
+      : '✅ Бот повідомляє про видалені повідомлення.'
+  }
 
 Для зміни налаштувань, натисніть на відповідну кнопку.
 `.trim();
 
 const settingsDescriptionButton = '📋 Опис налаштувань бота в поточному чаті';
 
+const deleteTensorButton = `${randomBanEmojis[0]} Видаляти стратегічну інформацію`;
 const deleteMessageButton = '❗ Повідомлення про причину видалення';
 
 const goBackButton = '⬅ Повернутись назад';
@@ -74,9 +86,6 @@ const startMessageAtom = `
  *
  * */
 const getDeclinedMassSendingMessage = 'Вибач, але у тебе немає прав для цієї команди.😞'.trim();
-
-const randomBanEmojis = ['👮🏻‍♀️', '🤦🏼‍♀️', '🙅🏻‍♀️'];
-const randomLocationBanEmojis = ['🏡', '🏘️', '🌳'];
 
 /**
  *
@@ -296,6 +305,7 @@ const getTensorTestResult = ({ chance, isSpam }) =>
 module.exports = {
   goBackButton,
   deleteMessageButton,
+  deleteTensorButton,
   detailedSettingsDescription,
   settingsDescriptionButton,
   settingsDeleteItemMessage,

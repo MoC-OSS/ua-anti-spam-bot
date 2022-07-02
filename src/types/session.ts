@@ -38,7 +38,8 @@ export interface ChatSessionData {
   isLimitedDeletion?: boolean;
   lastLimitedDeletionDate?: Date;
   chatSettings: {
-    enableDeleteMessage: boolean;
+    disableStrategicInfo: boolean;
+    disableDeleteMessage: boolean;
   }
 }
 

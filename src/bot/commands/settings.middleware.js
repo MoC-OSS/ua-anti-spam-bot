@@ -1,6 +1,7 @@
 const {
   getSettingsMenuMessage,
   deleteMessageButton,
+  deleteTensorButton,
   settingsSubmitMessage,
   settingsDescriptionButton,
   detailedSettingsDescription,
@@ -8,6 +9,7 @@ const {
 } = require('../../message');
 const { onlyAdmin } = require('../middleware');
 const { MiddlewareMenu } = require('../middleware-menu.menu');
+const { handleError } = require('../../utils');
 
 class SettingsMiddleware {
   constructor() {
@@ -22,15 +24,20 @@ class SettingsMiddleware {
      * */
     const toggleSetting = (ctx, key) => {
       ctx.chatSession.chatSettings[key] = ctx.chatSession.chatSettings[key] === false;
-      ctx.editMessageText(getSettingsMenuMessage(ctx.chatSession.chatSettings));
+      const newText = getSettingsMenuMessage(ctx.chatSession.chatSettings);
+
+      if (ctx.msg.text !== newText) {
+        ctx.editMessageText(newText).catch(handleError);
+      }
     };
 
     this.settingsMenuObj = new MiddlewareMenu('settingsMenu')
       .addGlobalMiddlewares(onlyAdmin)
-      .text(deleteMessageButton, (ctx) => toggleSetting(ctx, 'enableDeleteMessage'))
+      .text(deleteTensorButton, (ctx) => toggleSetting(ctx, 'disableStrategicInfo'))
+      .text(deleteMessageButton, (ctx) => toggleSetting(ctx, 'disableDeleteMessage'))
       .row()
       .submenu(settingsDescriptionButton, 'settingsDescriptionSubmenu', (ctx) => {
-        ctx.editMessageText(detailedSettingsDescription);
+        ctx.editMessageText(detailedSettingsDescription).catch(handleError);
       })
       .row()
       .text(settingsSubmitMessage, (ctx) => {
@@ -44,7 +51,7 @@ class SettingsMiddleware {
     this.settingsDescriptionObj = new MiddlewareMenu('settingsDescriptionSubmenu')
       .addGlobalMiddlewares(onlyAdmin)
       .back(goBackButton, (ctx) => {
-        ctx.editMessageText(getSettingsMenuMessage(ctx.chatSession.chatSettings));
+        ctx.editMessageText(getSettingsMenuMessage(ctx.chatSession.chatSettings)).catch(handleError);
       });
 
     return this.settingsDescriptionObj;
