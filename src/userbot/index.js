@@ -8,7 +8,7 @@ const { initTensor } = require('../tensor/tensor.service');
 const { initSwindlersTensor } = require('../tensor/swindlers-tensor.service');
 // const { findChannelAdmins } = require('./find-channel-admins');
 const { MtProtoClient } = require('./mt-proto-client');
-const { googleService } = require('../services/google.service');
+const { swindlersGoogleService } = require('../services/swindlers-google.service');
 const { DynamicStorageService } = require('../services/dynamic-storage.service');
 const { SwindlersBotsService } = require('../services/swindlers-bots.service');
 const { dataset } = require('../../dataset/dataset');
@@ -19,7 +19,7 @@ console.info('Start listener application');
 auth().then(async (api) => {
   await redisClient.client.connect().then(() => console.info('Redis client successfully started'));
   const mtProtoClient = new MtProtoClient(api);
-  const dynamicStorageService = new DynamicStorageService(googleService, dataset);
+  const dynamicStorageService = new DynamicStorageService(swindlersGoogleService, dataset);
   await dynamicStorageService.init();
 
   const userbotStorage = new UserbotStorage();
