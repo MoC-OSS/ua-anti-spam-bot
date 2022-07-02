@@ -6,7 +6,7 @@ const { redisService } = require('../../services/redis.service');
 const { errorHandler } = require('../../utils');
 const { creatorId, trainingChat } = require('../../creator');
 const { getTensorTestResult } = require('../../message');
-// const { googleService } = require('../../services/google.service');
+const { googleService } = require('../../services/google.service');
 
 const defaultTime = 30;
 const removeTime = 30;
@@ -64,17 +64,17 @@ class TestTensorListener {
     };
 
     const writeInGoogleSheetFunction = () => {
-      // const sheetId = env.GOOGLE_SPREADSHEET_ID;
-      // const sheetPositiveName = env.GOOGLE_POSITIVE_SHEET_NAME;
-      // const sheetNegativeName = env.GOOGLE_NEGATIVE_SHEET_NAME;
-      // switch (state) {
-      //   case 'negatives':
-      //     return googleService.appendToSheet(sheetId, sheetNegativeName, word);
-      //   case 'positives':
-      //     return googleService.appendToSheet(sheetId, sheetPositiveName, word);
-      //   default:
-      //     throw new Error(`Invalid state: ${state}`);
-      // }
+      const sheetId = env.GOOGLE_SPREADSHEET_ID;
+      const sheetPositiveName = env.GOOGLE_POSITIVE_SHEET_NAME;
+      const sheetNegativeName = env.GOOGLE_NEGATIVE_SHEET_NAME;
+      switch (state) {
+        case 'negatives':
+          return googleService.appendToSheet(sheetId, sheetNegativeName, word);
+        case 'positives':
+          return googleService.appendToSheet(sheetId, sheetPositiveName, word);
+        default:
+          throw new Error(`Invalid state: ${state}`);
+      }
     };
 
     switch (state) {
