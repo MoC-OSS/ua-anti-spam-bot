@@ -9,7 +9,7 @@ class DynamicStorageService {
   constructor(swindlersGoogleService, dataset) {
     this.swindlersGoogleService = swindlersGoogleService;
     this.swindlerMessages = [];
-    this.swindlerBots = dataset.swindlers_bots;
+    this.swindlerBots = dataset.swindlers_bots || [];
     this.swindlerDomains = dataset.swindlers_domains || [];
     this.notSwindlers = [];
     this.fetchEmmiter = new EventEmitter();
