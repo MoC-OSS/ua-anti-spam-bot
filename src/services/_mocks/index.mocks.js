@@ -42,6 +42,7 @@ const mockSwindlersGoogleService = {
   getTrainingPositives: getCompactSheet,
   getBots: getCompactSheet,
   getDomains: getCompactSheet,
+  getNotSwindlers: () => [],
 };
 
 const mockDataset = {

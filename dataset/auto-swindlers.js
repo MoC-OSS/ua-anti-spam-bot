@@ -1,10 +1,6 @@
-const fs = require('fs');
-const path = require('path');
-
 const { urlRegexp } = require('ukrainian-ml-optimizer');
 
 const { swindlersRegex } = require('../src/creator');
-const swindlersBots = require('./strings/swindlers_bots.json');
 const { DynamicStorageService } = require('../src/services/dynamic-storage.service');
 const { SwindlersUrlsService } = require('../src/services/swindlers-urls.service');
 const { swindlersGoogleService } = require('../src/services/swindlers-google.service');
@@ -28,7 +24,11 @@ function removeDuplicates(array) {
   return [...new Set(array)];
 }
 
-const autoSwindlers = async (swindlers) => {
+/**
+ * @param {string[]} swindlers
+ * @param {string[]} swindlersBots
+ * */
+const autoSwindlers = async (swindlers, swindlersBots) => {
   function findSwindlersByPattern(items, pattern) {
     return removeDuplicates([...items, ...swindlers.map((message) => message.match(pattern) || []).flat()])
       .filter((item) => !notSwindlers.includes(item))
@@ -72,8 +72,6 @@ const autoSwindlers = async (swindlers) => {
   console.info(notMatchedUrls.join('\n'));
   console.info('notMatchedDomains\n');
   console.info(notMatchedDomains.join('\n'));
-
-  fs.writeFileSync(path.join(__dirname, './strings/swindlers_bots.json'), `${JSON.stringify(newSwindlersBots, null, 2)}\n`);
 
   await swindlersGoogleService.updateBots(newSwindlersBots);
   await swindlersGoogleService.updateDomains(swindlersDomains);

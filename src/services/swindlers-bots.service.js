@@ -13,27 +13,10 @@ class SwindlersBotsService {
     this.urlRegexp =
       /(https?:\/\/(?:www\.|(?!www))?[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|(https?:\/\/(?:www\.|(?!www)))?[a-zA-Z0-9-]+\.[^\s]{2,}|www\.?[a-zA-Z0-9]+\.[^\s]{2,})/g;
     this.telegramDomainRegexp = /^(https?:\/\/)?(www\.)?t\.me\/(.{1,256})/g;
-    this.exceptionMentions = [
-      '@46311',
-      '@monobankbot',
-      '@Diia_help_bot',
-      '@get_help_ua_bot',
-      '@Dopomoga_vzpbot',
-      '@EKamenskoetopchip_bot',
-      '@dytyna_ne_sama_bot',
-      '@stop_russian_war_bot',
-      '@ukraine_avanger_bot',
-      '@Ebenz_lpg_bot',
-      '@Odinfo_bot',
-      '@all',
-      '@UNISEFF_OOH',
-      '@botsbaseru',
-      '@InfoHelp_Ukraine',
-      '@finhelp4ua',
-      '@realukraine_bot',
-    ];
+    this.exceptionMentions = this.dynamicStorageService.notSwindlers;
 
     this.dynamicStorageService.fetchEmmiter.on('fetch', () => {
+      this.exceptionMentions = this.dynamicStorageService.notSwindlers;
       this.initFuzzySet();
     });
   }
