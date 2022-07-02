@@ -14,7 +14,7 @@ const { S3Service } = require('./services/s3.service');
 const { DynamicStorageService } = require('./services/dynamic-storage.service');
 const { SwindlersBotsService } = require('./services/swindlers-bots.service');
 const { SwindlersUrlsService } = require('./services/swindlers-urls.service');
-const { googleService } = require('./services/google.service');
+const { swindlersGoogleService } = require('./services/swindlers-google.service');
 
 const { initTensor } = require('./tensor/tensor.service');
 const { initSwindlersTensor } = require('./tensor/swindlers-tensor.service');
@@ -140,7 +140,7 @@ const rootMenu = new Menu('root');
 
   const redisSession = new RedisSession();
   const redisChatSession = new RedisChatSession();
-  const dynamicStorageService = new DynamicStorageService(googleService, dataset);
+  const dynamicStorageService = new DynamicStorageService(swindlersGoogleService, dataset);
   await dynamicStorageService.init();
 
   const swindlersBotsService = new SwindlersBotsService(dynamicStorageService, 0.6);
