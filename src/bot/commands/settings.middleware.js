@@ -1,5 +1,3 @@
-const { Menu } = require('@grammyjs/menu');
-
 const {
   getSettingsMenuMessage,
   deleteMessageButton,
@@ -9,6 +7,7 @@ const {
   goBackButton,
 } = require('../../message');
 const { onlyAdmin } = require('../middleware');
+const { MiddlewareMenu } = require('../middleware-menu.menu');
 
 class SettingsMiddleware {
   constructor() {
@@ -17,8 +16,9 @@ class SettingsMiddleware {
   }
 
   initMenu() {
-    this.settingsMenuObj = new Menu('settingsMenu')
-      .text(deleteMessageButton, onlyAdmin, (ctx) => {
+    this.settingsMenuObj = new MiddlewareMenu('settingsMenu')
+      .addGlobalMiddlewares(onlyAdmin)
+      .text(deleteMessageButton, (ctx) => {
         if (ctx.chatSession.chatSettings.enableDeleteMessage === false) {
           ctx.chatSession.chatSettings.enableDeleteMessage = true;
         } else {
@@ -28,11 +28,11 @@ class SettingsMiddleware {
         ctx.editMessageText(getSettingsMenuMessage(ctx.chatSession.chatSettings));
       })
       .row()
-      .submenu(settingsDescriptionButton, 'settingsDescriptionSubmenu', onlyAdmin, (ctx) => {
+      .submenu(settingsDescriptionButton, 'settingsDescriptionSubmenu', (ctx) => {
         ctx.editMessageText(detailedSettingsDescription);
       })
       .row()
-      .text(settingsSubmitMessage, onlyAdmin, (ctx) => {
+      .text(settingsSubmitMessage, (ctx) => {
         ctx.deleteMessage();
       });
 
@@ -40,9 +40,11 @@ class SettingsMiddleware {
   }
 
   initDescriptionSubmenu() {
-    this.settingsDescriptionObj = new Menu('settingsDescriptionSubmenu').back(goBackButton, (ctx) => {
-      ctx.editMessageText(getSettingsMenuMessage(ctx.chatSession.chatSettings));
-    });
+    this.settingsDescriptionObj = new MiddlewareMenu('settingsDescriptionSubmenu')
+      .addGlobalMiddlewares(onlyAdmin)
+      .back(goBackButton, (ctx) => {
+        ctx.editMessageText(getSettingsMenuMessage(ctx.chatSession.chatSettings));
+      });
 
     return this.settingsDescriptionObj;
   }
