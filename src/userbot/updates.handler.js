@@ -20,7 +20,11 @@ const SWINDLER_SETTINGS = {
   APPEND_TO_SHEET: 0.85,
 };
 
-const swindlersTopUsed = Object.keys(dataset.swindlers_top_used);
+const swindlersTopUsed = Object.keys(dataset.swindlers_top_used || {});
+
+if (swindlersTopUsed.length === 0) {
+  console.info('WARN: swindlers_top_used are not generated! You need to run `npm run download-swindlers` to generate this file!');
+}
 
 class UpdatesHandler {
   /**
