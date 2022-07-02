@@ -4,7 +4,7 @@ const path = require('path');
 const CyrillicToTranslit = require('cyrillic-to-translit-js');
 
 const datasetPath = path.join(__dirname, './strings');
-const files = fs.readdirSync(datasetPath);
+const files = fs.readdirSync(datasetPath).filter((filePath) => path.extname(filePath) === '.json');
 const filePaths = files.map((filePath) => path.join(datasetPath, filePath));
 const fileKey = files.map((file) => file.split('.')[0]);
 

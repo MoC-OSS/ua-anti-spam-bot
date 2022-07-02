@@ -28,10 +28,11 @@ class GoogleService {
    * @param {string} spreadsheetId
    * @param {string} sheetName
    * @param {string} [range]
+   * @param {boolean} [compact=false]
    *
    * @returns {Promise<Record<string, any>[] | null>}
    * */
-  async getSheet(spreadsheetId, sheetName, range) {
+  async getSheet(spreadsheetId, sheetName, range, compact = false) {
     try {
       return await sheets.spreadsheets.values
         .get({
@@ -47,13 +48,17 @@ class GoogleService {
 
           return (
             response.data.values
-              .map((row, index) => ({
-                value: row[0],
-                index: sheetStartFrom + index,
-                sheetKey,
-                fullPath: `${sheetName}!${sheetKey}${sheetStartFrom + index}`,
-              }))
-              .filter((item) => !!item.value) || null
+              .map((row, index) =>
+                compact
+                  ? row[0]
+                  : {
+                      value: row[0],
+                      index: sheetStartFrom + index,
+                      sheetKey,
+                      fullPath: `${sheetName}!${sheetKey}${sheetStartFrom + index}`,
+                    },
+              )
+              .filter((item) => (compact ? !!item : !!item.value)) || null
           );
         });
     } catch (e) {

@@ -1,7 +1,4 @@
-const fs = require('fs');
-const { env } = require('typed-dotenv').config();
-
-const { googleService } = require('../src/services/google.service');
+const { swindlersGoogleService } = require('../src/services/swindlers-google.service');
 const { removeSimilar } = require('./remove-similar');
 
 const [, , type] = process.argv;
@@ -16,68 +13,65 @@ const urlRegexp =
 
 const processPromise = (response) =>
   response.map((item) => ({
-    value: item.value.replace(urlRegexp, ' ').replace(mentionRegexp, ' '),
-    label: item.value,
+    value: item.replace(urlRegexp, ' ').replace(mentionRegexp, ' '),
+    label: item,
   }));
 
 (async () => {
-  let trainData;
-  let testData;
-  const settings = {
-    path: '',
-    testRange: '',
-    trainRange: '',
-  };
+  const methodsMap = new Map([
+    [
+      'positives',
+      {
+        debugPath: './test-ps.json',
+        getTrainData: () => swindlersGoogleService.getTrainingPositives(),
+        getTestData: () => swindlersGoogleService.getTestingPositives(),
+        updateTrainData: swindlersGoogleService.updateTrainingPositives.bind(swindlersGoogleService),
+        updateTestData: swindlersGoogleService.updateTestingPositives.bind(swindlersGoogleService),
+        clearTrainData: swindlersGoogleService.clearTrainingPositives.bind(swindlersGoogleService),
+        clearTestData: swindlersGoogleService.clearTestingPositives.bind(swindlersGoogleService),
+      },
+    ],
+    [
+      'negatives',
+      {
+        debugPath: './test-ns.json',
+        getTrainData: () => swindlersGoogleService.getTrainingNegatives(),
+        getTestData: () => swindlersGoogleService.getTestingNegatives(),
+        updateTrainData: swindlersGoogleService.updateTrainingNegatives.bind(swindlersGoogleService),
+        updateTestData: swindlersGoogleService.updateTestingNegatives.bind(swindlersGoogleService),
+        clearTrainData: swindlersGoogleService.clearTrainingNegatives.bind(swindlersGoogleService),
+        clearTestData: swindlersGoogleService.clearTestingNegatives.bind(swindlersGoogleService),
+      },
+    ],
+  ]);
 
-  switch (type) {
-    case 'positives': {
-      settings.path = './test-ps.json';
-      settings.trainRange = 'B6:B';
-      settings.testRange = 'F6:F';
-      [trainData, testData] = await Promise.all(
-        [
-          googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, settings.trainRange),
-          googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, settings.testRange),
-        ].map((promise) => promise.then(processPromise)),
-      );
+  const methods = methodsMap.get(type);
 
-      break;
-    }
-
-    case 'negatives': {
-      settings.path = './test-ns.json';
-      settings.trainRange = 'A6:A';
-      settings.testRange = 'E6:E';
-      [trainData, testData] = await Promise.all(
-        [
-          googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, settings.trainRange),
-          googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, settings.testRange),
-        ].map((promise) => promise.then(processPromise)),
-      );
-      break;
-    }
-
-    default:
-      throw new Error('Invalid type');
+  if (!methods) {
+    throw new Error('Invalid type');
   }
 
-  const uniqueTrainSwindlers = await removeSimilar(trainData, 0.9);
+  const [trainData, testData] = await Promise.all(
+    [methods.getTrainData(), methods.getTestData()].map((promise) => promise.then(processPromise)),
+  );
+
+  const uniqueTrainSwindlers = await removeSimilar(removeDuplicates(trainData), 0.9);
   const newTrainData = uniqueTrainSwindlers
     .filter((item) => item[0].unique)
     .map((item) => item[0].first.label)
     .filter((item) => item.replace(urlRegexp, '').replace(mentionRegexp, '').trim());
-  const newTestData = [
+
+  const newTestData = removeDuplicates([
     ...testData.map((item) => item.label),
     ...uniqueTrainSwindlers.filter((item) => !item[0].unique).map((item) => item[0].first.label),
-  ].filter((item) => item.replace(urlRegexp, '').replace(mentionRegexp, '').trim());
+  ]).filter((item) => item.replace(urlRegexp, '').replace(mentionRegexp, '').trim());
 
-  const uniqueTestSwindlers = removeDuplicates(newTestData);
+  await methods.clearTrainData();
+  await methods.updateTrainData(newTrainData);
 
-  await googleService.clearSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, settings.trainRange);
-  await googleService.updateSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, newTrainData, settings.trainRange);
+  await methods.clearTestData();
+  await methods.updateTestData(newTestData);
 
-  await googleService.clearSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, settings.testRange);
-  await googleService.updateSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, newTestData, settings.testRange);
-
-  fs.writeFileSync(settings.path, JSON.stringify(uniqueTestSwindlers, null, 2));
+  // const uniqueTestSwindlers = removeDuplicates(newTestData);
+  // fs.writeFileSync(methods.debugPath, JSON.stringify(uniqueTestSwindlers, null, 2));
 })();
