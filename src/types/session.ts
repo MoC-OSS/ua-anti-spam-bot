@@ -40,6 +40,7 @@ export interface ChatSessionData {
   chatSettings: {
     disableStrategicInfo: boolean;
     disableDeleteMessage: boolean;
+    disableSwindlerMessage: boolean;
   }
 }
 

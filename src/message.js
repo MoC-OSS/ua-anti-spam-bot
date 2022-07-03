@@ -49,6 +49,7 @@ ${settings.disableStrategicInfo === true ? '⛔️ Бот не видаляє с
       ? '⛔️ Бот не повідомляє про видалені повідомлення.'
       : '✅ Бот повідомляє про видалені повідомлення.'
   }
+${settings.disableSwindlerMessage === true ? '⛔️ Бот не видаляє повідомлення шахраїв.' : '✅ Бот видаляє повідомлення шахраїв.'}
 
 Для зміни налаштувань, натисніть на відповідну кнопку.
 `.trim();
@@ -57,6 +58,7 @@ const settingsDescriptionButton = '📋 Опис налаштувань бота
 
 const deleteTensorButton = `${randomBanEmojis[0]} Видаляти стратегічну інформацію`;
 const deleteMessageButton = '❗ Повідомлення про причину видалення';
+const deleteSwindlerButton = '💰 Видаляти повідомлення шахраїв';
 
 const goBackButton = '⬅ Повернутись назад';
 
@@ -306,6 +308,7 @@ module.exports = {
   goBackButton,
   deleteMessageButton,
   deleteTensorButton,
+  deleteSwindlerButton,
   detailedSettingsDescription,
   settingsDescriptionButton,
   settingsDeleteItemMessage,

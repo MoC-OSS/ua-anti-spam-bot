@@ -1,6 +1,7 @@
 const {
   getSettingsMenuMessage,
   deleteMessageButton,
+  deleteSwindlerButton,
   deleteTensorButton,
   settingsSubmitMessage,
   settingsDescriptionButton,
@@ -35,6 +36,7 @@ class SettingsMiddleware {
       .addGlobalMiddlewares(onlyAdmin)
       .text(deleteTensorButton, (ctx) => toggleSetting(ctx, 'disableStrategicInfo'))
       .text(deleteMessageButton, (ctx) => toggleSetting(ctx, 'disableDeleteMessage'))
+      .text(deleteSwindlerButton, (ctx) => toggleSetting(ctx, 'disableSwindlerMessage'))
       .row()
       .submenu(settingsDescriptionButton, 'settingsDescriptionSubmenu', (ctx) => {
         ctx.editMessageText(detailedSettingsDescription).catch(handleError);
