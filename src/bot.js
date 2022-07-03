@@ -51,6 +51,7 @@ const {
 } = require('./bot/middleware');
 const { handleError, errorHandler, sleep } = require('./utils');
 const { logsChat, creatorId } = require('./creator');
+const { settingsAvailableMessage } = require('./message');
 
 /**
  * @typedef { import("grammy").GrammyError } GrammyError
@@ -169,9 +170,23 @@ const rootMenu = new Menu('root');
 
   bot.use(router);
 
-  bot
-    .errorBoundary(handleError)
-    .command('settings', deleteMessageMiddleware, onlyAdmin, errorHandler(settingsMiddleware.sendSettingsMenu()));
+  bot.errorBoundary(handleError).command(
+    'settings',
+    deleteMessageMiddleware,
+    onlyAdmin,
+    nestedMiddleware((ctx, next) => {
+      if (ctx.chat.type !== 'private') {
+        return next();
+      }
+    }, errorHandler(settingsMiddleware.sendSettingsMenu())),
+    (ctx, next) => {
+      if (ctx.chat.type === 'private') {
+        ctx.reply(settingsAvailableMessage);
+      }
+
+      return next();
+    },
+  );
 
   bot.errorBoundary(handleError).command('start', errorHandler(startMiddleware.middleware()));
   bot.errorBoundary(handleError).command(['help', 'status'], errorHandler(helpMiddleware.middleware()));
