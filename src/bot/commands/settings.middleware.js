@@ -4,8 +4,8 @@ const {
   deleteSwindlerButton,
   deleteTensorButton,
   settingsSubmitMessage,
-  settingsDescriptionButton,
-  detailedSettingsDescription,
+  // settingsDescriptionButton,
+  // detailedSettingsDescription,
   goBackButton,
 } = require('../../message');
 const { onlyAdmin } = require('../middleware');
@@ -37,10 +37,11 @@ class SettingsMiddleware {
       .text(deleteTensorButton, (ctx) => toggleSetting(ctx, 'disableStrategicInfo'))
       .text(deleteMessageButton, (ctx) => toggleSetting(ctx, 'disableDeleteMessage'))
       .text(deleteSwindlerButton, (ctx) => toggleSetting(ctx, 'disableSwindlerMessage'))
-      .row()
-      .submenu(settingsDescriptionButton, 'settingsDescriptionSubmenu', (ctx) => {
-        ctx.editMessageText(detailedSettingsDescription).catch(handleError);
-      })
+      // TODO UABOT-2 COMMENT UNTIL DESCRIPTION WILL BE AVAILABLE
+      // .row()
+      // .submenu(settingsDescriptionButton, 'settingsDescriptionSubmenu', (ctx) => {
+      //   ctx.editMessageText(detailedSettingsDescription).catch(handleError);
+      // })
       .row()
       .text(settingsSubmitMessage, (ctx) => {
         ctx.deleteMessage();

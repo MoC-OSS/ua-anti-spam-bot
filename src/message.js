@@ -28,6 +28,7 @@ const swindlersUpdateEndMessage = 'Оновлення спіску шахраї�
 /**
  * Generic - Settings
  * */
+const settingsAvailableMessage = '👨‍👩‍👧‍👦 Налаштування доступні тільки для групових чатів.';
 const settingsDeleteItemMessage = 'Повідомлення про видалення';
 const settingsSubmitMessage = '💾 Зберегти';
 const cancelMessageSending = 'Розсилка була відмінена!';
@@ -310,6 +311,7 @@ module.exports = {
   deleteTensorButton,
   deleteSwindlerButton,
   detailedSettingsDescription,
+  settingsAvailableMessage,
   settingsDescriptionButton,
   settingsDeleteItemMessage,
   settingsSubmitMessage,
