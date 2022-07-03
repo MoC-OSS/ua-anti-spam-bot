@@ -95,7 +95,7 @@ class OnTextListener {
           await ctx
             .deleteMessage()
             .then(() => {
-              if (ctx.chatSession.chatSettings.enableDeleteMessage === true) {
+              if (ctx.chatSession.chatSettings.disableDeleteMessage !== true) {
                 ctx.replyWithHTML(
                   getDeleteMessage({ writeUsername, userId, wordMessage: '', debugMessage, withLocation: rep.byRules.dataset.location }),
                 );
