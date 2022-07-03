@@ -28,7 +28,7 @@ class SettingsMiddleware {
       const newText = getSettingsMenuMessage(ctx.chatSession.chatSettings);
 
       if (ctx.msg.text !== newText) {
-        ctx.editMessageText(newText).catch(handleError);
+        ctx.editMessageText(newText, { parse_mode: 'HTML' }).catch(handleError);
       }
     };
 
@@ -53,7 +53,7 @@ class SettingsMiddleware {
     this.settingsDescriptionObj = new MiddlewareMenu('settingsDescriptionSubmenu')
       .addGlobalMiddlewares(onlyAdmin)
       .back(goBackButton, (ctx) => {
-        ctx.editMessageText(getSettingsMenuMessage(ctx.chatSession.chatSettings)).catch(handleError);
+        ctx.editMessageText(getSettingsMenuMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
       });
 
     return this.settingsDescriptionObj;
@@ -64,7 +64,7 @@ class SettingsMiddleware {
      * @param {GrammyContext} ctx
      * */
     const middleware = async (ctx) => {
-      ctx.reply(getSettingsMenuMessage(ctx.chatSession.chatSettings), { reply_markup: this.settingsMenuObj }).catch(() => {});
+      ctx.replyWithHTML(getSettingsMenuMessage(ctx.chatSession.chatSettings), { reply_markup: this.settingsMenuObj }).catch(() => {});
     };
 
     return middleware;
