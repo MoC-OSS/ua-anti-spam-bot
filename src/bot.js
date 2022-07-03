@@ -89,6 +89,9 @@ const rootMenu = new Menu('root');
 
   const startTime = new Date();
 
+  /**
+   * @type {GrammyBot}
+   * */
   const bot = new Bot(env.BOT_TOKEN);
 
   if (!env.DEBUG) {
