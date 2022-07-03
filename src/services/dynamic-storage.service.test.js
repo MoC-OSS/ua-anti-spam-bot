@@ -1,5 +1,5 @@
 const { DynamicStorageService } = require('./dynamic-storage.service');
-const { mockGoogleService, mockDataset } = require('./_mocks/index.mocks');
+const { mockSwindlersGoogleService, mockDataset } = require('./_mocks/index.mocks');
 
 /**
  * @type {DynamicStorageService}
@@ -7,7 +7,7 @@ const { mockGoogleService, mockDataset } = require('./_mocks/index.mocks');
 let dynamicStorageService;
 describe('DynamicStorageService', () => {
   beforeAll(() => {
-    dynamicStorageService = new DynamicStorageService(mockGoogleService, mockDataset);
+    dynamicStorageService = new DynamicStorageService(mockSwindlersGoogleService, mockDataset);
   });
 
   it('should init with mock dataset', () => {

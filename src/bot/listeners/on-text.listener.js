@@ -95,9 +95,11 @@ class OnTextListener {
           await ctx
             .deleteMessage()
             .then(() => {
-              ctx.replyWithHTML(
-                getDeleteMessage({ writeUsername, userId, wordMessage: '', debugMessage, withLocation: rep.byRules.dataset.location }),
-              );
+              if (ctx.chatSession.chatSettings.disableDeleteMessage !== true) {
+                ctx.replyWithHTML(
+                  getDeleteMessage({ writeUsername, userId, wordMessage: '', debugMessage, withLocation: rep.byRules.dataset.location }),
+                );
+              }
             })
             .catch(() => {
               if (

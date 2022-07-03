@@ -14,7 +14,7 @@ const { S3Service } = require('./services/s3.service');
 const { DynamicStorageService } = require('./services/dynamic-storage.service');
 const { SwindlersBotsService } = require('./services/swindlers-bots.service');
 const { SwindlersUrlsService } = require('./services/swindlers-urls.service');
-const { googleService } = require('./services/google.service');
+const { swindlersGoogleService } = require('./services/swindlers-google.service');
 
 const { initTensor } = require('./tensor/tensor.service');
 const { initSwindlersTensor } = require('./tensor/swindlers-tensor.service');
@@ -28,6 +28,7 @@ const {
   StartMiddleware,
   StatisticsMiddleware,
   UpdatesMiddleware,
+  SettingsMiddleware,
   SwindlersUpdateMiddleware,
 } = require('./bot/commands');
 const { OnTextListener, TestTensorListener } = require('./bot/listeners');
@@ -35,7 +36,11 @@ const {
   DeleteSwindlersMiddleware,
   GlobalMiddleware,
   botActiveMiddleware,
+  deleteMessageMiddleware,
+  ignoreBySettingsMiddleware,
   ignoreOld,
+  nestedMiddleware,
+  onlyAdmin,
   onlyCreator,
   onlyNotAdmin,
   onlyNotForwarded,
@@ -46,9 +51,7 @@ const {
 } = require('./bot/middleware');
 const { handleError, errorHandler, sleep } = require('./utils');
 const { logsChat, creatorId } = require('./creator');
-
-// TODO commented for settings feature
-// const { getSettingsMenuMessage, settingsSubmitMessage, settingsDeleteItemMessage } = require('./message');
+const { settingsAvailableMessage } = require('./message');
 
 /**
  * @typedef { import("grammy").GrammyError } GrammyError
@@ -72,27 +75,6 @@ if (error) {
 
 const rootMenu = new Menu('root');
 
-// TODO commented for settings feature
-// const menu = new Menu('settings')
-//   .text(
-//     (ctx) => (ctx.session.settings.disableDeleteMessage === false ? '⛔️' : '✅') + settingsDeleteItemMessage, // dynamic label
-//     (ctx) => {
-//       console.log('button press', ctx.session.settings.disableDeleteMessage);
-//       if (ctx.session.settings.disableDeleteMessage === false) {
-//         delete ctx.session.settings.disableDeleteMessage;
-//       } else {
-//         ctx.session.settings.disableDeleteMessage = false;
-//       }
-//
-//       ctx.editMessageText(getSettingsMenuMessage(ctx.session.settings));
-//     },
-//   )
-//   .row()
-//   .text(settingsSubmitMessage, (ctx) => {
-//     console.log(ctx);
-//     ctx.deleteMessage();
-//   });
-
 (async () => {
   console.info('Waiting for the old instance to down...');
   await sleep(env.DEBUG ? 0 : 5000);
@@ -108,6 +90,9 @@ const rootMenu = new Menu('root');
 
   const startTime = new Date();
 
+  /**
+   * @type {GrammyBot}
+   * */
   const bot = new Bot(env.BOT_TOKEN);
 
   if (!env.DEBUG) {
@@ -140,7 +125,7 @@ const rootMenu = new Menu('root');
 
   const redisSession = new RedisSession();
   const redisChatSession = new RedisChatSession();
-  const dynamicStorageService = new DynamicStorageService(googleService, dataset);
+  const dynamicStorageService = new DynamicStorageService(swindlersGoogleService, dataset);
   await dynamicStorageService.init();
 
   const swindlersBotsService = new SwindlersBotsService(dynamicStorageService, 0.6);
@@ -154,6 +139,7 @@ const rootMenu = new Menu('root');
   const swindlersUpdateMiddleware = new SwindlersUpdateMiddleware(dynamicStorageService);
   const statisticsMiddleware = new StatisticsMiddleware(startTime);
   const updatesMiddleware = new UpdatesMiddleware(startTime);
+  const settingsMiddleware = new SettingsMiddleware();
   const deleteSwindlersMiddleware = new DeleteSwindlersMiddleware(
     dynamicStorageService,
     swindlersTensorService,
@@ -168,6 +154,8 @@ const rootMenu = new Menu('root');
 
   rootMenu.register(tensorListener.initMenu(trainingThrottler));
   rootMenu.register(updatesMiddleware.initMenu());
+  rootMenu.register(settingsMiddleware.initMenu());
+  rootMenu.register(settingsMiddleware.initDescriptionSubmenu(), 'settingsMenu');
 
   bot.use(hydrateReply);
 
@@ -182,7 +170,23 @@ const rootMenu = new Menu('root');
 
   bot.use(router);
 
-  // TODO commented for settings feature
+  bot.errorBoundary(handleError).command(
+    'settings',
+    deleteMessageMiddleware,
+    onlyAdmin,
+    nestedMiddleware((ctx, next) => {
+      if (ctx.chat.type !== 'private') {
+        return next();
+      }
+    }, errorHandler(settingsMiddleware.sendSettingsMenu())),
+    (ctx, next) => {
+      if (ctx.chat.type === 'private') {
+        ctx.reply(settingsAvailableMessage);
+      }
+
+      return next();
+    },
+  );
 
   bot.errorBoundary(handleError).command('start', errorHandler(startMiddleware.middleware()));
   bot.errorBoundary(handleError).command(['help', 'status'], errorHandler(helpMiddleware.middleware()));
@@ -320,11 +324,6 @@ const rootMenu = new Menu('root');
   router.route('confirmation', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.confirmation()));
   router.route('messageSending', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.messageSending()));
 
-  // TODO commented for settings feature
-  // bot.command('settings', (ctx) => {
-  //   ctx.reply(getSettingsMenuMessage(ctx.session.settings), { reply_markup: menu });
-  // });
-
   bot
     .errorBoundary(handleError)
     .on(
@@ -337,10 +336,13 @@ const rootMenu = new Menu('root');
       onlyNotForwarded,
       onlyWithText,
       onlyWhenBotAdmin,
-      deleteSwindlersMiddleware.middleware(),
-      errorHandler(performanceStartMiddleware),
-      errorHandler(onTextListener.middleware()),
-      errorHandler(performanceEndMiddleware),
+      nestedMiddleware(ignoreBySettingsMiddleware('disableSwindlerMessage'), deleteSwindlersMiddleware.middleware()),
+      nestedMiddleware(
+        ignoreBySettingsMiddleware('disableStrategicInfo'),
+        errorHandler(performanceStartMiddleware),
+        errorHandler(onTextListener.middleware()),
+        errorHandler(performanceEndMiddleware),
+      ),
     );
 
   bot.catch(handleError);

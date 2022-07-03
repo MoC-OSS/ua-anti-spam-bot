@@ -1,7 +1,11 @@
 const botActiveMiddlewareExports = require('./bot-active.middleware');
+const deleteMessageMiddlewareExports = require('./delete-message.middleware');
 const deleteSwindlersMiddlewareExports = require('./delete-swindlers.middleware');
 const globalMiddlewareExports = require('./global.middleware');
+const ignoreBySettingsMiddlewareExports = require('./ignore-by-settings.middleware');
 const ignoreOldExports = require('./ignore-old.middleware');
+const nestedMiddlewareExports = require('./nested.middleware');
+const onlyAdmin = require('./only-admin.middleware');
 const onlyCreator = require('./only-creator.middleware');
 const onlyNotAdminMiddlewareExports = require('./only-not-admin.middleware');
 const onlyNotForwardedMiddlewareExports = require('./only-not-forwarded.middleware');
@@ -12,9 +16,13 @@ const performanceStartMiddlewareExports = require('./performance-start.middlewar
 
 module.exports = {
   ...botActiveMiddlewareExports,
+  ...deleteMessageMiddlewareExports,
   ...deleteSwindlersMiddlewareExports,
   ...globalMiddlewareExports,
+  ...ignoreBySettingsMiddlewareExports,
   ...ignoreOldExports,
+  ...nestedMiddlewareExports,
+  ...onlyAdmin,
   ...onlyCreator,
   ...onlyNotAdminMiddlewareExports,
   ...onlyNotForwardedMiddlewareExports,
