@@ -37,7 +37,9 @@ const {
   GlobalMiddleware,
   botActiveMiddleware,
   deleteMessageMiddleware,
+  ignoreBySettingsMiddleware,
   ignoreOld,
+  nestedMiddleware,
   onlyAdmin,
   onlyCreator,
   onlyNotAdmin,
@@ -316,10 +318,13 @@ const rootMenu = new Menu('root');
       onlyNotForwarded,
       onlyWithText,
       onlyWhenBotAdmin,
-      deleteSwindlersMiddleware.middleware(),
-      errorHandler(performanceStartMiddleware),
-      errorHandler(onTextListener.middleware()),
-      errorHandler(performanceEndMiddleware),
+      nestedMiddleware(ignoreBySettingsMiddleware('disableSwindlerMessage'), deleteSwindlersMiddleware.middleware()),
+      nestedMiddleware(
+        ignoreBySettingsMiddleware('disableStrategicInfo'),
+        errorHandler(performanceStartMiddleware),
+        errorHandler(onTextListener.middleware()),
+        errorHandler(performanceEndMiddleware),
+      ),
     );
 
   bot.catch(handleError);
