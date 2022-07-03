@@ -3,6 +3,9 @@ const { env } = require('typed-dotenv').config();
 const { helpChat } = require('./creator');
 const { getRandomItem } = require('./utils');
 
+const randomBanEmojis = ['👮🏻‍♀️', '🤦🏼‍♀️', '🙅🏻‍♀️'];
+const randomLocationBanEmojis = ['🏡', '🏘️', '🌳'];
+
 /**
  * Generic
  * */
@@ -32,13 +35,34 @@ const cancelMessageSending = 'Розсилка була відмінена!';
  * Complex - Settings
  * */
 
-const getSettingsMenuMessage = ({ disableDeleteMessage }) =>
+/**
+ * @param {ChatSessionData['chatSettings']} settings
+ * */
+const getSettingsMenuMessage = (settings) =>
   `
-🤖 Налаштування бота.
+<b>🤖 Налаштування бота в поточному чаті.</b>
 Тут ви можете регулювати параметри.
 
-${disableDeleteMessage === false ? '⛔️ Бот не повідомляє про видалені повідомлення' : '✅ Бот повідомляє про видалені повідомлення'}
+🚀 ${settings.disableStrategicInfo === true ? '⛔️ Бот не видаляє стратегічну інформацію.' : '✅ Бот видаляє стратегічну інформацію.'}
+❗ ${
+    settings.disableStrategicInfo === true || settings.disableDeleteMessage === true
+      ? '⛔️ Бот не повідомляє про видалену стратегічну інформацію.'
+      : '✅ Бот повідомляє про видалену стратегічну інформацію.'
+  }
+💰 ${settings.disableSwindlerMessage === true ? '⛔️ Бот не видаляє повідомлення шахраїв.' : '✅ Бот видаляє повідомлення шахраїв.'}
+
+Для зміни налаштувань, натисніть на відповідну кнопку нижче. 👇
 `.trim();
+
+const settingsDescriptionButton = '📋 Опис налаштувань бота в поточному чаті';
+
+const deleteTensorButton = `🚀 Інцидент`;
+const deleteMessageButton = '❗ Причина';
+const deleteSwindlerButton = '💰 Шахраї';
+
+const goBackButton = '⬅ Повернутись назад';
+
+const detailedSettingsDescription = '📋 Детальний опиc всіх налаштувань';
 
 /**
  *
@@ -64,9 +88,6 @@ const startMessageAtom = `
  *
  * */
 const getDeclinedMassSendingMessage = 'Вибач, але у тебе немає прав для цієї команди.😞'.trim();
-
-const randomBanEmojis = ['👮🏻‍♀️', '🤦🏼‍♀️', '🙅🏻‍♀️'];
-const randomLocationBanEmojis = ['🏡', '🏘️', '🌳'];
 
 /**
  *
@@ -284,6 +305,12 @@ const getTensorTestResult = ({ chance, isSpam }) =>
  *
  * */
 module.exports = {
+  goBackButton,
+  deleteMessageButton,
+  deleteTensorButton,
+  deleteSwindlerButton,
+  detailedSettingsDescription,
+  settingsDescriptionButton,
   settingsDeleteItemMessage,
   settingsSubmitMessage,
   memberReadyMessage,

@@ -62,6 +62,9 @@ class GlobalMiddleware {
   updateChatInfo(ctx) {
     ctx.chatSession.chatType = ctx.chat?.type;
     ctx.chatSession.chatTitle = ctx.chat?.title;
+    if (ctx.chatSession.chatSettings === undefined) {
+      ctx.chatSession.chatSettings = {};
+    }
     ctx
       .getChatMembersCount()
       .then((count) => {

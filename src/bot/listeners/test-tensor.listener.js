@@ -70,10 +70,8 @@ class TestTensorListener {
       switch (state) {
         case 'negatives':
           return googleService.appendToSheet(sheetId, sheetNegativeName, word);
-
         case 'positives':
           return googleService.appendToSheet(sheetId, sheetPositiveName, word);
-
         default:
           throw new Error(`Invalid state: ${state}`);
       }
