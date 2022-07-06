@@ -1,0 +1,35 @@
+class SwindlersCardsService {
+  /**
+   * @param {DynamicStorageService} dynamicStorageService
+   * */
+  constructor(dynamicStorageService) {
+    this.dynamicStorageService = dynamicStorageService;
+    this.cards = this.dynamicStorageService.swindlerCards;
+
+    this.cardRegex = /\d{4}.?\d{4}.?\d{4}.?\d{4}/g;
+
+    this.dynamicStorageService.fetchEmmiter.on('fetch', () => {
+      this.cards = this.dynamicStorageService.swindlerCards;
+    });
+  }
+
+  /**
+   * @param {string} message - raw message from user to parse
+   *
+   * @returns {string[]}
+   */
+  parseCards(message) {
+    return (message.match(this.cardRegex) || []).map((card) => card.replace(/\D/g, '')).filter(Boolean);
+  }
+
+  /**
+   * @param {string} name
+   */
+  isSpam(name) {
+    return this.cards.includes(name);
+  }
+}
+
+module.exports = {
+  SwindlersCardsService,
+};
