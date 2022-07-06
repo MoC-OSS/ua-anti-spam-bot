@@ -30,9 +30,9 @@ function removeDuplicates(array) {
  * */
 const autoSwindlers = async (swindlers, swindlersBots) => {
   function findSwindlersByPattern(items, pattern) {
-    return removeDuplicates([...items, ...swindlers.map((message) => message.match(pattern) || []).flat()])
-      .filter((item) => !notSwindlers.includes(item))
-      .sort();
+    return removeDuplicates([...items, ...swindlers.map((message) => message.match(pattern) || []).flat()]).filter(
+      (item) => !notSwindlers.includes(item),
+    );
   }
 
   await dynamicStorageService.init();
