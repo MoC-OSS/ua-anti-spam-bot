@@ -42,6 +42,7 @@ const mockSwindlersGoogleService = {
   getTrainingPositives: getCompactSheet,
   getBots: getCompactSheet,
   getDomains: getCompactSheet,
+  getCards: jest.fn(() => Promise.resolve(['4222422242224222'])),
   getNotSwindlers: () => [],
 };
 
@@ -56,6 +57,7 @@ const mockDataset = {
     '@Diia_helper_2022_bot',
     '@Diia_helpps_bot',
   ],
+  swindlers_cards: ['4222422242224222'],
   immediately: ['test'],
   swindlers_domains: ['olx-ua.darpays.site', 'olx-ua.europe-pays.site', 'olx-ua.glob-payments.site', 'olx-ua.lightpays.online'],
 };

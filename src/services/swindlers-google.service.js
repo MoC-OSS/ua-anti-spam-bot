@@ -20,6 +20,7 @@ class SwindlersGoogleService {
       TESTING_POSITIVES: 'F6:F',
       SITES: 'G6:G',
       USERS: 'H6:H',
+      CARDS: 'I6:I',
       NOT_SWINDLERS: 'J6:J',
     };
   }
@@ -209,6 +210,16 @@ class SwindlersGoogleService {
 
   getUsers() {
     return this.getSheet(this.RANGES.USERS);
+  }
+
+  /**
+   *
+   * @namespace Cards
+   *
+   * */
+
+  getCards() {
+    return this.getSheet(this.RANGES.CARDS);
   }
 
   /**

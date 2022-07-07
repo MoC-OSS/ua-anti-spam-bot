@@ -11,6 +11,7 @@ class DynamicStorageService {
     this.swindlerMessages = [];
     this.swindlerBots = dataset.swindlers_bots || [];
     this.swindlerDomains = dataset.swindlers_domains || [];
+    this.swindlerCards = dataset.swindlers_cards || [];
     this.notSwindlers = [];
     this.fetchEmmiter = new EventEmitter();
   }
@@ -28,13 +29,15 @@ class DynamicStorageService {
       this.swindlersGoogleService.getBots(),
       this.swindlersGoogleService.getDomains(),
       this.swindlersGoogleService.getNotSwindlers(),
+      this.swindlersGoogleService.getCards(),
     ]);
 
-    return cases.then(([swindlerPositives, swindlerBots, swindlerDomains, notSwindlers]) => {
+    return cases.then(([swindlerPositives, swindlerBots, swindlerDomains, notSwindlers, swindlerCards]) => {
       this.swindlerMessages = this.removeDuplicates(swindlerPositives).map(optimizeText).filter(Boolean);
       this.swindlerBots = this.removeDuplicates(swindlerBots);
       this.swindlerDomains = this.removeDuplicates(swindlerDomains);
       this.notSwindlers = this.removeDuplicates(notSwindlers);
+      this.swindlerCards = this.removeDuplicates(swindlerCards);
       this.fetchEmmiter.emit('fetch');
       console.info('got DynamicStorageService messages', new Date());
     });

@@ -1,30 +1,14 @@
-const { optimizeText } = require('ukrainian-ml-optimizer');
-const stringSimilarity = require('string-similarity');
-const { env } = require('typed-dotenv').config();
-
 const { InputFile } = require('grammy');
 const { logsChat } = require('../../creator');
 const { handleError, compareDatesWithOffset, telegramUtil } = require('../../utils');
 const { getCannotDeleteMessage } = require('../../message');
 
-const SWINDLER_SETTINGS = {
-  DELETE_CHANCE: 0.8,
-  LOG_CHANGE: 0.5,
-};
-
 class DeleteSwindlersMiddleware {
   /**
-   * @param {DynamicStorageService} dynamicStorageService
-   * @param {SwindlersTensorService} swindlersTensorService
-   * @param {SwindlersBotsService} swindlersBotsService
-   * @param {SwindlersUrlsService} swindlersUrlsService
+   * @param {SwindlersDetectService} swindlersDetectService
    * */
-  constructor(dynamicStorageService, swindlersTensorService, swindlersBotsService, swindlersUrlsService) {
-    this.dynamicStorageService = dynamicStorageService;
-    this.swindlersTensorService = swindlersTensorService;
-    this.swindlersTensorService = swindlersTensorService;
-    this.swindlersBotsService = swindlersBotsService;
-    this.swindlersUrlsService = swindlersUrlsService;
+  constructor(swindlersDetectService) {
+    this.swindlersDetectService = swindlersDetectService;
   }
 
   middleware() {
@@ -37,63 +21,19 @@ class DeleteSwindlersMiddleware {
     const middleware = async (ctx, next) => {
       const message = ctx.state.text;
 
-      const notSwindlers = ['@Diia_help_bot'];
-      if (notSwindlers.some((item) => message.includes(item))) {
-        return next();
+      const result = await this.swindlersDetectService.isSwindlerMessage(message);
+
+      if (result.isSpam) {
+        this.saveSwindlersMessage(ctx, result.rate, result.reason);
+        this.removeMessage(ctx);
+        return;
       }
 
-      const foundSwindlerUrl = this.swindlersUrlsService.processMessage(message);
-
-      if (foundSwindlerUrl) {
-        this.saveSwindlersMessage(ctx, foundSwindlerUrl.rate, 'site');
-        return this.removeMessage(ctx);
+      if (!result.isSpam && result.reason === 'compare') {
+        this.saveSwindlersMessage(ctx, result.rate, result.reason);
       }
 
-      const foundSwindlerMention = this.swindlersBotsService.processMessage(message);
-
-      if (foundSwindlerMention) {
-        this.saveSwindlersMessage(ctx, foundSwindlerMention.rate, `mention (${foundSwindlerMention.nearestName})`);
-        return this.removeMessage(ctx);
-      }
-
-      const { isSpam, spamRate } = await this.swindlersTensorService.predict(message);
-
-      if (isSpam) {
-        this.saveSwindlersMessage(ctx, spamRate, 'tensor');
-        return this.removeMessage(ctx);
-      }
-
-      if (spamRate < 0.2) {
-        return next();
-      }
-
-      const processedMessage = optimizeText(message);
-
-      let lastChance = 0;
-      let maxChance = 0;
-      const foundSwindler = this.dynamicStorageService.swindlerMessages.some((text) => {
-        lastChance = stringSimilarity.compareTwoStrings(processedMessage, text);
-
-        if (lastChance > maxChance) {
-          maxChance = lastChance;
-        }
-
-        return lastChance >= SWINDLER_SETTINGS.DELETE_CHANCE;
-      });
-
-      if (maxChance > SWINDLER_SETTINGS.LOG_CHANGE) {
-        this.saveSwindlersMessage(ctx, maxChance, 'compare');
-      }
-
-      if (env.DEBUG) {
-        ctx.reply([foundSwindler, processedMessage, maxChance].join('\n')).catch(handleError);
-      }
-
-      if (foundSwindler) {
-        return this.removeMessage(ctx);
-      }
-
-      next();
+      return next();
     };
 
     return middleware;
