@@ -28,6 +28,18 @@ class SwindlersCardsService {
   isSpam(name) {
     return this.cards.includes(name);
   }
+
+  /**
+   * @param {string} message - raw message from user to parse
+   */
+  processMessage(message) {
+    const cards = this.parseCards(message);
+    if (cards.length && cards.some((card) => this.cards.includes(card))) {
+      return true;
+    }
+
+    return null;
+  }
 }
 
 module.exports = {

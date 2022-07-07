@@ -48,6 +48,16 @@ class SwindlersDetectService {
       };
     }
 
+    const foundCard = this.swindlersCardsService.processMessage(message);
+
+    if (foundCard) {
+      return {
+        isSpam: true,
+        rate: 200,
+        reason: 'card',
+      };
+    }
+
     const { isSpam, spamRate } = await this.swindlersTensorService.predict(message);
 
     if (isSpam) {
@@ -58,13 +68,13 @@ class SwindlersDetectService {
       };
     }
 
-    if (spamRate < 0.5) {
-      return {
-        isSpam: false,
-        rate: spamRate,
-        reason: 'low tensor rate',
-      };
-    }
+    // if (spamRate < 0.2) {
+    //   return {
+    //     isSpam: false,
+    //     rate: spamRate,
+    //     reason: 'low tensor rate',
+    //   };
+    // }
 
     const processedMessage = optimizeText(message);
 
