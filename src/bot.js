@@ -13,6 +13,8 @@ const { redisService } = require('./services/redis.service');
 const { S3Service } = require('./services/s3.service');
 const { DynamicStorageService } = require('./services/dynamic-storage.service');
 const { SwindlersBotsService } = require('./services/swindlers-bots.service');
+const { SwindlersCardsService } = require('./services/swindlers-cards.service');
+const { SwindlersDetectService } = require('./services/swindlers-detect.service');
 const { SwindlersUrlsService } = require('./services/swindlers-urls.service');
 const { swindlersGoogleService } = require('./services/swindlers-google.service');
 
@@ -58,6 +60,7 @@ const { settingsAvailableMessage } = require('./message');
  * @typedef { import("@grammyjs/types/manage").BotCommand } BotCommand
  * @typedef { import("./types").GrammyContext } GrammyContext
  * @typedef { import("./types").SessionObject } SessionObject
+ * @typedef { import("./types").GrammyMiddleware } GrammyMiddleware
  */
 
 /**
@@ -130,6 +133,15 @@ const rootMenu = new Menu('root');
 
   const swindlersBotsService = new SwindlersBotsService(dynamicStorageService, 0.6);
   const swindlersUrlsService = new SwindlersUrlsService(dynamicStorageService, 0.8);
+  const swindlersCardsService = new SwindlersCardsService(dynamicStorageService);
+
+  const swindlersDetectService = new SwindlersDetectService(
+    dynamicStorageService,
+    swindlersBotsService,
+    swindlersCardsService,
+    swindlersUrlsService,
+    swindlersTensorService,
+  );
 
   const globalMiddleware = new GlobalMiddleware(bot);
 
@@ -140,12 +152,7 @@ const rootMenu = new Menu('root');
   const statisticsMiddleware = new StatisticsMiddleware(startTime);
   const updatesMiddleware = new UpdatesMiddleware(startTime);
   const settingsMiddleware = new SettingsMiddleware();
-  const deleteSwindlersMiddleware = new DeleteSwindlersMiddleware(
-    dynamicStorageService,
-    swindlersTensorService,
-    swindlersBotsService,
-    swindlersUrlsService,
-  );
+  const deleteSwindlersMiddleware = new DeleteSwindlersMiddleware(swindlersDetectService);
 
   const messageHandler = new MessageHandler(tensorService);
 
