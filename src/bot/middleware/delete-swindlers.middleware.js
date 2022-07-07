@@ -63,7 +63,7 @@ class DeleteSwindlersMiddleware {
         return this.removeMessage(ctx);
       }
 
-      if (spamRate < 0.5) {
+      if (spamRate < 0.2) {
         return next();
       }
 
