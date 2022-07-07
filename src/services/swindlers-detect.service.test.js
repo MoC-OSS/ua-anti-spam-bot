@@ -1,4 +1,4 @@
-const { mockDynamicStorageService, mockNewUrl } = require('./_mocks/index.mocks');
+const { mockDynamicStorageService, mockNewUrl, mockNewBot } = require('./_mocks/index.mocks');
 const { SwindlersBotsService } = require('./swindlers-bots.service');
 const { SwindlersCardsService } = require('./swindlers-cards.service');
 const { SwindlersDetectService } = require('./swindlers-detect.service');
@@ -31,20 +31,33 @@ describe('SwindlersDetectService', () => {
   });
 
   describe('isSwindlerMessage', () => {
-    it('should match swindler urls as spam', async () => {
-      const text = 'https://da-pay.me/ тест';
-      const result = await swindlersDetectService.isSwindlerMessage(text);
+    describe('swindlersUrlsService', () => {
+      it('should match swindler urls as spam', async () => {
+        const text = 'https://da-pay.me/ тест';
+        const result = await swindlersDetectService.isSwindlerMessage(text);
 
-      expect(result).toEqual({ isSpam: true, rate: 200, reason: 'site' });
+        expect(result).toEqual({ isSpam: true, rate: 200, reason: 'site' });
+      });
+
+      it('should match similar swindler urls as spam', async () => {
+        const text = `${mockNewUrl} test`;
+        const result = await swindlersDetectService.isSwindlerMessage(text);
+
+        expect(result.isSpam).toEqual(true);
+        expect(result.rate).toBeGreaterThan(0.6);
+        expect(result.reason).toEqual('site');
+      });
     });
 
-    it('should match similar swindler urls as spam', async () => {
-      const text = `${mockNewUrl} test`;
-      const result = await swindlersDetectService.isSwindlerMessage(text);
+    describe('swindlersBotsService', () => {
+      it('should process message any find swindlers bots', async () => {
+        const text = `test message ${mockNewBot} with swindler bot`;
+        const result = await swindlersDetectService.isSwindlerMessage(text);
 
-      expect(result.isSpam).toEqual(true);
-      expect(result.rate).toBeGreaterThan(0.6);
-      expect(result.reason).toEqual('site');
+        expect(result.isSpam).toBeTruthy();
+        expect(result.rate).toBeGreaterThan(0.6);
+        expect(result.reason).toEqual('mention (@Diia_aid_bot)');
+      });
     });
   });
 });
