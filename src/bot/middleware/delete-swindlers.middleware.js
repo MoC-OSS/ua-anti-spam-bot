@@ -23,6 +23,8 @@ class DeleteSwindlersMiddleware {
 
       const result = await this.swindlersDetectService.isSwindlerMessage(message);
 
+      ctx.state.swindlersResult = result;
+
       if (result.isSpam) {
         this.saveSwindlersMessage(ctx, result.rate, result.reason);
         this.removeMessage(ctx);

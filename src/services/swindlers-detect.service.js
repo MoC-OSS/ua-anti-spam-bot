@@ -28,43 +28,52 @@ class SwindlersDetectService {
    * @param {string} message - message to process
    * */
   async isSwindlerMessage(message) {
+    const results = {};
     const foundSwindlerUrl = this.swindlersUrlsService.processMessage(message);
+    results.foundSwindlerUrl = foundSwindlerUrl;
 
     if (foundSwindlerUrl) {
       return {
         isSpam: true,
         rate: foundSwindlerUrl.rate,
         reason: 'site',
+        results,
       };
     }
 
     const foundSwindlerMention = this.swindlersBotsService.processMessage(message);
+    results.foundSwindlerMention = foundSwindlerMention;
 
     if (foundSwindlerMention) {
       return {
         isSpam: true,
         rate: foundSwindlerMention.rate,
         reason: `mention (${foundSwindlerMention.nearestName})`,
+        results,
       };
     }
 
     const foundCard = this.swindlersCardsService.processMessage(message);
+    results.foundCard = foundCard;
 
     if (foundCard) {
       return {
         isSpam: true,
         rate: 200,
         reason: 'card',
+        results,
       };
     }
 
-    const { isSpam, spamRate } = await this.swindlersTensorService.predict(message);
+    const foundTensor = await this.swindlersTensorService.predict(message);
+    results.foundTensor = foundTensor;
 
-    if (isSpam) {
+    if (foundTensor.isSpam) {
       return {
         isSpam: true,
-        rate: spamRate,
+        rate: foundTensor.spamRate,
         reason: 'tensor',
+        results,
       };
     }
 
@@ -89,12 +98,17 @@ class SwindlersDetectService {
 
       return lastChance >= this.SWINDLER_SETTINGS.DELETE_CHANCE;
     });
+    results.foundCompare = {
+      foundSwindler,
+      spamRate: maxChance,
+    };
 
     if (foundSwindler) {
       return {
         isSpam: true,
         rate: maxChance,
         reason: 'compare',
+        results,
       };
     }
 
@@ -103,6 +117,7 @@ class SwindlersDetectService {
         isSpam: false,
         rate: maxChance,
         reason: 'compare',
+        results,
       };
     }
 
@@ -110,6 +125,7 @@ class SwindlersDetectService {
       isSpam: false,
       rate: 0,
       reason: 'no match',
+      results,
     };
   }
 }
