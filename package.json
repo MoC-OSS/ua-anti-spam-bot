@@ -52,10 +52,12 @@
     "string-similarity": "^4.0.4",
     "typed-dotenv": "^10.0.1",
     "typegram": "^3.8.0",
-    "ukrainian-ml-optimizer": "github:DrSmile444/ukrainian-ml-optimizer"
+    "ukrainian-ml-optimizer": "github:DrSmile444/ukrainian-ml-optimizer",
+    "validator": "^13.7.0"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^16.2.1",
+    "@types/validator": "^13.7.4",
     "branch-name-lint": "^2.1.1",
     "commitlint": "^16.2.3",
     "cors": "^2.8.5",
