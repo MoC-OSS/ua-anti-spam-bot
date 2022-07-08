@@ -36,7 +36,9 @@ describe('SwindlersDetectService', () => {
         const text = 'https://da-pay.me/ тест';
         const result = await swindlersDetectService.isSwindlerMessage(text);
 
-        expect(result).toEqual({ isSpam: true, rate: 200, reason: 'site' });
+        expect(result.isSpam).toEqual(true);
+        expect(result.rate).toEqual(200);
+        expect(result.reason).toEqual('site');
       });
 
       it('should match similar swindler urls as spam', async () => {

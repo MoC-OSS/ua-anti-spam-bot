@@ -70,7 +70,7 @@ class OnTextListener {
         }
 
         if (ctx.chat.id === creatorId) {
-          ctx.reply(JSON.stringify({ ...rep.byRules.dataset, message }, null, 2));
+          ctx.reply(JSON.stringify({ ...rep.byRules.dataset, swindlersResult: ctx.state.swindlersResult, message }, null, 2));
         }
       }
 

@@ -3,11 +3,13 @@ const { urlRegexp } = require('ukrainian-ml-optimizer');
 const { swindlersRegex } = require('../src/creator');
 const { DynamicStorageService } = require('../src/services/dynamic-storage.service');
 const { SwindlersUrlsService } = require('../src/services/swindlers-urls.service');
+const { SwindlersCardsService } = require('../src/services/swindlers-cards.service');
 const { swindlersGoogleService } = require('../src/services/swindlers-google.service');
 const { dataset } = require('./dataset');
 
 const dynamicStorageService = new DynamicStorageService(swindlersGoogleService, dataset);
 const swindlersUrlsService = new SwindlersUrlsService(dynamicStorageService, 0.6);
+const swindlersCardsService = new SwindlersCardsService(dynamicStorageService);
 
 const notSwindlers = [
   '@alinaaaawwaa',
@@ -20,6 +22,12 @@ const notSwindlers = [
 
 const mentionRegexp = /\B@\w+/g;
 
+/**
+ * @template T
+ * @param {T} array
+ *
+ * @returns {T}
+ * */
 function removeDuplicates(array) {
   return [...new Set(array)];
 }
@@ -27,8 +35,9 @@ function removeDuplicates(array) {
 /**
  * @param {string[]} swindlers
  * @param {string[]} swindlersBots
+ * @param {string[]} swindlersCards
  * */
-const autoSwindlers = async (swindlers, swindlersBots) => {
+const autoSwindlers = async (swindlers, swindlersBots, swindlersCards) => {
   function findSwindlersByPattern(items, pattern) {
     return removeDuplicates([...items, ...swindlers.map((message) => message.match(pattern) || []).flat()]).filter(
       (item) => !notSwindlers.includes(item),
@@ -65,6 +74,7 @@ const autoSwindlers = async (swindlers, swindlersBots) => {
     .filter((item) => item !== 't.me');
 
   const newSwindlersBots = findSwindlersByPattern(swindlersBots, mentionRegexp);
+  const newSwindlersCards = removeDuplicates([...swindlersCards, swindlers.map((item) => swindlersCardsService.parseCards(item)).flat()]);
 
   const notMatchedUrls = swindlersUrls.filter((item) => urlRegexp.test(item)).filter((item) => !swindlersRegex.test(item));
 
@@ -76,6 +86,7 @@ const autoSwindlers = async (swindlers, swindlersBots) => {
   await swindlersGoogleService.updateBots(newSwindlersBots);
   await swindlersGoogleService.updateDomains(swindlersDomains);
   await swindlersGoogleService.updateSites(swindlersUrls);
+  await swindlersGoogleService.updateCards(newSwindlersCards);
 
   process.exit(0);
 };

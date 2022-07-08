@@ -223,6 +223,13 @@ class SwindlersGoogleService {
   }
 
   /**
+   * @param {string[]} cards
+   */
+  updateCards(cards) {
+    return this.updateSheet(this.RANGES.CARDS, cards);
+  }
+
+  /**
    *
    * @namespace Not swindlers
    *
