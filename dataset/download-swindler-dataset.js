@@ -6,13 +6,14 @@ const cases = Promise.all([
   swindlersGoogleService.getTrainingPositives(),
   swindlersGoogleService.getBots(),
   swindlersGoogleService.getTestingPositives(),
+  swindlersGoogleService.getCards(),
 ]);
 
 console.info('Loading training messages...');
 
-cases.then(async ([positives, newSwindlersBots, testPositives]) => {
+cases.then(async ([positives, newSwindlersBots, testPositives, swindlersCards]) => {
   console.info('Received training messages.');
 
   getSwindlersTopUsed([...positives, ...testPositives]);
-  await autoSwindlers([...positives, ...testPositives], newSwindlersBots);
+  await autoSwindlers([...positives, ...testPositives], newSwindlersBots, swindlersCards);
 });

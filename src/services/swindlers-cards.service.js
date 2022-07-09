@@ -1,3 +1,5 @@
+const { isCreditCard } = require('validator');
+
 class SwindlersCardsService {
   /**
    * @param {DynamicStorageService} dynamicStorageService
@@ -19,7 +21,9 @@ class SwindlersCardsService {
    * @returns {string[]}
    */
   parseCards(message) {
-    return (message.match(this.cardRegex) || []).map((card) => card.replace(/\D/g, '')).filter(Boolean);
+    return (message.match(this.cardRegex) || [])
+      .map((card) => card.replace(/\D/g, ''))
+      .filter((card) => card && card.length === 16 && isCreditCard(card));
   }
 
   /**
