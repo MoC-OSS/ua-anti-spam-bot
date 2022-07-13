@@ -32,7 +32,6 @@ class DynamicStorageService {
       this.swindlersGoogleService.getNotSwindlers(),
       this.swindlersGoogleService.getCards(),
       this.swindlersGoogleService.getSiteRegex(),
-      this.swindlersGoogleService.getUsers(),
     ]);
 
     return cases.then(([swindlerPositives, swindlerBots, swindlerDomains, notSwindlers, swindlerCards, swindlerRegexSites]) => {

@@ -44,6 +44,7 @@ const mockSwindlersGoogleService = {
   getDomains: getCompactSheet,
   getCards: jest.fn(() => Promise.resolve(['4222422242224222'])),
   getNotSwindlers: () => [],
+  getSiteRegex: () => [],
 };
 
 const mockDataset = {
@@ -60,6 +61,7 @@ const mockDataset = {
   swindlers_cards: ['4222422242224222'],
   immediately: ['test'],
   swindlers_domains: ['olx-ua.darpays.site', 'olx-ua.europe-pays.site', 'olx-ua.glob-payments.site', 'olx-ua.lightpays.online'],
+  swindlers_regex_sites: ['privat24.', 'orpay', 'da-pay'],
 };
 
 const mockDynamicStorageService = new DynamicStorageService(mockSwindlersGoogleService, mockDataset);
