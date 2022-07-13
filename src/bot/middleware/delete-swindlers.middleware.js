@@ -26,13 +26,13 @@ class DeleteSwindlersMiddleware {
       ctx.state.swindlersResult = result;
 
       if (result.isSpam) {
-        this.saveSwindlersMessage(ctx, result.rate, result.reason);
+        this.saveSwindlersMessage(ctx, result.rate, result.displayReason || result.reason);
         this.removeMessage(ctx);
         return;
       }
 
       if (!result.isSpam && result.reason === 'compare') {
-        this.saveSwindlersMessage(ctx, result.rate, result.reason);
+        this.saveSwindlersMessage(ctx, result.rate, result.displayReason || result.reason);
       }
 
       return next();
