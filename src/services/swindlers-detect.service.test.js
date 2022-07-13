@@ -58,7 +58,8 @@ describe('SwindlersDetectService', () => {
 
         expect(result.isSpam).toBeTruthy();
         expect(result.rate).toBeGreaterThan(0.6);
-        expect(result.reason).toEqual('mention (@Diia_aid_bot)');
+        expect(result.reason).toEqual('mention');
+        expect(result.match).toEqual('@Diia_aid_bot');
       });
     });
   });

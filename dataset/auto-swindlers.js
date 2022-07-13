@@ -1,6 +1,5 @@
 const { urlRegexp } = require('ukrainian-ml-optimizer');
 
-const { swindlersRegex } = require('../src/creator');
 const { DynamicStorageService } = require('../src/services/dynamic-storage.service');
 const { SwindlersUrlsService } = require('../src/services/swindlers-urls.service');
 const { SwindlersCardsService } = require('../src/services/swindlers-cards.service');
@@ -76,7 +75,9 @@ const autoSwindlers = async (swindlers, swindlersBots, swindlersCards) => {
   const newSwindlersBots = findSwindlersByPattern(swindlersBots, mentionRegexp);
   const newSwindlersCards = removeDuplicates([...swindlersCards, swindlers.map((item) => swindlersCardsService.parseCards(item)).flat()]);
 
-  const notMatchedUrls = swindlersUrls.filter((item) => urlRegexp.test(item)).filter((item) => !swindlersRegex.test(item));
+  const notMatchedUrls = swindlersUrls
+    .filter((item) => urlRegexp.test(item))
+    .filter((item) => !swindlersUrlsService.swindlersRegex.test(item));
 
   console.info('notMatchedUrls\n');
   console.info(notMatchedUrls.join('\n'));

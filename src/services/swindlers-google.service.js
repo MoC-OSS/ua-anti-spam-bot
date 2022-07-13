@@ -22,6 +22,7 @@ class SwindlersGoogleService {
       USERS: 'H6:H',
       CARDS: 'I6:I',
       NOT_SWINDLERS: 'J6:J',
+      SITE_REGEX: 'K6:K',
     };
   }
 
@@ -237,6 +238,16 @@ class SwindlersGoogleService {
 
   getNotSwindlers() {
     return this.getSheet(this.RANGES.NOT_SWINDLERS);
+  }
+
+  /**
+   *
+   * @namespace Site regex
+   *
+   * */
+
+  getSiteRegex() {
+    return this.getSheet(this.RANGES.SITE_REGEX);
   }
 }
 
