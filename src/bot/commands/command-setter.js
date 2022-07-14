@@ -1,4 +1,4 @@
-const { formatDate } = require('../../utils');
+const { formatDateIntoAccusative } = require('../../utils');
 
 /**
  * Handles bot public available commands
@@ -25,7 +25,7 @@ class CommandSetter {
    * */
   buildStatus() {
     const activeStatus = this.active ? '🟢 Онлайн' : '🔴 Офлайн';
-    return `${activeStatus}, оновлений у ${formatDate(this.startTime).replace(/GMT\+\d/, '')}`;
+    return `${activeStatus}, оновлений у ${formatDateIntoAccusative(this.startTime).replace(/GMT\+\d/, '')}`;
   }
 
   /**

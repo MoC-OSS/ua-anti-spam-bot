@@ -10,6 +10,15 @@ describe('SwindlersUrlsService', () => {
     swindlersUrlsService = new SwindlersUrlsService(mockDynamicStorageService, 0.6);
   });
 
+  describe('buildSiteRegex', () => {
+    it('should build site regex with passed sites', () => {
+      const sites = ['test.com', 'example.com'];
+      const result = swindlersUrlsService.buildSiteRegex(sites);
+
+      expect(result.source).toEqual('(?:https?:\\/\\/)?(test.com|example.com)(?!ua).+');
+    });
+  });
+
   describe('parseUrls', () => {
     it('should parse urls', () => {
       const text = `test https://url.com/ test url.com`;

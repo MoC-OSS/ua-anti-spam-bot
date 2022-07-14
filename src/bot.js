@@ -6,20 +6,12 @@ const { error, env } = require('typed-dotenv').config();
 const { apiThrottler } = require('@grammyjs/transformer-throttler');
 const Keyv = require('keyv');
 
-const { dataset } = require('../dataset/dataset');
-
 const { redisClient } = require('./db');
 const { redisService } = require('./services/redis.service');
 const { S3Service } = require('./services/s3.service');
-const { DynamicStorageService } = require('./services/dynamic-storage.service');
-const { SwindlersBotsService } = require('./services/swindlers-bots.service');
-const { SwindlersCardsService } = require('./services/swindlers-cards.service');
-const { SwindlersDetectService } = require('./services/swindlers-detect.service');
-const { SwindlersUrlsService } = require('./services/swindlers-urls.service');
-const { swindlersGoogleService } = require('./services/swindlers-google.service');
+const { initSwindlersContainer } = require('./services/swindlers.container');
 
 const { initTensor } = require('./tensor/tensor.service');
-const { initSwindlersTensor } = require('./tensor/swindlers-tensor.service');
 const { RedisSession, RedisChatSession } = require('./bot/sessionProviders');
 
 const { MessageHandler } = require('./bot/message.handler');
@@ -87,9 +79,9 @@ const rootMenu = new Menu('root');
 
   const s3Service = new S3Service();
   const tensorService = await initTensor(s3Service);
-  const swindlersTensorService = await initSwindlersTensor();
   tensorService.setSpamThreshold(await redisService.getBotTensorPercent());
-  swindlersTensorService.setSpamThreshold(0.87);
+
+  const { dynamicStorageService, swindlersDetectService } = await initSwindlersContainer();
 
   const startTime = new Date();
 
@@ -128,20 +120,6 @@ const rootMenu = new Menu('root');
 
   const redisSession = new RedisSession();
   const redisChatSession = new RedisChatSession();
-  const dynamicStorageService = new DynamicStorageService(swindlersGoogleService, dataset);
-  await dynamicStorageService.init();
-
-  const swindlersBotsService = new SwindlersBotsService(dynamicStorageService, 0.6);
-  const swindlersUrlsService = new SwindlersUrlsService(dynamicStorageService, 0.8);
-  const swindlersCardsService = new SwindlersCardsService(dynamicStorageService);
-
-  const swindlersDetectService = new SwindlersDetectService(
-    dynamicStorageService,
-    swindlersBotsService,
-    swindlersCardsService,
-    swindlersUrlsService,
-    swindlersTensorService,
-  );
 
   const globalMiddleware = new GlobalMiddleware(bot);
 

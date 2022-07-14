@@ -1,7 +1,5 @@
 const FuzzySet = require('fuzzyset');
 
-const { swindlersRegex } = require('../creator');
-
 class SwindlersUrlsService {
   /**
    * @param {DynamicStorageService} dynamicStorageService
@@ -36,10 +34,19 @@ class SwindlersUrlsService {
       'www.google.com',
     ];
 
+    this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
+    console.info('swindlersRegex', this.swindlersRegex);
     this.initFuzzySet();
     this.dynamicStorageService.fetchEmmiter.on('fetch', () => {
+      this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
+      console.info('swindlersRegex', this.swindlersRegex);
       this.initFuzzySet();
     });
+  }
+
+  buildSiteRegex(sites) {
+    const regex = /(?:https?:\/\/)?([[sites]])(?!ua).+/;
+    return new RegExp(regex.source.replace('[[sites]]', sites.join('|')));
   }
 
   /**
@@ -101,7 +108,7 @@ class SwindlersUrlsService {
    * @param {number} [customRate]
    */
   isSpamUrl(url, customRate) {
-    const isRegexpMatch = swindlersRegex.test(url);
+    const isRegexpMatch = this.swindlersRegex.test(url);
     if (isRegexpMatch) {
       return { isSpam: isRegexpMatch, rate: 200 };
     }

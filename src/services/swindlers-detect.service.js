@@ -26,6 +26,8 @@ class SwindlersDetectService {
 
   /**
    * @param {string} message - message to process
+   *
+   * @return {SwindlersResult}
    * */
   async isSwindlerMessage(message) {
     const results = {};
@@ -48,7 +50,9 @@ class SwindlersDetectService {
       return {
         isSpam: true,
         rate: foundSwindlerMention.rate,
-        reason: `mention (${foundSwindlerMention.nearestName})`,
+        reason: 'mention',
+        match: foundSwindlerMention.nearestName,
+        displayReason: `mention (${foundSwindlerMention.nearestName})`,
         results,
       };
     }
