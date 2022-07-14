@@ -4,7 +4,7 @@ const { InputFile } = require('grammy');
 const { creatorId, privateTrainingChat, logsChat } = require('../../creator');
 
 const { redisService } = require('../../services/redis.service');
-const { telegramUtil, handleError, compareDatesWithOffset } = require('../../utils');
+const { getUserData, telegramUtil, handleError, compareDatesWithOffset } = require('../../utils');
 const { getDeleteMessage, getDebugMessage, getCannotDeleteMessage } = require('../../message'); // spamDeleteMessage
 const { getMessageReputation } = require('../spam.handlers');
 
@@ -77,10 +77,7 @@ class OnTextListener {
       if (rep.byRules?.rule) {
         try {
           const trainingChatWhitelist = await redisService.getTrainingChatWhitelist();
-          const username = ctx.from?.username;
-          const fullName = ctx.from?.last_name ? `${ctx.from?.first_name} ${ctx.from?.last_name}` : ctx.from?.first_name;
-          const writeUsername = username ? `${username}` : fullName ?? '';
-          const userId = ctx.from?.id;
+          const { writeUsername, userId } = getUserData(ctx);
 
           let debugMessage = '';
 

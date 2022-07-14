@@ -1,5 +1,5 @@
 const { getStartMessage, getGroupStartMessage, makeAdminMessage } = require('../../message');
-const { handleError, telegramUtil } = require('../../utils');
+const { getUserData, handleError, telegramUtil } = require('../../utils');
 
 class StartMiddleware {
   /**
@@ -29,10 +29,7 @@ class StartMiddleware {
         .then(() => true)
         .catch(() => false);
 
-      const username = ctx.from?.username;
-      const fullName = ctx.from?.last_name ? `${ctx.from?.first_name} ${ctx.from?.last_name}` : ctx.from?.first_name;
-      const writeUsername = username ? `${username}` : fullName ?? '';
-      const userId = ctx.from?.id;
+      const { writeUsername, userId } = getUserData(ctx);
 
       if (!isAdmin || !canDelete) {
         return ctx.replyWithHTML(

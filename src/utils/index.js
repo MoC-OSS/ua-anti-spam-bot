@@ -64,6 +64,23 @@ function formatDateIntoAccusative(date) {
 }
 
 /**
+ * @param {GrammyContext} ctx
+ * */
+function getUserData(ctx) {
+  const username = ctx.from?.username;
+  const fullName = ctx.from?.last_name ? `${ctx.from?.first_name} ${ctx.from?.last_name}` : ctx.from?.first_name;
+  const writeUsername = username ? `@${username}` : fullName ?? '';
+  const userId = ctx.from?.id;
+
+  return {
+    username,
+    fullName,
+    writeUsername,
+    userId,
+  };
+}
+
+/**
  * @template T
  *
  * @param {T[]} array
@@ -97,6 +114,7 @@ function compareDatesWithOffset(initialDate, compareDate, hours) {
 
 module.exports = {
   logSkipMiddleware,
+  getUserData,
   joinMessage,
   logCtx,
   sleep,
