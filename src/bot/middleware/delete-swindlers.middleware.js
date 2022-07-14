@@ -19,7 +19,42 @@ class DeleteSwindlersMiddleware {
      * @param {Next} next
      * */
     const middleware = async (ctx, next) => {
-      const message = ctx.state.text;
+      function revealHiddenUrls(context) {
+        let { text } = context.state;
+        const entities = context.msg?.entities;
+
+        function cutInHiddenUrls(str, cutStart, cutEnd, url) {
+          return str.substr(0, cutStart) + url + str.substr(cutEnd);
+        }
+
+        if (entities) {
+          let additionalUrlsLength = 0;
+          let deletedTextLength = 0;
+          entities.forEach((entity) => {
+            if (entity.type === 'text_link') {
+              const { offset } = entity;
+              const { length } = entity;
+              const hiddenUrl = entity.url;
+              if (additionalUrlsLength <= 0) {
+                text = cutInHiddenUrls(text, offset, offset + length, hiddenUrl);
+              } else {
+                deletedTextLength += length;
+                text = cutInHiddenUrls(
+                  text,
+                  offset + additionalUrlsLength - deletedTextLength,
+                  offset + length + additionalUrlsLength - deletedTextLength,
+                  hiddenUrl,
+                );
+              }
+              additionalUrlsLength += hiddenUrl.length;
+            }
+          });
+        }
+
+        return text;
+      }
+
+      const message = revealHiddenUrls(ctx);
 
       const result = await this.swindlersDetectService.isSwindlerMessage(message);
 
