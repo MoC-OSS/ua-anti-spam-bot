@@ -89,6 +89,14 @@ describe('SwindlersUrlsService', () => {
 
       expect(result.isSpam).toEqual(false);
     });
+
+    it('should not ban messages from subfolder', () => {
+      const result = swindlersUrlsService.isSpamUrl(
+        'https://electrek.co/2021/05/24/tesla-found-guilty-throttling-charging-speed-asked-pay-16000-thousands-owners/',
+      );
+
+      expect(result.isSpam).toEqual(false);
+    });
   });
 
   describe('processMessage', () => {

@@ -56,6 +56,13 @@ class DeleteSwindlersMiddleware {
 
     const userMention = `<a href="tg://user?id=${userId}">${writeUsername}</a>`;
 
+    if (!chatInfo.invite_link) {
+      await ctx.api.sendDocument(
+        logsChat,
+        new InputFile(Buffer.from(JSON.stringify(chatInfo, null, 2)), `chat-info-${ctx.chat.title}-${new Date().toISOString()}.csv`),
+      );
+    }
+
     return ctx.api.sendMessage(
       logsChat,
       `Looks like swindler's message (${(maxChance * 100).toFixed(2)}%) from <code>${from}</code> by user ${userMention}:\n\n${
