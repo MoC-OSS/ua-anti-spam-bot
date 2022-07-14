@@ -53,6 +53,17 @@ function formatDate(date) {
 }
 
 /**
+ * @param {Date} date
+ * */
+function formatDateIntoAccusative(date) {
+  return formatDate(date)
+    .replace('середа', 'середу')
+    .replace("п'ятниця", "п'ятницю")
+    .replace('субота', 'суботу')
+    .replace('неділя', 'неділю');
+}
+
+/**
  * @template T
  *
  * @param {T[]} array
@@ -92,6 +103,7 @@ module.exports = {
   compareDatesWithOffset,
   truncateString,
   formatDate,
+  formatDateIntoAccusative,
   getRandomItem,
   messageUtil,
   telegramUtil,
