@@ -1,14 +1,6 @@
 const { urlRegexp } = require('ukrainian-ml-optimizer');
 
-const { DynamicStorageService } = require('../src/services/dynamic-storage.service');
-const { SwindlersUrlsService } = require('../src/services/swindlers-urls.service');
-const { SwindlersCardsService } = require('../src/services/swindlers-cards.service');
 const { swindlersGoogleService } = require('../src/services/swindlers-google.service');
-const { dataset } = require('./dataset');
-
-const dynamicStorageService = new DynamicStorageService(swindlersGoogleService, dataset);
-const swindlersUrlsService = new SwindlersUrlsService(dynamicStorageService, 0.6);
-const swindlersCardsService = new SwindlersCardsService(dynamicStorageService);
 
 const notSwindlers = [
   '@alinaaaawwaa',
@@ -32,18 +24,19 @@ function removeDuplicates(array) {
 }
 
 /**
+ * @param {SwindlersUrlsService} swindlersUrlsService
+ * @param {SwindlersCardsService} swindlersCardsService
  * @param {string[]} swindlers
  * @param {string[]} swindlersBots
  * @param {string[]} swindlersCards
  * */
-const autoSwindlers = async (swindlers, swindlersBots, swindlersCards) => {
+const autoSwindlers = async (swindlersUrlsService, swindlersCardsService, swindlers, swindlersBots, swindlersCards) => {
   function findSwindlersByPattern(items, pattern) {
     return removeDuplicates([...items, ...swindlers.map((message) => message.match(pattern) || []).flat()]).filter(
       (item) => !notSwindlers.includes(item),
     );
   }
 
-  await dynamicStorageService.init();
   const [savedSwindlerDomains, savedSwindlersUrls] = await Promise.all([
     swindlersGoogleService.getDomains(),
     swindlersGoogleService.getSites(),
@@ -73,7 +66,10 @@ const autoSwindlers = async (swindlers, swindlersBots, swindlersCards) => {
     .filter((item) => item !== 't.me');
 
   const newSwindlersBots = findSwindlersByPattern(swindlersBots, mentionRegexp);
-  const newSwindlersCards = removeDuplicates([...swindlersCards, swindlers.map((item) => swindlersCardsService.parseCards(item)).flat()]);
+  const newSwindlersCards = removeDuplicates([
+    ...swindlersCards,
+    ...swindlers.map((item) => swindlersCardsService.parseCards(item)).flat(),
+  ]);
 
   const notMatchedUrls = swindlersUrls
     .filter((item) => urlRegexp.test(item))
@@ -89,7 +85,9 @@ const autoSwindlers = async (swindlers, swindlersBots, swindlersCards) => {
   await swindlersGoogleService.updateSites(swindlersUrls);
   await swindlersGoogleService.updateCards(newSwindlersCards);
 
-  process.exit(0);
+  return {
+    swindlersUrls,
+  };
 };
 
 module.exports = {
