@@ -58,7 +58,9 @@ class DeleteSwindlersMiddleware {
 
     return ctx.api.sendMessage(
       logsChat,
-      `Looks like swindler's message (${(maxChance * 100).toFixed(2)}%) from ${from}:\n\n${chatMention || userMention}\n${ctx.state.text}`,
+      `Looks like swindler's message (${(maxChance * 100).toFixed(2)}%) from <code>${from}</code> by user ${userMention}:\n\n${
+        chatMention || userMention
+      }\n${ctx.state.text}`,
       {
         parse_mode: 'HTML',
       },
