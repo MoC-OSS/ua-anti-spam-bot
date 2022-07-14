@@ -35,9 +35,11 @@ class SwindlersUrlsService {
     ];
 
     this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
+    console.info('swindlersRegex', this.swindlersRegex);
     this.initFuzzySet();
     this.dynamicStorageService.fetchEmmiter.on('fetch', () => {
       this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
+      console.info('swindlersRegex', this.swindlersRegex);
       this.initFuzzySet();
     });
   }
