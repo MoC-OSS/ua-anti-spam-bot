@@ -108,12 +108,13 @@ class SwindlersUrlsService {
    * @param {number} [customRate]
    */
   isSpamUrl(url, customRate) {
-    const isRegexpMatch = this.swindlersRegex.test(url);
+    const domain = this.getUrlDomain(url);
+    const isRegexpMatch = this.swindlersRegex.test(domain);
+
     if (isRegexpMatch) {
       return { isSpam: isRegexpMatch, rate: 200 };
     }
 
-    const domain = this.getUrlDomain(url);
     const [[rate, nearestName]] = this.swindlersFuzzySet.get(domain) || [[0]];
 
     return {
