@@ -38,7 +38,6 @@ class DeleteSwindlersMiddleware {
               if (additionalUrlsLength <= 0) {
                 text = cutInHiddenUrls(text, offset, offset + length, hiddenUrl);
               } else {
-                deletedTextLength += length;
                 text = cutInHiddenUrls(
                   text,
                   offset + additionalUrlsLength - deletedTextLength,
@@ -46,6 +45,7 @@ class DeleteSwindlersMiddleware {
                   hiddenUrl,
                 );
               }
+              deletedTextLength += length;
               additionalUrlsLength += hiddenUrl.length;
             }
           });
