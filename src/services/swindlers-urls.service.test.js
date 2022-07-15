@@ -120,6 +120,7 @@ describe('SwindlersUrlsService', () => {
   describe('processMessage', () => {
     it('should process messages', async () => {
       const text = `https://da-pay.me/ тест`;
+      axios.get.mockImplementationOnce(() => Promise.resolve({ request: { res: { responseUrl: 'https://da-pay.me/' } } }));
       const result = await swindlersUrlsService.processMessage(text);
 
       const parsedUrl = swindlersUrlsService.parseUrls(text)[0];
@@ -135,12 +136,13 @@ describe('SwindlersUrlsService', () => {
     it('should not process telegram message', async () => {
       const text = `Плохие новости 18+👇👇👇
 
-https://t.me/+5v9SixsjZ9ZmMjBs
+    https://t.me/+5v9SixsjZ9ZmMjBs
 
-https://t.me/+5v9SixsjZ9ZmMjBs
+    https://t.me/+5v9SixsjZ9ZmMjBs
 
-https://t.me/+5v9SixsjZ9ZmMjBs`;
-      const result = swindlersUrlsService.processMessage(text);
+    https://t.me/+5v9SixsjZ9ZmMjBs`;
+      axios.get.mockImplementation(() => Promise.resolve({ request: { res: { responseUrl: 'https://t.me/+5v9SixsjZ9ZmMjBs' } } }));
+      const result = await swindlersUrlsService.processMessage(text);
 
       const parsedUrl = swindlersUrlsService.parseUrls(text)[0];
       axios.get.mockImplementationOnce(() => Promise.resolve({ request: { res: { responseUrl: parsedUrl } } }));
