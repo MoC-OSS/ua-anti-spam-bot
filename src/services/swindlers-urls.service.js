@@ -65,8 +65,10 @@ class SwindlersUrlsService {
     const urls = this.parseUrls(message);
     if (urls) {
       let lastResult = null;
-      const foundSwindlerUrl = urls.some(async (value) => {
-        lastResult = await this.isSpamUrl(value);
+      const getUrls = urls.map((e) => this.isSpamUrl(e));
+      const allUrls = await Promise.all(getUrls);
+      const foundSwindlerUrl = allUrls.some((value) => {
+        lastResult = value;
         return lastResult.isSpam;
       });
 
@@ -113,6 +115,7 @@ class SwindlersUrlsService {
       .get(url)
       .then((response) => response.request.res.responseUrl)
       .catch((err) => err.request._options.href);
+
     const domain = this.getUrlDomain(redirectUrl);
     const isRegexpMatch = this.swindlersRegex.test(domain);
     if (isRegexpMatch) {
