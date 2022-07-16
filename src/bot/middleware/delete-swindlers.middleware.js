@@ -123,7 +123,9 @@ class DeleteSwindlersMiddleware {
         Date.now() > new Date(ctx.chatSession.lastWarningDate).getTime() + SWINDLER_SETTINGS.WARNING_DELAY);
     if (shouldSend) {
       ctx.chatSession.lastWarningDate = new Date();
-      return ctx.api.sendMessage(ctx.update.message.chat.id, swindlersWarningMessage);
+      return ctx.api.sendMessage(ctx.update.message.chat.id, swindlersWarningMessage, {
+        parse_mode: 'HTML',
+      });
     }
   }
 
