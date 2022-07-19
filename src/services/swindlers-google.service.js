@@ -110,8 +110,8 @@ class SwindlersGoogleService {
     return this.clearSheet(this.RANGES.TRAINING_NEGATIVES);
   }
 
-  getTrainingPositives() {
-    return this.getSheet(this.RANGES.TRAINING_POSITIVES);
+  getTrainingPositives(compact = true) {
+    return this.getSheet(this.RANGES.TRAINING_POSITIVES, compact);
   }
 
   /**
@@ -124,10 +124,10 @@ class SwindlersGoogleService {
   /**
    * @param {string} singleCase - case to append
    * */
-  async appendTraingPositives(singleCase) {
-    const valuesLength = await this.getTrainingPositives();
-    const position = valuesLength.length + this.SHEETS_START_FROM;
-    return this.appendToSheet(this.APPEND_RANGE(this.SHEET_COLUMNS.TRAINING_POSITIVES, position), singleCase);
+  async appendTrainingPositives(singleCase) {
+    const values = await this.getTrainingPositives(false);
+    const lastPosition = values[values.length - 1].index + 1;
+    return this.appendToSheet(this.APPEND_RANGE(this.SHEET_COLUMNS.TRAINING_POSITIVES, lastPosition), singleCase);
   }
 
   clearTrainingPositives() {
