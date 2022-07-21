@@ -1,12 +1,6 @@
-const fs = require('fs');
-const path = require('path');
-
 const { urlRegexp } = require('ukrainian-ml-optimizer');
 
-const { swindlersRegex } = require('../src/creator');
-const swindlers = require('./strings/swindlers.json');
-const immediately = require('./strings/immediately.json');
-const swindlersBots = require('./strings/swindlers_bots.json');
+const { swindlersGoogleService } = require('../src/services/swindlers-google.service');
 
 const notSwindlers = [
   '@alinaaaawwaa',
@@ -17,25 +11,92 @@ const notSwindlers = [
   'https://www.nrc.no/countries/europe/ukraine/',
 ];
 
+const startsWith = ['https://t.me/', 't.me/', 'https://hi.alfabank.ua/', 'https://cutt.ly/'];
+
 const mentionRegexp = /\B@\w+/g;
 
+/**
+ * @template T
+ * @param {T} array
+ *
+ * @returns {T}
+ * */
 function removeDuplicates(array) {
   return [...new Set(array)];
 }
 
-function findSwindlersByPattern(items, pattern) {
-  return removeDuplicates([...items, ...swindlers.map((message) => message.match(pattern) || []).flat()])
-    .filter((item) => !notSwindlers.includes(item))
+/**
+ * @param {SwindlersUrlsService} swindlersUrlsService
+ * @param {SwindlersCardsService} swindlersCardsService
+ * @param {string[]} swindlers
+ * @param {string[]} swindlersBots
+ * @param {string[]} swindlersCards
+ * */
+const autoSwindlers = async (swindlersUrlsService, swindlersCardsService, swindlers, swindlersBots, swindlersCards) => {
+  function findSwindlersByPattern(items, pattern) {
+    return removeDuplicates([...items, ...swindlers.map((message) => message.match(pattern) || []).flat()]).filter(
+      (item) => !notSwindlers.includes(item),
+    );
+  }
+
+  const [savedSwindlerDomains, savedSwindlersUrls] = await Promise.all([
+    swindlersGoogleService.getDomains(),
+    swindlersGoogleService.getSites(),
+  ]);
+
+  const notMatchedDomains = [];
+  const swindlersUrls = removeDuplicates([
+    ...savedSwindlersUrls,
+    ...swindlers.map((message) => swindlersUrlsService.parseUrls(message)).flat(),
+  ])
+    .filter(
+      /**
+       * @param {string} url
+       * */
+      (url) => {
+        const isSwindler = swindlersUrlsService.isSpamUrl(`${url}/`);
+
+        if (!isSwindler.isSpam && !startsWith.some((excludeStart) => url.startsWith(excludeStart))) {
+          notMatchedDomains.push(url);
+        }
+
+        return isSwindler;
+      },
+    )
     .sort();
-}
 
-const newImmediately = findSwindlersByPattern(immediately, urlRegexp);
-const newSwindlersBots = findSwindlersByPattern(swindlersBots, mentionRegexp);
+  const swindlersDomains = removeDuplicates([
+    ...savedSwindlerDomains,
+    ...swindlersUrls.map((url) => swindlersUrlsService.getUrlDomain(url)),
+  ])
+    .sort()
+    .filter((item) => item !== 't.me');
 
-const notMatchedUrls = newImmediately.filter((item) => urlRegexp.test(item)).filter((item) => !swindlersRegex.test(item));
+  const newSwindlersBots = findSwindlersByPattern(swindlersBots, mentionRegexp);
+  const newSwindlersCards = removeDuplicates([
+    ...swindlersCards,
+    ...swindlers.map((item) => swindlersCardsService.parseCards(item)).flat(),
+  ]);
 
-console.info('notMatchedUrls\n');
-console.info(notMatchedUrls.join('\n'));
+  const notMatchedUrls = swindlersUrls
+    .filter((item) => urlRegexp.test(item))
+    .filter((item) => !swindlersUrlsService.swindlersRegex.test(item) && !startsWith.some((excludeStart) => item.startsWith(excludeStart)));
 
-fs.writeFileSync(path.join(__dirname, './strings/immediately.json'), `${JSON.stringify(newImmediately, null, 2)}\n`);
-fs.writeFileSync(path.join(__dirname, './strings/swindlers_bots.json'), `${JSON.stringify(newSwindlersBots, null, 2)}\n`);
+  console.info('notMatchedUrls\n');
+  console.info(notMatchedUrls.join('\n'));
+  console.info('notMatchedDomains\n');
+  console.info(notMatchedDomains.join('\n'));
+
+  await swindlersGoogleService.updateBots(newSwindlersBots);
+  await swindlersGoogleService.updateDomains(swindlersDomains);
+  await swindlersGoogleService.updateSites(swindlersUrls);
+  await swindlersGoogleService.updateCards(newSwindlersCards);
+
+  return {
+    swindlersUrls,
+  };
+};
+
+module.exports = {
+  autoSwindlers,
+};

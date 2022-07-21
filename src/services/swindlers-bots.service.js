@@ -13,20 +13,33 @@ class SwindlersBotsService {
     this.urlRegexp =
       /(https?:\/\/(?:www\.|(?!www))?[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|(https?:\/\/(?:www\.|(?!www)))?[a-zA-Z0-9-]+\.[^\s]{2,}|www\.?[a-zA-Z0-9]+\.[^\s]{2,})/g;
     this.telegramDomainRegexp = /^(https?:\/\/)?(www\.)?t\.me\/(.{1,256})/g;
-    this.exceptionMentions = [
-      '@Diia_help_bot',
-      '@46311',
-      '@Dopomoga_vzpbot',
-      '@EKamenskoetopchip_bot',
-      '@Ebenz_lpg_bot',
-      '@botsbaseru',
-      '@realukraine_bot',
-      '@Odinfo_bot',
-    ];
+    this.exceptionMentions = this.dynamicStorageService.notSwindlers;
 
     this.dynamicStorageService.fetchEmmiter.on('fetch', () => {
+      this.exceptionMentions = this.dynamicStorageService.notSwindlers;
       this.initFuzzySet();
     });
+  }
+
+  /**
+   * @param {string} message - raw message from user to parse
+   */
+  processMessage(message) {
+    const mentions = this.parseMentions(message);
+    if (mentions) {
+      let lastResult = null;
+      const foundSwindlerMention = mentions.some((value) => {
+        lastResult = this.isSpamBot(value);
+        return lastResult.isSpam;
+      });
+
+      if (foundSwindlerMention) {
+        const { isSpam, rate, nearestName, currentName } = lastResult;
+        return { isSpam, rate, nearestName, currentName };
+      }
+    }
+
+    return null;
   }
 
   /**

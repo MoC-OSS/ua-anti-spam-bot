@@ -1,27 +1,18 @@
-const { optimizeText } = require('ukrainian-ml-optimizer');
-const stringSimilarity = require('string-similarity');
-const { env } = require('typed-dotenv').config();
-
 const { InputFile } = require('grammy');
-const { dataset } = require('../../../dataset/dataset');
-const { logsChat, swindlersRegex } = require('../../creator');
-const { handleError, compareDatesWithOffset, telegramUtil } = require('../../utils');
+const { logsChat } = require('../../creator');
+const { handleError, compareDatesWithOffset, telegramUtil, getUserData } = require('../../utils');
 const { getCannotDeleteMessage, swindlersWarningMessage } = require('../../message');
 
 const SWINDLER_SETTINGS = {
-  DELETE_CHANCE: 0.8,
-  LOG_CHANGE: 0.5,
   WARNING_DELAY: 86400000 * 3,
 };
 
 class DeleteSwindlersMiddleware {
   /**
-   * @param {SwindlersTensorService} swindlersTensorService
-   * @param {SwindlersBotsService} swindlersBotsService
+   * @param {SwindlersDetectService} swindlersDetectService
    * */
-  constructor(swindlersTensorService, swindlersBotsService) {
-    this.swindlersTensorService = swindlersTensorService;
-    this.swindlersBotsService = swindlersBotsService;
+  constructor(swindlersDetectService) {
+    this.swindlersDetectService = swindlersDetectService;
   }
 
   middleware() {
@@ -34,81 +25,58 @@ class DeleteSwindlersMiddleware {
     const middleware = async (ctx, next) => {
       const message = ctx.state.text;
 
-      const notSwindlers = ['@Diia_help_bot'];
-      if (notSwindlers.some((item) => message.includes(item))) {
-        return next();
+      const result = await this.swindlersDetectService.isSwindlerMessage(message);
+
+      ctx.state.swindlersResult = result;
+
+      if (result.isSpam) {
+        this.saveSwindlersMessage(ctx, result.rate, result.displayReason || result.reason);
+        this.processWarningMessage(ctx);
+        this.removeMessage(ctx);
+        return;
       }
 
-      if (swindlersRegex.test(message)) {
-        return this.processSwindlersMessage(ctx, 200, 'site');
+      if (!result.isSpam && result.reason === 'compare') {
+        this.saveSwindlersMessage(ctx, result.rate, result.displayReason || result.reason);
       }
 
-      const mentions = this.swindlersBotsService.parseMentions(message);
-      if (mentions) {
-        let lastResult = null;
-        const foundSwindlerMention = mentions.some((value) => {
-          lastResult = this.swindlersBotsService.isSpamBot(value);
-          return lastResult.isSpam;
-        });
-
-        if (foundSwindlerMention) {
-          return this.processSwindlersMessage(ctx, lastResult.rate, `mention (${lastResult.nearestName})`);
-        }
-      }
-
-      const { isSpam, spamRate } = await this.swindlersTensorService.predict(message);
-
-      if (isSpam) {
-        return this.processSwindlersMessage(ctx, spamRate, 'tensor');
-      }
-
-      if (spamRate < 0.5) {
-        return next();
-      }
-
-      const processedMessage = optimizeText(message);
-
-      let lastChance = 0;
-      let maxChance = 0;
-      const foundSwindler = dataset.swindlers.some((text) => {
-        lastChance = stringSimilarity.compareTwoStrings(processedMessage, text);
-
-        if (lastChance > maxChance) {
-          maxChance = lastChance;
-        }
-
-        return lastChance >= SWINDLER_SETTINGS.DELETE_CHANCE;
-      });
-
-      if (maxChance > SWINDLER_SETTINGS.LOG_CHANGE) {
-        this.saveSwindlersMessage(ctx, maxChance, 'compare');
-      }
-
-      if (env.DEBUG) {
-        ctx.reply([foundSwindler, processedMessage, maxChance].join('\n')).catch(handleError);
-      }
-
-      if (foundSwindler) {
-        return this.removeMessage(ctx);
-      }
-
-      next();
+      return next();
     };
 
     return middleware;
   }
 
   /**
-   * Process messages that looks like from swindlers
-   *
    * @param {GrammyContext} ctx
-   * @param {Number} maxChance
-   * @param {Number} from
+   * @param {number} maxChance
+   * @param {SwindlerType | string} from
    * */
-  processSwindlersMessage(ctx, maxChance, from) {
-    this.saveSwindlersMessage(ctx, maxChance, from);
-    this.processWarningMessage(ctx);
-    return this.removeMessage(ctx);
+  async saveSwindlersMessage(ctx, maxChance, from) {
+    const { writeUsername, userId } = getUserData(ctx);
+    const chatInfo = await ctx.getChat();
+
+    const chatMention =
+      ctx.chat.title &&
+      (chatInfo.invite_link ? `<a href="${chatInfo.invite_link}">${ctx.chat.title}</a>` : `<code>${ctx.chat.title}</code>`);
+
+    const userMention = `<a href="tg://user?id=${userId}">${writeUsername}</a>`;
+
+    if (!chatInfo.invite_link) {
+      await ctx.api.sendDocument(
+        logsChat,
+        new InputFile(Buffer.from(JSON.stringify(chatInfo, null, 2)), `chat-info-${ctx.chat.title}-${new Date().toISOString()}.csv`),
+      );
+    }
+
+    return ctx.api.sendMessage(
+      logsChat,
+      `Looks like swindler's message (${(maxChance * 100).toFixed(2)}%) from <code>${from}</code> by user ${userMention}:\n\n${
+        chatMention || userMention
+      }\n${ctx.state.text}`,
+      {
+        parse_mode: 'HTML',
+      },
+    );
   }
 
   /**
@@ -127,23 +95,6 @@ class DeleteSwindlersMiddleware {
         parse_mode: 'HTML',
       });
     }
-  }
-
-  /**
-   * Save message case
-   *
-   * @param {GrammyContext} ctx
-   * @param {Number} maxChance
-   * @param {Number} from
-   * */
-  saveSwindlersMessage(ctx, maxChance, from) {
-    return ctx.api.sendMessage(
-      logsChat,
-      `Looks like swindler's message (${(maxChance * 100).toFixed(2)}%) from ${from}:\n\n<code>${ctx.chat.title}</code>\n${ctx.state.text}`,
-      {
-        parse_mode: 'HTML',
-      },
-    );
   }
 
   /**

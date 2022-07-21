@@ -2,26 +2,27 @@
 const fs = require('fs');
 const path = require('path');
 
-const { env } = require('typed-dotenv').config();
-const stringSimilarity = require('string-similarity');
-const { mentionRegexp, urlRegexp, optimizeText } = require('ukrainian-ml-optimizer');
+const { mentionRegexp, urlRegexp } = require('ukrainian-ml-optimizer');
 
 // eslint-disable-next-line import/no-unresolved
 const deleteFromMessage = require('./from-entities.json');
 const { dataset } = require('../../dataset/dataset');
-const { swindlersRegex } = require('../creator');
-const { googleService } = require('../services/google.service');
+const { swindlersGoogleService } = require('../services/swindlers-google.service');
 
 const sentMentionsFromStart = [];
 
 const SWINDLER_SETTINGS = {
   DELETE_CHANCE: 0.8,
   LOG_CHANGE: 0.8,
-  SAME_CHECK: 0.95,
+  SAME_CHECK: 0.9,
   APPEND_TO_SHEET: 0.85,
 };
 
-const swindlersTopUsed = Object.keys(dataset.swindlers_top_used);
+const swindlersTopUsed = Object.keys(dataset.swindlers_top_used || {});
+
+if (swindlersTopUsed.length === 0) {
+  console.info('WARN: swindlers_top_used are not generated! You need to run `npm run download-swindlers` to generate this file!');
+}
 
 class UpdatesHandler {
   /**
@@ -33,6 +34,7 @@ class UpdatesHandler {
    * @param {DynamicStorageService} dynamicStorageService
    * @param {SwindlersBotsService} swindlersBotsService
    * @param {UserbotStorage} userbotStorage
+   * @param {SwindlersDetectService} swindlersDetectService
    * */
   constructor(
     mtProtoClient,
@@ -42,6 +44,7 @@ class UpdatesHandler {
     dynamicStorageService,
     swindlersBotsService,
     userbotStorage,
+    swindlersDetectService,
   ) {
     this.mtProtoClient = mtProtoClient;
     this.chatPeers = chatPeers;
@@ -50,6 +53,7 @@ class UpdatesHandler {
     this.dynamicStorageService = dynamicStorageService;
     this.swindlersBotsService = swindlersBotsService;
     this.userbotStorage = userbotStorage;
+    this.swindlersDetectService = swindlersDetectService;
   }
 
   /**
@@ -81,14 +85,23 @@ class UpdatesHandler {
   async handleSwindlers(message) {
     const finalMessage = message.includes("Looks like swindler's message") ? message.split('\n').slice(3).join('\n') : message;
 
+    /**
+     * @type {SwindlerType[]}
+     * */
+    const matchArray = ['tensor', 'site', 'mention'];
+
     if (!mentionRegexp.test(finalMessage) && !urlRegexp.test(finalMessage)) {
       return { spam: false, reason: 'doesnt have url' };
     }
 
+    /**
+     * @param {number} spamRate
+     * @param {SwindlerType} from
+     * */
     const processFoundSwindler = (spamRate, from) => {
       console.info(true, from, spamRate, message);
 
-      const isGoodMatch = ['tensor', 'site', 'mention'].includes(from);
+      const isGoodMatch = matchArray.includes(from);
       const isRateGood = from !== 'tensor' || spamRate > 0.95;
 
       if (isGoodMatch && isRateGood) {
@@ -113,7 +126,7 @@ class UpdatesHandler {
         }
 
         if (maxChance > SWINDLER_SETTINGS.APPEND_TO_SHEET) {
-          googleService.appendToSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, finalMessage, 'B6:B');
+          swindlersGoogleService.appendTrainingPositives(finalMessage);
         } else {
           this.mtProtoClient.sendPeerMessage(finalMessage, this.chatPeers.swindlersChat);
         }
@@ -122,61 +135,11 @@ class UpdatesHandler {
       }
     };
 
-    /**
-     * Tensor try
-     * The fastest
-     * */
-    const { isSpam, spamRate } = await this.swindlersTensorService.predict(finalMessage, SWINDLER_SETTINGS.DELETE_CHANCE);
+    const spamResult = await this.swindlersDetectService.isSwindlerMessage(finalMessage);
 
-    if (isSpam) {
-      processFoundSwindler(spamRate, 'tensor');
-      return { spam: true, reason: 'tensor spam', spamRate };
-    }
-
-    /**
-     * Regex try
-     * The fastest
-     * */
-    const isSwindlersSite = swindlersRegex.test(finalMessage.toLowerCase());
-
-    if (isSwindlersSite) {
-      processFoundSwindler(200, 'site');
-      return { spam: true, reason: 'site match' };
-    }
-
-    const mentions = this.swindlersBotsService.parseMentions(message);
-    if (mentions) {
-      let lastResult = null;
-      const foundSwindlerMention = mentions.some((value) => {
-        lastResult = this.swindlersBotsService.isSpamBot(value);
-        return lastResult.isSpam;
-      });
-
-      if (foundSwindlerMention) {
-        processFoundSwindler(lastResult.rate, 'mention');
-        return { spam: true, reason: 'mention match' };
-      }
-    }
-
-    /**
-     * Compare try
-     * The slowest
-     * */
-    let lastChance = 0;
-    let maxChance = 0;
-    const foundSwindler = dataset.swindlers.some((text) => {
-      lastChance = stringSimilarity.compareTwoStrings(optimizeText(finalMessage), text);
-
-      if (lastChance > maxChance) {
-        maxChance = lastChance;
-      }
-
-      return lastChance >= SWINDLER_SETTINGS.LOG_CHANGE;
-    });
-
-    if (foundSwindler) {
-      processFoundSwindler(maxChance, 'compare');
-      return { spam: true, reason: 'compareTwoStrings match', maxChance };
+    if (spamResult.isSpam) {
+      processFoundSwindler(spamResult.rate, spamResult.reason);
+      return { spam: true, reason: spamResult.reason, rate: spamResult.rate };
     }
 
     /**
@@ -188,12 +151,12 @@ class UpdatesHandler {
       const isUnique = this.userbotStorage.handleHelpMessage(finalMessage);
       if (isUnique) {
         this.mtProtoClient.sendPeerMessage(message, this.chatPeers.helpChat);
-        console.info(null, spamRate, message);
+        console.info(null, spamResult.results?.foundTensor?.spamRate, message);
         return { spam: false, reason: 'help message' };
       }
     }
 
-    return { spam: false, reason: 'default return', maxChance };
+    return { spam: false, reason: 'default return' };
   }
 
   /**

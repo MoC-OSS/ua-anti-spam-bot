@@ -1,7 +1,10 @@
 const { env } = require('typed-dotenv').config();
 
-const { creatorNick } = require('./creator');
+const { helpChat } = require('./creator');
 const { getRandomItem } = require('./utils');
+
+const randomBanEmojis = ['👮🏻‍♀️', '🤦🏼‍♀️', '🙅🏻‍♀️'];
+const randomLocationBanEmojis = ['🏡', '🏘️', '🌳'];
 
 /**
  * Generic
@@ -32,6 +35,7 @@ const swindlersWarningMessage = `<b>❗УВАГА! UaAntiSpam_bot помітив
 /**
  * Generic - Settings
  * */
+const settingsAvailableMessage = '👨‍👩‍👧‍👦 Налаштування доступні тільки для групових чатів.';
 const settingsDeleteItemMessage = 'Повідомлення про видалення';
 const settingsSubmitMessage = '💾 Зберегти';
 const cancelMessageSending = 'Розсилка була відмінена!';
@@ -39,13 +43,34 @@ const cancelMessageSending = 'Розсилка була відмінена!';
  * Complex - Settings
  * */
 
-const getSettingsMenuMessage = ({ disableDeleteMessage }) =>
+/**
+ * @param {ChatSessionData['chatSettings']} settings
+ * */
+const getSettingsMenuMessage = (settings) =>
   `
-🤖 Налаштування бота.
+<b>🤖 Налаштування бота в поточному чаті.</b>
 Тут ви можете регулювати параметри.
 
-${disableDeleteMessage === false ? '⛔️ Бот не повідомляє про видалені повідомлення' : '✅ Бот повідомляє про видалені повідомлення'}
+🚀 ${settings.disableStrategicInfo === true ? '⛔️ Бот не видаляє стратегічну інформацію.' : '✅ Бот видаляє стратегічну інформацію.'}
+❗ ${
+    settings.disableStrategicInfo === true || settings.disableDeleteMessage === true
+      ? '⛔️ Бот не повідомляє про видалену стратегічну інформацію.'
+      : '✅ Бот повідомляє про видалену стратегічну інформацію.'
+  }
+💰 ${settings.disableSwindlerMessage === true ? '⛔️ Бот не видаляє повідомлення шахраїв.' : '✅ Бот видаляє повідомлення шахраїв.'}
+
+Для зміни налаштувань, натисніть на відповідну кнопку нижче. 👇
 `.trim();
+
+const settingsDescriptionButton = '📋 Опис налаштувань бота в поточному чаті';
+
+const deleteTensorButton = `🚀 Інцидент`;
+const deleteMessageButton = '❗ Причина';
+const deleteSwindlerButton = '💰 Шахраї';
+
+const goBackButton = '⬅ Повернутись назад';
+
+const detailedSettingsDescription = '📋 Детальний опиc всіх налаштувань';
 
 /**
  *
@@ -62,7 +87,7 @@ const confirmationMessage = `
 const startMessageAtom = `
 Привіт! 🇺🇦✌️
 
-Я чат-бот, який дозволяє автоматично видаляти повідомлення, що містять назви локацій міста, укриттів, а також ключові слова переміщення військ.
+Я чат-бот, який запобігає поширенню стратегічної інформації про переміщення ЗСУ, локації ворожих обстрілів та блокує фішингові повідомлення.
 `.trim();
 
 /**
@@ -72,17 +97,14 @@ const startMessageAtom = `
  * */
 const getDeclinedMassSendingMessage = 'Вибач, але у тебе немає прав для цієї команди.😞'.trim();
 
-const randomBanEmojis = ['👮🏻‍♀️', '🤦🏼‍♀️', '🙅🏻‍♀️'];
-const randomLocationBanEmojis = ['🏡', '🏘️', '🌳'];
-
 /**
  *
  * Message that bot sends on delete
  *
  * */
-const getDeleteMessage = ({ writeUsername, wordMessage, debugMessage, withLocation }) =>
+const getDeleteMessage = ({ writeUsername, userId, wordMessage, debugMessage, withLocation }) =>
   `
-❗️ ${writeUsername ? `${writeUsername}, <b>повідомлення` : '<b>Повідомлення'} видалено</b>.
+❗️ ${userId && writeUsername ? `<a href="tg://user?id=${userId}">${writeUsername}</a>, <b>повідомлення` : '<b>Повідомлення'} видалено</b>.
 
 ${getRandomItem(withLocation ? randomLocationBanEmojis : randomBanEmojis)} <b>Причина</b>: поширення потенційно стратегічної інформації${
     withLocation ? ' з повідомленням локації' : ''
@@ -164,9 +186,9 @@ ${botStartTime}</i>
  * Help handler
  *
  * */
-const getHelpMessage = ({ startLocaleTime, isAdmin, canDelete, user }) =>
+const getHelpMessage = ({ startLocaleTime, isAdmin, canDelete, user, userId }) =>
   `
-${user}
+<a href="tg://user?id=${userId}">${user}</a>
 
 ${isAdmin ? startAdminReadyMessage : makeAdminMessage}
 ${canDelete ? hasDeletePermissionMessage : hasNoDeletePermissionMessage}
@@ -180,7 +202,7 @@ ${canDelete ? hasDeletePermissionMessage : hasNoDeletePermissionMessage}
 
 ${startLocaleTime},
 
-Якщо є запитання, пишіть ${creatorNick}
+Якщо є запитання, пишіть в <a href="${helpChat}">чат підтримки</a>.
 `.trim();
 
 /**
@@ -192,13 +214,13 @@ const getStartMessage = () =>
   `
 ${startMessageAtom}
 
-<b>Як мене запустити?</b>
+<b>Щоб бот запрацював в чаті:</b>
 
-Додай мене і зроби адміністратором:
-• Або в звичайну групу;
-• Або в чат каналу.
+• Додайте бот в чат;
+• Зробіть бота адміністратором.
 
-Якщо є запитання або бот не працює, пишіть ${creatorNick}.
+Розробник бота – @dimkasmile за підтримки Master of Code Global.
+Якщо бот не працює, пишіть <a href="${helpChat}">чат підтримки</a>.
 
 Дивись відео з інструкцією нижче:
 https://youtu.be/RX0cZYf1Lm4
@@ -209,9 +231,9 @@ https://youtu.be/RX0cZYf1Lm4
  * Message that bot sends when user uses /start in the group
  *
  * */
-const getGroupStartMessage = ({ adminsString, isAdmin = false, canDelete, user }) =>
+const getGroupStartMessage = ({ adminsString, isAdmin = false, canDelete, user = '', userId }) =>
   `
-${user}
+<a href="tg://user?id=${userId}">${user}</a>
 
 ${isAdmin ? startAdminReadyMessage : makeAdminMessage}
 ${canDelete ? hasDeletePermissionMessage : hasNoDeletePermissionMessage}
@@ -239,7 +261,7 @@ const getStartChannelMessage = ({ botName }) =>
 Ви мене додали в <b>канал</b> як адміністратора, але я не можу перевіряти повідомлення в коментарях.
 
 Видаліть мене і додайте в <b>чат каналу</b> каналу <b>як адміністратора</b>.
-Якщо є запитання, пишіть ${creatorNick}
+Якщо є запитання, пишіть в <a href="${helpChat}">чат підтримки</a>
 `.trim();
 
 /**
@@ -273,7 +295,7 @@ const getBotJoinMessage = ({ adminsString, isAdmin = false }) =>
   `
 ${startMessageAtom}
 
-${getGroupStartMessage({ adminsString, isAdmin })}
+${getGroupStartMessage({ adminsString, isAdmin }).trim()}
 `.trim();
 
 /**
@@ -291,6 +313,13 @@ const getTensorTestResult = ({ chance, isSpam }) =>
  *
  * */
 module.exports = {
+  goBackButton,
+  deleteMessageButton,
+  deleteTensorButton,
+  deleteSwindlerButton,
+  detailedSettingsDescription,
+  settingsAvailableMessage,
+  settingsDescriptionButton,
   settingsDeleteItemMessage,
   settingsSubmitMessage,
   memberReadyMessage,

@@ -1,10 +1,9 @@
 /**
- * @param {Error} catchError
- * @param {string} reason
+ * @type {GrammyErrorHandler}
  * */
-function handleError(catchError, reason = '') {
+const handleError = (catchError, reason = '') => {
   console.error('**** HANDLED ERROR ****', reason, catchError);
-}
+};
 
 module.exports = {
   handleError,

@@ -5,13 +5,9 @@ const auth = require('./auth');
 const { UserbotStorage } = require('./storage.handler');
 const { UpdatesHandler } = require('./updates.handler');
 const { initTensor } = require('../tensor/tensor.service');
-const { initSwindlersTensor } = require('../tensor/swindlers-tensor.service');
 // const { findChannelAdmins } = require('./find-channel-admins');
 const { MtProtoClient } = require('./mt-proto-client');
-const { googleService } = require('../services/google.service');
-const { DynamicStorageService } = require('../services/dynamic-storage.service');
-const { SwindlersBotsService } = require('../services/swindlers-bots.service');
-const { dataset } = require('../../dataset/dataset');
+const { initSwindlersContainer } = require('../services/swindlers.container');
 
 // const testMessage = ``.trim();
 
@@ -19,18 +15,15 @@ console.info('Start listener application');
 auth().then(async (api) => {
   await redisClient.client.connect().then(() => console.info('Redis client successfully started'));
   const mtProtoClient = new MtProtoClient(api);
-  const dynamicStorageService = new DynamicStorageService(googleService, dataset);
-  await dynamicStorageService.init();
+
+  const { dynamicStorageService, swindlersDetectService, swindlersBotsService, swindlersTensorService } = await initSwindlersContainer();
 
   const userbotStorage = new UserbotStorage();
   await userbotStorage.init();
   console.info('Application is listening new messages.');
 
   const tensorService = await initTensor();
-  const swindlersTensorService = await initSwindlersTensor();
   console.info('Tensor is ready.');
-
-  const swindlersBotsService = new SwindlersBotsService(dynamicStorageService, 0.6);
 
   // findChannelAdmins(api);
   // return;
@@ -50,10 +43,13 @@ auth().then(async (api) => {
     dynamicStorageService,
     swindlersBotsService,
     userbotStorage,
+    swindlersDetectService,
   );
 
   // const testSwindlerResult = await updatesHandler.handleSwindlers(testMessage);
   // console.log(testSwindlerResult);
+
+  console.info('Userbot is ready and started');
 
   api.mtproto.updates.on('updates', (updateInfo) =>
     updatesHandler.filterUpdate(updateInfo, async (message) => {
