@@ -11,7 +11,7 @@ const { getCannotDeleteMessage, swindlersWarningMessage } = require('../../messa
 const SWINDLER_SETTINGS = {
   DELETE_CHANCE: 0.8,
   LOG_CHANGE: 0.5,
-  WARNING_DELAY: 86400000,
+  WARNING_DELAY: 86400000 * 3,
 };
 
 class DeleteSwindlersMiddleware {
