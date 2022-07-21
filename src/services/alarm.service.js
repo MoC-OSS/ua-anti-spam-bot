@@ -25,7 +25,6 @@ class AlarmService {
     const source = new EventSource(apiUrl, opts);
 
     source.onmessage = (event) => {
-      console.info('API EMIT DATA', event);
       if (event.event === 'update') {
         this.updatesEmitter.emit('alarm', event);
       }
