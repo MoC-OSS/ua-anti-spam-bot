@@ -11,6 +11,8 @@ const notSwindlers = [
   'https://www.nrc.no/countries/europe/ukraine/',
 ];
 
+const startsWith = ['https://t.me/', 't.me/', 'https://hi.alfabank.ua/', 'https://cutt.ly/'];
+
 const mentionRegexp = /\B@\w+/g;
 
 /**
@@ -47,15 +49,20 @@ const autoSwindlers = async (swindlersUrlsService, swindlersCardsService, swindl
     ...savedSwindlersUrls,
     ...swindlers.map((message) => swindlersUrlsService.parseUrls(message)).flat(),
   ])
-    .filter((url) => {
-      const isSwindler = swindlersUrlsService.isSpamUrl(`${url}/`);
+    .filter(
+      /**
+       * @param {string} url
+       * */
+      (url) => {
+        const isSwindler = swindlersUrlsService.isSpamUrl(`${url}/`);
 
-      if (!isSwindler.isSpam) {
-        notMatchedDomains.push(url);
-      }
+        if (!isSwindler.isSpam && !startsWith.some((excludeStart) => url.startsWith(excludeStart))) {
+          notMatchedDomains.push(url);
+        }
 
-      return isSwindler;
-    })
+        return isSwindler;
+      },
+    )
     .sort();
 
   const swindlersDomains = removeDuplicates([
@@ -73,7 +80,7 @@ const autoSwindlers = async (swindlersUrlsService, swindlersCardsService, swindl
 
   const notMatchedUrls = swindlersUrls
     .filter((item) => urlRegexp.test(item))
-    .filter((item) => !swindlersUrlsService.swindlersRegex.test(item));
+    .filter((item) => !swindlersUrlsService.swindlersRegex.test(item) && !startsWith.some((excludeStart) => item.startsWith(excludeStart)));
 
   console.info('notMatchedUrls\n');
   console.info(notMatchedUrls.join('\n'));

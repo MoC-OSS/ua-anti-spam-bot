@@ -126,7 +126,7 @@ class UpdatesHandler {
         }
 
         if (maxChance > SWINDLER_SETTINGS.APPEND_TO_SHEET) {
-          swindlersGoogleService.appendTraingPositives(finalMessage);
+          swindlersGoogleService.appendTrainingPositives(finalMessage);
         } else {
           this.mtProtoClient.sendPeerMessage(finalMessage, this.chatPeers.swindlersChat);
         }
