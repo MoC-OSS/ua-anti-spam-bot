@@ -1,4 +1,5 @@
 const FuzzySet = require('fuzzyset');
+const axios = require('axios');
 
 class SwindlersUrlsService {
   /**
@@ -61,12 +62,14 @@ class SwindlersUrlsService {
   /**
    * @param {string} message - raw message from user to parse
    */
-  processMessage(message) {
+  async processMessage(message) {
     const urls = this.parseUrls(message);
     if (urls) {
       let lastResult = null;
-      const foundSwindlerUrl = urls.some((value) => {
-        lastResult = this.isSpamUrl(value);
+      const getUrls = urls.map((e) => this.isSpamUrl(e));
+      const allUrls = await Promise.all(getUrls);
+      const foundSwindlerUrl = allUrls.some((value) => {
+        lastResult = value;
         return lastResult.isSpam;
       });
 
@@ -108,10 +111,14 @@ class SwindlersUrlsService {
    * @param {string} url
    * @param {number} [customRate]
    */
-  isSpamUrl(url, customRate) {
-    const domain = this.getUrlDomain(url);
-    const isRegexpMatch = this.swindlersRegex.test(domain);
+  async isSpamUrl(url, customRate) {
+    const redirectUrl = await axios
+      .get(url)
+      .then((response) => response.request.res.responseUrl)
+      .catch((err) => err.request._options.href || err.request._currentUrl);
 
+    const domain = this.getUrlDomain(redirectUrl);
+    const isRegexpMatch = this.swindlersRegex.test(domain);
     if (isRegexpMatch) {
       return { isSpam: isRegexpMatch, rate: 200 };
     }
@@ -123,6 +130,7 @@ class SwindlersUrlsService {
       rate,
       nearestName,
       currentName: domain,
+      redirectUrl,
     };
   }
 }
