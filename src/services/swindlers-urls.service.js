@@ -32,6 +32,7 @@ class SwindlersUrlsService {
       'paypal.com',
       'privat24.ua',
       'www.google.com',
+      'instagram.com',
     ];
 
     this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
