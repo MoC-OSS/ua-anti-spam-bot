@@ -114,7 +114,7 @@ class SwindlersUrlsService {
     const redirectUrl = await axios
       .get(url)
       .then((response) => response.request.res.responseUrl)
-      .catch((err) => err.request._options.href);
+      .catch((err) => err.request._options.href || err.request._currentUrl);
 
     const domain = this.getUrlDomain(redirectUrl);
     const isRegexpMatch = this.swindlersRegex.test(domain);
@@ -129,6 +129,7 @@ class SwindlersUrlsService {
       rate,
       nearestName,
       currentName: domain,
+      redirectUrl,
     };
   }
 }
