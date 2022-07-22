@@ -65,6 +65,12 @@ class GlobalMiddleware {
     if (ctx.chatSession.chatSettings === undefined) {
       ctx.chatSession.chatSettings = {};
     }
+    if (ctx.chatSession.chatSettings.airRaidAlertSettings === undefined) {
+      ctx.chatSession.chatSettings.airRaidAlertSettings = {
+        airRaidAlertPageNumber: 1,
+        disableChatWhileAirRaidAlert: false,
+      };
+    }
     ctx
       .getChatMembersCount()
       .then((count) => {

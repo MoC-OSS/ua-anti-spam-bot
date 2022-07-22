@@ -141,6 +141,7 @@ const rootMenu = new Menu('root');
   rootMenu.register(updatesMiddleware.initMenu());
   rootMenu.register(settingsMiddleware.initMenu());
   rootMenu.register(settingsMiddleware.initDescriptionSubmenu(), 'settingsMenu');
+  rootMenu.register(settingsMiddleware.initAirRaidAlertSubmenu(), 'settingsMenu');
 
   bot.use(hydrateReply);
 

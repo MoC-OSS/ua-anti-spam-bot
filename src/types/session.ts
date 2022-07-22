@@ -38,6 +38,10 @@ export interface ChatSessionData {
   isLimitedDeletion?: boolean;
   lastLimitedDeletionDate?: Date;
   chatSettings: {
+    airRaidAlertSettings: {
+      airRaidAlertPageNumber: number;
+      disableChatWhileAirRaidAlert: boolean;
+    };
     disableStrategicInfo: boolean;
     disableDeleteMessage: boolean;
     disableSwindlerMessage: boolean;
