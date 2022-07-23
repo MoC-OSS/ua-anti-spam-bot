@@ -61,7 +61,7 @@ describe('SwindlersUrlsService', () => {
       const text = 'https://www.orpay.me/test/1234567890';
       const result = swindlersUrlsService.getUrlDomain(text);
 
-      expect(result).toEqual('www.orpay.me');
+      expect(result).toEqual('www.orpay.me/');
     });
   });
 
