@@ -23,7 +23,20 @@ const hasNoDeletePermissionMessage = '⛔ Я не маю права на вид�
  * Generic - SwindlersUpdate
  * */
 const swindlersUpdateStartMessage = 'Починаю оновлення списку шахраїв...';
-const swindlersUpdateEndMessage = 'Оновлення спіску шахраїв завершено.';
+const swindlersUpdateEndMessage = 'Оновлення спіску шахраїв завершено.'; /**
+
+ * Generic - Air alarm
+ * */
+const alarmStartMessage = `
+<b>❗ Тривога! Рухайтесь до укриття! 🔊</b>
+
+Всі повідомлення на час тривоги заблоковано!
+`;
+const alarmEndMessage = `
+<b>❎ Відбій тривоги! 🔇</b>
+
+Блокування повідомлень зняті. Приємного спілкування!
+`;
 
 /**
  * Generic - Settings
@@ -326,6 +339,8 @@ module.exports = {
   confirmationMessage,
   swindlersUpdateStartMessage,
   swindlersUpdateEndMessage,
+  alarmStartMessage,
+  alarmEndMessage,
   getBotJoinMessage,
   getCannotDeleteMessage,
   getDebugMessage,

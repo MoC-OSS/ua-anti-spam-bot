@@ -36,6 +36,7 @@
     "contains-emoji": "^1.1.0",
     "cyrillic-to-translit-js": "^3.1.0",
     "diff": "^5.0.0",
+    "eventsource": "^2.0.2",
     "express": "^4.17.3",
     "fuse.js": "^6.5.3",
     "fuzzyset": "^1.0.7",
