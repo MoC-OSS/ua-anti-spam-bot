@@ -30,14 +30,14 @@ class DeleteSwindlersMiddleware {
       ctx.state.swindlersResult = result;
 
       if (result.isSpam) {
-        this.saveSwindlersMessage(ctx, result.rate, result.displayReason || result.reason);
-        this.processWarningMessage(ctx);
+        await this.saveSwindlersMessage(ctx, result.rate, result.displayReason || result.reason);
+        await this.processWarningMessage(ctx);
         this.removeMessage(ctx);
         return;
       }
 
       if (!result.isSpam && result.reason === 'compare') {
-        this.saveSwindlersMessage(ctx, result.rate, result.displayReason || result.reason);
+        await this.saveSwindlersMessage(ctx, result.rate, result.displayReason || result.reason);
       }
 
       return next();
@@ -91,7 +91,7 @@ class DeleteSwindlersMiddleware {
         Date.now() > new Date(ctx.chatSession.lastWarningDate).getTime() + SWINDLER_SETTINGS.WARNING_DELAY);
     if (shouldSend) {
       ctx.chatSession.lastWarningDate = new Date();
-      return ctx.api.sendMessage(ctx.update.message.chat.id, swindlersWarningMessage, {
+      return ctx.reply(swindlersWarningMessage, {
         parse_mode: 'HTML',
       });
     }
