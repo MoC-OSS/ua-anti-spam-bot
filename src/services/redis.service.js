@@ -174,6 +174,17 @@ class RedisService {
   }
 
   /**
+   * @param {string} chatId
+   * @returns {Promise<ChatSession>}
+   * */
+  async getChatSession(chatId) {
+    if (!this.redisSelectors.chatSessions.test(chatId)) {
+      throw new Error(`This is an invalid chat id: ${chatId}`);
+    }
+    return redisClient.getRawValue(chatId);
+  }
+
+  /**
    * @returns {Promise<string[]>}
    * */
   async getTrainingTempMessages() {
