@@ -1,5 +1,5 @@
 const { getHelpMessage } = require('../../message');
-const { formatDate, handleError } = require('../../utils');
+const { formatDate, handleError, getUserData } = require('../../utils');
 
 class HelpMiddleware {
   /**
@@ -32,10 +32,7 @@ class HelpMiddleware {
         handleError(e);
       }
 
-      const username = ctx.from?.username;
-      const fullName = ctx.from?.last_name ? `${ctx.from?.first_name} ${ctx.from?.last_name}` : ctx.from?.first_name;
-      const writeUsername = username ? `${username}` : fullName ?? '';
-      const userId = ctx.from?.id;
+      const { writeUsername, userId } = getUserData(ctx);
 
       ctx
         .replyWithHTML(

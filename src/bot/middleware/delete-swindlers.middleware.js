@@ -1,7 +1,11 @@
 const { InputFile } = require('grammy');
 const { logsChat } = require('../../creator');
-const { handleError, compareDatesWithOffset, telegramUtil } = require('../../utils');
-const { getCannotDeleteMessage } = require('../../message');
+const { handleError, compareDatesWithOffset, telegramUtil, getUserData } = require('../../utils');
+const { getCannotDeleteMessage, swindlersWarningMessage } = require('../../message');
+
+const SWINDLER_SETTINGS = {
+  WARNING_DELAY: 86400000 * 3,
+};
 
 class DeleteSwindlersMiddleware {
   /**
@@ -61,13 +65,14 @@ class DeleteSwindlersMiddleware {
       ctx.state.swindlersResult = result;
 
       if (result.isSpam) {
-        this.saveSwindlersMessage(ctx, result.rate, result.displayReason || result.reason);
+        await this.saveSwindlersMessage(ctx, result.rate, result.displayReason || result.reason);
+        await this.processWarningMessage(ctx);
         this.removeMessage(ctx);
         return;
       }
 
       if (!result.isSpam && result.reason === 'compare') {
-        this.saveSwindlersMessage(ctx, result.rate, result.displayReason || result.reason);
+        await this.saveSwindlersMessage(ctx, result.rate, result.displayReason || result.reason);
       }
 
       return next();
@@ -76,14 +81,55 @@ class DeleteSwindlersMiddleware {
     return middleware;
   }
 
-  saveSwindlersMessage(ctx, maxChance, from) {
+  /**
+   * @param {GrammyContext} ctx
+   * @param {number} maxChance
+   * @param {SwindlerType | string} from
+   * */
+  async saveSwindlersMessage(ctx, maxChance, from) {
+    const { writeUsername, userId } = getUserData(ctx);
+    const chatInfo = await ctx.getChat();
+
+    const chatMention =
+      ctx.chat.title &&
+      (chatInfo.invite_link ? `<a href="${chatInfo.invite_link}">${ctx.chat.title}</a>` : `<code>${ctx.chat.title}</code>`);
+
+    const userMention = `<a href="tg://user?id=${userId}">${writeUsername}</a>`;
+
+    if (!chatInfo.invite_link) {
+      await ctx.api.sendDocument(
+        logsChat,
+        new InputFile(Buffer.from(JSON.stringify(chatInfo, null, 2)), `chat-info-${ctx.chat.title}-${new Date().toISOString()}.csv`),
+      );
+    }
+
     return ctx.api.sendMessage(
       logsChat,
-      `Looks like swindler's message (${(maxChance * 100).toFixed(2)}%) from ${from}:\n\n<code>${ctx.chat.title}</code>\n${ctx.state.text}`,
+      `Looks like swindler's message (${(maxChance * 100).toFixed(2)}%) from <code>${from}</code> by user ${userMention}:\n\n${
+        chatMention || userMention
+      }\n${ctx.state.text}`,
       {
         parse_mode: 'HTML',
       },
     );
+  }
+
+  /**
+   * Sends warning to the chat, or skips if it was sent
+   *
+   * @param {GrammyContext} ctx
+   * */
+  processWarningMessage(ctx) {
+    const shouldSend =
+      !ctx.chatSession.lastWarningDate ||
+      (ctx.chatSession.lastWarningDate &&
+        Date.now() > new Date(ctx.chatSession.lastWarningDate).getTime() + SWINDLER_SETTINGS.WARNING_DELAY);
+    if (shouldSend) {
+      ctx.chatSession.lastWarningDate = new Date();
+      return ctx.reply(swindlersWarningMessage, {
+        parse_mode: 'HTML',
+      });
+    }
   }
 
   /**

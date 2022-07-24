@@ -1,14 +1,6 @@
 const { urlRegexp } = require('ukrainian-ml-optimizer');
 
-const { DynamicStorageService } = require('../src/services/dynamic-storage.service');
-const { SwindlersUrlsService } = require('../src/services/swindlers-urls.service');
-const { SwindlersCardsService } = require('../src/services/swindlers-cards.service');
 const { swindlersGoogleService } = require('../src/services/swindlers-google.service');
-const { dataset } = require('./dataset');
-
-const dynamicStorageService = new DynamicStorageService(swindlersGoogleService, dataset);
-const swindlersUrlsService = new SwindlersUrlsService(dynamicStorageService, 0.6);
-const swindlersCardsService = new SwindlersCardsService(dynamicStorageService);
 
 const notSwindlers = [
   '@alinaaaawwaa',
@@ -18,6 +10,8 @@ const notSwindlers = [
   'https://redcross.org.ua/)',
   'https://www.nrc.no/countries/europe/ukraine/',
 ];
+
+const startsWith = ['https://t.me/', 't.me/', 'https://hi.alfabank.ua/', 'https://cutt.ly/'];
 
 const mentionRegexp = /\B@\w+/g;
 
@@ -32,18 +26,19 @@ function removeDuplicates(array) {
 }
 
 /**
+ * @param {SwindlersUrlsService} swindlersUrlsService
+ * @param {SwindlersCardsService} swindlersCardsService
  * @param {string[]} swindlers
  * @param {string[]} swindlersBots
  * @param {string[]} swindlersCards
  * */
-const autoSwindlers = async (swindlers, swindlersBots, swindlersCards) => {
+const autoSwindlers = async (swindlersUrlsService, swindlersCardsService, swindlers, swindlersBots, swindlersCards) => {
   function findSwindlersByPattern(items, pattern) {
     return removeDuplicates([...items, ...swindlers.map((message) => message.match(pattern) || []).flat()]).filter(
       (item) => !notSwindlers.includes(item),
     );
   }
 
-  await dynamicStorageService.init();
   const [savedSwindlerDomains, savedSwindlersUrls] = await Promise.all([
     swindlersGoogleService.getDomains(),
     swindlersGoogleService.getSites(),
@@ -54,15 +49,21 @@ const autoSwindlers = async (swindlers, swindlersBots, swindlersCards) => {
     ...savedSwindlersUrls,
     ...swindlers.map((message) => swindlersUrlsService.parseUrls(message)).flat(),
   ])
-    .filter((url) => {
-      const isSwindler = swindlersUrlsService.isSpamUrl(`${url}/`);
+    .filter(
+      /**
+       * @param {string} url
+       * */
+      (url) => {
+        const isUrl = swindlersUrlsService.parseUrls(url);
+        const isSwindler = isUrl.length && swindlersUrlsService.isSpamUrl(url.endsWith('/') ? url : `${url}/`);
 
-      if (!isSwindler.isSpam) {
-        notMatchedDomains.push(url);
-      }
+        if (isSwindler && !isSwindler.isSpam && !startsWith.some((excludeStart) => url.startsWith(excludeStart))) {
+          notMatchedDomains.push(url);
+        }
 
-      return isSwindler;
-    })
+        return isSwindler;
+      },
+    )
     .sort();
 
   const swindlersDomains = removeDuplicates([
@@ -73,11 +74,14 @@ const autoSwindlers = async (swindlers, swindlersBots, swindlersCards) => {
     .filter((item) => item !== 't.me');
 
   const newSwindlersBots = findSwindlersByPattern(swindlersBots, mentionRegexp);
-  const newSwindlersCards = removeDuplicates([...swindlersCards, swindlers.map((item) => swindlersCardsService.parseCards(item)).flat()]);
+  const newSwindlersCards = removeDuplicates([
+    ...swindlersCards,
+    ...swindlers.map((item) => swindlersCardsService.parseCards(item)).flat(),
+  ]);
 
   const notMatchedUrls = swindlersUrls
     .filter((item) => urlRegexp.test(item))
-    .filter((item) => !swindlersUrlsService.swindlersRegex.test(item));
+    .filter((item) => !swindlersUrlsService.swindlersRegex.test(item) && !startsWith.some((excludeStart) => item.startsWith(excludeStart)));
 
   console.info('notMatchedUrls\n');
   console.info(notMatchedUrls.join('\n'));
@@ -89,7 +93,9 @@ const autoSwindlers = async (swindlers, swindlersBots, swindlersCards) => {
   await swindlersGoogleService.updateSites(swindlersUrls);
   await swindlersGoogleService.updateCards(newSwindlersCards);
 
-  process.exit(0);
+  return {
+    swindlersUrls,
+  };
 };
 
 module.exports = {
