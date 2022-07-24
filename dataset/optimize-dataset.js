@@ -54,12 +54,12 @@ function processFromGoogle() {
 }
 
 // eslint-disable-next-line no-unused-vars
-function processFromLocal() {
-  const positivesLocal = require('../positives.json');
-  const negativesLocal = require('../negatives.json');
+// function processFromLocal() {
+//   const positivesLocal = require('../positives.json');
+//   const negativesLocal = require('../negatives.json');
 
-  processCases(positivesLocal, negativesLocal);
-}
+//   processCases(positivesLocal, negativesLocal);
+// }
 
 // googleService.removeSheetRange(env.GOOGLE_SPREADSHEET_ID, `${env.GOOGLE_POSITIVE_SHEET_NAME}!A8`).then(() => {
 //   console.info('removed!');
