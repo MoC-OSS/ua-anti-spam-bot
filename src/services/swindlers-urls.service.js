@@ -138,7 +138,12 @@ class SwindlersUrlsService {
             return url;
           }
 
-          return err.response.headers.location || err.response.config.url || url;
+          try {
+            return err.response.headers.location || err.response.config.url || url;
+          } catch (e) {
+            console.error(e);
+            return url;
+          }
         },
       );
 
