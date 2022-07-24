@@ -41,7 +41,7 @@ describe('SwindlersDetectService', () => {
         axios.get.mockImplementationOnce(() => Promise.resolve({ request: { res: { responseUrl } } }));
         const result = await swindlersDetectService.isSwindlerMessage(text);
 
-        expect(axios.get).toHaveBeenCalledWith(responseUrl);
+        expect(axios.get).toHaveBeenCalledWith(responseUrl, { maxRedirects: 0 });
         expect(result.isSpam).toEqual(true);
         expect(result.rate).toEqual(200);
         expect(result.reason).toEqual('site');
@@ -51,10 +51,10 @@ describe('SwindlersDetectService', () => {
         const text = 'https://da-pay.me/ тест';
         const responseUrl = 'https://da-pay.me/';
         // eslint-disable-next-line prefer-promise-reject-errors
-        axios.get.mockImplementationOnce(() => Promise.reject({ request: { _options: { href: responseUrl } } }));
+        axios.get.mockImplementationOnce(() => Promise.reject({ response: { headers: { location: responseUrl } } }));
         const result = await swindlersDetectService.isSwindlerMessage(text);
 
-        expect(axios.get).toHaveBeenCalledWith(responseUrl);
+        expect(axios.get).toHaveBeenCalledWith(responseUrl, { maxRedirects: 0 });
         expect(result.isSpam).toEqual(true);
         expect(result.rate).toEqual(200);
         expect(result.reason).toEqual('site');
@@ -62,10 +62,10 @@ describe('SwindlersDetectService', () => {
 
       it('should match similar swindler urls as spam', async () => {
         const text = `${mockNewUrl} test`;
-        axios.get.mockImplementationOnce(() => Promise.resolve({ request: { res: { responseUrl: mockNewUrl } } }));
+        axios.get.mockImplementationOnce(() => Promise.resolve({ response: { headers: { location: mockNewUrl } } }));
         const result = await swindlersDetectService.isSwindlerMessage(text);
 
-        expect(axios.get).toHaveBeenCalledWith(mockNewUrl);
+        expect(axios.get).toHaveBeenCalledWith(mockNewUrl, { maxRedirects: 0 });
         expect(result.isSpam).toEqual(true);
         expect(result.rate).toBeGreaterThan(0.6);
         expect(result.reason).toEqual('site');

@@ -37,6 +37,7 @@ export interface ChatSessionData {
   botAdminDate: Date;
   isLimitedDeletion?: boolean;
   lastLimitedDeletionDate?: Date;
+  lastWarningDate?: Date;
   chatSettings: {
     disableStrategicInfo: boolean;
     disableDeleteMessage: boolean;

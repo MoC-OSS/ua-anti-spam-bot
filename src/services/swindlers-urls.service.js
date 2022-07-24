@@ -1,6 +1,8 @@
 const FuzzySet = require('fuzzyset');
 const axios = require('axios');
 
+const harmfulUrlStart = ['https://bitly.com/a/blocked'];
+
 class SwindlersUrlsService {
   /**
    * @param {DynamicStorageService} dynamicStorageService
@@ -104,7 +106,7 @@ class SwindlersUrlsService {
    */
   getUrlDomain(url) {
     const validUrl = url.slice(0, 4) === 'http' ? url : `https://${url}`;
-    return new URL(validUrl).host;
+    return `${new URL(validUrl).host}/`;
   }
 
   /**
@@ -112,10 +114,45 @@ class SwindlersUrlsService {
    * @param {number} [customRate]
    */
   async isSpamUrl(url, customRate) {
+    /**
+     * @see https://loige.co/unshorten-expand-short-urls-with-node-js/
+     * */
     const redirectUrl = await axios
-      .get(url)
-      .then((response) => response.request.res.responseUrl)
-      .catch((err) => err.request._options.href || err.request._currentUrl);
+      .get(url, { maxRedirects: 0 })
+      .then(() => url)
+      .catch(
+        /**
+         * @param {AxiosError} err
+         */
+        (err) => {
+          if (err.code === 'ENOTFOUND' && err.syscall === 'getaddrinfo') {
+            return url;
+          }
+
+          if (err.code === 'ECONNREFUSED' && err.syscall === 'connect') {
+            return url;
+          }
+
+          if (err.code === 'ERR_TLS_CERT_ALTNAME_INVALID') {
+            return url;
+          }
+
+          if (err.code === 'ECONNRESET') {
+            return url;
+          }
+
+          try {
+            return err.response.headers.location || err.response.config.url || url;
+          } catch (e) {
+            console.error(e);
+            return url;
+          }
+        },
+      );
+
+    if (harmfulUrlStart.some((start) => redirectUrl.startsWith(start))) {
+      return { isSpam: true, rate: 300 };
+    }
 
     const domain = this.getUrlDomain(redirectUrl);
     const isRegexpMatch = this.swindlersRegex.test(domain);
