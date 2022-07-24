@@ -114,6 +114,9 @@ class SwindlersUrlsService {
    * @param {number} [customRate]
    */
   async isSpamUrl(url, customRate) {
+    /**
+     * @see https://loige.co/unshorten-expand-short-urls-with-node-js/
+     * */
     const redirectUrl = await axios
       .get(url, { maxRedirects: 0 })
       .then(() => url)
