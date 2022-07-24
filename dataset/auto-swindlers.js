@@ -54,9 +54,10 @@ const autoSwindlers = async (swindlersUrlsService, swindlersCardsService, swindl
        * @param {string} url
        * */
       (url) => {
-        const isSwindler = swindlersUrlsService.isSpamUrl(`${url}/`);
+        const isUrl = swindlersUrlsService.parseUrls(url);
+        const isSwindler = isUrl.length && swindlersUrlsService.isSpamUrl(url.endsWith('/') ? url : `${url}/`);
 
-        if (!isSwindler.isSpam && !startsWith.some((excludeStart) => url.startsWith(excludeStart))) {
+        if (isSwindler && !isSwindler.isSpam && !startsWith.some((excludeStart) => url.startsWith(excludeStart))) {
           notMatchedDomains.push(url);
         }
 

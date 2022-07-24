@@ -117,7 +117,30 @@ class SwindlersUrlsService {
     const redirectUrl = await axios
       .get(url, { maxRedirects: 0 })
       .then(() => url)
-      .catch((err) => err.response.headers.location || err.response.config.url || url);
+      .catch(
+        /**
+         * @param {AxiosError} err
+         */
+        (err) => {
+          if (err.code === 'ENOTFOUND' && err.syscall === 'getaddrinfo') {
+            return url;
+          }
+
+          if (err.code === 'ECONNREFUSED' && err.syscall === 'connect') {
+            return url;
+          }
+
+          if (err.code === 'ERR_TLS_CERT_ALTNAME_INVALID') {
+            return url;
+          }
+
+          if (err.code === 'ECONNRESET') {
+            return url;
+          }
+
+          return err.response.headers.location || err.response.config.url || url;
+        },
+      );
 
     if (harmfulUrlStart.some((start) => redirectUrl.startsWith(start))) {
       return { isSpam: true, rate: 300 };

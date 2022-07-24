@@ -54,6 +54,14 @@ describe('SwindlersUrlsService', () => {
 
       expect(result).toEqual([]);
     });
+
+    // TODO fix this case
+    it('should not parse extra characters', () => {
+      const text = 'https://test.site/get/0426053194✅🇺🇦/';
+      const result = swindlersUrlsService.parseUrls(text);
+
+      expect(result).toStrictEqual([]);
+    });
   });
 
   describe('getUrlDomain', () => {
