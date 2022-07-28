@@ -9,6 +9,8 @@ const Keyv = require('keyv');
 const { redisClient } = require('./db');
 const { redisService } = require('./services/redis.service');
 const { S3Service } = require('./services/s3.service');
+const { alarmChatService } = require('./services/alarm-chat.service');
+
 const { initSwindlersContainer } = require('./services/swindlers.container');
 
 const { initTensor } = require('./tensor/tensor.service');
@@ -89,6 +91,8 @@ const rootMenu = new Menu('root');
    * @type {GrammyBot}
    * */
   const bot = new Bot(env.BOT_TOKEN);
+
+  await alarmChatService.init(bot.api);
 
   if (!env.DEBUG) {
     bot.api.sendMessage(logsChat, '*** 20220406204759 Migration started...').catch(() => {});
