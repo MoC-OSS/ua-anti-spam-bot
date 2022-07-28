@@ -11,6 +11,7 @@ const {
 const { onlyAdmin } = require('../middleware');
 const { MiddlewareMenu } = require('../middleware-menu.menu');
 const { handleError } = require('../../utils');
+const { alarmService } = require('../../services/alarm.service');
 
 class SettingsMiddleware {
   constructor() {
@@ -60,116 +61,22 @@ class SettingsMiddleware {
     this.settingsAirRaidAlertObj = new MiddlewareMenu('settingsAirRaidAlertSubmenu')
       .addGlobalMiddlewares(onlyAdmin)
       .dynamic(async (ctx, range) => {
-        const statesObject = [
-          {
-            name: 'Test 1',
-            id: 1,
-          },
-          {
-            name: 'Test 2',
-            id: 2,
-          },
-          {
-            name: 'Test 3',
-            id: 3,
-          },
-          {
-            name: 'Test 4',
-            id: 4,
-          },
-          {
-            name: 'Test 5',
-            id: 5,
-          },
-          {
-            name: 'Test 6',
-            id: 6,
-          },
-          {
-            name: 'Test 7',
-            id: 7,
-          },
-          {
-            name: 'Test 8',
-            id: 8,
-          },
-          {
-            name: 'Test 9',
-            id: 9,
-          },
-          {
-            name: 'Test 10',
-            id: 10,
-          },
-          {
-            name: 'Test 11',
-            id: 11,
-          },
-          {
-            name: 'Test 12',
-            id: 12,
-          },
-          {
-            name: 'Test 1',
-            id: 1,
-          },
-          {
-            name: 'Test 2',
-            id: 2,
-          },
-          {
-            name: 'Test 3',
-            id: 3,
-          },
-          {
-            name: 'Test 4',
-            id: 4,
-          },
-          {
-            name: 'Test 5',
-            id: 5,
-          },
-          {
-            name: 'Test 6',
-            id: 6,
-          },
-          {
-            name: 'Test 7',
-            id: 7,
-          },
-          {
-            name: 'Test 8',
-            id: 8,
-          },
-          {
-            name: 'Test 9',
-            id: 9,
-          },
-          {
-            name: 'Test 10',
-            id: 10,
-          },
-          {
-            name: 'Test 11',
-            id: 11,
-          },
-          {
-            name: 'Test 12',
-            id: 12,
-          },
-        ];
+        const alarmServiceResponse = await alarmService.getStates();
+        const { states } = alarmServiceResponse;
+
         const pageIndex = ctx.chatSession.chatSettings.airRaidAlertSettings.airRaidAlertPageNumber;
-        const maxPageIndex = Math.ceil(statesObject.length / 10);
+        const maxPageIndex = Math.ceil(states.length / 10);
         const currentButtonsLimit = pageIndex * 10;
-        const lastPageButtonsNumber = Number(String(statesObject.length / 10).slice(2, 3));
+        const lastPageButtonsNumber = Number(String(states.length / 10).slice(2, 3));
         let buttonIndex = pageIndex * 10 - 10;
         let columnIndex = 0;
+
         if (pageIndex === 1) {
           for (buttonIndex; buttonIndex < currentButtonsLimit; buttonIndex += 1) {
             if (columnIndex % 2 === 0) {
-              range.text(statesObject[buttonIndex].name, () => {});
+              range.text(states[buttonIndex].name, () => {});
             } else {
-              range.text(statesObject[buttonIndex].name, () => {}).row();
+              range.text(states[buttonIndex].name, () => {}).row();
             }
             columnIndex += 1;
           }
@@ -180,9 +87,9 @@ class SettingsMiddleware {
         } else if (pageIndex > 1 && pageIndex !== maxPageIndex) {
           for (buttonIndex; buttonIndex < currentButtonsLimit; buttonIndex += 1) {
             if (columnIndex % 2 === 0) {
-              range.text(statesObject[buttonIndex].name, () => {});
+              range.text(states[buttonIndex].name, () => {});
             } else {
-              range.text(statesObject[buttonIndex].name, () => {}).row();
+              range.text(states[buttonIndex].name, () => {}).row();
             }
             columnIndex += 1;
           }
@@ -198,9 +105,9 @@ class SettingsMiddleware {
           const lastPageButtonsLimit = buttonIndex + lastPageButtonsNumber;
           for (buttonIndex; buttonIndex < lastPageButtonsLimit; buttonIndex += 1) {
             if (columnIndex % 2 === 0) {
-              range.text(statesObject[buttonIndex].name, () => {});
+              range.text(states[buttonIndex].name, () => {});
             } else {
-              range.text(statesObject[buttonIndex].name, () => {}).row();
+              range.text(states[buttonIndex].name, () => {}).row();
             }
             columnIndex += 1;
           }

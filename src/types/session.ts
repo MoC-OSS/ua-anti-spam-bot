@@ -41,6 +41,7 @@ export interface ChatSessionData {
     airRaidAlertSettings: {
       airRaidAlertPageNumber: number;
       disableChatWhileAirRaidAlert: boolean;
+      chatAlarmLocation: string;
     };
     disableStrategicInfo: boolean;
     disableDeleteMessage: boolean;
