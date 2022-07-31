@@ -36,6 +36,8 @@ class SwindlersUrlsService {
       'privat24.ua',
       'www.google.com',
       'instagram.com',
+      't.me',
+      't.me/',
     ];
 
     this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
@@ -142,6 +144,10 @@ class SwindlersUrlsService {
           }
 
           try {
+            if (!err.response) {
+              console.error(err);
+            }
+
             return err.response.headers.location || err.response.config.url || url;
           } catch (e) {
             console.error(e);

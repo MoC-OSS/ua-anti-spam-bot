@@ -151,6 +151,10 @@ class SwindlersGoogleService {
     return this.updateSheet(this.RANGES.BOTS, bots);
   }
 
+  clearBots() {
+    return this.clearSheet(this.RANGES.BOTS);
+  }
+
   /**
    *
    * @namespace Domains

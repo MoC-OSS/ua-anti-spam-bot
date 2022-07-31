@@ -31,8 +31,9 @@ function removeDuplicates(array) {
  * @param {string[]} swindlers
  * @param {string[]} swindlersBots
  * @param {string[]} swindlersCards
+ * @param {string[]} swindlersUsers
  * */
-const autoSwindlers = async (swindlersUrlsService, swindlersCardsService, swindlers, swindlersBots, swindlersCards) => {
+const autoSwindlers = async (swindlersUrlsService, swindlersCardsService, swindlers, swindlersBots, swindlersCards, swindlersUsers) => {
   function findSwindlersByPattern(items, pattern) {
     return removeDuplicates([...items, ...swindlers.map((message) => message.match(pattern) || []).flat()]).filter(
       (item) => !notSwindlers.includes(item),
@@ -73,7 +74,7 @@ const autoSwindlers = async (swindlersUrlsService, swindlersCardsService, swindl
     .sort()
     .filter((item) => item !== 't.me');
 
-  const newSwindlersBots = findSwindlersByPattern(swindlersBots, mentionRegexp);
+  const newSwindlersBots = findSwindlersByPattern(swindlersBots, mentionRegexp).filter((bot) => !swindlersUsers.includes(bot));
   const newSwindlersCards = removeDuplicates([
     ...swindlersCards,
     ...swindlers.map((item) => swindlersCardsService.parseCards(item)).flat(),
@@ -88,6 +89,7 @@ const autoSwindlers = async (swindlersUrlsService, swindlersCardsService, swindl
   console.info('notMatchedDomains\n');
   console.info(notMatchedDomains.join('\n'));
 
+  await swindlersGoogleService.clearBots();
   await swindlersGoogleService.updateBots(newSwindlersBots);
   await swindlersGoogleService.updateDomains(swindlersDomains);
   await swindlersGoogleService.updateSites(swindlersUrls);
