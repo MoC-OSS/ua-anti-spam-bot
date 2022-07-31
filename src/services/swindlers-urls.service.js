@@ -36,6 +36,8 @@ class SwindlersUrlsService {
       'privat24.ua',
       'www.google.com',
       'instagram.com',
+      't.me',
+      't.me/',
     ];
 
     this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
@@ -114,6 +116,13 @@ class SwindlersUrlsService {
    * @param {number} [customRate]
    */
   async isSpamUrl(url, customRate) {
+    if (!url) {
+      return {
+        rate: 0,
+        isSpam: false,
+      };
+    }
+
     /**
      * @see https://loige.co/unshorten-expand-short-urls-with-node-js/
      * */
@@ -133,6 +142,10 @@ class SwindlersUrlsService {
             return url;
           }
 
+          if (err.code === 'ETIMEDOUT' && err.syscall === 'connect') {
+            return url;
+          }
+
           if (err.code === 'ERR_TLS_CERT_ALTNAME_INVALID') {
             return url;
           }
@@ -142,6 +155,10 @@ class SwindlersUrlsService {
           }
 
           try {
+            if (!err.response) {
+              console.error(err);
+            }
+
             return err.response.headers.location || err.response.config.url || url;
           } catch (e) {
             console.error(e);
