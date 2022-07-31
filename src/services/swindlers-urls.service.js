@@ -116,6 +116,13 @@ class SwindlersUrlsService {
    * @param {number} [customRate]
    */
   async isSpamUrl(url, customRate) {
+    if (!url) {
+      return {
+        rate: 0,
+        isSpam: false,
+      };
+    }
+
     /**
      * @see https://loige.co/unshorten-expand-short-urls-with-node-js/
      * */
