@@ -30,14 +30,14 @@ class DeleteSwindlersMiddleware {
       ctx.state.swindlersResult = result;
 
       if (result.isSpam) {
-        await this.saveSwindlersMessage(ctx, result.rate, result.displayReason || result.reason);
+        await this.saveSwindlersMessage(ctx, result.rate, result.displayReason || result.reason, message);
         await this.processWarningMessage(ctx);
         this.removeMessage(ctx);
         return;
       }
 
       if (!result.isSpam && result.reason === 'compare') {
-        await this.saveSwindlersMessage(ctx, result.rate, result.displayReason || result.reason);
+        await this.saveSwindlersMessage(ctx, result.rate, result.displayReason || result.reason, message);
       }
 
       return next();
@@ -50,10 +50,12 @@ class DeleteSwindlersMiddleware {
    * @param {GrammyContext} ctx
    * @param {number} maxChance
    * @param {SwindlerType | string} from
+   * @param {string} [message]
    * */
-  async saveSwindlersMessage(ctx, maxChance, from) {
+  async saveSwindlersMessage(ctx, maxChance, from, message) {
     const { writeUsername, userId } = getUserData(ctx);
     const chatInfo = await ctx.getChat();
+    const text = message || ctx.state.text;
 
     const chatMention =
       ctx.chat.title &&
@@ -72,7 +74,7 @@ class DeleteSwindlersMiddleware {
       logsChat,
       `Looks like swindler's message (${(maxChance * 100).toFixed(2)}%) from <code>${from}</code> by user ${userMention}:\n\n${
         chatMention || userMention
-      }\n${ctx.state.text}`,
+      }\n${text}`,
       {
         parse_mode: 'HTML',
       },
