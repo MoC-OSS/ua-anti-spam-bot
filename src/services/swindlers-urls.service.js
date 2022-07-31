@@ -135,6 +135,10 @@ class SwindlersUrlsService {
             return url;
           }
 
+          if (err.code === 'ETIMEDOUT' && err.syscall === 'connect') {
+            return url;
+          }
+
           if (err.code === 'ERR_TLS_CERT_ALTNAME_INVALID') {
             return url;
           }
