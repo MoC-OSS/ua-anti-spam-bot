@@ -1,6 +1,6 @@
 const { InputFile } = require('grammy');
 const { logsChat } = require('../../creator');
-const { handleError, compareDatesWithOffset, telegramUtil, getUserData } = require('../../utils');
+const { handleError, compareDatesWithOffset, telegramUtil, getUserData, revealHiddenUrls } = require('../../utils');
 const { getCannotDeleteMessage, swindlersWarningMessage } = require('../../message');
 
 const SWINDLER_SETTINGS = {
@@ -23,41 +23,6 @@ class DeleteSwindlersMiddleware {
      * @param {Next} next
      * */
     const middleware = async (ctx, next) => {
-      function revealHiddenUrls(context) {
-        let { text } = context.state;
-        const entities = context.msg?.entities;
-
-        function cutInHiddenUrls(str, cutStart, cutEnd, url) {
-          return str.substr(0, cutStart) + url + str.substr(cutEnd);
-        }
-
-        if (entities) {
-          let additionalUrlsLength = 0;
-          let deletedTextLength = 0;
-          entities.forEach((entity) => {
-            if (entity.type === 'text_link') {
-              const { offset } = entity;
-              const { length } = entity;
-              const hiddenUrl = entity.url;
-              if (additionalUrlsLength <= 0) {
-                text = cutInHiddenUrls(text, offset, offset + length, hiddenUrl);
-              } else {
-                text = cutInHiddenUrls(
-                  text,
-                  offset + additionalUrlsLength - deletedTextLength,
-                  offset + length + additionalUrlsLength - deletedTextLength,
-                  hiddenUrl,
-                );
-              }
-              deletedTextLength += length;
-              additionalUrlsLength += hiddenUrl.length;
-            }
-          });
-        }
-
-        return text;
-      }
-
       const message = revealHiddenUrls(ctx);
 
       const result = await this.swindlersDetectService.isSwindlerMessage(message);
