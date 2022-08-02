@@ -1,9 +1,12 @@
 const {
   getSettingsMenuMessage,
+  getAirRaidAlarmSettingsMessage,
   deleteMessageButton,
   deleteSwindlerButton,
   deleteTensorButton,
   settingsSubmitMessage,
+  turnOffChatWhileAlarmButton,
+  airAlarmAlertButton,
   // settingsDescriptionButton,
   // detailedSettingsDescription,
   goBackButton,
@@ -11,13 +14,17 @@ const {
 const { onlyAdmin } = require('../middleware');
 const { MiddlewareMenu } = require('../middleware-menu.menu');
 const { handleError } = require('../../utils');
-const { alarmService } = require('../../services/alarm.service');
+const dynamicLocationMenu = require('./air-raid-alarm');
 
 class SettingsMiddleware {
-  constructor() {
+  /**
+   * @param {AlarmNotification[]} airRaidAlarmStates
+   * */
+  constructor(airRaidAlarmStates) {
     this.settingsMenuObj = null;
     this.settingsDescriptionObj = null;
     this.settingsAirRaidAlertObj = null;
+    this.airRaidAlarmStates = airRaidAlarmStates;
   }
 
   initMenu() {
@@ -38,10 +45,12 @@ class SettingsMiddleware {
       .addGlobalMiddlewares(onlyAdmin)
       .text(deleteTensorButton, (ctx) => toggleSetting(ctx, 'disableStrategicInfo'))
       .text(deleteMessageButton, (ctx) => toggleSetting(ctx, 'disableDeleteMessage'))
-      .text(deleteSwindlerButton, (ctx) => toggleSetting(ctx, 'disableSwindlerMessage'))
       .row()
-      .submenu('Повітряна тривога', 'settingsAirRaidAlertSubmenu', (ctx) => {
-        ctx.editMessageText('detailedSettingsDescription').catch(handleError);
+      .text(deleteSwindlerButton, (ctx) => toggleSetting(ctx, 'disableSwindlerMessage'))
+      .text(turnOffChatWhileAlarmButton, (ctx) => toggleSetting(ctx, 'disableChatWhileAirRaidAlert'))
+      .row()
+      .submenu(airAlarmAlertButton, 'settingsAirRaidAlertSubmenu', (ctx) => {
+        ctx.editMessageText(getAirRaidAlarmSettingsMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
       })
       // TODO UABOT-2 COMMENT UNTIL DESCRIPTION WILL BE AVAILABLE
       // .row()
@@ -50,6 +59,7 @@ class SettingsMiddleware {
       // })
       .row()
       .text(settingsSubmitMessage, (ctx) => {
+        // console.log(ctx.chatSession.chatSettings);
         ctx.deleteMessage();
       });
 
@@ -57,66 +67,9 @@ class SettingsMiddleware {
   }
 
   initAirRaidAlertSubmenu() {
-    // ctx.chatSession.chatSettings.airRaidAlertSettings.airRaidAlertPageNumber = 1;
     this.settingsAirRaidAlertObj = new MiddlewareMenu('settingsAirRaidAlertSubmenu')
       .addGlobalMiddlewares(onlyAdmin)
-      .dynamic(async (ctx, range) => {
-        const alarmServiceResponse = await alarmService.getStates();
-        const { states } = alarmServiceResponse;
-
-        const pageIndex = ctx.chatSession.chatSettings.airRaidAlertSettings.airRaidAlertPageNumber;
-        const maxPageIndex = Math.ceil(states.length / 10);
-        const currentButtonsLimit = pageIndex * 10;
-        const lastPageButtonsNumber = Number(String(states.length / 10).slice(2, 3));
-        let buttonIndex = pageIndex * 10 - 10;
-        let columnIndex = 0;
-
-        if (pageIndex === 1) {
-          for (buttonIndex; buttonIndex < currentButtonsLimit; buttonIndex += 1) {
-            if (columnIndex % 2 === 0) {
-              range.text(states[buttonIndex].name, () => {});
-            } else {
-              range.text(states[buttonIndex].name, () => {}).row();
-            }
-            columnIndex += 1;
-          }
-          range.text('Next page', (context) => {
-            context.menu.update();
-            context.chatSession.chatSettings.airRaidAlertSettings.airRaidAlertPageNumber += 1;
-          });
-        } else if (pageIndex > 1 && pageIndex !== maxPageIndex) {
-          for (buttonIndex; buttonIndex < currentButtonsLimit; buttonIndex += 1) {
-            if (columnIndex % 2 === 0) {
-              range.text(states[buttonIndex].name, () => {});
-            } else {
-              range.text(states[buttonIndex].name, () => {}).row();
-            }
-            columnIndex += 1;
-          }
-          range.text('Next page', (context) => {
-            context.menu.update();
-            context.chatSession.chatSettings.airRaidAlertSettings.airRaidAlertPageNumber += 1;
-          });
-          range.text('Previous page', (context) => {
-            context.menu.update();
-            context.chatSession.chatSettings.airRaidAlertSettings.airRaidAlertPageNumber -= 1;
-          });
-        } else if (pageIndex === maxPageIndex) {
-          const lastPageButtonsLimit = buttonIndex + lastPageButtonsNumber;
-          for (buttonIndex; buttonIndex < lastPageButtonsLimit; buttonIndex += 1) {
-            if (columnIndex % 2 === 0) {
-              range.text(states[buttonIndex].name, () => {});
-            } else {
-              range.text(states[buttonIndex].name, () => {}).row();
-            }
-            columnIndex += 1;
-          }
-          range.text('Previous page', (context) => {
-            context.menu.update();
-            context.chatSession.chatSettings.airRaidAlertSettings.airRaidAlertPageNumber -= 1;
-          });
-        }
-      })
+      .dynamic((ctx, range) => dynamicLocationMenu(ctx, range, this.airRaidAlarmStates))
       .row()
       .back(goBackButton, (ctx) => {
         ctx.editMessageText(getSettingsMenuMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);

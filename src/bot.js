@@ -10,6 +10,7 @@ const { redisClient } = require('./db');
 const { redisService } = require('./services/redis.service');
 const { S3Service } = require('./services/s3.service');
 const { alarmChatService } = require('./services/alarm-chat.service');
+const { alarmService } = require('./services/alarm.service');
 
 const { initSwindlersContainer } = require('./services/swindlers.container');
 
@@ -93,6 +94,7 @@ const rootMenu = new Menu('root');
   const bot = new Bot(env.BOT_TOKEN);
 
   await alarmChatService.init(bot.api);
+  const airRaidAlarmStates = await alarmService.getStates();
 
   if (!env.DEBUG) {
     bot.api.sendMessage(logsChat, '*** 20220406204759 Migration started...').catch(() => {});
@@ -133,7 +135,7 @@ const rootMenu = new Menu('root');
   const swindlersUpdateMiddleware = new SwindlersUpdateMiddleware(dynamicStorageService);
   const statisticsMiddleware = new StatisticsMiddleware(startTime);
   const updatesMiddleware = new UpdatesMiddleware(startTime);
-  const settingsMiddleware = new SettingsMiddleware();
+  const settingsMiddleware = new SettingsMiddleware(airRaidAlarmStates.states);
   const deleteSwindlersMiddleware = new DeleteSwindlersMiddleware(swindlersDetectService);
 
   const messageHandler = new MessageHandler(tensorService);

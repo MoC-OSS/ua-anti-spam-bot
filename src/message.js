@@ -64,6 +64,21 @@ const getSettingsMenuMessage = (settings) =>
       : '✅ Бот повідомляє про видалену стратегічну інформацію.'
   }
 💰 ${settings.disableSwindlerMessage === true ? '⛔️ Бот не видаляє повідомлення шахраїв.' : '✅ Бот видаляє повідомлення шахраїв.'}
+📢 ${
+    settings.disableChatWhileAirRaidAlert === true
+      ? '⛔️ Бот не вимикає чат під час повітряної тривоги в вашому регіоні.'
+      : '✅ Бот вимикає чат під час повітряної тривоги в вашому регіоні.'
+  }
+
+Для зміни налаштувань, натисніть на відповідну кнопку нижче. 👇
+`.trim();
+
+const getAirRaidAlarmSettingsMessage = (settings) =>
+  `
+<b>🤖 Налаштування повітряної тривоги в поточному чаті.</b>
+Тут ти можеш змінити регіон до якого відноситься цей чат.
+
+🏰 ${settings.airRaidAlertSettings.chatAlarmLocation} - твій вибраний регіон.
 
 Для зміни налаштувань, натисніть на відповідну кнопку нижче. 👇
 `.trim();
@@ -73,10 +88,16 @@ const settingsDescriptionButton = '📋 Опис налаштувань бота
 const deleteTensorButton = `🚀 Інцидент`;
 const deleteMessageButton = '❗ Причина';
 const deleteSwindlerButton = '💰 Шахраї';
+const turnOffChatWhileAlarmButton = '📢 Повітряна тривога';
 
-const goBackButton = '⬅ Повернутись назад';
+const goBackButton = '⬅️ Повернутись назад';
+
+const nextPage = 'Наступна сторінка ⏩';
+const previousPage = '⏪ Попередня сторінка';
 
 const detailedSettingsDescription = '📋 Детальний опиc всіх налаштувань';
+
+const airAlarmAlertButton = '✈️⚠️ Налаштування повітряної тривоги';
 
 /**
  *
@@ -319,6 +340,10 @@ const getTensorTestResult = ({ chance, isSpam }) =>
  *
  * */
 module.exports = {
+  nextPage,
+  previousPage,
+  airAlarmAlertButton,
+  turnOffChatWhileAlarmButton,
   goBackButton,
   deleteMessageButton,
   deleteTensorButton,
@@ -341,6 +366,7 @@ module.exports = {
   swindlersUpdateEndMessage,
   alarmStartMessage,
   alarmEndMessage,
+  getAirRaidAlarmSettingsMessage,
   getBotJoinMessage,
   getCannotDeleteMessage,
   getDebugMessage,

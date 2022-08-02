@@ -40,16 +40,12 @@ export interface ChatSessionData {
   chatSettings: {
     airRaidAlertSettings: {
       airRaidAlertPageNumber: number;
-      disableChatWhileAirRaidAlert: boolean;
       chatAlarmLocation: string;
     };
+    disableChatWhileAirRaidAlert: boolean;
     disableStrategicInfo: boolean;
     disableDeleteMessage: boolean;
     disableSwindlerMessage: boolean;
-    airRaidAlertSettings? : {
-      disableChatWhileAirRaidAlert: boolean;
-      chatAlarmLocation: string;
-    }
   }
   chatPermissions?: {
     can_send_messages: boolean;
