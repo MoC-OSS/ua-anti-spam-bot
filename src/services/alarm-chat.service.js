@@ -1,6 +1,6 @@
 const { alarmService, ALARM_EVENT_KEY } = require('./alarm.service');
 const { redisService } = require('./redis.service');
-const { alarmStartMessage, alarmEndMessage } = require('../message');
+const { alarmStartMessage, alarmEndMessage, alarmStartNotificationMessage, alarmEndNotificationMessage } = require('../message');
 
 class AlarmChatService {
   async init(api) {
@@ -74,6 +74,13 @@ class AlarmChatService {
    * */
   async processChatAlarm(chat, isAlarm) {
     const chatInfo = await this.api.getChat(chat.id);
+
+    // need to complete this:?
+    if (isAlarm && chat.data.chatSettings.airRaidAlertSettings.notificationMessage) {
+      this.api.sendMessage(chat.id, alarmStartNotificationMessage, { parse_mode: 'HTML' });
+    } else {
+      this.api.sendMessage(chat.id, alarmEndNotificationMessage, { parse_mode: 'HTML' });
+    }
 
     if (isAlarm) {
       const newSession = { ...chat, chatPermissions: chatInfo.permissions };

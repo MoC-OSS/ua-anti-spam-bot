@@ -7,6 +7,7 @@ const {
   settingsSubmitMessage,
   turnOffChatWhileAlarmButton,
   airAlarmAlertButton,
+  airAlarmNotificationMessage,
   // settingsDescriptionButton,
   // detailedSettingsDescription,
   goBackButton,
@@ -45,9 +46,29 @@ class SettingsMiddleware {
       .addGlobalMiddlewares(onlyAdmin)
       .text(deleteTensorButton, (ctx) => toggleSetting(ctx, 'disableStrategicInfo'))
       .text(deleteMessageButton, (ctx) => toggleSetting(ctx, 'disableDeleteMessage'))
-      .row()
       .text(deleteSwindlerButton, (ctx) => toggleSetting(ctx, 'disableSwindlerMessage'))
-      .text(turnOffChatWhileAlarmButton, (ctx) => toggleSetting(ctx, 'disableChatWhileAirRaidAlert'))
+      .row()
+      .text(airAlarmNotificationMessage, (ctx) => {
+        ctx.chatSession.chatSettings.airRaidAlertSettings.notificationMessage =
+          ctx.chatSession.chatSettings.airRaidAlertSettings.notificationMessage === false;
+        const newText = getSettingsMenuMessage(ctx.chatSession.chatSettings);
+
+        if (ctx.msg.text !== newText) {
+          ctx.editMessageText(newText, { parse_mode: 'HTML' }).catch(handleError);
+        }
+      })
+      .row()
+      .text(turnOffChatWhileAlarmButton, (ctx) => {
+        if (ctx.chatSession.chatSettings.disableChatWhileAirRaidAlert === true) {
+          ctx.chatSession.chatSettings.airRaidAlertSettings.notificationMessage = true;
+        }
+        ctx.chatSession.chatSettings.disableChatWhileAirRaidAlert = ctx.chatSession.chatSettings.disableChatWhileAirRaidAlert === false;
+        const newText = getSettingsMenuMessage(ctx.chatSession.chatSettings);
+
+        if (ctx.msg.text !== newText) {
+          ctx.editMessageText(newText, { parse_mode: 'HTML' }).catch(handleError);
+        }
+      })
       .row()
       .submenu(airAlarmAlertButton, 'settingsAirRaidAlertSubmenu', (ctx) => {
         ctx.editMessageText(getAirRaidAlarmSettingsMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
