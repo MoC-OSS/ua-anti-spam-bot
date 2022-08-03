@@ -3,71 +3,60 @@ const { getAirRaidAlarmSettingsMessage, nextPage, previousPage } = require('../.
 const { handleError } = require('../../../utils');
 
 const dynamicLocationMenu = async (ctx, range, states) => {
-  const pageIndex = ctx.chatSession.chatSettings.airRaidAlertSettings.airRaidAlertPageNumber;
+  const pageIndex = ctx.chatSession.chatSettings.airRaidAlertSettings.pageNumber;
   const maxPageIndex = Math.ceil(states.length / 10);
-  const currentButtonsLimit = pageIndex * 10;
   const lastPageButtonsNumber = states.length % 10;
+  let currentButtonsLimit = pageIndex * 10;
   let buttonIndex = pageIndex * 10 - 10;
   let columnIndex = 0;
+  const lastPageButtonsLimit = buttonIndex + lastPageButtonsNumber;
 
   function createTextButton(locationName) {
     return range.text(locationName, (context) => {
-      context.chatSession.chatSettings.airRaidAlertSettings.chatAlarmLocation = locationName;
+      context.chatSession.chatSettings.airRaidAlertSettings.state = locationName;
       context.editMessageText(getAirRaidAlarmSettingsMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
     });
   }
 
+  function createNextButton() {
+    return range.text(nextPage, (context) => {
+      context.menu.update();
+      context.chatSession.chatSettings.airRaidAlertSettings.pageNumber += 1;
+    });
+  }
+
+  function createPreviousButton() {
+    return range.text(previousPage, (context) => {
+      context.menu.update();
+      context.chatSession.chatSettings.airRaidAlertSettings.pageNumber -= 1;
+    });
+  }
+
+  if (states.length - buttonIndex < 10) currentButtonsLimit = lastPageButtonsLimit;
+
+  for (buttonIndex; buttonIndex < currentButtonsLimit; buttonIndex += 1) {
+    const locationName = states[buttonIndex].name;
+
+    if (columnIndex % 2 === 0) {
+      if (currentButtonsLimit === buttonIndex + 1) {
+        createTextButton(locationName).row();
+      } else {
+        createTextButton(locationName);
+      }
+    } else {
+      createTextButton(locationName).row();
+    }
+
+    columnIndex += 1;
+  }
+
   if (pageIndex === 1) {
-    for (buttonIndex; buttonIndex < currentButtonsLimit; buttonIndex += 1) {
-      const locationName = states[buttonIndex].name;
-      if (columnIndex % 2 === 0) {
-        createTextButton(locationName);
-      } else {
-        createTextButton(locationName).row();
-      }
-      columnIndex += 1;
-    }
-    range.text(nextPage, (context) => {
-      context.menu.update();
-      context.chatSession.chatSettings.airRaidAlertSettings.airRaidAlertPageNumber += 1;
-    });
+    createNextButton();
   } else if (pageIndex > 1 && pageIndex !== maxPageIndex) {
-    for (buttonIndex; buttonIndex < currentButtonsLimit; buttonIndex += 1) {
-      const locationName = states[buttonIndex].name;
-      if (columnIndex % 2 === 0) {
-        createTextButton(locationName);
-      } else {
-        createTextButton(locationName).row();
-      }
-      columnIndex += 1;
-    }
-    range.text(previousPage, (context) => {
-      context.menu.update();
-      context.chatSession.chatSettings.airRaidAlertSettings.airRaidAlertPageNumber -= 1;
-    });
-    range.text(nextPage, (context) => {
-      context.menu.update();
-      context.chatSession.chatSettings.airRaidAlertSettings.airRaidAlertPageNumber += 1;
-    });
+    createPreviousButton();
+    createNextButton();
   } else if (pageIndex === maxPageIndex) {
-    const lastPageButtonsLimit = buttonIndex + lastPageButtonsNumber;
-    for (buttonIndex; buttonIndex < lastPageButtonsLimit; buttonIndex += 1) {
-      const locationName = states[buttonIndex].name;
-      if (columnIndex % 2 === 0) {
-        if (lastPageButtonsLimit === buttonIndex + 1) {
-          createTextButton(locationName).row();
-        } else {
-          createTextButton(locationName);
-        }
-      } else {
-        createTextButton(locationName).row();
-      }
-      columnIndex += 1;
-    }
-    range.text(previousPage, (context) => {
-      context.menu.update();
-      context.chatSession.chatSettings.airRaidAlertSettings.airRaidAlertPageNumber -= 1;
-    });
+    createPreviousButton();
   }
 };
 

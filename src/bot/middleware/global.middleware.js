@@ -73,8 +73,8 @@ class GlobalMiddleware {
 
     if (ctx.chatSession.chatSettings.airRaidAlertSettings === undefined) {
       ctx.chatSession.chatSettings.airRaidAlertSettings = {
-        airRaidAlertPageNumber: 1,
-        chatAlarmLocation: '',
+        pageNumber: 1,
+        state: '',
       };
     }
 

@@ -47,7 +47,7 @@ class AlarmChatService {
             chatSettings: {
               airRaidAlertSettings: {
                 disableChatWhileAirRaidAlert: true,
-                chatAlarmLocation: 'Львівська область',
+                state: 'Львівська область',
               },
             },
           },
@@ -61,7 +61,7 @@ class AlarmChatService {
 
   subscribeToAlarms() {
     alarmService.updatesEmitter.on(ALARM_EVENT_KEY, (event) => {
-      const affectedChats = this.chats.filter((chat) => chat.data.chatSettings.airRaidAlertSettings.chatAlarmLocation === event.state.name);
+      const affectedChats = this.chats.filter((chat) => chat.data.chatSettings.airRaidAlertSettings.state === event.state.name);
       affectedChats.forEach(async (chat) => {
         await this.processChatAlarm(chat, event.state.alert);
       });

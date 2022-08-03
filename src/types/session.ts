@@ -39,8 +39,8 @@ export interface ChatSessionData {
   lastLimitedDeletionDate?: Date;
   chatSettings: {
     airRaidAlertSettings: {
-      airRaidAlertPageNumber: number;
-      chatAlarmLocation: string;
+      pageNumber: number;
+      state: string;
     };
     disableChatWhileAirRaidAlert: boolean;
     disableStrategicInfo: boolean;
