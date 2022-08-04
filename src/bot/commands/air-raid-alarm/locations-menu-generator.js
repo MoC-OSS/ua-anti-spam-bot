@@ -2,8 +2,14 @@ const { getAirRaidAlarmSettingsMessage, nextPage, previousPage } = require('../.
 
 const { handleError } = require('../../../utils');
 
+/**
+ * @param {GrammyContext} ctx
+ * @param {MenuRange<GrammyContext>} range
+ * @param {AlarmNotification[]} states
+ * */
 const dynamicLocationMenu = async (ctx, range, states) => {
   const pageIndex = ctx.chatSession.chatSettings.airRaidAlertSettings.pageNumber;
+  const { state } = ctx.chatSession.chatSettings.airRaidAlertSettings;
   const maxPageIndex = Math.ceil(states.length / 10);
   const lastPageButtonsNumber = states.length % 10;
   let currentButtonsLimit = pageIndex * 10;
@@ -12,7 +18,8 @@ const dynamicLocationMenu = async (ctx, range, states) => {
   const lastPageButtonsLimit = buttonIndex + lastPageButtonsNumber;
 
   function createTextButton(locationName) {
-    return range.text(locationName, (context) => {
+    const displayLocationName = state === locationName ? `✅ ${locationName}` : locationName;
+    return range.text(displayLocationName, (context) => {
       context.chatSession.chatSettings.airRaidAlertSettings.state = locationName;
       context.editMessageText(getAirRaidAlarmSettingsMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
     });
@@ -32,7 +39,9 @@ const dynamicLocationMenu = async (ctx, range, states) => {
     });
   }
 
-  if (states.length - buttonIndex < 10) currentButtonsLimit = lastPageButtonsLimit;
+  if (states.length - buttonIndex < 10) {
+    currentButtonsLimit = lastPageButtonsLimit;
+  }
 
   for (buttonIndex; buttonIndex < currentButtonsLimit; buttonIndex += 1) {
     const locationName = states[buttonIndex].name;
