@@ -30,12 +30,13 @@ module.exports = {
     );
 
     return {
-      swindlersDetectService,
       dynamicStorageService,
       swindlersBotsService,
       swindlersCardsService,
-      swindlersUrlsService,
+      swindlersDetectService,
+      swindlersGoogleService,
       swindlersTensorService,
+      swindlersUrlsService,
     };
   },
 };

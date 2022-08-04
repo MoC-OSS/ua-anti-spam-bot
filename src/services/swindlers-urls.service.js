@@ -1,4 +1,7 @@
 const FuzzySet = require('fuzzyset');
+const axios = require('axios');
+
+const harmfulUrlStart = ['https://bitly.com/a/blocked'];
 
 class SwindlersUrlsService {
   /**
@@ -32,6 +35,9 @@ class SwindlersUrlsService {
       'paypal.com',
       'privat24.ua',
       'www.google.com',
+      'instagram.com',
+      't.me',
+      't.me/',
     ];
 
     this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
@@ -60,12 +66,14 @@ class SwindlersUrlsService {
   /**
    * @param {string} message - raw message from user to parse
    */
-  processMessage(message) {
+  async processMessage(message) {
     const urls = this.parseUrls(message);
     if (urls) {
       let lastResult = null;
-      const foundSwindlerUrl = urls.some((value) => {
-        lastResult = this.isSpamUrl(value);
+      const getUrls = urls.map((e) => this.isSpamUrl(e));
+      const allUrls = await Promise.all(getUrls);
+      const foundSwindlerUrl = allUrls.some((value) => {
+        lastResult = value;
         return lastResult.isSpam;
       });
 
@@ -100,17 +108,71 @@ class SwindlersUrlsService {
    */
   getUrlDomain(url) {
     const validUrl = url.slice(0, 4) === 'http' ? url : `https://${url}`;
-    return new URL(validUrl).host;
+    return `${new URL(validUrl).host}/`;
   }
 
   /**
    * @param {string} url
    * @param {number} [customRate]
    */
-  isSpamUrl(url, customRate) {
-    const domain = this.getUrlDomain(url);
-    const isRegexpMatch = this.swindlersRegex.test(domain);
+  async isSpamUrl(url, customRate) {
+    if (!url) {
+      return {
+        rate: 0,
+        isSpam: false,
+      };
+    }
 
+    /**
+     * @see https://loige.co/unshorten-expand-short-urls-with-node-js/
+     * */
+    const redirectUrl = await axios
+      .get(url, { maxRedirects: 0 })
+      .then(() => url)
+      .catch(
+        /**
+         * @param {AxiosError} err
+         */
+        (err) => {
+          if (err.code === 'ENOTFOUND' && err.syscall === 'getaddrinfo') {
+            return url;
+          }
+
+          if (err.code === 'ECONNREFUSED' && err.syscall === 'connect') {
+            return url;
+          }
+
+          if (err.code === 'ETIMEDOUT' && err.syscall === 'connect') {
+            return url;
+          }
+
+          if (err.code === 'ERR_TLS_CERT_ALTNAME_INVALID') {
+            return url;
+          }
+
+          if (err.code === 'ECONNRESET') {
+            return url;
+          }
+
+          try {
+            if (!err.response) {
+              console.error(err);
+            }
+
+            return err.response.headers.location || err.response.config.url || url;
+          } catch (e) {
+            console.error(e);
+            return url;
+          }
+        },
+      );
+
+    if (harmfulUrlStart.some((start) => redirectUrl.startsWith(start))) {
+      return { isSpam: true, rate: 300 };
+    }
+
+    const domain = this.getUrlDomain(redirectUrl);
+    const isRegexpMatch = this.swindlersRegex.test(domain);
     if (isRegexpMatch) {
       return { isSpam: isRegexpMatch, rate: 200 };
     }
@@ -122,6 +184,7 @@ class SwindlersUrlsService {
       rate,
       nearestName,
       currentName: domain,
+      redirectUrl,
     };
   }
 }

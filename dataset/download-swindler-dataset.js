@@ -8,17 +8,25 @@ const cases = Promise.all([
   swindlersGoogleService.getBots(),
   swindlersGoogleService.getTestingPositives(),
   swindlersGoogleService.getCards(),
+  swindlersGoogleService.getUsers(),
 ]);
 
 console.info('Loading training messages...');
 
-cases.then(async ([positives, newSwindlersBots, testPositives, swindlersCards]) => {
+cases.then(async ([positives, newSwindlersBots, testPositives, swindlersCards, swindlersUsers]) => {
   console.info('Received training messages.');
 
   const { swindlersUrlsService, swindlersCardsService } = await initSwindlersContainer();
 
   getSwindlersTopUsed([...positives, ...testPositives]);
-  await autoSwindlers(swindlersUrlsService, swindlersCardsService, [...positives, ...testPositives], newSwindlersBots, swindlersCards);
+  await autoSwindlers(
+    swindlersUrlsService,
+    swindlersCardsService,
+    [...positives, ...testPositives],
+    newSwindlersBots,
+    swindlersCards,
+    swindlersUsers,
+  );
 
   process.exit(0);
 });

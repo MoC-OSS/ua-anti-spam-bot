@@ -1,5 +1,8 @@
+const axios = require('axios');
 const { SwindlersUrlsService } = require('./swindlers-urls.service');
 const { mockDynamicStorageService, mockNewUrl } = require('./_mocks/index.mocks');
+
+jest.mock('axios');
 
 /**
  * @type {SwindlersUrlsService}
@@ -51,6 +54,14 @@ describe('SwindlersUrlsService', () => {
 
       expect(result).toEqual([]);
     });
+
+    // TODO fix this case
+    it('should not parse extra characters', () => {
+      const text = 'https://test.site/get/0426053194✅🇺🇦/';
+      const result = swindlersUrlsService.parseUrls(text);
+
+      expect(result).toStrictEqual([]);
+    });
   });
 
   describe('getUrlDomain', () => {
@@ -58,40 +69,55 @@ describe('SwindlersUrlsService', () => {
       const text = 'https://www.orpay.me/test/1234567890';
       const result = swindlersUrlsService.getUrlDomain(text);
 
-      expect(result).toEqual('www.orpay.me');
+      expect(result).toEqual('www.orpay.me/');
     });
   });
 
   describe('isSpamUrl', () => {
-    it('should match swindlers url', () => {
+    it('should match swindlers url', async () => {
       const text = 'https://www.orpay.me';
-      const result = swindlersUrlsService.isSpamUrl(text);
+      axios.get.mockImplementationOnce(() => Promise.resolve({ request: { res: { responseUrl: text } } }));
+      const result = await swindlersUrlsService.isSpamUrl(text);
 
       expect(result.isSpam).toEqual(true);
     });
 
-    it('should not match privat url', () => {
+    it('should not match privat url', async () => {
       const text = 'https://next.privat24.ua/';
-      const result = swindlersUrlsService.isSpamUrl(text);
+      axios.get.mockImplementationOnce(() => Promise.resolve({ request: { res: { responseUrl: text } } }));
+      const result = await swindlersUrlsService.isSpamUrl(text);
 
       expect(result.isSpam).toEqual(false);
     });
 
-    it('should match similar url', () => {
-      const result = swindlersUrlsService.isSpamUrl(mockNewUrl);
+    it('should match similar url', async () => {
+      axios.get.mockImplementationOnce(() => Promise.resolve({ request: { res: { responseUrl: mockNewUrl } } }));
+
+      const result = await swindlersUrlsService.isSpamUrl(mockNewUrl);
 
       expect(result.isSpam).toEqual(true);
       expect(result.rate).toBeGreaterThan(0.6);
     });
 
-    it('should not match telegram url', () => {
-      const result = swindlersUrlsService.isSpamUrl('https://t.me/+5v9SixsjZ9ZmMjBs');
+    it('should not match telegram url', async () => {
+      axios.get.mockImplementationOnce(() => Promise.resolve({ request: { res: { responseUrl: 'https://t.me/+5v9SixsjZ9ZmMjBs' } } }));
+      const result = await swindlersUrlsService.isSpamUrl('https://t.me/+5v9SixsjZ9ZmMjBs');
 
       expect(result.isSpam).toEqual(false);
     });
 
-    it('should not ban messages from subfolder', () => {
-      const result = swindlersUrlsService.isSpamUrl(
+    it('should not ban messages from subfolder', async () => {
+      axios.get.mockImplementationOnce(() =>
+        Promise.resolve({
+          request: {
+            res: {
+              responseUrl: 'https://electrek.co/2021/05/24/tesla-found-guilty-throttling-charging-speed-asked-pay-16000-thousands-owners/',
+            },
+          },
+        }),
+      );
+
+      const result = await swindlersUrlsService.isSpamUrl(
         'https://electrek.co/2021/05/24/tesla-found-guilty-throttling-charging-speed-asked-pay-16000-thousands-owners/',
       );
 
@@ -100,12 +126,14 @@ describe('SwindlersUrlsService', () => {
   });
 
   describe('processMessage', () => {
-    it('should process messages', () => {
+    it('should process messages', async () => {
       const text = `https://da-pay.me/ тест`;
-      const result = swindlersUrlsService.processMessage(text);
+      axios.get.mockImplementationOnce(() => Promise.resolve({ request: { res: { responseUrl: 'https://da-pay.me/' } } }));
+      const result = await swindlersUrlsService.processMessage(text);
 
       const parsedUrl = swindlersUrlsService.parseUrls(text)[0];
-      const isUrlSpam = swindlersUrlsService.isSpamUrl(parsedUrl);
+      axios.get.mockImplementationOnce(() => Promise.resolve({ request: { res: { responseUrl: parsedUrl } } }));
+      const isUrlSpam = await swindlersUrlsService.isSpamUrl(parsedUrl);
 
       expect(parsedUrl).toEqual('https://da-pay.me/');
       expect(isUrlSpam.isSpam).toEqual(true);
@@ -113,20 +141,22 @@ describe('SwindlersUrlsService', () => {
       expect(result.rate).toEqual(200);
     });
 
-    it('should not process telegram message', () => {
+    it('should not process telegram message', async () => {
       const text = `Плохие новости 18+👇👇👇
 
-https://t.me/+5v9SixsjZ9ZmMjBs
+    https://t.me/+5v9SixsjZ9ZmMjBs
 
-https://t.me/+5v9SixsjZ9ZmMjBs
+    https://t.me/+5v9SixsjZ9ZmMjBs
 
-https://t.me/+5v9SixsjZ9ZmMjBs`;
-      const result = swindlersUrlsService.processMessage(text);
+    https://t.me/+5v9SixsjZ9ZmMjBs`;
+      axios.get.mockImplementation(() => Promise.resolve({ request: { res: { responseUrl: 'https://t.me/+5v9SixsjZ9ZmMjBs' } } }));
+      const result = await swindlersUrlsService.processMessage(text);
 
       const parsedUrl = swindlersUrlsService.parseUrls(text)[0];
-      const isUrlSpam = swindlersUrlsService.isSpamUrl(parsedUrl);
+      axios.get.mockImplementationOnce(() => Promise.resolve({ request: { res: { responseUrl: parsedUrl } } }));
+      const isUrlSpam = await swindlersUrlsService.isSpamUrl(parsedUrl);
 
-      expect(parsedUrl).toEqual('https://t.me/+5v9SixsjZ9ZmMjBs');
+      expect(parsedUrl).toEqual(undefined);
       expect(isUrlSpam.isSpam).toEqual(false);
       expect(result).toEqual(null);
     });

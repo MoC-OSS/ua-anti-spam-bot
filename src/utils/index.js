@@ -6,6 +6,7 @@ const { MessageUtil } = require('./message.util');
 const { TelegramUtil } = require('./telegram.util');
 const errorUtilExports = require('./error.util');
 const errorHandlerExports = require('./error-handler');
+const revealHiddenUrlsExports = require('./reveal-hidden-urls.util');
 
 const messageUtil = new MessageUtil();
 const telegramUtil = new TelegramUtil();
@@ -127,4 +128,5 @@ module.exports = {
   telegramUtil,
   ...errorHandlerExports,
   ...errorUtilExports,
+  ...revealHiddenUrlsExports,
 };

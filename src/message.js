@@ -20,11 +20,20 @@ const hasDeletePermissionMessage = '✅ Я маю права на видален
 const hasNoDeletePermissionMessage = '⛔ Я не маю права на видалення повідомлень';
 
 /**
- * Generic - SwindlersUpdate
+ * Generic - Swindlers
  * */
 const swindlersUpdateStartMessage = 'Починаю оновлення списку шахраїв...';
-const swindlersUpdateEndMessage = 'Оновлення спіску шахраїв завершено.'; /**
+const swindlersUpdateEndMessage = 'Оновлення спіску шахраїв завершено.';
+const swindlersWarningMessage = `<b>❗УВАГА! UA Anti Spam Bot 🇺🇦 помітив повідомлення від шахраїв в цьому чаті!</b>
 
+Будьте обережні та дотримуйтесь правил інформаційної безпеки:
+
+🔶 Не переходьте за підозрілими посиланнями із чатів!
+🔶 Уникайте реєстрацій та передачі персональних даних стороннім неперевіреним ресурсам.
+🔶 Ніколи не вводьте захищені дані ваших платіжних карток (CVV-код та PIN).
+`;
+
+/**
  * Generic - Air alarm
  * */
 const alarmStartMessage = `
@@ -41,7 +50,6 @@ const alarmStartNotificationMessage = `
 const alarmEndNotificationMessage = `
 <b>❎ Відбій повітряної тривоги! 🔇</b>
 `;
-
 /**
  * Generic - Settings
  * */
@@ -382,6 +390,7 @@ module.exports = {
   confirmationMessage,
   swindlersUpdateStartMessage,
   swindlersUpdateEndMessage,
+  swindlersWarningMessage,
   alarmStartMessage,
   alarmEndMessage,
   getAirRaidAlarmSettingsMessage,

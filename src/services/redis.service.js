@@ -11,6 +11,7 @@ class RedisService {
       trainingChatWhitelist: 'training:chatWhiteList',
       trainingStartRank: 'training:startRank',
       trainingTempMessages: 'training:tempMessages',
+      trainingBots: 'training:bots',
       userSessions: /^-?\d+:-?\d+$/,
       chatSessions: /^-?\d+$/,
     };
@@ -21,6 +22,13 @@ class RedisService {
    * */
   async getTrainingChatWhitelist() {
     return (await redisClient.getRawValue(this.redisSelectors.trainingChatWhitelist)) || [];
+  }
+
+  /**
+   * @returns {Promise<string[]>}
+   * */
+  async getTrainingBots() {
+    return (await redisClient.getRawValue(this.redisSelectors.trainingBots)) || [];
   }
 
   /**
@@ -38,6 +46,17 @@ class RedisService {
     currentChats.push(newChatId);
 
     return this.setTrainingChatWhitelist(currentChats.join(','));
+  }
+
+  setTrainingBots(bots) {
+    return redisClient.setRawValue(this.redisSelectors.trainingBots, bots);
+  }
+
+  async updateTrainingBots(bot) {
+    const currentBots = await this.getTrainingChatWhitelist();
+    currentBots.push(bot);
+
+    return this.setTrainingBots(currentBots);
   }
 
   /**
