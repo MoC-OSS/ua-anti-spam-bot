@@ -56,6 +56,7 @@ const { settingsAvailableMessage } = require('./message');
  * @typedef { import("./types").GrammyContext } GrammyContext
  * @typedef { import("./types").SessionObject } SessionObject
  * @typedef { import("./types").GrammyMiddleware } GrammyMiddleware
+ * @typedef { import("./types").AlarmNotification } AlarmNotification
  */
 
 /**
@@ -343,7 +344,10 @@ const rootMenu = new Menu('root');
     onStart: () => {
       console.info(`Bot @${bot.me.username} started!`, new Date().toString());
 
-      if (!env.DEBUG) {
+      if (env.DEBUG) {
+        // For development
+        alarmService.mockAlarms();
+      } else {
         bot.api
           .sendMessage(logsChat, `🎉 <b>Bot @${bot.me.username} has been started!</b>\n<i>${new Date().toString()}</i>`, {
             parse_mode: 'HTML',

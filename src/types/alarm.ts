@@ -10,3 +10,8 @@ export interface AlarmNotification {
   state: State;
   notification_id: string;
 }
+
+export interface AlarmStates {
+  states: State[];
+  last_update: string;
+}

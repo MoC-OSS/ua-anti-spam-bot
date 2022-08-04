@@ -3,6 +3,9 @@ const { redisService } = require('./redis.service');
 const { alarmStartMessage, alarmEndMessage, alarmStartNotificationMessage, alarmEndNotificationMessage } = require('../message');
 
 class AlarmChatService {
+  /**
+   * @param {GrammyBot['api']} api
+   * */
   async init(api) {
     this.api = api;
     this.chats = await this.getChatsWithAlarmModeOn();
@@ -56,7 +59,9 @@ class AlarmChatService {
       return s;
     });
 
-    return sessions.filter((s) => s.data.chatSettings?.airRaidAlertSettings?.disableChatWhileAirRaidAlert);
+    return sessions.filter(
+      (s) => s.data.chatSettings?.airRaidAlertSettings?.notificationMessage || s.data.chatSettings?.disableChatWhileAirRaidAlert,
+    );
   }
 
   subscribeToAlarms() {

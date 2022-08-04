@@ -19,7 +19,7 @@ const dynamicLocationMenu = require('./air-raid-alarm');
 
 class SettingsMiddleware {
   /**
-   * @param {AlarmNotification[]} airRaidAlarmStates
+   * @param {State[]} airRaidAlarmStates
    * */
   constructor(airRaidAlarmStates) {
     this.settingsMenuObj = null;
@@ -67,10 +67,7 @@ class SettingsMiddleware {
       //   ctx.editMessageText(detailedSettingsDescription).catch(handleError);
       // })
       .row()
-      .text(settingsSubmitMessage, (ctx) => {
-        // console.log(ctx.chatSession.chatSettings);
-        ctx.deleteMessage();
-      });
+      .text(settingsSubmitMessage, (ctx) => ctx.deleteMessage());
 
     return this.settingsMenuObj;
   }

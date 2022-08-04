@@ -1,8 +1,10 @@
+const path = require('node:path');
+const events = require('node:events');
+
 const { env } = require('typed-dotenv').config();
 const axios = require('axios');
-const events = require('events');
-
 const EventSource = require('eventsource');
+
 const { getAlarmMock } = require('./_mocks/alarm.mock');
 
 const apiUrl = 'https://alerts.com.ua/api/states';
@@ -11,16 +13,15 @@ const ALARM_EVENT_KEY = 'update';
 
 class AlarmService {
   constructor() {
+    /**
+     * @type {EventEmitter<AlarmNotification>}
+     * */
     this.updatesEmitter = new events.EventEmitter();
     this.subscribeOnNotifications();
-
-    // For development
-    // this.mockAlarms();
   }
 
   /**
-   *
-   * @returns {Promise< AlarmNotification[]>}
+   * @returns {Promise<AlarmStates>}
    * */
   async getStates() {
     return axios
@@ -35,7 +36,8 @@ class AlarmService {
    * Creates SSE subscription to Alarm API events
    * */
   subscribeOnNotifications() {
-    const source = new EventSource(apiUrl, apiOptions);
+    const apiUrlLive = path.join(apiUrl, 'live');
+    const source = new EventSource(apiUrlLive, apiOptions);
     source.onmessage = (event) => {
       if (event.event === ALARM_EVENT_KEY) {
         this.updatesEmitter.emit(ALARM_EVENT_KEY, event.data);
@@ -48,13 +50,17 @@ class AlarmService {
    * 20s waiting => start air alarm with mock => 20s waiting => end air alarm with mock
    * */
   mockAlarms() {
+    this.updatesEmitter.on(ALARM_EVENT_KEY, (notification) => {
+      console.info(notification);
+    });
+
     setTimeout(() => {
       this.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(true));
-    }, 20000);
+    }, 1000);
 
     setTimeout(() => {
       this.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(false));
-    }, 40000);
+    }, 5000);
   }
 }
 
