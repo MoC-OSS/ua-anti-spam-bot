@@ -1,11 +1,12 @@
 const { getAirRaidAlarmSettingsMessage, nextPage, previousPage } = require('../../../message');
 
 const { handleError } = require('../../../utils');
+const { onlyAdmin } = require('../../middleware');
 
 /**
  * @param {GrammyContext} ctx
  * @param {MenuRange<GrammyContext>} range
- * @param {AlarmNotification[]} states
+ * @param {State[]} states
  * */
 const dynamicLocationMenu = async (ctx, range, states) => {
   const pageIndex = ctx.chatSession.chatSettings.airRaidAlertSettings.pageNumber;
@@ -19,21 +20,22 @@ const dynamicLocationMenu = async (ctx, range, states) => {
 
   function createTextButton(locationName) {
     const displayLocationName = state === locationName ? `✅ ${locationName}` : locationName;
-    return range.text(displayLocationName, (context) => {
+    // TODO UABOT-35 update MiddlewareMenu to handle dynamic buttons
+    return range.text(displayLocationName, onlyAdmin, (context) => {
       context.chatSession.chatSettings.airRaidAlertSettings.state = locationName;
       context.editMessageText(getAirRaidAlarmSettingsMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
     });
   }
 
   function createNextButton() {
-    return range.text(nextPage, (context) => {
+    return range.text(nextPage, onlyAdmin, (context) => {
       context.menu.update();
       context.chatSession.chatSettings.airRaidAlertSettings.pageNumber += 1;
     });
   }
 
   function createPreviousButton() {
-    return range.text(previousPage, (context) => {
+    return range.text(previousPage, onlyAdmin, (context) => {
       context.menu.update();
       context.chatSession.chatSettings.airRaidAlertSettings.pageNumber -= 1;
     });
