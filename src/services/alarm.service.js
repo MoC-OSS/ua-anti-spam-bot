@@ -3,7 +3,7 @@ const axios = require('axios');
 const events = require('events');
 
 const EventSource = require('eventsource');
-const { getAlarmMock } = require('./_mocks/alarm.mock');
+const { getAlarmMock } = require('./_mocks/alarm.mocks');
 
 const apiUrl = 'https://alerts.com.ua/api/states';
 const apiOptions = { headers: { 'X-API-Key': env.ALARM_KEY } };

@@ -35,33 +35,35 @@ class AlarmChatService {
    * @returns {Promise<ChatSession[]>}
    * */
   async getChatsWithAlarmModeOn() {
-    let sessions = await redisService.getChatSessions();
-
+    const sessions = await redisService.getChatSessions();
+    // console.log('SESSIONS', sessions);
     // mock, delete later
-    sessions = sessions.map((s) => {
-      if (s.id === '-774112991' || s.id === '-694504354') {
-        return {
-          id: s.id,
-          data: {
-            ...s.data,
-            chatSettings: {
-              airRaidAlertSettings: {
-                disableChatWhileAirRaidAlert: true,
-                chatAlarmLocation: 'Львівська область',
-              },
-            },
-          },
-        };
-      }
-      return s;
-    });
+    // sessions = sessions.map((s) => {
+    //   if (s.id === '-774112991' || s.id === '-694504354') {
+    //     return {
+    //       id: s.id,
+    //       data: {
+    //         ...s.data,
+    //         chatSettings: {
+    //           airRaidAlertSettings: {
+    //             disableChatWhileAirRaidAlert: true,
+    //             chatAlarmLocation: 'Львівська область',
+    //           },
+    //         },
+    //       },
+    //     };
+    //   }
+    //   return s;
+    // });
 
     return sessions.filter((s) => s.data.chatSettings?.airRaidAlertSettings?.disableChatWhileAirRaidAlert);
   }
 
   subscribeToAlarms() {
     alarmService.updatesEmitter.on(ALARM_EVENT_KEY, (event) => {
-      const affectedChats = this.chats.filter((chat) => chat.data.chatSettings.airRaidAlertSettings.chatAlarmLocation === event.state.name);
+      const affectedChats = this.chats.filter(
+        (chat) => chat.data.chatSettings?.airRaidAlertSettings?.chatAlarmLocation === event.state.name,
+      );
       affectedChats.forEach(async (chat) => {
         await this.processChatAlarm(chat, event.state.alert);
       });
@@ -74,7 +76,6 @@ class AlarmChatService {
    * */
   async processChatAlarm(chat, isAlarm) {
     const chatInfo = await this.api.getChat(chat.id);
-
     if (isAlarm) {
       const newSession = { ...chat, chatPermissions: chatInfo.permissions };
       await redisService.updateChatSession(chat.id, newSession);
