@@ -1,6 +1,7 @@
 const axios = require('axios');
 const { SwindlersUrlsService } = require('./swindlers-urls.service');
 const { mockDynamicStorageService, mockNewUrl } = require('./_mocks/index.mocks');
+const { EXCEPTION_DOMAINS } = require('./constants/swindlers-urls.constant');
 
 jest.mock('axios');
 
@@ -47,7 +48,7 @@ describe('SwindlersUrlsService', () => {
     });
 
     it('should not match excluded url', () => {
-      const text = `https://${swindlersUrlsService.exceptionDomains.join(' https://')}`;
+      const text = `https://${EXCEPTION_DOMAINS.join(' https://')}`;
       const result = swindlersUrlsService.parseUrls(text);
 
       console.info(text);
