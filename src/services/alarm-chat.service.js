@@ -1,6 +1,7 @@
 const { alarmService, ALARM_EVENT_KEY } = require('./alarm.service');
 const { redisService } = require('./redis.service');
-const { alarmStartMessage, alarmEndMessage, alarmStartNotificationMessage, alarmEndNotificationMessage } = require('../message');
+const { getAlarmStartNotificationMessage, alarmEndNotificationMessage, chatIsMutedMessage, chatIsUnmutedMessage } = require('../message');
+const { handleError } = require('../utils');
 
 class AlarmChatService {
   /**
@@ -79,12 +80,16 @@ class AlarmChatService {
    * */
   async processChatAlarm(chat, isAlarm) {
     const chatInfo = await this.api.getChat(chat.id);
+    let startAlarmMessage = '';
+    let endAlarmMessage = '';
 
-    // need to complete this:?
-    if (isAlarm && chat.data.chatSettings.airRaidAlertSettings.notificationMessage) {
-      this.api.sendMessage(chat.id, alarmStartNotificationMessage, { parse_mode: 'HTML' });
-    } else {
-      this.api.sendMessage(chat.id, alarmEndNotificationMessage, { parse_mode: 'HTML' });
+    if (chat.data.chatSettings.disableChatWhileAirRaidAlert) {
+      startAlarmMessage += getAlarmStartNotificationMessage(chat.data.chatSettings);
+      endAlarmMessage += alarmEndNotificationMessage;
+    }
+    if (chat.data.chatSettings.airRaidAlertSettings.notificationMessage) {
+      startAlarmMessage += chatIsMutedMessage;
+      endAlarmMessage += chatIsUnmutedMessage;
     }
 
     if (isAlarm) {
@@ -92,12 +97,12 @@ class AlarmChatService {
       await redisService.updateChatSession(chat.id, newSession);
       const newPermissions = {};
       this.api.setChatPermissions(chat.id, newPermissions);
-      this.api.sendMessage(chat.id, alarmStartMessage, { parse_mode: 'HTML' });
+      this.api.sendMessage(chat.id, startAlarmMessage, { parse_mode: 'HTML' }).catch(handleError);
     } else {
       const currentSession = await redisService.getChatSession(chat.id);
       const newPermissions = { ...currentSession.data.chatPermissions };
       this.api.setChatPermissions(chat.id, newPermissions);
-      this.api.sendMessage(chat.id, alarmEndMessage, { parse_mode: 'HTML' });
+      this.api.sendMessage(chat.id, endAlarmMessage, { parse_mode: 'HTML' }).catch(handleError);
     }
   }
 }

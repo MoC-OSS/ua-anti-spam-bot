@@ -21,6 +21,10 @@ const dynamicLocationMenu = async (ctx, range, states) => {
   function createTextButton(locationName) {
     const displayLocationName = state === locationName ? `✅ ${locationName}` : locationName;
     // TODO UABOT-35 update MiddlewareMenu to handle dynamic buttons
+
+    /**
+     * @param {GrammyContext} context
+     * */
     return range.text(displayLocationName, onlyAdmin, (context) => {
       context.chatSession.chatSettings.airRaidAlertSettings.state = locationName;
       context.editMessageText(getAirRaidAlarmSettingsMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);

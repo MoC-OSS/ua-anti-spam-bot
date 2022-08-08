@@ -8,6 +8,7 @@ const {
   turnOffChatWhileAlarmButton,
   airAlarmAlertButton,
   airAlarmNotificationMessage,
+  selectYourState,
   // settingsDescriptionButton,
   // detailedSettingsDescription,
   goBackButton,
@@ -42,7 +43,21 @@ class SettingsMiddleware {
       }
     };
 
-    this.settingsMenuObj = new MiddlewareMenu('settingsMenu')
+    const isStateSelected = (ctx) => {
+      const { state } = ctx.chatSession.chatSettings.airRaidAlertSettings;
+      if (!state) {
+        ctx
+          .answerCallbackQuery({
+            text: selectYourState,
+            show_alert: true,
+          })
+          .catch(handleError);
+        return false;
+      }
+      return true;
+    };
+
+    this.settingsMenuObj = new MiddlewareMenu('settingsMenu', { autoAnswer: false })
       .addGlobalMiddlewares(onlyAdmin)
       .text(deleteTensorButton, (ctx) => toggleSetting(ctx, 'disableStrategicInfo'))
       .text(deleteMessageButton, (ctx) => toggleSetting(ctx, 'disableDeleteMessage'))
@@ -52,15 +67,21 @@ class SettingsMiddleware {
         ctx.editMessageText(getAirRaidAlarmSettingsMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
       })
       .text(airAlarmNotificationMessage, (ctx) => {
-        ctx.chatSession.chatSettings.airRaidAlertSettings.notificationMessage =
-          ctx.chatSession.chatSettings.airRaidAlertSettings.notificationMessage === false;
-        const newText = getSettingsMenuMessage(ctx.chatSession.chatSettings);
+        if (isStateSelected(ctx)) {
+          ctx.chatSession.chatSettings.airRaidAlertSettings.notificationMessage =
+            ctx.chatSession.chatSettings.airRaidAlertSettings.notificationMessage === false;
+          const newText = getSettingsMenuMessage(ctx.chatSession.chatSettings);
 
-        if (ctx.msg.text !== newText) {
-          ctx.editMessageText(newText, { parse_mode: 'HTML' }).catch(handleError);
+          if (ctx.msg.text !== newText) {
+            ctx.editMessageText(newText, { parse_mode: 'HTML' }).catch(handleError);
+          }
         }
       })
-      .text(turnOffChatWhileAlarmButton, (ctx) => toggleSetting(ctx, 'disableChatWhileAirRaidAlert'))
+      .text(turnOffChatWhileAlarmButton, (ctx) => {
+        if (isStateSelected(ctx)) {
+          toggleSetting(ctx, 'disableChatWhileAirRaidAlert');
+        }
+      })
       // TODO UABOT-2 COMMENT UNTIL DESCRIPTION WILL BE AVAILABLE
       // .row()
       // .submenu(settingsDescriptionButton, 'settingsDescriptionSubmenu', (ctx) => {
