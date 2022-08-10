@@ -1,5 +1,15 @@
 const { redisClient } = require('../db');
 
+/**
+ * @template T
+ * @param {T} array
+ *
+ * @returns {T}
+ * */
+function removeDuplicates(array) {
+  return [...new Set(array)];
+}
+
 class RedisService {
   constructor() {
     this.redisClient = redisClient;
@@ -52,11 +62,11 @@ class RedisService {
     return redisClient.setRawValue(this.redisSelectors.trainingBots, bots);
   }
 
-  async updateTrainingBots(bot) {
-    const currentBots = await this.getTrainingChatWhitelist();
-    currentBots.push(bot);
+  async updateTrainingBots(bots) {
+    const currentBots = await this.getTrainingBots();
+    const newBots = removeDuplicates([...currentBots, ...bots]);
 
-    return this.setTrainingBots(currentBots);
+    return this.setTrainingBots(newBots);
   }
 
   /**
