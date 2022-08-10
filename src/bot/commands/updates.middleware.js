@@ -1,8 +1,8 @@
 const { Menu } = require('@grammyjs/menu');
-const { apiThrottler } = require('@grammyjs/transformer-throttler');
+const Bottleneck = require('bottleneck');
 
 const { redisService } = require('../../services/redis.service');
-const { getUpdatesMessage, getSuccessfulMessage, cancelMessageSending, confirmationMessage } = require('../../message');
+const { getUpdatesMessage, getSuccessfulMessage, cancelMessageSending, confirmationMessage, getUpdateMessage } = require('../../message');
 const { handleError } = require('../../utils');
 
 class UpdatesMiddleware {
@@ -33,12 +33,13 @@ class UpdatesMiddleware {
     /**
      * @param {GrammyContext} ctx
      * */
-    return async (ctx) => {
+    const middleware = async (ctx) => {
       const userInput = ctx.msg?.text;
       const textEntities = ctx.msg?.entities;
       ctx.session.updatesText = userInput;
       ctx.session.textEntities = textEntities ?? null;
       ctx.session.step = 'messageSending';
+      await ctx.replyWithChatAction('typing');
       const sessions = (await redisService.getChatSessions()).filter(
         (session) => session.data.chatType === 'private' || session.data.chatType === 'supergroup',
       );
@@ -46,6 +47,8 @@ class UpdatesMiddleware {
       await ctx.reply(`${confirmationMessage}\nВсього чатів: ${sessions.length}`);
       await ctx.reply(userInput, { entities: textEntities ?? null, reply_markup: this.menu });
     };
+
+    return middleware;
   }
 
   messageSending() {
@@ -56,8 +59,10 @@ class UpdatesMiddleware {
       ctx.session.step = 'idle';
       const payload = ctx.match;
       if (payload === 'approve') {
-        const throttler = apiThrottler();
-        ctx.api.config.use(throttler);
+        const limiter = new Bottleneck({
+          maxConcurrent: 1,
+          minTime: 2000,
+        });
 
         const updatesMessage = ctx.session.updatesText;
         const updatesMessageEntities = ctx.session.textEntities;
@@ -66,16 +71,35 @@ class UpdatesMiddleware {
           (session) => session.data.chatType === 'private' || session.data.chatType === 'supergroup',
         );
         const totalCount = privateAndSuperGroupsSessions.length;
+        const chunkSize = Math.ceil(totalCount / 10);
+        let finishedCount = 0;
+        let successCount = 0;
 
-        privateAndSuperGroupsSessions.forEach(async (e) => {
-          await ctx.api.sendMessage(e.id, updatesMessage, { entities: updatesMessageEntities ?? null }).catch((error) => {
-            console.error('This bot was blocked or kicked from this chat!');
-            handleError(error);
+        privateAndSuperGroupsSessions.forEach((e) => {
+          limiter.schedule(() => {
+            ctx.api
+              .sendMessage(e.id, updatesMessage, { entities: updatesMessageEntities ?? null })
+              .then(() => {
+                successCount += 1;
+              })
+              .catch(handleError)
+              .finally(() => {
+                finishedCount += 1;
+              });
           });
         });
-        ctx.reply(getSuccessfulMessage({ totalCount }));
+
+        limiter.on('done', () => {
+          if (finishedCount % chunkSize === 0) {
+            ctx.reply(getUpdateMessage({ totalCount, successCount, finishedCount })).catch(handleError);
+          }
+        });
+
+        limiter.on('empty', () => {
+          ctx.reply(getSuccessfulMessage({ totalCount, successCount })).catch(handleError);
+        });
       } else {
-        ctx.reply(cancelMessageSending);
+        await ctx.reply(cancelMessageSending);
       }
     };
   }
