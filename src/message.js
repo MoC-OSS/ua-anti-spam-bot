@@ -275,15 +275,21 @@ const getUpdatesMessage = () =>
 
 `.trim();
 
+const getUpdateMessage = ({ totalCount, finishedCount, successCount }) =>
+  `
+Було опрацьовано ${finishedCount}/${totalCount} повідомлень...
+Успішно ${successCount} повідомлень.
+`.trim();
+
 /**
  *
  * Message that bots sends before confirmation
  *
  * */
-const getSuccessfulMessage = ({ totalCount }) =>
+const getSuccessfulMessage = ({ totalCount, successCount }) =>
   `
-Загальна кількість унікальних приватних чатів та супер-груп: ${totalCount}.
-
+Розсилка завершена!
+Було відправлено ${successCount}/${totalCount} повідомлень.
 `.trim();
 
 /**
@@ -345,6 +351,7 @@ module.exports = {
   getStartMessage,
   getStatisticsMessage,
   getSuccessfulMessage,
+  getUpdateMessage,
   getTensorTestResult,
   getUpdatesMessage,
 };
