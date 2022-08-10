@@ -33,6 +33,7 @@
     "@types/fuzzyset": "^1.0.4",
     "aws-sdk": "^2.1130.0",
     "axios": "^0.26.1",
+    "bottleneck": "^2.19.5",
     "contains-emoji": "^1.1.0",
     "cyrillic-to-translit-js": "^3.1.0",
     "diff": "^5.0.0",
@@ -72,7 +73,6 @@
     "nodemon": "^2.0.15",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.6.2",
-    "queue": "^6.0.2",
     "smile-track": "^0.17.0",
     "worker-farm": "^1.7.0"
   }
