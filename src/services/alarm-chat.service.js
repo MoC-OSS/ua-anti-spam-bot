@@ -60,9 +60,7 @@ class AlarmChatService {
       return s;
     });
 
-    return sessions.filter(
-      (s) => s.data.chatSettings?.airRaidAlertSettings?.notificationMessage || s.data.chatSettings?.disableChatWhileAirRaidAlert,
-    );
+    return sessions.filter((s) => s.data.chatSettings?.airRaidAlertSettings?.disableChatWhileAirRaidAlert);
   }
 
   subscribeToAlarms() {
