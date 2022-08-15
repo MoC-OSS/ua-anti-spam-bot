@@ -98,7 +98,7 @@ class SwindlersUrlsService {
     /**
      * @see https://loige.co/unshorten-expand-short-urls-with-node-js/
      * */
-    const redirectUrl = SHORTS.includes(new URL(url).host)
+    const redirectUrl = SHORTS.includes(this.getUrlDomain(url).slice(0, -1))
       ? await axios
           .get(url, { maxRedirects: 0 })
           .then(() => url)

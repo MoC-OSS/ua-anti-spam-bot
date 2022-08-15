@@ -124,6 +124,23 @@ describe('SwindlersUrlsService', () => {
 
       expect(result.isSpam).toEqual(false);
     });
+
+    it('should resolve links from link shortener', async () => {
+      axios.get.mockImplementationOnce(() =>
+        Promise.resolve({
+          request: {
+            res: {
+              responseUrl: 'https://electrek.co/2021/05/24/tesla-found-guilty-throttling-charging-speed-asked-pay-16000-thousands-owners/',
+            },
+          },
+        }),
+      );
+
+      const result = await swindlersUrlsService.isSpamUrl('https://bit.ly/test-swindler-mock');
+
+      expect(axios.get).toBeCalled();
+      expect(result.isSpam).toEqual(false);
+    });
   });
 
   describe('processMessage', () => {
