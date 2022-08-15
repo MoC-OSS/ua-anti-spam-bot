@@ -44,6 +44,8 @@ describe('AlarmChatService', () => {
       const chat = generateChat(testId, session);
       await alarmChatService.updateChat(session, testId);
       alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(true));
+      // eslint-disable-next-line no-promise-executor-return
+      await new Promise((r) => setTimeout(r, 3000));
       expect(alarmChatService.processChatAlarm).toHaveBeenCalledTimes(1);
       expect(alarmChatService.processChatAlarm).toHaveBeenCalledWith(chat, true);
     });
