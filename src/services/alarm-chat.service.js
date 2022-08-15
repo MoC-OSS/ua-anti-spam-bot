@@ -59,7 +59,6 @@ class AlarmChatService {
    * @param {boolean} isAlarm
    * */
   async processChatAlarm(chat, isAlarm) {
-    // console.log(chat);
     const chatInfo = await this.api.getChat(chat.id);
     let startAlarmMessage = '';
     let endAlarmMessage = '';
