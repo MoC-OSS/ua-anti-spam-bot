@@ -4,7 +4,6 @@ const events = require('node:events');
 const { env } = require('typed-dotenv').config();
 const axios = require('axios');
 const EventSource = require('eventsource');
-const { getAlarmMock } = require('./_mocks/alarm.mocks');
 
 const apiUrl = 'https://alerts.com.ua/api/states';
 const apiOptions = { headers: { 'X-API-Key': env.ALARM_KEY } };
@@ -42,24 +41,6 @@ class AlarmService {
         this.updatesEmitter.emit(ALARM_EVENT_KEY, event.data);
       }
     };
-  }
-
-  /**
-   * For development. Emits two alarm values at 20 second interval after init.
-   * 20s waiting => start air alarm with mock => 20s waiting => end air alarm with mock
-   * */
-  mockAlarms() {
-    this.updatesEmitter.on(ALARM_EVENT_KEY, (notification) => {
-      console.info(notification);
-    });
-
-    setTimeout(() => {
-      this.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(true));
-    }, 1000);
-
-    setTimeout(() => {
-      this.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(false));
-    }, 5000);
   }
 }
 

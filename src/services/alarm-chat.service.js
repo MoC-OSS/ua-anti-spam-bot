@@ -14,24 +14,23 @@ class AlarmChatService {
   }
 
   /**
-   * @param {ChatSession} chatSession
+   * @param {ChatSessionData} chatSession
+   * @param {string} id
    * */
-  addOrUpdateChat(chatSession) {
-    const index = this.chats.findIndex((chat) => chat.id === chatSession.id);
-    if (~index) {
-      this.chats[index] = chatSession;
-    } else {
-      this.chats.push(chatSession);
-    }
-  }
-
-  /**
-   * @param {ChatSession} chatSession
-   * */
-  deleteChat(chatSession) {
-    const index = this.chats.findIndex((chat) => chat.id === chatSession.id);
-    if (~index) {
-      this.chats.splice(index, 1);
+  async updateChat(chatSession, id) {
+    const chatId = id.toString();
+    const index = this.chats.findIndex((chat) => chat.id === chatId);
+    if (index !== -1) {
+      if (!chatSession.chatSettings.disableChatWhileAirRaidAlert && !chatSession.chatSettings.airRaidAlertSettings.notificationMessage) {
+        this.chats.splice(index, 1);
+      } else {
+        this.chats[index].data = chatSession;
+      }
+    } else if (chatSession.chatSettings.disableChatWhileAirRaidAlert || chatSession.chatSettings.airRaidAlertSettings.notificationMessage) {
+      this.chats.push({
+        id: chatId,
+        data: chatSession,
+      });
     }
   }
 
@@ -39,35 +38,18 @@ class AlarmChatService {
    * @returns {Promise<ChatSession[]>}
    * */
   async getChatsWithAlarmModeOn() {
-    let sessions = await redisService.getChatSessions();
-
-    // mock, delete later
-    sessions = sessions.map((s) => {
-      if (s.id === '-774112991' || s.id === '-694504354') {
-        return {
-          id: s.id,
-          data: {
-            ...s.data,
-            chatSettings: {
-              airRaidAlertSettings: {
-                disableChatWhileAirRaidAlert: true,
-                state: 'Львівська область',
-              },
-            },
-          },
-        };
-      }
-      return s;
-    });
-
-    return sessions.filter((s) => s.data.chatSettings?.airRaidAlertSettings?.disableChatWhileAirRaidAlert);
+    const sessions = await redisService.getChatSessions();
+    return sessions.filter(
+      (s) => s.data.chatSettings?.airRaidAlertSettings?.notificationMessage || s.data.chatSettings?.disableChatWhileAirRaidAlert,
+    );
   }
 
   subscribeToAlarms() {
     alarmService.updatesEmitter.on(ALARM_EVENT_KEY, (event) => {
-      const affectedChats = this.chats.filter((chat) => chat.data.chatSettings.airRaidAlertSettings.state === event.state.name);
-      affectedChats.forEach(async (chat) => {
-        await this.processChatAlarm(chat, event.state.alert);
+      this.chats.forEach(async (chat) => {
+        if (chat.data.chatSettings.airRaidAlertSettings.state === event.state.name) {
+          await this.processChatAlarm(chat, event.state.alert);
+        }
       });
     });
   }
@@ -77,29 +59,35 @@ class AlarmChatService {
    * @param {boolean} isAlarm
    * */
   async processChatAlarm(chat, isAlarm) {
+    // console.log(chat);
     const chatInfo = await this.api.getChat(chat.id);
     let startAlarmMessage = '';
     let endAlarmMessage = '';
 
-    if (chat.data.chatSettings.disableChatWhileAirRaidAlert) {
+    if (chat.data.chatSettings.airRaidAlertSettings.notificationMessage) {
       startAlarmMessage += getAlarmStartNotificationMessage(chat.data.chatSettings);
       endAlarmMessage += alarmEndNotificationMessage;
     }
-    if (chat.data.chatSettings.airRaidAlertSettings.notificationMessage) {
+    if (chat.data.chatSettings.disableChatWhileAirRaidAlert) {
       startAlarmMessage += chatIsMutedMessage;
       endAlarmMessage += chatIsUnmutedMessage;
     }
 
     if (isAlarm) {
-      const newSession = { ...chat, chatPermissions: chatInfo.permissions };
-      await redisService.updateChatSession(chat.id, newSession);
-      const newPermissions = {};
-      this.api.setChatPermissions(chat.id, newPermissions);
+      if (chat.data.chatSettings.disableChatWhileAirRaidAlert) {
+        const newSession = { ...chat.data };
+        newSession.chatPermissions = { ...chatInfo.permissions };
+        await redisService.updateChatSession(chat.id, newSession);
+        const newPermissions = {};
+        await this.api.setChatPermissions(chat.id, newPermissions);
+      }
       this.api.sendMessage(chat.id, startAlarmMessage, { parse_mode: 'HTML' }).catch(handleError);
     } else {
-      const currentSession = await redisService.getChatSession(chat.id);
-      const newPermissions = { ...currentSession.data.chatPermissions };
-      this.api.setChatPermissions(chat.id, newPermissions);
+      if (chat.data.chatSettings.disableChatWhileAirRaidAlert) {
+        const currentSession = await redisService.getChatSession(chat.id);
+        const newPermissions = { ...currentSession.chatPermissions };
+        await this.api.setChatPermissions(chat.id, newPermissions);
+      }
       this.api.sendMessage(chat.id, endAlarmMessage, { parse_mode: 'HTML' }).catch(handleError);
     }
   }

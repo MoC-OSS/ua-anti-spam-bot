@@ -180,10 +180,11 @@ class RedisService {
       ...newSession,
     };
 
-    return redisClient.setRawValue(chatId, writeSession).then((res) => {
-      console.info(`Chat id has been updated: ${chatId}`, writeSession);
-      return res;
-    });
+    return redisClient.setRawValue(chatId, writeSession).then(
+      (res) =>
+        // console.info(`Chat id has been updated: ${chatId}`, writeSession);
+        res,
+    );
   }
 
   /**
@@ -204,7 +205,7 @@ class RedisService {
 
   /**
    * @param {string} chatId
-   * @returns {Promise<ChatSession>}
+   * @returns {Promise<ChatSessionData>}
    * */
   async getChatSession(chatId) {
     if (!this.redisSelectors.chatSessions.test(chatId)) {

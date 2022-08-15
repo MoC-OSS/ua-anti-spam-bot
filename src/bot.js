@@ -346,7 +346,6 @@ const rootMenu = new Menu('root');
 
       if (env.DEBUG) {
         // For development
-        alarmService.mockAlarms();
       } else {
         bot.api
           .sendMessage(logsChat, `🎉 <b>Bot @${bot.me.username} has been started!</b>\n<i>${new Date().toString()}</i>`, {

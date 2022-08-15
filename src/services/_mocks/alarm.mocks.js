@@ -1,16 +1,17 @@
 const { generateRandomNumber, generateRandomString, generateRandomBoolean } = require('./helpers.mocks');
 
 const testId = '1234567890';
+const testState = 'Львівська область';
 
 const getAlarmMock = (alert = false) => ({
   state: {
     alert,
-    id: 12,
-    name: 'Львівська область',
-    name_en: 'Lviv oblast',
-    changed: '2022-04-05T06:14:56+03:00',
+    id: generateRandomNumber(2),
+    name: testState,
+    name_en: generateRandomString(10),
+    changed: generateRandomString(10),
   },
-  notification_id: 'b7b5cb85-ddc0-11ec-90d3-c8b29b63332d',
+  notification_id: generateRandomString(10),
 });
 
 const chartMock = {
@@ -27,63 +28,65 @@ const chartMock = {
   },
 };
 
-const apiMock = {
-  sendMessage: jest.fn(() => Promise.resolve(null)),
-  getChat: jest.fn(() => chartMock),
-  setChatPermissions: jest.fn(() => {}),
-};
-
-function generateChatSession(
-  id = generateRandomString(10),
-  chatAlarmLocation = generateRandomString(10),
-  disableChatWhileAirRaidAlert = true,
-) {
+function generateChatSessionData(state = generateRandomString(10), disableChatWhileAirRaidAlert = true, notificationMessage = true) {
   return {
-    id,
-    data: {
-      chatType: generateRandomString(10),
-      chatMembersCount: generateRandomNumber(10),
-      botRemoved: generateRandomBoolean(),
-      isBotAdmin: generateRandomBoolean(),
-      botAdminDate: new Date(),
-      chatSettings: {
-        disableStrategicInfo: generateRandomBoolean(),
-        disableDeleteMessage: generateRandomBoolean(),
-        disableSwindlerMessage: generateRandomBoolean(),
-        airRaidAlertSettings: {
-          disableChatWhileAirRaidAlert,
-          chatAlarmLocation,
-        },
+    chatType: generateRandomString(10),
+    chatMembersCount: generateRandomNumber(10),
+    botRemoved: generateRandomBoolean(),
+    isBotAdmin: generateRandomBoolean(),
+    botAdminDate: new Date(),
+    chatSettings: {
+      disableStrategicInfo: generateRandomBoolean(),
+      disableDeleteMessage: generateRandomBoolean(),
+      disableSwindlerMessage: generateRandomBoolean(),
+      disableChatWhileAirRaidAlert,
+      airRaidAlertSettings: {
+        notificationMessage,
+        state,
+        pageNumber: generateRandomNumber(1),
       },
-      chatPermissions: {
-        can_send_messages: generateRandomBoolean(),
-        can_send_media_messages: generateRandomBoolean(),
-        can_send_polls: generateRandomBoolean(),
-        can_send_other_messages: generateRandomBoolean(),
-        can_add_web_page_previews: generateRandomBoolean(),
-        can_change_info: generateRandomBoolean(),
-        can_invite_users: generateRandomBoolean(),
-        can_pin_messages: generateRandomBoolean(),
-      },
+    },
+    chatPermissions: {
+      can_send_messages: generateRandomBoolean(),
+      can_send_media_messages: generateRandomBoolean(),
+      can_send_polls: generateRandomBoolean(),
+      can_send_other_messages: generateRandomBoolean(),
+      can_add_web_page_previews: generateRandomBoolean(),
+      can_change_info: generateRandomBoolean(),
+      can_invite_users: generateRandomBoolean(),
+      can_pin_messages: generateRandomBoolean(),
     },
   };
 }
 
-function getMockSessions(alarmModeOnLength = 3, alarmModeOffLength = 3) {
-  const alarmModeOn = Array.from({ length: alarmModeOnLength }, () =>
-    generateChatSession(generateRandomString(10), generateRandomString(10), true),
+function generateChat(id, data) {
+  return { id, data };
+}
+
+function generateMockSessions(
+  state = generateRandomString(10),
+  disableChatWhileAirRaidAlertOn = 3,
+  notificationMessageOn = 3,
+  bothOff = 3,
+) {
+  const disableChatWhileAirRaidAlertOnArr = Array.from({ length: disableChatWhileAirRaidAlertOn }, () =>
+    generateChat(generateRandomString(10), generateChatSessionData(state, true, false)),
   );
-  const alarmModeOff = Array.from({ length: alarmModeOffLength }, () =>
-    generateChatSession(generateRandomString(10), generateRandomString(10), false),
+  const notificationMessageOnArr = Array.from({ length: notificationMessageOn }, () =>
+    generateChat(generateRandomString(10), generateChatSessionData(state, false, true)),
   );
-  return [...alarmModeOn, ...alarmModeOff];
+  const bothOffArr = Array.from({ length: bothOff }, () =>
+    generateChat(generateRandomString(10), generateChatSessionData(state, false, false)),
+  );
+  return [...disableChatWhileAirRaidAlertOnArr, ...notificationMessageOnArr, ...bothOffArr];
 }
 
 module.exports = {
   getAlarmMock,
-  apiMock,
-  getMockSessions,
-  generateChatSession,
+  generateMockSessions,
+  generateChatSessionData,
+  generateChat,
   testId,
+  testState,
   chartMock,
 };

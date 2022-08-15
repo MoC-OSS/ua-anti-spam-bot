@@ -1,10 +1,24 @@
 const { alarmChatService } = require('./alarm-chat.service');
-const { apiMock, getMockSessions, testId, generateChatSession, getAlarmMock } = require('./_mocks/alarm.mocks');
+const {
+  generateMockSessions,
+  testId,
+  testState,
+  generateChatSessionData,
+  getAlarmMock,
+  chartMock,
+  generateChat,
+} = require('./_mocks/alarm.mocks');
 const { alarmService, ALARM_EVENT_KEY } = require('./alarm.service');
+
+const apiMock = {
+  sendMessage: jest.fn(() => Promise.resolve(null)),
+  getChat: jest.fn(() => chartMock),
+  setChatPermissions: jest.fn(() => {}),
+};
 
 const redis = {
   redisService: {
-    getChatSessions: async () => Promise.resolve(getMockSessions()),
+    getChatSessions: async () => Promise.resolve(generateMockSessions()),
     updateChatSession: async () => Promise.resolve(null),
   },
 };
@@ -17,55 +31,46 @@ describe('AlarmChatService', () => {
     alarmChatService.init(apiMock);
   });
 
-  describe('add and delete chats', () => {
-    it('should add new chat to list', () => {
-      const lengthBefore = alarmChatService.chats.length;
-      const chat = generateChatSession(testId);
-      alarmChatService.addOrUpdateChat(chat);
-      expect(alarmChatService.chats.length).toEqual(lengthBefore + 1);
-      expect(alarmChatService.chats[alarmChatService.chats.length - 1]).toEqual(chat);
-    });
-    it('should update current chat', () => {
-      const lengthBefore = alarmChatService.chats.length;
-      const chat = generateChatSession(testId);
-      alarmChatService.addOrUpdateChat(chat);
-      expect(alarmChatService.chats.length).toEqual(lengthBefore);
-      expect(alarmChatService.chats[alarmChatService.chats.length - 1]).toEqual(chat);
-    });
-
-    it('delete existing chat', () => {
-      const lengthBefore = alarmChatService.chats.length;
-      const chat = generateChatSession(testId);
-      alarmChatService.deleteChat(chat);
-      expect(alarmChatService.chats.length).toEqual(lengthBefore - 1);
-      expect(alarmChatService.chats[alarmChatService.chats.length - 1]).not.toEqual(chat);
-    });
-    it('do nothing if the chat is not found', () => {
-      const lengthBefore = alarmChatService.chats.length;
-      const chat = generateChatSession(testId);
-      alarmChatService.deleteChat(chat);
-      expect(alarmChatService.chats.length).toEqual(lengthBefore);
-    });
-  });
-
   describe('getChatsWithAlarmModeOn', () => {
     it('should get sessions only with disableChatWhileAirRaidAlert', async () => {
       const sessions = await alarmChatService.getChatsWithAlarmModeOn();
-      expect(sessions.length).toEqual(3);
+      expect(sessions.length).toEqual(6);
     });
   });
 
   describe('subscribeToAlarms', () => {
     it('should process alarm = true', async () => {
-      alarmChatService.api.setChatPermissions = jest.fn(() => Promise.resolve(null));
-      const chat = generateChatSession(testId, 'Львівська область');
-      alarmChatService.addOrUpdateChat(chat);
+      const session = generateChatSessionData(testState, true, true);
+      const chat = generateChat(testId, session);
+      await alarmChatService.updateChat(session, testId);
       alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(true));
       expect(alarmChatService.processChatAlarm).toHaveBeenCalledTimes(1);
       expect(alarmChatService.processChatAlarm).toHaveBeenCalledWith(chat, true);
+    });
+  });
 
-      // expect(redis.redisService.updateChatSession).toBeCalled();
-      // expect(alarmChatService.api.setChatPermissions).toHaveBeenCalledTimes(1);
+  describe('add and delete chats', () => {
+    it('should add new chat to list', () => {
+      alarmChatService.chats = [];
+      const lengthBefore = alarmChatService.chats.length;
+      const chat = generateChatSessionData();
+      alarmChatService.updateChat(chat, testId);
+      expect(alarmChatService.chats.length).toEqual(lengthBefore + 1);
+      expect(alarmChatService.chats[alarmChatService.chats.length - 1]).toEqual({ id: testId, data: chat });
+    });
+    it('should update current chat', () => {
+      const lengthBefore = alarmChatService.chats.length;
+      const chat = generateChatSessionData();
+      alarmChatService.updateChat(chat, testId);
+      expect(alarmChatService.chats.length).toEqual(lengthBefore);
+      expect(alarmChatService.chats[alarmChatService.chats.length - 1]).toEqual({ id: testId, data: chat });
+    });
+    it('delete existing chat', () => {
+      const lengthBefore = alarmChatService.chats.length;
+      const chat = generateChatSessionData('', false, false);
+      alarmChatService.updateChat(chat, testId);
+      expect(alarmChatService.chats.length).toEqual(lengthBefore - 1);
+      expect(alarmChatService.chats[alarmChatService.chats.length - 1]).not.toEqual({ id: testId, data: chat });
     });
   });
 });

@@ -17,6 +17,7 @@ const { onlyAdmin } = require('../middleware');
 const { MiddlewareMenu } = require('../middleware-menu.menu');
 const { handleError } = require('../../utils');
 const dynamicLocationMenu = require('./air-raid-alarm');
+const { alarmChatService } = require('../../services/alarm-chat.service');
 
 class SettingsMiddleware {
   /**
@@ -70,6 +71,7 @@ class SettingsMiddleware {
         if (isStateSelected(ctx)) {
           ctx.chatSession.chatSettings.airRaidAlertSettings.notificationMessage =
             ctx.chatSession.chatSettings.airRaidAlertSettings.notificationMessage === false;
+          alarmChatService.updateChat(ctx.chatSession, ctx.chat.id);
           const newText = getSettingsMenuMessage(ctx.chatSession.chatSettings);
 
           if (ctx.msg.text !== newText) {
@@ -80,6 +82,7 @@ class SettingsMiddleware {
       .text(turnOffChatWhileAlarmButton, (ctx) => {
         if (isStateSelected(ctx)) {
           toggleSetting(ctx, 'disableChatWhileAirRaidAlert');
+          alarmChatService.updateChat(ctx.chatSession, ctx.chat.id);
         }
       })
       // TODO UABOT-2 COMMENT UNTIL DESCRIPTION WILL BE AVAILABLE

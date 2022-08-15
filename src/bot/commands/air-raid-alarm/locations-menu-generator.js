@@ -2,6 +2,7 @@ const { getAirRaidAlarmSettingsMessage, nextPage, previousPage } = require('../.
 
 const { handleError } = require('../../../utils');
 const { onlyAdmin } = require('../../middleware');
+const { alarmChatService } = require('../../../services/alarm-chat.service');
 
 /**
  * @param {GrammyContext} ctx
@@ -27,6 +28,7 @@ const dynamicLocationMenu = async (ctx, range, states) => {
      * */
     return range.text(displayLocationName, onlyAdmin, (context) => {
       context.chatSession.chatSettings.airRaidAlertSettings.state = locationName;
+      alarmChatService.updateChat(context.chatSession, context.chat.id);
       context.editMessageText(getAirRaidAlarmSettingsMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
     });
   }
