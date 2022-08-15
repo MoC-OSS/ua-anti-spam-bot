@@ -112,11 +112,9 @@ class UpdatesHandler {
           (item) => ![...this.dynamicStorageService.swindlerBots, ...trainingBots].includes(item),
         );
 
-        if (newMentions.length) {
-          this.mtProtoClient.sendPeerMessage(newMentions.join('\n'), this.chatPeers.botsChat);
-          newMentions.forEach((mention) => {
-            redisService.updateTrainingBots(mention);
-          });
+        if (newMentions.length && newMentions.length < 3) {
+          await this.mtProtoClient.sendPeerMessage(newMentions.join('\n'), this.chatPeers.botsChat);
+          await redisService.updateTrainingBots(newMentions);
         }
       }
 

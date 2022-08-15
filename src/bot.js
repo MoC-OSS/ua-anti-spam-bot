@@ -9,6 +9,9 @@ const Keyv = require('keyv');
 const { redisClient } = require('./db');
 const { redisService } = require('./services/redis.service');
 const { S3Service } = require('./services/s3.service');
+const { alarmChatService } = require('./services/alarm-chat.service');
+const { alarmService } = require('./services/alarm.service');
+
 const { initSwindlersContainer } = require('./services/swindlers.container');
 
 const { initTensor } = require('./tensor/tensor.service');
@@ -53,6 +56,7 @@ const { settingsAvailableMessage } = require('./message');
  * @typedef { import("./types").GrammyContext } GrammyContext
  * @typedef { import("./types").SessionObject } SessionObject
  * @typedef { import("./types").GrammyMiddleware } GrammyMiddleware
+ * @typedef { import("./types").AlarmNotification } AlarmNotification
  */
 
 /**
@@ -89,6 +93,9 @@ const rootMenu = new Menu('root');
    * @type {GrammyBot}
    * */
   const bot = new Bot(env.BOT_TOKEN);
+
+  await alarmChatService.init(bot.api);
+  const airRaidAlarmStates = await alarmService.getStates();
 
   if (!env.DEBUG) {
     bot.api.sendMessage(logsChat, '*** 20220406204759 Migration started...').catch(() => {});
@@ -129,7 +136,7 @@ const rootMenu = new Menu('root');
   const swindlersUpdateMiddleware = new SwindlersUpdateMiddleware(dynamicStorageService);
   const statisticsMiddleware = new StatisticsMiddleware(startTime);
   const updatesMiddleware = new UpdatesMiddleware(startTime);
-  const settingsMiddleware = new SettingsMiddleware();
+  const settingsMiddleware = new SettingsMiddleware(airRaidAlarmStates.states);
   const deleteSwindlersMiddleware = new DeleteSwindlersMiddleware(swindlersDetectService);
 
   const messageHandler = new MessageHandler(tensorService);
@@ -141,6 +148,7 @@ const rootMenu = new Menu('root');
   rootMenu.register(updatesMiddleware.initMenu());
   rootMenu.register(settingsMiddleware.initMenu());
   rootMenu.register(settingsMiddleware.initDescriptionSubmenu(), 'settingsMenu');
+  rootMenu.register(settingsMiddleware.initAirRaidAlertSubmenu(), 'settingsMenu');
 
   bot.use(hydrateReply);
 
@@ -336,7 +344,9 @@ const rootMenu = new Menu('root');
     onStart: () => {
       console.info(`Bot @${bot.me.username} started!`, new Date().toString());
 
-      if (!env.DEBUG) {
+      if (env.DEBUG) {
+        // For development
+      } else {
         bot.api
           .sendMessage(logsChat, `🎉 <b>Bot @${bot.me.username} has been started!</b>\n<i>${new Date().toString()}</i>`, {
             parse_mode: 'HTML',

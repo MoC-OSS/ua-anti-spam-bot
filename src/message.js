@@ -6,6 +6,14 @@ const { getRandomItem } = require('./utils');
 const randomBanEmojis = ['👮🏻‍♀️', '🤦🏼‍♀️', '🙅🏻‍♀️'];
 const randomLocationBanEmojis = ['🏡', '🏘️', '🌳'];
 
+function getCurrentTimeAndDate() {
+  const currentDate = new Date();
+  return `
+🕒 ${currentDate.getDate()}/${
+    currentDate.getMonth() + 1
+  }/${currentDate.getFullYear()} ${currentDate.getHours()}:${currentDate.getMinutes()}`;
+}
+
 /**
  * Generic
  * */
@@ -31,6 +39,26 @@ const swindlersWarningMessage = `<b>❗УВАГА! UA Anti Spam Bot 🇺🇦 п�
 🔶 Не переходьте за підозрілими посиланнями із чатів!
 🔶 Уникайте реєстрацій та передачі персональних даних стороннім неперевіреним ресурсам.
 🔶 Ніколи не вводьте захищені дані ваших платіжних карток (CVV-код та PIN).
+`;
+
+/**
+ * Generic - Air alarm
+ * */
+const chatIsMutedMessage = `
+🤫 Можливість відправляти повідомлення під час повітряної тривоги тимчасово заблокована!
+`;
+const chatIsUnmutedMessage = `
+💬 Блокування повідомлень зняті. Приємного спілкування!
+`;
+
+const getAlarmStartNotificationMessage = (settings) => `
+<b>❗ Увага! У вашому регіоні: ${settings.airRaidAlertSettings.state} повітряна тривога! Пройдіть до укриття! 🔊</b>
+${getCurrentTimeAndDate()}
+`;
+
+const alarmEndNotificationMessage = `
+<b>❎ Відбій повітряної тривоги! 🔇</b>
+${getCurrentTimeAndDate()}
 `;
 /**
  * Generic - Settings
@@ -59,6 +87,37 @@ const getSettingsMenuMessage = (settings) =>
   }
 💰 ${settings.disableSwindlerMessage === true ? '⛔️ Бот не видаляє повідомлення шахраїв.' : '✅ Бот видаляє повідомлення шахраїв.'}
 
+<b>Налаштування повітряної тривоги.</b>
+🏰 ${
+    settings.airRaidAlertSettings.state
+      ? `✅ ${settings.airRaidAlertSettings.state} - твій вибраний регіон.`
+      : '⛔ Ти ще не вибрав свій регіон.'
+  }
+📢 ${
+    settings.airRaidAlertSettings.notificationMessage === false
+      ? '⛔️ Бот не повідомляє про початок і завершення повітряної тривоги у вашому регіоні.'
+      : '✅ Бот повідомляє про початок і завершення повітряної тривоги у вашому регіоні.'
+  }
+🤫 ${
+    settings.disableChatWhileAirRaidAlert === false
+      ? '⛔️ Бот не вимикає чат під час повітряної тривоги у вашому регіоні.'
+      : '✅ Бот вимикає чат під час повітряної тривоги у вашому регіоні.'
+  }
+
+Для зміни налаштувань, натисніть на відповідну кнопку нижче. 👇
+`.trim();
+
+const getAirRaidAlarmSettingsMessage = (settings) =>
+  `
+<b>🤖 Налаштування повітряної тривоги в поточному чаті.</b>
+Тут ти можеш змінити регіон до якого відноситься цей чат.
+
+🏰 ${
+    settings.airRaidAlertSettings.state
+      ? `✅ ${settings.airRaidAlertSettings.state} - твій вибраний регіон.`
+      : '⛔️ Ти ще не вибрав свій регіон.'
+  }
+
 Для зміни налаштувань, натисніть на відповідну кнопку нижче. 👇
 `.trim();
 
@@ -68,7 +127,16 @@ const deleteTensorButton = `🚀 Інцидент`;
 const deleteMessageButton = '❗ Причина';
 const deleteSwindlerButton = '💰 Шахраї';
 
-const goBackButton = '⬅ Повернутись назад';
+const airAlarmAlertButton = '🏰 Регіон';
+const airAlarmNotificationMessage = '📢 Тривога';
+const turnOffChatWhileAlarmButton = '🤫 Тиша';
+
+const goBackButton = '⬅️ Повернутись назад';
+
+const nextPage = 'Наступна сторінка ⏩';
+const previousPage = '⏪ Попередня сторінка';
+
+const selectYourState = 'Будь ласка, виберіть свій регіон.';
 
 const detailedSettingsDescription = '📋 Детальний опиc всіх налаштувань';
 
@@ -319,6 +387,14 @@ const getTensorTestResult = ({ chance, isSpam }) =>
  *
  * */
 module.exports = {
+  selectYourState,
+  airAlarmNotificationMessage,
+  getAlarmStartNotificationMessage,
+  alarmEndNotificationMessage,
+  nextPage,
+  previousPage,
+  airAlarmAlertButton,
+  turnOffChatWhileAlarmButton,
   goBackButton,
   deleteMessageButton,
   deleteTensorButton,
@@ -340,6 +416,9 @@ module.exports = {
   swindlersUpdateStartMessage,
   swindlersUpdateEndMessage,
   swindlersWarningMessage,
+  chatIsMutedMessage,
+  chatIsUnmutedMessage,
+  getAirRaidAlarmSettingsMessage,
   getBotJoinMessage,
   getCannotDeleteMessage,
   getDebugMessage,
