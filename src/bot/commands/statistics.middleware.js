@@ -21,6 +21,7 @@ class StatisticsMiddleware {
      * */
     return async (ctx) => {
       try {
+        await ctx.replyWithChatAction('typing');
         const chatSessions = await redisService.getChatSessions();
 
         const superGroupsSessions = chatSessions.filter((session) => session.data.chatType === 'supergroup');

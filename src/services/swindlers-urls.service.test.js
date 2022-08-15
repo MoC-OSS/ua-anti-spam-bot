@@ -1,6 +1,7 @@
 const axios = require('axios');
 const { SwindlersUrlsService } = require('./swindlers-urls.service');
 const { mockDynamicStorageService, mockNewUrl } = require('./_mocks/index.mocks');
+const { EXCEPTION_DOMAINS } = require('./constants/swindlers-urls.constant');
 
 jest.mock('axios');
 
@@ -47,7 +48,7 @@ describe('SwindlersUrlsService', () => {
     });
 
     it('should not match excluded url', () => {
-      const text = `https://${swindlersUrlsService.exceptionDomains.join(' https://')}`;
+      const text = `https://${EXCEPTION_DOMAINS.join(' https://')}`;
       const result = swindlersUrlsService.parseUrls(text);
 
       console.info(text);
@@ -121,6 +122,23 @@ describe('SwindlersUrlsService', () => {
         'https://electrek.co/2021/05/24/tesla-found-guilty-throttling-charging-speed-asked-pay-16000-thousands-owners/',
       );
 
+      expect(result.isSpam).toEqual(false);
+    });
+
+    it('should resolve links from link shortener', async () => {
+      axios.get.mockImplementationOnce(() =>
+        Promise.resolve({
+          request: {
+            res: {
+              responseUrl: 'https://electrek.co/2021/05/24/tesla-found-guilty-throttling-charging-speed-asked-pay-16000-thousands-owners/',
+            },
+          },
+        }),
+      );
+
+      const result = await swindlersUrlsService.isSpamUrl('https://bit.ly/test-swindler-mock');
+
+      expect(axios.get).toBeCalled();
       expect(result.isSpam).toEqual(false);
     });
   });
