@@ -1,3 +1,4 @@
+const Bottleneck = require('bottleneck');
 const { alarmService, ALARM_EVENT_KEY } = require('./alarm.service');
 const { redisService } = require('./redis.service');
 const { getAlarmStartNotificationMessage, alarmEndNotificationMessage, chatIsMutedMessage, chatIsUnmutedMessage } = require('../message');
@@ -10,6 +11,10 @@ class AlarmChatService {
   async init(api) {
     this.api = api;
     this.chats = await this.getChatsWithAlarmModeOn();
+    this.limiter = new Bottleneck({
+      maxConcurrent: 1,
+      minTime: 2000,
+    });
     this.subscribeToAlarms();
   }
 
@@ -46,9 +51,11 @@ class AlarmChatService {
 
   subscribeToAlarms() {
     alarmService.updatesEmitter.on(ALARM_EVENT_KEY, (event) => {
-      this.chats.forEach(async (chat) => {
+      this.chats.forEach((chat) => {
         if (chat.data.chatSettings.airRaidAlertSettings.state === event.state.name) {
-          await this.processChatAlarm(chat, event.state.alert);
+          this.limiter.schedule(() => {
+            this.processChatAlarm(chat, event.state.alert).catch(handleError);
+          });
         }
       });
     });
