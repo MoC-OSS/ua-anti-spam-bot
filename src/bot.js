@@ -10,7 +10,7 @@ const { redisClient } = require('./db');
 const { redisService } = require('./services/redis.service');
 const { S3Service } = require('./services/s3.service');
 const { alarmChatService } = require('./services/alarm-chat.service');
-const { alarmService } = require('./services/alarm.service');
+const { alarmService, ALARM_EVENT_KEY } = require('./services/alarm.service');
 
 const { initSwindlersContainer } = require('./services/swindlers.container');
 
@@ -49,6 +49,7 @@ const {
 const { handleError, errorHandler, sleep } = require('./utils');
 const { logsChat, creatorId } = require('./creator');
 const { settingsAvailableMessage } = require('./message');
+const { getAlarmMock } = require('./services/_mocks/alarm.mocks');
 
 /**
  * @typedef { import("grammy").GrammyError } GrammyError
@@ -306,6 +307,22 @@ const rootMenu = new Menu('root');
       commandSetter.setActive(true);
       commandSetter.updateCommands();
       ctx.reply('✅ Я включений глобально');
+    }),
+  );
+
+  bot.command(
+    'start_alarm',
+    onlyAdmin,
+    errorHandler(() => {
+      alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(true));
+    }),
+  );
+
+  bot.command(
+    'end_alarm',
+    onlyAdmin,
+    errorHandler(() => {
+      alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(false));
     }),
   );
 
