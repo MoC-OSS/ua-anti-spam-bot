@@ -40,6 +40,7 @@ const {
   onlyAdmin,
   onlyCreator,
   onlyNotAdmin,
+  onlyWhitelisted,
   onlyNotForwarded,
   onlyWhenBotAdmin,
   onlyWithText,
@@ -312,7 +313,7 @@ const rootMenu = new Menu('root');
 
   bot.command(
     'start_alarm',
-    onlyAdmin,
+    onlyWhitelisted,
     errorHandler(() => {
       alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(true));
     }),
@@ -320,7 +321,7 @@ const rootMenu = new Menu('root');
 
   bot.command(
     'end_alarm',
-    onlyAdmin,
+    onlyWhitelisted,
     errorHandler(() => {
       alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(false));
     }),
