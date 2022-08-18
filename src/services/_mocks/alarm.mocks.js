@@ -2,12 +2,19 @@ const { generateRandomNumber, generateRandomString, generateRandomBoolean } = re
 
 const testId = '1234567890';
 const testState = 'Львівська область';
+const generateTestState = (state = testState) => ({
+  id: generateRandomNumber(3),
+  name: state,
+  name_en: generateRandomBoolean(),
+  alert: false,
+  changed: generateRandomString(10),
+});
 
-const getAlarmMock = (alert = false) => ({
+const getAlarmMock = (alert = false, state = testState) => ({
   state: {
     alert,
     id: generateRandomNumber(2),
-    name: testState,
+    name: state,
     name_en: generateRandomString(10),
     changed: generateRandomString(10),
   },
@@ -86,6 +93,7 @@ module.exports = {
   generateMockSessions,
   generateChatSessionData,
   generateChat,
+  generateTestState,
   testId,
   testState,
   chartMock,

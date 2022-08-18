@@ -1,15 +1,18 @@
 const { getAirRaidAlarmSettingsMessage, nextPage, previousPage } = require('../../../message');
 
-const { handleError } = require('../../../utils');
+const { handleError, isIdWhitelisted } = require('../../../utils');
 const { onlyAdmin } = require('../../middleware');
 const { alarmChatService } = require('../../../services/alarm-chat.service');
+const { generateTestState } = require('../../../services/_mocks/alarm.mocks');
+const { TEST_ALARM_STATE } = require('../../../services/alarm.service');
 
 /**
  * @param {GrammyContext} ctx
  * @param {MenuRange<GrammyContext>} range
  * @param {State[]} states
  * */
-const dynamicLocationMenu = async (ctx, range, states) => {
+const dynamicLocationMenu = async (ctx, range, alertStates) => {
+  const states = isIdWhitelisted(ctx.from.id) ? [...alertStates, generateTestState(TEST_ALARM_STATE)] : alertStates;
   const pageIndex = ctx.chatSession.chatSettings.airRaidAlertSettings.pageNumber;
   const { state } = ctx.chatSession.chatSettings.airRaidAlertSettings;
   const maxPageIndex = Math.ceil(states.length / 10);

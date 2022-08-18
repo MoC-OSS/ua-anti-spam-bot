@@ -113,6 +113,14 @@ function compareDatesWithOffset(initialDate, compareDate, hours) {
   return +initialDate + additionalTime < +compareDate;
 }
 
+/**
+ * @param {number} id
+ * */
+function isIdWhitelisted(id) {
+  const whitelist = env.USERS_WHITELIST.split(', ');
+  return whitelist.includes(id.toString());
+}
+
 module.exports = {
   logSkipMiddleware,
   getUserData,
@@ -126,6 +134,7 @@ module.exports = {
   getRandomItem,
   messageUtil,
   telegramUtil,
+  isIdWhitelisted,
   ...errorHandlerExports,
   ...errorUtilExports,
   ...revealHiddenUrlsExports,
