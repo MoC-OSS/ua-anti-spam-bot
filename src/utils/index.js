@@ -117,7 +117,7 @@ function compareDatesWithOffset(initialDate, compareDate, hours) {
  * @param {number} id
  * */
 function isIdWhitelisted(id) {
-  const whitelist = env.USERS_WHITELIST.split(', ');
+  const whitelist = (env.USERS_WHITELIST || '').split(', ');
   return whitelist.includes(id.toString());
 }
 
