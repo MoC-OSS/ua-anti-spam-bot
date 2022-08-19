@@ -49,12 +49,21 @@ class AlarmService {
       console.info('Connection to Alarm API opened successfully.');
     });
 
-    source.addEventListener('update', (e) => {
-      const data = JSON.parse(e.data);
-      if (data) {
-        this.updatesEmitter.emit(ALARM_EVENT_KEY, data);
-      }
-    });
+    source.addEventListener(
+      'update',
+      /**
+       * @param {MessageEvent} e
+       * */
+      (e) => {
+        /**
+         * @type {AlarmNotification}
+         * */
+        const data = JSON.parse(e.data);
+        if (data) {
+          this.updatesEmitter.emit(ALARM_EVENT_KEY, data);
+        }
+      },
+    );
   }
 
   initTestAlarms() {
