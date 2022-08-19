@@ -40,11 +40,21 @@ class AlarmService {
     source.onerror = (e) => {
       console.info(`Subscribe to Alarm API fail:  ${e.message}`);
     };
-    source.onmessage = (event) => {
-      if (event.event === ALARM_EVENT_KEY) {
-        this.updatesEmitter.emit(ALARM_EVENT_KEY, event.data);
+
+    source.addEventListener('open', () => {
+      console.info('Opening a connection to Alarm API ...');
+    });
+
+    source.addEventListener('hello', () => {
+      console.info('Connection to Alarm API opened successfully.');
+    });
+
+    source.addEventListener('update', (e) => {
+      const data = JSON.parse(e.data);
+      if (data) {
+        this.updatesEmitter.emit(ALARM_EVENT_KEY, data);
       }
-    };
+    });
   }
 
   initTestAlarms() {
