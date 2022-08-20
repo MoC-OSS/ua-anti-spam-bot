@@ -48,12 +48,56 @@ const chatIsUnmutedMessage = `
 💬 Блокування повідомлень зняті. Приємного спілкування!
 `;
 
+const isNight = () => {
+  const hours = +moment().format('H');
+  return hours >= 20 || hours <= 5;
+};
+
+const getDayTimeEmoji = () => (isNight() ? '🌖' : '☀️');
+
+const getRandomAlarmStartText = () => {
+  const currentTimeEmoji = getDayTimeEmoji();
+  const randomAlarmEmoji = getRandomItem(['⚠️', '❗️', '🔊', '🚨', '📢', '❕', currentTimeEmoji]);
+
+  const genericMessages = [
+    '<b>НЕ нехтуйте</b> повітряною тривогою.',
+    'Покиньте вулиці та пройдіть в укриття!',
+    'Пройдіть до укриття!',
+    'Будьте обережні!',
+    'Будьте в укриттях.',
+    'Не ігноруйте сигнали повітряної тривоги!',
+    'Не ігноруйте тривогу!',
+    'Перебувайте в укриттях до завершення повітряної тривоги!',
+  ];
+
+  return `${getRandomItem(genericMessages)} ${randomAlarmEmoji}`;
+};
+
+const getRandomAlarmEndText = () => {
+  const currentTimeEmoji = getDayTimeEmoji();
+  const randomAlarmEmoji = `${getRandomItem(['🇺🇦', '🙏', currentTimeEmoji])} `;
+
+  const genericMessages = [
+    'Будьте обережні',
+    'Бережіть себе',
+    'Дякуємо силам ППО!',
+    'Слава ЗСУ!',
+    'Усім мирного неба над головою',
+    'Дякуємо ППО за роботу!',
+  ].map((item) => `${item} ${randomAlarmEmoji}`);
+
+  const nightMessages = [`Всім тихої ночі! ${currentTimeEmoji}`, `Всім гарного вечора і тихої ночі! ${currentTimeEmoji}`];
+  const dayMessages = ['Всім гарного дня! ☀️'];
+
+  return isNight() ? getRandomItem([...genericMessages, ...nightMessages]) : getRandomItem([...genericMessages, ...dayMessages]);
+};
+
 /**
  * @param {ChatSessionData['chatSettings']} settings
  * */
 const getAlarmStartNotificationMessage = (settings) => `
 🔴 <b> ${getCurrentTimeAndDate()} Повітряна тривога в ${settings.airRaidAlertSettings.state}!</b>
-Пройдіть до укриття! 🔊
+${getRandomAlarmStartText()}
 `;
 
 /**
@@ -61,7 +105,7 @@ const getAlarmStartNotificationMessage = (settings) => `
  * */
 const alarmEndNotificationMessage = (settings) => `
 🟢 <b>${getCurrentTimeAndDate()} Відбій тривоги в ${settings.airRaidAlertSettings.state}!</b>
-Будьте обережні 🙂
+${getRandomAlarmEndText()}
 `;
 /**
  * Generic - Settings
