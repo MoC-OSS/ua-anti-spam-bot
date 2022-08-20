@@ -72,7 +72,7 @@ class AlarmChatService {
 
     if (chat.data.chatSettings.airRaidAlertSettings.notificationMessage) {
       startAlarmMessage += getAlarmStartNotificationMessage(chat.data.chatSettings);
-      endAlarmMessage += alarmEndNotificationMessage;
+      endAlarmMessage += alarmEndNotificationMessage(chat.data.chatSettings);
     }
     if (chat.data.chatSettings.disableChatWhileAirRaidAlert) {
       startAlarmMessage += chatIsMutedMessage;

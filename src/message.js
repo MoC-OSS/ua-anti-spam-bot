@@ -1,4 +1,5 @@
 const { env } = require('typed-dotenv').config();
+const moment = require('moment-timezone');
 
 const { helpChat } = require('./creator');
 const { getRandomItem } = require('./utils');
@@ -7,11 +8,7 @@ const randomBanEmojis = ['👮🏻‍♀️', '🤦🏼‍♀️', '🙅🏻‍�
 const randomLocationBanEmojis = ['🏡', '🏘️', '🌳'];
 
 function getCurrentTimeAndDate() {
-  const currentDate = new Date();
-  return `
-🕒 ${currentDate.getDate()}/${
-    currentDate.getMonth() + 1
-  }/${currentDate.getFullYear()} ${currentDate.getHours()}:${currentDate.getMinutes()}`;
+  return moment().format('LT');
 }
 
 /**
@@ -51,14 +48,20 @@ const chatIsUnmutedMessage = `
 💬 Блокування повідомлень зняті. Приємного спілкування!
 `;
 
+/**
+ * @param {ChatSessionData['chatSettings']} settings
+ * */
 const getAlarmStartNotificationMessage = (settings) => `
-<b>❗ Увага! У вашому регіоні: ${settings.airRaidAlertSettings.state} повітряна тривога! Пройдіть до укриття! 🔊</b>
-${getCurrentTimeAndDate()}
+🔴 <b> ${getCurrentTimeAndDate()} Повітряна тривога в ${settings.airRaidAlertSettings.state}!</b>
+Пройдіть до укриття! 🔊
 `;
 
-const alarmEndNotificationMessage = `
-<b>❎ Відбій повітряної тривоги! 🔇</b>
-${getCurrentTimeAndDate()}
+/**
+ * @param {ChatSessionData['chatSettings']} settings
+ * */
+const alarmEndNotificationMessage = (settings) => `
+🟢 <b>${getCurrentTimeAndDate()} Відбій тривоги в ${settings.airRaidAlertSettings.state}!</b>
+Будьте обережні 🙂
 `;
 /**
  * Generic - Settings
