@@ -6,6 +6,7 @@ const { error, env } = require('typed-dotenv').config();
 const { apiThrottler } = require('@grammyjs/transformer-throttler');
 const Keyv = require('keyv');
 
+const moment = require('moment-timezone');
 const { redisClient } = require('./db');
 const { redisService } = require('./services/redis.service');
 const { S3Service } = require('./services/s3.service');
@@ -65,6 +66,9 @@ const { getAlarmMock } = require('./services/_mocks/alarm.mocks');
  * @callback Next
  * @returns Promise<void>
  */
+
+moment.tz.setDefault('Europe/Kiev');
+moment.locale('uk');
 
 const keyv = new Keyv('sqlite://db.sqlite');
 keyv.on('error', (err) => console.error('Connection Error', err));
