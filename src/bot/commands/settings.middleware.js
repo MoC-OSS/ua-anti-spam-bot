@@ -12,6 +12,7 @@ const {
   // settingsDescriptionButton,
   // detailedSettingsDescription,
   goBackButton,
+  blockWhenAlarm,
 } = require('../../message');
 const { onlyAdmin } = require('../middleware');
 const { MiddlewareMenu } = require('../middleware-menu.menu');
@@ -58,6 +59,21 @@ class SettingsMiddleware {
       return true;
     };
 
+    const isAlarmNow = (ctx) => {
+      const isAlarm = alarmChatService.isAlarmNow(ctx.chatSession.chatSettings.airRaidAlertSettings.state);
+      console.info('IS ALARM', isAlarm);
+      if (isAlarm) {
+        ctx
+          .answerCallbackQuery({
+            text: blockWhenAlarm,
+            show_alert: true,
+          })
+          .catch(handleError);
+        return true;
+      }
+      return false;
+    };
+
     this.settingsMenuObj = new MiddlewareMenu('settingsMenu', { autoAnswer: false })
       .addGlobalMiddlewares(onlyAdmin)
       .text(deleteTensorButton, (ctx) => toggleSetting(ctx, 'disableStrategicInfo'))
@@ -65,10 +81,12 @@ class SettingsMiddleware {
       .text(deleteSwindlerButton, (ctx) => toggleSetting(ctx, 'disableSwindlerMessage'))
       .row()
       .submenu(airAlarmAlertButton, 'settingsAirRaidAlertSubmenu', (ctx) => {
-        ctx.editMessageText(getAirRaidAlarmSettingsMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
+        if (!isAlarmNow(ctx)) {
+          ctx.editMessageText(getAirRaidAlarmSettingsMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
+        }
       })
       .text(airAlarmNotificationMessage, (ctx) => {
-        if (isStateSelected(ctx)) {
+        if (isStateSelected(ctx) && !isAlarmNow(ctx)) {
           ctx.chatSession.chatSettings.airRaidAlertSettings.notificationMessage =
             ctx.chatSession.chatSettings.airRaidAlertSettings.notificationMessage === false;
           alarmChatService.updateChat(ctx.chatSession, ctx.chat.id);
@@ -80,7 +98,7 @@ class SettingsMiddleware {
         }
       })
       .text(turnOffChatWhileAlarmButton, (ctx) => {
-        if (isStateSelected(ctx)) {
+        if (isStateSelected(ctx) && !isAlarmNow(ctx)) {
           toggleSetting(ctx, 'disableChatWhileAirRaidAlert');
           alarmChatService.updateChat(ctx.chatSession, ctx.chat.id);
         }

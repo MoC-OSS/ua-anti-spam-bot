@@ -185,6 +185,8 @@ const previousPage = '⏪ Попередня сторінка';
 
 const selectYourState = 'Будь ласка, виберіть свій регіон.';
 
+const blockWhenAlarm = 'Це налаштування заблоковано під час тривоги. Будь ласка, зробіть це після відміни тривоги.';
+
 const detailedSettingsDescription = '📋 Детальний опиc всіх налаштувань';
 
 /**
@@ -465,6 +467,7 @@ module.exports = {
   swindlersWarningMessage,
   chatIsMutedMessage,
   chatIsUnmutedMessage,
+  blockWhenAlarm,
   getAirRaidAlarmSettingsMessage,
   getBotJoinMessage,
   getCannotDeleteMessage,

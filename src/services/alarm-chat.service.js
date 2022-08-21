@@ -11,11 +11,20 @@ class AlarmChatService {
   async init(api) {
     this.api = api;
     this.chats = await this.getChatsWithAlarmModeOn();
+    this.alarms = new Set([]);
     this.limiter = new Bottleneck({
       maxConcurrent: 1,
       minTime: 2000,
     });
     this.subscribeToAlarms();
+  }
+
+  /**
+   * @param {state} string
+   * @returns {boolean}
+   * */
+  isAlarmNow(state) {
+    return this.alarms.has(state);
   }
 
   /**
@@ -51,6 +60,11 @@ class AlarmChatService {
 
   subscribeToAlarms() {
     alarmService.updatesEmitter.on(ALARM_EVENT_KEY, (event) => {
+      if (event.state.alert) {
+        this.alarms.add(event.state.name);
+      } else {
+        this.alarms.delete(event.state.name);
+      }
       this.chats.forEach((chat) => {
         if (chat.data.chatSettings.airRaidAlertSettings.state === event.state.name) {
           this.limiter.schedule(() => {
