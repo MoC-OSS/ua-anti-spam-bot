@@ -59,21 +59,6 @@ class SettingsMiddleware {
       return true;
     };
 
-    const isAlarmNow = (ctx) => {
-      const isAlarm = alarmChatService.isAlarmNow(ctx.chatSession.chatSettings.airRaidAlertSettings.state);
-      console.info('IS ALARM', isAlarm);
-      if (isAlarm) {
-        ctx
-          .answerCallbackQuery({
-            text: blockWhenAlarm,
-            show_alert: true,
-          })
-          .catch(handleError);
-        return true;
-      }
-      return false;
-    };
-
     this.settingsMenuObj = new MiddlewareMenu('settingsMenu', { autoAnswer: false })
       .addGlobalMiddlewares(onlyAdmin)
       .text(deleteTensorButton, (ctx) => toggleSetting(ctx, 'disableStrategicInfo'))
@@ -81,12 +66,10 @@ class SettingsMiddleware {
       .text(deleteSwindlerButton, (ctx) => toggleSetting(ctx, 'disableSwindlerMessage'))
       .row()
       .submenu(airAlarmAlertButton, 'settingsAirRaidAlertSubmenu', (ctx) => {
-        if (!isAlarmNow(ctx)) {
-          ctx.editMessageText(getAirRaidAlarmSettingsMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
-        }
+        ctx.editMessageText(getAirRaidAlarmSettingsMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
       })
       .text(airAlarmNotificationMessage, (ctx) => {
-        if (isStateSelected(ctx) && !isAlarmNow(ctx)) {
+        if (isStateSelected(ctx) && !this.isAlarmNow(ctx)) {
           ctx.chatSession.chatSettings.airRaidAlertSettings.notificationMessage =
             ctx.chatSession.chatSettings.airRaidAlertSettings.notificationMessage === false;
           alarmChatService.updateChat(ctx.chatSession, ctx.chat.id);
@@ -98,7 +81,7 @@ class SettingsMiddleware {
         }
       })
       .text(turnOffChatWhileAlarmButton, (ctx) => {
-        if (isStateSelected(ctx) && !isAlarmNow(ctx)) {
+        if (isStateSelected(ctx) && !this.isAlarmNow(ctx)) {
           toggleSetting(ctx, 'disableChatWhileAirRaidAlert');
           alarmChatService.updateChat(ctx.chatSession, ctx.chat.id);
         }
@@ -114,10 +97,29 @@ class SettingsMiddleware {
     return this.settingsMenuObj;
   }
 
+  isAlarmNow(ctx) {
+    const isAlarm = alarmChatService.isAlarmNow(ctx.chatSession.chatSettings.airRaidAlertSettings.state);
+    console.info('IS ALARM', isAlarm);
+    if (isAlarm) {
+      ctx
+        .answerCallbackQuery({
+          text: blockWhenAlarm,
+          show_alert: true,
+        })
+        .catch(handleError);
+      return true;
+    }
+    return false;
+  }
+
   initAirRaidAlertSubmenu() {
     this.settingsAirRaidAlertObj = new MiddlewareMenu('settingsAirRaidAlertSubmenu')
       .addGlobalMiddlewares(onlyAdmin)
-      .dynamic((ctx, range) => dynamicLocationMenu(ctx, range, this.airRaidAlarmStates))
+      .dynamic((ctx, range) => {
+        if (!this.isAlarmNow(ctx)) {
+          return dynamicLocationMenu(ctx, range, this.airRaidAlarmStates);
+        }
+      })
       .row()
       .back(goBackButton, (ctx) => {
         ctx.editMessageText(getSettingsMenuMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
