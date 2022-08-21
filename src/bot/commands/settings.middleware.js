@@ -99,7 +99,6 @@ class SettingsMiddleware {
 
   isAlarmNow(ctx) {
     const isAlarm = alarmChatService.isAlarmNow(ctx.chatSession.chatSettings.airRaidAlertSettings.state);
-    console.info('IS ALARM', isAlarm);
     if (isAlarm) {
       ctx
         .answerCallbackQuery({
