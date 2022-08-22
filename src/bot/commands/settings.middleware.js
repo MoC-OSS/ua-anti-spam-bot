@@ -83,9 +83,6 @@ class SettingsMiddleware {
         ctx.menu.nav('settingsAirRaidAlertSubmenu');
         ctx.editMessageText(getAirRaidAlarmSettingsMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
       })
-      // .submenu(airAlarmAlertButton, 'settingsAirRaidAlertSubmenu', isAlarmNow, (ctx) => {
-      //   ctx.editMessageText(getAirRaidAlarmSettingsMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
-      // })
       .text(airAlarmNotificationMessage, isAlarmNow, (ctx) => {
         if (isStateSelected(ctx)) {
           ctx.chatSession.chatSettings.airRaidAlertSettings.notificationMessage =
