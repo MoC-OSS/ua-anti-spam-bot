@@ -66,7 +66,9 @@ class SettingsMiddleware {
       .text(deleteSwindlerButton, (ctx) => toggleSetting(ctx, 'disableSwindlerMessage'))
       .row()
       .submenu(airAlarmAlertButton, 'settingsAirRaidAlertSubmenu', (ctx) => {
-        ctx.editMessageText(getAirRaidAlarmSettingsMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
+        if (!this.isAlarmNow(ctx)) {
+          ctx.editMessageText(getAirRaidAlarmSettingsMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
+        }
       })
       .text(airAlarmNotificationMessage, (ctx) => {
         if (isStateSelected(ctx) && !this.isAlarmNow(ctx)) {
@@ -114,11 +116,7 @@ class SettingsMiddleware {
   initAirRaidAlertSubmenu() {
     this.settingsAirRaidAlertObj = new MiddlewareMenu('settingsAirRaidAlertSubmenu')
       .addGlobalMiddlewares(onlyAdmin)
-      .dynamic((ctx, range) => {
-        if (!this.isAlarmNow(ctx)) {
-          return dynamicLocationMenu(ctx, range, this.airRaidAlarmStates);
-        }
-      })
+      .dynamic((ctx, range) => dynamicLocationMenu(ctx, range, this.airRaidAlarmStates))
       .row()
       .back(goBackButton, (ctx) => {
         ctx.editMessageText(getSettingsMenuMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
