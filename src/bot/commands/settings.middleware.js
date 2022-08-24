@@ -12,6 +12,7 @@ const {
   // settingsDescriptionButton,
   // detailedSettingsDescription,
   goBackButton,
+  blockWhenAlarm,
 } = require('../../message');
 const { onlyAdmin } = require('../middleware');
 const { MiddlewareMenu } = require('../middleware-menu.menu');
@@ -58,16 +59,31 @@ class SettingsMiddleware {
       return true;
     };
 
+    const isAlarmNow = (ctx, next) => {
+      const isAlarm = alarmChatService.isAlarmNow(ctx.chatSession.chatSettings.airRaidAlertSettings.state);
+      if (isAlarm) {
+        ctx
+          .answerCallbackQuery({
+            text: blockWhenAlarm,
+            show_alert: true,
+          })
+          .catch(handleError);
+      } else {
+        return next();
+      }
+    };
+
     this.settingsMenuObj = new MiddlewareMenu('settingsMenu', { autoAnswer: false })
       .addGlobalMiddlewares(onlyAdmin)
       .text(deleteTensorButton, (ctx) => toggleSetting(ctx, 'disableStrategicInfo'))
       .text(deleteMessageButton, (ctx) => toggleSetting(ctx, 'disableDeleteMessage'))
       .text(deleteSwindlerButton, (ctx) => toggleSetting(ctx, 'disableSwindlerMessage'))
       .row()
-      .submenu(airAlarmAlertButton, 'settingsAirRaidAlertSubmenu', (ctx) => {
+      .text(airAlarmAlertButton, isAlarmNow, (ctx) => {
+        ctx.menu.nav('settingsAirRaidAlertSubmenu');
         ctx.editMessageText(getAirRaidAlarmSettingsMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
       })
-      .text(airAlarmNotificationMessage, (ctx) => {
+      .text(airAlarmNotificationMessage, isAlarmNow, (ctx) => {
         if (isStateSelected(ctx)) {
           ctx.chatSession.chatSettings.airRaidAlertSettings.notificationMessage =
             ctx.chatSession.chatSettings.airRaidAlertSettings.notificationMessage === false;
@@ -79,7 +95,7 @@ class SettingsMiddleware {
           }
         }
       })
-      .text(turnOffChatWhileAlarmButton, (ctx) => {
+      .text(turnOffChatWhileAlarmButton, isAlarmNow, (ctx) => {
         if (isStateSelected(ctx)) {
           toggleSetting(ctx, 'disableChatWhileAirRaidAlert');
           alarmChatService.updateChat(ctx.chatSession, ctx.chat.id);
