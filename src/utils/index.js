@@ -65,6 +65,21 @@ function formatDateIntoAccusative(date) {
 }
 
 /**
+ * @param {string} state
+ * */
+function formatStateIntoAccusative(state) {
+  if (!state.includes('область')) {
+    return state;
+  }
+
+  const [stateName] = state.split(' ');
+  const accusativeStateName = stateName.replace('ька', 'ькій');
+  const accusativeStateType = 'області';
+
+  return `${accusativeStateName} ${accusativeStateType}`;
+}
+
+/**
  * @param {GrammyContext} ctx
  * */
 function getUserData(ctx) {
@@ -131,6 +146,7 @@ module.exports = {
   truncateString,
   formatDate,
   formatDateIntoAccusative,
+  formatStateIntoAccusative,
   getRandomItem,
   messageUtil,
   telegramUtil,
