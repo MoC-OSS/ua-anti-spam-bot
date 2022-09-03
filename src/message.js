@@ -2,7 +2,7 @@ const { env } = require('typed-dotenv').config();
 const moment = require('moment-timezone');
 
 const { helpChat } = require('./creator');
-const { getRandomItem } = require('./utils');
+const { getRandomItem, formatStateIntoAccusative } = require('./utils');
 
 const randomBanEmojis = ['👮🏻‍♀️', '🤦🏼‍♀️', '🙅🏻‍♀️'];
 const randomLocationBanEmojis = ['🏡', '🏘️', '🌳'];
@@ -96,7 +96,7 @@ const getRandomAlarmEndText = () => {
  * @param {ChatSessionData['chatSettings']} settings
  * */
 const getAlarmStartNotificationMessage = (settings) => `
-🔴 <b> ${getCurrentTimeAndDate()} Повітряна тривога в ${settings.airRaidAlertSettings.state}!</b>
+🔴 <b> ${getCurrentTimeAndDate()} Повітряна тривога в ${formatStateIntoAccusative(settings.airRaidAlertSettings.state)}!</b>
 ${getRandomAlarmStartText()}
 `;
 
@@ -104,7 +104,7 @@ ${getRandomAlarmStartText()}
  * @param {ChatSessionData['chatSettings']} settings
  * */
 const alarmEndNotificationMessage = (settings) => `
-🟢 <b>${getCurrentTimeAndDate()} Відбій тривоги в ${settings.airRaidAlertSettings.state}!</b>
+🟢 <b>${getCurrentTimeAndDate()} Відбій тривоги в ${formatStateIntoAccusative(settings.airRaidAlertSettings.state)}!</b>
 ${getRandomAlarmEndText()}
 `;
 /**
