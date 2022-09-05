@@ -392,9 +392,9 @@ const getUpdatesMessage = () =>
 
 `.trim();
 
-const getUpdateMessage = ({ totalCount, finishedCount, successCount }) =>
+const getUpdateMessage = ({ totalCount, finishedCount, successCount, type }) =>
   `
-Було опрацьовано ${finishedCount}/${totalCount} повідомлень...
+Було опрацьовано ${finishedCount}/${totalCount} повідомлень для ${type}...
 Успішно ${successCount} повідомлень.
 `.trim();
 
