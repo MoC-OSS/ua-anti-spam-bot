@@ -41,7 +41,7 @@ class UpdatesMiddleware {
       ctx.session.step = 'messageSending';
       await ctx.replyWithChatAction('typing');
       const sessions = (await redisService.getChatSessions()).filter(
-        (session) => session.data.chatType === 'private' || session.data.chatType === 'supergroup',
+        (session) => (session.data.chatType === 'private' || session.data.chatType === 'supergroup') && !session.data.botRemoved,
       );
 
       await ctx.reply(`${confirmationMessage}\nВсього чатів: ${sessions.length}`);
@@ -59,49 +59,65 @@ class UpdatesMiddleware {
       ctx.session.step = 'idle';
       const payload = ctx.match;
       if (payload === 'approve') {
-        const limiter = new Bottleneck({
-          maxConcurrent: 1,
-          minTime: 2000,
-        });
-
-        const updatesMessage = ctx.session.updatesText;
-        const updatesMessageEntities = ctx.session.textEntities;
         const sessions = await redisService.getChatSessions();
-        const privateAndSuperGroupsSessions = sessions.filter(
-          (session) => session.data.chatType === 'private' || session.data.chatType === 'supergroup',
-        );
-        const totalCount = privateAndSuperGroupsSessions.length;
-        const chunkSize = Math.ceil(totalCount / 10);
-        let finishedCount = 0;
-        let successCount = 0;
+        const superGroupSessions = sessions.filter((session) => session.data.chatType === 'supergroup' && !session.data.botRemoved);
+        const privateGroupSessions = sessions.filter((session) => session.data.chatType === 'private' && !session.data.botRemoved);
 
-        privateAndSuperGroupsSessions.forEach((e) => {
-          limiter.schedule(() => {
-            ctx.api
-              .sendMessage(e.id, updatesMessage, { entities: updatesMessageEntities ?? null })
-              .then(() => {
-                successCount += 1;
-              })
-              .catch(handleError)
-              .finally(() => {
-                finishedCount += 1;
-              });
-          });
-        });
-
-        limiter.on('done', () => {
-          if (finishedCount % chunkSize === 0) {
-            ctx.reply(getUpdateMessage({ totalCount, successCount, finishedCount })).catch(handleError);
-          }
-        });
-
-        limiter.on('empty', () => {
-          ctx.reply(getSuccessfulMessage({ totalCount, successCount })).catch(handleError);
-        });
+        await this.bulkSending(ctx, superGroupSessions, 'supergroup');
+        await this.bulkSending(ctx, privateGroupSessions, 'private');
       } else {
         await ctx.reply(cancelMessageSending);
       }
     };
+  }
+
+  /**
+   * @param {GrammyContext} ctx
+   * @param {ChatSession[]} sessions
+   * @param {string} type
+   *
+   * @returns {Promise<void>}
+   * */
+  bulkSending(ctx, sessions, type) {
+    return new Promise((resolve) => {
+      const limiter = new Bottleneck({
+        maxConcurrent: 1,
+        minTime: 2000,
+      });
+
+      const updatesMessage = ctx.session.updatesText;
+      const updatesMessageEntities = ctx.session.textEntities;
+
+      const totalCount = sessions.length;
+      const chunkSize = Math.ceil(totalCount / 10);
+      let finishedCount = 0;
+      let successCount = 0;
+
+      sessions.forEach((e) => {
+        limiter.schedule(() => {
+          ctx.api
+            .sendMessage(e.id, updatesMessage, { entities: updatesMessageEntities ?? null })
+            .then(() => {
+              successCount += 1;
+            })
+            .catch(handleError)
+            .finally(() => {
+              finishedCount += 1;
+            });
+        });
+      });
+
+      limiter.on('done', () => {
+        if (finishedCount % chunkSize === 0) {
+          ctx.reply(getUpdateMessage({ totalCount, successCount, finishedCount, type })).catch(handleError);
+        }
+      });
+
+      limiter.on('empty', () => {
+        ctx.reply(getSuccessfulMessage({ totalCount, successCount })).catch(handleError);
+        resolve();
+      });
+    });
   }
 }
 
