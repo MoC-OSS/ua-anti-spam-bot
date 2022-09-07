@@ -62,9 +62,23 @@ class GlobalMiddleware {
   updateChatInfo(ctx) {
     ctx.chatSession.chatType = ctx.chat?.type;
     ctx.chatSession.chatTitle = ctx.chat?.title;
+
     if (ctx.chatSession.chatSettings === undefined) {
       ctx.chatSession.chatSettings = {};
     }
+
+    if (ctx.chatSession.chatSettings.disableChatWhileAirRaidAlert === undefined) {
+      ctx.chatSession.chatSettings.disableChatWhileAirRaidAlert = false;
+    }
+
+    if (ctx.chatSession.chatSettings.airRaidAlertSettings === undefined) {
+      ctx.chatSession.chatSettings.airRaidAlertSettings = {
+        pageNumber: 1,
+        state: null,
+        notificationMessage: false,
+      };
+    }
+
     ctx
       .getChatMembersCount()
       .then((count) => {

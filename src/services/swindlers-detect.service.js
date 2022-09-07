@@ -31,7 +31,7 @@ class SwindlersDetectService {
    * */
   async isSwindlerMessage(message) {
     const results = {};
-    const foundSwindlerUrl = this.swindlersUrlsService.processMessage(message);
+    const foundSwindlerUrl = await this.swindlersUrlsService.processMessage(message);
     results.foundSwindlerUrl = foundSwindlerUrl;
 
     if (foundSwindlerUrl) {

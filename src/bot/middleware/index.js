@@ -7,6 +7,7 @@ const ignoreOldExports = require('./ignore-old.middleware');
 const nestedMiddlewareExports = require('./nested.middleware');
 const onlyAdmin = require('./only-admin.middleware');
 const onlyCreator = require('./only-creator.middleware');
+const onlyWhitelisted = require('./only-whitelisted');
 const onlyNotAdminMiddlewareExports = require('./only-not-admin.middleware');
 const onlyNotForwardedMiddlewareExports = require('./only-not-forwarded.middleware');
 const onlyWhenBotAdminExports = require('./only-when-bot-admin.middleware');
@@ -24,6 +25,7 @@ module.exports = {
   ...nestedMiddlewareExports,
   ...onlyAdmin,
   ...onlyCreator,
+  ...onlyWhitelisted,
   ...onlyNotAdminMiddlewareExports,
   ...onlyNotForwardedMiddlewareExports,
   ...onlyWhenBotAdminExports,

@@ -11,6 +11,8 @@ const notSwindlers = [
   'https://www.nrc.no/countries/europe/ukraine/',
 ];
 
+const startsWith = ['https://t.me/', 't.me/', 'https://hi.alfabank.ua/', 'https://cutt.ly/'];
+
 const mentionRegexp = /\B@\w+/g;
 
 /**
@@ -29,8 +31,9 @@ function removeDuplicates(array) {
  * @param {string[]} swindlers
  * @param {string[]} swindlersBots
  * @param {string[]} swindlersCards
+ * @param {string[]} swindlersUsers
  * */
-const autoSwindlers = async (swindlersUrlsService, swindlersCardsService, swindlers, swindlersBots, swindlersCards) => {
+const autoSwindlers = async (swindlersUrlsService, swindlersCardsService, swindlers, swindlersBots, swindlersCards, swindlersUsers) => {
   function findSwindlersByPattern(items, pattern) {
     return removeDuplicates([...items, ...swindlers.map((message) => message.match(pattern) || []).flat()]).filter(
       (item) => !notSwindlers.includes(item),
@@ -47,15 +50,21 @@ const autoSwindlers = async (swindlersUrlsService, swindlersCardsService, swindl
     ...savedSwindlersUrls,
     ...swindlers.map((message) => swindlersUrlsService.parseUrls(message)).flat(),
   ])
-    .filter((url) => {
-      const isSwindler = swindlersUrlsService.isSpamUrl(`${url}/`);
+    .filter(
+      /**
+       * @param {string} url
+       * */
+      (url) => {
+        const isUrl = swindlersUrlsService.parseUrls(url);
+        const isSwindler = isUrl.length && swindlersUrlsService.isSpamUrl(url.endsWith('/') ? url : `${url}/`);
 
-      if (!isSwindler.isSpam) {
-        notMatchedDomains.push(url);
-      }
+        if (isSwindler && !isSwindler.isSpam && !startsWith.some((excludeStart) => url.startsWith(excludeStart))) {
+          notMatchedDomains.push(url);
+        }
 
-      return isSwindler;
-    })
+        return isSwindler;
+      },
+    )
     .sort();
 
   const swindlersDomains = removeDuplicates([
@@ -65,7 +74,7 @@ const autoSwindlers = async (swindlersUrlsService, swindlersCardsService, swindl
     .sort()
     .filter((item) => item !== 't.me');
 
-  const newSwindlersBots = findSwindlersByPattern(swindlersBots, mentionRegexp);
+  const newSwindlersBots = findSwindlersByPattern(swindlersBots, mentionRegexp).filter((bot) => !swindlersUsers.includes(bot));
   const newSwindlersCards = removeDuplicates([
     ...swindlersCards,
     ...swindlers.map((item) => swindlersCardsService.parseCards(item)).flat(),
@@ -73,13 +82,14 @@ const autoSwindlers = async (swindlersUrlsService, swindlersCardsService, swindl
 
   const notMatchedUrls = swindlersUrls
     .filter((item) => urlRegexp.test(item))
-    .filter((item) => !swindlersUrlsService.swindlersRegex.test(item));
+    .filter((item) => !swindlersUrlsService.swindlersRegex.test(item) && !startsWith.some((excludeStart) => item.startsWith(excludeStart)));
 
   console.info('notMatchedUrls\n');
   console.info(notMatchedUrls.join('\n'));
   console.info('notMatchedDomains\n');
   console.info(notMatchedDomains.join('\n'));
 
+  await swindlersGoogleService.clearBots();
   await swindlersGoogleService.updateBots(newSwindlersBots);
   await swindlersGoogleService.updateDomains(swindlersDomains);
   await swindlersGoogleService.updateSites(swindlersUrls);

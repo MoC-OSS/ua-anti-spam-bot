@@ -5,7 +5,6 @@ const auth = require('./auth');
 const { UserbotStorage } = require('./storage.handler');
 const { UpdatesHandler } = require('./updates.handler');
 const { initTensor } = require('../tensor/tensor.service');
-const { initSwindlersTensor } = require('../tensor/swindlers-tensor.service');
 // const { findChannelAdmins } = require('./find-channel-admins');
 const { MtProtoClient } = require('./mt-proto-client');
 const { initSwindlersContainer } = require('../services/swindlers.container');
@@ -17,14 +16,13 @@ auth().then(async (api) => {
   await redisClient.client.connect().then(() => console.info('Redis client successfully started'));
   const mtProtoClient = new MtProtoClient(api);
 
-  const { dynamicStorageService, swindlersDetectService, swindlersBotsService } = await initSwindlersContainer();
+  const { dynamicStorageService, swindlersDetectService, swindlersBotsService, swindlersTensorService } = await initSwindlersContainer();
 
   const userbotStorage = new UserbotStorage();
   await userbotStorage.init();
   console.info('Application is listening new messages.');
 
   const tensorService = await initTensor();
-  const swindlersTensorService = await initSwindlersTensor();
   console.info('Tensor is ready.');
 
   // findChannelAdmins(api);
@@ -35,6 +33,7 @@ auth().then(async (api) => {
     trainingChat: mtProtoClient.resolvePeer(allChats.chats, env.USERBOT_TRAING_CHAT_NAME),
     helpChat: mtProtoClient.resolvePeer(allChats.chats, 'UA Anti Spam Bot - Help'),
     swindlersChat: mtProtoClient.resolvePeer(allChats.chats, 'UA Anti Spam Bot - Swindlers'),
+    botsChat: mtProtoClient.resolvePeer(allChats.chats, 'UA Anti Spam Bot - Bots'),
   };
 
   const updatesHandler = new UpdatesHandler(

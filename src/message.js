@@ -1,10 +1,15 @@
 const { env } = require('typed-dotenv').config();
+const moment = require('moment-timezone');
 
 const { helpChat } = require('./creator');
-const { getRandomItem } = require('./utils');
+const { getRandomItem, formatStateIntoAccusative } = require('./utils');
 
 const randomBanEmojis = ['👮🏻‍♀️', '🤦🏼‍♀️', '🙅🏻‍♀️'];
 const randomLocationBanEmojis = ['🏡', '🏘️', '🌳'];
+
+function getCurrentTimeAndDate() {
+  return moment().format('LT');
+}
 
 /**
  * Generic
@@ -20,11 +25,88 @@ const hasDeletePermissionMessage = '✅ Я маю права на видален
 const hasNoDeletePermissionMessage = '⛔ Я не маю права на видалення повідомлень';
 
 /**
- * Generic - SwindlersUpdate
+ * Generic - Swindlers
  * */
 const swindlersUpdateStartMessage = 'Починаю оновлення списку шахраїв...';
 const swindlersUpdateEndMessage = 'Оновлення спіску шахраїв завершено.';
+const swindlersWarningMessage = `<b>❗УВАГА! UA Anti Spam Bot 🇺🇦 помітив повідомлення від шахраїв в цьому чаті!</b>
 
+Будьте обережні та дотримуйтесь правил інформаційної безпеки:
+
+🔶 Не переходьте за підозрілими посиланнями із чатів!
+🔶 Уникайте реєстрацій та передачі персональних даних стороннім неперевіреним ресурсам.
+🔶 Ніколи не вводьте захищені дані ваших платіжних карток (CVV-код та PIN).
+`;
+
+/**
+ * Generic - Air alarm
+ * */
+const chatIsMutedMessage = `
+🤫 Можливість відправляти повідомлення під час повітряної тривоги тимчасово заблокована!
+`;
+const chatIsUnmutedMessage = `
+💬 Блокування повідомлень зняті. Приємного спілкування!
+`;
+
+const isNight = () => {
+  const hours = +moment().format('H');
+  return hours >= 20 || hours <= 5;
+};
+
+const getDayTimeEmoji = () => (isNight() ? '🌖' : '☀️');
+
+const getRandomAlarmStartText = () => {
+  const currentTimeEmoji = getDayTimeEmoji();
+  const randomAlarmEmoji = getRandomItem(['⚠️', '❗️', '🔊', '🚨', '📢', '❕', currentTimeEmoji]);
+
+  const genericMessages = [
+    '<b>НЕ нехтуйте</b> повітряною тривогою.',
+    'Покиньте вулиці та пройдіть в укриття!',
+    'Пройдіть до укриття!',
+    'Будьте обережні!',
+    'Будьте в укриттях.',
+    'Не ігноруйте сигнали повітряної тривоги!',
+    'Не ігноруйте тривогу!',
+    'Перебувайте в укриттях до завершення повітряної тривоги!',
+  ];
+
+  return `${getRandomItem(genericMessages)} ${randomAlarmEmoji}`;
+};
+
+const getRandomAlarmEndText = () => {
+  const currentTimeEmoji = getDayTimeEmoji();
+  const randomAlarmEmoji = `${getRandomItem(['🇺🇦', '🙏', currentTimeEmoji])} `;
+
+  const genericMessages = [
+    'Будьте обережні',
+    'Бережіть себе',
+    'Дякуємо силам ППО!',
+    'Слава ЗСУ!',
+    'Усім мирного неба над головою',
+    'Дякуємо ППО за роботу!',
+  ].map((item) => `${item} ${randomAlarmEmoji}`);
+
+  const nightMessages = [`Всім тихої ночі! ${currentTimeEmoji}`, `Всім гарного вечора і тихої ночі! ${currentTimeEmoji}`];
+  const dayMessages = ['Всім гарного дня! ☀️'];
+
+  return isNight() ? getRandomItem([...genericMessages, ...nightMessages]) : getRandomItem([...genericMessages, ...dayMessages]);
+};
+
+/**
+ * @param {ChatSessionData['chatSettings']} settings
+ * */
+const getAlarmStartNotificationMessage = (settings) => `
+🔴 <b> ${getCurrentTimeAndDate()} Повітряна тривога в ${formatStateIntoAccusative(settings.airRaidAlertSettings.state)}!</b>
+${getRandomAlarmStartText()}
+`;
+
+/**
+ * @param {ChatSessionData['chatSettings']} settings
+ * */
+const alarmEndNotificationMessage = (settings) => `
+🟢 <b>${getCurrentTimeAndDate()} Відбій тривоги в ${formatStateIntoAccusative(settings.airRaidAlertSettings.state)}!</b>
+${getRandomAlarmEndText()}
+`;
 /**
  * Generic - Settings
  * */
@@ -52,6 +134,37 @@ const getSettingsMenuMessage = (settings) =>
   }
 💰 ${settings.disableSwindlerMessage === true ? '⛔️ Бот не видаляє повідомлення шахраїв.' : '✅ Бот видаляє повідомлення шахраїв.'}
 
+<b>Налаштування повітряної тривоги.</b>
+🏰 ${
+    settings.airRaidAlertSettings.state
+      ? `✅ ${settings.airRaidAlertSettings.state} - твій вибраний регіон.`
+      : '⛔ Ти ще не вибрав свій регіон.'
+  }
+📢 ${
+    settings.airRaidAlertSettings.notificationMessage === false
+      ? '⛔️ Бот не повідомляє про початок і завершення повітряної тривоги у вашому регіоні.'
+      : '✅ Бот повідомляє про початок і завершення повітряної тривоги у вашому регіоні.'
+  }
+🤫 ${
+    settings.disableChatWhileAirRaidAlert === false
+      ? '⛔️ Бот не вимикає чат під час повітряної тривоги у вашому регіоні.'
+      : '✅ Бот вимикає чат під час повітряної тривоги у вашому регіоні.'
+  }
+
+Для зміни налаштувань, натисніть на відповідну кнопку нижче. 👇
+`.trim();
+
+const getAirRaidAlarmSettingsMessage = (settings) =>
+  `
+<b>🤖 Налаштування повітряної тривоги в поточному чаті.</b>
+Тут ти можеш змінити регіон до якого відноситься цей чат.
+
+🏰 ${
+    settings.airRaidAlertSettings.state
+      ? `✅ ${settings.airRaidAlertSettings.state} - твій вибраний регіон.`
+      : '⛔️ Ти ще не вибрав свій регіон.'
+  }
+
 Для зміни налаштувань, натисніть на відповідну кнопку нижче. 👇
 `.trim();
 
@@ -61,7 +174,18 @@ const deleteTensorButton = `🚀 Інцидент`;
 const deleteMessageButton = '❗ Причина';
 const deleteSwindlerButton = '💰 Шахраї';
 
-const goBackButton = '⬅ Повернутись назад';
+const airAlarmAlertButton = '🏰 Регіон';
+const airAlarmNotificationMessage = '📢 Тривога';
+const turnOffChatWhileAlarmButton = '🤫 Тиша';
+
+const goBackButton = '⬅️ Повернутись назад';
+
+const nextPage = 'Наступна сторінка ⏩';
+const previousPage = '⏪ Попередня сторінка';
+
+const selectYourState = 'Будь ласка, виберіть свій регіон.';
+
+const blockWhenAlarm = 'Це налаштування заблоковано під час тривоги. Будь ласка, зробіть це після відміни тривоги.';
 
 const detailedSettingsDescription = '📋 Детальний опиc всіх налаштувань';
 
@@ -268,9 +392,9 @@ const getUpdatesMessage = () =>
 
 `.trim();
 
-const getUpdateMessage = ({ totalCount, finishedCount, successCount }) =>
+const getUpdateMessage = ({ totalCount, finishedCount, successCount, type }) =>
   `
-Було опрацьовано ${finishedCount}/${totalCount} повідомлень...
+Було опрацьовано ${finishedCount}/${totalCount} повідомлень для ${type}...
 Успішно ${successCount} повідомлень.
 `.trim();
 
@@ -312,6 +436,14 @@ const getTensorTestResult = ({ chance, isSpam }) =>
  *
  * */
 module.exports = {
+  selectYourState,
+  airAlarmNotificationMessage,
+  getAlarmStartNotificationMessage,
+  alarmEndNotificationMessage,
+  nextPage,
+  previousPage,
+  airAlarmAlertButton,
+  turnOffChatWhileAlarmButton,
   goBackButton,
   deleteMessageButton,
   deleteTensorButton,
@@ -332,6 +464,11 @@ module.exports = {
   confirmationMessage,
   swindlersUpdateStartMessage,
   swindlersUpdateEndMessage,
+  swindlersWarningMessage,
+  chatIsMutedMessage,
+  chatIsUnmutedMessage,
+  blockWhenAlarm,
+  getAirRaidAlarmSettingsMessage,
   getBotJoinMessage,
   getCannotDeleteMessage,
   getDebugMessage,

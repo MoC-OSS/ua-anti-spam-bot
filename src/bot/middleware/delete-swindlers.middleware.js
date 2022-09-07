@@ -1,7 +1,11 @@
 const { InputFile } = require('grammy');
 const { logsChat } = require('../../creator');
-const { handleError, compareDatesWithOffset, telegramUtil, getUserData } = require('../../utils');
-const { getCannotDeleteMessage } = require('../../message');
+const { handleError, compareDatesWithOffset, telegramUtil, getUserData, revealHiddenUrls } = require('../../utils');
+const { getCannotDeleteMessage, swindlersWarningMessage } = require('../../message');
+
+const SWINDLER_SETTINGS = {
+  WARNING_DELAY: 86400000 * 3,
+};
 
 class DeleteSwindlersMiddleware {
   /**
@@ -19,20 +23,21 @@ class DeleteSwindlersMiddleware {
      * @param {Next} next
      * */
     const middleware = async (ctx, next) => {
-      const message = ctx.state.text;
+      const message = revealHiddenUrls(ctx);
 
       const result = await this.swindlersDetectService.isSwindlerMessage(message);
 
       ctx.state.swindlersResult = result;
 
       if (result.isSpam) {
-        this.saveSwindlersMessage(ctx, result.rate, result.displayReason || result.reason);
+        await this.saveSwindlersMessage(ctx, result.rate, result.displayReason || result.reason, message);
+        await this.processWarningMessage(ctx);
         this.removeMessage(ctx);
         return;
       }
 
       if (!result.isSpam && result.reason === 'compare') {
-        this.saveSwindlersMessage(ctx, result.rate, result.displayReason || result.reason);
+        await this.saveSwindlersMessage(ctx, result.rate, result.displayReason || result.reason, message);
       }
 
       return next();
@@ -45,10 +50,12 @@ class DeleteSwindlersMiddleware {
    * @param {GrammyContext} ctx
    * @param {number} maxChance
    * @param {SwindlerType | string} from
+   * @param {string} [message]
    * */
-  async saveSwindlersMessage(ctx, maxChance, from) {
+  async saveSwindlersMessage(ctx, maxChance, from, message) {
     const { writeUsername, userId } = getUserData(ctx);
     const chatInfo = await ctx.getChat();
+    const text = message || ctx.state.text;
 
     const chatMention =
       ctx.chat.title &&
@@ -67,11 +74,29 @@ class DeleteSwindlersMiddleware {
       logsChat,
       `Looks like swindler's message (${(maxChance * 100).toFixed(2)}%) from <code>${from}</code> by user ${userMention}:\n\n${
         chatMention || userMention
-      }\n${ctx.state.text}`,
+      }\n${text}`,
       {
         parse_mode: 'HTML',
       },
     );
+  }
+
+  /**
+   * Sends warning to the chat, or skips if it was sent
+   *
+   * @param {GrammyContext} ctx
+   * */
+  processWarningMessage(ctx) {
+    const shouldSend =
+      !ctx.chatSession.lastWarningDate ||
+      (ctx.chatSession.lastWarningDate &&
+        Date.now() > new Date(ctx.chatSession.lastWarningDate).getTime() + SWINDLER_SETTINGS.WARNING_DELAY);
+    if (shouldSend) {
+      ctx.chatSession.lastWarningDate = new Date();
+      return ctx.reply(swindlersWarningMessage, {
+        parse_mode: 'HTML',
+      });
+    }
   }
 
   /**

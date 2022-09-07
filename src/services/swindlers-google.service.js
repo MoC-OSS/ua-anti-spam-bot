@@ -11,18 +11,34 @@ class SwindlersGoogleService {
      * @private
      * */
     this.googleService = localGoogleService;
+    this.SHEETS_START_FROM = 6;
+    this.RANGE = (column) => `${column}${this.SHEETS_START_FROM}:${column}`;
+    this.APPEND_RANGE = (column, position) => `${column}${position}`;
+    this.SHEET_COLUMNS = {
+      TRAINING_NEGATIVES: 'A',
+      TRAINING_POSITIVES: 'B',
+      BOTS: 'C',
+      DOMAINS: 'D',
+      TESTING_NEGATIVES: 'E',
+      TESTING_POSITIVES: 'F',
+      SITES: 'G',
+      USERS: 'H',
+      CARDS: 'I',
+      NOT_SWINDLERS: 'J',
+      SITE_REGEX: 'K',
+    };
     this.RANGES = {
-      TRAINING_NEGATIVES: 'A6:A',
-      TRAINING_POSITIVES: 'B6:B',
-      BOTS: 'C6:C',
-      DOMAINS: 'D6:D',
-      TESTING_NEGATIVES: 'E6:E',
-      TESTING_POSITIVES: 'F6:F',
-      SITES: 'G6:G',
-      USERS: 'H6:H',
-      CARDS: 'I6:I',
-      NOT_SWINDLERS: 'J6:J',
-      SITE_REGEX: 'K6:K',
+      TRAINING_NEGATIVES: this.RANGE(this.SHEET_COLUMNS.TRAINING_NEGATIVES),
+      TRAINING_POSITIVES: this.RANGE(this.SHEET_COLUMNS.TRAINING_POSITIVES),
+      BOTS: this.RANGE(this.SHEET_COLUMNS.BOTS),
+      DOMAINS: this.RANGE(this.SHEET_COLUMNS.DOMAINS),
+      TESTING_NEGATIVES: this.RANGE(this.SHEET_COLUMNS.TESTING_NEGATIVES),
+      TESTING_POSITIVES: this.RANGE(this.SHEET_COLUMNS.TESTING_POSITIVES),
+      SITES: this.RANGE(this.SHEET_COLUMNS.SITES),
+      USERS: this.RANGE(this.SHEET_COLUMNS.USERS),
+      CARDS: this.RANGE(this.SHEET_COLUMNS.CARDS),
+      NOT_SWINDLERS: this.RANGE(this.SHEET_COLUMNS.NOT_SWINDLERS),
+      SITE_REGEX: this.RANGE(this.SHEET_COLUMNS.SITE_REGEX),
     };
   }
 
@@ -94,8 +110,8 @@ class SwindlersGoogleService {
     return this.clearSheet(this.RANGES.TRAINING_NEGATIVES);
   }
 
-  getTrainingPositives() {
-    return this.getSheet(this.RANGES.TRAINING_POSITIVES);
+  getTrainingPositives(compact = true) {
+    return this.getSheet(this.RANGES.TRAINING_POSITIVES, compact);
   }
 
   /**
@@ -108,8 +124,10 @@ class SwindlersGoogleService {
   /**
    * @param {string} singleCase - case to append
    * */
-  appendTraingPositives(singleCase) {
-    return this.appendToSheet(this.RANGES.TRAINING_POSITIVES, singleCase);
+  async appendTrainingPositives(singleCase) {
+    const values = await this.getTrainingPositives(false);
+    const lastPosition = values[values.length - 1].index + 1;
+    return this.appendToSheet(this.APPEND_RANGE(this.SHEET_COLUMNS.TRAINING_POSITIVES, lastPosition), singleCase);
   }
 
   clearTrainingPositives() {
@@ -131,6 +149,10 @@ class SwindlersGoogleService {
    */
   updateBots(bots) {
     return this.updateSheet(this.RANGES.BOTS, bots);
+  }
+
+  clearBots() {
+    return this.clearSheet(this.RANGES.BOTS);
   }
 
   /**

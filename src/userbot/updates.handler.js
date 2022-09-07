@@ -8,6 +8,7 @@ const { mentionRegexp, urlRegexp } = require('ukrainian-ml-optimizer');
 const deleteFromMessage = require('./from-entities.json');
 const { dataset } = require('../../dataset/dataset');
 const { swindlersGoogleService } = require('../services/swindlers-google.service');
+const { redisService } = require('../services/redis.service');
 
 const sentMentionsFromStart = [];
 
@@ -98,7 +99,7 @@ class UpdatesHandler {
      * @param {number} spamRate
      * @param {SwindlerType} from
      * */
-    const processFoundSwindler = (spamRate, from) => {
+    const processFoundSwindler = async (spamRate, from) => {
       console.info(true, from, spamRate, message);
 
       const isGoodMatch = matchArray.includes(from);
@@ -106,10 +107,14 @@ class UpdatesHandler {
 
       if (isGoodMatch && isRateGood) {
         const allMentions = this.swindlersBotsService.parseMentions(message);
-        const newMentions = (allMentions || []).filter((item) => !this.dynamicStorageService.swindlerBots.includes(item));
+        const trainingBots = await redisService.getTrainingBots();
+        const newMentions = (allMentions || []).filter(
+          (item) => ![...this.dynamicStorageService.swindlerBots, ...trainingBots].includes(item),
+        );
 
-        if (newMentions.length) {
-          this.mtProtoClient.sendSelfMessage(newMentions.join('\n'));
+        if (newMentions.length && newMentions.length < 3) {
+          await this.mtProtoClient.sendPeerMessage(newMentions.join('\n'), this.chatPeers.botsChat);
+          await redisService.updateTrainingBots(newMentions);
         }
       }
 
@@ -126,7 +131,7 @@ class UpdatesHandler {
         }
 
         if (maxChance > SWINDLER_SETTINGS.APPEND_TO_SHEET) {
-          swindlersGoogleService.appendTraingPositives(finalMessage);
+          swindlersGoogleService.appendTrainingPositives(finalMessage);
         } else {
           this.mtProtoClient.sendPeerMessage(finalMessage, this.chatPeers.swindlersChat);
         }
@@ -138,7 +143,7 @@ class UpdatesHandler {
     const spamResult = await this.swindlersDetectService.isSwindlerMessage(finalMessage);
 
     if (spamResult.isSpam) {
-      processFoundSwindler(spamResult.rate, spamResult.reason);
+      await processFoundSwindler(spamResult.rate, spamResult.reason);
       return { spam: true, reason: spamResult.reason, rate: spamResult.rate };
     }
 

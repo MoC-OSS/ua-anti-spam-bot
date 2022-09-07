@@ -1,5 +1,15 @@
 const { redisClient } = require('../db');
 
+/**
+ * @template T
+ * @param {T} array
+ *
+ * @returns {T}
+ * */
+function removeDuplicates(array) {
+  return [...new Set(array)];
+}
+
 class RedisService {
   constructor() {
     this.redisClient = redisClient;
@@ -11,6 +21,7 @@ class RedisService {
       trainingChatWhitelist: 'training:chatWhiteList',
       trainingStartRank: 'training:startRank',
       trainingTempMessages: 'training:tempMessages',
+      trainingBots: 'training:bots',
       userSessions: /^-?\d+:-?\d+$/,
       chatSessions: /^-?\d+$/,
     };
@@ -21,6 +32,13 @@ class RedisService {
    * */
   async getTrainingChatWhitelist() {
     return (await redisClient.getRawValue(this.redisSelectors.trainingChatWhitelist)) || [];
+  }
+
+  /**
+   * @returns {Promise<string[]>}
+   * */
+  async getTrainingBots() {
+    return (await redisClient.getRawValue(this.redisSelectors.trainingBots)) || [];
   }
 
   /**
@@ -38,6 +56,17 @@ class RedisService {
     currentChats.push(newChatId);
 
     return this.setTrainingChatWhitelist(currentChats.join(','));
+  }
+
+  setTrainingBots(bots) {
+    return redisClient.setRawValue(this.redisSelectors.trainingBots, bots);
+  }
+
+  async updateTrainingBots(bots) {
+    const currentBots = await this.getTrainingBots();
+    const newBots = removeDuplicates([...currentBots, ...bots]);
+
+    return this.setTrainingBots(newBots);
   }
 
   /**
@@ -151,10 +180,11 @@ class RedisService {
       ...newSession,
     };
 
-    return redisClient.setRawValue(chatId, writeSession).then((res) => {
-      console.info(`Chat id has been updated: ${chatId}`, writeSession);
-      return res;
-    });
+    return redisClient.setRawValue(chatId, writeSession).then(
+      (res) =>
+        // console.info(`Chat id has been updated: ${chatId}`, writeSession);
+        res,
+    );
   }
 
   /**
@@ -171,6 +201,17 @@ class RedisService {
   async getChatSessions() {
     const allSessions = await redisClient.getAllRecords();
     return allSessions.filter((session) => this.redisSelectors.chatSessions.test(session.id));
+  }
+
+  /**
+   * @param {string} chatId
+   * @returns {Promise<ChatSessionData>}
+   * */
+  async getChatSession(chatId) {
+    if (!this.redisSelectors.chatSessions.test(chatId)) {
+      throw new Error(`This is an invalid chat id: ${chatId}`);
+    }
+    return redisClient.getRawValue(chatId);
   }
 
   /**

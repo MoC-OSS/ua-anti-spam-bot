@@ -6,6 +6,7 @@ const { MessageUtil } = require('./message.util');
 const { TelegramUtil } = require('./telegram.util');
 const errorUtilExports = require('./error.util');
 const errorHandlerExports = require('./error-handler');
+const revealHiddenUrlsExports = require('./reveal-hidden-urls.util');
 
 const messageUtil = new MessageUtil();
 const telegramUtil = new TelegramUtil();
@@ -64,6 +65,21 @@ function formatDateIntoAccusative(date) {
 }
 
 /**
+ * @param {string} state
+ * */
+function formatStateIntoAccusative(state) {
+  if (!state.includes('область')) {
+    return state;
+  }
+
+  const [stateName] = state.split(' ');
+  const accusativeStateName = stateName.replace('ька', 'ькій');
+  const accusativeStateType = 'області';
+
+  return `${accusativeStateName} ${accusativeStateType}`;
+}
+
+/**
  * @param {GrammyContext} ctx
  * */
 function getUserData(ctx) {
@@ -112,6 +128,14 @@ function compareDatesWithOffset(initialDate, compareDate, hours) {
   return +initialDate + additionalTime < +compareDate;
 }
 
+/**
+ * @param {number} id
+ * */
+function isIdWhitelisted(id) {
+  const whitelist = (env.USERS_WHITELIST || '').split(', ');
+  return whitelist.includes(id.toString());
+}
+
 module.exports = {
   logSkipMiddleware,
   getUserData,
@@ -122,9 +146,12 @@ module.exports = {
   truncateString,
   formatDate,
   formatDateIntoAccusative,
+  formatStateIntoAccusative,
   getRandomItem,
   messageUtil,
   telegramUtil,
+  isIdWhitelisted,
   ...errorHandlerExports,
   ...errorUtilExports,
+  ...revealHiddenUrlsExports,
 };
