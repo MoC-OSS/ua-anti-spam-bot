@@ -110,22 +110,25 @@ class DeleteSwindlersMiddleware {
         ctx.chatSession.isLimitedDeletion = true;
         ctx.chatSession.lastLimitedDeletionDate = new Date();
 
-        telegramUtil.getChatAdmins(ctx, ctx.chat.id).then(({ adminsString, admins }) => {
-          ctx.replyWithHTML(getCannotDeleteMessage({ adminsString }), { reply_to_message_id: ctx.msg.message_id }).catch(handleError);
+        return telegramUtil
+          .getChatAdmins(ctx, ctx.chat.id)
+          .then(({ adminsString, admins }) => {
+            ctx.replyWithHTML(getCannotDeleteMessage({ adminsString }), { reply_to_message_id: ctx.msg.message_id }).catch(handleError);
 
-          ctx.state.admins = admins;
+            ctx.state.admins = admins;
 
-          ctx.api
-            .sendMessage(logsChat, `Cannot delete the following message from chat\n\n<code>${ctx.chat.title}</code>\n${ctx.msg.text}`, {
-              parse_mode: 'HTML',
-            })
-            .then(() => {
-              ctx.api
-                .sendDocument(logsChat, new InputFile(Buffer.from(JSON.stringify(ctx, null, 2)), `ctx-${new Date().toISOString()}.json`))
-                .catch(handleError);
-            })
-            .catch(handleError);
-        });
+            ctx.api
+              .sendMessage(logsChat, `Cannot delete the following message from chat\n\n<code>${ctx.chat.title}</code>\n${ctx.msg.text}`, {
+                parse_mode: 'HTML',
+              })
+              .then(() => {
+                ctx.api
+                  .sendDocument(logsChat, new InputFile(Buffer.from(JSON.stringify(ctx, null, 2)), `ctx-${new Date().toISOString()}.json`))
+                  .catch(handleError);
+              })
+              .catch(handleError);
+          })
+          .catch(handleError);
       }
     });
   }
