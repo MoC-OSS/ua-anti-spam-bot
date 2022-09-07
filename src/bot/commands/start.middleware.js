@@ -37,16 +37,19 @@ class StartMiddleware {
         );
       }
 
-      telegramUtil.getChatAdmins(this.bot, ctx.chat.id).then(({ adminsString }) => {
-        ctx
-          .replyWithHTML(
-            getGroupStartMessage({ adminsString, isAdmin, canDelete, user: writeUsername !== '@GroupAnonymousBot' ? writeUsername : '' }),
-          )
-          .catch((getAdminsError) => {
-            handleError(getAdminsError);
-            ctx.replyWithHTML(makeAdminMessage);
-          });
-      });
+      return telegramUtil
+        .getChatAdmins(this.bot, ctx.chat.id)
+        .then(({ adminsString }) => {
+          ctx
+            .replyWithHTML(
+              getGroupStartMessage({ adminsString, isAdmin, canDelete, user: writeUsername !== '@GroupAnonymousBot' ? writeUsername : '' }),
+            )
+            .catch((getAdminsError) => {
+              handleError(getAdminsError);
+              ctx.replyWithHTML(makeAdminMessage);
+            });
+        })
+        .catch(handleError);
     };
   }
 }
