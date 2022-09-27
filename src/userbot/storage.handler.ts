@@ -1,10 +1,10 @@
-const { env } = require('typed-dotenv').config();
+import { env } from 'typed-dotenv'.config();
 // eslint-disable-next-line import/no-extraneous-dependencies
-const stringSimilarity = require('string-similarity');
+import stringSimilarity from 'string-similarity';
 
-const { redisService } = require('../services/redis.service');
-const { googleService } = require('../services/google.service');
-const { swindlersGoogleService } = require('../services/swindlers-google.service');
+import { redisService } from '../services/redis.service';
+import { googleService } from '../services/google.service';
+import { swindlersGoogleService } from '../services/swindlers-google.service';
 
 const limits = {
   STORAGE: 999999999,

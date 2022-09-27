@@ -1,7 +1,7 @@
-const axios = require('axios');
-const { SwindlersUrlsService } = require('./swindlers-urls.service');
-const { mockDynamicStorageService, mockNewUrl } = require('./_mocks/index.mocks');
-const { EXCEPTION_DOMAINS } = require('./constants/swindlers-urls.constant');
+import axios from 'axios';
+import { SwindlersUrlsService } from './swindlers-urls.service';
+import { mockDynamicStorageService, mockNewUrl } from './_mocks/index.mocks';
+import { EXCEPTION_DOMAINS } from './constants/swindlers-urls.constant';
 
 jest.mock('axios');
 

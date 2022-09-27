@@ -1,8 +1,8 @@
 /* eslint-disable camelcase */
-const path = require('path');
-const { env } = require('typed-dotenv').config();
-const MTProto = require('@mtproto/core');
-const { sleep } = require('@mtproto/core/src/utils/common');
+import path from 'path';
+import { env } from 'typed-dotenv'.config();
+import MTProto from '@mtproto/core';
+import { sleep } from '@mtproto/core/src/utils/common';
 
 export class API {
   mtproto: typeof MTProto;

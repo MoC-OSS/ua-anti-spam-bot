@@ -1,15 +1,17 @@
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 import { RawApi } from 'grammy';
+
 import { TensorService } from '../../tensor/tensor.service';
+import { errorHandler } from '../../utils/error-handler';
 
-const { Menu } = require('@grammyjs/menu');
-const { env } = require('typed-dotenv').config();
+import { Menu } from '@grammyjs/menu';
+import { env } from 'typed-dotenv'.config();
 
-const { redisService } = require('../../services/redis.service');
-const { errorHandler } = require('../../utils');
-const { creatorId, trainingChat } = require('../../creator');
-const { getTensorTestResult } = require('../../message');
-const { googleService } = require('../../services/google.service');
+import { redisService } from '../../services/redis.service';
+
+import { creatorId, trainingChat } from '../../creator';
+import { getTensorTestResult } from '../../message';
+import { googleService } from '../../services/google.service';
 
 const defaultTime = 30;
 const removeTime = 30;
@@ -17,23 +19,28 @@ const removeTime = 30;
 /**
  * @param {GrammyContext} ctx
  * */
-const getAnyUsername = (ctx) => {
-  const username = ctx.callbackQuery.from?.username;
-  const fullName = ctx.callbackQuery.from?.last_name
-    ? `${ctx.callbackQuery.from?.first_name} ${ctx.callbackQuery.from?.last_name}`
-    : ctx.callbackQuery.from?.first_name;
+const getAnyUsername = (context) => {
+  const username = context.callbackQuery.from?.username;
+  const fullName = context.callbackQuery.from?.last_name
+    ? `${context.callbackQuery.from?.first_name} ${context.callbackQuery.from?.last_name}`
+    : context.callbackQuery.from?.first_name;
   return username ? `@${username}` : fullName ?? '';
 };
 
-class TestTensorListener {
+export class TestTensorListener {
   /**
    * @param {TensorService} tensorService
    */
-  tensorService: TensorService
+  tensorService: TensorService;
+
   menu: any;
+
   messageNodeTimeouts: any;
+
   messageNodeIntervals: any;
+
   storage: any;
+
   constructor(tensorService) {
     this.tensorService = tensorService;
     this.menu = null;
@@ -105,17 +112,17 @@ class TestTensorListener {
     /**
      * @param {GrammyContext} ctx
      * */
-    const finalMiddleware = async (ctx) => {
-      const storage = this.storage[this.getStorageKey(ctx)];
+    const finalMiddleware = async (context) => {
+      const storage = this.storage[this.getStorageKey(context)];
 
-      clearTimeout(this.messageNodeTimeouts[this.getStorageKey(ctx)]);
-      clearInterval(this.messageNodeIntervals[this.getStorageKey(ctx)]);
+      clearTimeout(this.messageNodeTimeouts[this.getStorageKey(context)]);
+      clearInterval(this.messageNodeIntervals[this.getStorageKey(context)]);
 
-      delete this.messageNodeTimeouts[this.getStorageKey(ctx)];
-      delete this.messageNodeIntervals[this.getStorageKey(ctx)];
+      delete this.messageNodeTimeouts[this.getStorageKey(context)];
+      delete this.messageNodeIntervals[this.getStorageKey(context)];
 
       if (!storage) {
-        ctx.editMessageText(ctx.msg.text, { reply_markup: null }).catch(() => {});
+        context.editMessageText(context.msg.text, { reply_markup: null }).catch(() => {});
         return;
       }
 
@@ -128,7 +135,7 @@ class TestTensorListener {
         (positivesCount === skipsCount && skipsCount !== 0) ||
         (negativesCount === skipsCount && negativesCount !== 0)
       ) {
-        ctx.editMessageText(`${storage.originalMessage}\n\nЧекаю на більше оцінок...`).catch(() => {});
+        context.editMessageText(`${storage.originalMessage}\n\nЧекаю на більше оцінок...`).catch(() => {});
         return;
       }
 
@@ -150,7 +157,7 @@ class TestTensorListener {
 
       // const winUsersText = winUsers.slice(0, 2).join(', ') + (winUsers.length > 3 ? ' та інші' : '');
 
-      const originMessage = ctx.update.callback_query.message.reply_to_message;
+      const originMessage = context.update.callback_query.message.reply_to_message;
 
       if (status === true) {
         this.writeDataset('positives', originMessage.text || originMessage.caption);
@@ -168,9 +175,9 @@ class TestTensorListener {
       /**
        * We need to use throttler for Test Tensor because telegram could ban the bot
        * */
-      ctx.api.config.use(throttler);
+      context.api.config.use(throttler);
 
-      await ctx
+      await context
         .editMessageText(
           `${storage.originalMessage}\n\n${winUsers.join(
             ', ',
@@ -183,32 +190,32 @@ class TestTensorListener {
         .catch(() => {});
 
       setTimeout(() => {
-        ctx.api
+        context.api
           .deleteMessage(originMessage.chat.id, originMessage.message_id)
-          .then(() => ctx.api.deleteMessage(ctx.chat.id, ctx.msg.message_id))
+          .then(() => context.api.deleteMessage(context.chat.id, context.msg.message_id))
           .catch(console.error);
       }, removeTime * 1000);
 
-      delete this.storage[this.getStorageKey(ctx)];
+      delete this.storage[this.getStorageKey(context)];
     };
 
-    const processButtonMiddleware = errorHandler((ctx) => {
-      const storage = this.storage[this.getStorageKey(ctx)];
-      ctx
+    const processButtonMiddleware = errorHandler((context) => {
+      const storage = this.storage[this.getStorageKey(context)];
+      context
         .editMessageText(`${storage.originalMessage}\n\nЧекаю ${storage.time} сек...\n${new Date().toISOString()}`, {
           parse_mode: 'HTML',
         })
         .catch(() => {});
 
-      clearTimeout(this.messageNodeTimeouts[this.getStorageKey(ctx)]);
-      clearInterval(this.messageNodeIntervals[this.getStorageKey(ctx)]);
+      clearTimeout(this.messageNodeTimeouts[this.getStorageKey(context)]);
+      clearInterval(this.messageNodeIntervals[this.getStorageKey(context)]);
       storage.time = defaultTime;
 
-      this.messageNodeIntervals[this.getStorageKey(ctx)] = setInterval(() => {
+      this.messageNodeIntervals[this.getStorageKey(context)] = setInterval(() => {
         storage.time -= 5;
 
         if (storage.time !== 0) {
-          ctx
+          context
             .editMessageText(`${storage.originalMessage}\n\nЧекаю ${storage.time} сек...\n${new Date().toISOString()}`, {
               parse_mode: 'HTML',
             })
@@ -216,63 +223,63 @@ class TestTensorListener {
         }
       }, defaultTime * 1000 + 2000);
 
-      this.messageNodeTimeouts[this.getStorageKey(ctx)] = setTimeout(() => {
-        finalMiddleware(ctx);
+      this.messageNodeTimeouts[this.getStorageKey(context)] = setTimeout(() => {
+        finalMiddleware(context);
       }, defaultTime * 1000);
     });
 
     const initMenu = () => {
       this.menu = new Menu('spam-menu')
         .text(
-          (ctx) => `✅ Це спам (${this.storage[this.getStorageKey(ctx)]?.positives?.length || 0})`,
-          errorHandler((ctx) => {
-            this.initTensorSession(ctx, ctx.msg.text);
+          (context) => `✅ Це спам (${this.storage[this.getStorageKey(context)]?.positives?.length || 0})`,
+          errorHandler((context) => {
+            this.initTensorSession(context, context.msg.text);
 
-            const storage = this.storage[this.getStorageKey(ctx)];
-            const username = getAnyUsername(ctx);
+            const storage = this.storage[this.getStorageKey(context)];
+            const username = getAnyUsername(context);
             storage.negatives = storage.negatives?.filter((item) => item !== username);
             storage.skips = storage.skips.filter((item) => item !== username);
             if (!storage.positives.includes(username)) {
               storage.positives.push(username);
             }
 
-            ctx.menu.update();
-            processButtonMiddleware(ctx);
+            context.menu.update();
+            processButtonMiddleware(context, null);
           }),
         )
         .text(
-          (ctx) => `⛔️ Це не спам (${this.storage[this.getStorageKey(ctx)]?.negatives?.length || 0})`,
-          errorHandler((ctx) => {
-            this.initTensorSession(ctx, ctx.msg.text);
+          (context) => `⛔️ Це не спам (${this.storage[this.getStorageKey(context)]?.negatives?.length || 0})`,
+          errorHandler((context) => {
+            this.initTensorSession(context, context.msg.text);
 
-            const storage = this.storage[this.getStorageKey(ctx)];
-            const username = getAnyUsername(ctx);
+            const storage = this.storage[this.getStorageKey(context)];
+            const username = getAnyUsername(context);
             storage.positives = storage.positives.filter((item) => item !== username);
             storage.skips = storage.skips.filter((item) => item !== username);
             if (!storage.negatives.includes(username)) {
               storage.negatives.push(username);
             }
 
-            ctx.menu.update();
-            processButtonMiddleware(ctx);
+            context.menu.update();
+            processButtonMiddleware(context, null);
           }),
         )
         .row()
         .text(
-          (ctx) => `⏭ Пропустити (${this.storage[this.getStorageKey(ctx)]?.skips?.length || 0})`,
-          errorHandler((ctx) => {
-            this.initTensorSession(ctx, ctx.msg.text);
+          (context) => `⏭ Пропустити (${this.storage[this.getStorageKey(context)]?.skips?.length || 0})`,
+          errorHandler((context) => {
+            this.initTensorSession(context, context.msg.text);
 
-            const storage = this.storage[this.getStorageKey(ctx)];
-            const username = getAnyUsername(ctx);
+            const storage = this.storage[this.getStorageKey(context)];
+            const username = getAnyUsername(context);
             storage.positives = storage.positives.filter((item) => item !== username);
             storage.negatives = storage.negatives?.filter((item) => item !== username);
             if (!storage.skips.includes(username)) {
               storage.skips.push(username);
             }
 
-            ctx.menu.update();
-            processButtonMiddleware(ctx);
+            context.menu.update();
+            processButtonMiddleware(context, null);
           }),
         );
     };
@@ -285,9 +292,9 @@ class TestTensorListener {
   /**
    * @param {GrammyContext} ctx
    * */
-  initTensorSession(ctx, message) {
-    if (!this.storage[this.getStorageKey(ctx)]?.originalMessage) {
-      this.storage[this.getStorageKey(ctx)] = {
+  initTensorSession(context, message) {
+    if (!this.storage[this.getStorageKey(context)]?.originalMessage) {
+      this.storage[this.getStorageKey(context)] = {
         positives: [],
         negatives: [],
         skips: [],
@@ -300,17 +307,17 @@ class TestTensorListener {
   /**
    * @param {GrammyContext} ctx
    * */
-  getStorageKey(ctx) {
+  getStorageKey(context) {
     let chatInstance;
-    if (ctx.chat) {
-      chatInstance = ctx.chat.id;
-    } else if (ctx.updateType === 'callback_query') {
-      chatInstance = ctx.callbackQuery.chat_instance;
+    if (context.chat) {
+      chatInstance = context.chat.id;
+    } else if (context.updateType === 'callback_query') {
+      chatInstance = context.callbackQuery.chat_instance;
     } else {
-      chatInstance = ctx.from.id;
+      chatInstance = context.from.id;
     }
 
-    return `${chatInstance}:${ctx.msg.reply_to_message?.message_id || ctx.msg.message_id}`;
+    return `${chatInstance}:${context.msg.reply_to_message?.message_id || context.msg.message_id}`;
   }
 
   /**
@@ -322,32 +329,32 @@ class TestTensorListener {
      * @param {GrammyContext} ctx
      * @param {Next} next
      * */
-    return async (ctx, next) => {
-      if (ctx.chat.id !== trainingChat && !env.TEST_TENSOR) {
+    return async (context, next) => {
+      if (context.chat.id !== trainingChat && !env.TEST_TENSOR) {
         return next();
       }
 
       /**
        * We need to use throttler for Test Tensor because telegram could ban the bot
        * */
-      ctx.api.config.use(throttler);
+      context.api.config.use(throttler);
 
-      if (ctx.from.id !== creatorId) {
-        if (ctx.chat.type !== 'supergroup') {
-          ctx.reply('В особистих не працюю 😝');
+      if (context.from.id !== creatorId) {
+        if (context.chat.type !== 'supergroup') {
+          context.reply('В особистих не працюю 😝');
           return;
         }
 
-        if (ctx.chat.id !== trainingChat) {
-          ctx.reply('Я працюю тільки в одному супер чаті 😝');
+        if (context.chat.id !== trainingChat) {
+          context.reply('Я працюю тільки в одному супер чаті 😝');
           return;
         }
       }
 
-      const message = ctx.msg.text || ctx.msg.caption;
+      const message = context.msg.text || context.msg.caption;
 
       if (!message) {
-        ctx.api.deleteMessage(ctx.chat.id, ctx.msg.message_id).catch();
+        context.api.deleteMessage(context.chat.id, context.msg.message_id).catch();
         return;
       }
 
@@ -357,22 +364,20 @@ class TestTensorListener {
         const chance = `${(spamRate * 100).toFixed(4)}%`;
         const tensorTestMessage = getTensorTestResult({ chance, isSpam, tensorDate: fileStat?.mtime });
 
-        this.initTensorSession(ctx, tensorTestMessage);
+        this.initTensorSession(context, tensorTestMessage);
 
-        ctx
+        context
           .replyWithHTML(tensorTestMessage, {
-            reply_to_message_id: ctx.msg.message_id,
+            reply_to_message_id: context.msg.message_id,
             reply_markup: this.menu,
           })
           .catch(() => {});
       } catch (error: any) {
         console.error(error);
-        ctx.reply(`Cannot parse this message.\nError:\n${error.message}`, { reply_to_message_id: ctx.msg.message_id }).catch(() => {});
+        context
+          .reply(`Cannot parse this message.\nError:\n${error.message}`, { reply_to_message_id: context.msg.message_id })
+          .catch(() => {});
       }
     };
   }
 }
-
-module.exports = {
-  TestTensorListener,
-};

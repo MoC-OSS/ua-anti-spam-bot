@@ -1,10 +1,10 @@
 import { GrammyBot } from '../types';
 
-const Bottleneck = require('bottleneck');
-const { alarmService, ALARM_EVENT_KEY } = require('./alarm.service');
-const { redisService } = require('./redis.service');
-const { getAlarmStartNotificationMessage, alarmEndNotificationMessage, chatIsMutedMessage, chatIsUnmutedMessage } = require('../message');
-const { handleError } = require('../utils');
+import Bottleneck from 'bottleneck';
+import { alarmService, ALARM_EVENT_KEY } from './alarm.service';
+import { redisService } from './redis.service';
+import { getAlarmStartNotificationMessage, alarmEndNotificationMessage, chatIsMutedMessage, chatIsUnmutedMessage } from '../message';
+import { handleError } from '../utils';
 
 export class AlarmChatService {
   /**

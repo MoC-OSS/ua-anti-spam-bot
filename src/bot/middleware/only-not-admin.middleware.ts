@@ -1,4 +1,4 @@
-const { logSkipMiddleware } = require('../../utils');
+import { logSkipMiddleware } from '../../utils';
 
 const TELEGRAM_FORWARD_USER_ID = 777000;
 const CHANNEL_BOT_ID = 136817688;

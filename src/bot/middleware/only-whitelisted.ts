@@ -1,5 +1,5 @@
-const { getDeclinedMassSendingMessage } = require('../../message');
-const { isIdWhitelisted } = require('../../utils');
+import { getDeclinedMassSendingMessage } from '../../message';
+import { isIdWhitelisted } from '../../utils';
 
 /**
  * @description

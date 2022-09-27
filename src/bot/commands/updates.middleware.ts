@@ -1,11 +1,11 @@
 import { GrammyContext } from '../../types';
 
-const { Menu } = require('@grammyjs/menu');
-const Bottleneck = require('bottleneck');
+import { Menu } from '@grammyjs/menu';
+import Bottleneck from 'bottleneck';
 
-const { redisService } = require('../../services/redis.service');
-const { getUpdatesMessage, getSuccessfulMessage, cancelMessageSending, confirmationMessage, getUpdateMessage } = require('../../message');
-const { handleError } = require('../../utils');
+import { redisService } from '../../services/redis.service';
+import { getUpdatesMessage, getSuccessfulMessage, cancelMessageSending, confirmationMessage, getUpdateMessage } from '../../message';
+import { handleError } from '../../utils';
 
 export class UpdatesMiddleware {
   menu: any;

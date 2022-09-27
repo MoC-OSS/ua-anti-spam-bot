@@ -1,9 +1,9 @@
 import { GrammyContext } from '../../types';
 
-const { InputFile } = require('grammy');
+import { InputFile } from 'grammy';
 
-const { redisClient } = require('../../db');
-const { creatorId } = require('../../creator');
+import { redisClient } from '../../db';
+import { creatorId } from '../../creator';
 
 class SessionMiddleware {
   /**

@@ -1,4 +1,4 @@
-const { redisClient } = require('../db');
+import { redisClient } from '../db';
 
 /**
  * @template T
@@ -231,8 +231,4 @@ export class RedisService {
   }
 }
 
-const redisService = new RedisService();
-
-module.exports = {
-  redisService,
-};
+export const redisService = new RedisService();

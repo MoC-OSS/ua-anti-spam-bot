@@ -4,8 +4,8 @@ import { SwindlersCardsService } from './swindlers-cards.service';
 import { SwindlersUrlsService } from './swindlers-urls.service';
 import { SwindlersTensorService } from '../tensor/swindlers-tensor.service';
 
-const { optimizeText } = require('ukrainian-ml-optimizer');
-const stringSimilarity = require('string-similarity');
+import { optimizeText } from 'ukrainian-ml-optimizer';
+import stringSimilarity from 'string-similarity';
 
 export class SwindlersDetectService {
   /**

@@ -1,12 +1,12 @@
-const fs = require('fs');
+import fs from 'fs';
 
-const { env } = require('typed-dotenv').config();
+import { env } from 'typed-dotenv'.config();
 
-const { MessageUtil } = require('./message.util');
-const { TelegramUtil } = require('./telegram.util');
-const errorUtilExports = require('./error.util');
-const errorHandlerExports = require('./error-handler');
-const revealHiddenUrlsExports = require('./reveal-hidden-urls.util');
+import { MessageUtil } from './message.util';
+import { TelegramUtil } from './telegram.util';
+import errorUtilExports from './error.util';
+import errorHandlerExports from './error-handler';
+import revealHiddenUrlsExports from './reveal-hidden-urls.util';
 
 const messageUtil = new MessageUtil();
 const telegramUtil = new TelegramUtil();

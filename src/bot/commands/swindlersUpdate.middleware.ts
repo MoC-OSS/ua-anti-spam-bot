@@ -1,6 +1,6 @@
 import { DynamicStorageService } from '../../services/dynamic-storage.service';
 
-const { swindlersUpdateStartMessage, swindlersUpdateEndMessage } = require('../../message');
+import { swindlersUpdateStartMessage, swindlersUpdateEndMessage } from '../../message';
 
 export class SwindlersUpdateMiddleware {
   /**

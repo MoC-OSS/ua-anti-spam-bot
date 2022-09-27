@@ -16,11 +16,11 @@ const {
   goBackButton,
   blockWhenAlarm,
 } = require('../../message');
-const { onlyAdmin } = require('../middleware');
-const { MiddlewareMenu } = require('../middleware-menu.menu');
-const { handleError } = require('../../utils');
-const dynamicLocationMenu = require('./air-raid-alarm');
-const { alarmChatService } = require('../../services/alarm-chat.service');
+import { onlyAdmin } from '../middleware';
+import { MiddlewareMenu } from '../middleware-menu.menu';
+import { handleError } from '../../utils';
+import {dynamicLocationMenu } from './air-raid-alarm/locations-menu-generator';
+import { alarmChatService } from '../../services/alarm-chat.service';
 
 export class SettingsMiddleware {
   /**

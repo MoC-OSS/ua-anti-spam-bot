@@ -1,7 +1,7 @@
 import { BotCommand } from 'typegram';
 import { Bot } from 'grammy';
 
-const { formatDateIntoAccusative } = require('../../utils');
+import { formatDateIntoAccusative } from '../../utils';
 
 /**
  * Handles bot public available commands

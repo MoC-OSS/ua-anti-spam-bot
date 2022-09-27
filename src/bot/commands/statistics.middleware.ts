@@ -1,7 +1,7 @@
-const { redisService } = require('../../services/redis.service');
+import { redisService } from '../../services/redis.service';
 
-const { handleError, formatDate } = require('../../utils');
-const { getStatisticsMessage } = require('../../message');
+import { handleError, formatDate } from '../../utils';
+import { getStatisticsMessage } from '../../message';
 
 export class StatisticsMiddleware {
   /**

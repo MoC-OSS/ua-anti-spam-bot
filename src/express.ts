@@ -1,10 +1,10 @@
-const express = require('express');
-const { error, env } = require('typed-dotenv').config();
+import express from 'express';
+import { error, env } from 'typed-dotenv'.config();
 
-const { S3Service } = require('./services/s3.service');
+import { S3Service } from './services/s3.service';
 
 import { initTensor }  from './tensor/tensor.service';
-const { processHandler } = require('./express/process.handler');
+import { processHandler } from './express/process.handler';
 
 (async () => {
   const s3Service = new S3Service();

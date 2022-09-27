@@ -1,14 +1,14 @@
 const events = require('node:events');
 
-const { env } = require('typed-dotenv').config();
-const axios = require('axios');
-const EventSource = require('eventsource');
-const { getAlarmMock } = require('./_mocks/alarm.mocks');
+import { env } from 'typed-dotenv'.config();
+import axios from 'axios';
+import EventSource from 'eventsource';
+import { getAlarmMock } from './_mocks/alarm.mocks';
 
 const apiUrl = 'https://alerts.com.ua/api/states';
 const apiOptions = { headers: { 'X-API-Key': env.ALARM_KEY } };
-const ALARM_EVENT_KEY = 'update';
-const TEST_ALARM_STATE = 'Московська область';
+export const ALARM_EVENT_KEY = 'update';
+export const TEST_ALARM_STATE = 'Московська область';
 
 export class AlarmService {
   updatesEmitter: any;

@@ -1,4 +1,4 @@
-const { Menu } = require('@grammyjs/menu');
+import { Menu } from '@grammyjs/menu';
 
 /**
  * @description

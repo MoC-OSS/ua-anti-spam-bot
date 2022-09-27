@@ -1,5 +1,5 @@
-const { Context } = require('grammy');
-const { revealHiddenUrls } = require('./reveal-hidden-urls.util');
+import { Context } from 'grammy';
+import { revealHiddenUrls } from './reveal-hidden-urls.util';
 
 /**
  * @returns GrammyContext

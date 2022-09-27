@@ -1,10 +1,10 @@
 import { S3 } from 'aws-sdk';
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-const { env } = require('typed-dotenv').config();
-const AWS = require('aws-sdk');
+import { env } from 'typed-dotenv'.config();
+import AWS from 'aws-sdk';
 
 export class S3Service {
   s3: S3;

@@ -1,8 +1,8 @@
 import { GoogleService } from './google.service';
 
-const { env } = require('typed-dotenv').config();
+import { env } from 'typed-dotenv'.config();
 
-const { googleService } = require('./google.service');
+import { googleService } from './google.service';
 
 export class SwindlersGoogleService {
   /**

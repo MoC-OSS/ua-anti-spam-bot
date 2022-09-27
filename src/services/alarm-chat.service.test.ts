@@ -1,4 +1,4 @@
-const { alarmChatService } = require('./alarm-chat.service');
+import { alarmChatService } from './alarm-chat.service';
 const {
   generateMockSessions,
   testId,
@@ -8,7 +8,7 @@ const {
   chartMock,
   generateChat,
 } = require('./_mocks/alarm.mocks');
-const { alarmService, ALARM_EVENT_KEY } = require('./alarm.service');
+import { alarmService, ALARM_EVENT_KEY } from './alarm.service';
 
 const apiMock = {
   sendMessage: jest.fn(() => Promise.resolve(null)),

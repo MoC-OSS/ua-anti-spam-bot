@@ -7,16 +7,16 @@ import { SwindlersBotsService } from '../services/swindlers-bots.service';
 import { SwindlersDetectService } from '../services/swindlers-detect.service';
 import { MtProtoClient } from './mt-proto-client';
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-const { mentionRegexp, urlRegexp } = require('ukrainian-ml-optimizer');
+import { mentionRegexp, urlRegexp } from 'ukrainian-ml-optimizer';
 
 // eslint-disable-next-line import/no-unresolved
-const deleteFromMessage = require('./from-entities.json');
-const { dataset } = require('../../dataset/dataset');
-const { swindlersGoogleService } = require('../services/swindlers-google.service');
-const { redisService } = require('../services/redis.service');
+import deleteFromMessage from './from-entities.json';
+import { dataset } from '../../dataset/dataset';
+import { swindlersGoogleService } from '../services/swindlers-google.service';
+import { redisService } from '../services/redis.service';
 
 const sentMentionsFromStart: any[] = [];
 

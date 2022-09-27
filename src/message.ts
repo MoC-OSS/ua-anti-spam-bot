@@ -1,8 +1,8 @@
-const { env } = require('typed-dotenv').config();
-const moment = require('moment-timezone');
+import { env } from 'typed-dotenv'.config();
+import moment from 'moment-timezone';
 
-const { helpChat } = require('./creator');
-const { getRandomItem, formatStateIntoAccusative } = require('./utils');
+import { helpChat } from './creator';
+import { getRandomItem, formatStateIntoAccusative } from './utils';
 
 export const randomBanEmojis = ['👮🏻‍♀️', '🤦🏼‍♀️', '🙅🏻‍♀️'];
 export const randomLocationBanEmojis = ['🏡', '🏘️', '🌳'];

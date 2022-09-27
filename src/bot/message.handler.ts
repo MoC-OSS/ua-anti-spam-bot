@@ -1,11 +1,11 @@
 import axios from 'axios';
 import { TensorService } from '../tensor/tensor.service';
-const { env } = require('typed-dotenv').config();
+import { env } from 'typed-dotenv'.config();
 
-const { processHandler } = require('../express/process.handler');
+import { processHandler } from '../express/process.handler';
 
-const { redisService } = require('../services/redis.service');
-const { handleError } = require('../utils');
+import { redisService } from '../services/redis.service';
+import { handleError } from '../utils';
 
 const host = `http://${env.HOST}:${env.PORT}`;
 

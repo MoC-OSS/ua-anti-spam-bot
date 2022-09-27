@@ -1,19 +1,19 @@
-const botActiveMiddlewareExports = require('./bot-active.middleware');
-const deleteMessageMiddlewareExports = require('./delete-message.middleware');
-const deleteSwindlersMiddlewareExports = require('./delete-swindlers.middleware');
-const globalMiddlewareExports = require('./global.middleware');
-const ignoreBySettingsMiddlewareExports = require('./ignore-by-settings.middleware');
-const ignoreOldExports = require('./ignore-old.middleware');
-const nestedMiddlewareExports = require('./nested.middleware');
-const onlyAdmin = require('./only-admin.middleware');
-const onlyCreator = require('./only-creator.middleware');
-const onlyWhitelisted = require('./only-whitelisted');
-const onlyNotAdminMiddlewareExports = require('./only-not-admin.middleware');
-const onlyNotForwardedMiddlewareExports = require('./only-not-forwarded.middleware');
-const onlyWhenBotAdminExports = require('./only-when-bot-admin.middleware');
-const onlyWithTextExports = require('./only-with-text.middleware');
-const performanceEndMiddlewareExports = require('./performance-end.middleware');
-const performanceStartMiddlewareExports = require('./performance-start.middleware');
+import botActiveMiddlewareExports from './bot-active.middleware';
+import deleteMessageMiddlewareExports from './delete-message.middleware';
+import deleteSwindlersMiddlewareExports from './delete-swindlers.middleware';
+import globalMiddlewareExports from './global.middleware';
+import ignoreBySettingsMiddlewareExports from './ignore-by-settings.middleware';
+import ignoreOldExports from './ignore-old.middleware';
+import nestedMiddlewareExports from './nested.middleware';
+import onlyAdmin from './only-admin.middleware';
+import onlyCreator from './only-creator.middleware';
+import onlyWhitelisted from './only-whitelisted';
+import onlyNotAdminMiddlewareExports from './only-not-admin.middleware';
+import onlyNotForwardedMiddlewareExports from './only-not-forwarded.middleware';
+import onlyWhenBotAdminExports from './only-when-bot-admin.middleware';
+import onlyWithTextExports from './only-with-text.middleware';
+import performanceEndMiddlewareExports from './performance-end.middleware';
+import performanceStartMiddlewareExports from './performance-start.middleware';
 
 module.exports = {
   ...botActiveMiddlewareExports,

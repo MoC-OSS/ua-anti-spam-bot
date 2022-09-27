@@ -1,6 +1,6 @@
 import { DynamicStorageService } from './dynamic-storage.service';
 
-const { isCreditCard } = require('validator');
+import { isCreditCard } from 'validator';
 
 export class SwindlersCardsService {
   /**

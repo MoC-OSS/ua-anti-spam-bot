@@ -1,6 +1,6 @@
 import { Bot } from 'grammy';
 
-const { env } = require('typed-dotenv').config();
+import { env } from 'typed-dotenv'.config();
 
 import {
   adminReadyHasNoDeletePermissionMessage,
@@ -9,7 +9,7 @@ import {
   getStartChannelMessage,
   memberReadyMessage,
 } from '../../message';
-const { logCtx, handleError, telegramUtil } = require('../../utils');
+import { logCtx, handleError, telegramUtil } from '../../utils';
 
 class GlobalMiddleware {
   /**

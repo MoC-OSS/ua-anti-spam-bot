@@ -1,11 +1,11 @@
-const commandSetterExports = require('./command-setter');
-const helpMiddlewareExports = require('./help.middleware');
-const swindlersUpdateMiddlewareExports = require('./swindlersUpdate.middleware');
-const sessionMiddlewareExports = require('./session.middleware');
-const startMiddlewareExports = require('./start.middleware');
-const statisticsMiddlewareExports = require('./statistics.middleware');
-const UpdatesMiddleware = require('./updates.middleware');
-const SettingsMiddleware = require('./settings.middleware');
+import commandSetterExports from './command-setter';
+import helpMiddlewareExports from './help.middleware';
+import swindlersUpdateMiddlewareExports from './swindlersUpdate.middleware';
+import sessionMiddlewareExports from './session.middleware';
+import startMiddlewareExports from './start.middleware';
+import statisticsMiddlewareExports from './statistics.middleware';
+import UpdatesMiddleware from './updates.middleware';
+import SettingsMiddleware from './settings.middleware';
 
 module.exports = {
   ...commandSetterExports,
@@ -13,6 +13,7 @@ module.exports = {
   ...sessionMiddlewareExports,
   ...startMiddlewareExports,
   ...statisticsMiddlewareExports,
+
   ...UpdatesMiddleware,
   ...SettingsMiddleware,
   ...swindlersUpdateMiddlewareExports,

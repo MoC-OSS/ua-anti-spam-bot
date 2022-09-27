@@ -1,7 +1,7 @@
 import { SwindlersGoogleService } from './swindlers-google.service';
 
-const { optimizeText } = require('ukrainian-ml-optimizer');
-const EventEmitter = require('events');
+import { optimizeText } from 'ukrainian-ml-optimizer';
+import EventEmitter from 'events';
 
 export class DynamicStorageService {
   /**

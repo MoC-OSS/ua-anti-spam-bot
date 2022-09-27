@@ -1,11 +1,11 @@
 import { SwindlersBotsService } from './swindlers-bots.service';
 
-const axios = require('axios');
-const { mockDynamicStorageService, mockNewUrl, mockNewBot } = require('./_mocks/index.mocks');
+import axios from 'axios';
+import { mockDynamicStorageService, mockNewUrl, mockNewBot } from './_mocks/index.mocks';
 import { SwindlersCardsService } from './swindlers-cards.service';
-const { SwindlersDetectService } = require('./swindlers-detect.service');
-const { SwindlersUrlsService } = require('./swindlers-urls.service');
-const { initSwindlersTensor } = require('../tensor/swindlers-tensor.service');
+import { SwindlersDetectService } from './swindlers-detect.service';
+import { SwindlersUrlsService } from './swindlers-urls.service';
+import { initSwindlersTensor } from '../tensor/swindlers-tensor.service';
 
 jest.mock('axios');
 

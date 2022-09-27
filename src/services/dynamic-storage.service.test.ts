@@ -1,5 +1,5 @@
 import { DynamicStorageService }from './dynamic-storage.service';
-const { mockSwindlersGoogleService, mockDataset } = require('./_mocks/index.mocks');
+import { mockSwindlersGoogleService, mockDataset } from './_mocks/index.mocks';
 
 /**
  * @type {DynamicStorageService}

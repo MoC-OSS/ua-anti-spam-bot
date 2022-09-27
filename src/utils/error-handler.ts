@@ -1,8 +1,8 @@
-const { InputFile } = require('grammy');
-const { env } = require('typed-dotenv').config();
+import { InputFile } from 'grammy';
+import { env } from 'typed-dotenv'.config();
 
-const { logsChat } = require('../creator');
-const { handleError } = require('./error.util');
+import { logsChat } from '../creator';
+import { handleError } from './error.util';
 
 /**
  * Wrapper to catch async errors within a stage. Helps to avoid try catch blocks in there

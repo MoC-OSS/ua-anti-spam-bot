@@ -1,4 +1,4 @@
-const { nestedMiddleware } = require('./nested.middleware');
+import { nestedMiddleware } from './nested.middleware';
 
 describe('nestedMiddleware', () => {
   it('should call all middlewares', async () => {

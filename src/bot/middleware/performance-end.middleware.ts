@@ -1,4 +1,4 @@
-const { env } = require('typed-dotenv').config();
+import { env } from 'typed-dotenv'.config();
 
 /**
  * Used for performance checking

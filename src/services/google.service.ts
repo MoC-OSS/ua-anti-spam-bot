@@ -1,7 +1,7 @@
-const { google } = require('googleapis');
-const { auth } = require('google-auth-library');
-const { env } = require('typed-dotenv').config();
-const { handleError } = require('../utils');
+import { google } from 'googleapis';
+import { auth } from 'google-auth-library';
+import { env } from 'typed-dotenv'.config();
+import { handleError } from '../utils';
 
 const sheets = google.sheets('v4');
 

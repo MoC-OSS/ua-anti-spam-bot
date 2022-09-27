@@ -1,4 +1,4 @@
-const { logSkipMiddleware } = require('../../utils');
+import { logSkipMiddleware } from '../../utils';
 
 export const onlyAdmin = async (ctx, next) => {
   // No chat = no service

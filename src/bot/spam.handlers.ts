@@ -1,8 +1,8 @@
-const { env } = require('typed-dotenv').config();
-const containsEmoji = require('contains-emoji');
-const GraphemeSplitter = require('grapheme-splitter');
+import { env } from 'typed-dotenv'.config();
+import containsEmoji from 'contains-emoji';
+import GraphemeSplitter from 'grapheme-splitter';
 
-const { telegramUtil } = require('../utils');
+import { telegramUtil } from '../utils';
 
 const splitter = new GraphemeSplitter();
 

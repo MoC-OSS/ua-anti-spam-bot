@@ -1,13 +1,13 @@
-const { env } = require('typed-dotenv').config();
+import { env } from 'typed-dotenv'.config();
 
-const { redisClient } = require('../db');
-const auth = require('./auth');
+import { redisClient } from '../db';
+import auth from './auth';
 import { UserbotStorage } from './storage.handler';
-const { UpdatesHandler } = require('./updates.handler');
-const { initTensor } = require('../tensor/tensor.service');
+import { UpdatesHandler } from './updates.handler';
+import { initTensor } from '../tensor/tensor.service';
 // const { findChannelAdmins } = require('./find-channel-admins');
-const { MtProtoClient } = require('./mt-proto-client');
-const { initSwindlersContainer } = require('../services/swindlers.container');
+import { MtProtoClient } from './mt-proto-client';
+import { initSwindlersContainer } from '../services/swindlers.container';
 
 // const testMessage = ``.trim();
 

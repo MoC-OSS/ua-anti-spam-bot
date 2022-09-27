@@ -1,5 +1,5 @@
-const { creatorId } = require('../../creator');
-const { getDeclinedMassSendingMessage } = require('../../message');
+import { creatorId } from '../../creator';
+import { getDeclinedMassSendingMessage } from '../../message';
 
 /**
  * @description

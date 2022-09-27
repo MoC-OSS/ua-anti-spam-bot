@@ -1,7 +1,7 @@
 import { GrammyContext } from '../../types';
 
-const { getHelpMessage } = require('../../message');
-const { formatDate, handleError, getUserData } = require('../../utils');
+import { getHelpMessage } from '../../message';
+import { formatDate, handleError, getUserData } from '../../utils';
 
 class HelpMiddleware {
   /**

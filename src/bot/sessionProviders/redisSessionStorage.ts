@@ -1,4 +1,4 @@
-const { redisClient } = require('../../db');
+import { redisClient } from '../../db';
 
 export class RedisSession {
   options: any;

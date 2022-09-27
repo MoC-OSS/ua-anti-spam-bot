@@ -1,4 +1,4 @@
-const { formatStateIntoAccusative } = require('./index');
+import { formatStateIntoAccusative } from './index';
 
 describe('formatStateIntoAccusative', () => {
   const states = [

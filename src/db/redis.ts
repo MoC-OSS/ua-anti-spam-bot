@@ -1,5 +1,5 @@
-const redis = require('redis');
-const { env } = require('typed-dotenv').config();
+import redis from 'redis';
+import { env } from 'typed-dotenv'.config();
 
 export const client = redis.createClient({ url: env.REDIS_URL });
 

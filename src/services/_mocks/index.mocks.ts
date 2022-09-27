@@ -1,4 +1,4 @@
-const { DynamicStorageService } = require('../dynamic-storage.service');
+import { DynamicStorageService } from '../dynamic-storage.service';
 
 const mockNewBot = '@Diia_move_bot';
 const mockNewUrl = 'https://olx.new-darpay.site/some/234234234';

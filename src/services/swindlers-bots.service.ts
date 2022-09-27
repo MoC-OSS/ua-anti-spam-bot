@@ -1,6 +1,6 @@
 import { DynamicStorageService } from './dynamic-storage.service';
 
-const FuzzySet = require('fuzzyset');
+import FuzzySet from 'fuzzyset';
 
 export class SwindlersBotsService {
   /**

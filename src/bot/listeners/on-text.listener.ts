@@ -1,22 +1,18 @@
-import { MessageHandler } from '../message.handler';
-
-const { env } = require('typed-dotenv').config();
-
-import { Bot } from 'grammy';
+import { Bot, InputFile } from 'grammy';
+import * as typedDotenv from 'typed-dotenv';
 import Keyv = require('keyv');
-
-const { InputFile } = require('grammy');
-
-const { creatorId, privateTrainingChat, logsChat } = require('../../creator');
-
-const { redisService } = require('../../services/redis.service');
-const { getUserData, telegramUtil, handleError, compareDatesWithOffset } = require('../../utils');
-const { getDeleteMessage, getDebugMessage, getCannotDeleteMessage } = require('../../message'); // spamDeleteMessage
-const { getMessageReputation } = require('../spam.handlers');
+import { creatorId, logsChat, privateTrainingChat } from '../../creator';
+import { getCannotDeleteMessage, getDebugMessage, getDeleteMessage } from '../../message'; // spamDeleteMessage
+import { redisService } from '../../services/redis.service';
+import { compareDatesWithOffset, getUserData, handleError, telegramUtil } from '../../utils';
+import { MessageHandler } from '../message.handler';
+import { getMessageReputation } from '../spam.handlers';
 
 // const slavaWords = ['слава україні', 'слава украине', 'слава зсу'];
+const { env } = typedDotenv.config();
 
-class OnTextListener {
+// eslint-disable-next-line import/prefer-default-export
+export class OnTextListener {
   /**
    * @param {Bot} bot
    * @param {Keyv} keyv
@@ -25,9 +21,13 @@ class OnTextListener {
    */
 
   bot: Bot;
+
   keyv: Keyv;
+
   startTime: Date;
+
   messageHandler: MessageHandler;
+
   constructor(bot, keyv, startTime, messageHandler) {
     this.bot = bot;
     this.keyv = keyv;
@@ -171,7 +171,3 @@ class OnTextListener {
     };
   }
 }
-
-module.exports = {
-  OnTextListener,
-};

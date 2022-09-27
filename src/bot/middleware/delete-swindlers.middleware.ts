@@ -1,8 +1,8 @@
 import { InputFile } from 'grammy';
 import { SwindlersDetectService } from '../../services/swindlers-detect.service';
-const { logsChat } = require('../../creator');
-const { handleError, compareDatesWithOffset, telegramUtil, getUserData, revealHiddenUrls } = require('../../utils');
-const { getCannotDeleteMessage, swindlersWarningMessage } = require('../../message');
+import { logsChat } from '../../creator';
+import { handleError, compareDatesWithOffset, telegramUtil, getUserData, revealHiddenUrls } from '../../utils';
+import { getCannotDeleteMessage, swindlersWarningMessage } from '../../message';
 
 const SWINDLER_SETTINGS = {
   WARNING_DELAY: 86400000 * 3,

@@ -7,13 +7,13 @@ import { GrammyError } from 'grammy';
  * This migration is created for prod from user sessions and chat info to chat based sessions.
  * */
 
-const Queue = require('queue-promise');
+import Queue from 'queue-promise';
 
 // const { logsChat } = require('./creator');
 import logsChat from './creator';
 
 import { redisClient } from './db';
-const { redisService } = require('./services/redis.service');
+import { redisService } from './services/redis.service';
 
 /**
  * @param {Bot} bot

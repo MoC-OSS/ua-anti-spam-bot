@@ -1,8 +1,8 @@
 import { DynamicStorageService } from './dynamic-storage.service';
 
-const FuzzySet = require('fuzzyset');
-const axios = require('axios');
-const { URL_REGEXP, VALID_URL_REGEXP, EXCEPTION_DOMAINS, SHORTS } = require('./constants/swindlers-urls.constant');
+import FuzzySet from 'fuzzyset';
+import axios from 'axios';
+import { URL_REGEXP, VALID_URL_REGEXP, EXCEPTION_DOMAINS, SHORTS } from './constants/swindlers-urls.constant';
 
 const harmfulUrlStart = ['https://bitly.com/a/blocked'];
 

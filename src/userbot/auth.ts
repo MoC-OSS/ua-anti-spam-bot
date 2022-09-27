@@ -1,6 +1,6 @@
 /* eslint-disable camelcase */
-const { env } = require('typed-dotenv').config();
-const api = require('./api');
+import { env } from 'typed-dotenv'.config();
+import api from './api';
 
  export function checkPassword({ srp_id, A, M1 }) {
   return api.call('auth.checkPassword', {

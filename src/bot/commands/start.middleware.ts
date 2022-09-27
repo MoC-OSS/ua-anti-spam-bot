@@ -1,8 +1,8 @@
 import { Bot } from 'grammy';
 import { GrammyContext } from '../../types';
 
-const { getStartMessage, getGroupStartMessage, makeAdminMessage } = require('../../message');
-const { getUserData, handleError, telegramUtil } = require('../../utils');
+import { getStartMessage, getGroupStartMessage, makeAdminMessage } from '../../message';
+import { getUserData, handleError, telegramUtil } from '../../utils';
 
 class StartMiddleware {
   /**

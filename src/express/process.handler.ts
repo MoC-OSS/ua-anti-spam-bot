@@ -1,8 +1,8 @@
-const lodashGet = require('lodash.get');
-const { removeNumber, removeLatinPartialLetters, removeSpecialSymbols } = require('ukrainian-ml-optimizer');
+import lodashGet from 'lodash.get';
+import { removeNumber, removeLatinPartialLetters, removeSpecialSymbols } from 'ukrainian-ml-optimizer';
 
-const { messageUtil } = require('../utils');
-const { dataset } = require('../../dataset/dataset');
+import { messageUtil } from '../utils';
+import { dataset } from '../../dataset/dataset';
 
 class ProcessHandler {
   /**

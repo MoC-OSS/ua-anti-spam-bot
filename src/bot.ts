@@ -1,36 +1,30 @@
+import { Menu } from '@grammyjs/menu';
+import { hydrateReply } from '@grammyjs/parse-mode';
+import { Router } from '@grammyjs/router';
+import { apiThrottler } from '@grammyjs/transformer-throttler';
 import { Bot, InputFile } from 'grammy';
+import Keyv from 'keyv';
+import moment from 'moment-timezone';
 
-const { hydrateReply } = require('@grammyjs/parse-mode');
-const { Router } = require('@grammyjs/router');
-const { Menu } = require('@grammyjs/menu');
-const { error, env } = require('typed-dotenv').config();
-const { apiThrottler } = require('@grammyjs/transformer-throttler');
-const Keyv = require('keyv');
+import { OnTextListener } from './bot/listeners/on-text.listener';
+import { TestTensorListener } from './bot/listeners/test-tensor.listener';
+import { MessageHandler } from './bot/message.handler';
+import { getAlarmMock } from './services/_mocks/alarm.mocks';
+import { ALARM_EVENT_KEY, alarmService } from './services/alarm.service';
+import { alarmChatService } from './services/alarm-chat.service';
+import { redisService } from './services/redis.service';
+import { S3Service } from './services/s3.service';
+import { initSwindlersContainer } from './services/swindlers.container';
+import { initTensor } from './tensor/tensor.service';
+import { errorHandler } from './utils/error-handler';
+import env from './config';
+import { creatorId, logsChat } from './creator';
+import { redisClient } from './db';
+import { settingsAvailableMessage } from './message';
+import { sleep } from './utils';
+import { handleError } from './utils/error.util';
 
-const moment = require('moment-timezone');
-const { redisClient } = require('./db');
-const { redisService } = require('./services/redis.service');
-const { S3Service } = require('./services/s3.service');
-const { alarmChatService } = require('./services/alarm-chat.service');
-const { alarmService, ALARM_EVENT_KEY } = require('./services/alarm.service');
-
-const { initSwindlersContainer } = require('./services/swindlers.container');
-
-const { initTensor } = require('./tensor/tensor.service');
-const { RedisSession, RedisChatSession } = require('./bot/sessionProviders');
-
-const { MessageHandler } = require('./bot/message.handler');
-const {
-  CommandSetter,
-  HelpMiddleware,
-  SessionMiddleware,
-  StartMiddleware,
-  StatisticsMiddleware,
-  UpdatesMiddleware,
-  SettingsMiddleware,
-  SwindlersUpdateMiddleware,
-} = require('./bot/commands');
-const { OnTextListener, TestTensorListener } = require('./bot/listeners');
+// const { error, env } = typedDotenv.config();
 const {
   DeleteSwindlersMiddleware,
   GlobalMiddleware,
@@ -49,10 +43,16 @@ const {
   performanceEndMiddleware,
   performanceStartMiddleware,
 } = require('./bot/middleware');
-const { handleError, errorHandler, sleep } = require('./utils');
-const { logsChat, creatorId } = require('./creator');
-const { settingsAvailableMessage } = require('./message');
-const { getAlarmMock } = require('./services/_mocks/alarm.mocks');
+const {
+  CommandSetter,
+  HelpMiddleware,
+  SessionMiddleware,
+  StartMiddleware,
+  StatisticsMiddleware,
+  UpdatesMiddleware,
+  SettingsMiddleware,
+  SwindlersUpdateMiddleware,
+} = require('./bot/commands');
 
 /**
  * @typedef { import("grammy").GrammyError } GrammyError
@@ -72,12 +72,7 @@ moment.tz.setDefault('Europe/Kiev');
 moment.locale('uk');
 
 const keyv = new Keyv('sqlite://db.sqlite');
-keyv.on('error', (err) => console.error('Connection Error', err));
-
-if (error) {
-  console.error('Something wrong with env variables');
-  process.exit();
-}
+keyv.on('error', (error_) => console.error('Connection Error', error_));
 
 const rootMenu = new Menu('root');
 
@@ -99,7 +94,7 @@ const rootMenu = new Menu('root');
   /**
    * @type {GrammyBot}
    * */
-  const bot = new Bot(env.BOT_TOKEN);
+  const bot = new Bot(<string>env?.BOT_TOKEN);
 
   await alarmChatService.init(bot.api);
   const airRaidAlarmStates = await alarmService.getStates();
@@ -166,7 +161,7 @@ const rootMenu = new Menu('root');
 
   bot.use(errorHandler(globalMiddleware.middleware()));
 
-  const router = new Router((ctx) => ctx.session?.step || 'idle');
+  const router = new Router((context) => context.session?.step || 'idle');
 
   bot.use(router);
 
@@ -174,14 +169,14 @@ const rootMenu = new Menu('root');
     'settings',
     deleteMessageMiddleware,
     onlyAdmin,
-    nestedMiddleware((ctx, next) => {
-      if (ctx.chat.type !== 'private') {
+    nestedMiddleware((context, next) => {
+      if (context.chat.type !== 'private') {
         return next();
       }
     }, errorHandler(settingsMiddleware.sendSettingsMenu())),
-    (ctx, next) => {
-      if (ctx.chat.type === 'private') {
-        ctx.reply(settingsAvailableMessage);
+    (context, next) => {
+      if (context.chat.type === 'private') {
+        context.reply(settingsAvailableMessage);
       }
 
       return next();
@@ -195,124 +190,130 @@ const rootMenu = new Menu('root');
   bot.errorBoundary(handleError).command('session', botActiveMiddleware, errorHandler(sessionMiddleware.middleware()));
   bot.errorBoundary(handleError).command('statistics', botActiveMiddleware, errorHandler(statisticsMiddleware.middleware()));
 
-  bot.errorBoundary(handleError).command('get_tensor', onlyCreator, async (ctx) => {
+  bot.errorBoundary(handleError).command('get_tensor', onlyCreator, async (context) => {
     let positives = await redisService.getPositives();
     let negatives = await redisService.getNegatives();
 
     positives = positives.map((singleCase) => singleCase.replace(/\n/g, ' '));
     negatives = negatives.map((singleCase) => singleCase.replace(/\n/g, ' '));
 
-    if (positives.length) {
-      await ctx.api.sendDocument(creatorId, new InputFile(Buffer.from(positives.join('\n')), `positives-${new Date().toISOString()}.csv`));
+    if (positives.length > 0) {
+      await context.api.sendDocument(
+        creatorId,
+        new InputFile(Buffer.from(positives.join('\n')), `positives-${new Date().toISOString()}.csv`),
+      );
     }
 
-    if (negatives.length) {
-      await ctx.api.sendDocument(creatorId, new InputFile(Buffer.from(negatives.join('\n')), `negatives-${new Date().toISOString()}.csv`));
+    if (negatives.length > 0) {
+      await context.api.sendDocument(
+        creatorId,
+        new InputFile(Buffer.from(negatives.join('\n')), `negatives-${new Date().toISOString()}.csv`),
+      );
     }
 
     await redisService.deletePositives();
     await redisService.deleteNegatives();
   });
 
-  const botRedisActive = async (ctx, next) => {
+  const botRedisActive = async (context, next) => {
     const isDeactivated = await redisService.getIsBotDeactivated();
-    const isInLocal = ctx.chat.type === 'private' && ctx.chat.id === creatorId;
+    const isInLocal = context.chat.type === 'private' && context.chat.id === creatorId;
 
     if (!isDeactivated || isInLocal) {
       return next();
     }
 
-    console.info('Skip due to redis: ', ctx.chat.id);
+    console.info('Skip due to redis:', context.chat.id);
   };
 
   bot.command(
     'set_rank',
     onlyCreator,
-    errorHandler(async (ctx) => {
-      const newPercent = +ctx.match;
+    errorHandler(async (context) => {
+      const newPercent = +context.match;
 
-      if (!ctx.match) {
-        return ctx.reply(`Current rank is: ${await redisService.getBotTensorPercent()}`);
+      if (!context.match) {
+        return context.reply(`Current rank is: ${await redisService.getBotTensorPercent()}`);
       }
 
       if (Number.isNaN(newPercent)) {
-        return ctx.reply(`Cannot parse is as a number:\n${ctx.match}`);
+        return context.reply(`Cannot parse is as a number:\n${context.match}`);
       }
 
       tensorService.setSpamThreshold(newPercent);
       await redisService.setBotTensorPercent(newPercent);
-      ctx.reply(`Set new tensor rank: ${newPercent}`);
+      context.reply(`Set new tensor rank: ${newPercent}`);
     }),
   );
 
   bot.command(
     'set_training_start_rank',
     onlyCreator,
-    errorHandler(async (ctx) => {
-      const newPercent = +ctx.match;
+    errorHandler(async (context) => {
+      const newPercent = +context.match;
 
-      if (!ctx.match) {
-        return ctx.reply(`Current training start rank is: ${await redisService.getTrainingStartRank()}`);
+      if (!context.match) {
+        return context.reply(`Current training start rank is: ${await redisService.getTrainingStartRank()}`);
       }
 
       if (Number.isNaN(newPercent)) {
-        return ctx.reply(`Cannot parse is as a number:\n${ctx.match}`);
+        return context.reply(`Cannot parse is as a number:\n${context.match}`);
       }
 
       await redisService.setTrainingStartRank(newPercent);
-      ctx.reply(`Set new training start rank rank: ${newPercent}`);
+      context.reply(`Set new training start rank rank: ${newPercent}`);
     }),
   );
 
   bot.command(
     'set_training_chat_whitelist',
     onlyCreator,
-    errorHandler(async (ctx) => {
-      const newChats = ctx.match;
+    errorHandler(async (context) => {
+      const newChats = context.match;
 
-      if (!ctx.match) {
-        return ctx.reply(`Current training chat whitelist is:\n\n${(await redisService.getTrainingChatWhitelist()).join(',')}`);
+      if (!context.match) {
+        return context.reply(`Current training chat whitelist is:\n\n${(await redisService.getTrainingChatWhitelist()).join(',')}`);
       }
 
       await redisService.setTrainingChatWhitelist(newChats);
-      ctx.reply(`Set training chat whitelist is:\n\n${newChats}`);
+      context.reply(`Set training chat whitelist is:\n\n${newChats}`);
     }),
   );
 
   bot.command(
     'update_training_chat_whitelist',
     onlyCreator,
-    errorHandler(async (ctx) => {
-      const newChats = ctx.match;
+    errorHandler(async (context) => {
+      const newChats = context.match;
 
-      if (!ctx.match) {
-        return ctx.reply(`Current training chat whitelist is:\n\n${(await redisService.getTrainingChatWhitelist()).join(',')}`);
+      if (!context.match) {
+        return context.reply(`Current training chat whitelist is:\n\n${(await redisService.getTrainingChatWhitelist()).join(',')}`);
       }
 
       await redisService.updateTrainingChatWhitelist(newChats);
-      ctx.reply(`Set training chat whitelist is:\n\n${newChats}`);
+      context.reply(`Set training chat whitelist is:\n\n${newChats}`);
     }),
   );
 
   bot.command(
     'disable',
     onlyCreator,
-    errorHandler(async (ctx) => {
+    errorHandler(async (context) => {
       await redisService.setIsBotDeactivated(true);
       commandSetter.setActive(false);
       commandSetter.updateCommands();
-      ctx.reply('⛔️ Я виключений глобально');
+      context.reply('⛔️ Я виключений глобально');
     }),
   );
 
   bot.command(
     'enable',
     onlyCreator,
-    errorHandler(async (ctx) => {
+    errorHandler(async (context) => {
       await redisService.setIsBotDeactivated(false);
       commandSetter.setActive(true);
       commandSetter.updateCommands();
-      ctx.reply('✅ Я включений глобально');
+      context.reply('✅ Я включений глобально');
     }),
   );
 
@@ -332,8 +333,8 @@ const rootMenu = new Menu('root');
     }),
   );
 
-  bot.command('leave', onlyCreator, (ctx) => {
-    ctx.leaveChat().catch(() => {});
+  bot.command('leave', onlyCreator, (context) => {
+    context.leaveChat().catch(() => {});
   });
 
   bot.command('updates', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.initialization()));

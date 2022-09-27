@@ -1,4 +1,4 @@
-const { SwindlersCardsService } = require('./swindlers-cards.service');
+import { SwindlersCardsService } from './swindlers-cards.service';
 import { mockDynamicStorageService } from'./_mocks/index.mocks';
 
 /**

@@ -1,5 +1,5 @@
 // const CyrillicToTranslit = require('cyrillic-to-translit-js');
-const Fuse = require('fuse.js');
+import Fuse from 'fuse.js';
 
 // const cyrillicToTranslit = new CyrillicToTranslit();
 

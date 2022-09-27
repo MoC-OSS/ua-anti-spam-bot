@@ -2,13 +2,13 @@ import { GrammyContext } from '../../../types';
 import { MenuRange } from '@grammyjs/menu';
 import { State } from '../../../types/alarm';
 
-const { getAirRaidAlarmSettingsMessage, nextPage, previousPage } = require('../../../message');
+import { getAirRaidAlarmSettingsMessage, nextPage, previousPage } from '../../../message';
 
-const { handleError, isIdWhitelisted } = require('../../../utils');
-const { onlyAdmin } = require('../../middleware');
-const { alarmChatService } = require('../../../services/alarm-chat.service');
-const { generateTestState } = require('../../../services/_mocks/alarm.mocks');
-const { TEST_ALARM_STATE } = require('../../../services/alarm.service');
+import { handleError, isIdWhitelisted } from '../../../utils';
+import { onlyAdmin } from '../../middleware';
+import { alarmChatService } from '../../../services/alarm-chat.service';
+import { generateTestState } from '../../../services/_mocks/alarm.mocks';
+import { TEST_ALARM_STATE } from '../../../services/alarm.service';
 
 /**
  * @param {GrammyContext} ctx

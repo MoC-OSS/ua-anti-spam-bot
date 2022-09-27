@@ -1,9 +1,9 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-const { env } = require('typed-dotenv').config();
-const { optimizeText } = require('ukrainian-ml-optimizer');
-const tf = require('@tensorflow/tfjs');
+import { env } from 'typed-dotenv'.config();
+import { optimizeText } from 'ukrainian-ml-optimizer';
+import tf from '@tensorflow/tfjs';
 require('@tensorflow/tfjs-node');
 
 export class TensorService {
