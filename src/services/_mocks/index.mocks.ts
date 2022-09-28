@@ -65,12 +65,3 @@ export const mockDataset = {
 };
 
 export const mockDynamicStorageService = new DynamicStorageService(mockSwindlersGoogleService, mockDataset);
-
-module.exports = {
-  mockDataset,
-  mockNewUrl,
-  mockDynamicStorageService,
-  mockGoogleService,
-  mockSwindlersGoogleService,
-  mockNewBot,
-};

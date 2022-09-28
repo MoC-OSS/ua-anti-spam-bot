@@ -1,4 +1,8 @@
-export const { generateRandomNumber, generateRandomString, generateRandomBoolean } = require('./helpers.mocks');
+import { ChatSessionData } from '../../types';
+import { AlarmNotification } from '../../types/alarm';
+import { getRandomItem } from '../../utils';
+
+import { generateRandomBoolean, generateRandomNumber, generateRandomString } from './helpers.mocks';
 
 export const testId = '1234567890';
 export const testState = 'Львівська область';
@@ -10,13 +14,13 @@ export const generateTestState = (state = testState) => ({
   changed: generateRandomString(10),
 });
 
-export const getAlarmMock = (alert = false, state = testState) => ({
+export const getAlarmMock = (alert = false, state = testState): AlarmNotification => ({
   state: {
-    alert,
+    alert: JSON.stringify(alert),
     id: generateRandomNumber(2),
     name: state,
     name_en: generateRandomString(10),
-    changed: generateRandomString(10),
+    changed: new Date(),
   },
   notification_id: generateRandomString(10),
 });
@@ -35,9 +39,13 @@ export const chartMock = {
   },
 };
 
-export function generateChatSessionData(state = generateRandomString(10), disableChatWhileAirRaidAlert = true, notificationMessage = true) {
+export function generateChatSessionData(
+  state = generateRandomString(10),
+  disableChatWhileAirRaidAlert = true,
+  notificationMessage = true,
+): ChatSessionData {
   return {
-    chatType: generateRandomString(10),
+    chatType: getRandomItem(['channel', 'channel', 'supergroup', 'group']),
     chatMembersCount: generateRandomNumber(10),
     botRemoved: generateRandomBoolean(),
     isBotAdmin: generateRandomBoolean(),
@@ -66,7 +74,7 @@ export function generateChatSessionData(state = generateRandomString(10), disabl
   };
 }
 
-export function generateChat(id, data) {
+export function generateChat(id: string, data: ChatSessionData) {
   return { id, data };
 }
 
@@ -76,25 +84,16 @@ export function generateMockSessions(
   notificationMessageOn = 3,
   bothOff = 3,
 ) {
-  const disableChatWhileAirRaidAlertOnArr = Array.from({ length: disableChatWhileAirRaidAlertOn }, () =>
+  const disableChatWhileAirRaidAlertOnArray = Array.from({ length: disableChatWhileAirRaidAlertOn }, () =>
     generateChat(generateRandomString(10), generateChatSessionData(state, true, false)),
   );
-  const notificationMessageOnArr = Array.from({ length: notificationMessageOn }, () =>
+  const notificationMessageOnArray = Array.from({ length: notificationMessageOn }, () =>
     generateChat(generateRandomString(10), generateChatSessionData(state, false, true)),
   );
-  const bothOffArr = Array.from({ length: bothOff }, () =>
+  const bothOffArray = Array.from({ length: bothOff }, () =>
     generateChat(generateRandomString(10), generateChatSessionData(state, false, false)),
   );
-  return [...disableChatWhileAirRaidAlertOnArr, ...notificationMessageOnArr, ...bothOffArr];
+  return [...disableChatWhileAirRaidAlertOnArray, ...notificationMessageOnArray, ...bothOffArray];
 }
 
-module.exports = {
-  getAlarmMock,
-  generateMockSessions,
-  generateChatSessionData,
-  generateChat,
-  generateTestState,
-  testId,
-  testState,
-  chartMock,
-};
+export * from './helpers.mocks';
