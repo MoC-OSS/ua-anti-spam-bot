@@ -1,6 +1,7 @@
-import events from 'node:events';
+import { EventEmitter } from 'node:events';
 import axios from 'axios';
 import EventSource from 'eventsource';
+import type TypedEmitter from 'typed-emitter';
 import { AlarmNotification, AlarmStates } from 'types/alarm';
 
 import environment from '../config';
@@ -12,14 +13,15 @@ const apiOptions = { headers: { 'X-API-Key': environment.ALARM_KEY as string } }
 export const ALARM_EVENT_KEY = 'update';
 export const TEST_ALARM_STATE = 'Московська область';
 
+export type UpdatesEvents = {
+  update: (body: AlarmNotification) => void;
+};
+
 export class AlarmService {
-  updatesEmitter: events.EventEmitter;
+  updatesEmitter: TypedEmitter<UpdatesEvents>;
 
   constructor() {
-    /**
-     * @type {EventEmitter<AlarmNotification>}
-     * */
-    this.updatesEmitter = new events.EventEmitter();
+    this.updatesEmitter = new EventEmitter() as TypedEmitter<UpdatesEvents>;
     this.subscribeOnNotifications();
     this.initTestAlarms();
   }
