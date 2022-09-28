@@ -1,4 +1,5 @@
 import * as typedDotenv from 'typed-dotenv';
+import type { Env } from 'typed-dotenv/dist/lib/types';
 
 const { error, env } = typedDotenv.config();
 
@@ -9,4 +10,4 @@ if (error) {
   process.exit();
 }
 
-export default env;
+export default env as Env;
