@@ -1,17 +1,20 @@
-const events = require('node:events');
-
-import { env } from 'typed-dotenv'.config();
+import events from 'node:events';
 import axios from 'axios';
 import EventSource from 'eventsource';
+import { AlarmNotification, AlarmStates } from 'types/alarm';
+
+import environment from '../config';
+
 import { getAlarmMock } from './_mocks/alarm.mocks';
 
 const apiUrl = 'https://alerts.com.ua/api/states';
-const apiOptions = { headers: { 'X-API-Key': env.ALARM_KEY } };
+const apiOptions = { headers: { 'X-API-Key': environment.ALARM_KEY as string } };
 export const ALARM_EVENT_KEY = 'update';
 export const TEST_ALARM_STATE = 'Московська область';
 
 export class AlarmService {
-  updatesEmitter: any;
+  updatesEmitter: events.EventEmitter;
+
   constructor() {
     /**
      * @type {EventEmitter<AlarmNotification>}
@@ -21,15 +24,13 @@ export class AlarmService {
     this.initTestAlarms();
   }
 
-  /**
-   * @returns {Promise<AlarmStates>}
-   * */
-  async getStates() {
+  getStates(): Promise<AlarmStates | null> {
     return axios
-      .get(apiUrl, apiOptions)
+      .get<AlarmStates>(apiUrl, apiOptions)
       .then((response) => response.data)
-      .catch((e) => {
-        console.info(`Alarm API is not responding:  ${e}`);
+      .catch((error: Record<any, any>) => {
+        console.info(`Alarm API is not responding:  ${JSON.stringify(error)}`);
+        return null;
       });
   }
 
@@ -38,9 +39,9 @@ export class AlarmService {
    * */
   subscribeOnNotifications() {
     const source = new EventSource(`${apiUrl}/live`, apiOptions);
-    source.onerror = (e) => {
-      console.info(`Subscribe to Alarm API fail:  ${e.message}`);
-    };
+    source.addEventListener('error', (event: MessageEvent & Record<string, any>) => {
+      console.info(`Subscribe to Alarm API fail:  ${event.message as string}`);
+    });
 
     source.addEventListener('open', () => {
       console.info('Opening a connection to Alarm API ...');
@@ -50,21 +51,16 @@ export class AlarmService {
       console.info('Connection to Alarm API opened successfully.');
     });
 
-    source.addEventListener(
-      'update',
+    source.addEventListener('update', (event: MessageEvent<string>) => {
       /**
-       * @param {MessageEvent} e
+       * SSE endpoint response
+       * @see https://alerts.com.ua/en
        * */
-      (e) => {
-        /**
-         * @type {AlarmNotification}
-         * */
-        const data = JSON.parse(e.data);
-        if (data) {
-          this.updatesEmitter.emit(ALARM_EVENT_KEY, data);
-        }
-      },
-    );
+      const data = JSON.parse(event.data) as AlarmNotification | null;
+      if (data) {
+        this.updatesEmitter.emit(ALARM_EVENT_KEY, data);
+      }
+    });
   }
 
   initTestAlarms() {
@@ -72,14 +68,8 @@ export class AlarmService {
     setInterval(() => {
       this.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(alert, TEST_ALARM_STATE));
       alert = !alert;
-    }, 60000);
+    }, 60_000);
   }
 }
 
 export const alarmService = new AlarmService();
-
-module.exports = {
-  alarmService,
-  ALARM_EVENT_KEY,
-  TEST_ALARM_STATE,
-};
