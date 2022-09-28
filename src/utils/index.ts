@@ -1,12 +1,14 @@
-import fs from 'fs';
+import fs from 'node:fs';
 
-import { env } from 'typed-dotenv'.config();
+import environment from '../config';
 
 import { MessageUtil } from './message.util';
 import { TelegramUtil } from './telegram.util';
-import errorUtilExports from './error.util';
-import errorHandlerExports from './error-handler';
-import revealHiddenUrlsExports from './reveal-hidden-urls.util';
+
+export * from './error.util';
+export * from './error-handler';
+export * from './remove-duplicates.util';
+export * from './reveal-hidden-urls.util';
 
 const messageUtil = new MessageUtil();
 const telegramUtil = new TelegramUtil();
@@ -18,17 +20,17 @@ export function joinMessage(messages) {
 /**
  * @param {GrammyContext} ctx
  * */
-function logCtx(ctx) {
-  if (env.DEBUG) {
+function logContext(context) {
+  if (environment.DEBUG) {
     /**
      * @type {GrammyContext}
      * */
-    const writeCtx = JSON.parse(JSON.stringify(ctx));
+    const writeContext = JSON.parse(JSON.stringify(context));
     // noinspection JSConstantReassignment
-    delete writeCtx.tg;
-    console.info(JSON.stringify(writeCtx, null, 2));
+    delete writeContext.tg;
+    console.info(JSON.stringify(writeContext, null, 2));
 
-    fs.writeFileSync('./last-ctx.json', `${JSON.stringify(writeCtx, null, 2)}\n`);
+    fs.writeFileSync('./last-ctx.json', `${JSON.stringify(writeContext, null, 2)}\n`);
   }
 }
 
@@ -38,12 +40,12 @@ export function sleep(time) {
   });
 }
 
-export function truncateString(str, num) {
-  if (str.length > num) {
-    return `${str.slice(0, num)}..`;
+export function truncateString(string_, number_) {
+  if (string_.length > number_) {
+    return `${string_.slice(0, number_)}..`;
   }
 
-  return str;
+  return string_;
 }
 
 /**
@@ -82,11 +84,11 @@ export function formatStateIntoAccusative(state) {
 /**
  * @param {GrammyContext} ctx
  * */
-export function getUserData(ctx) {
-  const username = ctx.from?.username;
-  const fullName = ctx.from?.last_name ? `${ctx.from?.first_name} ${ctx.from?.last_name}` : ctx.from?.first_name;
+export function getUserData(context) {
+  const username = context.from?.username;
+  const fullName = context.from?.last_name ? `${context.from?.first_name} ${context.from?.last_name}` : context.from?.first_name;
   const writeUsername = username ? `@${username}` : fullName ?? '';
-  const userId = ctx.from?.id;
+  const userId = context.from?.id;
 
   return {
     username,
@@ -102,7 +104,7 @@ export function getUserData(ctx) {
  * @param {T[]} array
  * @returns {T} - random item from array
  * */
-export function getRandomItem(array) {
+export function getRandomItem<T>(array: T[]): T {
   return array[Math.floor(Math.random() * array.length)];
 }
 
@@ -111,9 +113,9 @@ export function getRandomItem(array) {
  * @param {string} reason
  * @param {any} [extra]
  * */
-export function logSkipMiddleware(ctx, reason, extra) {
-  if (env.DEBUG || env.DEBUG_MIDDLEWARE) {
-    console.info(`Skip due to ${reason} in chat ${ctx.chat.title}`, extra);
+export function logSkipMiddleware(context, reason, extra) {
+  if (environment.DEBUG || environment.DEBUG_MIDDLEWARE) {
+    console.info(`Skip due to ${reason} in chat ${context.chat.title}`, extra);
   }
 }
 
@@ -132,6 +134,6 @@ export function compareDatesWithOffset(initialDate, compareDate, hours) {
  * @param {number} id
  * */
 export function isIdWhitelisted(id) {
-  const whitelist = (env.USERS_WHITELIST || '').split(', ');
+  const whitelist = (environment.USERS_WHITELIST || '').split(', ');
   return whitelist.includes(id.toString());
 }
