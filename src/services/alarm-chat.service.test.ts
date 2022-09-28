@@ -1,34 +1,34 @@
-import { alarmChatService } from './alarm-chat.service';
-const {
-  generateMockSessions,
-  testId,
-  testState,
-  generateChatSessionData,
-  getAlarmMock,
+import {
   chartMock,
   generateChat,
-} = require('./_mocks/alarm.mocks');
-import { alarmService, ALARM_EVENT_KEY } from './alarm.service';
+  generateChatSessionData,
+  generateMockSessions,
+  getAlarmMock,
+  testId,
+  testState,
+} from './_mocks/alarm.mocks';
+import { ALARM_EVENT_KEY, alarmService } from './alarm.service';
+import { alarmChatService } from './alarm-chat.service';
 
 const apiMock = {
   sendMessage: jest.fn(() => Promise.resolve(null)),
   getChat: jest.fn(() => chartMock),
-  setChatPermissions: jest.fn(() => {}),
+  setChatPermissions: jest.fn(),
 };
 
 const redis = {
   redisService: {
-    getChatSessions: async () => Promise.resolve(generateMockSessions()),
-    updateChatSession: async () => Promise.resolve(null),
+    getChatSessions: () => generateMockSessions(),
+    updateChatSession: () => null,
   },
 };
 
 jest.mock('./redis.service', () => redis);
 
 describe('AlarmChatService', () => {
-  beforeAll(() => {
-    alarmChatService.processChatAlarm = jest.fn(alarmChatService.processChatAlarm);
-    alarmChatService.init(apiMock);
+  beforeAll(async () => {
+    alarmChatService.processChatAlarm = jest.fn(alarmChatService.processChatAlarm.bind(this));
+    await alarmChatService.init(apiMock);
   });
 
   describe('getChatsWithAlarmModeOn', () => {
