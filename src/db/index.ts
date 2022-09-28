@@ -1,1 +1,1 @@
-export const redisClient = require('./redis');
+export * as redisClient from './redis';
