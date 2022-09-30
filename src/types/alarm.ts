@@ -1,9 +1,9 @@
 export interface State {
-  alert : string,
-  id: number,
-  name: string,
-  name_en: string,
-  changed: Date,
+  alert: boolean;
+  id: number;
+  name: string;
+  name_en: string;
+  changed: Date;
 }
 
 export interface AlarmNotification {

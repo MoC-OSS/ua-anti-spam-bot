@@ -1,4 +1,5 @@
 import Bottleneck from 'bottleneck';
+import { forEach } from 'p-iteration';
 import type { Chat } from 'typegram/manage';
 
 import { alarmEndNotificationMessage, chatIsMutedMessage, chatIsUnmutedMessage, getAlarmStartNotificationMessage } from '../message';
@@ -73,11 +74,14 @@ export class AlarmChatService {
       }
 
       if (this.chats) {
-        for (const chat of this.chats) {
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        forEach(this.chats, async (chat) => {
           if (chat.data.chatSettings.airRaidAlertSettings.state === event.state.name) {
-            this.limiter.schedule(() => this.processChatAlarm(chat, event.state.alert).catch(handleError));
+            await this.limiter.schedule(() => this.processChatAlarm(chat, event.state.alert).catch(handleError));
           }
-        }
+        }).catch((error) => {
+          console.error('Error while scheduling the limiter', error);
+        });
       }
     });
   }
