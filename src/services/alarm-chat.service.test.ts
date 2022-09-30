@@ -1,3 +1,5 @@
+import { sleep } from '../utils';
+
 import {
   chartMock,
   generateChat,
@@ -28,7 +30,8 @@ jest.mock('./redis.service', () => redis);
 describe('AlarmChatService', () => {
   beforeAll(async () => {
     alarmChatService.processChatAlarm = jest.fn(alarmChatService.processChatAlarm.bind(this));
-    await alarmChatService.init(apiMock);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    await alarmChatService.init(apiMock as any);
   });
 
   describe('getChatsWithAlarmModeOn', () => {
@@ -42,12 +45,12 @@ describe('AlarmChatService', () => {
     it('should process alarm = true', async () => {
       const session = generateChatSessionData(testState, true, true);
       const chat = generateChat(testId, session);
-      await alarmChatService.updateChat(session, testId);
+      alarmChatService.updateChat(session, testId);
       alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(true));
       // eslint-disable-next-line no-promise-executor-return
-      await new Promise((r) => setTimeout(r, 3000));
-      expect(alarmChatService.processChatAlarm).toHaveBeenCalledTimes(1);
-      expect(alarmChatService.processChatAlarm).toHaveBeenCalledWith(chat, true);
+      await sleep(3000);
+      expect(alarmChatService.processChatAlarm.bind(this)).toHaveBeenCalledTimes(1);
+      expect(alarmChatService.processChatAlarm.bind(this)).toHaveBeenCalledWith(chat, true);
     });
   });
 
