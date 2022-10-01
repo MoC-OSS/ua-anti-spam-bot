@@ -10,9 +10,17 @@
 
 export type SwindlerType = 'site' | 'mention' | 'card' | 'tensor' | 'compare' | 'no match';
 
-export interface SwindlersResult {
+export interface SwindlersBaseResult {
   isSpam: boolean;
   rate: number;
+}
+
+export interface SwindlersBotsResult extends SwindlersBaseResult {
+  nearestName?: string;
+  currentName: string;
+}
+
+export interface SwindlersResult extends SwindlersBaseResult {
   reason: SwindlerType;
   displayReason?: string;
   match?: string;

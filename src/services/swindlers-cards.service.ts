@@ -1,22 +1,14 @@
-import { isCreditCard } from 'validator';
+import isCreditCard from 'validator/es/lib/isCreditCard';
 
 import { DynamicStorageService } from './dynamic-storage.service';
 
 export class SwindlersCardsService {
-  /**
-   * @param {DynamicStorageService} dynamicStorageService
-   * */
-  dynamicStorageService: DynamicStorageService;
+  cards: string[] = [];
 
-  cards: any;
+  cardRegex = /(?:\d{4}.?){3}\d{4}/g;
 
-  cardRegex: RegExp;
-
-  constructor(dynamicStorageService) {
-    this.dynamicStorageService = dynamicStorageService;
+  constructor(private dynamicStorageService: DynamicStorageService) {
     this.cards = this.dynamicStorageService.swindlerCards;
-
-    this.cardRegex = /(?:\d{4}.?){3}\d{4}/g;
 
     this.dynamicStorageService.fetchEmitter.on('fetch', () => {
       this.cards = this.dynamicStorageService.swindlerCards;
@@ -28,7 +20,7 @@ export class SwindlersCardsService {
    *
    * @returns {string[]}
    */
-  parseCards(message) {
+  parseCards(message: string): string[] {
     return (message.match(this.cardRegex) || [])
       .map((card) => card.replace(/\D/g, ''))
       .filter((card) => card && card.length === 16 && isCreditCard(card));
@@ -37,14 +29,14 @@ export class SwindlersCardsService {
   /**
    * @param {string} name
    */
-  isSpam(name) {
+  isSpam(name: string): boolean {
     return this.cards.includes(name);
   }
 
   /**
    * @param {string} message - raw message from user to parse
    */
-  processMessage(message) {
+  processMessage(message: string): true | null {
     const cards = this.parseCards(message);
     if (cards.some((card) => this.cards.includes(card))) {
       return true;
@@ -53,7 +45,3 @@ export class SwindlersCardsService {
     return null;
   }
 }
-
-module.exports = {
-  SwindlersCardsService,
-};

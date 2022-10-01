@@ -167,6 +167,7 @@ export class RedisService {
       ...newSession,
     } as ChatSessionData;
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return redisClient.setRawValue(chatId, writeSession as any);
   }
 

@@ -1,7 +1,8 @@
-import { DynamicStorageService } from '../dynamic-storage.service';
+import { DynamicStorageService, LocalDataset } from '../dynamic-storage.service';
+import { SwindlersGoogleService } from '../swindlers-google.service';
 
-const mockNewBot = '@Diia_move_bot';
-const mockNewUrl = 'https://olx.new-darpay.site/some/234234234';
+export const mockNewBot = '@Diia_move_bot';
+export const mockNewUrl = 'https://olx.new-darpay.site/some/234234234';
 
 export const getSheet = jest.fn(() =>
   Promise.resolve([
@@ -43,9 +44,9 @@ export const mockSwindlersGoogleService = {
   getBots: getCompactSheet,
   getDomains: getCompactSheet,
   getCards: jest.fn(() => Promise.resolve(['4222422242224222'])),
-  getNotSwindlers: () => [],
-  getSiteRegex: () => [],
-};
+  getNotSwindlers: () => Promise.resolve([]),
+  getSiteRegex: () => Promise.resolve([]),
+} as Partial<SwindlersGoogleService> as SwindlersGoogleService;
 
 export const mockDataset = {
   swindlers_bots: [
@@ -62,6 +63,6 @@ export const mockDataset = {
   immediately: ['test'],
   swindlers_domains: ['olx-ua.darpays.site', 'olx-ua.europe-pays.site', 'olx-ua.glob-payments.site', 'olx-ua.lightpays.online'],
   swindlers_regex_sites: ['privat24.', 'orpay', 'da-pay', '-pay'],
-};
+} as LocalDataset;
 
 export const mockDynamicStorageService = new DynamicStorageService(mockSwindlersGoogleService, mockDataset);
