@@ -4,6 +4,8 @@
     "outDir": "dist",
     "module": "commonjs",
     "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
     "strict": true,
     "skipLibCheck": true,
     "types": ["jest"],

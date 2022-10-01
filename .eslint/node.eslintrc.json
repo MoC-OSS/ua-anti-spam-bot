@@ -1,5 +1,5 @@
 {
-  "extends": ["eslint-config-airbnb-base", "airbnb-base"],
+  "extends": ["airbnb-base"],
   "env": {
     "commonjs": true,
     "node": true

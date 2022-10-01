@@ -5,7 +5,10 @@
   "env": {
     "es2021": true
   },
-  "ignorePatterns": ["!src/**/*.{ts,js}", "node_modules"],
+  "ignorePatterns": [
+    "!src/**/*.{ts,js}",
+    "node_modules"
+  ],
   "root": true,
   "extends": [
     "./.eslint/node.eslintrc.json",
