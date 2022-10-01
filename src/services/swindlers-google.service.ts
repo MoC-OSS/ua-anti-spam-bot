@@ -1,4 +1,4 @@
-import environment from '../config';
+import { environmentConfig } from '../config';
 
 import { GoogleService, googleService as localGoogleService } from './google.service';
 
@@ -50,7 +50,12 @@ export class SwindlersGoogleService {
    * */
   getSheet<T extends boolean | true | false>(range: string, compact: T) {
     const isCompact = compact === undefined ? (true as T) : compact;
-    return this.googleService.getSheet<T>(environment.GOOGLE_SPREADSHEET_ID, environment.GOOGLE_SWINDLERS_SHEET_NAME, range, isCompact);
+    return this.googleService.getSheet<T>(
+      environmentConfig.GOOGLE_SPREADSHEET_ID,
+      environmentConfig.GOOGLE_SWINDLERS_SHEET_NAME,
+      range,
+      isCompact,
+    );
   }
 
   /**
@@ -58,7 +63,7 @@ export class SwindlersGoogleService {
    * @param {string} range - range from {this.RANGES}
    * */
   clearSheet(range: string) {
-    return this.googleService.clearSheet(environment.GOOGLE_SPREADSHEET_ID, environment.GOOGLE_SWINDLERS_SHEET_NAME, range);
+    return this.googleService.clearSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, environmentConfig.GOOGLE_SWINDLERS_SHEET_NAME, range);
   }
 
   /**
@@ -69,7 +74,12 @@ export class SwindlersGoogleService {
    * @returns Promise<any>
    * */
   updateSheet(range: string, values: string[]) {
-    return this.googleService.updateSheet(environment.GOOGLE_SPREADSHEET_ID, environment.GOOGLE_SWINDLERS_SHEET_NAME, values, range);
+    return this.googleService.updateSheet(
+      environmentConfig.GOOGLE_SPREADSHEET_ID,
+      environmentConfig.GOOGLE_SWINDLERS_SHEET_NAME,
+      values,
+      range,
+    );
   }
 
   /**
@@ -80,7 +90,12 @@ export class SwindlersGoogleService {
    * @returns Promise<any>
    * */
   appendToSheet(range: string, value: string) {
-    return this.googleService.appendToSheet(environment.GOOGLE_SPREADSHEET_ID, environment.GOOGLE_SWINDLERS_SHEET_NAME, value, range);
+    return this.googleService.appendToSheet(
+      environmentConfig.GOOGLE_SPREADSHEET_ID,
+      environmentConfig.GOOGLE_SWINDLERS_SHEET_NAME,
+      value,
+      range,
+    );
   }
 
   /**

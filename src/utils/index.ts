@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 
-import environment from '../config';
+import { environmentConfig } from '../config';
 
 import { MessageUtil } from './message.util';
 import { TelegramUtil } from './telegram.util';
@@ -21,7 +21,7 @@ export function joinMessage(messages) {
  * @param {GrammyContext} ctx
  * */
 function logContext(context) {
-  if (environment.DEBUG) {
+  if (environmentConfig.DEBUG) {
     /**
      * @type {GrammyContext}
      * */
@@ -114,7 +114,7 @@ export function getRandomItem<T>(array: T[]): T {
  * @param {any} [extra]
  * */
 export function logSkipMiddleware(context, reason, extra) {
-  if (environment.DEBUG || environment.DEBUG_MIDDLEWARE) {
+  if (environmentConfig.DEBUG || environmentConfig.DEBUG_MIDDLEWARE) {
     console.info(`Skip due to ${reason} in chat ${context.chat.title}`, extra);
   }
 }
@@ -134,6 +134,6 @@ export function compareDatesWithOffset(initialDate, compareDate, hours) {
  * @param {number} id
  * */
 export function isIdWhitelisted(id) {
-  const whitelist = (environment.USERS_WHITELIST || '').split(', ');
+  const whitelist = (environmentConfig.USERS_WHITELIST || '').split(', ');
   return whitelist.includes(id.toString());
 }

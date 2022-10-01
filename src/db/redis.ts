@@ -1,10 +1,10 @@
 import redis from 'redis';
 import type { JsonArray, JsonObject, JsonValue, Primitive } from 'type-fest';
 
-import environment from '../config';
+import { environmentConfig } from '../config';
 import { ChatSession, Session } from '../types';
 
-export const client = redis.createClient({ url: environment.REDIS_URL as string });
+export const client = redis.createClient({ url: environmentConfig.REDIS_URL });
 
 export async function getRawValue<T>(key: string | null | undefined): Promise<T | null> {
   if (!key) return {} as T;

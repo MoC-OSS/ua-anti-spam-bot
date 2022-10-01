@@ -11,4 +11,4 @@ if (error) {
   process.exit();
 }
 
-export default env as unknown as EnvironmentConfig;
+export const environmentConfig = env as unknown as EnvironmentConfig;

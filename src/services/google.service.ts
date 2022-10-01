@@ -2,7 +2,7 @@ import { auth } from 'google-auth-library';
 import { JWTInput } from 'google-auth-library/build/src/auth/credentials';
 import { google } from 'googleapis';
 
-import environment from '../config';
+import { environmentConfig } from '../config';
 import { GoogleFullCellData, GoogleShortCellData } from '../types';
 import { handleError } from '../utils';
 
@@ -18,7 +18,7 @@ export class GoogleService {
 
   googleAuth() {
     try {
-      const keys = JSON.parse(environment.GOOGLE_CREDITS) as JWTInput;
+      const keys = JSON.parse(environmentConfig.GOOGLE_CREDITS) as JWTInput;
       const client = auth.fromJSON(keys);
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore

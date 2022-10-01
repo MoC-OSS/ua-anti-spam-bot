@@ -18,7 +18,7 @@ import { initSwindlersContainer } from './services/swindlers.container';
 import { initTensor } from './tensor/tensor.service';
 import { handleError } from './utils/error.util';
 import { errorHandler } from './utils/error-handler';
-import environment from './config';
+import { environmentConfig } from './config';
 import { creatorId, logsChat } from './creator';
 import { redisClient } from './db';
 import { settingsAvailableMessage } from './message';
@@ -78,7 +78,7 @@ const rootMenu = new Menu('root');
 
 (async () => {
   console.info('Waiting for the old instance to down...');
-  await sleep(environment.DEBUG ? 0 : 5000);
+  await sleep(environmentConfig.DEBUG ? 0 : 5000);
   console.info('Starting a new instance...');
 
   await redisClient.client.connect().then(() => console.info('Redis client successfully started'));
@@ -94,19 +94,19 @@ const rootMenu = new Menu('root');
   /**
    * @type {GrammyBot}
    * */
-  const bot = new Bot(<string>environment?.BOT_TOKEN);
+  const bot = new Bot(environmentConfig?.BOT_TOKEN);
 
   await alarmChatService.init(bot.api);
   const airRaidAlarmStates = await alarmService.getStates();
 
-  if (!environment.DEBUG) {
+  if (!environmentConfig.DEBUG) {
     bot.api.sendMessage(logsChat, '*** 20220406204759 Migration started...').catch(() => {});
   }
   // eslint-disable-next-line global-require
   require('./20220406204759-migrate-redis-user-session')(bot, startTime)
     .then(() => {
       console.info('*** 20220406204759 Migration run successfully!!!');
-      if (!environment.DEBUG) {
+      if (!environmentConfig.DEBUG) {
         bot.api.sendMessage(logsChat, '*** 20220406204759 Migration run successfully!!!').catch(() => {});
       }
     })
@@ -368,7 +368,7 @@ const rootMenu = new Menu('root');
     onStart: () => {
       console.info(`Bot @${bot.botInfo.username} started!`, new Date().toString());
 
-      if (environment.DEBUG) {
+      if (environmentConfig.DEBUG) {
         // For development
       } else {
         bot.api
