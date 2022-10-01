@@ -30,7 +30,6 @@ export interface Chat {
   date: number;
 }
 
-
 export interface FromId {
   _: string;
   user_id: string;
