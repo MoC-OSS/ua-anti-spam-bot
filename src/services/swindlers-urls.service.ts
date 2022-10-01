@@ -1,8 +1,8 @@
-import { DynamicStorageService } from './dynamic-storage.service';
-
-import FuzzySet from 'fuzzyset';
 import axios from 'axios';
-import { URL_REGEXP, VALID_URL_REGEXP, EXCEPTION_DOMAINS, SHORTS } from './constants/swindlers-urls.constant';
+import FuzzySet from 'fuzzyset';
+
+import { EXCEPTION_DOMAINS, SHORTS, URL_REGEXP, VALID_URL_REGEXP } from './constants/swindlers-urls.constant';
+import { DynamicStorageService } from './dynamic-storage.service';
 
 const harmfulUrlStart = ['https://bitly.com/a/blocked'];
 
@@ -12,16 +12,20 @@ export class SwindlersUrlsService {
    * @param {number} [rate]
    * */
   dynamicStorageService: DynamicStorageService;
+
   rate: number;
+
   swindlersRegex: RegExp;
+
   swindlersFuzzySet: any;
+
   constructor(dynamicStorageService, rate = 0.9) {
     this.dynamicStorageService = dynamicStorageService;
     this.rate = rate;
     this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
     console.info('swindlersRegex', this.swindlersRegex);
     this.initFuzzySet();
-    this.dynamicStorageService.fetchEmmiter.on('fetch', () => {
+    this.dynamicStorageService.fetchEmitter.on('fetch', () => {
       this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
       console.info('swindlersRegex', this.swindlersRegex);
       this.initFuzzySet();
@@ -29,7 +33,7 @@ export class SwindlersUrlsService {
   }
 
   buildSiteRegex(sites) {
-    const regex = /(?:https?:\/\/)?([[sites]])(?!ua).+/;
+    const regex = /(?:https?:\/\/)?([[eist]])(?!ua).+/;
     return new RegExp(regex.source.replace('[[sites]]', sites.join('|')));
   }
 
@@ -74,7 +78,7 @@ export class SwindlersUrlsService {
       try {
         const urlInstance = new URL(validUrl);
         return urlInstance && !EXCEPTION_DOMAINS.includes(urlInstance.host) && VALID_URL_REGEXP.test(validUrl);
-      } catch (e) {
+      } catch {
         return false;
       }
     });
@@ -112,35 +116,35 @@ export class SwindlersUrlsService {
             /**
              * @param {AxiosError} err
              */
-            (err) => {
-              if (err.code === 'ENOTFOUND' && err.syscall === 'getaddrinfo') {
+            (error) => {
+              if (error.code === 'ENOTFOUND' && error.syscall === 'getaddrinfo') {
                 return url;
               }
 
-              if (err.code === 'ECONNREFUSED' && err.syscall === 'connect') {
+              if (error.code === 'ECONNREFUSED' && error.syscall === 'connect') {
                 return url;
               }
 
-              if (err.code === 'ETIMEDOUT' && err.syscall === 'connect') {
+              if (error.code === 'ETIMEDOUT' && error.syscall === 'connect') {
                 return url;
               }
 
-              if (err.code === 'ERR_TLS_CERT_ALTNAME_INVALID') {
+              if (error.code === 'ERR_TLS_CERT_ALTNAME_INVALID') {
                 return url;
               }
 
-              if (err.code === 'ECONNRESET') {
+              if (error.code === 'ECONNRESET') {
                 return url;
               }
 
               try {
-                if (!err.response) {
-                  console.error(err);
+                if (!error.response) {
+                  console.error(error);
                 }
 
-                return err.response.headers.location || err.response.config.url || url;
-              } catch (e) {
-                console.error(e);
+                return error.response.headers.location || error.response.config.url || url;
+              } catch (error) {
+                console.error(error);
                 return url;
               }
             },

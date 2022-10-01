@@ -1,6 +1,6 @@
-import { DynamicStorageService } from './dynamic-storage.service';
-
 import FuzzySet from 'fuzzyset';
+
+import { DynamicStorageService } from './dynamic-storage.service';
 
 export class SwindlersBotsService {
   /**
@@ -8,23 +8,30 @@ export class SwindlersBotsService {
    * @param {number} [rate]
    * */
   dynamicStorageService: DynamicStorageService;
+
   rate: number;
+
   mentionRegexp: RegExp;
+
   urlRegexp: RegExp;
+
   telegramDomainRegexp: RegExp;
+
   exceptionMentions: any;
+
   swindlersBotsFuzzySet: any;
+
   constructor(dynamicStorageService, rate = 0.9) {
     this.dynamicStorageService = dynamicStorageService;
     this.rate = rate;
     this.initFuzzySet();
     this.mentionRegexp = /\B@\w+/g;
     this.urlRegexp =
-      /(https?:\/\/(?:www\.|(?!www))?[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|(https?:\/\/(?:www\.|(?!www)))?[a-zA-Z0-9-]+\.[^\s]{2,}|www\.?[a-zA-Z0-9]+\.[^\s]{2,})/g;
+      /(https?:\/\/(?:www\.|(?!www))?[\dA-Za-z][\dA-Za-z-]+[\dA-Za-z]\.\S{2,}|www\.[\dA-Za-z][\dA-Za-z-]+[\dA-Za-z]\.\S{2,}|(https?:\/\/(?:www\.|(?!www)))?[\dA-Za-z-]+\.\S{2,}|www\.?[\dA-Za-z]+\.\S{2,})/g;
     this.telegramDomainRegexp = /^(https?:\/\/)?(www\.)?t\.me\/(.{1,256})/g;
     this.exceptionMentions = this.dynamicStorageService.notSwindlers;
 
-    this.dynamicStorageService.fetchEmmiter.on('fetch', () => {
+    this.dynamicStorageService.fetchEmitter.on('fetch', () => {
       this.exceptionMentions = this.dynamicStorageService.notSwindlers;
       this.initFuzzySet();
     });

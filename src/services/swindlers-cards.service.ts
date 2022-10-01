@@ -1,21 +1,24 @@
-import { DynamicStorageService } from './dynamic-storage.service';
-
 import { isCreditCard } from 'validator';
+
+import { DynamicStorageService } from './dynamic-storage.service';
 
 export class SwindlersCardsService {
   /**
    * @param {DynamicStorageService} dynamicStorageService
    * */
   dynamicStorageService: DynamicStorageService;
+
   cards: any;
+
   cardRegex: RegExp;
+
   constructor(dynamicStorageService) {
     this.dynamicStorageService = dynamicStorageService;
     this.cards = this.dynamicStorageService.swindlerCards;
 
-    this.cardRegex = /\d{4}.?\d{4}.?\d{4}.?\d{4}/g;
+    this.cardRegex = /(?:\d{4}.?){3}\d{4}/g;
 
-    this.dynamicStorageService.fetchEmmiter.on('fetch', () => {
+    this.dynamicStorageService.fetchEmitter.on('fetch', () => {
       this.cards = this.dynamicStorageService.swindlerCards;
     });
   }
@@ -43,7 +46,7 @@ export class SwindlersCardsService {
    */
   processMessage(message) {
     const cards = this.parseCards(message);
-    if (cards.length && cards.some((card) => this.cards.includes(card))) {
+    if (cards.some((card) => this.cards.includes(card))) {
       return true;
     }
 
