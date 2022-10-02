@@ -3,7 +3,9 @@
     {
       "files": [
         "*.js",
+        "*.ts",
         "*.jsx",
+        "*.tsx",
         "*.vue"
       ],
       "rules": {

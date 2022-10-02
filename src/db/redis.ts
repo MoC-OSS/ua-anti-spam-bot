@@ -1,40 +1,43 @@
 import redis from 'redis';
-import { env } from 'typed-dotenv'.config();
+import type { JsonArray, JsonObject, JsonValue, Primitive } from 'type-fest';
 
-export const client = redis.createClient({ url: env.REDIS_URL });
+import { environmentConfig } from '../config';
+import { ChatSession, Session } from '../types';
 
-async function getRawValue(key) {
-  if (!key) return {};
+export const client = redis.createClient({ url: environmentConfig.REDIS_URL });
+
+export async function getRawValue<T>(key: string | null | undefined): Promise<T | null> {
+  if (!key) return {} as T;
   try {
     const sourceSession = await client.get(key);
-    return JSON.parse(sourceSession);
-  } catch (error) {
+    return JSON.parse(sourceSession || '{}') as T;
+  } catch {
     return null;
   }
 }
 
-async function getValue(key) {
-  if (!key) return {};
+export async function getValue<T>(key: string): Promise<T> {
+  if (!key) return {} as T;
   try {
     const sourceSession = await client.get(key);
-    return JSON.parse(sourceSession) || {};
+    return (JSON.parse(sourceSession || '{}') || {}) as T;
   } catch (error) {
     console.error(error);
-    return {};
+    return {} as T;
   }
 }
 
-function setRawValue(key, value) {
+export function setRawValue(key: string, value: Primitive | JsonValue) {
   return client.set(key, JSON.stringify(value));
 }
 
-function setValue(key, value) {
+export function setValue(key: string, value: JsonObject) {
   if (!key || !value) return;
 
   return client.set(key, JSON.stringify(value));
 }
 
-function removeKey(key) {
+export function removeKey(key: string) {
   if (!key) {
     return null;
   }
@@ -42,35 +45,28 @@ function removeKey(key) {
   return client.del(key);
 }
 
-/**
- * @returns {Promise<(Session | ChatSession)[]>}
- * */
-async function getAllRecords() {
+export async function getAllRecords(): Promise<(Session | ChatSession)[]> {
   try {
     const keys = await client.keys('*');
     const sourceRecords = await Promise.all(keys.map((key) => client.get(key)));
-    return sourceRecords.map((record, index) => {
-      try {
-        return {
-          id: keys[index],
-          data: JSON.parse(record),
-        };
-      } catch (error) {
-        return {};
-      }
-    });
+    return sourceRecords
+      .map((record, index) => {
+        if (!record) {
+          return null;
+        }
+
+        try {
+          return {
+            id: keys[index],
+            data: JSON.parse(record || '{}') as Session['data'] & ChatSession['data'],
+          } as Session & ChatSession;
+        } catch {
+          return null;
+        }
+      })
+      .filter(Boolean) as (Session & ChatSession)[];
   } catch (error) {
     console.error(error);
     return [];
   }
 }
-
-module.exports = {
-  client,
-  getAllRecords,
-  getRawValue,
-  getValue,
-  removeKey,
-  setRawValue,
-  setValue,
-};

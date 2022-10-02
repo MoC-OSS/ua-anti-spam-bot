@@ -1,44 +1,65 @@
+import { EventEmitter } from 'node:events';
+import type TypedEmitter from 'typed-emitter';
+import { optimizeText } from 'ukrainian-ml-optimizer';
+
+import { dataset } from '../../dataset/dataset';
+
 import { SwindlersGoogleService } from './swindlers-google.service';
 
-import { optimizeText } from 'ukrainian-ml-optimizer';
-import EventEmitter from 'events';
+export type FetchEvents = {
+  fetch: () => void;
+};
+
+export type LocalDataset = typeof dataset &
+  Partial<{
+    swindlers_bots: string[];
+    swindlers_domains: string[];
+    swindlers_cards: string[];
+    swindlers_regex_sites: string[];
+  }>;
 
 export class DynamicStorageService {
+  swindlerMessages: any[];
+
+  swindlerBots: string[];
+
+  swindlerDomains: string[];
+
+  swindlerCards: string[];
+
+  swindlerRegexSites: string[];
+
+  notSwindlers: string[];
+
+  fetchEmitter: TypedEmitter<FetchEvents>;
+
   /**
    * @param {SwindlersGoogleService} swindlersGoogleService
-   * @param {any} dataset
+   * @param {any} localDataset
    * */
-  swindlersGoogleService: SwindlersGoogleService;
-  swindlerMessages: any[];
-  swindlerBots: string[];
-  swindlerDomains: string[];
-  swindlerCards: string[];
-  swindlerRegexSites: string[];
-  notSwindlers: string[];
-  fetchEmmiter: typeof EventEmitter;
-
-  constructor(swindlersGoogleService, dataset) {
-    this.swindlersGoogleService = swindlersGoogleService;
+  constructor(private swindlersGoogleService: SwindlersGoogleService, localDataset: LocalDataset) {
     this.swindlerMessages = [];
-    this.swindlerBots = dataset.swindlers_bots || [];
-    this.swindlerDomains = dataset.swindlers_domains || [];
-    this.swindlerCards = dataset.swindlers_cards || [];
-    this.swindlerRegexSites = dataset.swindlers_regex_sites || [];
+    this.swindlerBots = localDataset.swindlers_bots || [];
+    this.swindlerDomains = localDataset.swindlers_domains || [];
+    this.swindlerCards = localDataset.swindlers_cards || [];
+    this.swindlerRegexSites = localDataset.swindlers_regex_sites || [];
     this.notSwindlers = [];
-    this.fetchEmmiter = new EventEmitter();
+    this.fetchEmitter = new EventEmitter() as TypedEmitter<FetchEvents>;
   }
 
   async init() {
     await this.updateSwindlers();
     setInterval(() => {
-      this.updateSwindlers();
+      this.updateSwindlers().catch((error) => {
+        console.error('Cannot update swindlers on interval. Reason:', error);
+      });
     }, 1000 * 60 * 60);
   }
 
   async updateSwindlers() {
     const cases = Promise.all([
-      this.swindlersGoogleService.getTrainingPositives(),
-      this.swindlersGoogleService.getBots(),
+      this.swindlersGoogleService.getTrainingPositives(true),
+      this.swindlersGoogleService.getBots(true),
       this.swindlersGoogleService.getDomains(),
       this.swindlersGoogleService.getNotSwindlers(),
       this.swindlersGoogleService.getCards(),
@@ -52,13 +73,13 @@ export class DynamicStorageService {
       this.notSwindlers = this.removeDuplicates(notSwindlers);
       this.swindlerCards = this.removeDuplicates(swindlerCards);
       this.swindlerRegexSites = this.removeDuplicates(swindlerRegexSites);
-      this.fetchEmmiter.emit('fetch');
+      this.fetchEmitter.emit('fetch');
       console.info('got DynamicStorageService messages', new Date());
     });
   }
 
-  smartAppend(arr1, arr2) {
-    return this.removeDuplicates([...arr1, ...arr2]);
+  smartAppend(array1, array2) {
+    return this.removeDuplicates([...array1, ...array2]);
   }
 
   removeDuplicates(array: string[]): string[] {

@@ -1,34 +1,37 @@
-import { alarmChatService } from './alarm-chat.service';
-const {
-  generateMockSessions,
-  testId,
-  testState,
-  generateChatSessionData,
-  getAlarmMock,
+import { sleep } from '../utils';
+
+import {
   chartMock,
   generateChat,
-} = require('./_mocks/alarm.mocks');
-import { alarmService, ALARM_EVENT_KEY } from './alarm.service';
+  generateChatSessionData,
+  generateMockSessions,
+  getAlarmMock,
+  testId,
+  testState,
+} from './_mocks/alarm.mocks';
+import { ALARM_EVENT_KEY, alarmService } from './alarm.service';
+import { alarmChatService } from './alarm-chat.service';
 
 const apiMock = {
   sendMessage: jest.fn(() => Promise.resolve(null)),
   getChat: jest.fn(() => chartMock),
-  setChatPermissions: jest.fn(() => {}),
+  setChatPermissions: jest.fn(),
 };
 
 const redis = {
   redisService: {
-    getChatSessions: async () => Promise.resolve(generateMockSessions()),
-    updateChatSession: async () => Promise.resolve(null),
+    getChatSessions: () => generateMockSessions(),
+    updateChatSession: () => null,
   },
 };
 
 jest.mock('./redis.service', () => redis);
 
 describe('AlarmChatService', () => {
-  beforeAll(() => {
-    alarmChatService.processChatAlarm = jest.fn(alarmChatService.processChatAlarm);
-    alarmChatService.init(apiMock);
+  beforeAll(async () => {
+    alarmChatService.processChatAlarm = jest.fn(alarmChatService.processChatAlarm.bind(this));
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    await alarmChatService.init(apiMock as any);
   });
 
   describe('getChatsWithAlarmModeOn', () => {
@@ -42,12 +45,12 @@ describe('AlarmChatService', () => {
     it('should process alarm = true', async () => {
       const session = generateChatSessionData(testState, true, true);
       const chat = generateChat(testId, session);
-      await alarmChatService.updateChat(session, testId);
+      alarmChatService.updateChat(session, testId);
       alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(true));
       // eslint-disable-next-line no-promise-executor-return
-      await new Promise((r) => setTimeout(r, 3000));
-      expect(alarmChatService.processChatAlarm).toHaveBeenCalledTimes(1);
-      expect(alarmChatService.processChatAlarm).toHaveBeenCalledWith(chat, true);
+      await sleep(3000);
+      expect(alarmChatService.processChatAlarm.bind(this)).toHaveBeenCalledTimes(1);
+      expect(alarmChatService.processChatAlarm.bind(this)).toHaveBeenCalledWith(chat, true);
     });
   });
 

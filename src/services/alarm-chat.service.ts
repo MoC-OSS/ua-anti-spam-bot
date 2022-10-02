@@ -1,20 +1,24 @@
-import { GrammyBot } from '../types';
-
 import Bottleneck from 'bottleneck';
-import { alarmService, ALARM_EVENT_KEY } from './alarm.service';
-import { redisService } from './redis.service';
-import { getAlarmStartNotificationMessage, alarmEndNotificationMessage, chatIsMutedMessage, chatIsUnmutedMessage } from '../message';
+import { forEach } from 'p-iteration';
+import type { Chat } from 'typegram/manage';
+
+import { alarmEndNotificationMessage, chatIsMutedMessage, chatIsUnmutedMessage, getAlarmStartNotificationMessage } from '../message';
+import { ChatSession, ChatSessionData, GrammyBot } from '../types';
 import { handleError } from '../utils';
 
+import { ALARM_EVENT_KEY, alarmService } from './alarm.service';
+import { redisService } from './redis.service';
+
 export class AlarmChatService {
-  /**
-   * @param {GrammyBot['api']} api
-   * */
-  api: GrammyBot['api'] | undefined;
-  chats: any[] | undefined;
-  alarms: Set<any> | undefined;
-  limiter: typeof Bottleneck | undefined;
-  async init(api) {
+  api!: GrammyBot['api'];
+
+  chats: ChatSession[] = [];
+
+  alarms: Set<string> | undefined;
+
+  limiter!: Bottleneck;
+
+  async init(api: GrammyBot['api']) {
     this.api = api;
     this.chats = await this.getChatsWithAlarmModeOn();
     this.alarms = new Set([]);
@@ -26,10 +30,10 @@ export class AlarmChatService {
   }
 
   /**
-   * @param {state} string
+   * @param {string} state
    * @returns {boolean}
    * */
-  isAlarmNow(state) {
+  isAlarmNow(state: string) {
     return this.alarms?.has(state);
   }
 
@@ -37,14 +41,13 @@ export class AlarmChatService {
    * @param {ChatSessionData} chatSession
    * @param {string} id
    * */
-  async updateChat(chatSession, id) {
+  updateChat(chatSession: ChatSessionData, id: string) {
     const chatId = id.toString();
     const index = this.chats?.findIndex((chat) => chat.id === chatId) || -1;
     if (index !== -1) {
       if (!chatSession.chatSettings.disableChatWhileAirRaidAlert && !chatSession.chatSettings.airRaidAlertSettings.notificationMessage) {
         this.chats?.splice(index, 1);
       } else {
-        // @ts-ignore
         this.chats[index].data = chatSession;
       }
     } else if (chatSession.chatSettings.disableChatWhileAirRaidAlert || chatSession.chatSettings.airRaidAlertSettings.notificationMessage) {
@@ -55,9 +58,6 @@ export class AlarmChatService {
     }
   }
 
-  /**
-   * @returns {Promise<ChatSession[]>}
-   * */
   async getChatsWithAlarmModeOn() {
     const sessions = await redisService.getChatSessions();
     return sessions.filter(
@@ -72,13 +72,17 @@ export class AlarmChatService {
       } else {
         this.alarms?.delete(event.state.name);
       }
-      this.chats?.forEach((chat) => {
-        if (chat.data.chatSettings.airRaidAlertSettings.state === event.state.name) {
-          this.limiter.schedule(() => {
-            this.processChatAlarm(chat, event.state.alert).catch(handleError);
-          });
-        }
-      });
+
+      if (this.chats) {
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        forEach(this.chats, async (chat) => {
+          if (chat.data.chatSettings.airRaidAlertSettings.state === event.state.name) {
+            await this.limiter.schedule(() => this.processChatAlarm(chat, event.state.alert).catch(handleError));
+          }
+        }).catch((error) => {
+          console.error('Error while scheduling the limiter', error);
+        });
+      }
     });
   }
 
@@ -86,7 +90,7 @@ export class AlarmChatService {
    * @param {ChatSession} chat
    * @param {boolean} isAlarm
    * */
-  async processChatAlarm(chat, isAlarm) {
+  async processChatAlarm(chat: ChatSession, isAlarm: boolean) {
     const chatInfo = await this.api?.getChat(chat.id);
     let startAlarmMessage = '';
     let endAlarmMessage = '';
@@ -103,25 +107,23 @@ export class AlarmChatService {
     if (isAlarm) {
       if (chat.data.chatSettings.disableChatWhileAirRaidAlert) {
         const newSession = { ...chat.data };
-        newSession.chatPermissions = { ...(chatInfo as any).permissions };
+        newSession.chatPermissions = { ...(chatInfo as Chat.MultiUserGetChat).permissions };
         await redisService.updateChatSession(chat.id, newSession);
         const newPermissions = {};
         await this.api?.setChatPermissions(chat.id, newPermissions);
       }
+
       this.api?.sendMessage(chat.id, startAlarmMessage, { parse_mode: 'HTML' }).catch(handleError);
     } else {
       if (chat.data.chatSettings.disableChatWhileAirRaidAlert) {
         const currentSession = await redisService.getChatSession(chat.id);
-        const newPermissions = { ...currentSession.chatPermissions };
+        const newPermissions = { ...currentSession?.chatPermissions };
         await this.api?.setChatPermissions(chat.id, newPermissions);
       }
+
       this.api?.sendMessage(chat.id, endAlarmMessage, { parse_mode: 'HTML' }).catch(handleError);
     }
   }
 }
 
 export const alarmChatService = new AlarmChatService();
-
-module.exports = {
-  alarmChatService,
-};

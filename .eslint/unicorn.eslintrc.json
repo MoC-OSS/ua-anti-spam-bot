@@ -2,5 +2,9 @@
   "plugins": [
     "unicorn"
   ],
-  "extends": "plugin:unicorn/recommended"
+  "extends": "plugin:unicorn/recommended",
+  "rules": {
+    "unicorn/no-null": "off",
+    "unicorn/no-array-for-each": "off"
+  }
 }

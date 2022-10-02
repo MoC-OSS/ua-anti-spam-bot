@@ -1,35 +1,31 @@
-import { DynamicStorageService } from './dynamic-storage.service';
-
+import axios, { AxiosError } from 'axios';
 import FuzzySet from 'fuzzyset';
-import axios from 'axios';
-import { URL_REGEXP, VALID_URL_REGEXP, EXCEPTION_DOMAINS, SHORTS } from './constants/swindlers-urls.constant';
+
+import { SwindlersBaseResult, SwindlersUrlsResult } from '../types/swindlers';
+
+import { EXCEPTION_DOMAINS, SHORTS, URL_REGEXP, VALID_URL_REGEXP } from './constants/swindlers-urls.constant';
+import { DynamicStorageService } from './dynamic-storage.service';
 
 const harmfulUrlStart = ['https://bitly.com/a/blocked'];
 
 export class SwindlersUrlsService {
-  /**
-   * @param {DynamicStorageService} dynamicStorageService
-   * @param {number} [rate]
-   * */
-  dynamicStorageService: DynamicStorageService;
-  rate: number;
   swindlersRegex: RegExp;
-  swindlersFuzzySet: any;
-  constructor(dynamicStorageService, rate = 0.9) {
-    this.dynamicStorageService = dynamicStorageService;
-    this.rate = rate;
+
+  swindlersFuzzySet!: FuzzySet;
+
+  constructor(private dynamicStorageService: DynamicStorageService, private rate = 0.9) {
     this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
     console.info('swindlersRegex', this.swindlersRegex);
     this.initFuzzySet();
-    this.dynamicStorageService.fetchEmmiter.on('fetch', () => {
+    this.dynamicStorageService.fetchEmitter.on('fetch', () => {
       this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
       console.info('swindlersRegex', this.swindlersRegex);
       this.initFuzzySet();
     });
   }
 
-  buildSiteRegex(sites) {
-    const regex = /(?:https?:\/\/)?([[sites]])(?!ua).+/;
+  buildSiteRegex(sites: string[]): RegExp {
+    const regex = /(?:https?:\/\/)?([[eist]])(?!ua).+/;
     return new RegExp(regex.source.replace('[[sites]]', sites.join('|')));
   }
 
@@ -44,11 +40,11 @@ export class SwindlersUrlsService {
   /**
    * @param {string} message - raw message from user to parse
    */
-  async processMessage(message) {
+  async processMessage(message: string): Promise<SwindlersBaseResult | SwindlersUrlsResult | null> {
     const urls = this.parseUrls(message);
     if (urls) {
-      let lastResult: any = null;
-      const getUrls = urls.map((e) => this.isSpamUrl(e, null));
+      let lastResult: SwindlersBaseResult | SwindlersUrlsResult | null = null;
+      const getUrls = urls.map((url) => this.isSpamUrl(url));
       const allUrls = await Promise.all(getUrls);
       const foundSwindlerUrl = allUrls.some((value) => {
         lastResult = value;
@@ -68,13 +64,13 @@ export class SwindlersUrlsService {
    *
    * @returns {string[]}
    */
-  parseUrls(message) {
+  parseUrls(message: string): string[] {
     return (message.match(URL_REGEXP) || []).filter((url) => {
       const validUrl = url.slice(0, 4) === 'http' ? url : `https://${url}`;
       try {
         const urlInstance = new URL(validUrl);
         return urlInstance && !EXCEPTION_DOMAINS.includes(urlInstance.host) && VALID_URL_REGEXP.test(validUrl);
-      } catch (e) {
+      } catch {
         return false;
       }
     });
@@ -84,7 +80,7 @@ export class SwindlersUrlsService {
    * @param {string} url
    * @returns {string | null}
    */
-  getUrlDomain(url) {
+  getUrlDomain(url: string): string {
     const validUrl = url.slice(0, 4) === 'http' ? url : `https://${url}`;
     return `${new URL(validUrl).host}/`;
   }
@@ -93,12 +89,12 @@ export class SwindlersUrlsService {
    * @param {string} url
    * @param {number} [customRate]
    */
-  async isSpamUrl(url, customRate) {
+  async isSpamUrl(url: string, customRate?: number): Promise<SwindlersBaseResult | SwindlersUrlsResult> {
     if (!url) {
       return {
         rate: 0,
         isSpam: false,
-      };
+      } as SwindlersBaseResult;
     }
 
     /**
@@ -112,35 +108,35 @@ export class SwindlersUrlsService {
             /**
              * @param {AxiosError} err
              */
-            (err) => {
-              if (err.code === 'ENOTFOUND' && err.syscall === 'getaddrinfo') {
+            (error: NodeJS.ErrnoException & AxiosError) => {
+              if (error.code === 'ENOTFOUND' && error.syscall === 'getaddrinfo') {
                 return url;
               }
 
-              if (err.code === 'ECONNREFUSED' && err.syscall === 'connect') {
+              if (error.code === 'ECONNREFUSED' && error.syscall === 'connect') {
                 return url;
               }
 
-              if (err.code === 'ETIMEDOUT' && err.syscall === 'connect') {
+              if (error.code === 'ETIMEDOUT' && error.syscall === 'connect') {
                 return url;
               }
 
-              if (err.code === 'ERR_TLS_CERT_ALTNAME_INVALID') {
+              if (error.code === 'ERR_TLS_CERT_ALTNAME_INVALID') {
                 return url;
               }
 
-              if (err.code === 'ECONNRESET') {
+              if (error.code === 'ECONNRESET') {
                 return url;
               }
 
               try {
-                if (!err.response) {
-                  console.error(err);
+                if (!error.response) {
+                  console.error(error);
                 }
 
-                return err.response.headers.location || err.response.config.url || url;
-              } catch (e) {
-                console.error(e);
+                return error.response?.headers.location || error.response?.config.url || url;
+              } catch (nestedError: unknown) {
+                console.error(nestedError);
                 return url;
               }
             },
@@ -148,13 +144,13 @@ export class SwindlersUrlsService {
       : url;
 
     if (harmfulUrlStart.some((start) => redirectUrl.startsWith(start))) {
-      return { isSpam: true, rate: 300 };
+      return { isSpam: true, rate: 300 } as SwindlersBaseResult;
     }
 
     const domain = this.getUrlDomain(redirectUrl);
     const isRegexpMatch = this.swindlersRegex.test(domain);
     if (isRegexpMatch) {
-      return { isSpam: isRegexpMatch, rate: 200 };
+      return { isSpam: isRegexpMatch, rate: 200 } as SwindlersBaseResult;
     }
 
     const [[rate, nearestName]] = this.swindlersFuzzySet.get(domain) || [[0]];
@@ -165,10 +161,6 @@ export class SwindlersUrlsService {
       nearestName,
       currentName: domain,
       redirectUrl,
-    };
+    } as SwindlersUrlsResult;
   }
 }
-
-module.exports = {
-  SwindlersUrlsService,
-};

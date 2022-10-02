@@ -1,6 +1,13 @@
 {
-  "env": {
-    "jest/globals": true
-  },
-  "plugins": ["jest"]
+  "overrides": [
+    {
+      "env": {
+        "jest/globals": true
+      },
+      "files": ["src/**/*.test.ts", "src/**/*.spec.ts"],
+      "plugins": ["jest"],
+      "extends": ["plugin:jest/recommended"],
+      "rules": { "jest/prefer-expect-assertions": "off" }
+    }
+  ]
 }

@@ -1,54 +1,39 @@
-import { GoogleService } from './google.service';
+import { environmentConfig } from '../config';
 
-import { env } from 'typed-dotenv'.config();
-
-import { googleService } from './google.service';
+import { GoogleService, googleService as localGoogleService } from './google.service';
 
 export class SwindlersGoogleService {
-  /**
-   * @param {GoogleService} localGoogleService
-   * */
-  googleService: GoogleService;
-  SHEETS_START_FROM: number;
-  RANGE: (a) => {};
-  APPEND_RANGE: (a, b) => {};
-  SHEET_COLUMNS: { [key: string]: string };
-  RANGES: any;
-  constructor(localGoogleService) {
-    /**
-     * @private
-     * */
-    this.googleService = localGoogleService;
-    this.SHEETS_START_FROM = 6;
-    this.RANGE = (column): string => `${column}${this.SHEETS_START_FROM}:${column}`;
-    this.APPEND_RANGE = (column, position) => `${column}${position}`;
-    this.SHEET_COLUMNS = {
-      TRAINING_NEGATIVES: 'A',
-      TRAINING_POSITIVES: 'B',
-      BOTS: 'C',
-      DOMAINS: 'D',
-      TESTING_NEGATIVES: 'E',
-      TESTING_POSITIVES: 'F',
-      SITES: 'G',
-      USERS: 'H',
-      CARDS: 'I',
-      NOT_SWINDLERS: 'J',
-      SITE_REGEX: 'K',
-    };
-    this.RANGES = {
-      TRAINING_NEGATIVES: this.RANGE(this.SHEET_COLUMNS.TRAINING_NEGATIVES),
-      TRAINING_POSITIVES: this.RANGE(this.SHEET_COLUMNS.TRAINING_POSITIVES),
-      BOTS: this.RANGE(this.SHEET_COLUMNS.BOTS),
-      DOMAINS: this.RANGE(this.SHEET_COLUMNS.DOMAINS),
-      TESTING_NEGATIVES: this.RANGE(this.SHEET_COLUMNS.TESTING_NEGATIVES),
-      TESTING_POSITIVES: this.RANGE(this.SHEET_COLUMNS.TESTING_POSITIVES),
-      SITES: this.RANGE(this.SHEET_COLUMNS.SITES),
-      USERS: this.RANGE(this.SHEET_COLUMNS.USERS),
-      CARDS: this.RANGE(this.SHEET_COLUMNS.CARDS),
-      NOT_SWINDLERS: this.RANGE(this.SHEET_COLUMNS.NOT_SWINDLERS),
-      SITE_REGEX: this.RANGE(this.SHEET_COLUMNS.SITE_REGEX),
-    };
-  }
+  SHEETS_START_FROM = 6;
+
+  private SHEET_COLUMNS = {
+    TRAINING_NEGATIVES: 'A',
+    TRAINING_POSITIVES: 'B',
+    BOTS: 'C',
+    DOMAINS: 'D',
+    TESTING_NEGATIVES: 'E',
+    TESTING_POSITIVES: 'F',
+    SITES: 'G',
+    USERS: 'H',
+    CARDS: 'I',
+    NOT_SWINDLERS: 'J',
+    SITE_REGEX: 'K',
+  };
+
+  RANGES = {
+    TRAINING_NEGATIVES: this.buildRange(this.SHEET_COLUMNS.TRAINING_NEGATIVES),
+    TRAINING_POSITIVES: this.buildRange(this.SHEET_COLUMNS.TRAINING_POSITIVES),
+    BOTS: this.buildRange(this.SHEET_COLUMNS.BOTS),
+    DOMAINS: this.buildRange(this.SHEET_COLUMNS.DOMAINS),
+    TESTING_NEGATIVES: this.buildRange(this.SHEET_COLUMNS.TESTING_NEGATIVES),
+    TESTING_POSITIVES: this.buildRange(this.SHEET_COLUMNS.TESTING_POSITIVES),
+    SITES: this.buildRange(this.SHEET_COLUMNS.SITES),
+    USERS: this.buildRange(this.SHEET_COLUMNS.USERS),
+    CARDS: this.buildRange(this.SHEET_COLUMNS.CARDS),
+    NOT_SWINDLERS: this.buildRange(this.SHEET_COLUMNS.NOT_SWINDLERS),
+    SITE_REGEX: this.buildRange(this.SHEET_COLUMNS.SITE_REGEX),
+  };
+
+  constructor(private googleService: GoogleService) {}
 
   /**
    *
@@ -63,16 +48,22 @@ export class SwindlersGoogleService {
    *
    * @returns Promise<Record<string, any>[] | null>
    * */
-  getSheet(range, compact = true) {
-    return this.googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, range, compact);
+  getSheet<T extends boolean | true | false>(range: string, compact: T) {
+    const isCompact = compact === undefined ? (true as T) : compact;
+    return this.googleService.getSheet<T>(
+      environmentConfig.GOOGLE_SPREADSHEET_ID,
+      environmentConfig.GOOGLE_SWINDLERS_SHEET_NAME,
+      range,
+      isCompact,
+    );
   }
 
   /**
    * @private
    * @param {string} range - range from {this.RANGES}
    * */
-  clearSheet(range) {
-    return this.googleService.clearSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, range);
+  clearSheet(range: string) {
+    return this.googleService.clearSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, environmentConfig.GOOGLE_SWINDLERS_SHEET_NAME, range);
   }
 
   /**
@@ -82,8 +73,13 @@ export class SwindlersGoogleService {
    *
    * @returns Promise<any>
    * */
-  updateSheet(range, values) {
-    return this.googleService.updateSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, values, range);
+  updateSheet(range: string, values: string[]) {
+    return this.googleService.updateSheet(
+      environmentConfig.GOOGLE_SPREADSHEET_ID,
+      environmentConfig.GOOGLE_SWINDLERS_SHEET_NAME,
+      values,
+      range,
+    );
   }
 
   /**
@@ -93,8 +89,13 @@ export class SwindlersGoogleService {
    *
    * @returns Promise<any>
    * */
-  appendToSheet(range, value) {
-    return this.googleService.appendToSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_SWINDLERS_SHEET_NAME, value, range);
+  appendToSheet(range: string, value: string) {
+    return this.googleService.appendToSheet(
+      environmentConfig.GOOGLE_SPREADSHEET_ID,
+      environmentConfig.GOOGLE_SWINDLERS_SHEET_NAME,
+      value,
+      range,
+    );
   }
 
   /**
@@ -104,13 +105,13 @@ export class SwindlersGoogleService {
    * */
 
   getTrainingNegatives() {
-    return this.getSheet(this.RANGES.TRAINING_NEGATIVES);
+    return this.getSheet(this.RANGES.TRAINING_NEGATIVES, true);
   }
 
   /**
    * @param {string[]} cases - cases to update
    * */
-  updateTrainingNegatives(cases) {
+  updateTrainingNegatives(cases: string[]) {
     return this.updateSheet(this.RANGES.TRAINING_NEGATIVES, cases);
   }
 
@@ -118,24 +119,25 @@ export class SwindlersGoogleService {
     return this.clearSheet(this.RANGES.TRAINING_NEGATIVES);
   }
 
-  async getTrainingPositives(compact = true): Promise<any> {
-    return await this.getSheet(this.RANGES.TRAINING_POSITIVES, compact);
+  getTrainingPositives<T extends boolean>(compact?: T) {
+    const isCompact = compact === undefined ? (true as T) : compact;
+    return this.getSheet<T>(this.RANGES.TRAINING_POSITIVES, isCompact);
   }
 
   /**
    * @param {string[]} cases - cases to update
    * */
-  updateTrainingPositives(cases) {
+  updateTrainingPositives(cases: string[]) {
     return this.updateSheet(this.RANGES.TRAINING_POSITIVES, cases);
   }
 
   /**
    * @param {string} singleCase - case to append
    * */
-  async appendTrainingPositives(singleCase) {
+  async appendTrainingPositives(singleCase: string) {
     const values = await this.getTrainingPositives(false);
     const lastPosition = values[values.length - 1].index + 1;
-    return this.appendToSheet(this.APPEND_RANGE(this.SHEET_COLUMNS.TRAINING_POSITIVES, lastPosition), singleCase);
+    return this.appendToSheet(this.appendRange(this.SHEET_COLUMNS.TRAINING_POSITIVES, lastPosition), singleCase);
   }
 
   clearTrainingPositives() {
@@ -149,13 +151,13 @@ export class SwindlersGoogleService {
    * */
 
   getBots() {
-    return this.getSheet(this.RANGES.BOTS);
+    return this.getSheet(this.RANGES.BOTS, true);
   }
 
   /**
    * @param {string[]} bots
    */
-  updateBots(bots) {
+  updateBots(bots: string[]) {
     return this.updateSheet(this.RANGES.BOTS, bots);
   }
 
@@ -170,13 +172,13 @@ export class SwindlersGoogleService {
    * */
 
   getDomains() {
-    return this.getSheet(this.RANGES.DOMAINS);
+    return this.getSheet(this.RANGES.DOMAINS, true);
   }
 
   /**
    * @param {string[]} domains
    */
-  updateDomains(domains) {
+  updateDomains(domains: string[]) {
     return this.updateSheet(this.RANGES.DOMAINS, domains);
   }
 
@@ -187,13 +189,13 @@ export class SwindlersGoogleService {
    * */
 
   getTestingNegatives() {
-    return this.getSheet(this.RANGES.TESTING_NEGATIVES);
+    return this.getSheet(this.RANGES.TESTING_NEGATIVES, true);
   }
 
   /**
    * @param {string[]} cases - cases to update
    * */
-  updateTestingNegatives(cases) {
+  updateTestingNegatives(cases: string[]) {
     return this.updateSheet(this.RANGES.TESTING_NEGATIVES, cases);
   }
 
@@ -202,13 +204,13 @@ export class SwindlersGoogleService {
   }
 
   getTestingPositives() {
-    return this.getSheet(this.RANGES.TESTING_POSITIVES);
+    return this.getSheet(this.RANGES.TESTING_POSITIVES, true);
   }
 
   /**
    * @param {string[]} cases - cases to update
    * */
-  updateTestingPositives(cases) {
+  updateTestingPositives(cases: string[]) {
     return this.updateSheet(this.RANGES.TESTING_POSITIVES, cases);
   }
 
@@ -223,13 +225,13 @@ export class SwindlersGoogleService {
    * */
 
   getSites() {
-    return this.getSheet(this.RANGES.SITES);
+    return this.getSheet(this.RANGES.SITES, true);
   }
 
   /**
    * @param {string[]} sites
    */
-  updateSites(sites) {
+  updateSites(sites: string[]) {
     return this.updateSheet(this.RANGES.SITES, sites);
   }
 
@@ -240,7 +242,7 @@ export class SwindlersGoogleService {
    * */
 
   getUsers() {
-    return this.getSheet(this.RANGES.USERS);
+    return this.getSheet(this.RANGES.USERS, true);
   }
 
   /**
@@ -250,13 +252,13 @@ export class SwindlersGoogleService {
    * */
 
   getCards() {
-    return this.getSheet(this.RANGES.CARDS);
+    return this.getSheet(this.RANGES.CARDS, true);
   }
 
   /**
    * @param {string[]} cards
    */
-  updateCards(cards) {
+  updateCards(cards: string[]) {
     return this.updateSheet(this.RANGES.CARDS, cards);
   }
 
@@ -267,7 +269,7 @@ export class SwindlersGoogleService {
    * */
 
   getNotSwindlers() {
-    return this.getSheet(this.RANGES.NOT_SWINDLERS);
+    return this.getSheet(this.RANGES.NOT_SWINDLERS, true);
   }
 
   /**
@@ -277,13 +279,16 @@ export class SwindlersGoogleService {
    * */
 
   getSiteRegex() {
-    return this.getSheet(this.RANGES.SITE_REGEX);
+    return this.getSheet(this.RANGES.SITE_REGEX, true);
+  }
+
+  private buildRange(column: string): string {
+    return `${column}${this.SHEETS_START_FROM}:${column}`;
+  }
+
+  private appendRange(column: string, position: string | number) {
+    return `${column}${position}`;
   }
 }
 
-export const swindlersGoogleService = new SwindlersGoogleService(googleService);
-
-module.exports = {
-  swindlersGoogleService,
-  SwindlersGoogleService,
-};
+export const swindlersGoogleService = new SwindlersGoogleService(localGoogleService);

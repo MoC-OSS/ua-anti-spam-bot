@@ -1,7 +1,4 @@
 {
-  "extends": {
-    "packages": ["eslint-config-prettier", "eslint-plugin-prettier", "prettier"]
-  },
   "extends": [
     "prettier"
   ],

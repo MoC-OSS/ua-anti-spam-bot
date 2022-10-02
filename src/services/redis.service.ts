@@ -1,70 +1,59 @@
 import { redisClient } from '../db';
-
-/**
- * @template T
- * @param {T} array
- *
- * @returns {T}
- * */
-function removeDuplicates(array) {
-  return [...new Set(array)];
-}
+import { ChatSession, ChatSessionData, Session } from '../types';
+import { removeDuplicates } from '../utils';
 
 export class RedisService {
-  redisClient: any;
-  redisSelectors: any;
-  constructor() {
-    this.redisClient = redisClient;
-    this.redisSelectors = {
-      isBotDeactivated: 'isBotDeactivated',
-      botTensorPercent: 'botTensorPercent',
-      positives: 'training:positives',
-      negatives: 'training:negatives',
-      trainingChatWhitelist: 'training:chatWhiteList',
-      trainingStartRank: 'training:startRank',
-      trainingTempMessages: 'training:tempMessages',
-      trainingBots: 'training:bots',
-      userSessions: /^-?\d+:-?\d+$/,
-      chatSessions: /^-?\d+$/,
-    };
-  }
+  redisClient = redisClient;
+
+  redisSelectors = {
+    isBotDeactivated: 'isBotDeactivated',
+    botTensorPercent: 'botTensorPercent',
+    positives: 'training:positives',
+    negatives: 'training:negatives',
+    trainingChatWhitelist: 'training:chatWhiteList',
+    trainingStartRank: 'training:startRank',
+    trainingTempMessages: 'training:tempMessages',
+    trainingBots: 'training:bots',
+    userSessions: /^-?\d+:-?\d+$/,
+    chatSessions: /^-?\d+$/,
+  };
 
   /**
    * @returns {Promise<string[]>}
    * */
   async getTrainingChatWhitelist() {
-    return (await redisClient.getRawValue(this.redisSelectors.trainingChatWhitelist)) || [];
+    return (await redisClient.getRawValue<string[]>(this.redisSelectors.trainingChatWhitelist)) || [];
   }
 
   /**
    * @returns {Promise<string[]>}
    * */
   async getTrainingBots() {
-    return (await redisClient.getRawValue(this.redisSelectors.trainingBots)) || [];
+    return (await redisClient.getRawValue<string[]>(this.redisSelectors.trainingBots)) || [];
   }
 
   /**
    * @param {string} newChatIds
    * */
-  setTrainingChatWhitelist(newChatIds) {
+  setTrainingChatWhitelist(newChatIds: string) {
     return redisClient.setRawValue(this.redisSelectors.trainingChatWhitelist, newChatIds.replace(/ /g, '').split(','));
   }
 
   /**
    * @param {string} newChatId
    * */
-  async updateTrainingChatWhitelist(newChatId) {
+  async updateTrainingChatWhitelist(newChatId: string) {
     const currentChats = await this.getTrainingChatWhitelist();
     currentChats.push(newChatId);
 
     return this.setTrainingChatWhitelist(currentChats.join(','));
   }
 
-  setTrainingBots(bots) {
+  setTrainingBots(bots: string[]) {
     return redisClient.setRawValue(this.redisSelectors.trainingBots, bots);
   }
 
-  async updateTrainingBots(bots) {
+  async updateTrainingBots(bots: string[]) {
     const currentBots = await this.getTrainingBots();
     const newBots = removeDuplicates([...currentBots, ...bots]);
 
@@ -75,13 +64,13 @@ export class RedisService {
    * @returns {Promise<number>}
    * */
   getTrainingStartRank() {
-    return redisClient.getRawValue(this.redisSelectors.trainingStartRank);
+    return redisClient.getRawValue<number>(this.redisSelectors.trainingStartRank);
   }
 
   /**
    * @param {number} newValue
    * */
-  setTrainingStartRank(newValue) {
+  setTrainingStartRank(newValue: number) {
     if (newValue && +newValue) {
       return redisClient.setRawValue(this.redisSelectors.trainingStartRank, newValue);
     }
@@ -93,13 +82,13 @@ export class RedisService {
    * @returns {Promise<number>}
    * */
   getBotTensorPercent() {
-    return redisClient.getRawValue(this.redisSelectors.botTensorPercent);
+    return redisClient.getRawValue<number>(this.redisSelectors.botTensorPercent);
   }
 
   /**
    * @param {number} newValue
    * */
-  setBotTensorPercent(newValue) {
+  setBotTensorPercent(newValue: number) {
     if (newValue && +newValue) {
       return redisClient.setRawValue(this.redisSelectors.botTensorPercent, newValue);
     }
@@ -111,13 +100,13 @@ export class RedisService {
    * @returns {Promise<boolean>}
    * */
   getIsBotDeactivated() {
-    return redisClient.getRawValue(this.redisSelectors.isBotDeactivated);
+    return redisClient.getRawValue<boolean>(this.redisSelectors.isBotDeactivated);
   }
 
   /**
    * @param {boolean} newValue
    * */
-  setIsBotDeactivated(newValue) {
+  setIsBotDeactivated(newValue: boolean) {
     return redisClient.setRawValue(this.redisSelectors.isBotDeactivated, newValue);
   }
 
@@ -125,20 +114,20 @@ export class RedisService {
    * @returns {Promise<string[]>}
    * */
   async getNegatives() {
-    return (await redisClient.getRawValue(this.redisSelectors.negatives)) || [];
+    return (await redisClient.getRawValue<string[]>(this.redisSelectors.negatives)) || [];
   }
 
   /**
    * @returns {Promise<string[]>}
    * */
   async getPositives() {
-    return (await redisClient.getRawValue(this.redisSelectors.positives)) || [];
+    return (await redisClient.getRawValue<string[]>(this.redisSelectors.positives)) || [];
   }
 
   /**
    * @param {string} word
    */
-  async updateNegatives(word) {
+  async updateNegatives(word: string) {
     const words = await this.getNegatives();
     words.push(word);
 
@@ -148,7 +137,7 @@ export class RedisService {
   /**
    * @param {string} word
    */
-  async updatePositives(word) {
+  async updatePositives(word: string) {
     const words = await this.getPositives();
     words.push(word);
 
@@ -167,66 +156,53 @@ export class RedisService {
    * @param {string} chatId
    * @param {Partial<ChatSessionData>} newSession
    * */
-  async updateChatSession(chatId, newSession) {
+  async updateChatSession(chatId: string, newSession: Partial<ChatSessionData>) {
     if (!this.redisSelectors.chatSessions.test(chatId)) {
       throw new Error(`This is an invalid chat id: ${chatId}`);
     }
 
-    const currentSession = await redisClient.getRawValue(chatId);
-
-    /**
-     * @type {Partial<ChatSessionData>}
-     * */
+    const currentSession = await redisClient.getRawValue<ChatSessionData>(chatId);
     const writeSession = {
-      ...(currentSession || {}),
+      ...currentSession,
       ...newSession,
-    };
+    } as ChatSessionData;
 
-    return redisClient.setRawValue(chatId, writeSession).then(
-      (res) =>
-        // console.info(`Chat id has been updated: ${chatId}`, writeSession);
-        res,
-    );
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    return redisClient.setRawValue(chatId, writeSession as any);
   }
 
-  /**
-   * @returns {Promise<Session[]>}
-   * */
-  async getUserSessions() {
+  async getUserSessions(): Promise<Session[]> {
     const allSessions = await redisClient.getAllRecords();
-    return allSessions.filter((session) => this.redisSelectors.userSessions.test(session.id));
+    return allSessions.filter((session) => this.redisSelectors.userSessions.test(session.id)) as Session[];
   }
 
-  /**
-   * @returns {Promise<ChatSession[]>}
-   * */
-  async getChatSessions() {
+  async getChatSessions(): Promise<ChatSession[]> {
     const allSessions = await redisClient.getAllRecords();
-    return allSessions.filter((session) => this.redisSelectors.chatSessions.test(session.id));
+    return allSessions.filter((session) => this.redisSelectors.chatSessions.test(session.id)) as ChatSession[];
   }
 
   /**
    * @param {string} chatId
    * @returns {Promise<ChatSessionData>}
    * */
-  async getChatSession(chatId) {
+  async getChatSession(chatId: string) {
     if (!this.redisSelectors.chatSessions.test(chatId)) {
       throw new Error(`This is an invalid chat id: ${chatId}`);
     }
-    return redisClient.getRawValue(chatId);
+    return redisClient.getRawValue<ChatSessionData>(chatId);
   }
 
   /**
    * @returns {Promise<string[]>}
    * */
   async getTrainingTempMessages() {
-    return (await redisClient.getRawValue(this.redisSelectors.trainingTempMessages)) || [];
+    return (await redisClient.getRawValue<string[]>(this.redisSelectors.trainingTempMessages)) || [];
   }
 
   /**
    * @param {string[]} messages
    * */
-  setTrainingTempMessages(messages) {
+  setTrainingTempMessages(messages: string[]) {
     return redisClient.setRawValue(this.redisSelectors.trainingTempMessages, messages);
   }
 }

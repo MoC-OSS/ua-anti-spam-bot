@@ -1,30 +1,27 @@
+import FuzzySet from 'fuzzyset';
+import { removeDuplicates } from 'utils';
+
+import { SwindlersBotsResult } from '../types/swindlers';
+
 import { DynamicStorageService } from './dynamic-storage.service';
 
-import FuzzySet from 'fuzzyset';
-
 export class SwindlersBotsService {
-  /**
-   * @param {DynamicStorageService} dynamicStorageService
-   * @param {number} [rate]
-   * */
-  dynamicStorageService: DynamicStorageService;
-  rate: number;
-  mentionRegexp: RegExp;
-  urlRegexp: RegExp;
-  telegramDomainRegexp: RegExp;
-  exceptionMentions: any;
-  swindlersBotsFuzzySet: any;
-  constructor(dynamicStorageService, rate = 0.9) {
-    this.dynamicStorageService = dynamicStorageService;
-    this.rate = rate;
+  readonly mentionRegexp = /\B@\w+/g;
+
+  readonly urlRegexp =
+    /(https?:\/\/(?:www\.|(?!www))?[\dA-Za-z][\dA-Za-z-]+[\dA-Za-z]\.\S{2,}|www\.[\dA-Za-z][\dA-Za-z-]+[\dA-Za-z]\.\S{2,}|(https?:\/\/(?:www\.|(?!www)))?[\dA-Za-z-]+\.\S{2,}|www\.?[\dA-Za-z]+\.\S{2,})/g;
+
+  readonly telegramDomainRegexp = /^(https?:\/\/)?(www\.)?t\.me\/(.{1,256})/g;
+
+  exceptionMentions: string[] = [];
+
+  swindlersBotsFuzzySet!: FuzzySet;
+
+  constructor(private dynamicStorageService: DynamicStorageService, private rate = 0.9) {
     this.initFuzzySet();
-    this.mentionRegexp = /\B@\w+/g;
-    this.urlRegexp =
-      /(https?:\/\/(?:www\.|(?!www))?[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|(https?:\/\/(?:www\.|(?!www)))?[a-zA-Z0-9-]+\.[^\s]{2,}|www\.?[a-zA-Z0-9]+\.[^\s]{2,})/g;
-    this.telegramDomainRegexp = /^(https?:\/\/)?(www\.)?t\.me\/(.{1,256})/g;
     this.exceptionMentions = this.dynamicStorageService.notSwindlers;
 
-    this.dynamicStorageService.fetchEmmiter.on('fetch', () => {
+    this.dynamicStorageService.fetchEmitter.on('fetch', () => {
       this.exceptionMentions = this.dynamicStorageService.notSwindlers;
       this.initFuzzySet();
     });
@@ -33,18 +30,18 @@ export class SwindlersBotsService {
   /**
    * @param {string} message - raw message from user to parse
    */
-  processMessage(message) {
+  processMessage(message: string): SwindlersBotsResult | null {
     const mentions = this.parseMentions(message);
     if (mentions) {
-      let lastResult: any = null;
+      let lastResult: null | SwindlersBotsResult = null;
+
       const foundSwindlerMention = mentions.some((value) => {
-        lastResult = this.isSpamBot(value, null);
+        lastResult = this.isSpamBot(value);
         return lastResult.isSpam;
       });
 
       if (foundSwindlerMention) {
-        const { isSpam, rate, nearestName, currentName } = lastResult;
-        return { isSpam, rate, nearestName, currentName };
+        return lastResult;
       }
     }
 
@@ -64,21 +61,21 @@ export class SwindlersBotsService {
    *
    * @returns {string[]}
    */
-  parseMentions(message) {
+  parseMentions(message: string): string[] {
     const directMentions = message.match(this.mentionRegexp) || [];
     const linkMentions = (message.match(this.urlRegexp) || [])
       .filter((url) => url.split('/').includes('t.me'))
       .map((url) => url.split('/').splice(-1)[0])
       .map((mention) => (mention[mention.length - 1] === '.' ? `@${mention.slice(0, -1)}` : `@${mention}`));
 
-    return this.removeDuplicates([...directMentions, ...linkMentions]).filter((item) => !this.exceptionMentions.includes(item));
+    return removeDuplicates([...directMentions, ...linkMentions]).filter((item) => !this.exceptionMentions.includes(item));
   }
 
   /**
    * @param {string} name
    * @param {number} [customRate]
    */
-  isSpamBot(name, customRate) {
+  isSpamBot(name: string, customRate?: number): SwindlersBotsResult {
     const [[rate, nearestName]] = this.swindlersBotsFuzzySet.get(name) || [[0]];
     return {
       isSpam: rate > (customRate || this.rate),
@@ -86,10 +83,5 @@ export class SwindlersBotsService {
       nearestName,
       currentName: name,
     };
-  }
-
-  // TODO refactor to move in own util when TS is available
-  removeDuplicates(array) {
-    return [...new Set(array)];
   }
 }

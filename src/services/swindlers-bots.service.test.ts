@@ -1,5 +1,5 @@
 import { mockDynamicStorageService, mockNewBot } from './_mocks/index.mocks';
-import { SwindlersBotsService }  from './swindlers-bots.service';
+import { SwindlersBotsService } from './swindlers-bots.service';
 
 const expectedMentions = ['@test_mention', '@another_mention'];
 const expectedUrls = ['t.me/test_mention', 'https://t.me/another_mention', 'not-t.me/not-a-mention'];
@@ -7,7 +7,7 @@ const expectedUrls = ['t.me/test_mention', 'https://t.me/another_mention', 'not-
 /**
  * @type {SwindlersBotsService}
  * */
-let swindlersBotsService;
+let swindlersBotsService: SwindlersBotsService;
 describe('SwindlersBotsService', () => {
   beforeAll(() => {
     swindlersBotsService = new SwindlersBotsService(mockDynamicStorageService, 0.6);
@@ -82,7 +82,7 @@ describe('SwindlersBotsService', () => {
       const result = swindlersBotsService.processMessage(`test message ${mockNewBot} with swindler bot`);
 
       expect(result).toBeTruthy();
-      expect(result.isSpam).toBeTruthy();
+      expect(result?.isSpam).toBeTruthy();
     });
 
     it('should not process regular message', () => {

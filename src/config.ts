@@ -1,5 +1,7 @@
 import * as typedDotenv from 'typed-dotenv';
 
+import { EnvironmentConfig } from './types';
+
 const { error, env } = typedDotenv.config();
 
 if (error) {
@@ -9,4 +11,4 @@ if (error) {
   process.exit();
 }
 
-export default env;
+export const environmentConfig = env as unknown as EnvironmentConfig;
