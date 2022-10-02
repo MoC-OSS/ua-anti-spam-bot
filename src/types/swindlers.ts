@@ -8,6 +8,8 @@
 //   NO_MATCH = 'no match',
 // }
 
+import fs from 'node:fs';
+
 export type SwindlerType = 'site' | 'mention' | 'card' | 'tensor' | 'compare' | 'no match';
 
 export interface SwindlersBaseResult {
@@ -25,4 +27,24 @@ export interface SwindlersResult extends SwindlersBaseResult {
   displayReason?: string;
   match?: string;
   results: Record<any, any>;
+}
+
+export interface SwindlersUrlsResult extends SwindlersBaseResult {
+  nearestName?: string;
+  currentName: string;
+  redirectUrl: string;
+}
+
+export interface SwindlerTensorResult {
+  spamRate: number;
+  deleteRank: number;
+  isSpam: boolean;
+  tensorRank: number[];
+  fileStat: fs.Stats;
+}
+
+export interface SwindlersResultSummary {
+  foundSwindlerUrl?: SwindlersBaseResult | SwindlersUrlsResult | null;
+  foundSwindlerMention?: SwindlersBotsResult | null;
+  foundCard?: true | null;
 }

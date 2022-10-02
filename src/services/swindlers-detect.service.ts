@@ -1,49 +1,38 @@
+import stringSimilarity from 'string-similarity';
+import { optimizeText } from 'ukrainian-ml-optimizer';
+
+import { SwindlersTensorService } from '../tensor/swindlers-tensor.service';
+import { SwindlersResult } from '../types/swindlers';
+
 import { DynamicStorageService } from './dynamic-storage.service';
 import { SwindlersBotsService } from './swindlers-bots.service';
 import { SwindlersCardsService } from './swindlers-cards.service';
 import { SwindlersUrlsService } from './swindlers-urls.service';
-import { SwindlersTensorService } from '../tensor/swindlers-tensor.service';
-
-import { optimizeText } from 'ukrainian-ml-optimizer';
-import stringSimilarity from 'string-similarity';
 
 export class SwindlersDetectService {
-  /**
-   * @param {DynamicStorageService} dynamicStorageService
-   * @param {SwindlersBotsService} swindlersBotsService
-   * @param {SwindlersCardsService} swindlersCardsService
-   * @param {SwindlersUrlsService} swindlersUrlsService
-   * @param {SwindlersTensorService} swindlersTensorService
-   * */
-  dynamicStorageService: DynamicStorageService;
-  swindlersBotsService: SwindlersBotsService;
-  swindlersCardsService: SwindlersCardsService;
-  swindlersUrlsService: SwindlersUrlsService;
-  swindlersTensorService: SwindlersTensorService;
-  SWINDLER_SETTINGS: any;
-  constructor(dynamicStorageService, swindlersBotsService, swindlersCardsService, swindlersUrlsService, swindlersTensorService) {
-    this.dynamicStorageService = dynamicStorageService;
-    this.swindlersBotsService = swindlersBotsService;
-    this.swindlersCardsService = swindlersCardsService;
-    this.swindlersUrlsService = swindlersUrlsService;
-    this.swindlersTensorService = swindlersTensorService;
+  SWINDLER_SETTINGS = {
+    DELETE_CHANCE: 0.8,
+    LOG_CHANGE: 0.8,
+    SAME_CHECK: 0.9,
+    APPEND_TO_SHEET: 0.85,
+  };
 
-    this.SWINDLER_SETTINGS = {
-      DELETE_CHANCE: 0.8,
-      LOG_CHANGE: 0.8,
-      SAME_CHECK: 0.9,
-      APPEND_TO_SHEET: 0.85,
-    };
-  }
+  constructor(
+    private dynamicStorageService: DynamicStorageService,
+    private swindlersBotsService: SwindlersBotsService,
+    private swindlersCardsService: SwindlersCardsService,
+    private swindlersUrlsService: SwindlersUrlsService,
+    private swindlersTensorService: SwindlersTensorService,
+  ) {}
 
   /**
    * @param {string} message - message to process
    *
    * @return {SwindlersResult}
    * */
-  async isSwindlerMessage(message) {
-    const results: any = {};
-    const foundSwindlerUrl: any = await this.swindlersUrlsService.processMessage(message);
+  async isSwindlerMessage(message: string) {
+    const results = {};
+    const foundSwindlerUrl = await this.swindlersUrlsService.processMessage(message);
     results.foundSwindlerUrl = foundSwindlerUrl;
 
     if (foundSwindlerUrl) {
@@ -145,4 +134,3 @@ export class SwindlersDetectService {
     };
   }
 }
-

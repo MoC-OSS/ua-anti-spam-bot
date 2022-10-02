@@ -1,42 +1,46 @@
-import fs from 'fs';
-import path from 'path';
-
-import { env } from 'typed-dotenv'.config();
-import { optimizeText } from 'ukrainian-ml-optimizer';
+import fs from 'node:fs';
+import path from 'node:path';
 import tf from '@tensorflow/tfjs';
-require('@tensorflow/tfjs-node');
+import type { ModelArtifacts } from '@tensorflow/tfjs-core/dist/io/types';
+import { LayersModel } from '@tensorflow/tfjs-node';
+import { optimizeText } from 'ukrainian-ml-optimizer';
+
+import { environmentConfig } from '../config';
+import { SwindlerTensorResult } from '../types/swindlers';
 
 export class SwindlersTensorService {
-  model: any;
-  SPAM_THRESHOLD: any;
-  modelPath: any;
-  DICTIONARY: any;
-  MODEL: any;
-  DICTIONARY_EXTRAS: any;
-  modelLength: any;
-  constructor(modelPath, spamThreshold) {
-    /**
-     * @type {import('@tensorflow/tfjs').LayersModel}
-     * */
-    this.model = null;
-    this.SPAM_THRESHOLD = spamThreshold;
-    this.modelPath = modelPath;
+  model: LayersModel | null = null;
 
+  DICTIONARY: string[] = [];
+
+  MODEL: ModelArtifacts | undefined;
+
+  DICTIONARY_EXTRAS = {
+    START: 0,
+    UNKNOWN: 1,
+    PAD: 2,
+  };
+
+  modelLength: number;
+
+  constructor(private readonly modelPath: string, private SPAM_THRESHOLD: number) {
     try {
-      this.DICTIONARY = JSON.parse(fs.readFileSync(path.join(__dirname, './swindlers-temp/vocab.json')).toString());
-      this.MODEL = JSON.parse(fs.readFileSync(path.join(__dirname, './swindlers-temp/model.json')).toString());
-    } catch (e) {
+      this.DICTIONARY = JSON.parse(fs.readFileSync(path.join(__dirname, './swindlers-temp/vocab.json')).toString()) as string[];
+      this.MODEL = JSON.parse(fs.readFileSync(path.join(__dirname, './swindlers-temp/model.json')).toString()) as ModelArtifacts;
+    } catch (error) {
       console.error('Cannot parse model! Reason:');
-      console.error(e);
+      console.error(error);
     }
 
-    this.DICTIONARY_EXTRAS = this.getDictionaryExtras();
-    this.modelLength = this.MODEL.modelTopology.model_config.config.layers[1].config.input_length;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    this.modelLength = this.MODEL?.modelTopology?.model_config?.config.layers[1].config.input_length as number;
   }
 
-  setSpamThreshold(newThreshold) {
+  setSpamThreshold(newThreshold: string | number) {
     if (newThreshold && +newThreshold) {
-      this.SPAM_THRESHOLD = newThreshold;
+      this.SPAM_THRESHOLD = +newThreshold;
     }
   }
 
@@ -46,9 +50,9 @@ export class SwindlersTensorService {
     this.model = await tf.loadLayersModel(`file://${fullModelPath}`);
   }
 
-  async predict(word, rate) {
+  predict(word: string, rate: number): Promise<SwindlerTensorResult> {
     const tensorRank = this.tokenize(word);
-    const tensorPredict = this.model.predict(tensorRank.tensor);
+    const tensorPredict = this.model?.predict(tensorRank.tensor);
     const fullModelPath = path.join(__dirname, this.modelPath);
 
     const deleteRank = rate || this.SPAM_THRESHOLD;
@@ -56,23 +60,29 @@ export class SwindlersTensorService {
     /**
      * @type {Stats | null}
      * */
-    let fileStat = null;
+    let fileStat: fs.Stats | null = null;
 
-    if (env.TEST_TENSOR) {
+    if (environmentConfig.TEST_TENSOR) {
       try {
         fileStat = fs.statSync(fullModelPath);
-      } catch (e) {
+      } catch {
         fileStat = null;
       }
     }
 
-    return tensorPredict.data().then((numericData) => ({
-      spamRate: numericData[1],
-      deleteRank,
-      isSpam: numericData[1] > deleteRank,
-      tensorRank: tensorRank.tokenArray,
-      fileStat,
-    }));
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    return tensorPredict?.data().then(
+      (numericData: [number, number]) =>
+        ({
+          spamRate: numericData[1],
+          deleteRank,
+          isSpam: numericData[1] > deleteRank,
+          tensorRank: tensorRank.tokenArray,
+          fileStat,
+        } as SwindlerTensorResult),
+    ) as Promise<SwindlerTensorResult>;
   }
 
   tokenize(message) {
@@ -84,7 +94,7 @@ export class SwindlersTensorService {
     // Then split on spaces to create a word array.
     const wordArray = optimizeText(message)
       .split(' ')
-      .slice(0, this.modelLength - 1);
+      .slice(0, this.modelLength - 1) as string[];
 
     let index = 0;
 
@@ -110,38 +120,24 @@ export class SwindlersTensorService {
       tensor: tf.tensor([returnArray]),
     };
   }
-
-  /**
-   * @private
-   * */
-  getDictionaryExtras() {
-    return {
-      START: 0,
-      UNKNOWN: 1,
-      PAD: 2,
-    };
-  }
 }
 
-module.exports = {
-  SwindlersTensorService,
-  initSwindlersTensor: async () => {
-    // if (env.S3_BUCKET && s3Service) {
-    //   try {
-    //     console.info('* Staring new tensorflow S3 logic...');
-    //     await s3Service.downloadTensorFlowModel(path.join(__dirname, 'swindlers-temp'));
-    //     console.info('Tensor flow model has been loaded from S3.');
-    //   } catch (e) {
-    //     console.error('Cannot download tensor flow model from S3.\nReason: ', e);
-    //     console.error('Use the legacy model.');
-    //   }
-    // } else {
-    //   console.info('Skip loading model from S3 due to no S3_BUCKET or no s3Service.');
-    // }
+export const initSwindlersTensor = async () => {
+  // if (environmentConfig.S3_BUCKET && s3Service) {
+  //   try {
+  //     console.info('* Staring new tensorflow S3 logic...');
+  //     await s3Service.downloadTensorFlowModel(path.join(__dirname, 'swindlers-temp'));
+  //     console.info('Tensor flow model has been loaded from S3.');
+  //   } catch (e) {
+  //     console.error('Cannot download tensor flow model from S3.\nReason: ', e);
+  //     console.error('Use the legacy model.');
+  //   }
+  // } else {
+  //   console.info('Skip loading model from S3 due to no S3_BUCKET or no s3Service.');
+  // }
 
-    const tensorService = new SwindlersTensorService('./swindlers-temp/model.json', env.TENSOR_RANK);
-    await tensorService.loadModel();
+  const tensorService = new SwindlersTensorService('./swindlers-temp/model.json', environmentConfig.TENSOR_RANK);
+  await tensorService.loadModel();
 
-    return tensorService;
-  },
+  return tensorService;
 };
