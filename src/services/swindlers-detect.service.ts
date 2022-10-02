@@ -90,12 +90,12 @@ export class SwindlersDetectService {
     //   };
     // }
 
-    const processedMessage = optimizeText(message) as string;
+    const processedMessage = optimizeText(message);
 
     let lastChance = 0;
     let maxChance = 0;
     const foundSwindler = this.dynamicStorageService.swindlerMessages.some((text) => {
-      lastChance = compareTwoStrings(processedMessage, text) as number;
+      lastChance = compareTwoStrings(processedMessage, text);
 
       if (lastChance > maxChance) {
         maxChance = lastChance;
