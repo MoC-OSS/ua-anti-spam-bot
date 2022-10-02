@@ -1,8 +1,8 @@
-import stringSimilarity from 'string-similarity';
+import { compareTwoStrings } from 'string-similarity';
 import { optimizeText } from 'ukrainian-ml-optimizer';
 
 import { SwindlersTensorService } from '../tensor/swindlers-tensor.service';
-import { SwindlersResult } from '../types/swindlers';
+import { SwindlersResult, SwindlersResultSummary } from '../types/swindlers';
 
 import { DynamicStorageService } from './dynamic-storage.service';
 import { SwindlersBotsService } from './swindlers-bots.service';
@@ -31,7 +31,7 @@ export class SwindlersDetectService {
    * @return {SwindlersResult}
    * */
   async isSwindlerMessage(message: string) {
-    const results = {};
+    const results: SwindlersResultSummary = {};
     const foundSwindlerUrl = await this.swindlersUrlsService.processMessage(message);
     results.foundSwindlerUrl = foundSwindlerUrl;
 
@@ -53,7 +53,7 @@ export class SwindlersDetectService {
         rate: foundSwindlerMention.rate,
         reason: 'mention',
         match: foundSwindlerMention.nearestName,
-        displayReason: `mention (${foundSwindlerMention.nearestName})`,
+        displayReason: `mention (${foundSwindlerMention.nearestName || ''})`,
         results,
       };
     }
@@ -90,12 +90,12 @@ export class SwindlersDetectService {
     //   };
     // }
 
-    const processedMessage = optimizeText(message);
+    const processedMessage = optimizeText(message) as string;
 
     let lastChance = 0;
     let maxChance = 0;
     const foundSwindler = this.dynamicStorageService.swindlerMessages.some((text) => {
-      lastChance = stringSimilarity.compareTwoStrings(processedMessage, text);
+      lastChance = compareTwoStrings(processedMessage, text) as number;
 
       if (lastChance > maxChance) {
         maxChance = lastChance;

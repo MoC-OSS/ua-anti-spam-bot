@@ -50,7 +50,7 @@ export class SwindlersTensorService {
     this.model = await tf.loadLayersModel(`file://${fullModelPath}`);
   }
 
-  predict(word: string, rate: number): Promise<SwindlerTensorResult> {
+  predict(word: string, rate: number | null): Promise<SwindlerTensorResult> {
     const tensorRank = this.tokenize(word);
     const tensorPredict = this.model?.predict(tensorRank.tensor);
     const fullModelPath = path.join(__dirname, this.modelPath);

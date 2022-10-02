@@ -47,4 +47,9 @@ export interface SwindlersResultSummary {
   foundSwindlerUrl?: SwindlersBaseResult | SwindlersUrlsResult | null;
   foundSwindlerMention?: SwindlersBotsResult | null;
   foundCard?: true | null;
+  foundTensor?: SwindlerTensorResult;
+  foundCompare?: {
+    foundSwindler: boolean;
+    spamRate: number;
+  };
 }
