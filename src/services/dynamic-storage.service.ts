@@ -68,7 +68,9 @@ export class DynamicStorageService {
     ]);
 
     return cases.then(([swindlerPositives, swindlerBots, swindlerDomains, notSwindlers, swindlerCards, swindlerRegexSites]) => {
-      this.swindlerMessages = removeDuplicates(swindlerPositives).map(optimizeText).filter(Boolean);
+      this.swindlerMessages = removeDuplicates(swindlerPositives)
+        .map((element) => optimizeText(element))
+        .filter(Boolean);
       this.swindlerBots = removeDuplicates(swindlerBots);
       this.swindlerDomains = removeDuplicates(swindlerDomains);
       this.notSwindlers = removeDuplicates(notSwindlers);

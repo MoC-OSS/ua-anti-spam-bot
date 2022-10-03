@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prefer-module */
 import fs from 'node:fs';
 import path from 'node:path';
 import tf from '@tensorflow/tfjs';
@@ -85,7 +86,7 @@ export class SwindlersTensorService {
     ) as Promise<SwindlerTensorResult>;
   }
 
-  tokenize(message) {
+  tokenize(message: string) {
     // Always start with the START token.
     const returnArray = [this.DICTIONARY_EXTRAS.START];
 
@@ -94,7 +95,7 @@ export class SwindlersTensorService {
     // Then split on spaces to create a word array.
     const wordArray = optimizeText(message)
       .split(' ')
-      .slice(0, this.modelLength - 1) as string[];
+      .slice(0, this.modelLength - 1);
 
     let index = 0;
 
