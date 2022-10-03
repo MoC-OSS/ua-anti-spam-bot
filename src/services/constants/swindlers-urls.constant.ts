@@ -445,7 +445,7 @@ export const EXCEPTION_DOMAINS = [
 ];
 
 export const URL_REGEXP =
-  /(https?:\/\/(?:www\.|(?!www))?[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|(https?:\/\/(?:www\.|(?!www)))?[a-zA-Z0-9-]+\.[^\s]{2,}|www\.?[a-zA-Z0-9]+\.[^\s]{2,})/g;
+  /(https?:\/\/(?:www\.|(?!www))?[\dA-Za-z][\dA-Za-z-]+[\dA-Za-z]\.\S{2,}|www\.[\dA-Za-z][\dA-Za-z-]+[\dA-Za-z]\.\S{2,}|(https?:\/\/(?:www\.|(?!www)))?[\dA-Za-z-]+\.\S{2,}|www\.?[\dA-Za-z]+\.\S{2,})/g;
 export const VALID_URL_REGEXP = new RegExp(
   '^(https?:\\/\\/)?' + // protocol
     '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
@@ -455,10 +455,3 @@ export const VALID_URL_REGEXP = new RegExp(
     '(\\#[-a-z\\d_]*)?$',
   'i',
 );
-
-module.exports = {
-  SHORTS,
-  EXCEPTION_DOMAINS,
-  URL_REGEXP,
-  VALID_URL_REGEXP,
-};

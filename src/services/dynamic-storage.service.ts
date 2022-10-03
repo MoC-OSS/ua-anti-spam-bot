@@ -3,6 +3,7 @@ import type TypedEmitter from 'typed-emitter';
 import { optimizeText } from 'ukrainian-ml-optimizer';
 
 import { dataset } from '../../dataset/dataset';
+import { removeDuplicates } from '../utils';
 
 import { SwindlersGoogleService } from './swindlers-google.service';
 
@@ -19,17 +20,17 @@ export type LocalDataset = typeof dataset &
   }>;
 
 export class DynamicStorageService {
-  swindlerMessages: any[];
+  swindlerMessages: string[] = [];
 
-  swindlerBots: string[];
+  swindlerBots: string[] = [];
 
-  swindlerDomains: string[];
+  swindlerDomains: string[] = [];
 
-  swindlerCards: string[];
+  swindlerCards: string[] = [];
 
-  swindlerRegexSites: string[];
+  swindlerRegexSites: string[] = [];
 
-  notSwindlers: string[];
+  notSwindlers: string[] = [];
 
   fetchEmitter: TypedEmitter<FetchEvents>;
 
@@ -59,7 +60,7 @@ export class DynamicStorageService {
   async updateSwindlers() {
     const cases = Promise.all([
       this.swindlersGoogleService.getTrainingPositives(true),
-      this.swindlersGoogleService.getBots(true),
+      this.swindlersGoogleService.getBots(),
       this.swindlersGoogleService.getDomains(),
       this.swindlersGoogleService.getNotSwindlers(),
       this.swindlersGoogleService.getCards(),
@@ -67,22 +68,16 @@ export class DynamicStorageService {
     ]);
 
     return cases.then(([swindlerPositives, swindlerBots, swindlerDomains, notSwindlers, swindlerCards, swindlerRegexSites]) => {
-      this.swindlerMessages = this.removeDuplicates(swindlerPositives).map(optimizeText).filter(Boolean);
-      this.swindlerBots = this.removeDuplicates(swindlerBots);
-      this.swindlerDomains = this.removeDuplicates(swindlerDomains);
-      this.notSwindlers = this.removeDuplicates(notSwindlers);
-      this.swindlerCards = this.removeDuplicates(swindlerCards);
-      this.swindlerRegexSites = this.removeDuplicates(swindlerRegexSites);
+      this.swindlerMessages = removeDuplicates(swindlerPositives)
+        .map((element) => optimizeText(element))
+        .filter(Boolean);
+      this.swindlerBots = removeDuplicates(swindlerBots);
+      this.swindlerDomains = removeDuplicates(swindlerDomains);
+      this.notSwindlers = removeDuplicates(notSwindlers);
+      this.swindlerCards = removeDuplicates(swindlerCards);
+      this.swindlerRegexSites = removeDuplicates(swindlerRegexSites);
       this.fetchEmitter.emit('fetch');
       console.info('got DynamicStorageService messages', new Date());
     });
-  }
-
-  smartAppend(array1, array2) {
-    return this.removeDuplicates([...array1, ...array2]);
-  }
-
-  removeDuplicates(array: string[]): string[] {
-    return [...new Set(array)];
   }
 }

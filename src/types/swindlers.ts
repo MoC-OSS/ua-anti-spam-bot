@@ -22,13 +22,6 @@ export interface SwindlersBotsResult extends SwindlersBaseResult {
   currentName: string;
 }
 
-export interface SwindlersResult extends SwindlersBaseResult {
-  reason: SwindlerType;
-  displayReason?: string;
-  match?: string;
-  results: Record<any, any>;
-}
-
 export interface SwindlersUrlsResult extends SwindlersBaseResult {
   nearestName?: string;
   currentName: string;
@@ -47,4 +40,16 @@ export interface SwindlersResultSummary {
   foundSwindlerUrl?: SwindlersBaseResult | SwindlersUrlsResult | null;
   foundSwindlerMention?: SwindlersBotsResult | null;
   foundCard?: true | null;
+  foundTensor?: SwindlerTensorResult;
+  foundCompare?: {
+    foundSwindler: boolean;
+    spamRate: number;
+  };
+}
+
+export interface SwindlersResult extends SwindlersBaseResult {
+  reason: SwindlerType;
+  displayReason?: string;
+  match?: string;
+  results: SwindlersResultSummary;
 }

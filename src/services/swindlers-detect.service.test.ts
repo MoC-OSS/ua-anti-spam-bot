@@ -1,22 +1,25 @@
-import { SwindlersBotsService } from './swindlers-bots.service';
-
 import axios from 'axios';
-import { mockDynamicStorageService, mockNewUrl, mockNewBot } from './_mocks/index.mocks';
+
+import { initSwindlersTensor, SwindlersTensorService } from '../tensor/swindlers-tensor.service';
+
+import { mockDynamicStorageService, mockNewBot, mockNewUrl } from './_mocks/index.mocks';
+import { SwindlersBotsService } from './swindlers-bots.service';
 import { SwindlersCardsService } from './swindlers-cards.service';
 import { SwindlersDetectService } from './swindlers-detect.service';
 import { SwindlersUrlsService } from './swindlers-urls.service';
-import { initSwindlersTensor } from '../tensor/swindlers-tensor.service';
 
 jest.mock('axios');
+
+const axiosMock = axios as jest.Mocked<typeof axios>;
 
 /**
  * @type {SwindlersDetectService}
  * */
-let swindlersDetectService;
+let swindlersDetectService: SwindlersDetectService;
 /**
  * @type {SwindlersTensorService}
  * */
-let swindlersTensorService;
+let swindlersTensorService: SwindlersTensorService;
 const swindlersBotsService = new SwindlersBotsService(mockDynamicStorageService, 0.6);
 const swindlersCardsService = new SwindlersCardsService(mockDynamicStorageService);
 const swindlersUrlsService = new SwindlersUrlsService(mockDynamicStorageService, 0.6);
@@ -39,7 +42,7 @@ describe('SwindlersDetectService', () => {
       it('should match swindler urls as spam', async () => {
         const text = 'https://da-pay.me/ тест';
         const responseUrl = 'https://da-pay.me/';
-        axios.get.mockImplementationOnce(() => Promise.resolve({ request: { res: { responseUrl } } }));
+        axiosMock.get.mockImplementationOnce(() => Promise.resolve({ request: { res: { responseUrl } } }));
         const result = await swindlersDetectService.isSwindlerMessage(text);
 
         expect(result.isSpam).toEqual(true);
@@ -51,10 +54,10 @@ describe('SwindlersDetectService', () => {
         const text = 'https://privat24.io/ тест';
         const responseUrl = 'https://privat24.io/';
         // eslint-disable-next-line prefer-promise-reject-errors
-        axios.get.mockImplementationOnce(() => Promise.reject({ response: { headers: { location: responseUrl } } }));
+        axiosMock.get.mockImplementationOnce(() => Promise.reject({ response: { headers: { location: responseUrl } } }));
         const result = await swindlersDetectService.isSwindlerMessage(text);
 
-        expect(axios.get).toHaveBeenCalledWith(responseUrl, { maxRedirects: 0 });
+        expect(axiosMock.get.bind(this)).toHaveBeenCalledWith(responseUrl, { maxRedirects: 0 });
         expect(result.isSpam).toEqual(true);
         expect(result.rate).toEqual(200);
         expect(result.reason).toEqual('site');
@@ -62,7 +65,7 @@ describe('SwindlersDetectService', () => {
 
       it('should match similar swindler urls as spam', async () => {
         const text = `${mockNewUrl} test`;
-        axios.get.mockImplementationOnce(() => Promise.resolve({ response: { headers: { location: mockNewUrl } } }));
+        axiosMock.get.mockImplementationOnce(() => Promise.resolve({ response: { headers: { location: mockNewUrl } } }));
         const result = await swindlersDetectService.isSwindlerMessage(text);
         expect(result.isSpam).toEqual(true);
         expect(result.rate).toBeGreaterThan(0.6);
