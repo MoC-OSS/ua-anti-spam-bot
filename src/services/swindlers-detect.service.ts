@@ -30,7 +30,7 @@ export class SwindlersDetectService {
    *
    * @return {SwindlersResult}
    * */
-  async isSwindlerMessage(message: string) {
+  async isSwindlerMessage(message: string): Promise<SwindlersResult> {
     const results: SwindlersResultSummary = {};
     const foundSwindlerUrl = await this.swindlersUrlsService.processMessage(message);
     results.foundSwindlerUrl = foundSwindlerUrl;
@@ -41,7 +41,7 @@ export class SwindlersDetectService {
         rate: foundSwindlerUrl.rate,
         reason: 'site',
         results,
-      };
+      } as SwindlersResult;
     }
 
     const foundSwindlerMention = this.swindlersBotsService.processMessage(message);
@@ -55,7 +55,7 @@ export class SwindlersDetectService {
         match: foundSwindlerMention.nearestName,
         displayReason: `mention (${foundSwindlerMention.nearestName || ''})`,
         results,
-      };
+      } as SwindlersResult;
     }
 
     const foundCard = this.swindlersCardsService.processMessage(message);
@@ -67,7 +67,7 @@ export class SwindlersDetectService {
         rate: 200,
         reason: 'card',
         results,
-      };
+      } as SwindlersResult;
     }
 
     const foundTensor = await this.swindlersTensorService.predict(message, null);
@@ -79,7 +79,7 @@ export class SwindlersDetectService {
         rate: foundTensor.spamRate,
         reason: 'tensor',
         results,
-      };
+      } as SwindlersResult;
     }
 
     // if (spamRate < 0.2) {
@@ -114,7 +114,7 @@ export class SwindlersDetectService {
         rate: maxChance,
         reason: 'compare',
         results,
-      };
+      } as SwindlersResult;
     }
 
     if (maxChance > this.SWINDLER_SETTINGS.LOG_CHANGE) {
@@ -123,7 +123,7 @@ export class SwindlersDetectService {
         rate: maxChance,
         reason: 'compare',
         results,
-      };
+      } as SwindlersResult;
     }
 
     return {
@@ -131,6 +131,6 @@ export class SwindlersDetectService {
       rate: 0,
       reason: 'no match',
       results,
-    };
+    } as SwindlersResult;
   }
 }

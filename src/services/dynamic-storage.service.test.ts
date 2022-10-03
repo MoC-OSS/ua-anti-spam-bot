@@ -4,7 +4,7 @@ import { DynamicStorageService } from './dynamic-storage.service';
 /**
  * @type {DynamicStorageService}
  * */
-let dynamicStorageService;
+let dynamicStorageService: DynamicStorageService;
 describe('DynamicStorageService', () => {
   beforeAll(() => {
     dynamicStorageService = new DynamicStorageService(mockSwindlersGoogleService, mockDataset);

@@ -22,13 +22,6 @@ export interface SwindlersBotsResult extends SwindlersBaseResult {
   currentName: string;
 }
 
-export interface SwindlersResult extends SwindlersBaseResult {
-  reason: SwindlerType;
-  displayReason?: string;
-  match?: string;
-  results: Record<any, any>;
-}
-
 export interface SwindlersUrlsResult extends SwindlersBaseResult {
   nearestName?: string;
   currentName: string;
@@ -52,4 +45,11 @@ export interface SwindlersResultSummary {
     foundSwindler: boolean;
     spamRate: number;
   };
+}
+
+export interface SwindlersResult extends SwindlersBaseResult {
+  reason: SwindlerType;
+  displayReason?: string;
+  match?: string;
+  results: SwindlersResultSummary;
 }
