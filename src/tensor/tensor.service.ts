@@ -124,7 +124,7 @@ export class TensorService {
   }
 }
 
-export const initTensor = async (s3Service: S3Service) => {
+export const initTensor = async (s3Service?: S3Service) => {
   if (environmentConfig.S3_BUCKET && s3Service) {
     try {
       console.info('* Staring new tensorflow S3 logic...');

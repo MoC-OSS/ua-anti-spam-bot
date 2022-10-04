@@ -1,9 +1,9 @@
 import { auth } from 'google-auth-library';
-import { JWTInput } from 'google-auth-library/build/src/auth/credentials';
+import type { JWTInput } from 'google-auth-library/build/src/auth/credentials';
 import { google } from 'googleapis';
 
 import { environmentConfig } from '../config';
-import { GoogleFullCellData, GoogleShortCellData } from '../types';
+import type { GoogleFullCellData, GoogleShortCellData } from '../types';
 import { handleError } from '../utils';
 
 const sheets = google.sheets('v4');
@@ -42,7 +42,7 @@ export class GoogleService {
    *
    * @returns {Promise<Record<string, any>[] | null>}
    * */
-  async getSheet<T extends boolean | true | false>(
+  async getSheet<T extends boolean | true | false = false>(
     spreadsheetId: string,
     sheetName: string,
     range?: string,

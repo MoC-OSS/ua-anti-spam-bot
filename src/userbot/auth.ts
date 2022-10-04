@@ -1,8 +1,10 @@
-/* eslint-disable camelcase */
-import { env } from 'typed-dotenv'.config();
-import api from './api';
+/* eslint-disable camelcase,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/ban-ts-comment,@typescript-eslint/no-unsafe-assignment */
+import { environmentConfig } from '../config';
+import type { CheckPassword } from '../types';
 
- export function checkPassword({ srp_id, A, M1 }) {
+import { api } from './api';
+
+export function checkPassword({ srp_id, A, M1 }: CheckPassword) {
   return api.call('auth.checkPassword', {
     password: {
       _: 'inputCheckPasswordSRP',
@@ -20,12 +22,12 @@ async function getUser() {
         _: 'inputUserSelf',
       },
     });
-  } catch (error) {
+  } catch {
     return null;
   }
 }
 
-function sendCode(phone) {
+function sendCode(phone: string) {
   return api.call('auth.sendCode', {
     phone_number: phone,
     settings: {
@@ -52,17 +54,17 @@ function signUp({ phone, phone_code_hash }) {
 }
 
 function getPassword() {
-  return api.call('account.getPassword');
+  return api.call<any>('account.getPassword');
 }
 
-module.exports = async () => {
+export default async () => {
   const user = await getUser();
 
   if (!user) {
     console.info('User is undefined, try to new connection');
 
-    const phone = env.USERBOT_LOGIN_PHONE;
-    const code = env.USERBOT_LOGIN_CODE;
+    const phone = environmentConfig.USERBOT_LOGIN_PHONE;
+    const code = environmentConfig.USERBOT_LOGIN_CODE;
 
     // const { code, phoneNumber: phone } = config;
     const { phone_code_hash } = await sendCode(phone);
@@ -92,6 +94,7 @@ module.exports = async () => {
       const password = 'USER_PASSWORD';
 
       const { srp_id, current_algo, srp_B } = await getPassword();
+      // @ts-ignore
       const { g, p, salt1, salt2 } = current_algo;
 
       const { A, M1 } = await api.mtproto.crypto.getSRPParams({

@@ -70,6 +70,7 @@ export interface AwsEnvironmentConfig {
 export type EnvironmentConfig = GrammyEnvironmentConfig &
   ServerEnvironmentConfig &
   MiscellaneousEnvironmentConfig &
+  UserbotEnvironmentConfig &
   PostgresEnvironmentConfig &
   SpamReputationEnvironmentConfig &
   GoogleEnvironmentConfig &

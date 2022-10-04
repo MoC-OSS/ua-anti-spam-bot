@@ -1,19 +1,15 @@
-import { API } from './api';
+import type { Chat, ProtoUpdate } from '../types';
+
+import type { API } from './api';
 
 export class MtProtoClient {
-  /**
-   * @param {API} api
-   * */
-  api: API
-  constructor(api) {
-    this.api = api;
-  }
+  constructor(private api: API) {}
 
   messagesGetAllChats() {
-    return this.api.call('messages.getAllChats', { except_ids: [] });
+    return this.api.call<ProtoUpdate>('messages.getAllChats', { except_ids: [] });
   }
 
-  resolvePeer(chats, title) {
+  resolvePeer(chats: Chat[], title: string) {
     const peer = chats.find((chat) => chat.title === title);
 
     if (!peer) {
@@ -46,7 +42,7 @@ export class MtProtoClient {
   /**
    * @param {string} query
    * */
-  contactsSearch(query) {
+  contactsSearch(query: string) {
     return this.api.call('contacts.search', {
       q: query,
     });
@@ -55,10 +51,10 @@ export class MtProtoClient {
   /**
    * @param {string} message
    * */
-  sendSelfMessage(message) {
+  sendSelfMessage(message: string) {
     return this.api.call('messages.sendMessage', {
       message,
-      random_id: Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff),
+      random_id: Math.ceil(Math.random() * 0xff_ff_ff) + Math.ceil(Math.random() * 0xff_ff_ff),
       peer: {
         _: 'inputPeerSelf',
       },
@@ -69,15 +65,11 @@ export class MtProtoClient {
    * @param {string} message
    * @param {Record<string, any>} peer
    * */
-  sendPeerMessage(message, peer) {
+  sendPeerMessage(message: string, peer: Record<string, any>) {
     return this.api.call('messages.sendMessage', {
       message,
-      random_id: Math.ceil(Math.random() * 0xffffff) + Math.ceil(Math.random() * 0xffffff),
+      random_id: Math.ceil(Math.random() * 0xff_ff_ff) + Math.ceil(Math.random() * 0xff_ff_ff),
       peer,
     });
   }
 }
-
-module.exports = {
-  MtProtoClient,
-};
