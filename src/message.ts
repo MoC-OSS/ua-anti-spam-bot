@@ -1,8 +1,10 @@
-import { env } from 'typed-dotenv'.config();
 import moment from 'moment-timezone';
+import type { JsonObject } from 'type-fest';
 
+import { environmentConfig } from './config';
 import { helpChat } from './creator';
-import { getRandomItem, formatStateIntoAccusative } from './utils';
+import type { ChatSessionData } from './types';
+import { formatStateIntoAccusative, getRandomItem } from './utils';
 
 export const randomBanEmojis = ['👮🏻‍♀️', '🤦🏼‍♀️', '🙅🏻‍♀️'];
 export const randomLocationBanEmojis = ['🏡', '🏘️', '🌳'];
@@ -95,16 +97,16 @@ export const getRandomAlarmEndText = () => {
 /**
  * @param {ChatSessionData['chatSettings']} settings
  * */
-export const getAlarmStartNotificationMessage = (settings) => `
-🔴 <b> ${getCurrentTimeAndDate()} Повітряна тривога в ${formatStateIntoAccusative(settings.airRaidAlertSettings.state)}!</b>
+export const getAlarmStartNotificationMessage = (settings: ChatSessionData['chatSettings']) => `
+🔴 <b> ${getCurrentTimeAndDate()} Повітряна тривога в ${formatStateIntoAccusative(settings.airRaidAlertSettings.state || '')}!</b>
 ${getRandomAlarmStartText()}
 `;
 
 /**
  * @param {ChatSessionData['chatSettings']} settings
  * */
-export const alarmEndNotificationMessage = (settings) => `
-🟢 <b>${getCurrentTimeAndDate()} Відбій тривоги в ${formatStateIntoAccusative(settings.airRaidAlertSettings.state)}!</b>
+export const alarmEndNotificationMessage = (settings: ChatSessionData['chatSettings']) => `
+🟢 <b>${getCurrentTimeAndDate()} Відбій тривоги в ${formatStateIntoAccusative(settings.airRaidAlertSettings.state || '')}!</b>
 ${getRandomAlarmEndText()}
 `;
 /**
@@ -121,18 +123,18 @@ export const cancelMessageSending = 'Розсилка була відмінен�
 /**
  * @param {ChatSessionData['chatSettings']} settings
  * */
-export const getSettingsMenuMessage = (settings) =>
+export const getSettingsMenuMessage = (settings: ChatSessionData['chatSettings']) =>
   `
 <b>🤖 Налаштування бота в поточному чаті.</b>
 Тут ви можете регулювати параметри.
 
-🚀 ${settings.disableStrategicInfo === true ? '⛔️ Бот не видаляє стратегічну інформацію.' : '✅ Бот видаляє стратегічну інформацію.'}
+🚀 ${settings.disableStrategicInfo ? '⛔️ Бот не видаляє стратегічну інформацію.' : '✅ Бот видаляє стратегічну інформацію.'}
 ❗ ${
-    settings.disableStrategicInfo === true || settings.disableDeleteMessage === true
+    settings.disableStrategicInfo || settings.disableDeleteMessage
       ? '⛔️ Бот не повідомляє про видалену стратегічну інформацію.'
       : '✅ Бот повідомляє про видалену стратегічну інформацію.'
   }
-💰 ${settings.disableSwindlerMessage === true ? '⛔️ Бот не видаляє повідомлення шахраїв.' : '✅ Бот видаляє повідомлення шахраїв.'}
+💰 ${settings.disableSwindlerMessage ? '⛔️ Бот не видаляє повідомлення шахраїв.' : '✅ Бот видаляє повідомлення шахраїв.'}
 
 <b>Налаштування повітряної тривоги.</b>
 🏰 ${
@@ -154,7 +156,7 @@ export const getSettingsMenuMessage = (settings) =>
 Для зміни налаштувань, натисніть на відповідну кнопку нижче. 👇
 `.trim();
 
-export const getAirRaidAlarmSettingsMessage = (settings) =>
+export const getAirRaidAlarmSettingsMessage = (settings: ChatSessionData['chatSettings']) =>
   `
 <b>🤖 Налаштування повітряної тривоги в поточному чаті.</b>
 Тут ти можеш змінити регіон до якого відноситься цей чат.
@@ -214,12 +216,20 @@ export const startMessageAtom = `
  * */
 export const getDeclinedMassSendingMessage = 'Вибач, але у тебе немає прав для цієї команди.😞'.trim();
 
+export interface DeleteMessageProperties {
+  writeUsername: string;
+  userId: number;
+  wordMessage: string;
+  debugMessage: string;
+  withLocation: boolean;
+}
+
 /**
  *
  * Message that bot sends on delete
  *
  * */
-export const getDeleteMessage = ({ writeUsername, userId, wordMessage, debugMessage, withLocation }) =>
+export const getDeleteMessage = ({ writeUsername, userId, wordMessage, debugMessage, withLocation }: DeleteMessageProperties) =>
   `
 ❗️ ${userId && writeUsername ? `<a href="tg://user?id=${userId}">${writeUsername}</a>, <b>повідомлення` : '<b>Повідомлення'} видалено</b>.
 
@@ -236,12 +246,18 @@ ${getRandomItem(withLocation ? randomLocationBanEmojis : randomBanEmojis)} <b>П
 
 ${debugMessage}`.trim();
 
+export interface DebugMessageProperties {
+  message: string;
+  byRules: JsonObject;
+  startTime: Date;
+}
+
 /**
  *
- * Returns debug message that bot adds to delete message if env is debug
+ * Returns debug message that bot adds to delete message if environmentConfig is debug
  *
  * */
-export const getDebugMessage = ({ message, byRules, startTime }) =>
+export const getDebugMessage = ({ message, byRules, startTime }: DebugMessageProperties) =>
   `
 ***DEBUG***
 Message:
@@ -251,11 +267,24 @@ Ban reason:
 ${JSON.stringify(byRules)}
 
 Logic type:
-${env.USE_SERVER ? 'server' : 'local'}
+${environmentConfig.USE_SERVER ? 'server' : 'local'}
 
 Last deploy:
 ${startTime.toString()}
 `.trim();
+
+export interface StatisticsMessageProperties {
+  adminsChatsCount: number;
+  botRemovedCount: number;
+  botStartTime: string;
+  channelCount: number;
+  groupCount: number;
+  memberChatsCount: number;
+  privateCount: number;
+  superGroupsCount: number;
+  totalSessionCount: number;
+  totalUserCounts: number;
+}
 
 /**
  *
@@ -273,7 +302,7 @@ export const getStatisticsMessage = ({
   superGroupsCount,
   totalSessionCount,
   totalUserCounts,
-}) =>
+}: StatisticsMessageProperties) =>
   `
 <b>Кількість всіх: </b>
 • Чатів - ${totalSessionCount} 🎉
@@ -298,12 +327,20 @@ export const getStatisticsMessage = ({
 ${botStartTime}</i>
 `.trim();
 
+export interface HelpMessageProperties {
+  startLocaleTime: string;
+  isAdmin: boolean;
+  canDelete: boolean;
+  user: string;
+  userId: number;
+}
+
 /**
  *
  * Help handler
  *
  * */
-export const getHelpMessage = ({ startLocaleTime, isAdmin, canDelete, user, userId }) =>
+export const getHelpMessage = ({ startLocaleTime, isAdmin, canDelete, user, userId }: HelpMessageProperties) =>
   `
 <a href="tg://user?id=${userId}">${user}</a>
 
@@ -343,14 +380,22 @@ ${startMessageAtom}
 https://youtu.be/RX0cZYf1Lm4
 `.trim();
 
+export interface GroupStartMessageProperties {
+  adminsString: string;
+  isAdmin?: boolean;
+  canDelete: boolean;
+  user?: string;
+  userId?: number;
+}
+
 /**
  *
  * Message that bot sends when user uses /start in the group
  *
  * */
-export const getGroupStartMessage = ({ adminsString, isAdmin = false, canDelete, user = '', userId }) =>
+export const getGroupStartMessage = ({ adminsString, isAdmin = false, canDelete, user = '', userId }: GroupStartMessageProperties) =>
   `
-<a href="tg://user?id=${userId}">${user}</a>
+${userId ? `<a href="tg://user?id=${userId}">${user}</a>` : user}
 
 ${isAdmin ? startAdminReadyMessage : makeAdminMessage}
 ${canDelete ? hasDeletePermissionMessage : hasNoDeletePermissionMessage}
@@ -358,7 +403,11 @@ ${canDelete ? hasDeletePermissionMessage : hasNoDeletePermissionMessage}
 ${((!isAdmin || !canDelete) && (adminsString ? `З цим може допомогти: ${adminsString}` : 'З цим може допомогти творець чату')) || ''}
 `.trim();
 
-export const getCannotDeleteMessage = ({ adminsString }) =>
+export interface CannotDeleteMessageProperties {
+  adminsString: string;
+}
+
+export const getCannotDeleteMessage = ({ adminsString }: CannotDeleteMessageProperties) =>
   `
 <b>😢 Не можу видалити це повідомлення.</b>
 Я не маю прав на видалення або в Telegram стався збій.
@@ -367,12 +416,16 @@ export const getCannotDeleteMessage = ({ adminsString }) =>
 ${adminsString ? `З цим може допомогти: ${adminsString}` : 'З цим може допомогти творець чату'}
 `.trim();
 
+export interface StartChannelMessageProperties {
+  botName: string;
+}
+
 /**
  *
  * Message that bot sends when user invites it into a channel
  *
  * */
-export const getStartChannelMessage = ({ botName }) =>
+export const getStartChannelMessage = ({ botName }: StartChannelMessageProperties) =>
   `
 Привіт! Повідомлення від офіційного чат-боту @${botName}.
 Ви мене додали в <b>канал</b> як адміністратора, але я не можу перевіряти повідомлення в коментарях.
@@ -392,46 +445,62 @@ export const getUpdatesMessage = () =>
 
 `.trim();
 
-export const getUpdateMessage = ({ totalCount, finishedCount, successCount, type }) =>
+export interface UpdateMessageProperties {
+  totalCount: number;
+  finishedCount: number;
+  successCount: number;
+  type: string; // TODO add type
+}
+
+export const getUpdateMessage = ({ totalCount, finishedCount, successCount, type }: UpdateMessageProperties) =>
   `
 Було опрацьовано ${finishedCount}/${totalCount} повідомлень для ${type}...
 Успішно ${successCount} повідомлень.
 `.trim();
+
+export interface SuccessfulMessageProperties {
+  totalCount: number;
+  successCount: number;
+}
 
 /**
  *
  * Message that bots sends before confirmation
  *
  * */
-export const getSuccessfulMessage = ({ totalCount, successCount }) =>
+export const getSuccessfulMessage = ({ totalCount, successCount }: SuccessfulMessageProperties) =>
   `
 Розсилка завершена!
 Було відправлено ${successCount}/${totalCount} повідомлень.
 `.trim();
+
+export interface BotJoinMessageProperties {
+  adminsString: string;
+  isAdmin?: boolean;
+}
 
 /**
  *
  * Message that bot sends when user invites in into a group
  *
  * */
-export const getBotJoinMessage = ({ adminsString, isAdmin = false }) =>
+export const getBotJoinMessage = ({ adminsString, isAdmin = false }: BotJoinMessageProperties) =>
   `
 ${startMessageAtom}
 
-${getGroupStartMessage({ adminsString, isAdmin, canDelete: null, user: undefined, userId: null }).trim()}
+${getGroupStartMessage({ adminsString, isAdmin, canDelete: false, user: undefined, userId: undefined }).trim()}
 `.trim();
+
+export interface TensorTestResultProperties {
+  chance: number;
+  isSpam: boolean;
+}
 
 /**
  * Test messages
  */
-export const getTensorTestResult = ({ chance, isSpam }) =>
+export const getTensorTestResult = ({ chance, isSpam }: TensorTestResultProperties) =>
   `
 🎲 Шанс спаму - <b>${chance}</b>
 🤔 Я вважаю...<b>${isSpam ? '✅ Це спам' : '⛔️ Це не спам'}</b>
 `.trim();
-
-/**
- *
- * Exports
- *
- * */

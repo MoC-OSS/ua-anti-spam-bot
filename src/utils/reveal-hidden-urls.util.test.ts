@@ -1,24 +1,36 @@
 import { Context } from 'grammy';
 
+import type { GrammyContext } from '../types';
+
 import { revealHiddenUrls } from './reveal-hidden-urls.util';
 
 /**
  * @returns GrammyContext
  * */
-const createContext = (text, entities) => {
+const createContext = (text: string, entities: any[]) => {
   const newContext = new Context(
     {
       update_id: 324_607_000,
       message: {
         message_id: 9701,
-        from: {},
-        chat: {},
+        from: {
+          id: 9999,
+          is_bot: false,
+          first_name: 'Mock',
+        },
+        chat: {
+          id: 999,
+          type: 'private',
+          first_name: 'Mock Chat',
+        },
         date: 1_659_262_017,
         text,
         entities,
       },
     },
     {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       raw: {},
       state: { text },
     },
@@ -31,7 +43,7 @@ const createContext = (text, entities) => {
       can_read_all_group_messages: false,
       supports_inline_queries: false,
     },
-  );
+  ) as GrammyContext;
 
   newContext.state = {};
   newContext.state.text = text;

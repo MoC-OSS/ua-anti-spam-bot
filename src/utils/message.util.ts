@@ -12,12 +12,12 @@ const options = {
   minMatchCharLength: 6,
 };
 
-class MessageUtil {
-  findInText(message, searchFor, strict = false) {
+export class MessageUtil {
+  findInText(message: string, searchFor: string, strict = false) {
     /**
      * Direct hit
      * */
-    let directHit = false;
+    let directHit: string | boolean = false;
 
     if (searchFor.length <= 4) {
       directHit = strict
@@ -25,7 +25,7 @@ class MessageUtil {
             .replace(/[^\da-z\u0400-\u04FF]/gi, ' ')
             .replace(/\s\s+/g, ' ')
             .split(' ')
-            .find((word) => word.toLowerCase() === searchFor.toLowerCase())
+            .find((word) => word.toLowerCase() === searchFor.toLowerCase()) || false
         : message.toLowerCase().includes(searchFor.toLowerCase());
 
       return directHit;
@@ -56,7 +56,7 @@ class MessageUtil {
    *
    * @returns {string | null}
    * */
-  fuseInText(message, wordsArray) {
+  fuseInText(message: string, wordsArray: string[]) {
     /**
      * Fuse hit
      * */
@@ -65,7 +65,3 @@ class MessageUtil {
     return wordsArray.find((word) => fuseInstance.search(word).length > 0) || null;
   }
 }
-
-module.exports = {
-  MessageUtil,
-};
