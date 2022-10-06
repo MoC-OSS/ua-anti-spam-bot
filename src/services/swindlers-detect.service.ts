@@ -1,13 +1,13 @@
 import { compareTwoStrings } from 'string-similarity';
 import { optimizeText } from 'ukrainian-ml-optimizer';
 
-import { SwindlersTensorService } from '../tensor/swindlers-tensor.service';
-import { SwindlersResult, SwindlersResultSummary } from '../types/swindlers';
+import type { SwindlersTensorService } from '../tensor';
+import type { SwindlersResult, SwindlersResultSummary } from '../types';
 
-import { DynamicStorageService } from './dynamic-storage.service';
-import { SwindlersBotsService } from './swindlers-bots.service';
-import { SwindlersCardsService } from './swindlers-cards.service';
-import { SwindlersUrlsService } from './swindlers-urls.service';
+import type { DynamicStorageService } from './dynamic-storage.service';
+import type { SwindlersBotsService } from './swindlers-bots.service';
+import type { SwindlersCardsService } from './swindlers-cards.service';
+import type { SwindlersUrlsService } from './swindlers-urls.service';
 
 export class SwindlersDetectService {
   SWINDLER_SETTINGS = {

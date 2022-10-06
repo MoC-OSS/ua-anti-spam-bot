@@ -6,17 +6,17 @@ import { logSkipMiddleware } from '../../utils';
  * @param {GrammyContext} ctx
  * @param {Next} next
  * */
-export function botActiveMiddleware(ctx, next) {
+export function botActiveMiddleware(context, next) {
   // TODO use for ctx prod debug
   // console.info('enter botActiveMiddleware ******', ctx.chat?.title, '******', ctx.state.text);
 
-  if (ctx.chat.type !== 'private' && !ctx.chatSession.botRemoved && ctx.chatSession.isBotAdmin) {
+  if (context.chat.type !== 'private' && !context.chatSession.botRemoved && context.chatSession.isBotAdmin) {
     return next();
   }
 
-  if (ctx.chat.type === 'private') {
+  if (context.chat.type === 'private') {
     return next();
   }
 
-  logSkipMiddleware(ctx, 'bot kicked or not admin', ctx.chatSession);
+  logSkipMiddleware(context, 'bot kicked or not admin', context.chatSession);
 }

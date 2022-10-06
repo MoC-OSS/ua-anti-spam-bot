@@ -1,18 +1,19 @@
 import { Context } from 'grammy';
+
 import { revealHiddenUrls } from './reveal-hidden-urls.util';
 
 /**
  * @returns GrammyContext
  * */
-const createCtx = (text, entities) => {
-  const newCtx = new Context(
+const createContext = (text, entities) => {
+  const newContext = new Context(
     {
-      update_id: 324607000,
+      update_id: 324_607_000,
       message: {
         message_id: 9701,
         from: {},
         chat: {},
-        date: 1659262017,
+        date: 1_659_262_017,
         text,
         entities,
       },
@@ -32,10 +33,10 @@ const createCtx = (text, entities) => {
     },
   );
 
-  newCtx.state = {};
-  newCtx.state.text = text;
+  newContext.state = {};
+  newContext.state.text = text;
 
-  return newCtx;
+  return newContext;
 };
 
 describe('revealHiddenUrls', () => {
@@ -43,8 +44,8 @@ describe('revealHiddenUrls', () => {
     const text = 'test url';
     const entities = [{ offset: 0, length: 8, type: 'text_link', url: 'http://example.com/' }];
 
-    const ctx = createCtx(text, entities);
-    const result = revealHiddenUrls(ctx);
+    const context = createContext(text, entities);
+    const result = revealHiddenUrls(context);
 
     expect(result).toEqual('http://example.com/');
   });
@@ -53,8 +54,8 @@ describe('revealHiddenUrls', () => {
     const text = 'Допомога приват';
     const entities = [{ offset: 9, length: 6, type: 'text_link', url: 'https://example.com' }];
 
-    const ctx = createCtx(text, entities);
-    const result = revealHiddenUrls(ctx);
+    const context = createContext(text, entities);
+    const result = revealHiddenUrls(context);
 
     expect(result).toEqual('Допомога https://example.com');
   });
@@ -67,8 +68,8 @@ describe('revealHiddenUrls', () => {
       { offset: 42, length: 4, type: 'text_link', url: 'http://example3.com/' },
     ];
 
-    const ctx = createCtx(text, entities);
-    const result = revealHiddenUrls(ctx);
+    const context = createContext(text, entities);
+    const result = revealHiddenUrls(context);
 
     expect(result).toEqual('http://example1.com/ text http://example2.com/ text123 234 !@#$%^&*()_+-= http://example3.com/');
   });
@@ -82,8 +83,8 @@ describe('revealHiddenUrls', () => {
       { offset: 25, length: 9, type: 'bold' },
     ];
 
-    const ctx = createCtx(text, entities);
-    const result = revealHiddenUrls(ctx);
+    const context = createContext(text, entities);
+    const result = revealHiddenUrls(context);
 
     expect(result).toEqual('test some text http://example1.com/ text http://example2.com/');
   });

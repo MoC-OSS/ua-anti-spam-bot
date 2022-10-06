@@ -7,7 +7,7 @@ const options = {
   shouldSort: true,
   threshold: 0.1,
   location: 0,
-  distance: 100000,
+  distance: 100_000,
   maxPatternLength: 32,
   minMatchCharLength: 6,
 };
@@ -20,15 +20,13 @@ class MessageUtil {
     let directHit = false;
 
     if (searchFor.length <= 4) {
-      if (strict) {
-        directHit = message
-          .replace(/[^a-z\u0400-\u04FF\d]/gi, ' ')
-          .replace(/\s\s+/g, ' ')
-          .split(' ')
-          .find((word) => word.toLowerCase() === searchFor.toLowerCase());
-      } else {
-        directHit = message.toLowerCase().includes(searchFor.toLowerCase());
-      }
+      directHit = strict
+        ? message
+            .replace(/[^\da-z\u0400-\u04FF]/gi, ' ')
+            .replace(/\s\s+/g, ' ')
+            .split(' ')
+            .find((word) => word.toLowerCase() === searchFor.toLowerCase())
+        : message.toLowerCase().includes(searchFor.toLowerCase());
 
       return directHit;
     }
@@ -64,7 +62,7 @@ class MessageUtil {
      * */
     const fuseInstance = new Fuse([message], options);
 
-    return wordsArray.find((word) => !!fuseInstance.search(word).length) || null;
+    return wordsArray.find((word) => fuseInstance.search(word).length > 0) || null;
   }
 }
 

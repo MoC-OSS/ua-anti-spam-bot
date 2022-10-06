@@ -1,24 +1,23 @@
-import { GrammyContext } from '../../../types';
-import { MenuRange } from '@grammyjs/menu';
-import { State } from '../../../types/alarm';
+import type { MenuRange } from '@grammyjs/menu';
 
 import { getAirRaidAlarmSettingsMessage, nextPage, previousPage } from '../../../message';
-
-import { handleError, isIdWhitelisted } from '../../../utils';
-import { onlyAdmin } from '../../middleware';
-import { alarmChatService } from '../../../services/alarm-chat.service';
 import { generateTestState } from '../../../services/_mocks/alarm.mocks';
 import { TEST_ALARM_STATE } from '../../../services/alarm.service';
+import { alarmChatService } from '../../../services/alarm-chat.service';
+import type { GrammyContext } from '../../../types';
+import type { State } from '../../../types/alarm';
+import { handleError, isIdWhitelisted } from '../../../utils';
+import { onlyAdmin } from '../../middleware';
 
 /**
  * @param {GrammyContext} ctx
  * @param {MenuRange<GrammyContext>} range
  * @param alertStates
  * */
-export const dynamicLocationMenu = async (ctx: GrammyContext, range: MenuRange<GrammyContext>, alertStates: State[]) => {
-  const states = isIdWhitelisted(ctx.from?.id) ? [...alertStates, generateTestState(TEST_ALARM_STATE)] : alertStates;
-  const pageIndex = ctx.chatSession.chatSettings.airRaidAlertSettings.pageNumber;
-  const { state } = ctx.chatSession.chatSettings.airRaidAlertSettings;
+export const dynamicLocationMenu = async (context_: GrammyContext, range: MenuRange<GrammyContext>, alertStates: State[]) => {
+  const states = isIdWhitelisted(context_.from?.id) ? [...alertStates, generateTestState(TEST_ALARM_STATE)] : alertStates;
+  const pageIndex = context_.chatSession.chatSettings.airRaidAlertSettings.pageNumber;
+  const { state } = context_.chatSession.chatSettings.airRaidAlertSettings;
   const maxPageIndex = Math.ceil(states.length / 10);
   const lastPageButtonsNumber = states.length % 10;
   let currentButtonsLimit = pageIndex * 10;
@@ -36,7 +35,7 @@ export const dynamicLocationMenu = async (ctx: GrammyContext, range: MenuRange<G
     return range.text(displayLocationName, onlyAdmin, (context) => {
       context.chatSession.chatSettings.airRaidAlertSettings.state = locationName;
       alarmChatService.updateChat(context.chatSession, context.chat?.id);
-      context.editMessageText(getAirRaidAlarmSettingsMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
+      context.editMessageText(getAirRaidAlarmSettingsMessage(context_.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
     });
   }
 

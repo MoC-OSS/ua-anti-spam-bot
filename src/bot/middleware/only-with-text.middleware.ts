@@ -7,13 +7,13 @@ import { logSkipMiddleware } from '../../utils';
  * @param {GrammyContext} ctx
  * @param {Next} next
  * */
-export function onlyWithText(ctx, next) {
-  const text = ctx.msg.text || ctx.msg.caption;
+export function onlyWithText(context, next) {
+  const text = context.msg.text || context.msg.caption;
 
   if (text) {
-    ctx.state.text = text;
+    context.state.text = text;
     return next();
   }
 
-  logSkipMiddleware(ctx, 'no text');
+  logSkipMiddleware(context, 'no text');
 }

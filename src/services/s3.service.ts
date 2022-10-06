@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import AWS, { S3 } from 'aws-sdk';
+import type { S3 } from 'aws-sdk';
+import AWS from 'aws-sdk';
 
 import { environmentConfig } from '../config';
 

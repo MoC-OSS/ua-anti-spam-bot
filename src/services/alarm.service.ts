@@ -2,11 +2,11 @@ import { EventEmitter } from 'node:events';
 import axios from 'axios';
 import EventSource from 'eventsource';
 import type TypedEmitter from 'typed-emitter';
-import { AlarmNotification, AlarmStates } from 'types/alarm';
+import type { AlarmNotification, AlarmStates } from 'types/alarm';
 
 import { environmentConfig } from '../config';
 
-import { getAlarmMock } from './_mocks/alarm.mocks';
+import { getAlarmMock } from './_mocks';
 
 const apiUrl = 'https://alerts.com.ua/api/states';
 const apiOptions = { headers: { 'X-API-Key': environmentConfig.ALARM_KEY } };

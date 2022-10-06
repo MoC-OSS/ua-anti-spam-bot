@@ -3,11 +3,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import tf from '@tensorflow/tfjs';
 import type { ModelArtifacts } from '@tensorflow/tfjs-core/dist/io/types';
-import { LayersModel } from '@tensorflow/tfjs-node';
+import type { LayersModel } from '@tensorflow/tfjs-node';
 import { optimizeText } from 'ukrainian-ml-optimizer';
 
 import { environmentConfig } from '../config';
-import { SwindlerTensorResult } from '../types/swindlers';
+import type { SwindlerTensorResult } from '../types/swindlers';
 
 export class SwindlersTensorService {
   model: LayersModel | null = null;

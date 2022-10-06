@@ -1,12 +1,12 @@
-import { DynamicStorageService } from '../../services/dynamic-storage.service';
-
-import { swindlersUpdateStartMessage, swindlersUpdateEndMessage } from '../../message';
+import { swindlersUpdateEndMessage, swindlersUpdateStartMessage } from '../../message';
+import type { DynamicStorageService } from '../../services/dynamic-storage.service';
 
 export class SwindlersUpdateMiddleware {
   /**
    * @param {DynamicStorageService} dynamicStorageService
    * */
   dynamicStorageService: DynamicStorageService;
+
   constructor(dynamicStorageService) {
     this.dynamicStorageService = dynamicStorageService;
   }
@@ -18,12 +18,12 @@ export class SwindlersUpdateMiddleware {
     /**
      * @param {GrammyContext} ctx
      * */
-    return async (ctx) => {
-      ctx.reply(swindlersUpdateStartMessage).then((message) => {
+    return async (context) => {
+      context.reply(swindlersUpdateStartMessage).then((message) => {
         // eslint-disable-next-line camelcase
         const { message_id } = message;
         // eslint-disable-next-line camelcase
-        this.dynamicStorageService.updateSwindlers().then(() => ctx.editMessageText(swindlersUpdateEndMessage, { message_id }));
+        this.dynamicStorageService.updateSwindlers().then(() => context.editMessageText(swindlersUpdateEndMessage, { message_id }));
       });
     };
   }

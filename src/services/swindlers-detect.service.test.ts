@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-import { initSwindlersTensor, SwindlersTensorService } from '../tensor/swindlers-tensor.service';
+import type { SwindlersTensorService } from '../tensor/swindlers-tensor.service';
+import { initSwindlersTensor } from '../tensor/swindlers-tensor.service';
 
 import { mockDynamicStorageService, mockNewBot, mockNewUrl } from './_mocks/index.mocks';
 import { SwindlersBotsService } from './swindlers-bots.service';

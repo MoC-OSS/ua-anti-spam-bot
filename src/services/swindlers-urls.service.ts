@@ -1,10 +1,11 @@
-import axios, { AxiosError } from 'axios';
+import type { AxiosError } from 'axios';
+import axios from 'axios';
 import FuzzySet from 'fuzzyset';
 
-import { SwindlersBaseResult, SwindlersUrlsResult } from '../types/swindlers';
+import type { SwindlersBaseResult, SwindlersUrlsResult } from '../types';
 
-import { EXCEPTION_DOMAINS, SHORTS, URL_REGEXP, VALID_URL_REGEXP } from './constants/swindlers-urls.constant';
-import { DynamicStorageService } from './dynamic-storage.service';
+import { EXCEPTION_DOMAINS, SHORTS, URL_REGEXP, VALID_URL_REGEXP } from './constants';
+import type { DynamicStorageService } from './dynamic-storage.service';
 
 const harmfulUrlStart = ['https://bitly.com/a/blocked'];
 

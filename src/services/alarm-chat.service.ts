@@ -3,7 +3,7 @@ import { forEach } from 'p-iteration';
 import type { Chat } from 'typegram/manage';
 
 import { alarmEndNotificationMessage, chatIsMutedMessage, chatIsUnmutedMessage, getAlarmStartNotificationMessage } from '../message';
-import { ChatSession, ChatSessionData, GrammyBot } from '../types';
+import type { ChatSession, ChatSessionData, GrammyBot } from '../types';
 import { handleError } from '../utils';
 
 import { ALARM_EVENT_KEY, alarmService } from './alarm.service';

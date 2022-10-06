@@ -1,14 +1,14 @@
-import { GrammyContext } from '../../types';
-
 import { Menu } from '@grammyjs/menu';
 import Bottleneck from 'bottleneck';
 
+import { cancelMessageSending, confirmationMessage, getSuccessfulMessage, getUpdateMessage, getUpdatesMessage } from '../../message';
 import { redisService } from '../../services/redis.service';
-import { getUpdatesMessage, getSuccessfulMessage, cancelMessageSending, confirmationMessage, getUpdateMessage } from '../../message';
+import type { GrammyContext } from '../../types';
 import { handleError } from '../../utils';
 
 export class UpdatesMiddleware {
   menu: any;
+
   constructor() {
     this.menu = null;
   }
@@ -26,9 +26,9 @@ export class UpdatesMiddleware {
     /**
      * @param {GrammyContext} ctx
      * */
-    return (ctx: GrammyContext) => {
-      ctx.session.step = 'confirmation';
-      ctx.replyWithHTML(getUpdatesMessage());
+    return (context: GrammyContext) => {
+      context.session.step = 'confirmation';
+      context.replyWithHTML(getUpdatesMessage());
     };
   }
 
@@ -36,19 +36,19 @@ export class UpdatesMiddleware {
     /**
      * @param {GrammyContext} ctx
      * */
-    const middleware = async (ctx) => {
-      const userInput = ctx.msg?.text;
-      const textEntities = ctx.msg?.entities;
-      ctx.session.updatesText = userInput;
-      ctx.session.textEntities = textEntities ?? null;
-      ctx.session.step = 'messageSending';
-      await ctx.replyWithChatAction('typing');
+    const middleware = async (context) => {
+      const userInput = context.msg?.text;
+      const textEntities = context.msg?.entities;
+      context.session.updatesText = userInput;
+      context.session.textEntities = textEntities ?? null;
+      context.session.step = 'messageSending';
+      await context.replyWithChatAction('typing');
       const sessions = (await redisService.getChatSessions()).filter(
         (session) => (session.data.chatType === 'private' || session.data.chatType === 'supergroup') && !session.data.botRemoved,
       );
 
-      await ctx.reply(`${confirmationMessage}\nВсього чатів: ${sessions.length}`);
-      await ctx.reply(userInput, { entities: textEntities ?? null, reply_markup: this.menu });
+      await context.reply(`${confirmationMessage}\nВсього чатів: ${sessions.length}`);
+      await context.reply(userInput, { entities: textEntities ?? null, reply_markup: this.menu });
     };
 
     return middleware;
@@ -58,18 +58,18 @@ export class UpdatesMiddleware {
     /**
      * @param {GrammyContext} ctx
      * */
-    return async (ctx) => {
-      ctx.session.step = 'idle';
-      const payload = ctx.match;
+    return async (context) => {
+      context.session.step = 'idle';
+      const payload = context.match;
       if (payload === 'approve') {
         const sessions = await redisService.getChatSessions();
         const superGroupSessions = sessions.filter((session) => session.data.chatType === 'supergroup' && !session.data.botRemoved);
         const privateGroupSessions = sessions.filter((session) => session.data.chatType === 'private' && !session.data.botRemoved);
 
-        await this.bulkSending(ctx, superGroupSessions, 'supergroup');
-        await this.bulkSending(ctx, privateGroupSessions, 'private');
+        await this.bulkSending(context, superGroupSessions, 'supergroup');
+        await this.bulkSending(context, privateGroupSessions, 'private');
       } else {
-        await ctx.reply(cancelMessageSending);
+        await context.reply(cancelMessageSending);
       }
     };
   }
@@ -81,15 +81,15 @@ export class UpdatesMiddleware {
    *
    * @returns {Promise<void>}
    * */
-  bulkSending(ctx, sessions, type) {
+  bulkSending(context, sessions, type) {
     return new Promise<void>((resolve) => {
       const limiter = new Bottleneck({
         maxConcurrent: 1,
         minTime: 2000,
       });
 
-      const updatesMessage = ctx.session.updatesText;
-      const updatesMessageEntities = ctx.session.textEntities;
+      const updatesMessage = context.session.updatesText;
+      const updatesMessageEntities = context.session.textEntities;
 
       const totalCount = sessions.length;
       const chunkSize = Math.ceil(totalCount / 10);
@@ -98,7 +98,7 @@ export class UpdatesMiddleware {
 
       sessions.forEach((e) => {
         limiter.schedule(() => {
-          ctx.api
+          context.api
             .sendMessage(e.id, updatesMessage, { entities: updatesMessageEntities ?? null })
             .then(() => {
               successCount += 1;
@@ -112,12 +112,12 @@ export class UpdatesMiddleware {
 
       limiter.on('done', () => {
         if (finishedCount % chunkSize === 0) {
-          ctx.reply(getUpdateMessage({ totalCount, successCount, finishedCount, type })).catch(handleError);
+          context.reply(getUpdateMessage({ totalCount, successCount, finishedCount, type })).catch(handleError);
         }
       });
 
       limiter.on('empty', () => {
-        ctx.reply(getSuccessfulMessage({ totalCount, successCount })).catch(handleError);
+        context.reply(getSuccessfulMessage({ totalCount, successCount })).catch(handleError);
         resolve();
       });
     });

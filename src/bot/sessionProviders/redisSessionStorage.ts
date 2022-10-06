@@ -2,28 +2,29 @@ import { redisClient } from '../../db';
 
 export class RedisSession {
   options: any;
+
   constructor() {
     this.options = {
       property: 'session',
       state: {},
       format: {},
-      getSessionKey: (ctx) => {
-        if (!ctx.from) return; // should never happen
+      getSessionKey: (context) => {
+        if (!context.from) return; // should never happen
         let chatInstance;
-        if (ctx.chat) {
-          chatInstance = ctx.chat.id;
-        } else if (ctx.updateType === 'callback_query') {
-          chatInstance = ctx.callbackQuery.chat_instance;
+        if (context.chat) {
+          chatInstance = context.chat.id;
+        } else if (context.updateType === 'callback_query') {
+          chatInstance = context.callbackQuery.chat_instance;
         } else {
-          chatInstance = ctx.from.id;
+          chatInstance = context.from.id;
         }
-        return `${chatInstance}:${ctx.from.id}`;
+        return `${chatInstance}:${context.from.id}`;
       },
     };
   }
 
-  getSessionKey(ctx) {
-    return this.options.getSessionKey(ctx);
+  getSessionKey(context) {
+    return this.options.getSessionKey(context);
   }
 
   getSession(key) {
@@ -36,11 +37,11 @@ export class RedisSession {
 
   middleware(property = this.options.property) {
     const that = this;
-    return async (ctx, next) => {
-      const key = that.getSessionKey(ctx);
+    return async (context, next) => {
+      const key = that.getSessionKey(context);
       if (!key) return next();
       let session = await that.getSession(key);
-      Object.defineProperty(ctx, property, {
+      Object.defineProperty(context, property, {
         get() {
           return session;
         },

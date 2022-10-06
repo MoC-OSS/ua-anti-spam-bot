@@ -8,7 +8,7 @@
 //   NO_MATCH = 'no match',
 // }
 
-import fs from 'node:fs';
+import type fs from 'node:fs';
 
 export type SwindlerType = 'site' | 'mention' | 'card' | 'tensor' | 'compare' | 'no match';
 
