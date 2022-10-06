@@ -3,7 +3,7 @@ import { InputFile } from 'grammy';
 
 import { environmentConfig } from '../config';
 import { logsChat } from '../creator';
-import type { GrammyContext } from '../types';
+import type { GrammyContext, RealGrammyContext } from '../types';
 
 import { handleError } from './error.util';
 
@@ -23,19 +23,20 @@ export const errorHandler =
     } catch (error) {
       handleError(error);
 
-      const writeContext = JSON.parse(JSON.stringify(context)) as GrammyContext & { tg: any; telegram: any; api: any };
+      const writeContext = JSON.parse(JSON.stringify(context)) as RealGrammyContext;
       // noinspection JSConstantReassignment
       delete writeContext.tg;
       delete writeContext.telegram;
+      // noinspection JSConstantReassignment
       delete writeContext.api;
 
       console.error('*** CTX ***', writeContext);
 
-      if (!environmentConfig.DEBUG) {
+      if (!environmentConfig.DEBUG && error instanceof Error) {
         context.api
           .sendMessage(
             logsChat,
-            ['<b>Bot failed with message:</b>', error?.message, '', '<b>Stack:</b>', `<code>${error.stack}</code>`].join('\n'),
+            ['<b>Bot failed with message:</b>', error.message, '', '<b>Stack:</b>', `<code>${error.stack || ''}</code>`].join('\n'),
             {
               parse_mode: 'HTML',
             },
