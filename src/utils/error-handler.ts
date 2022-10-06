@@ -1,49 +1,51 @@
+import type { Middleware, MiddlewareFn } from 'grammy';
 import { InputFile } from 'grammy';
-import { env } from 'typed-dotenv'.config();
 
+import { environmentConfig } from '../config';
 import { logsChat } from '../creator';
+import type { GrammyContext } from '../types';
+
 import { handleError } from './error.util';
 
 /**
  * Wrapper to catch async errors within a stage. Helps to avoid try catch blocks in there
- * @param {function} fn - function to enter a stage
+ * @param {function} callback - function to enter a stage
  */
 export const errorHandler =
-  (fn) =>
-  /**
-   * @param {GrammyContext} ctx
-   * @param {Next} next
-   * */
-  async (ctx, next) => {
+  (callback: MiddlewareFn<GrammyContext>): Middleware<GrammyContext> =>
+  async (context, next) => {
     try {
-      if (!fn) {
+      if (!callback) {
         console.error('errorHandler received an empty value instead of function.');
       }
 
-      return await fn(ctx, next);
-    } catch (error: any) {
+      return await callback(context, next);
+    } catch (error) {
       handleError(error);
 
-      const writeCtx = JSON.parse(JSON.stringify(ctx));
+      const writeContext = JSON.parse(JSON.stringify(context)) as GrammyContext & { tg: any; telegram: any; api: any };
       // noinspection JSConstantReassignment
-      delete writeCtx.tg;
-      delete writeCtx.telegram;
-      delete writeCtx.api;
+      delete writeContext.tg;
+      delete writeContext.telegram;
+      delete writeContext.api;
 
-      console.error('*** CTX ***', writeCtx);
+      console.error('*** CTX ***', writeContext);
 
-      if (!env.DEBUG) {
-        ctx.api
+      if (!environmentConfig.DEBUG) {
+        context.api
           .sendMessage(
             logsChat,
-            ['<b>Bot failed with message:</b>', error.message, '', '<b>Stack:</b>', `<code>${error.stack}</code>`].join('\n'),
+            ['<b>Bot failed with message:</b>', error?.message, '', '<b>Stack:</b>', `<code>${error.stack}</code>`].join('\n'),
             {
               parse_mode: 'HTML',
             },
           )
           .then(() =>
-            ctx.api
-              .sendDocument(logsChat, new InputFile(Buffer.from(JSON.stringify(writeCtx, null, 2)), `ctx-${new Date().toISOString()}.json`))
+            context.api
+              .sendDocument(
+                logsChat,
+                new InputFile(Buffer.from(JSON.stringify(writeContext, null, 2)), `ctx-${new Date().toISOString()}.json`),
+              )
               .catch(handleError),
           )
           .catch(handleError);
@@ -52,7 +54,3 @@ export const errorHandler =
       return next();
     }
   };
-
-module.exports = {
-  errorHandler,
-};
