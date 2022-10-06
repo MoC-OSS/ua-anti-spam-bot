@@ -10,6 +10,11 @@ export type GrammyContext = Context &
   ChatSessionFlavor<ChatSessionData> &
   StateFlavor<State>;
 
+/**
+ * Real object with hidden fields
+ * */
+export type RealGrammyContext = GrammyContext & { tg: any; telegram: any; api: any };
+
 export type GrammyMiddleware = Middleware<GrammyContext>;
 
 export type GrammyBot = Bot<GrammyContext>;

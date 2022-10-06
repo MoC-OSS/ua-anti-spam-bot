@@ -1,5 +1,7 @@
-/* eslint-disable no-param-reassign */
+/* eslint-disable no-param-reassign,unicorn/prefer-module */
+import type { Bot } from 'grammy';
 import { GrammyError } from 'grammy';
+import { forEach } from 'p-iteration';
 /**
  * @deprecated
  * @description
@@ -7,16 +9,19 @@ import { GrammyError } from 'grammy';
  * */
 import Queue from 'queue-promise';
 
-import { redisService } from './services/redis.service';
-// const { logsChat } = require('./creator');
-import logsChat from './creator';
+import { logsChat } from './creator';
 import { redisClient } from './db';
+import { redisService } from './services';
+import type { ChatSessionData, GrammyContext, SessionData } from './types';
+import { handleError } from './utils';
+
+const getChatId = (sessionId: string) => sessionId.split(':')[0];
 
 /**
  * @param {Bot} bot
  * @param {Date} botStartDate
  * */
-module.exports = async (bot, botStartDate) => {
+export default async (bot: Bot<GrammyContext>, botStartDate: Date) => {
   const compareDate = `${botStartDate.getFullYear()}-${botStartDate.getMonth() + 1}-${botStartDate.getDate()}`;
 
   if (compareDate !== '2022-4-10') {
@@ -29,8 +34,6 @@ module.exports = async (bot, botStartDate) => {
     interval: 5000,
     start: false,
   });
-
-  const getChatId = (sessionId) => sessionId.split(':')[0];
 
   /**
    * @type {Session[]}
@@ -49,11 +52,10 @@ module.exports = async (bot, botStartDate) => {
       logsChat,
       JSON.stringify({ uniqueUserRecords: uniqueUserRecords.length, nonUniqueUserRecords: nonUniqueUserRecords.length }),
     )
-    .catch(() => {});
+    .catch(handleError);
 
-  nonUniqueUserRecords.forEach((record) => {
-    redisClient.removeKey(record.id);
-  });
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  await forEach(nonUniqueUserRecords, (record) => redisClient.removeKey(record.id));
 
   // eslint-disable-next-line no-restricted-syntax
   uniqueUserRecords.forEach((record) => {
@@ -62,12 +64,9 @@ module.exports = async (bot, botStartDate) => {
     /**
      * @type {ChatSessionData & SessionData}
      * */
-    let chatSessionRecord: any = {};
+    let chatSessionRecord: Partial<ChatSessionData & SessionData> = {};
 
-    /**
-     * @param {ChatSessionData & SessionData} obj
-     * */
-    const clearObject = (object) => {
+    const clearObject = (object: Partial<ChatSessionData & SessionData>) => {
       delete object.step;
       delete object.textEntities;
       delete object.updatesText;
@@ -100,37 +99,35 @@ module.exports = async (bot, botStartDate) => {
         clearObject(chatSessionRecord);
 
         console.info(`** Chat id has been migrated: ${record.id}`);
-      } catch (error_: any) {
-        // noinspection UnnecessaryLocalVariableJS
-        /**
-         * @type {GrammyError} e
-         * */
-        const error = error_;
+      } catch (error) {
+        if (error instanceof GrammyError) {
+          switch (error.description) {
+            case 'Bad Request: chat not found':
+            case 'Bad Request: group chat was upgraded to a supergroup chat':
+              return redisClient.removeKey(record.id);
 
-        switch (error.description) {
-          case 'Bad Request: chat not found':
-          case 'Bad Request: group chat was upgraded to a supergroup chat':
-            return redisClient.removeKey(record.id);
+            case 'Forbidden: bot was kicked from the supergroup chat':
+            case 'Forbidden: bot was kicked from the group chat':
+              chatSessionRecord = {
+                ...chatSessionRecord,
+                ...record.data,
+              };
 
-          case 'Forbidden: bot was kicked from the supergroup chat':
-          case 'Forbidden: bot was kicked from the group chat':
-            chatSessionRecord = {
-              ...chatSessionRecord,
-              ...record.data,
-            };
+              chatSessionRecord.botRemoved = true;
+              chatSessionRecord.isBotAdmin = false;
+              delete chatSessionRecord.botAdminDate;
 
-            chatSessionRecord.botRemoved = true;
-            chatSessionRecord.isBotAdmin = false;
-            delete chatSessionRecord.botAdminDate;
+              await redisService.updateChatSession(chatId, chatSessionRecord).then(() => redisClient.removeKey(record.id));
+              break;
 
-            redisService.updateChatSession(chatId, chatSessionRecord).then(() => redisClient.removeKey(record.id));
-            break;
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            case /Too Many Requests: retry after/.test(error.description):
+              throw error;
 
-          case /Too Many Requests: retry after/.test(error.description):
-            throw new Error(error);
-
-          default:
-            throw new Error(error);
+            default:
+              throw error;
+          }
         }
       }
     });
@@ -138,7 +135,7 @@ module.exports = async (bot, botStartDate) => {
 
   while (queue.shouldRun) {
     if (queue.size > 0 && queue.size % 100 === 0) {
-      bot.api.sendMessage(logsChat, `** Migration queue size: ${queue.size}`).catch(() => {});
+      bot.api.sendMessage(logsChat, `** Migration queue size: ${queue.size}`).catch(handleError);
     }
 
     // eslint-disable-next-line no-await-in-loop
