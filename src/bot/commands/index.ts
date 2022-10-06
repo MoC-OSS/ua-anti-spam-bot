@@ -1,20 +1,8 @@
-import commandSetterExports from './command-setter';
-import helpMiddlewareExports from './help.middleware';
-import swindlersUpdateMiddlewareExports from './swindlersUpdate.middleware';
-import sessionMiddlewareExports from './session.middleware';
-import startMiddlewareExports from './start.middleware';
-import statisticsMiddlewareExports from './statistics.middleware';
-import UpdatesMiddleware from './updates.middleware';
-import SettingsMiddleware from './settings.middleware';
-
-module.exports = {
-  ...commandSetterExports,
-  ...helpMiddlewareExports,
-  ...sessionMiddlewareExports,
-  ...startMiddlewareExports,
-  ...statisticsMiddlewareExports,
-
-  ...UpdatesMiddleware,
-  ...SettingsMiddleware,
-  ...swindlersUpdateMiddlewareExports,
-};
+export * from './command-setter';
+export * from './help.middleware';
+export * from './session.middleware';
+export * from './settings.middleware';
+export * from './start.middleware';
+export * from './statistics.middleware';
+export * from './swindlersUpdate.middleware';
+export * from './updates.middleware';
