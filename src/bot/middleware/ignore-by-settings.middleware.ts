@@ -1,14 +1,16 @@
+import type { Middleware } from 'grammy';
+
+import type { ChatSessionData, GrammyContext } from '../../types';
+
 /**
  * @param {keyof ChatSessionData['chatSettings']} key
  *
  * @returns {GrammyMiddleware}
  * */
-const ignoreBySettingsMiddleware = (key) => async (ctx, next) => {
-  if (ctx.chatSession.chatSettings[key] !== true) {
-    await next();
-  }
-};
-
-module.exports = {
-  ignoreBySettingsMiddleware,
-};
+export const ignoreBySettingsMiddleware =
+  (key: keyof ChatSessionData['chatSettings']): Middleware<GrammyContext> =>
+  async (context, next) => {
+    if (context.chatSession.chatSettings[key] !== true) {
+      await next();
+    }
+  };

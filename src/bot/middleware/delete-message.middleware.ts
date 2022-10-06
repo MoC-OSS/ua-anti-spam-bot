@@ -1,16 +1,16 @@
+import type { NextFunction } from 'grammy';
+
+import type { GrammyContext } from '../../types';
+
 /**
  * Delete user entered message
  *
- * @param {GrammyContext} ctx
- * @param {Next} next
+ * @param {GrammyContext} GrammyContext
+ * @param {NextFunction} next
  * */
-function deleteMessageMiddleware(ctx, next) {
-  return ctx
+export function deleteMessageMiddleware(context: GrammyContext, next: NextFunction) {
+  return context
     .deleteMessage()
     .then(next)
     .catch(() => {});
 }
-
-module.exports = {
-  deleteMessageMiddleware,
-};
