@@ -12,11 +12,9 @@ class ProcessHandler {
    *
    * @returns {string | null}
    * */
-  processHandler(message, datasetPath, strict = false) {
-    /**
-     * @type string[]
-     * */
-    const words = lodashGet(dataset, datasetPath.replace('_$', ''));
+  processHandler(message: string, datasetPath: string, strict = false) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    const words = lodashGet(dataset, datasetPath.replace('_$', '')) as string[];
 
     if (datasetPath === 'one_word') {
       return this.processOneWordMessage(message, words);
@@ -36,7 +34,7 @@ class ProcessHandler {
    *
    * @returns {string | null}
    * */
-  processOneWordMessage(message, words) {
+  processOneWordMessage(message: string, words: string[]) {
     const processedMessage = removeNumber(removeLatinPartialLetters(removeSpecialSymbols(message))).toLowerCase();
 
     return words.includes(processedMessage) ? message : null;
@@ -44,7 +42,3 @@ class ProcessHandler {
 }
 
 export const processHandler = new ProcessHandler();
-
-module.exports = {
-  processHandler,
-};
