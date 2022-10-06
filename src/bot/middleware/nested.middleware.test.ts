@@ -2,14 +2,14 @@ import { nestedMiddleware } from './nested.middleware';
 
 describe('nestedMiddleware', () => {
   it('should call all middlewares', async () => {
-    const mockMiddleware = jest.fn(async (ctx, next) => {
+    const mockMiddleware = jest.fn(async (context, next) => {
       await next();
     });
 
     const finalMockMiddleware = jest.fn(() => {});
 
     await nestedMiddleware(
-      async (ctx, next) => {
+      async (context, next) => {
         await next();
       },
       mockMiddleware,
@@ -21,7 +21,7 @@ describe('nestedMiddleware', () => {
   });
 
   it('should not call all middlewares', async () => {
-    const mockMiddleware = jest.fn(async (ctx, next) => {
+    const mockMiddleware = jest.fn(async (context, next) => {
       await next();
     });
 

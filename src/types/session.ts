@@ -48,7 +48,7 @@ export interface ChatSessionData {
     disableStrategicInfo: boolean;
     disableDeleteMessage: boolean;
     disableSwindlerMessage: boolean;
-  }
+  };
   chatPermissions?: Chat.MultiUserGetChat['permissions'];
 }
 

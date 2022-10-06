@@ -1,8 +1,8 @@
 import redis from 'redis';
-import type { JsonArray, JsonObject, JsonValue, Primitive } from 'type-fest';
+import type { JsonObject, JsonValue, Primitive } from 'type-fest';
 
 import { environmentConfig } from '../config';
-import { ChatSession, Session } from '../types';
+import type { ChatSession, Session } from '../types';
 
 export const client = redis.createClient({ url: environmentConfig.REDIS_URL });
 

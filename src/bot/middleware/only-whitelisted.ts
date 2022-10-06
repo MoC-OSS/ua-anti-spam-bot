@@ -8,12 +8,12 @@ import { isIdWhitelisted } from '../../utils';
  * @param {GrammyContext} ctx
  * @param {Next} next
  * */
-export function onlyWhitelisted(ctx, next) {
-  if (isIdWhitelisted(ctx.from.id)) {
+export function onlyWhitelisted(context, next) {
+  if (isIdWhitelisted(context.from.id)) {
     return next();
   }
 
-  ctx.reply(getDeclinedMassSendingMessage);
+  context.reply(getDeclinedMassSendingMessage);
 }
 
 module.exports = {

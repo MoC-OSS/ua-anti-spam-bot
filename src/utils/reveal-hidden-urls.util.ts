@@ -5,12 +5,12 @@
  *
  * @returns string
  * */
-export function revealHiddenUrls(ctx) {
-  let { text } = ctx.state;
-  const entities = ctx.msg?.entities;
+export function revealHiddenUrls(context) {
+  let { text } = context.state;
+  const entities = context.msg?.entities;
 
-  function cutInHiddenUrls(str, cutStart, cutEnd, url) {
-    return str.substr(0, cutStart) + url + str.substr(cutEnd);
+  function cutInHiddenUrls(string_, cutStart, cutEnd, url) {
+    return string_.slice(0, Math.max(0, cutStart)) + url + string_.slice(cutEnd);
   }
 
   if (entities) {
@@ -21,16 +21,15 @@ export function revealHiddenUrls(ctx) {
         const { offset } = entity;
         const { length } = entity;
         const hiddenUrl = entity.url;
-        if (additionalUrlsLength <= 0) {
-          text = cutInHiddenUrls(text, offset, offset + length, hiddenUrl);
-        } else {
-          text = cutInHiddenUrls(
-            text,
-            offset + additionalUrlsLength - deletedTextLength,
-            offset + length + additionalUrlsLength - deletedTextLength,
-            hiddenUrl,
-          );
-        }
+        text =
+          additionalUrlsLength <= 0
+            ? cutInHiddenUrls(text, offset, offset + length, hiddenUrl)
+            : cutInHiddenUrls(
+                text,
+                offset + additionalUrlsLength - deletedTextLength,
+                offset + length + additionalUrlsLength - deletedTextLength,
+                hiddenUrl,
+              );
         deletedTextLength += length;
         additionalUrlsLength += hiddenUrl.length;
       }

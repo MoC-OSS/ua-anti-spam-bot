@@ -1,5 +1,6 @@
-import { DynamicStorageService, LocalDataset } from '../dynamic-storage.service';
-import { SwindlersGoogleService } from '../swindlers-google.service';
+import type { LocalDataset } from '../dynamic-storage.service';
+import { DynamicStorageService } from '../dynamic-storage.service';
+import type { SwindlersGoogleService } from '../swindlers-google.service';
 
 export const mockNewBot = '@Diia_move_bot';
 export const mockNewUrl = 'https://olx.new-darpay.site/some/234234234';

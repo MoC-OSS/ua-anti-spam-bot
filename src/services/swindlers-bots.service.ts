@@ -1,9 +1,9 @@
 import FuzzySet from 'fuzzyset';
 import { removeDuplicates } from 'utils';
 
-import { SwindlersBotsResult } from '../types/swindlers';
+import type { SwindlersBotsResult } from '../types';
 
-import { DynamicStorageService } from './dynamic-storage.service';
+import type { DynamicStorageService } from './dynamic-storage.service';
 
 export class SwindlersBotsService {
   readonly mentionRegexp = /\B@\w+/g;

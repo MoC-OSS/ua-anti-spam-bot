@@ -8,12 +8,12 @@ import { getDeclinedMassSendingMessage } from '../../message';
  * @param {GrammyContext} ctx
  * @param {Next} next
  * */
-export function onlyCreator(ctx, next) {
-  if (ctx.from.id === creatorId) {
+export function onlyCreator(context, next) {
+  if (context.from.id === creatorId) {
     return next();
   }
 
-  ctx.reply(getDeclinedMassSendingMessage);
+  context.reply(getDeclinedMassSendingMessage);
 }
 
 module.exports = {

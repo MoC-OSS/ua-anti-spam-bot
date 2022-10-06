@@ -1,5 +1,5 @@
 import { redisClient } from '../db';
-import { ChatSession, ChatSessionData, Session } from '../types';
+import type { ChatSession, ChatSessionData, Session } from '../types';
 import { removeDuplicates } from '../utils';
 
 export class RedisService {

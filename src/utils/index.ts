@@ -10,8 +10,8 @@ export * from './error-handler';
 export * from './remove-duplicates.util';
 export * from './reveal-hidden-urls.util';
 
-const messageUtil = new MessageUtil();
-const telegramUtil = new TelegramUtil();
+export const messageUtil = new MessageUtil();
+export const telegramUtil = new TelegramUtil();
 
 export function joinMessage(messages) {
   return messages.join('\n');

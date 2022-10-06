@@ -1,4 +1,10 @@
-import { GrammyContext } from '../../types';
+import { alarmChatService } from '../../services/alarm-chat.service';
+import type { GrammyContext } from '../../types';
+import { handleError } from '../../utils';
+import { onlyAdmin } from '../middleware';
+import { MiddlewareMenu } from '../middleware-menu.menu';
+
+import { dynamicLocationMenu } from './air-raid-alarm/locations-menu-generator';
 
 const {
   getSettingsMenuMessage,
@@ -16,20 +22,19 @@ const {
   goBackButton,
   blockWhenAlarm,
 } = require('../../message');
-import { onlyAdmin } from '../middleware';
-import { MiddlewareMenu } from '../middleware-menu.menu';
-import { handleError } from '../../utils';
-import {dynamicLocationMenu } from './air-raid-alarm/locations-menu-generator';
-import { alarmChatService } from '../../services/alarm-chat.service';
 
 export class SettingsMiddleware {
   /**
    * @param {State[]} airRaidAlarmStates
    * */
   settingsMenuObj: any;
+
   settingsDescriptionObj: any;
+
   settingsAirRaidAlertObj: any;
+
   airRaidAlarmStates: any;
+
   constructor(airRaidAlarmStates) {
     this.settingsMenuObj = null;
     this.settingsDescriptionObj = null;
@@ -42,19 +47,19 @@ export class SettingsMiddleware {
      * @param {GrammyContext} ctx
      * @param {keyof ChatSessionData['chatSettings']} key
      * */
-    const toggleSetting = (ctx:GrammyContext, key: any) => {
-      ctx.chatSession.chatSettings[key] = ctx.chatSession.chatSettings[key] === false;
-      const newText = getSettingsMenuMessage(ctx.chatSession.chatSettings);
+    const toggleSetting = (context: GrammyContext, key: any) => {
+      context.chatSession.chatSettings[key] = context.chatSession.chatSettings[key] === false;
+      const newText = getSettingsMenuMessage(context.chatSession.chatSettings);
 
-      if (ctx.msg?.text !== newText) {
-        ctx.editMessageText(newText, { parse_mode: 'HTML' }).catch(handleError);
+      if (context.msg?.text !== newText) {
+        context.editMessageText(newText, { parse_mode: 'HTML' }).catch(handleError);
       }
     };
 
-    const isStateSelected = (ctx) => {
-      const { state } = ctx.chatSession.chatSettings.airRaidAlertSettings;
+    const isStateSelected = (context) => {
+      const { state } = context.chatSession.chatSettings.airRaidAlertSettings;
       if (!state) {
-        ctx
+        context
           .answerCallbackQuery({
             text: selectYourState,
             show_alert: true,
@@ -65,10 +70,10 @@ export class SettingsMiddleware {
       return true;
     };
 
-    const isAlarmNow = (ctx, next) => {
-      const isAlarm = alarmChatService.isAlarmNow(ctx.chatSession.chatSettings.airRaidAlertSettings.state);
+    const isAlarmNow = (context, next) => {
+      const isAlarm = alarmChatService.isAlarmNow(context.chatSession.chatSettings.airRaidAlertSettings.state);
       if (isAlarm) {
-        ctx
+        context
           .answerCallbackQuery({
             text: blockWhenAlarm,
             show_alert: true,
@@ -81,30 +86,32 @@ export class SettingsMiddleware {
 
     this.settingsMenuObj = new MiddlewareMenu('settingsMenu', { autoAnswer: false })
       .addGlobalMiddlewares(onlyAdmin)
-      .text(deleteTensorButton, (ctx) => toggleSetting(ctx, 'disableStrategicInfo'))
-      .text(deleteMessageButton, (ctx) => toggleSetting(ctx, 'disableDeleteMessage'))
-      .text(deleteSwindlerButton, (ctx) => toggleSetting(ctx, 'disableSwindlerMessage'))
+      .text(deleteTensorButton, (context) => toggleSetting(context, 'disableStrategicInfo'))
+      .text(deleteMessageButton, (context) => toggleSetting(context, 'disableDeleteMessage'))
+      .text(deleteSwindlerButton, (context) => toggleSetting(context, 'disableSwindlerMessage'))
       .row()
-      .text(airAlarmAlertButton, isAlarmNow, (ctx) => {
-        ctx.menu.nav('settingsAirRaidAlertSubmenu');
-        ctx.editMessageText(getAirRaidAlarmSettingsMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
+      .text(airAlarmAlertButton, isAlarmNow, (context) => {
+        context.menu.nav('settingsAirRaidAlertSubmenu');
+        context
+          .editMessageText(getAirRaidAlarmSettingsMessage(context.chatSession.chatSettings), { parse_mode: 'HTML' })
+          .catch(handleError);
       })
-      .text(airAlarmNotificationMessage, isAlarmNow, (ctx) => {
-        if (isStateSelected(ctx)) {
-          ctx.chatSession.chatSettings.airRaidAlertSettings.notificationMessage =
-            ctx.chatSession.chatSettings.airRaidAlertSettings.notificationMessage === false;
-          alarmChatService.updateChat(ctx.chatSession, ctx.chat.id);
-          const newText = getSettingsMenuMessage(ctx.chatSession.chatSettings);
+      .text(airAlarmNotificationMessage, isAlarmNow, (context) => {
+        if (isStateSelected(context)) {
+          context.chatSession.chatSettings.airRaidAlertSettings.notificationMessage =
+            context.chatSession.chatSettings.airRaidAlertSettings.notificationMessage === false;
+          alarmChatService.updateChat(context.chatSession, context.chat.id);
+          const newText = getSettingsMenuMessage(context.chatSession.chatSettings);
 
-          if (ctx.msg.text !== newText) {
-            ctx.editMessageText(newText, { parse_mode: 'HTML' }).catch(handleError);
+          if (context.msg.text !== newText) {
+            context.editMessageText(newText, { parse_mode: 'HTML' }).catch(handleError);
           }
         }
       })
-      .text(turnOffChatWhileAlarmButton, isAlarmNow, (ctx) => {
-        if (isStateSelected(ctx)) {
-          toggleSetting(ctx, 'disableChatWhileAirRaidAlert');
-          alarmChatService.updateChat(ctx.chatSession, ctx.chat.id);
+      .text(turnOffChatWhileAlarmButton, isAlarmNow, (context) => {
+        if (isStateSelected(context)) {
+          toggleSetting(context, 'disableChatWhileAirRaidAlert');
+          alarmChatService.updateChat(context.chatSession, context.chat.id);
         }
       })
       // TODO UABOT-2 COMMENT UNTIL DESCRIPTION WILL BE AVAILABLE
@@ -113,7 +120,7 @@ export class SettingsMiddleware {
       //   ctx.editMessageText(detailedSettingsDescription).catch(handleError);
       // })
       .row()
-      .text(settingsSubmitMessage, (ctx) => ctx.deleteMessage());
+      .text(settingsSubmitMessage, (context) => context.deleteMessage());
 
     return this.settingsMenuObj;
   }
@@ -121,10 +128,10 @@ export class SettingsMiddleware {
   initAirRaidAlertSubmenu() {
     this.settingsAirRaidAlertObj = new MiddlewareMenu('settingsAirRaidAlertSubmenu')
       .addGlobalMiddlewares(onlyAdmin)
-      .dynamic((ctx, range) => dynamicLocationMenu(ctx, range, this.airRaidAlarmStates))
+      .dynamic((context, range) => dynamicLocationMenu(context, range, this.airRaidAlarmStates))
       .row()
-      .back(goBackButton, (ctx) => {
-        ctx.editMessageText(getSettingsMenuMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
+      .back(goBackButton, (context) => {
+        context.editMessageText(getSettingsMenuMessage(context.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
       });
 
     return this.settingsAirRaidAlertObj;
@@ -133,8 +140,8 @@ export class SettingsMiddleware {
   initDescriptionSubmenu() {
     this.settingsDescriptionObj = new MiddlewareMenu('settingsDescriptionSubmenu')
       .addGlobalMiddlewares(onlyAdmin)
-      .back(goBackButton, (ctx) => {
-        ctx.editMessageText(getSettingsMenuMessage(ctx.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
+      .back(goBackButton, (context) => {
+        context.editMessageText(getSettingsMenuMessage(context.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
       });
 
     return this.settingsDescriptionObj;
@@ -144,8 +151,10 @@ export class SettingsMiddleware {
     /**
      * @param {GrammyContext} ctx
      * */
-    const middleware = async (ctx) => {
-      ctx.replyWithHTML(getSettingsMenuMessage(ctx.chatSession.chatSettings), { reply_markup: this.settingsMenuObj }).catch(() => {});
+    const middleware = async (context) => {
+      context
+        .replyWithHTML(getSettingsMenuMessage(context.chatSession.chatSettings), { reply_markup: this.settingsMenuObj })
+        .catch(() => {});
     };
 
     return middleware;

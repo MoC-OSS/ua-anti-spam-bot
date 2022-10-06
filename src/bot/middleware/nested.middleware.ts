@@ -4,7 +4,7 @@
  * */
 export const nestedMiddleware =
   (...middlewares) =>
-  async (ctx, next) => {
+  async (context, next) => {
     // eslint-disable-next-line no-restricted-syntax
     for (const middleware of middlewares) {
       let isNextCalled = false;
@@ -13,7 +13,7 @@ export const nestedMiddleware =
       };
 
       // eslint-disable-next-line no-await-in-loop
-      await middleware(ctx, localNext);
+      await middleware(context, localNext);
 
       if (!isNextCalled) {
         break;

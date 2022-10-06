@@ -1,15 +1,15 @@
-import { GrammyContext } from '../../types';
-
 import { InputFile } from 'grammy';
 
-import { redisClient } from '../../db';
 import { creatorId } from '../../creator';
+import { redisClient } from '../../db';
+import type { GrammyContext } from '../../types';
 
 class SessionMiddleware {
   /**
    * @param {Date} startTime
    * */
   startTime: Date;
+
   constructor(startTime: Date) {
     this.startTime = startTime;
   }
@@ -22,8 +22,8 @@ class SessionMiddleware {
     /**
      * @param {GrammyContext} ctx
      * */
-    return async (ctx: GrammyContext) => {
-      const chatId = ctx?.update?.message?.chat?.id;
+    return async (context: GrammyContext) => {
+      const chatId = context?.update?.message?.chat?.id;
 
       if (chatId === creatorId) {
         const sessions = await redisClient.getAllRecords();
@@ -31,7 +31,7 @@ class SessionMiddleware {
           Buffer.from(JSON.stringify({ sessions }, null, 2)),
           `telegraf-session-${this.startTime.toISOString()}.json`,
         );
-        ctx.replyWithDocument(sessionDocument);
+        context.replyWithDocument(sessionDocument);
       }
     };
   }

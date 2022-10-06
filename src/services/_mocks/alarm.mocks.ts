@@ -1,5 +1,5 @@
-import { ChatSessionData } from '../../types';
-import { AlarmNotification } from '../../types/alarm';
+import type { ChatSessionData } from '../../types';
+import type { AlarmNotification } from '../../types/alarm';
 import { getRandomItem } from '../../utils';
 
 import { generateRandomBoolean, generateRandomNumber, generateRandomString } from './helpers.mocks';

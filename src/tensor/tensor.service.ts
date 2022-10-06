@@ -3,12 +3,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import tf from '@tensorflow/tfjs';
 import type { ModelArtifacts } from '@tensorflow/tfjs-core/dist/io/types';
-import { LayersModel } from '@tensorflow/tfjs-node';
+import type { LayersModel } from '@tensorflow/tfjs-node';
 import { optimizeText } from 'ukrainian-ml-optimizer';
 
 import { environmentConfig } from '../config';
-import { S3Service } from '../services/s3.service';
-import { SwindlerTensorResult } from '../types/swindlers';
+import type { S3Service } from '../services/s3.service';
+import type { SwindlerTensorResult } from '../types/swindlers';
 
 export class TensorService {
   model: LayersModel | null = null;
@@ -124,7 +124,7 @@ export class TensorService {
   }
 }
 
-export const initTensor = async (s3Service: S3Service) => {
+export const initTensor = async (s3Service?: S3Service) => {
   if (environmentConfig.S3_BUCKET && s3Service) {
     try {
       console.info('* Staring new tensorflow S3 logic...');

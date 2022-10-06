@@ -1,37 +1,30 @@
-import { env } from 'typed-dotenv'.config();
 // eslint-disable-next-line import/no-extraneous-dependencies
 import stringSimilarity from 'string-similarity';
 
-import { redisService } from '../services/redis.service';
+import { environmentConfig } from '../config';
 import { googleService } from '../services/google.service';
+import { redisService } from '../services/redis.service';
 import { swindlersGoogleService } from '../services/swindlers-google.service';
 
 const limits = {
-  STORAGE: 999999999,
+  STORAGE: 999_999_999,
   LENGTH_RATE: 0.5,
 };
 
 export class UserbotStorage {
-  lastMessages: any[];
-  swindlerMessages: any[];
-  helpMessages: any[];
-  constructor() {
-    this.lastMessages = [];
-    this.swindlerMessages = [];
-    this.helpMessages = [];
-  }
+  lastMessages: string[] = [];
+
+  swindlerMessages: string[] = [];
+
+  helpMessages: string[] = [];
 
   async init() {
-    const sheetRequests = [
-      googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_POSITIVE_SHEET_NAME),
-      googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_NEGATIVE_SHEET_NAME),
-    ].map((request) => request.then((response) => response.map((positive) => positive.value)));
-
     const cases = Promise.all([
-      ...sheetRequests,
+      googleService.getSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, environmentConfig.GOOGLE_POSITIVE_SHEET_NAME, undefined, true),
+      googleService.getSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, environmentConfig.GOOGLE_NEGATIVE_SHEET_NAME, undefined, true),
       swindlersGoogleService.getTrainingPositives(),
       swindlersGoogleService.getTrainingNegatives(),
-      redisService.redisClient.getRawValue('training:help', this.helpMessages),
+      redisService.redisClient.getRawValue<string[]>('training:help'),
     ]);
 
     return cases.then(([positives, negatives, swindlerPositives, helpMessages, redisHelp]) => {
@@ -42,32 +35,32 @@ export class UserbotStorage {
     });
   }
 
-  handleMessage(str) {
-    const { isDifferent } = this.isUniqueText(str, this.lastMessages, null);
+  async handleMessage(text: string) {
+    const { isDifferent } = this.isUniqueText(text, this.lastMessages, null);
 
     if (isDifferent) {
       if (this.lastMessages.length > limits.STORAGE) {
         this.lastMessages = this.lastMessages.slice(this.lastMessages.length - limits.STORAGE + 1);
       }
 
-      this.lastMessages.push(str);
-      redisService.setTrainingTempMessages(this.lastMessages);
+      this.lastMessages.push(text);
+      await redisService.setTrainingTempMessages(this.lastMessages);
       return true;
     }
 
     return false;
   }
 
-  handleHelpMessage(str) {
-    const { isDifferent } = this.isUniqueText(str, this.helpMessages, 0.8);
+  async handleHelpMessage(text: string) {
+    const { isDifferent } = this.isUniqueText(text, this.helpMessages, 0.8);
 
     if (isDifferent) {
       if (this.helpMessages.length > limits.STORAGE) {
         this.helpMessages = this.helpMessages.slice(this.helpMessages.length - limits.STORAGE + 1);
       }
 
-      this.helpMessages.push(str);
-      redisService.redisClient.setRawValue('training:help', this.helpMessages);
+      this.helpMessages.push(text);
+      await redisService.redisClient.setRawValue('training:help', this.helpMessages);
       return true;
     }
 
@@ -75,18 +68,18 @@ export class UserbotStorage {
   }
 
   /**
-   * @param {string} str
+   * @param {string} text
    * @param {string[]} dataset
    * @param {number} [rate]
    * */
-  isUniqueText(str, dataset, rate) {
-    const isEmpty = !dataset.length;
+  isUniqueText(text: string, dataset: string[], rate?: number | null) {
+    const isEmpty = dataset.length === 0;
 
     if (isEmpty) {
       return { isDifferent: true, maxChance: 1 };
     }
 
-    const isStrictCompare = dataset.find((lastMessage) => lastMessage === str);
+    const isStrictCompare = dataset.find((lastMessage) => lastMessage === text);
 
     if (isStrictCompare) {
       return { isDifferent: false, maxChance: 0 };
@@ -95,7 +88,7 @@ export class UserbotStorage {
     let lastChance = 0;
     let maxChance = 0;
     const isDifferent = !dataset.some((lastMessage) => {
-      lastChance = stringSimilarity.compareTwoStrings(str, lastMessage);
+      lastChance = stringSimilarity.compareTwoStrings(text, lastMessage);
 
       if (lastChance > maxChance) {
         maxChance = lastChance;
@@ -107,7 +100,3 @@ export class UserbotStorage {
     return { isDifferent, maxChance };
   }
 }
-
-module.exports = {
-  UserbotStorage,
-};

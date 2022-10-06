@@ -16,6 +16,7 @@
           "never",
           {
             "json": "always",
+            "ts": "always",
             "vue": "always",
             "svg": "always",
             "jpg": "always",

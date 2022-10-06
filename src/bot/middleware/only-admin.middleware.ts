@@ -1,26 +1,26 @@
 import { logSkipMiddleware } from '../../utils';
 
-export const onlyAdmin = async (ctx, next) => {
+export const onlyAdmin = async (context, next) => {
   // No chat = no service
-  if (!ctx.chat) {
-    logSkipMiddleware(ctx, 'User is not admin');
+  if (!context.chat) {
+    logSkipMiddleware(context, 'User is not admin');
     return;
   }
   // Channels and private chats are only postable by admins
-  if (['channel', 'private'].includes(ctx.chat.type)) {
+  if (['channel', 'private'].includes(context.chat.type)) {
     return next();
   }
   // Anonymous users are always admins
-  if (ctx.from?.username === 'GroupAnonymousBot') {
+  if (context.from?.username === 'GroupAnonymousBot') {
     return next();
   }
   // Surely not an admin
-  if (!ctx.from?.id) {
-    logSkipMiddleware(ctx, 'User is not admin');
+  if (!context.from?.id) {
+    logSkipMiddleware(context, 'User is not admin');
     return;
   }
   // Check the member status
-  const chatMember = await ctx.getChatMember(ctx.from.id);
+  const chatMember = await context.getChatMember(context.from.id);
   if (['creator', 'administrator'].includes(chatMember.status)) {
     return next();
   }

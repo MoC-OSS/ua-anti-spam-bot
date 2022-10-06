@@ -1,5 +1,5 @@
-import { BotCommand } from 'typegram';
-import { Bot } from 'grammy';
+import type { Bot } from 'grammy';
+import type { BotCommand } from 'typegram';
 
 import { formatDateIntoAccusative } from '../../utils';
 
@@ -7,16 +7,20 @@ import { formatDateIntoAccusative } from '../../utils';
  * Handles bot public available commands
  * @see https://grammy.dev/guide/commands.html#usage
  * */
-class CommandSetter {
+export class CommandSetter {
   /**
    * @param {Bot} bot
    * @param {Date} startTime
    * @param {boolean} active
    * */
   bot: Bot;
+
   startTime: Date;
+
   active: boolean;
+
   commands: BotCommand[] = [];
+
   constructor(bot, startTime, active) {
     this.bot = bot;
     this.startTime = startTime;
@@ -61,7 +65,3 @@ class CommandSetter {
     return this.bot.api.setMyCommands(this.commands);
   }
 }
-
-module.exports = {
-  CommandSetter,
-};

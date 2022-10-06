@@ -7,16 +7,16 @@ import { logSkipMiddleware } from '../../utils';
  * @param {GrammyContext} ctx
  * @param {Next} next
  * */
-export async function onlyWhenBotAdmin(ctx, next) {
-  if (ctx.chat?.type === 'private') {
+export async function onlyWhenBotAdmin(context, next) {
+  if (context.chat?.type === 'private') {
     return next();
   }
 
-  const isMessageAfterBotAdmin = (ctx.msg?.date || 0) * 1000 > +new Date(ctx.chatSession.botAdminDate);
+  const isMessageAfterBotAdmin = (context.msg?.date || 0) * 1000 > +new Date(context.chatSession.botAdminDate);
 
-  if (!ctx.chatSession.botRemoved && isMessageAfterBotAdmin) {
+  if (!context.chatSession.botRemoved && isMessageAfterBotAdmin) {
     return next();
   }
 
-  logSkipMiddleware(ctx, 'message is older than bot admin');
+  logSkipMiddleware(context, 'message is older than bot admin');
 }

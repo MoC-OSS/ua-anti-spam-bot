@@ -1,16 +1,12 @@
-import { GrammyContext } from '../../types';
-
 import { getHelpMessage } from '../../message';
-import { formatDate, handleError, getUserData } from '../../utils';
+import type { GrammyContext } from '../../types';
+import { formatDate, getUserData, handleError } from '../../utils';
 
 class HelpMiddleware {
   /**
    * @param {Date} startTime
    * */
-  startTime: Date
-  constructor(startTime: Date) {
-    this.startTime = startTime;
-  }
+  constructor(private startTime: Date) {}
 
   /**
    * Handle /help
@@ -20,24 +16,24 @@ class HelpMiddleware {
     /**
      * @param {GrammyContext} ctx
      * */
-    return async (ctx: GrammyContext) => {
+    return async (context: GrammyContext) => {
       const startLocaleTime = formatDate(this.startTime);
 
-      const isAdmin = ctx.chatSession.isBotAdmin;
+      const isAdmin = context.chatSession.isBotAdmin;
       let canDelete = false;
 
       try {
-        canDelete = await ctx
+        canDelete = await context
           .deleteMessage()
           .then(() => true)
           .catch(() => false);
-      } catch (e) {
-        handleError(e);
+      } catch (error) {
+        handleError(error);
       }
 
-      const { writeUsername, userId } = getUserData(ctx);
+      const { writeUsername, userId } = getUserData(context);
 
-      ctx
+      context
         .replyWithHTML(
           getHelpMessage({
             startLocaleTime,

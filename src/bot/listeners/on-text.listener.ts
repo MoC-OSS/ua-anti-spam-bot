@@ -1,11 +1,12 @@
-import { Bot, InputFile } from 'grammy';
+import type { Bot } from 'grammy';
+import { InputFile } from 'grammy';
 import * as typedDotenv from 'typed-dotenv';
 import Keyv = require('keyv');
 import { creatorId, logsChat, privateTrainingChat } from '../../creator';
 import { getCannotDeleteMessage, getDebugMessage, getDeleteMessage } from '../../message'; // spamDeleteMessage
 import { redisService } from '../../services/redis.service';
 import { compareDatesWithOffset, getUserData, handleError, telegramUtil } from '../../utils';
-import { MessageHandler } from '../message.handler';
+import type { MessageHandler } from '../message.handler';
 import { getMessageReputation } from '../spam.handlers';
 
 // const slavaWords = ['слава україні', 'слава украине', 'слава зсу'];
@@ -43,11 +44,11 @@ export class OnTextListener {
      * @param {GrammyContext} ctx
      * @param {Next} next
      * */
-    return async (ctx, next) => {
+    return async (context, next) => {
       // TODO use for ctx prod debug
       // console.info('enter onText ******', ctx.chat?.title, '******', ctx.state.text);
 
-      const message = ctx.state.text;
+      const message = context.state.text;
 
       /**
        * Removed because ask to reduce chat messages
@@ -56,39 +57,39 @@ export class OnTextListener {
       //   ctx.reply('Героям Слава! 🇺🇦', { reply_to_message_id: ctx?.update?.message?.message_id });
       // }
 
-      if (!ctx.chat?.id) {
-        console.error(Date.toString(), 'Cannot access the chat:', ctx.chat);
+      if (!context.chat?.id) {
+        console.error(Date.toString(), 'Cannot access the chat:', context.chat);
         return next();
       }
 
-      if (env.ONLY_WORK_IN_COMMENTS && !telegramUtil.isInComments(ctx)) {
+      if (env.ONLY_WORK_IN_COMMENTS && !telegramUtil.isInComments(context)) {
         return next();
       }
 
-      if (ctx.session?.isCurrentUserAdmin && !env.DEBUG) {
+      if (context.session?.isCurrentUserAdmin && !env.DEBUG) {
         return next();
       }
 
-      const rep = await getMessageReputation(ctx, this.keyv, this.messageHandler);
+      const rep = await getMessageReputation(context, this.keyv, this.messageHandler);
 
       if (rep.byRules.dataset) {
-        ctx.state.dataset = rep.byRules.dataset;
+        context.state.dataset = rep.byRules.dataset;
         const { deleteRank, tensor } = rep.byRules.dataset;
         const startRank = (await redisService.getTrainingStartRank()) || 0.6;
 
         if (tensor > startRank && tensor < deleteRank) {
-          ctx.api.sendMessage(privateTrainingChat, ctx.state.text).catch(() => {});
+          context.api.sendMessage(privateTrainingChat, context.state.text).catch(() => {});
         }
 
-        if (ctx.chat.id === creatorId) {
-          ctx.reply(JSON.stringify({ ...rep.byRules.dataset, swindlersResult: ctx.state.swindlersResult, message }, null, 2));
+        if (context.chat.id === creatorId) {
+          context.reply(JSON.stringify({ ...rep.byRules.dataset, swindlersResult: context.state.swindlersResult, message }, null, 2));
         }
       }
 
       if (rep.byRules?.rule) {
         try {
           const trainingChatWhitelist = await redisService.getTrainingChatWhitelist();
-          const { writeUsername, userId } = getUserData(ctx);
+          const { writeUsername, userId } = getUserData(context);
 
           let debugMessage = '';
 
@@ -96,49 +97,49 @@ export class OnTextListener {
             debugMessage = getDebugMessage({ message, byRules: rep.byRules, startTime: this.startTime });
           }
 
-          if (trainingChatWhitelist && trainingChatWhitelist.includes(String(ctx.chat.id))) {
-            ctx.api.sendMessage(privateTrainingChat, ctx.state.text).catch(() => {});
+          if (trainingChatWhitelist && trainingChatWhitelist.includes(String(context.chat.id))) {
+            context.api.sendMessage(privateTrainingChat, context.state.text).catch(() => {});
           }
 
-          await ctx
+          await context
             .deleteMessage()
             .then(() => {
-              if (ctx.chatSession.chatSettings.disableDeleteMessage !== true) {
-                ctx.replyWithHTML(
+              if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
+                context.replyWithHTML(
                   getDeleteMessage({ writeUsername, userId, wordMessage: '', debugMessage, withLocation: rep.byRules.dataset.location }),
                 );
               }
             })
             .catch(() => {
               if (
-                !ctx.chatSession.isLimitedDeletion ||
-                compareDatesWithOffset(new Date(ctx.chatSession.lastLimitedDeletionDate), new Date(), 1)
+                !context.chatSession.isLimitedDeletion ||
+                compareDatesWithOffset(new Date(context.chatSession.lastLimitedDeletionDate), new Date(), 1)
               ) {
-                ctx.chatSession.isLimitedDeletion = true;
-                ctx.chatSession.lastLimitedDeletionDate = new Date();
+                context.chatSession.isLimitedDeletion = true;
+                context.chatSession.lastLimitedDeletionDate = new Date();
 
                 return telegramUtil
-                  .getChatAdmins(this.bot, ctx.chat.id)
+                  .getChatAdmins(this.bot, context.chat.id)
                   .then(({ adminsString, admins }) => {
-                    ctx
-                      .replyWithHTML(getCannotDeleteMessage({ adminsString }), { reply_to_message_id: ctx.msg.message_id })
+                    context
+                      .replyWithHTML(getCannotDeleteMessage({ adminsString }), { reply_to_message_id: context.msg.message_id })
                       .catch(handleError);
 
-                    ctx.state.admins = admins;
+                    context.state.admins = admins;
 
                     this.bot.api
                       .sendMessage(
                         logsChat,
-                        `Cannot delete the following message from chat\n\n<code>${ctx.chat.title}</code>\n${ctx.msg.text}`,
+                        `Cannot delete the following message from chat\n\n<code>${context.chat.title}</code>\n${context.msg.text}`,
                         {
                           parse_mode: 'HTML',
                         },
                       )
                       .then(() => {
-                        ctx.api
+                        context.api
                           .sendDocument(
                             logsChat,
-                            new InputFile(Buffer.from(JSON.stringify(ctx, null, 2)), `ctx-${new Date().toISOString()}.json`),
+                            new InputFile(Buffer.from(JSON.stringify(context, null, 2)), `ctx-${new Date().toISOString()}.json`),
                           )
                           .catch(handleError);
                       })
@@ -147,8 +148,8 @@ export class OnTextListener {
                   .catch(handleError);
               }
             });
-        } catch (e) {
-          console.error('Cannot delete the message. Reason:', e);
+        } catch (error) {
+          console.error('Cannot delete the message. Reason:', error);
         }
       }
 

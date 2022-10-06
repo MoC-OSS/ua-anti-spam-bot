@@ -1,6 +1,7 @@
 import { environmentConfig } from '../config';
 
-import { GoogleService, googleService as localGoogleService } from './google.service';
+import type { GoogleService } from './google.service';
+import { googleService as localGoogleService } from './google.service';
 
 export class SwindlersGoogleService {
   SHEETS_START_FROM = 6;
@@ -48,7 +49,7 @@ export class SwindlersGoogleService {
    *
    * @returns Promise<Record<string, any>[] | null>
    * */
-  getSheet<T extends boolean | true | false>(range: string, compact: T) {
+  getSheet<T extends boolean | true | false = true>(range: string, compact: T) {
     const isCompact = compact === undefined ? (true as T) : compact;
     return this.googleService.getSheet<T>(
       environmentConfig.GOOGLE_SPREADSHEET_ID,
@@ -119,7 +120,7 @@ export class SwindlersGoogleService {
     return this.clearSheet(this.RANGES.TRAINING_NEGATIVES);
   }
 
-  getTrainingPositives<T extends boolean>(compact?: T) {
+  getTrainingPositives<T extends boolean = true>(compact?: T) {
     const isCompact = compact === undefined ? (true as T) : compact;
     return this.getSheet<T>(this.RANGES.TRAINING_POSITIVES, isCompact);
   }

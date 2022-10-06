@@ -2,10 +2,10 @@ import { EventEmitter } from 'node:events';
 import type TypedEmitter from 'typed-emitter';
 import { optimizeText } from 'ukrainian-ml-optimizer';
 
-import { dataset } from '../../dataset/dataset';
+import type { dataset } from '../../dataset/dataset';
 import { removeDuplicates } from '../utils';
 
-import { SwindlersGoogleService } from './swindlers-google.service';
+import type { SwindlersGoogleService } from './swindlers-google.service';
 
 export type FetchEvents = {
   fetch: () => void;

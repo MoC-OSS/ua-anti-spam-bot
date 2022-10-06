@@ -1,7 +1,7 @@
 import { logSkipMiddleware } from '../../utils';
 
-const TELEGRAM_FORWARD_USER_ID = 777000;
-const CHANNEL_BOT_ID = 136817688;
+const TELEGRAM_FORWARD_USER_ID = 777_000;
+const CHANNEL_BOT_ID = 136_817_688;
 
 /**
  * @description
@@ -13,30 +13,30 @@ const CHANNEL_BOT_ID = 136817688;
  * @param {GrammyContext} ctx
  * @param {Next} next
  * */
-export async function onlyNotAdmin(ctx, next) {
+export async function onlyNotAdmin(context, next) {
   // TODO use for ctx prod debug
   // console.info('enter onlyNotAdmin ******', ctx.chat?.title, '******', ctx.state.text);
 
   /**
    * No chat - process the user
    * */
-  if (!ctx.chat) {
+  if (!context.chat) {
     return next();
   }
 
   /**
    * Handle forwarded messages from channel into channel's chat
    * */
-  if (ctx.from?.id === TELEGRAM_FORWARD_USER_ID) {
-    logSkipMiddleware(ctx, 'chat channel forward');
+  if (context.from?.id === TELEGRAM_FORWARD_USER_ID) {
+    logSkipMiddleware(context, 'chat channel forward');
     return;
   }
 
   /**
    * Skip channel admins message duplicated in chat
    * */
-  if (ctx.chat.type === 'channel') {
-    logSkipMiddleware(ctx, 'channel chat type');
+  if (context.chat.type === 'channel') {
+    logSkipMiddleware(context, 'channel chat type');
     return;
   }
 
@@ -44,32 +44,32 @@ export async function onlyNotAdmin(ctx, next) {
    * Skip channel post when bot in channel
    * On message doesn't handle user posts
    * */
-  if (ctx.update?.channel_post?.sender_chat?.type === 'channel') {
-    logSkipMiddleware(ctx, 'channel');
+  if (context.update?.channel_post?.sender_chat?.type === 'channel') {
+    logSkipMiddleware(context, 'channel');
     return;
   }
 
   /**
    * Anonymous users are always admins
    */
-  if (ctx.from?.username === 'GroupAnonymousBot') {
-    logSkipMiddleware(ctx, 'GroupAnonymousBot');
+  if (context.from?.username === 'GroupAnonymousBot') {
+    logSkipMiddleware(context, 'GroupAnonymousBot');
     return;
   }
 
   /**
    * If no id - not an admin
    * */
-  if (!ctx.from?.id) {
+  if (!context.from?.id) {
     return next();
   }
 
   /**
    * Check if the is admin. If so, skip.
    * */
-  const chatMember = await ctx.getChatMember(ctx.from.id);
+  const chatMember = await context.getChatMember(context.from.id);
   if (['creator', 'administrator'].includes(chatMember.status)) {
-    logSkipMiddleware(ctx, 'Admin');
+    logSkipMiddleware(context, 'Admin');
     return;
   }
 
@@ -78,8 +78,8 @@ export async function onlyNotAdmin(ctx, next) {
    * It means an admin wrote the message so we need to skip it.
    * https://github.com/42wim/matterbridge/issues/1654
    * */
-  if (ctx.from?.id === CHANNEL_BOT_ID || ctx.from?.username === 'Channel_Bot') {
-    logSkipMiddleware(ctx, 'Channel_Bot');
+  if (context.from?.id === CHANNEL_BOT_ID || context.from?.username === 'Channel_Bot') {
+    logSkipMiddleware(context, 'Channel_Bot');
     return;
   }
 

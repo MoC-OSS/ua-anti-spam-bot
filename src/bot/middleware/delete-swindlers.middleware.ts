@@ -1,18 +1,20 @@
 import { InputFile } from 'grammy';
-import { SwindlersDetectService } from '../../services/swindlers-detect.service';
+
 import { logsChat } from '../../creator';
-import { handleError, compareDatesWithOffset, telegramUtil, getUserData, revealHiddenUrls } from '../../utils';
 import { getCannotDeleteMessage, swindlersWarningMessage } from '../../message';
+import type { SwindlersDetectService } from '../../services/swindlers-detect.service';
+import { compareDatesWithOffset, getUserData, handleError, revealHiddenUrls, telegramUtil } from '../../utils';
 
 const SWINDLER_SETTINGS = {
-  WARNING_DELAY: 86400000 * 3,
+  WARNING_DELAY: 86_400_000 * 3,
 };
 
 class DeleteSwindlersMiddleware {
   /**
    * @param {SwindlersDetectService} swindlersDetectService
    * */
-  swindlersDetectService: SwindlersDetectService
+  swindlersDetectService: SwindlersDetectService;
+
   constructor(swindlersDetectService) {
     this.swindlersDetectService = swindlersDetectService;
   }
@@ -24,22 +26,22 @@ class DeleteSwindlersMiddleware {
      * @param {GrammyContext} ctx
      * @param {Next} next
      * */
-    const middleware = async (ctx, next) => {
-      const message = revealHiddenUrls(ctx);
+    const middleware = async (context, next) => {
+      const message = revealHiddenUrls(context);
 
       const result = await this.swindlersDetectService.isSwindlerMessage(message);
 
-      ctx.state.swindlersResult = result;
+      context.state.swindlersResult = result;
 
       if (result.isSpam) {
-        await this.saveSwindlersMessage(ctx, result.rate, result.displayReason || result.reason, message);
-        await this.processWarningMessage(ctx);
-        this.removeMessage(ctx);
+        await this.saveSwindlersMessage(context, result.rate, result.displayReason || result.reason, message);
+        await this.processWarningMessage(context);
+        this.removeMessage(context);
         return;
       }
 
       if (!result.isSpam && result.reason === 'compare') {
-        await this.saveSwindlersMessage(ctx, result.rate, result.displayReason || result.reason, message);
+        await this.saveSwindlersMessage(context, result.rate, result.displayReason || result.reason, message);
       }
 
       return next();
@@ -53,25 +55,25 @@ class DeleteSwindlersMiddleware {
    * @param {SwindlerType | string} from
    * @param {string} [message]
    * */
-  async saveSwindlersMessage(ctx, maxChance, from, message) {
-    const { writeUsername, userId } = getUserData(ctx);
-    const chatInfo = await ctx.getChat();
-    const text = message || ctx.state.text;
+  async saveSwindlersMessage(context, maxChance, from, message) {
+    const { writeUsername, userId } = getUserData(context);
+    const chatInfo = await context.getChat();
+    const text = message || context.state.text;
 
     const chatMention =
-      ctx.chat.title &&
-      (chatInfo.invite_link ? `<a href="${chatInfo.invite_link}">${ctx.chat.title}</a>` : `<code>${ctx.chat.title}</code>`);
+      context.chat.title &&
+      (chatInfo.invite_link ? `<a href="${chatInfo.invite_link}">${context.chat.title}</a>` : `<code>${context.chat.title}</code>`);
 
     const userMention = `<a href="tg://user?id=${userId}">${writeUsername}</a>`;
 
     if (!chatInfo.invite_link) {
-      await ctx.api.sendDocument(
+      await context.api.sendDocument(
         logsChat,
-        new InputFile(Buffer.from(JSON.stringify(chatInfo, null, 2)), `chat-info-${ctx.chat.title}-${new Date().toISOString()}.csv`),
+        new InputFile(Buffer.from(JSON.stringify(chatInfo, null, 2)), `chat-info-${context.chat.title}-${new Date().toISOString()}.csv`),
       );
     }
 
-    return ctx.api.sendMessage(
+    return context.api.sendMessage(
       logsChat,
       `Looks like swindler's message (${(maxChance * 100).toFixed(2)}%) from <code>${from}</code> by user ${userMention}:\n\n${
         chatMention || userMention
@@ -87,14 +89,14 @@ class DeleteSwindlersMiddleware {
    *
    * @param {GrammyContext} ctx
    * */
-  processWarningMessage(ctx) {
+  processWarningMessage(context) {
     const shouldSend =
-      !ctx.chatSession.lastWarningDate ||
-      (ctx.chatSession.lastWarningDate &&
-        Date.now() > new Date(ctx.chatSession.lastWarningDate).getTime() + SWINDLER_SETTINGS.WARNING_DELAY);
+      !context.chatSession.lastWarningDate ||
+      (context.chatSession.lastWarningDate &&
+        Date.now() > new Date(context.chatSession.lastWarningDate).getTime() + SWINDLER_SETTINGS.WARNING_DELAY);
     if (shouldSend) {
-      ctx.chatSession.lastWarningDate = new Date();
-      return ctx.reply(swindlersWarningMessage, {
+      context.chatSession.lastWarningDate = new Date();
+      return context.reply(swindlersWarningMessage, {
         parse_mode: 'HTML',
       });
     }
@@ -105,26 +107,38 @@ class DeleteSwindlersMiddleware {
    *
    * @param {GrammyContext} ctx
    * */
-  removeMessage(ctx) {
-    return ctx.deleteMessage().catch(() => {
-      if (!ctx.chatSession.isLimitedDeletion || compareDatesWithOffset(new Date(ctx.chatSession.lastLimitedDeletionDate), new Date(), 1)) {
-        ctx.chatSession.isLimitedDeletion = true;
-        ctx.chatSession.lastLimitedDeletionDate = new Date();
+  removeMessage(context) {
+    return context.deleteMessage().catch(() => {
+      if (
+        !context.chatSession.isLimitedDeletion ||
+        compareDatesWithOffset(new Date(context.chatSession.lastLimitedDeletionDate), new Date(), 1)
+      ) {
+        context.chatSession.isLimitedDeletion = true;
+        context.chatSession.lastLimitedDeletionDate = new Date();
 
         return telegramUtil
-          .getChatAdmins(ctx, ctx.chat.id)
+          .getChatAdmins(context, context.chat.id)
           .then(({ adminsString, admins }) => {
-            ctx.replyWithHTML(getCannotDeleteMessage({ adminsString }), { reply_to_message_id: ctx.msg.message_id }).catch(handleError);
+            context
+              .replyWithHTML(getCannotDeleteMessage({ adminsString }), { reply_to_message_id: context.msg.message_id })
+              .catch(handleError);
 
-            ctx.state.admins = admins;
+            context.state.admins = admins;
 
-            ctx.api
-              .sendMessage(logsChat, `Cannot delete the following message from chat\n\n<code>${ctx.chat.title}</code>\n${ctx.msg.text}`, {
-                parse_mode: 'HTML',
-              })
+            context.api
+              .sendMessage(
+                logsChat,
+                `Cannot delete the following message from chat\n\n<code>${context.chat.title}</code>\n${context.msg.text}`,
+                {
+                  parse_mode: 'HTML',
+                },
+              )
               .then(() => {
-                ctx.api
-                  .sendDocument(logsChat, new InputFile(Buffer.from(JSON.stringify(ctx, null, 2)), `ctx-${new Date().toISOString()}.json`))
+                context.api
+                  .sendDocument(
+                    logsChat,
+                    new InputFile(Buffer.from(JSON.stringify(context, null, 2)), `ctx-${new Date().toISOString()}.json`),
+                  )
                   .catch(handleError);
               })
               .catch(handleError);

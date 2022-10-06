@@ -7,15 +7,15 @@ import { logSkipMiddleware } from '../../utils';
  * @param {GrammyContext} ctx
  * @param {Next} next
  * */
-export async function onlyNotForwarded(ctx, next) {
+export async function onlyNotForwarded(context, next) {
   // TODO use for ctx prod debug
   // console.info('enter onlyNotForwarded ******', ctx.chat?.title, '******', ctx.state.text);
 
   /**
    * Skip forwarded messages
    * */
-  if (ctx.update?.message?.forward_from) {
-    logSkipMiddleware(ctx, 'regular forward');
+  if (context.update?.message?.forward_from) {
+    logSkipMiddleware(context, 'regular forward');
     return;
   }
 

@@ -1,19 +1,16 @@
 /* eslint-disable no-param-reassign */
 import { GrammyError } from 'grammy';
-
 /**
  * @deprecated
  * @description
  * This migration is created for prod from user sessions and chat info to chat based sessions.
  * */
-
 import Queue from 'queue-promise';
 
+import { redisService } from './services/redis.service';
 // const { logsChat } = require('./creator');
 import logsChat from './creator';
-
 import { redisClient } from './db';
-import { redisService } from './services/redis.service';
 
 /**
  * @param {Bot} bot
@@ -23,7 +20,7 @@ module.exports = async (bot, botStartDate) => {
   const compareDate = `${botStartDate.getFullYear()}-${botStartDate.getMonth() + 1}-${botStartDate.getDate()}`;
 
   if (compareDate !== '2022-4-10') {
-    console.info('Skip migration: ', __filename);
+    console.info('Skip migration:', __filename);
     return;
   }
 
@@ -70,11 +67,11 @@ module.exports = async (bot, botStartDate) => {
     /**
      * @param {ChatSessionData & SessionData} obj
      * */
-    const clearObject = (obj) => {
-      delete obj.step;
-      delete obj.textEntities;
-      delete obj.updatesText;
-      delete obj.isCurrentUserAdmin;
+    const clearObject = (object) => {
+      delete object.step;
+      delete object.textEntities;
+      delete object.updatesText;
+      delete object.isCurrentUserAdmin;
     };
 
     // eslint-disable-next-line no-await-in-loop
@@ -103,12 +100,12 @@ module.exports = async (bot, botStartDate) => {
         clearObject(chatSessionRecord);
 
         console.info(`** Chat id has been migrated: ${record.id}`);
-      } catch (e: any) {
+      } catch (error_: any) {
         // noinspection UnnecessaryLocalVariableJS
         /**
          * @type {GrammyError} e
          * */
-        const error = e;
+        const error = error_;
 
         switch (error.description) {
           case 'Bad Request: chat not found':
@@ -140,7 +137,7 @@ module.exports = async (bot, botStartDate) => {
   });
 
   while (queue.shouldRun) {
-    if (queue.size && queue.size % 100 === 0) {
+    if (queue.size > 0 && queue.size % 100 === 0) {
       bot.api.sendMessage(logsChat, `** Migration queue size: ${queue.size}`).catch(() => {});
     }
 

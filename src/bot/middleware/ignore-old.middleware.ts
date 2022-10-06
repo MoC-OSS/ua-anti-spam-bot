@@ -1,14 +1,18 @@
-const ignoreOld =
-  (threshold = 5 * 60) =>
-  (ctx, next) => {
-    if (ctx.msg?.date && new Date().getTime() / 1000 - ctx.msg.date > threshold) {
-      console.info(`Ignoring message from user ${ctx.from?.id} at chat ${ctx.chat?.id} (${new Date().getTime() / 1000}:${ctx.msg.date})`);
+import type { Middleware } from 'grammy';
+
+import type { GrammyContext } from '../../types';
+
+export const ignoreOld =
+  (threshold = 5 * 60): Middleware<GrammyContext> =>
+  (context, next) => {
+    if (context.msg?.date && Date.now() / 1000 - context.msg.date > threshold) {
+      console.info(
+        `Ignoring message from user ${context.from?.id || '$unknown'} at chat ${context.chat?.id || '$unknown'} (${Date.now() / 1000}:${
+          context.msg.date
+        })`,
+      );
       return;
     }
 
     return next();
   };
-
-module.exports = {
-  ignoreOld,
-};

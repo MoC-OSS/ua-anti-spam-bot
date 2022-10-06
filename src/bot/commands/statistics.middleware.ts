@@ -1,13 +1,13 @@
-import { redisService } from '../../services/redis.service';
-
-import { handleError, formatDate } from '../../utils';
 import { getStatisticsMessage } from '../../message';
+import { redisService } from '../../services/redis.service';
+import { formatDate, handleError } from '../../utils';
 
 export class StatisticsMiddleware {
   /**
    * @param {Date} startTime
    * */
   startTime: Date;
+
   constructor(startTime: Date) {
     this.startTime = startTime;
   }
@@ -20,9 +20,9 @@ export class StatisticsMiddleware {
     /**
      * @param {GrammyContext} ctx
      * */
-    return async (ctx) => {
+    return async (context) => {
       try {
-        await ctx.replyWithChatAction('typing');
+        await context.replyWithChatAction('typing');
         const chatSessions = await redisService.getChatSessions();
 
         const superGroupsSessions = chatSessions.filter((session) => session.data.chatType === 'supergroup');
@@ -43,7 +43,7 @@ export class StatisticsMiddleware {
         const memberChatsCount = [...superGroupsSessions, ...groupSessions].filter((session) => !session.data.isBotAdmin).length;
         const botRemovedCount = [...superGroupsSessions, ...groupSessions].filter((session) => session.data.botRemoved).length;
 
-        ctx.replyWithHTML(
+        context.replyWithHTML(
           getStatisticsMessage({
             adminsChatsCount,
             botRemovedCount,
@@ -57,9 +57,9 @@ export class StatisticsMiddleware {
             totalUserCounts,
           }),
         );
-      } catch (e) {
-        handleError(e);
-        await ctx.reply('Cannot get statistics');
+      } catch (error) {
+        handleError(error);
+        await context.reply('Cannot get statistics');
       }
     };
   }

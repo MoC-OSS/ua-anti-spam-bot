@@ -6,28 +6,10 @@ import { Bot, InputFile } from 'grammy';
 import Keyv from 'keyv';
 import moment from 'moment-timezone';
 
-import { OnTextListener } from './bot/listeners/on-text.listener';
-import { TestTensorListener } from './bot/listeners/test-tensor.listener';
+import { CommandSetter, SettingsMiddleware, StatisticsMiddleware, SwindlersUpdateMiddleware, UpdatesMiddleware } from './bot/commands';
+import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
-import { getAlarmMock } from './services/_mocks/alarm.mocks';
-import { ALARM_EVENT_KEY, alarmService } from './services/alarm.service';
-import { alarmChatService } from './services/alarm-chat.service';
-import { redisService } from './services/redis.service';
-import { S3Service } from './services/s3.service';
-import { initSwindlersContainer } from './services/swindlers.container';
-import { initTensor } from './tensor/tensor.service';
-import { handleError } from './utils/error.util';
-import { errorHandler } from './utils/error-handler';
-import { environmentConfig } from './config';
-import { creatorId, logsChat } from './creator';
-import { redisClient } from './db';
-import { settingsAvailableMessage } from './message';
-import { sleep } from './utils';
-
-// const { error, env } = typedDotenv.config();
-const {
-  DeleteSwindlersMiddleware,
-  GlobalMiddleware,
+import {
   botActiveMiddleware,
   deleteMessageMiddleware,
   ignoreBySettingsMiddleware,
@@ -36,23 +18,23 @@ const {
   onlyAdmin,
   onlyCreator,
   onlyNotAdmin,
-  onlyWhitelisted,
   onlyNotForwarded,
   onlyWhenBotAdmin,
+  onlyWhitelisted,
   onlyWithText,
   performanceEndMiddleware,
   performanceStartMiddleware,
-} = require('./bot/middleware');
-const {
-  CommandSetter,
-  HelpMiddleware,
-  SessionMiddleware,
-  StartMiddleware,
-  StatisticsMiddleware,
-  UpdatesMiddleware,
-  SettingsMiddleware,
-  SwindlersUpdateMiddleware,
-} = require('./bot/commands');
+} from './bot/middleware';
+import { RedisChatSession, RedisSession } from './bot/sessionProviders';
+import { getAlarmMock } from './services/_mocks';
+import { environmentConfig } from './config';
+import { creatorId, logsChat } from './creator';
+import { redisClient } from './db';
+import { settingsAvailableMessage } from './message';
+import { ALARM_EVENT_KEY, alarmChatService, alarmService, initSwindlersContainer, redisService, S3Service } from './services';
+import { initTensor } from './tensor';
+import type { GrammyContext } from './types';
+import { errorHandler, handleError, sleep } from './utils';
 
 /**
  * @typedef { import("grammy").GrammyError } GrammyError
@@ -91,10 +73,7 @@ const rootMenu = new Menu('root');
 
   const startTime = new Date();
 
-  /**
-   * @type {GrammyBot}
-   * */
-  const bot = new Bot(environmentConfig?.BOT_TOKEN);
+  const bot = new Bot<GrammyContext>(environmentConfig?.BOT_TOKEN);
 
   await alarmChatService.init(bot.api);
   const airRaidAlarmStates = await alarmService.getStates();
@@ -364,7 +343,7 @@ const rootMenu = new Menu('root');
 
   bot.catch(handleError);
 
-  bot.start({
+  await bot.start({
     onStart: () => {
       console.info(`Bot @${bot.botInfo.username} started!`, new Date().toString());
 

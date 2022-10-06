@@ -1,7 +1,7 @@
-import { Bot } from 'grammy';
-import { GrammyContext } from '../../types';
+import type { Bot } from 'grammy';
 
-import { getStartMessage, getGroupStartMessage, makeAdminMessage } from '../../message';
+import { getGroupStartMessage, getStartMessage, makeAdminMessage } from '../../message';
+import type { GrammyContext } from '../../types';
 import { getUserData, handleError, telegramUtil } from '../../utils';
 
 class StartMiddleware {
@@ -9,6 +9,7 @@ class StartMiddleware {
    * @param {Bot} bot
    * */
   bot: Bot;
+
   constructor(bot) {
     this.bot = bot;
   }
@@ -22,35 +23,35 @@ class StartMiddleware {
     /**
      * @param {GrammyContext} ctx
      * */
-    return async (ctx: GrammyContext) => {
-      if (ctx.chat?.type === 'private') {
-        return ctx.replyWithHTML(getStartMessage());
+    return async (context: GrammyContext) => {
+      if (context.chat?.type === 'private') {
+        return context.replyWithHTML(getStartMessage());
       }
 
-      const isAdmin = ctx.chatSession.isBotAdmin;
-      const canDelete = await ctx
+      const isAdmin = context.chatSession.isBotAdmin;
+      const canDelete = await context
         .deleteMessage()
         .then(() => true)
         .catch(() => false);
 
-      const { writeUsername, userId } = getUserData(ctx);
+      const { writeUsername, userId } = getUserData(context);
 
       if (!isAdmin || !canDelete) {
-        return ctx.replyWithHTML(
+        return context.replyWithHTML(
           getGroupStartMessage({ isAdmin, canDelete, user: writeUsername !== '@GroupAnonymousBot' ? writeUsername : '', userId }),
         );
       }
 
       return telegramUtil
-        .getChatAdmins(this.bot, ctx.chat?.id)
+        .getChatAdmins(this.bot, context.chat?.id)
         .then(({ adminsString }) => {
-          ctx
+          context
             .replyWithHTML(
               getGroupStartMessage({ adminsString, isAdmin, canDelete, user: writeUsername !== '@GroupAnonymousBot' ? writeUsername : '' }),
             )
             .catch((getAdminsError) => {
               handleError(getAdminsError);
-              ctx.replyWithHTML(makeAdminMessage);
+              context.replyWithHTML(makeAdminMessage);
             });
         })
         .catch(handleError);
