@@ -1,9 +1,9 @@
 /* eslint-disable unicorn/prefer-module */
 import fs from 'node:fs';
 import path from 'node:path';
-import tf from '@tensorflow/tfjs';
+import type { LayersModel } from '@tensorflow/tfjs';
+import * as tf from '@tensorflow/tfjs';
 import type { ModelArtifacts } from '@tensorflow/tfjs-core/dist/io/types';
-import type { LayersModel } from '@tensorflow/tfjs-node';
 import { optimizeText } from 'ukrainian-ml-optimizer';
 
 import { environmentConfig } from '../config';

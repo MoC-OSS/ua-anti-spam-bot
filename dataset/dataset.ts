@@ -18,8 +18,8 @@ import strict_percent_100 from './strings/strict_percent_100.json';
 // eslint-disable-next-line import/no-unresolved
 import swindlers_top_used from './strings/swindlers_top_used.json';
 
-const translitRus = new CyrillicToTranslit({ preset: 'ru' });
-const translitUa = new CyrillicToTranslit({ preset: 'uk' });
+const translitRus = CyrillicToTranslit({ preset: 'ru' });
+const translitUa = CyrillicToTranslit({ preset: 'uk' });
 
 function processMessage(dataset: string[]): string[] {
   const translitRussianDataset = dataset.map((word) => translitRus.transform(word, ' '));

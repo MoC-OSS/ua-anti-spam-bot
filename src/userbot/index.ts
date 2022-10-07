@@ -100,5 +100,5 @@ auth()
     }, 15_000);
   })
   .catch((error) => {
-    console.error('Cannot auth. Reason', error);
+    console.error('Cannot start. Reason:\n', error);
   });

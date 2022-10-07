@@ -1,7 +1,7 @@
 import FuzzySet from 'fuzzyset';
-import { removeDuplicates } from 'utils';
 
 import type { SwindlersBotsResult } from '../types';
+import { removeDuplicates } from '../utils';
 
 import type { DynamicStorageService } from './dynamic-storage.service';
 
