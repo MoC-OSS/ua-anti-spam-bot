@@ -1,21 +1,23 @@
 import axios from 'axios';
-import { TensorService } from '../tensor/tensor.service';
-import { env } from 'typed-dotenv'.config();
 
-import { processHandler } from '../express-logic/process.handler';
-
-import { redisService } from '../services/redis.service';
+import { environmentConfig } from '../config';
+import { processHandler } from '../express-logic';
+import { redisService } from '../services';
+import type { TensorService } from '../tensor';
+import type { GrammyContext, SwindlerTensorResult } from '../types';
 import { handleError } from '../utils';
 
-const host = `http://${env.HOST}:${env.PORT}`;
+const host = `http://${environmentConfig.HOST}:${environmentConfig.PORT}`;
 
 export class MessageHandler {
   /**
    * @param {TensorService} tensorService
    * */
   tensorService: TensorService;
-  datasetPaths: { [key: string]: string; } ;
-  constructor(tensorService) {
+
+  datasetPaths: { [key: string]: string };
+
+  constructor(tensorService: TensorService) {
     this.tensorService = tensorService;
 
     /**
@@ -44,8 +46,8 @@ export class MessageHandler {
    *
    * @returns {Promise<{ immediately: boolean, tensor: boolean, location: boolean, isSpam: boolean }>} is spam result
    */
-  async getTensorRank(message, originMessage) {
-    const tensorRank = (await redisService.getBotTensorPercent()) || env.TENSOR_RANK;
+  async getTensorRank(message: string, originMessage: string) {
+    const tensorRank = (await redisService.getBotTensorPercent()) || environmentConfig.TENSOR_RANK;
     /**
      * immediately
      *
@@ -113,7 +115,8 @@ export class MessageHandler {
     /**
      * Get tensor result.
      * */
-    const tensorResult = (await this.processTensorMessage(message, tensorRank)).result;
+    const processMessage = await this.processTensorMessage(message, tensorRank);
+    const tensorResult = processMessage.result;
 
     /**
      * 90% is very high and it's probably spam
@@ -198,7 +201,7 @@ export class MessageHandler {
    *
    * @returns Delete Rule
    */
-  async getDeleteRule(message) {
+  async getDeleteRule(message: string) {
     /**
      * Combined rules
      * */
@@ -234,17 +237,19 @@ export class MessageHandler {
     return finalHighRisk;
   }
 
-  async processTensorMessage(message, rate) {
+  async processTensorMessage(message: string, rate: number | null): Promise<{ result: SwindlerTensorResult }> {
     try {
-      if (env.USE_SERVER) {
-        return await axios.post(`${host}/tensor`, { message, rate }).then((response) => response.data);
+      if (environmentConfig.USE_SERVER) {
+        return await axios
+          .post(`${host}/tensor`, { message, rate })
+          .then((response: { data: { result: SwindlerTensorResult } }) => response.data);
       }
 
       return {
         result: await this.tensorService.predict(message, rate),
       };
-    } catch (e) {
-      handleError(e, 'API_DOWN');
+    } catch (error) {
+      handleError(error, 'API_DOWN');
       return {
         result: await this.tensorService.predict(message, rate),
       };
@@ -260,30 +265,31 @@ export class MessageHandler {
    * @param {string} datasetPath
    * @param {boolean} strict
    */
-  async processMessage(message, datasetPath, strict = false) {
-    const deleteRule = {
+  async processMessage(message: string, datasetPath: string, strict = false) {
+    const deleteRule: {
+      dataset: string | null;
+      rule: string | null;
+    } = {
       dataset: null,
       rule: null,
     };
 
-    let processResult;
+    let processResult: { result: string | null };
 
     try {
-      if (env.USE_SERVER) {
-        processResult = await axios
-          .post(`${host}/process`, {
-            message,
-            datasetPath,
-            strict,
-          })
-          .then((response) => response.data);
-      } else {
-        processResult = {
-          result: processHandler.processHandler(message, datasetPath, strict),
-        };
-      }
-    } catch (e) {
-      handleError(e, 'API_DOWN');
+      processResult = environmentConfig.USE_SERVER
+        ? await axios
+            .post(`${host}/process`, {
+              message,
+              datasetPath,
+              strict,
+            })
+            .then((response: { data: { result: string | null } }) => response.data)
+        : {
+            result: processHandler.processHandler(message, datasetPath, strict),
+          };
+    } catch (error) {
+      handleError(error, 'API_DOWN');
       processResult = {
         result: processHandler.processHandler(message, datasetPath, strict),
       };
@@ -301,10 +307,10 @@ export class MessageHandler {
    * @description
    * Removes mentions and extra spaces from the message
    *
-   * @param {GrammyContext} ctx
+   * @param {GrammyContext} context
    * @param {string} originMessage
    */
-  sanitizeMessage(ctx, originMessage) {
+  sanitizeMessage(context: GrammyContext, originMessage: string) {
     let message = originMessage;
 
     /**
@@ -317,29 +323,30 @@ export class MessageHandler {
         /**
          * Replace all text mentions with spaces
          * */
-        ctx?.update?.message?.entities
+        context?.update?.message?.entities
           ?.filter(Boolean)
           .filter((entity) => entity.type === 'text_mention')
           .forEach((entity) => {
+            // eslint-disable-next-line unicorn/prefer-string-slice
             const mention = result.substr(entity.offset, entity.length);
-            result = result.replace(mention, new Array(mention.length).fill(' ').join(''));
+            result = result.replace(mention, Array.from({ length: mention.length }, () => ' ').join(''));
           });
 
         /**
          * Replace all @ mentions with spaces
          * */
-        const atMentions = originMessage.match(/@[a-zA-Z]+/g);
+        const atMentions = originMessage.match(/@[A-Za-z]+/g);
 
-        if (atMentions && atMentions.length) {
+        if (atMentions && atMentions.length > 0) {
           atMentions.forEach((mention) => {
-            result = result.replace(mention, new Array(mention.length).fill(' ').join(''));
+            result = result.replace(mention, Array.from({ length: mention.length }, () => ' ').join(''));
           });
         }
 
         return result;
       })();
-    } catch (e) {
-      handleError(e, 'MENTION_REMOVER');
+    } catch (error) {
+      handleError(error, 'MENTION_REMOVER');
     }
 
     /**
@@ -347,8 +354,8 @@ export class MessageHandler {
      * */
     try {
       message = message.replace(/\s\s+/g, ' ');
-    } catch (e) {
-      handleError(e, 'EXTRA_SPACE_REMOVER');
+    } catch (error) {
+      handleError(error, 'EXTRA_SPACE_REMOVER');
     }
 
     if (!message) {
