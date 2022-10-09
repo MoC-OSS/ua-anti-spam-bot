@@ -310,7 +310,7 @@ export class MessageHandler {
    * @param {GrammyContext} context
    * @param {string} originMessage
    */
-  sanitizeMessage(context: GrammyContext, originMessage: string) {
+  sanitizeMessage(context: GrammyContext, originMessage: string): string {
     let message = originMessage;
 
     /**
@@ -360,7 +360,7 @@ export class MessageHandler {
 
     if (!message) {
       console.error('Cannot parse the message!', message);
-      return false;
+      return '';
     }
 
     return message;
