@@ -1,20 +1,18 @@
 import type { MenuRange } from '@grammyjs/menu';
 
 import { getAirRaidAlarmSettingsMessage, nextPage, previousPage } from '../../../message';
-import { generateTestState } from '../../../services/_mocks/alarm.mocks';
-import { TEST_ALARM_STATE } from '../../../services/alarm.service';
-import { alarmChatService } from '../../../services/alarm-chat.service';
-import type { GrammyContext } from '../../../types';
-import type { State } from '../../../types/alarm';
+import { alarmChatService, TEST_ALARM_STATE } from '../../../services';
+import { generateTestState } from '../../../services/_mocks';
+import type { GrammyContext, State } from '../../../types';
 import { handleError, isIdWhitelisted } from '../../../utils';
 import { onlyAdmin } from '../../middleware';
 
 /**
- * @param {GrammyContext} ctx
+ * @param {GrammyContext} context_
  * @param {MenuRange<GrammyContext>} range
  * @param alertStates
  * */
-export const dynamicLocationMenu = async (context_: GrammyContext, range: MenuRange<GrammyContext>, alertStates: State[]) => {
+export const dynamicLocationMenu = (context_: GrammyContext, range: MenuRange<GrammyContext>, alertStates: State[]) => {
   const states = isIdWhitelisted(context_.from?.id) ? [...alertStates, generateTestState(TEST_ALARM_STATE)] : alertStates;
   const pageIndex = context_.chatSession.chatSettings.airRaidAlertSettings.pageNumber;
   const { state } = context_.chatSession.chatSettings.airRaidAlertSettings;
@@ -25,7 +23,7 @@ export const dynamicLocationMenu = async (context_: GrammyContext, range: MenuRa
   let columnIndex = 0;
   const lastPageButtonsLimit = buttonIndex + lastPageButtonsNumber;
 
-  function createTextButton(locationName) {
+  function createTextButton(locationName: string) {
     const displayLocationName = state === locationName ? `✅ ${locationName}` : locationName;
     // TODO UABOT-35 update MiddlewareMenu to handle dynamic buttons
 
@@ -82,5 +80,3 @@ export const dynamicLocationMenu = async (context_: GrammyContext, range: MenuRa
     createPreviousButton();
   }
 };
-
-module.exports = dynamicLocationMenu;
