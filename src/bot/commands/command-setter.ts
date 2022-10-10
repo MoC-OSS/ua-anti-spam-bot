@@ -21,11 +21,12 @@ export class CommandSetter {
 
   commands: BotCommand[] = [];
 
-  constructor(bot, startTime, active) {
+  constructor(bot: Bot, startTime: Date, active: boolean) {
     this.bot = bot;
     this.startTime = startTime;
     this.active = active;
-    this.updateCommands();
+    // eslint-disable-next-line no-void
+    void this.updateCommands();
   }
 
   /**
@@ -42,16 +43,16 @@ export class CommandSetter {
   /**
    * @param {boolean} active
    */
-  setActive(active) {
+  async setActive(active: boolean) {
     this.active = active;
-    this.updateCommands();
+    await this.updateCommands();
   }
 
   /**
    * @description
    * Build new commands and set them into the bot
    * */
-  updateCommands() {
+  async updateCommands() {
     /**
      * @param {BotCommand[]}
      * */
@@ -62,6 +63,6 @@ export class CommandSetter {
       { command: 'status', description: this.buildStatus() },
     ];
 
-    return this.bot.api.setMyCommands(this.commands);
+    await this.bot.api.setMyCommands(this.commands);
   }
 }

@@ -41,7 +41,10 @@ export class AlarmChatService {
    * @param {ChatSessionData} chatSession
    * @param {string} id
    * */
-  updateChat(chatSession: ChatSessionData, id: string) {
+  updateChat(chatSession: ChatSessionData, id: number | undefined) {
+    if (!id) {
+      throw new Error(`This is an invalid chat id`);
+    }
     const chatId = id.toString();
     const index = this.chats?.findIndex((chat) => chat.id === chatId) || -1;
     if (index !== -1) {

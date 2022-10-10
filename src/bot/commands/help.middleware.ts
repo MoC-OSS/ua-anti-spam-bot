@@ -2,7 +2,7 @@ import { getHelpMessage } from '../../message';
 import type { GrammyContext } from '../../types';
 import { formatDate, getUserData, handleError } from '../../utils';
 
-class HelpMiddleware {
+export class HelpMiddleware {
   /**
    * @param {Date} startTime
    * */
@@ -33,6 +33,10 @@ class HelpMiddleware {
 
       const { writeUsername, userId } = getUserData(context);
 
+      if (!userId) {
+        throw new Error('Invalid user id');
+      }
+
       context
         .replyWithHTML(
           getHelpMessage({
@@ -47,7 +51,3 @@ class HelpMiddleware {
     };
   }
 }
-
-module.exports = {
-  HelpMiddleware,
-};

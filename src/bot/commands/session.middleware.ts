@@ -4,7 +4,7 @@ import { creatorId } from '../../creator';
 import { redisClient } from '../../db';
 import type { GrammyContext } from '../../types';
 
-class SessionMiddleware {
+export class SessionMiddleware {
   /**
    * @param {Date} startTime
    * */
@@ -31,12 +31,8 @@ class SessionMiddleware {
           Buffer.from(JSON.stringify({ sessions }, null, 2)),
           `telegraf-session-${this.startTime.toISOString()}.json`,
         );
-        context.replyWithDocument(sessionDocument);
+        await context.replyWithDocument(sessionDocument);
       }
     };
   }
 }
-
-module.exports = {
-  SessionMiddleware,
-};
