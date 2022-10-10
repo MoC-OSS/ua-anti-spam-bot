@@ -4,7 +4,7 @@ import { Menu } from '@grammyjs/menu';
  * @description
  * Reimplementation of Grammy's menu to support menu-level middlewares.
  * */
-class MiddlewareMenu extends Menu {
+ export class MiddlewareMenu extends Menu {
   /**
    * @param {MenuMiddleware<C>} middlewares
    * */
@@ -19,7 +19,3 @@ class MiddlewareMenu extends Menu {
     return this.add(typeof text === 'object' ? { ...text, middleware: newMiddlewares } : { text, middleware: newMiddlewares });
   }
 }
-
-module.exports = {
-  MiddlewareMenu,
-};
