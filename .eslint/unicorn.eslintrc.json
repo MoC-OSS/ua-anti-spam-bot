@@ -5,6 +5,7 @@
   "extends": "plugin:unicorn/recommended",
   "rules": {
     "unicorn/no-null": "off",
+    "unicorn/prefer-top-level-await": "off",
     "unicorn/no-array-for-each": "off"
   }
 }

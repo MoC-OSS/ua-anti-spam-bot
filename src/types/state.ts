@@ -30,7 +30,7 @@ interface PerformanceMiddlewareState {
 export type State = OnlyWithTextMiddlewareState &
   PerformanceMiddlewareState & {
     // TODO move into separate file src/types/swindlers.ts and add enum for reason
-    swindlersResult: {
+    swindlersResult?: {
       isSpam: boolean;
       rate: number;
       reason: string;

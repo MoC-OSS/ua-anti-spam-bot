@@ -2,7 +2,7 @@ import axios from 'axios';
 import { TensorService } from '../tensor/tensor.service';
 import { env } from 'typed-dotenv'.config();
 
-import { processHandler } from '../express/process.handler';
+import { processHandler } from '../express-logic/process.handler';
 
 import { redisService } from '../services/redis.service';
 import { handleError } from '../utils';

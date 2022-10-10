@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import type { GrammyContext } from 'types';
 
 import { environmentConfig } from '../config';
+import type { GrammyContext, RealGrammyContext } from '../types';
 
 import { MessageUtil } from './message.util';
 import { TelegramUtil } from './telegram.util';
@@ -14,19 +15,15 @@ export * from './reveal-hidden-urls.util';
 export const messageUtil = new MessageUtil();
 export const telegramUtil = new TelegramUtil();
 
-export function joinMessage(messages) {
-  return messages.join('\n');
-}
-
 /**
- * @param {GrammyContext} ctx
+ * @param {GrammyContext} context
  * */
-export function logContext(context) {
+export function logContext(context: GrammyContext) {
   if (environmentConfig.DEBUG) {
     /**
      * @type {GrammyContext}
      * */
-    const writeContext = JSON.parse(JSON.stringify(context));
+    const writeContext = JSON.parse(JSON.stringify(context)) as RealGrammyContext;
     // noinspection JSConstantReassignment
     delete writeContext.tg;
     console.info(JSON.stringify(writeContext, null, 2));
@@ -41,7 +38,7 @@ export function sleep(time: number) {
   });
 }
 
-export function truncateString(string_, number_) {
+export function truncateString(string_: string, number_: number) {
   if (string_.length > number_) {
     return `${string_.slice(0, number_)}..`;
   }
@@ -52,14 +49,14 @@ export function truncateString(string_, number_) {
 /**
  * @param {Date} date
  * */
-export function formatDate(date) {
+export function formatDate(date: Date) {
   return new Intl.DateTimeFormat('uk-UA', { dateStyle: 'full', timeStyle: 'long', timeZone: 'Europe/Kiev' }).format(date);
 }
 
 /**
  * @param {Date} date
  * */
-export function formatDateIntoAccusative(date) {
+export function formatDateIntoAccusative(date: Date) {
   return formatDate(date)
     .replace('середа', 'середу')
     .replace("п'ятниця", "п'ятницю")
@@ -70,7 +67,7 @@ export function formatDateIntoAccusative(date) {
 /**
  * @param {string} state
  * */
-export function formatStateIntoAccusative(state) {
+export function formatStateIntoAccusative(state: string) {
   if (!state.includes('область')) {
     return state;
   }
@@ -83,9 +80,9 @@ export function formatStateIntoAccusative(state) {
 }
 
 /**
- * @param {GrammyContext} ctx
+ * @param {GrammyContext} context
  * */
-export function getUserData(context) {
+export function getUserData(context: GrammyContext) {
   const username = context.from?.username;
   const fullName = context.from?.last_name ? `${context.from?.first_name} ${context.from?.last_name}` : context.from?.first_name;
   const writeUsername = username ? `@${username}` : fullName ?? '';
@@ -110,13 +107,16 @@ export function getRandomItem<T>(array: T[]): T {
 }
 
 /**
- * @param {GrammyContext} ctx
+ * @param {GrammyContext} context
  * @param {string} reason
  * @param {any} [extra]
  * */
-export function logSkipMiddleware(context: GrammyContext, reason: string, extra?: any) {
+export function logSkipMiddleware(context: GrammyContext, reason: string, extra: any) {
   if (environmentConfig.DEBUG || environmentConfig.DEBUG_MIDDLEWARE) {
-    console.info(`Skip due to ${reason} in chat ${context?.chat?.title}`, extra);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+    console.info(`Skip due to ${reason} in chat ${context.chat?.title || '$empty_title'}`, extra);
   }
 }
 
@@ -125,7 +125,7 @@ export function logSkipMiddleware(context: GrammyContext, reason: string, extra?
  * @param {Date} compareDate
  * @param {number} hours
  * */
-export function compareDatesWithOffset(initialDate, compareDate, hours) {
+export function compareDatesWithOffset(initialDate: Date, compareDate: Date, hours: number) {
   const additionalTime = 1000 * 60 * 60 * hours;
 
   return +initialDate + additionalTime < +compareDate;
@@ -134,7 +134,7 @@ export function compareDatesWithOffset(initialDate, compareDate, hours) {
 /**
  * @param {number} id
  * */
-export function isIdWhitelisted(id) {
+export function isIdWhitelisted(id: number) {
   const whitelist = (environmentConfig.USERS_WHITELIST || '').split(', ');
   return whitelist.includes(id.toString());
 }

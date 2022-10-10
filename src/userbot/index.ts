@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access,unicorn/prefer-top-level-await */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { environmentConfig } from '../config';
 import { redisClient } from '../db';
 import { initSwindlersContainer } from '../services/swindlers.container';
@@ -58,6 +58,7 @@ auth()
     //   console.log('updatesTooLong:', updateInfo);
     // });
     //
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     api.mtproto.updates.on('updateShortMessage', (updateInfo) => {
       console.info('updateShortChatMessage:', updateInfo);
     });
@@ -74,6 +75,7 @@ auth()
     //   console.log('updatesCombined:', updateInfo);
     // });
     //
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     api.mtproto.updates.on('updates', (updateInfo) => {
       console.info('updates:', updateInfo.updates);
     });
