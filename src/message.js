@@ -113,6 +113,7 @@ ${getRandomAlarmEndText()}
 const settingsAvailableMessage = '👨‍👩‍👧‍👦 Налаштування доступні тільки для групових чатів.';
 const settingsDeleteItemMessage = 'Повідомлення про видалення';
 const settingsSubmitMessage = '💾 Зберегти';
+const englishSettingsSubmitMessage = '💾 Save';
 const cancelMessageSending = 'Розсилка була відмінена!';
 /**
  * Complex - Settings
@@ -154,6 +155,42 @@ const getSettingsMenuMessage = (settings) =>
 Для зміни налаштувань, натисніть на відповідну кнопку нижче. 👇
 `.trim();
 
+/**
+ * @param {ChatSessionData['chatSettings']} settings
+ * */
+const getEnglishSettingsMenuMessage = (settings) =>
+  `
+<b>🤖 Bot Settings</b>
+Here you can adjust the settings:
+
+🚀 ${
+    settings.disableStrategicInfo === true
+      ? '⛔️ Do not delete messages containing strategic information.'
+      : '✅ Delete messages containing strategic information.'
+  }
+❗ ${
+    settings.disableStrategicInfo === true || settings.disableDeleteMessage === true
+      ? '⛔️ Do not post reports on the removed messages containing strategic information.'
+      : '✅ Post reports on the removed messages containing strategic information.'
+  }
+💰 ${settings.disableSwindlerMessage === true ? '⛔️ Do not detect and delete scam messages.' : '✅ Detect and delete scam messages.'}
+
+<b>Air raid alarm settings:</b>
+🏰 ${settings.airRaidAlertSettings.state ? `✅ Your region is ${settings.airRaidAlertSettings.state}.` : '⛔ No region is selected.'}
+📢 ${
+    settings.airRaidAlertSettings.notificationMessage === false
+      ? '⛔️ Do not notify about the start and end of an air alert in your region.'
+      : '✅ Notify about the start and end of an air alert in your region.'
+  }
+🤫 ${
+    settings.disableChatWhileAirRaidAlert === false
+      ? '⛔️ Do not disable the chat during an air alert in your region.'
+      : '✅ Disable the chat during an air alert in your region.'
+  }
+
+To change the setting, click the appropriate button below. 👇
+`.trim();
+
 const getAirRaidAlarmSettingsMessage = (settings) =>
   `
 <b>🤖 Налаштування повітряної тривоги в поточному чаті.</b>
@@ -170,6 +207,9 @@ const getAirRaidAlarmSettingsMessage = (settings) =>
 
 const settingsDescriptionButton = '📋 Опис налаштувань бота в поточному чаті';
 
+/**
+ * Ukrainian buttons
+ * */
 const deleteTensorButton = `🚀 Інцидент`;
 const deleteMessageButton = '❗ Причина';
 const deleteSwindlerButton = '💰 Шахраї';
@@ -177,6 +217,17 @@ const deleteSwindlerButton = '💰 Шахраї';
 const airAlarmAlertButton = '🏰 Регіон';
 const airAlarmNotificationMessage = '📢 Тривога';
 const turnOffChatWhileAlarmButton = '🤫 Тиша';
+
+/**
+ * English buttons
+ * */
+const englishDeleteTensorButton = `🚀 Incident`;
+const englishDeleteMessageButton = '❗ Reason';
+const englishDeleteSwindlerButton = '💰 Scam';
+
+const englishAirAlarmAlertButton = '🏰 Region';
+const englishAirAlarmNotificationMessage = '📢 Alarm';
+const englishTurnOffChatWhileAlarmButton = '🤫 Silent';
 
 const goBackButton = '⬅️ Повернутись назад';
 
@@ -468,6 +519,13 @@ module.exports = {
   chatIsMutedMessage,
   chatIsUnmutedMessage,
   blockWhenAlarm,
+  englishDeleteTensorButton,
+  englishDeleteMessageButton,
+  englishDeleteSwindlerButton,
+  englishAirAlarmAlertButton,
+  englishAirAlarmNotificationMessage,
+  englishTurnOffChatWhileAlarmButton,
+  englishSettingsSubmitMessage,
   getAirRaidAlarmSettingsMessage,
   getBotJoinMessage,
   getCannotDeleteMessage,
@@ -476,6 +534,7 @@ module.exports = {
   getGroupStartMessage,
   getHelpMessage,
   getSettingsMenuMessage,
+  getEnglishSettingsMenuMessage,
   getStartChannelMessage,
   getStartMessage,
   getStatisticsMessage,
