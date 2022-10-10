@@ -1,27 +1,30 @@
+import type { NextFunction } from 'grammy';
+import type { GrammyContext } from 'types';
+
 import { nestedMiddleware } from './nested.middleware';
 
 describe('nestedMiddleware', () => {
   it('should call all middlewares', async () => {
-    const mockMiddleware = jest.fn(async (context, next) => {
+    const mockMiddleware = jest.fn(async (context, next: NextFunction) => {
       await next();
     });
 
     const finalMockMiddleware = jest.fn(() => {});
 
     await nestedMiddleware(
-      async (context, next) => {
+      async (context: GrammyContext, next: NextFunction) => {
         await next();
       },
       mockMiddleware,
       mockMiddleware,
     )({}, finalMockMiddleware);
 
-    expect(mockMiddleware).toBeCalledTimes(2);
-    expect(finalMockMiddleware).toBeCalled();
+    expect(mockMiddleware).toHaveBeenCalledTimes(2);
+    expect(finalMockMiddleware).toHaveBeenCalled();
   });
 
   it('should not call all middlewares', async () => {
-    const mockMiddleware = jest.fn(async (context, next) => {
+    const mockMiddleware = jest.fn(async (context: GrammyContext, next: NextFunction) => {
       await next();
     });
 
@@ -36,7 +39,7 @@ describe('nestedMiddleware', () => {
       mockMiddleware,
     )({}, finalMockMiddleware);
 
-    expect(mockMiddleware).not.toBeCalled();
-    expect(finalMockMiddleware).toBeCalled();
+    expect(mockMiddleware).not.toHaveBeenCalled();
+    expect(finalMockMiddleware).toHaveBeenCalled();
   });
 });

@@ -1,11 +1,9 @@
+import type { GrammyContext } from 'types';
+
 /**
  * Reveals real link that were used in the message
- *
- * @param {GrammyContext} ctx
- *
- * @returns string
  * */
-export function revealHiddenUrls(context) {
+export function revealHiddenUrls(context: GrammyContext): string {
   let { text } = context.state;
   const entities = context.msg?.entities;
 
@@ -25,6 +23,7 @@ export function revealHiddenUrls(context) {
           additionalUrlsLength <= 0
             ? cutInHiddenUrls(text, offset, offset + length, hiddenUrl)
             : cutInHiddenUrls(
+
                 text,
                 offset + additionalUrlsLength - deletedTextLength,
                 offset + length + additionalUrlsLength - deletedTextLength,
@@ -38,7 +37,3 @@ export function revealHiddenUrls(context) {
 
   return text;
 }
-
-module.exports = {
-  revealHiddenUrls,
-};

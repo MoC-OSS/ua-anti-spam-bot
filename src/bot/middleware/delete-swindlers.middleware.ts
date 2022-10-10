@@ -1,4 +1,6 @@
+import type { Middleware, NextFunction } from 'grammy';
 import { InputFile } from 'grammy';
+import type { GrammyContext, SwindlerType } from 'types';
 
 import { logsChat } from '../../creator';
 import { getCannotDeleteMessage, swindlersWarningMessage } from '../../message';
@@ -9,24 +11,14 @@ const SWINDLER_SETTINGS = {
   WARNING_DELAY: 86_400_000 * 3,
 };
 
-class DeleteSwindlersMiddleware {
-  /**
-   * @param {SwindlersDetectService} swindlersDetectService
-   * */
-  swindlersDetectService: SwindlersDetectService;
+export class DeleteSwindlersMiddleware {
+  constructor(private swindlersDetectService: SwindlersDetectService) {}
 
-  constructor(swindlersDetectService) {
-    this.swindlersDetectService = swindlersDetectService;
-  }
-
-  middleware() {
+  middleware(): Middleware<GrammyContext> {
     /**
      * Delete messages that looks like from swindlers
-     *
-     * @param {GrammyContext} ctx
-     * @param {Next} next
      * */
-    const middleware = async (context, next) => {
+    const middleware = async (context: GrammyContext, next: NextFunction) => {
       const message = revealHiddenUrls(context);
 
       const result = await this.swindlersDetectService.isSwindlerMessage(message);
@@ -36,7 +28,7 @@ class DeleteSwindlersMiddleware {
       if (result.isSpam) {
         await this.saveSwindlersMessage(context, result.rate, result.displayReason || result.reason, message);
         await this.processWarningMessage(context);
-        this.removeMessage(context);
+        await this.removeMessage(context);
         return;
       }
 
@@ -55,10 +47,10 @@ class DeleteSwindlersMiddleware {
    * @param {SwindlerType | string} from
    * @param {string} [message]
    * */
-  async saveSwindlersMessage(context, maxChance, from, message) {
+  async saveSwindlersMessage(context: GrammyContext, maxChance: number, from: SwindlerType | string, message: string) {
     const { writeUsername, userId } = getUserData(context);
     const chatInfo = await context.getChat();
-    const text = message || context.state.text;
+    const text = message || context?.state?.text;
 
     const chatMention =
       context.chat.title &&
@@ -86,10 +78,8 @@ class DeleteSwindlersMiddleware {
 
   /**
    * Sends warning to the chat, or skips if it was sent
-   *
-   * @param {GrammyContext} ctx
    * */
-  processWarningMessage(context) {
+  processWarningMessage(context: GrammyContext) {
     const shouldSend =
       !context.chatSession.lastWarningDate ||
       (context.chatSession.lastWarningDate &&
@@ -105,10 +95,11 @@ class DeleteSwindlersMiddleware {
   /**
    * Delete messages that looks like from swindlers
    *
-   * @param {GrammyContext} ctx
    * */
-  removeMessage(context) {
-    return context.deleteMessage().catch(() => {
+  async removeMessage(context: GrammyContext) {
+    try {
+      return await context.deleteMessage();
+    } catch {
       if (
         !context.chatSession.isLimitedDeletion ||
         compareDatesWithOffset(new Date(context.chatSession.lastLimitedDeletionDate), new Date(), 1)
@@ -145,10 +136,6 @@ class DeleteSwindlersMiddleware {
           })
           .catch(handleError);
       }
-    });
+    }
   }
 }
-
-module.exports = {
-  DeleteSwindlersMiddleware,
-};

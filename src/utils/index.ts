@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import type { GrammyContext } from 'types';
 
 import { environmentConfig } from '../config';
 
@@ -20,7 +21,7 @@ export function joinMessage(messages) {
 /**
  * @param {GrammyContext} ctx
  * */
-function logContext(context) {
+export function logContext(context) {
   if (environmentConfig.DEBUG) {
     /**
      * @type {GrammyContext}
@@ -113,9 +114,9 @@ export function getRandomItem<T>(array: T[]): T {
  * @param {string} reason
  * @param {any} [extra]
  * */
-export function logSkipMiddleware(context, reason, extra) {
+export function logSkipMiddleware(context: GrammyContext, reason: string, extra?: any) {
   if (environmentConfig.DEBUG || environmentConfig.DEBUG_MIDDLEWARE) {
-    console.info(`Skip due to ${reason} in chat ${context.chat.title}`, extra);
+    console.info(`Skip due to ${reason} in chat ${context?.chat?.title}`, extra);
   }
 }
 
