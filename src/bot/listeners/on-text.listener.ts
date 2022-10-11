@@ -125,8 +125,6 @@ export class OnTextListener {
                       .replyWithHTML(getCannotDeleteMessage({ adminsString }), { reply_to_message_id: context.msg.message_id })
                       .catch(handleError);
 
-                    context.state.admins = admins;
-
                     this.bot.api
                       .sendMessage(
                         logsChat,

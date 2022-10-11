@@ -6,12 +6,9 @@ import { logSkipMiddleware } from '../../utils';
 /**
  * @description
  * Skip messages without text
- *
- * @param {GrammyContext} ctx
- * @param {Next} next
  * */
 export function onlyWithText(context: GrammyContext, next: NextFunction) {
-  const text = context?.msg?.text || context?.msg?.caption;
+  const text = context.msg?.text || context.msg?.caption;
 
   if (text) {
     context.state.text = text;

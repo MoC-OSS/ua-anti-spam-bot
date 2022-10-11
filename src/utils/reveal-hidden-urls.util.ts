@@ -7,7 +7,7 @@ function cutInHiddenUrls(string_: string | undefined, cutStart: number, cutEnd: 
 /**
  * Reveals real link that were used in the message
  *
- * @param {GrammyContext} ctx
+ * @param {GrammyContext} context
  *
  * @returns string
  * */
@@ -27,7 +27,6 @@ export function revealHiddenUrls(context: GrammyContext): string {
           additionalUrlsLength <= 0
             ? cutInHiddenUrls(text, offset, offset + length, hiddenUrl)
             : cutInHiddenUrls(
-
                 text,
                 offset + additionalUrlsLength - deletedTextLength,
                 offset + length + additionalUrlsLength - deletedTextLength,
@@ -39,5 +38,5 @@ export function revealHiddenUrls(context: GrammyContext): string {
     });
   }
 
-  return text;
+  return text!;
 }

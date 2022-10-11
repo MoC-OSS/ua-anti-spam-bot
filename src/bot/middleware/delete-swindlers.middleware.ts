@@ -1,4 +1,4 @@
-import type { Middleware, NextFunction } from 'grammy';
+import type { Bot, Middleware, NextFunction } from 'grammy';
 import { InputFile } from 'grammy';
 import type { GrammyContext, SwindlerType } from 'types';
 
@@ -12,7 +12,7 @@ const SWINDLER_SETTINGS = {
 };
 
 export class DeleteSwindlersMiddleware {
-  constructor(private swindlersDetectService: SwindlersDetectService) {}
+  constructor(private bot: Bot<GrammyContext>, private swindlersDetectService: SwindlersDetectService) {}
 
   middleware(): Middleware<GrammyContext> {
     /**
@@ -42,26 +42,27 @@ export class DeleteSwindlersMiddleware {
   }
 
   /**
-   * @param {GrammyContext} ctx
+   * @param {GrammyContext} context
    * @param {number} maxChance
    * @param {SwindlerType | string} from
    * @param {string} [message]
    * */
-  async saveSwindlersMessage(context: GrammyContext, maxChance: number, from: SwindlerType | string, message: string) {
+  async saveSwindlersMessage(context: GrammyContext, maxChance: number, from: SwindlerType | string, message?: string) {
     const { writeUsername, userId } = getUserData(context);
     const chatInfo = await context.getChat();
-    const text = message || context?.state?.text;
+    const text = message || context.state?.text || '';
 
-    const chatMention =
-      context.chat.title &&
-      (chatInfo.invite_link ? `<a href="${chatInfo.invite_link}">${context.chat.title}</a>` : `<code>${context.chat.title}</code>`);
+    const chatTitle = telegramUtil.getChatTitle(context.chat);
+    const inviteLink = telegramUtil.getInviteLink(chatInfo);
 
-    const userMention = `<a href="tg://user?id=${userId}">${writeUsername}</a>`;
+    const chatMention = chatTitle && (inviteLink ? `<a href="${inviteLink}">${chatTitle}</a>` : `<code>${chatTitle}</code>`);
 
-    if (!chatInfo.invite_link) {
+    const userMention = userId ? `<a href="tg://user?id=${userId}">${writeUsername}</a>` : writeUsername;
+
+    if (!inviteLink) {
       await context.api.sendDocument(
         logsChat,
-        new InputFile(Buffer.from(JSON.stringify(chatInfo, null, 2)), `chat-info-${context.chat.title}-${new Date().toISOString()}.csv`),
+        new InputFile(Buffer.from(JSON.stringify(chatInfo, null, 2)), `chat-info-${chatTitle}-${new Date().toISOString()}.csv`),
       );
     }
 
@@ -94,7 +95,6 @@ export class DeleteSwindlersMiddleware {
 
   /**
    * Delete messages that looks like from swindlers
-   *
    * */
   async removeMessage(context: GrammyContext) {
     try {
@@ -102,24 +102,28 @@ export class DeleteSwindlersMiddleware {
     } catch {
       if (
         !context.chatSession.isLimitedDeletion ||
-        compareDatesWithOffset(new Date(context.chatSession.lastLimitedDeletionDate), new Date(), 1)
+        compareDatesWithOffset(new Date(context.chatSession.lastLimitedDeletionDate || ''), new Date(), 1)
       ) {
         context.chatSession.isLimitedDeletion = true;
         context.chatSession.lastLimitedDeletionDate = new Date();
 
+        if (!context.chat?.id) {
+          return;
+        }
+
         return telegramUtil
-          .getChatAdmins(context, context.chat.id)
+          .getChatAdmins(this.bot, context.chat.id)
           .then(({ adminsString, admins }) => {
             context
-              .replyWithHTML(getCannotDeleteMessage({ adminsString }), { reply_to_message_id: context.msg.message_id })
+              .replyWithHTML(getCannotDeleteMessage({ adminsString }), { reply_to_message_id: context.msg?.message_id })
               .catch(handleError);
-
-            context.state.admins = admins;
 
             context.api
               .sendMessage(
                 logsChat,
-                `Cannot delete the following message from chat\n\n<code>${context.chat.title}</code>\n${context.msg.text}`,
+                `Cannot delete the following message from chat\n\n<code>${telegramUtil.getChatTitle(context.chat)}</code>\n${
+                  context.msg?.text || ''
+                }`,
                 {
                   parse_mode: 'HTML',
                 },

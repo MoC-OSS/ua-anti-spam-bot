@@ -12,6 +12,8 @@ import { MessageHandler } from './bot/message.handler';
 import {
   botActiveMiddleware,
   deleteMessageMiddleware,
+  DeleteSwindlersMiddleware,
+  GlobalMiddleware,
   ignoreBySettingsMiddleware,
   ignoreOld,
   nestedMiddleware,
@@ -118,7 +120,7 @@ const rootMenu = new Menu('root');
   const statisticsMiddleware = new StatisticsMiddleware(startTime);
   const updatesMiddleware = new UpdatesMiddleware(startTime);
   const settingsMiddleware = new SettingsMiddleware(airRaidAlarmStates.states);
-  const deleteSwindlersMiddleware = new DeleteSwindlersMiddleware(swindlersDetectService);
+  const deleteSwindlersMiddleware = new DeleteSwindlersMiddleware(bot, swindlersDetectService);
 
   const messageHandler = new MessageHandler(tensorService);
 

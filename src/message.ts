@@ -381,7 +381,7 @@ https://youtu.be/RX0cZYf1Lm4
 `.trim();
 
 export interface GroupStartMessageProperties {
-  adminsString: string;
+  adminsString?: string;
   isAdmin?: boolean;
   canDelete: boolean;
   user?: string;
@@ -404,7 +404,7 @@ ${((!isAdmin || !canDelete) && (adminsString ? `З цим може допомо�
 `.trim();
 
 export interface CannotDeleteMessageProperties {
-  adminsString: string;
+  adminsString?: string;
 }
 
 export const getCannotDeleteMessage = ({ adminsString }: CannotDeleteMessageProperties) =>
@@ -475,7 +475,7 @@ export const getSuccessfulMessage = ({ totalCount, successCount }: SuccessfulMes
 `.trim();
 
 export interface BotJoinMessageProperties {
-  adminsString: string;
+  adminsString?: string;
   isAdmin?: boolean;
 }
 

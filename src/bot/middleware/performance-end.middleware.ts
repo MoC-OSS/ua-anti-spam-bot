@@ -4,16 +4,13 @@ import type { GrammyContext } from 'types';
 
 /**
  * Used for performance checking
- *
- * @param {GrammyContext} ctx
- * @param {Next} next
  * */
 export async function performanceEndMiddleware(context: GrammyContext, next: NextFunction) {
   if (environmentConfig.DEBUG) {
     await context
       .replyWithHTML(
         [
-          `<b>Time</b>: ${performance.now() - context?.state?.performanceStart}`,
+          `<b>Time</b>: ${performance.now() - (context.state?.performanceStart || 0)}`,
           '',
           'Start:',
           context.state.performanceStart,

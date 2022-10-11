@@ -14,7 +14,7 @@ export function onlyNotForwarded(context: GrammyContext, next: NextFunction) {
   /**
    * Skip forwarded messages
    * */
-  if (context?.update?.message?.forward_from) {
+  if (context.update?.message?.forward_from) {
     logSkipMiddleware(context, 'regular forward');
     return;
   }

@@ -1,6 +1,6 @@
 import { environmentConfig } from 'config';
 import type { Bot, Middleware, NextFunction } from 'grammy';
-import type { GrammyContext } from 'types';
+import type { AirRaidAlertSettings, ChatSettings, GrammyContext } from 'types';
 
 import {
   adminReadyHasNoDeletePermissionMessage,
@@ -9,10 +9,10 @@ import {
   getStartChannelMessage,
   memberReadyMessage,
 } from '../../message';
-import { handleError, logCtx as logContext, telegramUtil } from '../../utils';
+import { emptyFunction, handleError, logContext, telegramUtil } from '../../utils';
 
 export class GlobalMiddleware {
-  constructor(private bot: Bot) {}
+  constructor(private bot: Bot<GrammyContext>) {}
 
   /**
    * Global middleware.
@@ -39,7 +39,7 @@ export class GlobalMiddleware {
       this.createState(context);
       this.updateChatInfo(context);
       await this.updateChatSessionIfEmpty(context);
-      this.handleBotInvite(context);
+      await this.handleBotInvite(context);
       this.handleBotKick(context);
       await this.handlePromoteAndDemote(context);
 
@@ -49,22 +49,29 @@ export class GlobalMiddleware {
 
   updateChatInfo(context: GrammyContext) {
     context.chatSession.chatType = context.chat?.type;
-    context.chatSession.chatTitle = context.chat?.title;
+    context.chatSession.chatTitle = telegramUtil.getChatTitle(context.chat);
+
+    const defaultAirRaidAlertSettings: AirRaidAlertSettings = {
+      pageNumber: 1,
+      state: null,
+      notificationMessage: false,
+    };
+
+    const defaultChatSettings: ChatSettings = {
+      airRaidAlertSettings: defaultAirRaidAlertSettings,
+      disableChatWhileAirRaidAlert: false,
+    };
 
     if (context.chatSession.chatSettings === undefined) {
-      context.chatSession.chatSettings = {};
+      context.chatSession.chatSettings = defaultChatSettings;
     }
 
     if (context.chatSession.chatSettings.disableChatWhileAirRaidAlert === undefined) {
-      context.chatSession.chatSettings.disableChatWhileAirRaidAlert = false;
+      context.chatSession.chatSettings.disableChatWhileAirRaidAlert = defaultChatSettings.disableChatWhileAirRaidAlert;
     }
 
     if (context.chatSession.chatSettings.airRaidAlertSettings === undefined) {
-      context.chatSession.chatSettings.airRaidAlertSettings = {
-        pageNumber: 1,
-        state: null,
-        notificationMessage: false,
-      };
+      context.chatSession.chatSettings.airRaidAlertSettings = defaultAirRaidAlertSettings;
     }
 
     context
@@ -76,14 +83,14 @@ export class GlobalMiddleware {
   }
 
   /**
-   * @param {GrammyContext} ctx
+   * @param {GrammyContext} context
    * */
-  async updateChatSessionIfEmpty(context) {
+  async updateChatSessionIfEmpty(context: GrammyContext) {
     /**
      * Private always not kicked and admin
      * TODO handle private ban
      * */
-    if (context.chat.type === 'private') {
+    if (context.chat?.type === 'private') {
       context.chatSession.botRemoved = false;
       context.chatSession.isBotAdmin = true;
       return;
@@ -114,7 +121,7 @@ export class GlobalMiddleware {
           context.chatSession.isBotAdmin = isBotAdmin;
           context.chatSession.botAdminDate = isBotAdmin ? new Date() : null;
         })
-        .catch(() => {});
+        .catch(emptyFunction);
     }
   }
 
@@ -125,19 +132,24 @@ export class GlobalMiddleware {
   }
 
   handleBotInvite(context: GrammyContext) {
-    const addedMember = context?.msg?.new_chat_member;
-    if (addedMember?.id === context.me.id && context.chat?.type !== 'private') {
+    // TODO rework with grammy queries
+    const addedMember = context.msg?.new_chat_members;
+    const foundMe = addedMember?.some((member) => member.id === context.me.id);
+
+    if (foundMe && context.chat?.type !== 'private' && context.chat?.id) {
       return telegramUtil
         .getChatAdmins(this.bot, context.chat.id)
-        .then(({ adminsString }) => {
-          context.replyWithHTML(getBotJoinMessage({ adminsString, isAdmin: context.chatSession.isBotAdmin }));
-        })
+        .then(({ adminsString }) => context.replyWithHTML(getBotJoinMessage({ adminsString, isAdmin: context.chatSession.isBotAdmin })))
         .catch(handleError);
     }
   }
 
   handleBotKick(context: GrammyContext) {
-    const isBotRemoved = context?.msg?.left_chat_participant?.id === context.me.id;
+    // TODO rework with grammy queries
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const isBotRemoved = context.msg?.left_chat_participant?.id === context.me.id;
     context.chatSession.botRemoved = isBotRemoved;
 
     if (isBotRemoved) {
@@ -147,8 +159,8 @@ export class GlobalMiddleware {
   }
 
   async handlePromoteAndDemote(context: GrammyContext) {
-    const oldPermissionsMember = context?.myChatMember?.old_chat_member;
-    const updatePermissionsMember = context?.myChatMember?.new_chat_member;
+    const oldPermissionsMember = context.myChatMember?.old_chat_member;
+    const updatePermissionsMember = context.myChatMember?.new_chat_member;
     const isUpdatedToAdmin = updatePermissionsMember?.user?.id === context.me.id && updatePermissionsMember?.status === 'administrator';
     const isDemotedToMember =
       updatePermissionsMember?.user?.id === context.me.id &&
@@ -156,7 +168,7 @@ export class GlobalMiddleware {
       oldPermissionsMember?.status === 'administrator';
 
     if (isUpdatedToAdmin) {
-      if (context.chat.type === 'channel') {
+      if (context.chat?.type === 'channel') {
         await context.replyWithHTML(getStartChannelMessage({ botName: context.me.username })).catch(handleError);
       } else {
         context.chatSession.botAdminDate = new Date();

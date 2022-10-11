@@ -1,5 +1,5 @@
 import type { ParseModeContext } from '@grammyjs/parse-mode';
-import type { Bot, Composer, Context, Middleware, SessionFlavor } from 'grammy';
+import type { Bot, Composer, Context, MiddlewareFn, SessionFlavor } from 'grammy';
 
 import type { ChatSessionData, ChatSessionFlavor, SessionData } from './session';
 import type { State, StateFlavor } from './state';
@@ -15,7 +15,7 @@ export type GrammyContext = Context &
  * */
 export type RealGrammyContext = GrammyContext & { tg: any; telegram: any; api: any };
 
-export type GrammyMiddleware = Middleware<GrammyContext>;
+export type GrammyMiddleware = MiddlewareFn<GrammyContext>;
 
 export type GrammyBot = Bot<GrammyContext>;
 export type GrammyErrorHandler = Parameters<Composer<GrammyContext>['errorBoundary']>[0];

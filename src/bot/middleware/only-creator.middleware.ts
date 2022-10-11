@@ -9,7 +9,7 @@ import { getDeclinedMassSendingMessage } from '../../message';
  * Allow actions only for bot creator
  * */
 export async function onlyCreator(context: GrammyContext, next: NextFunction) {
-  if (context?.from?.id === creatorId) {
+  if (context.from?.id === creatorId) {
     return next();
   }
 
