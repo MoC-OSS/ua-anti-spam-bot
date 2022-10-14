@@ -13,13 +13,12 @@ import {
   turnOffChatWhileAlarmButton,
 } from '../../message';
 import { alarmChatService } from '../../services';
-import type { GrammyContext } from '../../types';
+import type { GrammyContext, State } from '../../types';
 import { handleError } from '../../utils';
 import { onlyAdmin } from '../middleware';
 import { MiddlewareMenu } from '../middleware-menu.menu';
 
 import { dynamicLocationMenu } from './air-raid-alarm/locations-menu-generator';
-import type { State } from '../../types/state';
 
 const toggleSetting = (context: GrammyContext, key: string) => {
   context.chatSession.chatSettings[key] = context.chatSession.chatSettings[key] === false;
@@ -62,11 +61,11 @@ export class SettingsMiddleware {
   /**
    * @param {State[]} airRaidAlarmStates
    * */
-  settingsMenuObj: MiddlewareMenu | null;
+  settingsMenuObj: MiddlewareMenu<GrammyContext> | null;
 
-  settingsDescriptionObj: MiddlewareMenu | null;
+  settingsDescriptionObj: MiddlewareMenu<GrammyContext> | null;
 
-  settingsAirRaidAlertObj: MiddlewareMenu | null;
+  settingsAirRaidAlertObj: MiddlewareMenu<GrammyContext> | null;
 
   airRaidAlarmStates: State[];
 
@@ -83,7 +82,6 @@ export class SettingsMiddleware {
      * @param {keyof ChatSessionData['chatSettings']} key
      * */
 
-
     this.settingsMenuObj = new MiddlewareMenu('settingsMenu', { autoAnswer: false })
       .addGlobalMiddlewares(onlyAdmin)
       .text(deleteTensorButton, (context: GrammyContext) => toggleSetting(context, 'disableStrategicInfo'))
@@ -91,6 +89,9 @@ export class SettingsMiddleware {
       .text(deleteSwindlerButton, (context: GrammyContext) => toggleSetting(context, 'disableSwindlerMessage'))
       .row()
       .text(airAlarmAlertButton, isAlarmNow, (context: GrammyContext) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
         context.menu.nav('settingsAirRaidAlertSubmenu');
         context
           .editMessageText(getAirRaidAlarmSettingsMessage(context.chatSession.chatSettings), { parse_mode: 'HTML' })
@@ -128,7 +129,7 @@ export class SettingsMiddleware {
   initAirRaidAlertSubmenu() {
     this.settingsAirRaidAlertObj = new MiddlewareMenu('settingsAirRaidAlertSubmenu')
       .addGlobalMiddlewares(onlyAdmin)
-      .dynamic((context, range) => dynamicLocationMenu(context as GrammyContext, range as , this.airRaidAlarmStates))
+      .dynamic((context, range) => dynamicLocationMenu(context, range, this.airRaidAlarmStates))
       .row()
       .back(goBackButton, (context) => {
         context.editMessageText(getSettingsMenuMessage(context.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
@@ -151,12 +152,15 @@ export class SettingsMiddleware {
     /**
      * @param {GrammyContext} ctx
      * */
-    const middleware = async (context) => {
-      context
-        .replyWithHTML(getSettingsMenuMessage(context.chatSession.chatSettings), { reply_markup: this.settingsMenuObj })
-        .catch(() => {});
-    };
 
-    return middleware;
+    return async (context: GrammyContext) => {
+      if (this.settingsMenuObj) {
+        await context
+          .replyWithHTML(getSettingsMenuMessage(context.chatSession.chatSettings), { reply_markup: this.settingsMenuObj })
+          .catch((error: Error) => {
+            console.info(`sendSettingsMenu error ${error.message}`);
+          });
+      }
+    };
   }
 }

@@ -1,13 +1,15 @@
 import { Menu } from '@grammyjs/menu';
+import { GrammyContext } from '../types';
 
 /**
  * @description
  * Reimplementation of Grammy's menu to support menu-level middlewares.
  * */
- export class MiddlewareMenu extends Menu {
+ export class MiddlewareMenu<C extends GrammyContext> extends Menu<C> {
   /**
    * @param {MenuMiddleware<C>} middlewares
    * */
+
   addGlobalMiddlewares(...middlewares) {
     this.menuMiddlewares = middlewares;
     return this;

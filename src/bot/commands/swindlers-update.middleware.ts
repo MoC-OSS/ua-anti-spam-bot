@@ -1,13 +1,13 @@
 import { swindlersUpdateEndMessage, swindlersUpdateStartMessage } from '../../message';
-import type { DynamicStorageService } from '../../services/dynamic-storage.service';
+import type { DynamicStorageService } from '../../services';
+import type { GrammyContext } from '../../types';
 
 export class SwindlersUpdateMiddleware {
   /**
    * @param {DynamicStorageService} dynamicStorageService
    * */
-  dynamicStorageService: DynamicStorageService;
 
-  constructor(dynamicStorageService) {
+  constructor(private dynamicStorageService: DynamicStorageService) {
     this.dynamicStorageService = dynamicStorageService;
   }
 
@@ -18,12 +18,12 @@ export class SwindlersUpdateMiddleware {
     /**
      * @param {GrammyContext} ctx
      * */
-    return async (context) => {
-      context.reply(swindlersUpdateStartMessage).then((message) => {
+    return async (context: GrammyContext) => {
+      await context.reply(swindlersUpdateStartMessage).then(async (message) => {
         // eslint-disable-next-line camelcase
         const { message_id } = message;
         // eslint-disable-next-line camelcase
-        this.dynamicStorageService.updateSwindlers().then(() => context.editMessageText(swindlersUpdateEndMessage, { message_id }));
+        await this.dynamicStorageService.updateSwindlers().then(() => context.editMessageText(swindlersUpdateEndMessage, { message_id }));
       });
     };
   }

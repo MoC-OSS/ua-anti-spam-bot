@@ -4,15 +4,12 @@ import { getGroupStartMessage, getStartMessage, makeAdminMessage } from '../../m
 import type { GrammyContext } from '../../types';
 import { getUserData, handleError, telegramUtil } from '../../utils';
 
-class StartMiddleware {
+export class StartMiddleware {
   /**
    * @param {Bot} bot
    * */
-  bot: Bot;
 
-  constructor(bot) {
-    this.bot = bot;
-  }
+  constructor(private bot: Bot<GrammyContext>) {}
 
   /**
    * Handle /start
@@ -42,6 +39,10 @@ class StartMiddleware {
         );
       }
 
+      if (!context.chat?.id) {
+        throw new Error('StartMiddleware error: chat.id is undefined');
+      }
+
       return telegramUtil
         .getChatAdmins(this.bot, context.chat?.id)
         .then(({ adminsString }) => {
@@ -49,16 +50,12 @@ class StartMiddleware {
             .replyWithHTML(
               getGroupStartMessage({ adminsString, isAdmin, canDelete, user: writeUsername !== '@GroupAnonymousBot' ? writeUsername : '' }),
             )
-            .catch((getAdminsError) => {
+            .catch(async (getAdminsError) => {
               handleError(getAdminsError);
-              context.replyWithHTML(makeAdminMessage);
+              await context.replyWithHTML(makeAdminMessage);
             });
         })
         .catch(handleError);
     };
   }
 }
-
-module.exports = {
-  StartMiddleware,
-};
