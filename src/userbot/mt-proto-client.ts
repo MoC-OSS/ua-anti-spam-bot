@@ -21,21 +21,24 @@ export class MtProtoClient {
     }
 
     switch (peer._) {
-      case 'chat':
+      case 'chat': {
         return {
           _: `inputPeerChat`,
           chat_id: peer.id,
         };
+      }
 
-      case 'channel':
+      case 'channel': {
         return {
           _: 'inputPeerChannel',
           channel_id: peer.id,
           access_hash: peer.access_hash,
         };
+      }
 
-      default:
+      default: {
         throw new Error('Not Implemented');
+      }
     }
   }
 

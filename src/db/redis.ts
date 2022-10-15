@@ -1,4 +1,4 @@
-import redis from 'redis';
+import * as redis from 'redis';
 import type { JsonObject, JsonValue, Primitive } from 'type-fest';
 
 import { environmentConfig } from '../config';

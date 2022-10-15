@@ -12,6 +12,10 @@ export const initSwindlersContainer = async () => {
   const swindlersTensorService = await initSwindlersTensor();
   swindlersTensorService.setSpamThreshold(0.87);
 
+  // Test that swindlersTensorService works
+  // It throws an error if it's not working
+  await swindlersTensorService.predict('test', null);
+
   const dynamicStorageService = new DynamicStorageService(swindlersGoogleService, dataset);
   await dynamicStorageService.init();
 

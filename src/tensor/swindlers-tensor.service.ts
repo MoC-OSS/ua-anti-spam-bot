@@ -1,9 +1,9 @@
 /* eslint-disable unicorn/prefer-module */
 import fs from 'node:fs';
 import path from 'node:path';
-import tf from '@tensorflow/tfjs';
+import type { LayersModel } from '@tensorflow/tfjs';
 import type { ModelArtifacts } from '@tensorflow/tfjs-core/dist/io/types';
-import type { LayersModel } from '@tensorflow/tfjs-node';
+import * as tf from '@tensorflow/tfjs-node';
 import { optimizeText } from 'ukrainian-ml-optimizer';
 
 import { environmentConfig } from '../config';
@@ -73,7 +73,7 @@ export class SwindlersTensorService {
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
     return tensorPredict?.data().then(
       (numericData: [number, number]) =>
         ({

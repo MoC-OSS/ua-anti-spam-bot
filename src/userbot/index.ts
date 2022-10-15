@@ -52,7 +52,7 @@ auth()
     // const testSwindlerResult = await updatesHandler.handleSwindlers(testMessage);
     // console.log(testSwindlerResult);
 
-    // console.info('Userbot is ready and started and fixed');
+    console.info('Userbot is ready and started.');
     //
     // api.mtproto.updates.on('updatesTooLong', (updateInfo) => {
     //   console.log('updatesTooLong:', updateInfo);
@@ -76,19 +76,19 @@ auth()
     // });
     //
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    api.mtproto.updates.on('updates', (updateInfo) => {
-      console.info('updates:', updateInfo.updates);
-    });
+    // api.mtproto.updates.on('updates', (updateInfo) => {
+    //   console.info('updates:', updateInfo.updates);
+    // });
     //
     // api.mtproto.updates.on('updateShortSentMessage', (updateInfo) => {
     //   console.log('updateShortSentMessage:', updateInfo);
     // });
-    // api.mtproto.updates.on('updates', (updateInfo) =>
-    //   updatesHandler.filterUpdate(updateInfo, async (message) => {
-    //     // updatesHandler.handleTraining(message);
-    //     await updatesHandler.handleSwindlers(message);
-    //   }),
-    // );
+    api.mtproto.updates.on('updates', (updateInfo) =>
+      updatesHandler.filterUpdate(updateInfo, async (message) => {
+        // updatesHandler.handleTraining(message);
+        await updatesHandler.handleSwindlers(message);
+      }),
+    );
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     setInterval(async () => {
@@ -100,5 +100,5 @@ auth()
     }, 15_000);
   })
   .catch((error) => {
-    console.error('Cannot auth. Reason', error);
+    console.error('Cannot start. Reason:\n', error);
   });

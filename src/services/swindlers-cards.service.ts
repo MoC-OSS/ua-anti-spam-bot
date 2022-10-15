@@ -1,4 +1,4 @@
-import isCreditCard from 'validator/es/lib/isCreditCard';
+import isCreditCard from 'validator/lib/isCreditCard';
 
 import type { DynamicStorageService } from './dynamic-storage.service';
 
