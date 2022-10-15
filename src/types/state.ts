@@ -1,4 +1,4 @@
-import { SwindlerTensorResult } from './swindlers';
+import type { SwindlerTensorResult } from './swindlers';
 
 export interface StateFlavor<S> {
   /**

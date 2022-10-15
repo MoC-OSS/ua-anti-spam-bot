@@ -100,5 +100,6 @@ auth()
     }, 15_000);
   })
   .catch((error) => {
-    console.error('Cannot start. Reason:\n', error);
+    console.error('Cannot start userbot. Reason:\n', error);
+    throw error;
   });

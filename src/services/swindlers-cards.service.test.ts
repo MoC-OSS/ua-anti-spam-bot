@@ -1,4 +1,4 @@
-import { mockDynamicStorageService } from './_mocks/index.mocks';
+import { mockDynamicStorageService } from './_mocks';
 import { SwindlersCardsService } from './swindlers-cards.service';
 
 /**

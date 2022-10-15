@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-import type { SwindlersTensorService } from '../tensor/swindlers-tensor.service';
-import { initSwindlersTensor } from '../tensor/swindlers-tensor.service';
+import type { SwindlersTensorService } from '../tensor';
+import { initSwindlersTensor } from '../tensor';
 
-import { mockDynamicStorageService, mockNewBot, mockNewUrl } from './_mocks/index.mocks';
+import { mockDynamicStorageService, mockNewBot, mockNewUrl } from './_mocks';
 import { SwindlersBotsService } from './swindlers-bots.service';
 import { SwindlersCardsService } from './swindlers-cards.service';
 import { SwindlersDetectService } from './swindlers-detect.service';

@@ -1,6 +1,7 @@
 import type { Bot } from 'grammy';
 import type { BotCommand } from 'typegram';
 
+import type { GrammyContext } from '../../types';
 import { formatDateIntoAccusative } from '../../utils';
 
 /**
@@ -8,26 +9,14 @@ import { formatDateIntoAccusative } from '../../utils';
  * @see https://grammy.dev/guide/commands.html#usage
  * */
 export class CommandSetter {
+  commands: BotCommand[] = [];
+
   /**
    * @param {Bot} bot
    * @param {Date} startTime
    * @param {boolean} active
    * */
-  bot: Bot;
-
-  startTime: Date;
-
-  active: boolean;
-
-  commands: BotCommand[] = [];
-
-  constructor(bot: Bot, startTime: Date, active: boolean) {
-    this.bot = bot;
-    this.startTime = startTime;
-    this.active = active;
-    // eslint-disable-next-line no-void
-    void this.updateCommands();
-  }
+  constructor(private bot: Bot<GrammyContext>, private startTime: Date, private active: boolean) {}
 
   /**
    * @description

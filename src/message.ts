@@ -1,6 +1,7 @@
 import moment from 'moment-timezone';
 import type { JsonObject } from 'type-fest';
 
+import type { CustomJsonObject } from './types/object';
 import { environmentConfig } from './config';
 import { helpChat } from './creator';
 import type { ChatSessionData } from './types';
@@ -218,10 +219,10 @@ export const getDeclinedMassSendingMessage = 'Вибач, але у тебе н�
 
 export interface DeleteMessageProperties {
   writeUsername: string;
-  userId: number;
+  userId?: number;
   wordMessage: string;
   debugMessage: string;
-  withLocation: boolean;
+  withLocation?: boolean;
 }
 
 /**
@@ -248,7 +249,7 @@ ${debugMessage}`.trim();
 
 export interface DebugMessageProperties {
   message: string | undefined;
-  byRules: JsonObject;
+  byRules: CustomJsonObject;
   startTime: Date;
 }
 
@@ -329,7 +330,7 @@ ${botStartTime}</i>
 
 export interface HelpMessageProperties {
   startLocaleTime: string;
-  isAdmin: boolean;
+  isAdmin?: boolean;
   canDelete: boolean;
   user: string;
   userId: number;
@@ -492,7 +493,7 @@ ${getGroupStartMessage({ adminsString, isAdmin, canDelete: false, user: undefine
 `.trim();
 
 export interface TensorTestResultProperties {
-  chance: number;
+  chance: string;
   isSpam: boolean;
 }
 

@@ -1,5 +1,4 @@
-import type { ChatSessionData } from '../../types';
-import type { AlarmNotification } from '../../types/alarm';
+import type { AlarmNotification, ChatSessionData } from '../../types';
 import { getRandomItem } from '../../utils';
 
 import { generateRandomBoolean, generateRandomNumber, generateRandomString } from './helpers.mocks';
@@ -16,7 +15,7 @@ export const generateTestState = (state = testState) => ({
 
 export const getAlarmMock = (alert = false, state = testState): AlarmNotification => ({
   state: {
-    alert: JSON.stringify(alert),
+    alert,
     id: generateRandomNumber(2),
     name: state,
     name_en: generateRandomString(10),

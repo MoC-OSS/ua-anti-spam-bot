@@ -75,7 +75,7 @@ export async function onlyNotAdmin(context: GrammyContext, next: NextFunction) {
 
   /**
    * For public channels Telegram could send the message from channel as Channel_Bot.
-   * It means an admin wrote the message so we need to skip it.
+   * It means an admin wrote the message, so we need to skip it.
    * https://github.com/42wim/matterbridge/issues/1654
    * */
   if (context.from?.id === CHANNEL_BOT_ID || context.from?.username === 'Channel_Bot') {

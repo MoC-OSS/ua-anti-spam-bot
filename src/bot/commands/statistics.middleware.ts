@@ -1,27 +1,23 @@
 import { getStatisticsMessage } from '../../message';
 import { redisService } from '../../services';
-import type { GrammyContext } from '../../types';
+import type { GrammyMiddleware } from '../../types';
 import { formatDate, handleError } from '../../utils';
 
 export class StatisticsMiddleware {
   /**
    * @param {Date} startTime
    * */
-  startTime: Date;
-
-  constructor(startTime: Date) {
-    this.startTime = startTime;
-  }
+  constructor(private startTime: Date) {}
 
   /**
    * Handle /statistics
    * Returns current statistics
    * */
-  middleware() {
+  middleware(): GrammyMiddleware {
     /**
-     * @param {GrammyContext} ctx
+     * @param {GrammyContext} context
      * */
-    return async (context: GrammyContext) => {
+    return async (context) => {
       try {
         await context.replyWithChatAction('typing');
         const chatSessions = await redisService.getChatSessions();

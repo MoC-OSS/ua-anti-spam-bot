@@ -7,8 +7,8 @@ import * as tf from '@tensorflow/tfjs-node';
 import { optimizeText } from 'ukrainian-ml-optimizer';
 
 import { environmentConfig } from '../config';
-import type { S3Service } from '../services/s3.service';
-import type { SwindlerTensorResult } from '../types/swindlers';
+import type { S3Service } from '../services';
+import type { SwindlerTensorResult } from '../types';
 
 export class TensorService {
   model: LayersModel | null = null;
@@ -40,7 +40,7 @@ export class TensorService {
     this.modelLength = this.MODEL.modelTopology.model_config.config.layers[1].config.input_length as number;
   }
 
-  setSpamThreshold(newThreshold: number | string) {
+  setSpamThreshold(newThreshold: number | null | string) {
     if (newThreshold && +newThreshold) {
       this.SPAM_THRESHOLD = +newThreshold;
     }

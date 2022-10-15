@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-import { mockDynamicStorageService, mockNewUrl } from './_mocks/index.mocks';
-import { EXCEPTION_DOMAINS } from './constants/swindlers-urls.constant';
+import { mockDynamicStorageService, mockNewUrl } from './_mocks';
+import { EXCEPTION_DOMAINS } from './constants';
 import { SwindlersUrlsService } from './swindlers-urls.service';
 
 jest.mock('axios');
@@ -141,7 +141,7 @@ describe('SwindlersUrlsService', () => {
 
       const result = await swindlersUrlsService.isSpamUrl('https://bit.ly/test-swindler-mock');
 
-      expect(axiosMock.get.bind(this)).toBeCalled();
+      expect(axiosMock.get.bind(this)).toHaveBeenCalled();
       expect(result.isSpam).toEqual(false);
     });
   });

@@ -3,6 +3,7 @@ import type { JsonObject, JsonValue, Primitive } from 'type-fest';
 
 import { environmentConfig } from '../config';
 import type { ChatSession, Session } from '../types';
+import type { CustomJsonValue } from '../types/object';
 
 export const client = redis.createClient({ url: environmentConfig.REDIS_URL });
 
@@ -27,7 +28,7 @@ export async function getValue<T>(key: string): Promise<T> {
   }
 }
 
-export function setRawValue(key: string, value: Primitive | JsonValue) {
+export function setRawValue(key: string, value: Primitive | CustomJsonValue) {
   return client.set(key, JSON.stringify(value));
 }
 

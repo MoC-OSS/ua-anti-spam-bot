@@ -1,9 +1,7 @@
-import type { Middleware } from 'grammy';
-
-import type { GrammyContext } from '../../types';
+import type { GrammyMiddleware } from '../../types';
 
 export const ignoreOld =
-  (threshold = 5 * 60): Middleware<GrammyContext> =>
+  (threshold = 5 * 60): GrammyMiddleware =>
   (context, next) => {
     if (context.msg?.date && Date.now() / 1000 - context.msg.date > threshold) {
       console.info(

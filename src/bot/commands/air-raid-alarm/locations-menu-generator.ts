@@ -3,7 +3,7 @@ import type { MenuRange } from '@grammyjs/menu';
 import { getAirRaidAlarmSettingsMessage, nextPage, previousPage } from '../../../message';
 import { alarmChatService, TEST_ALARM_STATE } from '../../../services';
 import { generateTestState } from '../../../services/_mocks';
-import type { GrammyContext, State } from '../../../types';
+import type { GrammyMenuContext, State } from '../../../types';
 import { handleError, isIdWhitelisted } from '../../../utils';
 import { onlyAdmin } from '../../middleware';
 
@@ -12,7 +12,7 @@ import { onlyAdmin } from '../../middleware';
  * @param {MenuRange<GrammyContext>} range
  * @param alertStates
  * */
-export const dynamicLocationMenu = (context_: GrammyContext, range: MenuRange<GrammyContext>, alertStates: State[]) => {
+export const dynamicLocationMenu = (context_: GrammyMenuContext, range: MenuRange<GrammyMenuContext>, alertStates: State[]) => {
   const states = isIdWhitelisted(context_.from?.id) ? [...alertStates, generateTestState(TEST_ALARM_STATE)] : alertStates;
   const pageIndex = context_.chatSession.chatSettings.airRaidAlertSettings.pageNumber;
   const { state } = context_.chatSession.chatSettings.airRaidAlertSettings;

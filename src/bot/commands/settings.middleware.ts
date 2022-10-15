@@ -13,7 +13,7 @@ import {
   turnOffChatWhileAlarmButton,
 } from '../../message';
 import { alarmChatService } from '../../services';
-import type { GrammyContext, State } from '../../types';
+import type { GrammyContext, GrammyMiddleware, State } from '../../types';
 import { handleError } from '../../utils';
 import { onlyAdmin } from '../middleware';
 import { MiddlewareMenu } from '../middleware-menu.menu';
@@ -43,7 +43,7 @@ const isStateSelected = (context: GrammyContext) => {
   return true;
 };
 
-const isAlarmNow = (context: GrammyContext, next: () => unknown) => {
+const isAlarmNow: GrammyMiddleware = (context, next) => {
   const isAlarm = alarmChatService.isAlarmNow(context.chatSession.chatSettings.airRaidAlertSettings.state || '');
   if (isAlarm) {
     context
@@ -61,19 +61,16 @@ export class SettingsMiddleware {
   /**
    * @param {State[]} airRaidAlarmStates
    * */
-  settingsMenuObj: MiddlewareMenu<GrammyContext> | null;
+  settingsMenuObj: MiddlewareMenu | null;
 
-  settingsDescriptionObj: MiddlewareMenu<GrammyContext> | null;
+  settingsDescriptionObj: MiddlewareMenu | null;
 
-  settingsAirRaidAlertObj: MiddlewareMenu<GrammyContext> | null;
+  settingsAirRaidAlertObj: MiddlewareMenu | null;
 
-  airRaidAlarmStates: State[];
-
-  constructor(airRaidAlarmStates: State[]) {
+  constructor(private airRaidAlarmStates: State[]) {
     this.settingsMenuObj = null;
     this.settingsDescriptionObj = null;
     this.settingsAirRaidAlertObj = null;
-    this.airRaidAlarmStates = airRaidAlarmStates;
   }
 
   initMenu() {
@@ -84,11 +81,11 @@ export class SettingsMiddleware {
 
     this.settingsMenuObj = new MiddlewareMenu('settingsMenu', { autoAnswer: false })
       .addGlobalMiddlewares(onlyAdmin)
-      .text(deleteTensorButton, (context: GrammyContext) => toggleSetting(context, 'disableStrategicInfo'))
-      .text(deleteMessageButton, (context: GrammyContext) => toggleSetting(context, 'disableDeleteMessage'))
-      .text(deleteSwindlerButton, (context: GrammyContext) => toggleSetting(context, 'disableSwindlerMessage'))
+      .text(deleteTensorButton, (context) => toggleSetting(context, 'disableStrategicInfo'))
+      .text(deleteMessageButton, (context) => toggleSetting(context, 'disableDeleteMessage'))
+      .text(deleteSwindlerButton, (context) => toggleSetting(context, 'disableSwindlerMessage'))
       .row()
-      .text(airAlarmAlertButton, isAlarmNow, (context: GrammyContext) => {
+      .text(airAlarmAlertButton, isAlarmNow, (context) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
@@ -97,7 +94,7 @@ export class SettingsMiddleware {
           .editMessageText(getAirRaidAlarmSettingsMessage(context.chatSession.chatSettings), { parse_mode: 'HTML' })
           .catch(handleError);
       })
-      .text(airAlarmNotificationMessage, isAlarmNow, (context: GrammyContext) => {
+      .text(airAlarmNotificationMessage, isAlarmNow, (context) => {
         if (isStateSelected(context)) {
           context.chatSession.chatSettings.airRaidAlertSettings.notificationMessage =
             !context.chatSession.chatSettings.airRaidAlertSettings.notificationMessage;
@@ -109,7 +106,7 @@ export class SettingsMiddleware {
           }
         }
       })
-      .text(turnOffChatWhileAlarmButton, isAlarmNow, (context: GrammyContext) => {
+      .text(turnOffChatWhileAlarmButton, isAlarmNow, (context) => {
         if (isStateSelected(context)) {
           toggleSetting(context, 'disableChatWhileAirRaidAlert');
           alarmChatService.updateChat(context.chatSession, context.chat?.id);
@@ -121,7 +118,7 @@ export class SettingsMiddleware {
       //   ctx.editMessageText(detailedSettingsDescription).catch(handleError);
       // })
       .row()
-      .text(settingsSubmitMessage, (context: GrammyContext) => context.deleteMessage());
+      .text(settingsSubmitMessage, (context) => context.deleteMessage());
 
     return this.settingsMenuObj;
   }
@@ -148,12 +145,12 @@ export class SettingsMiddleware {
     return this.settingsDescriptionObj;
   }
 
-  sendSettingsMenu() {
+  sendSettingsMenu(): GrammyMiddleware {
     /**
-     * @param {GrammyContext} ctx
+     * @param {GrammyContext} context
      * */
 
-    return async (context: GrammyContext) => {
+    return async (context) => {
       if (this.settingsMenuObj) {
         await context
           .replyWithHTML(getSettingsMenuMessage(context.chatSession.chatSettings), { reply_markup: this.settingsMenuObj })

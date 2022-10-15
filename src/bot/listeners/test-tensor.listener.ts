@@ -1,57 +1,53 @@
 import * as fs from 'node:fs';
-import { RawApi } from 'grammy';
-
-import { TensorService } from '../../tensor/tensor.service';
-import { errorHandler } from '../../utils/error-handler';
-
 import { Menu } from '@grammyjs/menu';
-import { env } from 'typed-dotenv'.config();
+import type { Transformer } from 'grammy';
 
-import { redisService } from '../../services/redis.service';
-
+import { environmentConfig } from '../../config';
 import { creatorId, trainingChat } from '../../creator';
 import { getTensorTestResult } from '../../message';
-import { googleService } from '../../services/google.service';
-import { GrammyContext } from '../../types';
+import { googleService, redisService } from '../../services';
+import type { TensorService } from '../../tensor';
+import type { GrammyContext, GrammyMenuContext, GrammyMiddleware } from '../../types';
+import { emptyFunction, emptyPromiseFunction, errorHandler } from '../../utils';
 
 const defaultTime = 30;
 const removeTime = 30;
 
+export interface TestTensorStorage {
+  positives?: string[];
+  negatives?: string[];
+  skips?: string[];
+  originalMessage: string;
+  time: number;
+}
+
 /**
- * @param {GrammyContext} ctx
+ * @param {GrammyContext} context
  * */
-const getAnyUsername = (context) => {
-  const username = context.callbackQuery.from?.username;
-  const fullName = context.callbackQuery.from?.last_name
+const getAnyUsername = (context: GrammyContext) => {
+  const username = context.callbackQuery?.from?.username;
+  const fullName = context.callbackQuery?.from?.last_name
     ? `${context.callbackQuery.from?.first_name} ${context.callbackQuery.from?.last_name}`
-    : context.callbackQuery.from?.first_name;
+    : context.callbackQuery?.from?.first_name;
   return username ? `@${username}` : fullName ?? '';
 };
 
 export class TestTensorListener {
+  menu?: Menu<GrammyMenuContext>;
+
+  messageNodeTimeouts: Record<string, NodeJS.Timeout> = {};
+
+  messageNodeIntervals: Record<string, NodeJS.Timeout> = {};
+
+  storage: Record<string, TestTensorStorage> = {};
+
   /**
    * @param {TensorService} tensorService
    */
-  tensorService: TensorService;
+  constructor(private tensorService: TensorService) {}
 
-  menu: any;
-
-  messageNodeTimeouts: any;
-
-  messageNodeIntervals: any;
-
-  storage: any;
-
-  constructor(tensorService) {
-    this.tensorService = tensorService;
-    this.menu = null;
-    this.messageNodeTimeouts = {};
-    this.messageNodeIntervals = {};
-    this.storage = {};
-  }
-
-  writeDataset(state, word) {
-    // eslint-disable-next-line no-unused-vars
+  writeDataset(state: 'negatives' | 'positives' | string, word: string) {
+    // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
     const writeInFileFunction = () => {
       const fileName = `./${state}.json`;
 
@@ -59,7 +55,7 @@ export class TestTensorListener {
         fs.writeFileSync(fileName, '[]');
       }
 
-      const file = JSON.parse(fs.readFileSync(fileName, 'utf8') || '[]');
+      const file = JSON.parse(fs.readFileSync(fileName, 'utf8') || '[]') as string[];
       const newFile = [...new Set([...file, word])];
 
       fs.writeFileSync(fileName, `${JSON.stringify(newFile, null, 2)}\n`);
@@ -68,40 +64,48 @@ export class TestTensorListener {
     // eslint-disable-next-line no-unused-vars
     const writeInRedisFunction = () => {
       switch (state) {
-        case 'negatives':
+        case 'negatives': {
           return redisService.updateNegatives(word);
+        }
 
-        case 'positives':
+        case 'positives': {
           return redisService.updatePositives(word);
+        }
 
-        default:
+        default: {
           throw new Error(`Invalid state: ${state}`);
+        }
       }
     };
 
     const writeInGoogleSheetFunction = () => {
-      const sheetId = env.GOOGLE_SPREADSHEET_ID;
-      const sheetPositiveName = env.GOOGLE_POSITIVE_SHEET_NAME;
-      const sheetNegativeName = env.GOOGLE_NEGATIVE_SHEET_NAME;
+      const sheetId = environmentConfig.GOOGLE_SPREADSHEET_ID;
+      const sheetPositiveName = environmentConfig.GOOGLE_POSITIVE_SHEET_NAME;
+      const sheetNegativeName = environmentConfig.GOOGLE_NEGATIVE_SHEET_NAME;
       switch (state) {
-        case 'negatives':
+        case 'negatives': {
           return googleService.appendToSheet(sheetId, sheetNegativeName, word);
-        case 'positives':
+        }
+        case 'positives': {
           return googleService.appendToSheet(sheetId, sheetPositiveName, word);
-        default:
+        }
+        default: {
           throw new Error(`Invalid state: ${state}`);
+        }
       }
     };
 
     switch (state) {
       case 'negatives':
-      case 'positives':
+      case 'positives': {
         // return writeInFileFunction();
         // return writeInRedisFunction();
         return writeInGoogleSheetFunction();
+      }
 
-      default:
+      default: {
         throw new Error(`Invalid state: ${state}`);
+      }
     }
   }
 
@@ -109,7 +113,7 @@ export class TestTensorListener {
    * @param {Transformer<RawApi>} throttler - throttler need to be defined once to work.
    * So we can't init it each time in middleware because it has new instance, and it doesn't throttle,
    * */
-  initMenu(throttler: RawApi) {
+  initMenu(throttler: Transformer): Menu<GrammyMenuContext> {
     /**
      * @param context
      * */
@@ -123,20 +127,20 @@ export class TestTensorListener {
       delete this.messageNodeIntervals[this.getStorageKey(context)];
 
       if (!storage) {
-        context.editMessageText(context.msg?.text || '', { reply_markup: undefined }).catch(() => {});
+        context.editMessageText(context.msg?.text || '', { reply_markup: undefined }).catch(emptyFunction);
         return;
       }
 
-      const positivesCount = storage.positives?.length;
-      const negativesCount = storage.negatives?.length;
-      const skipsCount = storage.skips?.length;
+      const positivesCount = storage.positives?.length || 0;
+      const negativesCount = storage.negatives?.length || 0;
+      const skipsCount = storage.skips?.length || 0;
 
       if (
         (positivesCount === negativesCount && positivesCount !== 0) ||
         (positivesCount === skipsCount && skipsCount !== 0) ||
         (negativesCount === skipsCount && negativesCount !== 0)
       ) {
-        context.editMessageText(`${storage.originalMessage}\n\nЧекаю на більше оцінок...`).catch(() => {});
+        context.editMessageText(`${storage.originalMessage}\n\nЧекаю на більше оцінок...`).catch(emptyFunction);
         return;
       }
 
@@ -147,7 +151,7 @@ export class TestTensorListener {
         status = false;
       }
 
-      let winUsers = [];
+      let winUsers: string[] | undefined;
       if (status === true) {
         winUsers = storage.positives;
       } else if (status === false) {
@@ -158,12 +162,16 @@ export class TestTensorListener {
 
       // const winUsersText = winUsers.slice(0, 2).join(', ') + (winUsers.length > 3 ? ' та інші' : '');
 
-      const originMessage = context.update.callback_query.message.reply_to_message;
+      const originMessage = context.update.callback_query?.message?.reply_to_message;
+
+      if (!originMessage) {
+        throw new Error('Cannot find origin message');
+      }
 
       if (status === true) {
-        this.writeDataset('positives', originMessage.text || originMessage.caption);
+        await this.writeDataset('positives', originMessage.text || originMessage.caption || '');
       } else if (status === false) {
-        this.writeDataset('negatives', originMessage.text || originMessage.caption);
+        await this.writeDataset('negatives', originMessage.text || originMessage.caption || '');
       }
 
       let text = '⏭ пропуск';
@@ -180,20 +188,24 @@ export class TestTensorListener {
 
       await context
         .editMessageText(
-          `${storage.originalMessage}\n\n${winUsers.join(
-            ', ',
-          )} виділив/ли це як ${text}\nВидалю обидва повідомлення автоматично через ${removeTime} сек...\n${new Date().toISOString()}`,
+          `${storage.originalMessage}\n\n${
+            winUsers?.join(', ') || ''
+          } виділив/ли це як ${text}\nВидалю обидва повідомлення автоматично через ${removeTime} сек...\n${new Date().toISOString()}`,
           {
             parse_mode: 'HTML',
-            reply_markup: null,
+            reply_markup: undefined,
           },
         )
-        .catch(() => {});
+        .catch(emptyFunction);
 
       setTimeout(() => {
         context.api
           .deleteMessage(originMessage.chat.id, originMessage.message_id)
-          .then(() => context.api.deleteMessage(context.chat.id, context.msg.message_id))
+          .then(() => {
+            if (context.chat?.id && context.msg?.message_id) {
+              return context.api.deleteMessage(context.chat?.id, context.msg?.message_id);
+            }
+          })
           .catch(console.error);
       }, removeTime * 1000);
 
@@ -206,7 +218,7 @@ export class TestTensorListener {
         .editMessageText(`${storage.originalMessage}\n\nЧекаю ${storage.time} сек...\n${new Date().toISOString()}`, {
           parse_mode: 'HTML',
         })
-        .catch(() => {});
+        .catch(emptyFunction);
 
       clearTimeout(this.messageNodeTimeouts[this.getStorageKey(context)]);
       clearInterval(this.messageNodeIntervals[this.getStorageKey(context)]);
@@ -220,80 +232,82 @@ export class TestTensorListener {
             .editMessageText(`${storage.originalMessage}\n\nЧекаю ${storage.time} сек...\n${new Date().toISOString()}`, {
               parse_mode: 'HTML',
             })
-            .catch(() => {});
+            .catch(emptyFunction);
         }
       }, defaultTime * 1000 + 2000);
 
       this.messageNodeTimeouts[this.getStorageKey(context)] = setTimeout(() => {
-        finalMiddleware(context);
+        finalMiddleware(context).catch(emptyFunction);
       }, defaultTime * 1000);
     });
 
     const initMenu = () => {
-      this.menu = new Menu('spam-menu')
+      this.menu = new Menu<GrammyMenuContext>('spam-menu')
         .text(
           (context) => `✅ Це спам (${this.storage[this.getStorageKey(context)]?.positives?.length || 0})`,
-          errorHandler((context) => {
-            this.initTensorSession(context, context.msg.text);
+          (context) => context.menu.update(),
+          errorHandler<GrammyMenuContext>((context) => {
+            this.initTensorSession(context, context.msg?.text || '');
 
             const storage = this.storage[this.getStorageKey(context)];
             const username = getAnyUsername(context);
             storage.negatives = storage.negatives?.filter((item) => item !== username);
-            storage.skips = storage.skips.filter((item) => item !== username);
-            if (!storage.positives.includes(username)) {
-              storage.positives.push(username);
+            storage.skips = storage.skips?.filter((item) => item !== username);
+            if (!storage.positives?.includes(username)) {
+              storage.positives?.push(username);
             }
 
             context.menu.update();
-            processButtonMiddleware(context, null);
+            processButtonMiddleware(context, emptyPromiseFunction);
           }),
         )
         .text(
           (context) => `⛔️ Це не спам (${this.storage[this.getStorageKey(context)]?.negatives?.length || 0})`,
           errorHandler((context) => {
-            this.initTensorSession(context, context.msg.text);
+            this.initTensorSession(context, context.msg?.text || '');
 
             const storage = this.storage[this.getStorageKey(context)];
             const username = getAnyUsername(context);
-            storage.positives = storage.positives.filter((item) => item !== username);
-            storage.skips = storage.skips.filter((item) => item !== username);
-            if (!storage.negatives.includes(username)) {
-              storage.negatives.push(username);
+            storage.positives = storage.positives?.filter((item) => item !== username);
+            storage.skips = storage.skips?.filter((item) => item !== username);
+            if (!storage.negatives?.includes(username)) {
+              storage.negatives?.push(username);
             }
 
             context.menu.update();
-            processButtonMiddleware(context, null);
+            processButtonMiddleware(context, emptyPromiseFunction);
           }),
         )
         .row()
         .text(
           (context) => `⏭ Пропустити (${this.storage[this.getStorageKey(context)]?.skips?.length || 0})`,
           errorHandler((context) => {
-            this.initTensorSession(context, context.msg.text);
+            this.initTensorSession(context, context.msg?.text || '');
 
             const storage = this.storage[this.getStorageKey(context)];
             const username = getAnyUsername(context);
-            storage.positives = storage.positives.filter((item) => item !== username);
+            storage.positives = storage.positives?.filter((item) => item !== username);
             storage.negatives = storage.negatives?.filter((item) => item !== username);
-            if (!storage.skips.includes(username)) {
-              storage.skips.push(username);
+            if (!storage.skips?.includes(username)) {
+              storage.skips?.push(username);
             }
 
             context.menu.update();
-            processButtonMiddleware(context, null);
+            processButtonMiddleware(context, emptyPromiseFunction);
           }),
         );
+
+      return this.menu;
     };
 
-    initMenu();
-
-    return this.menu;
+    return initMenu();
   }
 
   /**
-   * @param {GrammyContext} ctx
+   * @param {GrammyContext} context
+   * @param message
    * */
-  initTensorSession(context, message) {
+  initTensorSession(context: GrammyContext, message: string) {
     if (!this.storage[this.getStorageKey(context)]?.originalMessage) {
       this.storage[this.getStorageKey(context)] = {
         positives: [],
@@ -306,32 +320,42 @@ export class TestTensorListener {
   }
 
   /**
-   * @param {GrammyContext} ctx
+   * @param {GrammyContext} context
    * */
-  getStorageKey(context) {
-    let chatInstance;
+  getStorageKey(context: GrammyContext) {
+    let chatInstance: number | string | undefined;
     if (context.chat) {
       chatInstance = context.chat.id;
-    } else if (context.updateType === 'callback_query') {
-      chatInstance = context.callbackQuery.chat_instance;
+    } else if (context.callbackQuery) {
+      chatInstance = context.callbackQuery?.chat_instance;
     } else {
-      chatInstance = context.from.id;
+      chatInstance = context.from?.id;
     }
 
-    return `${chatInstance}:${context.msg.reply_to_message?.message_id || context.msg.message_id}`;
+    if (!chatInstance) {
+      throw new Error('No chat instance!');
+    }
+
+    const messageId = context.msg?.reply_to_message?.message_id || context.msg?.message_id;
+
+    if (!messageId) {
+      throw new Error('No message id!');
+    }
+
+    return `${chatInstance}:${messageId}`;
   }
 
   /**
    * @param {Transformer} throttler - throttler need to be defined once to work.
    * So we can't init it each time in middleware because it has new instance, and it doesn't throttle,
    * */
-  middleware(throttler) {
+  middleware(throttler: Transformer): GrammyMiddleware {
     /**
-     * @param {GrammyContext} ctx
+     * @param {GrammyContext} context
      * @param {Next} next
      * */
     return async (context, next) => {
-      if (context.chat.id !== trainingChat && !env.TEST_TENSOR) {
+      if (context.chat?.id !== trainingChat && !environmentConfig.TEST_TENSOR) {
         return next();
       }
 
@@ -340,44 +364,46 @@ export class TestTensorListener {
        * */
       context.api.config.use(throttler);
 
-      if (context.from.id !== creatorId) {
-        if (context.chat.type !== 'supergroup') {
-          context.reply('В особистих не працюю 😝');
+      if (context.from?.id !== creatorId) {
+        if (context.chat?.type !== 'supergroup') {
+          await context.reply('В особистих не працюю 😝');
           return;
         }
 
         if (context.chat.id !== trainingChat) {
-          context.reply('Я працюю тільки в одному супер чаті 😝');
+          await context.reply('Я працюю тільки в одному супер чаті 😝');
           return;
         }
       }
 
-      const message = context.msg.text || context.msg.caption;
+      const message = context.msg?.text || context.msg?.caption;
 
-      if (!message) {
-        context.api.deleteMessage(context.chat.id, context.msg.message_id).catch();
+      if (!message && context.chat?.id && context.msg?.message_id) {
+        await context.api.deleteMessage(context.chat?.id, context.msg?.message_id).catch();
         return;
       }
 
       try {
-        const { spamRate, isSpam, fileStat } = await this.tensorService.predict(message, null);
+        const { spamRate, isSpam } = await this.tensorService.predict(message || '', null);
 
         const chance = `${(spamRate * 100).toFixed(4)}%`;
-        const tensorTestMessage = getTensorTestResult({ chance, isSpam, tensorDate: fileStat?.mtime });
+        const tensorTestMessage = getTensorTestResult({ chance, isSpam });
 
         this.initTensorSession(context, tensorTestMessage);
 
         context
           .replyWithHTML(tensorTestMessage, {
-            reply_to_message_id: context.msg.message_id,
+            reply_to_message_id: context.msg?.message_id,
             reply_markup: this.menu,
           })
-          .catch(() => {});
-      } catch (error: any) {
+          .catch(emptyFunction);
+      } catch (error) {
         console.error(error);
-        context
-          .reply(`Cannot parse this message.\nError:\n${error.message}`, { reply_to_message_id: context.msg.message_id })
-          .catch(() => {});
+        if (error instanceof Error) {
+          context
+            .reply(`Cannot parse this message.\nError:\n${error.message}`, { reply_to_message_id: context.msg?.message_id })
+            .catch(emptyFunction);
+        }
       }
     };
   }

@@ -3,11 +3,11 @@ import Bottleneck from 'bottleneck';
 
 import { cancelMessageSending, confirmationMessage, getSuccessfulMessage, getUpdateMessage, getUpdatesMessage } from '../../message';
 import { redisService } from '../../services';
-import type { ChatSession, GrammyContext } from '../../types';
+import type { ChatSession, GrammyContext, GrammyMenuContext } from '../../types';
 import { handleError } from '../../utils';
 
 export class UpdatesMiddleware {
-  constructor(private menu: Menu) {}
+  private menu: Menu<GrammyMenuContext> | undefined;
 
   public async middleware(context: GrammyContext) {
     const userInput = context.msg?.text;
@@ -26,7 +26,7 @@ export class UpdatesMiddleware {
   }
 
   initMenu() {
-    this.menu = new Menu('approveUpdatesMenu')
+    this.menu = new Menu<GrammyMenuContext>('approveUpdatesMenu')
       .text({ text: 'Підтвердити ✅', payload: 'approve' })
       .row()
       .text({ text: 'Відмінити ⛔️', payload: 'cancel' });
@@ -36,7 +36,7 @@ export class UpdatesMiddleware {
 
   initialization() {
     /**
-     * @param {GrammyContext} ctx
+     * @param {GrammyContext} context
      * */
     return async (context: GrammyContext) => {
       context.session.step = 'confirmation';
@@ -49,7 +49,7 @@ export class UpdatesMiddleware {
      * @param {GrammyContext} context
      * */
 
-    return this.middleware;
+    return this.middleware.bind(this);
   }
 
   messageSending() {

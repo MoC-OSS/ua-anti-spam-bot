@@ -107,7 +107,7 @@ export class SwindlersUrlsService {
           .then(() => url)
           .catch(
             /**
-             * @param {AxiosError} err
+             * @param error
              */
             (error: NodeJS.ErrnoException & AxiosError) => {
               if (error.code === 'ENOTFOUND' && error.syscall === 'getaddrinfo') {

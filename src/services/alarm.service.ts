@@ -26,13 +26,16 @@ export class AlarmService {
     this.initTestAlarms();
   }
 
-  getStates(): Promise<AlarmStates | null> {
+  getStates(): Promise<AlarmStates> {
     return axios
       .get<AlarmStates>(apiUrl, apiOptions)
       .then((response) => response.data)
       .catch((error: Record<any, any>) => {
         console.info(`Alarm API is not responding:  ${JSON.stringify(error)}`);
-        return null;
+        return {
+          states: [],
+          last_update: new Date().toISOString(),
+        };
       });
   }
 

@@ -7,7 +7,7 @@ import * as tf from '@tensorflow/tfjs-node';
 import { optimizeText } from 'ukrainian-ml-optimizer';
 
 import { environmentConfig } from '../config';
-import type { SwindlerTensorResult } from '../types/swindlers';
+import type { SwindlerTensorResult } from '../types';
 
 export class SwindlersTensorService {
   model: LayersModel | null = null;
