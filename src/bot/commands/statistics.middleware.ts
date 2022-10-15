@@ -1,5 +1,6 @@
 import { getStatisticsMessage } from '../../message';
-import { redisService } from '../../services/redis.service';
+import { redisService } from '../../services';
+import type { GrammyContext } from '../../types';
 import { formatDate, handleError } from '../../utils';
 
 export class StatisticsMiddleware {
@@ -20,7 +21,7 @@ export class StatisticsMiddleware {
     /**
      * @param {GrammyContext} ctx
      * */
-    return async (context) => {
+    return async (context: GrammyContext) => {
       try {
         await context.replyWithChatAction('typing');
         const chatSessions = await redisService.getChatSessions();
@@ -43,7 +44,7 @@ export class StatisticsMiddleware {
         const memberChatsCount = [...superGroupsSessions, ...groupSessions].filter((session) => !session.data.isBotAdmin).length;
         const botRemovedCount = [...superGroupsSessions, ...groupSessions].filter((session) => session.data.botRemoved).length;
 
-        context.replyWithHTML(
+        await context.replyWithHTML(
           getStatisticsMessage({
             adminsChatsCount,
             botRemovedCount,

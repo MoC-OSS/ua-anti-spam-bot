@@ -381,7 +381,7 @@ https://youtu.be/RX0cZYf1Lm4
 `.trim();
 
 export interface GroupStartMessageProperties {
-  adminsString: string;
+  adminsString?: string;
   isAdmin?: boolean;
   canDelete: boolean;
   user?: string;

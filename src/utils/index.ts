@@ -133,7 +133,10 @@ export function compareDatesWithOffset(initialDate: Date, compareDate: Date, hou
 /**
  * @param {number} id
  * */
-export function isIdWhitelisted(id: number) {
+export function isIdWhitelisted(id: number | undefined) {
+  if (!id) {
+    throw new Error(`This is an invalid id`);
+  }
   const whitelist = (environmentConfig.USERS_WHITELIST || '').split(', ');
   return whitelist.includes(id.toString());
 }
