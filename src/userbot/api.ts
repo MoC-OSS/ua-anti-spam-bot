@@ -1,17 +1,28 @@
 /* eslint-disable camelcase */
 import path from 'node:path';
 import MTProto from '@mtproto/core';
-import { sleep } from '@mtproto/core/src/utils/common';
 import type { JsonObject } from 'type-fest';
 
 import { environmentConfig } from '../config';
-import type { MTProtoError } from '../types';
+import type { CheckPassword, MTProtoError, ProtoUpdate } from '../types';
+import { sleep } from '../utils';
+
+export interface LocalMTProto extends MTProto {
+  call(method: string, parameters?: JsonObject, options?: JsonObject);
+  setDefaultDc(number: number);
+  crypto: {
+    getSRPParams(parameters: JsonObject): Promise<Omit<CheckPassword, 'srp_id'>>;
+  };
+  updates: {
+    on(type: string, callback: (updateInfo: ProtoUpdate) => any);
+  };
+}
 
 export class API {
-  mtproto: typeof MTProto;
+  mtproto: LocalMTProto;
 
   constructor() {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
     this.mtproto = new MTProto({
       api_id: environmentConfig.USERBOT_APP_ID,
       api_hash: environmentConfig.USERBOT_API_HASH,
