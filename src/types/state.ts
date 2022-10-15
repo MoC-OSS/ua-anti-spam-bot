@@ -1,3 +1,5 @@
+import { SwindlerTensorResult } from './swindlers';
+
 export interface StateFlavor<S> {
   /**
    * Session data on the context object.
@@ -35,4 +37,5 @@ export type State = OnlyWithTextMiddlewareState &
       rate: number;
       reason: string;
     };
+    dataset?: SwindlerTensorResult;
   };

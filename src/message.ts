@@ -247,7 +247,7 @@ ${getRandomItem(withLocation ? randomLocationBanEmojis : randomBanEmojis)} <b>П
 ${debugMessage}`.trim();
 
 export interface DebugMessageProperties {
-  message: string;
+  message: string | undefined;
   byRules: JsonObject;
   startTime: Date;
 }
@@ -261,7 +261,7 @@ export const getDebugMessage = ({ message, byRules, startTime }: DebugMessagePro
   `
 ***DEBUG***
 Message:
-${message}
+${message || 'Message is undefined'}
 
 Ban reason:
 ${JSON.stringify(byRules)}

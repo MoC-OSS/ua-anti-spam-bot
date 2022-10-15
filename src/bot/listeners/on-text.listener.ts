@@ -1,18 +1,19 @@
-import type { Bot } from 'grammy';
+import { environmentConfig } from 'config';
+import type { Bot, Middleware } from 'grammy';
 import { InputFile } from 'grammy';
-import * as typedDotenv from 'typed-dotenv';
 import Keyv = require('keyv');
+import type { NextFunction } from 'grammy/out/composer';
+
 import { creatorId, logsChat, privateTrainingChat } from '../../creator';
 import { getCannotDeleteMessage, getDebugMessage, getDeleteMessage } from '../../message'; // spamDeleteMessage
-import { redisService } from '../../services/redis.service';
+import { redisService } from '../../services';
+import type { GrammyContext } from '../../types';
 import { compareDatesWithOffset, getUserData, handleError, telegramUtil } from '../../utils';
 import type { MessageHandler } from '../message.handler';
 import { getMessageReputation } from '../spam.handlers';
 
 // const slavaWords = ['слава україні', 'слава украине', 'слава зсу'];
-const { env } = typedDotenv.config();
 
-// eslint-disable-next-line import/prefer-default-export
 export class OnTextListener {
   /**
    * @param {Bot} bot
@@ -21,30 +22,17 @@ export class OnTextListener {
    * @param {MessageHandler} messageHandler
    */
 
-  bot: Bot;
-
-  keyv: Keyv;
-
-  startTime: Date;
-
-  messageHandler: MessageHandler;
-
-  constructor(bot, keyv, startTime, messageHandler) {
-    this.bot = bot;
-    this.keyv = keyv;
-    this.startTime = startTime;
-    this.messageHandler = messageHandler;
-  }
+  constructor(private bot: Bot, private keyv: Keyv, private startTime: Date, private messageHandler: MessageHandler) {}
 
   /**
    * Handles every received message
    * */
-  middleware() {
+  middleware(): Middleware<GrammyContext> {
     /**
-     * @param {GrammyContext} ctx
-     * @param {Next} next
+     * @param {GrammyContext} context
+     * @param {NextFunction} next
      * */
-    return async (context, next) => {
+    return async (context: GrammyContext, next: NextFunction) => {
       // TODO use for ctx prod debug
       // console.info('enter onText ******', ctx.chat?.title, '******', ctx.state.text);
 
@@ -62,11 +50,11 @@ export class OnTextListener {
         return next();
       }
 
-      if (env.ONLY_WORK_IN_COMMENTS && !telegramUtil.isInComments(context)) {
+      if (environmentConfig.ONLY_WORK_IN_COMMENTS && !telegramUtil.isInComments(context)) {
         return next();
       }
 
-      if (context.session?.isCurrentUserAdmin && !env.DEBUG) {
+      if (context.session?.isCurrentUserAdmin && !environmentConfig.DEBUG) {
         return next();
       }
 
@@ -77,12 +65,22 @@ export class OnTextListener {
         const { deleteRank, tensor } = rep.byRules.dataset;
         const startRank = (await redisService.getTrainingStartRank()) || 0.6;
 
-        if (tensor > startRank && tensor < deleteRank) {
-          context.api.sendMessage(privateTrainingChat, context.state.text).catch(() => {});
+        if (tensor && tensor > startRank && tensor < deleteRank) {
+          context.api.sendMessage(privateTrainingChat, context.state.text || '').catch(handleError);
         }
 
         if (context.chat.id === creatorId) {
-          context.reply(JSON.stringify({ ...rep.byRules.dataset, swindlersResult: context.state.swindlersResult, message }, null, 2));
+          await context.reply(
+            JSON.stringify(
+              {
+                ...rep.byRules.dataset,
+                swindlersResult: context.state.swindlersResult,
+                message,
+              },
+              null,
+              2,
+            ),
+          );
         }
       }
 
@@ -93,20 +91,26 @@ export class OnTextListener {
 
           let debugMessage = '';
 
-          if (env.DEBUG) {
+          if (environmentConfig.DEBUG) {
             debugMessage = getDebugMessage({ message, byRules: rep.byRules, startTime: this.startTime });
           }
 
           if (trainingChatWhitelist && trainingChatWhitelist.includes(String(context.chat.id))) {
-            context.api.sendMessage(privateTrainingChat, context.state.text).catch(() => {});
+            context.api.sendMessage(privateTrainingChat, context.state.text || '').catch(() => handleError);
           }
 
           await context
             .deleteMessage()
-            .then(() => {
+            .then(async () => {
               if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
-                context.replyWithHTML(
-                  getDeleteMessage({ writeUsername, userId, wordMessage: '', debugMessage, withLocation: rep.byRules.dataset.location }),
+                await context.replyWithHTML(
+                  getDeleteMessage({
+                    writeUsername,
+                    userId,
+                    wordMessage: '',
+                    debugMessage,
+                    withLocation: rep.byRules.dataset.location
+                  }),
                 );
               }
             })
@@ -152,7 +156,7 @@ export class OnTextListener {
       }
 
       /*
-      if (rep.reputation <= 0 || (rep.userRep <= 0 && !env.DISABLE_USER_REP)) {
+      if (rep.reputation <= 0 || (rep.userRep <= 0 && !environmentConfig.DISABLE_USER_REP)) {
         try {
           await ctx
             .deleteMessage()

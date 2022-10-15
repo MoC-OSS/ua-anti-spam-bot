@@ -1,4 +1,5 @@
 import type { Chat } from 'typegram/manage';
+import type { MessageEntity } from 'typegram/message';
 
 export interface ChatSessionFlavor<S> {
   /**
@@ -21,7 +22,7 @@ export interface ChatSessionFlavor<S> {
 export interface UpdatesSessionData {
   step: string;
   updatesText: string;
-  textEntities: string;
+  textEntities: MessageEntity[];
 }
 
 export interface SessionData extends Partial<UpdatesSessionData> {

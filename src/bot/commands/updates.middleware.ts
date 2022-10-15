@@ -2,15 +2,27 @@ import { Menu } from '@grammyjs/menu';
 import Bottleneck from 'bottleneck';
 
 import { cancelMessageSending, confirmationMessage, getSuccessfulMessage, getUpdateMessage, getUpdatesMessage } from '../../message';
-import { redisService } from '../../services/redis.service';
-import type { GrammyContext } from '../../types';
+import { redisService } from '../../services';
+import type { ChatSession, GrammyContext } from '../../types';
 import { handleError } from '../../utils';
 
 export class UpdatesMiddleware {
-  menu: any;
+  constructor(private menu: Menu) {}
 
-  constructor() {
-    this.menu = null;
+  public async middleware(context: GrammyContext) {
+    const userInput = context.msg?.text;
+    const textEntities = context.msg?.entities;
+    context.session.updatesText = userInput;
+    context.session.textEntities = textEntities ?? undefined;
+    context.session.step = 'messageSending';
+    await context.replyWithChatAction('typing');
+    const rawSessions = await redisService.getChatSessions();
+    const sessions = rawSessions.filter(
+      (session) => (session.data.chatType === 'private' || session.data.chatType === 'supergroup') && !session.data.botRemoved,
+    );
+
+    await context.reply(`${confirmationMessage}\nВсього чатів: ${sessions.length}`);
+    await context.reply(userInput || '', { entities: textEntities ?? undefined, reply_markup: this.menu });
   }
 
   initMenu() {
@@ -26,39 +38,25 @@ export class UpdatesMiddleware {
     /**
      * @param {GrammyContext} ctx
      * */
-    return (context: GrammyContext) => {
+    return async (context: GrammyContext) => {
       context.session.step = 'confirmation';
-      context.replyWithHTML(getUpdatesMessage());
+      await context.replyWithHTML(getUpdatesMessage());
     };
   }
 
   confirmation() {
     /**
-     * @param {GrammyContext} ctx
+     * @param {GrammyContext} context
      * */
-    const middleware = async (context) => {
-      const userInput = context.msg?.text;
-      const textEntities = context.msg?.entities;
-      context.session.updatesText = userInput;
-      context.session.textEntities = textEntities ?? null;
-      context.session.step = 'messageSending';
-      await context.replyWithChatAction('typing');
-      const sessions = (await redisService.getChatSessions()).filter(
-        (session) => (session.data.chatType === 'private' || session.data.chatType === 'supergroup') && !session.data.botRemoved,
-      );
 
-      await context.reply(`${confirmationMessage}\nВсього чатів: ${sessions.length}`);
-      await context.reply(userInput, { entities: textEntities ?? null, reply_markup: this.menu });
-    };
-
-    return middleware;
+    return this.middleware;
   }
 
   messageSending() {
     /**
-     * @param {GrammyContext} ctx
+     * @param {GrammyContext} context
      * */
-    return async (context) => {
+    return async (context: GrammyContext) => {
       context.session.step = 'idle';
       const payload = context.match;
       if (payload === 'approve') {
@@ -75,13 +73,13 @@ export class UpdatesMiddleware {
   }
 
   /**
-   * @param {GrammyContext} ctx
+   * @param {GrammyContext} context
    * @param {ChatSession[]} sessions
    * @param {string} type
    *
    * @returns {Promise<void>}
    * */
-  bulkSending(context, sessions, type) {
+  bulkSending(context: GrammyContext, sessions: ChatSession[], type: string) {
     return new Promise<void>((resolve) => {
       const limiter = new Bottleneck({
         maxConcurrent: 1,
@@ -96,18 +94,20 @@ export class UpdatesMiddleware {
       let finishedCount = 0;
       let successCount = 0;
 
-      sessions.forEach((e) => {
-        limiter.schedule(() => {
-          context.api
-            .sendMessage(e.id, updatesMessage, { entities: updatesMessageEntities ?? null })
-            .then(() => {
-              successCount += 1;
-            })
-            .catch(handleError)
-            .finally(() => {
-              finishedCount += 1;
-            });
-        });
+      sessions.forEach((chartSession) => {
+        limiter
+          .schedule(() =>
+            context.api
+              .sendMessage(chartSession.id, updatesMessage || '', { entities: updatesMessageEntities ?? undefined })
+              .then(() => {
+                successCount += 1;
+              })
+              .catch(handleError)
+              .finally(() => {
+                finishedCount += 1;
+              }),
+          )
+          .catch(handleError);
       });
 
       limiter.on('done', () => {
@@ -123,7 +123,3 @@ export class UpdatesMiddleware {
     });
   }
 }
-
-module.exports = {
-  UpdatesMiddleware,
-};

@@ -12,6 +12,7 @@ import { redisService } from '../../services/redis.service';
 import { creatorId, trainingChat } from '../../creator';
 import { getTensorTestResult } from '../../message';
 import { googleService } from '../../services/google.service';
+import { GrammyContext } from '../../types';
 
 const defaultTime = 30;
 const removeTime = 30;
@@ -110,9 +111,9 @@ export class TestTensorListener {
    * */
   initMenu(throttler: RawApi) {
     /**
-     * @param {GrammyContext} ctx
+     * @param context
      * */
-    const finalMiddleware = async (context) => {
+    const finalMiddleware = async (context: GrammyContext) => {
       const storage = this.storage[this.getStorageKey(context)];
 
       clearTimeout(this.messageNodeTimeouts[this.getStorageKey(context)]);
@@ -122,7 +123,7 @@ export class TestTensorListener {
       delete this.messageNodeIntervals[this.getStorageKey(context)];
 
       if (!storage) {
-        context.editMessageText(context.msg.text, { reply_markup: null }).catch(() => {});
+        context.editMessageText(context.msg?.text || '', { reply_markup: undefined }).catch(() => {});
         return;
       }
 
