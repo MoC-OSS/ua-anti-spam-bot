@@ -28,27 +28,31 @@ export interface SessionData extends Partial<UpdatesSessionData> {
   isCurrentUserAdmin: boolean;
 }
 
+export interface AirRaidAlertSettings {
+  pageNumber: number;
+  state: string | null;
+  notificationMessage: boolean;
+}
+
+export interface ChatSettings {
+  airRaidAlertSettings: AirRaidAlertSettings;
+  disableChatWhileAirRaidAlert: boolean;
+  disableStrategicInfo?: boolean;
+  disableDeleteMessage?: boolean;
+  disableSwindlerMessage?: boolean;
+}
+
 export interface ChatSessionData {
-  chatType: Chat['type'];
+  chatType?: Chat['type'];
   chatTitle?: string;
   chatMembersCount: number;
   botRemoved: boolean;
-  isBotAdmin: boolean;
-  botAdminDate: Date;
+  isBotAdmin?: boolean;
+  botAdminDate?: Date | null;
   isLimitedDeletion?: boolean;
   lastLimitedDeletionDate?: Date;
   lastWarningDate?: Date;
-  chatSettings: {
-    airRaidAlertSettings: {
-      pageNumber: number;
-      state: string | null;
-      notificationMessage: boolean;
-    };
-    disableChatWhileAirRaidAlert: boolean;
-    disableStrategicInfo: boolean;
-    disableDeleteMessage: boolean;
-    disableSwindlerMessage: boolean;
-  };
+  chatSettings: ChatSettings;
   chatPermissions?: Chat.MultiUserGetChat['permissions'];
 }
 

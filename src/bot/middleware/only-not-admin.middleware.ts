@@ -1,3 +1,6 @@
+import type { NextFunction } from 'grammy';
+import type { GrammyContext } from 'types';
+
 import { logSkipMiddleware } from '../../utils';
 
 const TELEGRAM_FORWARD_USER_ID = 777_000;
@@ -9,11 +12,8 @@ const CHANNEL_BOT_ID = 136_817_688;
  *
  * Reversed copy from
  * @see https://github.com/backmeupplz/grammy-middlewares/blob/main/src/middlewares/onlyAdmin.ts
- *
- * @param {GrammyContext} ctx
- * @param {Next} next
  * */
-export async function onlyNotAdmin(context, next) {
+export async function onlyNotAdmin(context: GrammyContext, next: NextFunction) {
   // TODO use for ctx prod debug
   // console.info('enter onlyNotAdmin ******', ctx.chat?.title, '******', ctx.state.text);
 

@@ -15,9 +15,16 @@ export const messageUtil = new MessageUtil();
 export const telegramUtil = new TelegramUtil();
 
 /**
+ * Temporary fix for catch error handling
+ * TODO rework with global grammy error handling
+ * */
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+export const emptyFunction = () => {};
+
+/**
  * @param {GrammyContext} context
  * */
-function logContext(context: GrammyContext) {
+export function logContext(context: GrammyContext) {
   if (environmentConfig.DEBUG) {
     /**
      * @type {GrammyContext}
@@ -110,7 +117,7 @@ export function getRandomItem<T>(array: T[]): T {
  * @param {string} reason
  * @param {any} [extra]
  * */
-export function logSkipMiddleware(context: GrammyContext, reason: string, extra: any) {
+export function logSkipMiddleware(context: GrammyContext, reason: string, extra?: any) {
   if (environmentConfig.DEBUG || environmentConfig.DEBUG_MIDDLEWARE) {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore

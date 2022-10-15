@@ -1,6 +1,9 @@
+import type { NextFunction } from 'grammy';
+import type { GrammyContext } from 'types';
+
 import { logSkipMiddleware } from '../../utils';
 
-export const onlyAdmin = async (context, next) => {
+export const onlyAdmin = async (context: GrammyContext, next: NextFunction) => {
   // No chat = no service
   if (!context.chat) {
     logSkipMiddleware(context, 'User is not admin');
@@ -24,8 +27,4 @@ export const onlyAdmin = async (context, next) => {
   if (['creator', 'administrator'].includes(chatMember.status)) {
     return next();
   }
-};
-
-module.exports = {
-  onlyAdmin,
 };

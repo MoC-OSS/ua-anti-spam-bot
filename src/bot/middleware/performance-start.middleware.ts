@@ -1,14 +1,13 @@
-import { env } from 'typed-dotenv'.config();
+import { environmentConfig } from 'config';
+import type { NextFunction } from 'grammy';
+import type { GrammyContext } from 'types';
 
 /**
  * Used for performance checking
- *
- * @param {GrammyContext} ctx
- * @param {Next} next
  * */
-export function performanceStartMiddleware(ctx, next) {
-  if (env.DEBUG) {
-    ctx.state.performanceStart = performance.now();
+export function performanceStartMiddleware(context: GrammyContext, next: NextFunction) {
+  if (environmentConfig.DEBUG) {
+    context.state.performanceStart = performance.now();
   }
 
   return next();

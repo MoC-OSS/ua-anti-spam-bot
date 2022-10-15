@@ -323,7 +323,7 @@ export class MessageHandler {
         /**
          * Replace all text mentions with spaces
          * */
-        context?.update?.message?.entities
+        context.update?.message?.entities
           ?.filter(Boolean)
           .filter((entity) => entity.type === 'text_mention')
           .forEach((entity) => {

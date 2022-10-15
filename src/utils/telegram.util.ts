@@ -1,4 +1,6 @@
+import type { ChatFromGetChat } from '@grammyjs/types/manage';
 import type { Bot } from 'grammy';
+import type { Chat } from 'grammy/out/types';
 import type { ChatMemberOwner } from 'typegram';
 
 import type { GrammyContext } from '../types';
@@ -18,6 +20,14 @@ export class TelegramUtil {
    * */
   isInComments(context: GrammyContext): boolean {
     return context.msg?.reply_to_message?.from?.id === 777_000;
+  }
+
+  getChatTitle(chat?: Chat): string {
+    return (chat && 'title' in chat && chat.title) || '$title';
+  }
+
+  getInviteLink(chatInfo: ChatFromGetChat): string | undefined {
+    return ('invite_link' in chatInfo && chatInfo.invite_link) || undefined;
   }
 
   /**

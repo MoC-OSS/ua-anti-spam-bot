@@ -75,7 +75,7 @@ export const getMessageReputation = async (context: GrammyContext, keyv: Keyv, m
     urls * environmentConfig.URLS_REPUTATION +
     environmentConfig.NEW_MESSAGE_REPUTATION;
 
-  if (!fromChannel) await keyv.set(`user_${context?.from?.id || ''}`, userRep);
+  if (!fromChannel) await keyv.set(`user_${context.from?.id || ''}`, userRep);
 
   const reputation =
     environmentConfig.START_MSG_REPUTATION +

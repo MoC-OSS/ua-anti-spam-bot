@@ -11,7 +11,7 @@ function cutInHiddenUrls(string_: string | undefined, cutStart: number, cutEnd: 
  *
  * @returns string
  * */
-export function revealHiddenUrls(context: GrammyContext) {
+export function revealHiddenUrls(context: GrammyContext): string {
   let { text } = context.state;
   const entities = context.msg?.entities;
 
@@ -38,5 +38,5 @@ export function revealHiddenUrls(context: GrammyContext) {
     });
   }
 
-  return text;
+  return text!;
 }

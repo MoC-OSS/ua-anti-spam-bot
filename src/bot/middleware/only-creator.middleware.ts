@@ -1,21 +1,17 @@
+import type { NextFunction } from 'grammy';
+import type { GrammyContext } from 'types';
+
 import { creatorId } from '../../creator';
 import { getDeclinedMassSendingMessage } from '../../message';
 
 /**
  * @description
  * Allow actions only for bot creator
- *
- * @param {GrammyContext} ctx
- * @param {Next} next
  * */
-export function onlyCreator(context, next) {
-  if (context.from.id === creatorId) {
+export async function onlyCreator(context: GrammyContext, next: NextFunction) {
+  if (context.from?.id === creatorId) {
     return next();
   }
 
-  context.reply(getDeclinedMassSendingMessage);
+  await context.reply(getDeclinedMassSendingMessage);
 }
-
-module.exports = {
-  onlyCreator,
-};
