@@ -1,5 +1,6 @@
 import type { Chat } from 'typegram/manage';
 import type { MessageEntity } from 'typegram/message';
+import { GrammyContext } from './context';
 
 export interface ChatSessionFlavor<S> {
   /**
@@ -69,4 +70,11 @@ export interface ChatSession {
 
 export interface SessionObject {
   sessions: Session[];
+}
+
+export interface RedisSessionOptions {
+  property: 'session' | 'chatSession';
+  state: Record<string, unknown>;
+  format: Record<string, unknown>;
+  getSessionKey: (context: GrammyContext) => string;
 }
