@@ -60,7 +60,7 @@ class SwindlersUrlsService {
   /**
    * @param {string} message - raw message from user to parse
    *
-   * @returns {string[]}
+   * @returns {string[] | false}
    */
   parseUrls(message) {
     return (message.match(URL_REGEXP) || []).filter((url) => {
