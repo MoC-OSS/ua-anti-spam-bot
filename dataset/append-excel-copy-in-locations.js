@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('node:fs');
 
 const locations = require('./strings/locations.json');
 // eslint-disable-next-line import/no-unresolved

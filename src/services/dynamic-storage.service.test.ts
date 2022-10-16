@@ -1,4 +1,4 @@
-import { mockDataset, mockSwindlersGoogleService } from './_mocks';
+import { mockDataset, mockSwindlersGoogleService } from './_mocks/index.mocks';
 import { DynamicStorageService } from './dynamic-storage.service';
 
 /**

@@ -18,7 +18,7 @@
     "lint:branch-name": "branch-name-lint ./.branchlintrc.json",
     "lint:commit-name": "commitlint --edit",
     "track-time": "smile-track",
-    "lint:js": "eslint . --cache",
+    "lint:js": "eslint . --cache --quiet",
     "lint:js:fix": "npm run lint:js -- --fix"
   },
   "dependencies": {

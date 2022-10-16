@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('node:fs');
 
 // eslint-disable-next-line import/no-unresolved
 const truePositives = require('./cases/true-positives.json');
@@ -9,7 +9,7 @@ const csvFileRows = ['commenttext,spam'];
 
 function processDatasetCase(item) {
   return item
-    .replace(/[^a-z\u0400-\u04FF\d]/gi, ' ')
+    .replace(/[^\da-z\u0400-\u04FF]/gi, ' ')
     .replace(/\s\s+/g, ' ')
     .trim();
 }

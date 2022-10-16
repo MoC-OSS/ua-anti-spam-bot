@@ -1,6 +1,6 @@
 /* eslint-disable global-require */
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const { env } = require('typed-dotenv').config();
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -18,18 +18,16 @@ function processCases(positives, negatives) {
 
   // Used "for" for better performance
   // It saves around 4 seconds for 12,000 * 8,000 * 2 callback calls
-  for (let positiveIndex = 0; positiveIndex < positives.length; positiveIndex += 1) {
-    const positive = positives[positiveIndex];
+  for (const positive of positives) {
     const negativesMatch = [];
 
-    for (let negativeIndex = 0; negativeIndex < negatives.length; negativeIndex += 1) {
-      const negative = negatives[negativeIndex];
+    for (const negative of negatives) {
       if (stringSimilarity.compareTwoStrings(positive.value || '', negative.value || '') > 0.7) {
         negativesMatch.push(negative);
       }
     }
 
-    if (negativesMatch.length) {
+    if (negativesMatch.length > 0) {
       results.push({ positive, negativesMatch });
       console.info({ positive, negativesMatch });
 

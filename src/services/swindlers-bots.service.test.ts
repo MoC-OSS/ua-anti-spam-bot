@@ -1,4 +1,4 @@
-import { mockDynamicStorageService, mockNewBot } from './_mocks';
+import { mockDynamicStorageService, mockNewBot } from './_mocks/index.mocks';
 import { SwindlersBotsService } from './swindlers-bots.service';
 
 const expectedMentions = ['@test_mention', '@another_mention'];

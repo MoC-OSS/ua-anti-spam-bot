@@ -1,5 +1,5 @@
 import * as redis from 'redis';
-import type { JsonObject, JsonValue, Primitive } from 'type-fest';
+import type { JsonObject, Primitive } from 'type-fest';
 
 import { environmentConfig } from '../config';
 import type { ChatSession, Session } from '../types';

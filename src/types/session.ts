@@ -1,6 +1,7 @@
 import type { Chat } from 'typegram/manage';
 import type { MessageEntity } from 'typegram/message';
-import { GrammyContext } from './context';
+
+import type { GrammyContext } from './context';
 
 export interface ChatSessionFlavor<S> {
   /**

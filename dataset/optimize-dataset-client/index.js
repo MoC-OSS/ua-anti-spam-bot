@@ -1,24 +1,24 @@
 /* eslint-disable no-undef */
-const optimizeListEl = document.querySelector('[data-optimize-list]');
-const optimizeItemTemplateEl = document.querySelector('[data-optimize-item-template]');
-const caseTemplateEl = document.querySelector('[data-case-template]');
+const optimizeListElement = document.querySelector('[data-optimize-list]');
+const optimizeItemTemplateElement = document.querySelector('[data-optimize-item-template]');
+const caseTemplateElement = document.querySelector('[data-case-template]');
 
 function createCase(caseItem, type, callback) {
-  const positiveCaseEl = caseTemplateEl.content.cloneNode(true);
-  const positiveCaseBodyEl = positiveCaseEl.querySelector('[data-body]');
-  const positiveCaseMessageEl = positiveCaseEl.querySelector('[data-message]');
-  const positiveCaseRemoveBtnEl = positiveCaseEl.querySelector('[data-remove-btn]');
+  const positiveCaseElement = caseTemplateElement.content.cloneNode(true);
+  const positiveCaseBodyElement = positiveCaseElement.querySelector('[data-body]');
+  const positiveCaseMessageElement = positiveCaseElement.querySelector('[data-message]');
+  const positiveCaseRemoveButtonElement = positiveCaseElement.querySelector('[data-remove-btn]');
 
-  positiveCaseBodyEl.classList.add(type);
-  positiveCaseMessageEl.innerText = caseItem.value;
-  positiveCaseRemoveBtnEl.addEventListener('click', () => callback(positiveCaseBodyEl));
+  positiveCaseBodyElement.classList.add(type);
+  positiveCaseMessageElement.innerText = caseItem.value;
+  positiveCaseRemoveButtonElement.addEventListener('click', () => callback(positiveCaseBodyElement));
 
-  return positiveCaseEl;
+  return positiveCaseElement;
 }
 
-function handleDelete(path, type, el, index, negativeIndex) {
+function handleDelete(path, type, element, index, negativeIndex) {
   axios.post('http://localhost:3050/remove', { range: path, index, negativeIndex, type }).then(() => {
-    el.remove();
+    element.remove();
   });
 }
 
@@ -31,35 +31,35 @@ axios.get('http://localhost:3050/optimize').then((response) => {
       return;
     }
 
-    const optimizeItemEl = optimizeItemTemplateEl.content.cloneNode(true);
-    const optimizeItemPositivesEl = optimizeItemEl.querySelector('[data-positives]');
-    const optimizeItemNegativesEl = optimizeItemEl.querySelector('[data-negatives]');
-    const optimizeItemRemoveEl = optimizeItemEl.querySelector('[data-remove]');
+    const optimizeItemElement = optimizeItemTemplateElement.content.cloneNode(true);
+    const optimizeItemPositivesElement = optimizeItemElement.querySelector('[data-positives]');
+    const optimizeItemNegativesElement = optimizeItemElement.querySelector('[data-negatives]');
+    const optimizeItemRemoveElement = optimizeItemElement.querySelector('[data-remove]');
 
     if (!optimize.positive.resolved) {
-      const positiveCaseEl = createCase(optimize.positive, 'positive', (element) => {
+      const positiveCaseElement = createCase(optimize.positive, 'positive', (element) => {
         console.info('Remove', optimize.positive.fullPath);
         handleDelete(optimize.positive.fullPath, 'positive', element, index, -1);
       });
 
-      optimizeItemPositivesEl.appendChild(positiveCaseEl);
+      optimizeItemPositivesElement.append(positiveCaseElement);
     }
 
     optimize.negativesMatch
       .filter((negative) => !negative.resolved)
       .forEach((negative, negativeIndex) => {
-        const negativeCaseEl = createCase(negative, 'negative', (element) => {
+        const negativeCaseElement = createCase(negative, 'negative', (element) => {
           console.info('Remove', negative.fullPath);
           handleDelete(negative.fullPath, 'negative', element, index, negativeIndex);
         });
 
-        optimizeItemNegativesEl.appendChild(negativeCaseEl);
+        optimizeItemNegativesElement.append(negativeCaseElement);
       });
 
-    optimizeItemRemoveEl.addEventListener('click', () => {
-      handleDelete('', 'full', optimizeItemRemoveEl.parentElement, index, -1);
+    optimizeItemRemoveElement.addEventListener('click', () => {
+      handleDelete('', 'full', optimizeItemRemoveElement.parentElement, index, -1);
     });
 
-    optimizeListEl.appendChild(optimizeItemEl);
+    optimizeListElement.append(optimizeItemElement);
   });
 });

@@ -1,5 +1,4 @@
 import moment from 'moment-timezone';
-import type { JsonObject } from 'type-fest';
 
 import type { CustomJsonObject } from './types/object';
 import { environmentConfig } from './config';

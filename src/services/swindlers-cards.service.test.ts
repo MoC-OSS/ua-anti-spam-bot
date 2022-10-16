@@ -1,9 +1,6 @@
-import { mockDynamicStorageService } from './_mocks';
+import { mockDynamicStorageService } from './_mocks/index.mocks';
 import { SwindlersCardsService } from './swindlers-cards.service';
 
-/**
- * @type {SwindlersCardsService}
- * */
 let swindlersCardsService: SwindlersCardsService;
 
 describe('SwindlersCardsService', () => {

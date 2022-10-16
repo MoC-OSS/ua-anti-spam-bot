@@ -1,5 +1,6 @@
 import type { LocalDataset } from '../dynamic-storage.service';
 import { DynamicStorageService } from '../dynamic-storage.service';
+import type { GoogleService } from '../google.service';
 import type { SwindlersGoogleService } from '../swindlers-google.service';
 
 export const mockNewBot = '@Diia_move_bot';
@@ -33,9 +34,10 @@ getCompactSheet.mockReturnValueOnce(Promise.resolve(['test message from swindler
 /**
  * @type {GoogleService}
  * */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const mockGoogleService = {
   getSheet,
-};
+} as Partial<GoogleService> as GoogleService;
 
 /**
  * @type {SwindlersGoogleService}

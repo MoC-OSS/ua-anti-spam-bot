@@ -55,3 +55,4 @@ Thumbs.db
 # Smile Track
 /.smile-track
 /temp
+/dataset/**/*.js
