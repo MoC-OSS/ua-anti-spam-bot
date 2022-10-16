@@ -47,20 +47,6 @@ import { initTensor } from './tensor';
 import type { GrammyContext, GrammyMenuContext, GrammyMiddleware } from './types';
 import { emptyFunction, errorHandler, handleError, sleep } from './utils';
 
-/**
- * @typedef { import("grammy").GrammyError } GrammyError
- * @typedef { import("@grammyjs/types/manage").BotCommand } BotCommand
- * @typedef { import("./types").GrammyContext } GrammyContext
- * @typedef { import("./types").SessionObject } SessionObject
- * @typedef { import("./types").GrammyMiddleware } GrammyMiddleware
- * @typedef { import("./types").AlarmNotification } AlarmNotification
- */
-
-/**
- * @callback Next
- * @returns Promise<void>
- */
-
 moment.tz.setDefault('Europe/Kiev');
 moment.locale('uk');
 
@@ -286,7 +272,8 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
       const newChats = context.match;
 
       if (!context.match) {
-        return context.reply(`Current training chat whitelist is:\n\n${(await redisService.getTrainingChatWhitelist()).join(',')}`);
+        const whitelist = await redisService.getTrainingChatWhitelist();
+        return context.reply(`Current training chat whitelist is:\n\n${whitelist.join(',')}`);
       }
 
       await redisService.updateTrainingChatWhitelist(newChats);
@@ -336,8 +323,8 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
     context.leaveChat().catch(emptyFunction);
   });
 
-  bot.command('restart', onlyWhitelisted, async (ctx) => {
-    await ctx.reply('Restarting...');
+  bot.command('restart', onlyWhitelisted, async (context) => {
+    await context.reply('Restarting...');
     await commandSetter.setActive(false);
     await bot.stop();
     process.exit(0);

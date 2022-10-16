@@ -80,7 +80,10 @@ export class UpdatesHandler {
    * @param {string} message
    * */
   async handleSwindlers(message: string) {
-    const finalMessage = message.includes("Looks like swindler's message") ? message.split('\n').slice(3).join('\n') : message;
+    const finalMessage =
+      message.includes("Looks like swindler's message") || message.includes('Cannot delete the following message from chat')
+        ? message.split('\n').slice(3).join('\n')
+        : message;
 
     const matchArray = new Set<SwindlerType>(['tensor', 'site', 'mention']);
 
