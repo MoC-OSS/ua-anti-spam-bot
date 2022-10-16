@@ -84,8 +84,13 @@ export class SwindlersUrlsService {
    * @returns {string | null}
    */
   getUrlDomain(url: string): string {
-    const validUrl = url.slice(0, 4) === 'http' ? url : `https://${url}`;
-    return `${new URL(validUrl).host}/`;
+    try {
+      const validUrl = url.slice(0, 4) === 'http' ? url : `https://${url}`;
+      return `${new URL(validUrl).host}/`;
+    } catch (error) {
+      console.error('Cannot get URL domain:', url, error);
+      return url;
+    }
   }
 
   /**
