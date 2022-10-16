@@ -1,4 +1,4 @@
-const { optimizeText } = require('ukrainian-ml-optimizer');
+import { optimizeText } from 'ukrainian-ml-optimizer';
 
 /**
  * @param {string[]} array
@@ -6,14 +6,19 @@ const { optimizeText } = require('ukrainian-ml-optimizer');
  * @param {string} split
  * @param {(v: string) => string} additionalMap
  * */
-function getTopUsed(array, whitelist = [], split = ' ', additionalMap = (v) => v) {
-  const words = new Map();
+export function getTopUsed(
+  array: string[],
+  whitelist: string[] = [],
+  split = ' ',
+  additionalMap: (v: string, index: number, self: string[]) => string = (v) => v,
+) {
+  const words: Map<string, number> = new Map();
 
   array.forEach((item) =>
     optimizeText(item)
       .trim()
       .split(split)
-      .map(additionalMap)
+      .map((element, index, self) => additionalMap(element, index, self))
       .filter((word) => optimizeText(word))
       .filter((word) => word.length > 3 && !whitelist.includes(word))
       .forEach((word) => {
@@ -22,9 +27,5 @@ function getTopUsed(array, whitelist = [], split = ' ', additionalMap = (v) => v
       }),
   );
 
-  return Array.from(words.entries()).sort((a, b) => b[1] - a[1]);
+  return [...words.entries()].sort((a, b) => b[1] - a[1]);
 }
-
-module.exports = {
-  getTopUsed,
-};
