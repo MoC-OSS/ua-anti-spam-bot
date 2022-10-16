@@ -2,9 +2,7 @@
 import stringSimilarity from 'string-similarity';
 
 import { environmentConfig } from '../config';
-import { googleService } from '../services/google.service';
-import { redisService } from '../services/redis.service';
-import { swindlersGoogleService } from '../services/swindlers-google.service';
+import { googleService, redisService, swindlersGoogleService } from '../services';
 
 const limits = {
   STORAGE: 999_999_999,

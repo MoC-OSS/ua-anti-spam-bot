@@ -2,20 +2,18 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { forEachSeries } from 'p-iteration';
+import type { SetNonNullable } from 'type-fest';
 import { mentionRegexp, urlRegexp } from 'ukrainian-ml-optimizer';
 
 import { dataset } from '../../dataset/dataset';
-import type { DynamicStorageService } from '../services/dynamic-storage.service';
-import { redisService } from '../services/redis.service';
-import type { SwindlersBotsService } from '../services/swindlers-bots.service';
-import type { SwindlersDetectService } from '../services/swindlers-detect.service';
-import { swindlersGoogleService } from '../services/swindlers-google.service';
-import type { SwindlersTensorService } from '../tensor/swindlers-tensor.service';
-import type { TensorService } from '../tensor/tensor.service';
+import type { DynamicStorageService, SwindlersBotsService, SwindlersDetectService } from '../services';
+import { redisService, swindlersGoogleService } from '../services';
+import type { SwindlersTensorService, TensorService } from '../tensor';
 import type { ProtoUpdate, SwindlerType } from '../types';
 
 // eslint-disable-next-line import/no-unresolved
 import deleteFromMessage from './from-entities.json';
+import type { ChatPeers } from './index';
 import type { MtProtoClient } from './mt-proto-client';
 import type { UserbotStorage } from './storage.handler';
 
@@ -37,10 +35,9 @@ if (swindlersTopUsed.length === 0) {
 export class UpdatesHandler {
   /**
    * @param {MtProtoClient} mtProtoClient
-   * @param {any} chatPeers - TODO add defined type
+   * @param {SetNonNullable<ChatPeers, keyof ChatPeers>} chatPeers
    * @param {TensorService} tensorService
    * @param {SwindlersTensorService} swindlersTensorService
-   * @param {ProtoUpdate} updateInfo
    * @param {DynamicStorageService} dynamicStorageService
    * @param {SwindlersBotsService} swindlersBotsService
    * @param {UserbotStorage} userbotStorage
@@ -48,7 +45,7 @@ export class UpdatesHandler {
    * */
   constructor(
     private mtProtoClient: MtProtoClient,
-    private chatPeers: Record<string, any>,
+    private chatPeers: SetNonNullable<ChatPeers, keyof ChatPeers>,
     private tensorService: TensorService,
     private swindlersTensorService: SwindlersTensorService,
     private dynamicStorageService: DynamicStorageService,
@@ -64,12 +61,7 @@ export class UpdatesHandler {
   filterUpdate(updateInfo: ProtoUpdate, callback: (string: string) => any) {
     const allowedTypes = new Set(['updateEditChannelMessage', 'updateNewChannelMessage']);
 
-    const newMessageUpdates = updateInfo.updates.filter(
-      (anUpdate) =>
-        allowedTypes.has(anUpdate._) &&
-        anUpdate.message?.message &&
-        anUpdate.message.peer_id?.channel_id !== this.chatPeers.trainingChat.channel_id,
-    );
+    const newMessageUpdates = updateInfo.updates.filter((anUpdate) => allowedTypes.has(anUpdate._) && anUpdate.message?.message);
     if (!newMessageUpdates || newMessageUpdates.length === 0) {
       return;
     }
