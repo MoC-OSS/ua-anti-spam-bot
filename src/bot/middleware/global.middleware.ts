@@ -1,19 +1,10 @@
-import type { Bot, NextFunction } from 'grammy';
+import type { NextFunction } from 'grammy';
 
 import { environmentConfig } from '../../config';
-import {
-  adminReadyHasNoDeletePermissionMessage,
-  adminReadyMessage,
-  getBotJoinMessage,
-  getStartChannelMessage,
-  memberReadyMessage,
-} from '../../message';
 import type { AirRaidAlertSettings, ChatSettings, GrammyContext, GrammyMiddleware } from '../../types';
 import { emptyFunction, handleError, logContext, telegramUtil } from '../../utils';
 
 export class GlobalMiddleware {
-  constructor(private bot: Bot<GrammyContext>) {}
-
   /**
    * Global middleware.
    * Checks some bot information and updates the session
@@ -39,9 +30,6 @@ export class GlobalMiddleware {
       this.createState(context);
       this.updateChatInfo(context);
       await this.updateChatSessionIfEmpty(context);
-      await this.handleBotInvite(context);
-      this.handleBotKick(context);
-      await this.handlePromoteAndDemote(context);
 
       return next();
     };
@@ -74,12 +62,14 @@ export class GlobalMiddleware {
       context.chatSession.chatSettings.airRaidAlertSettings = defaultAirRaidAlertSettings;
     }
 
-    context
-      .getChatMembersCount()
-      .then((count) => {
-        context.chatSession.chatMembersCount = count;
-      })
-      .catch(handleError);
+    if (context.myChatMember?.new_chat_member.status !== 'left') {
+      context
+        .getChatMembersCount()
+        .then((count) => {
+          context.chatSession.chatMembersCount = count;
+        })
+        .catch(handleError);
+    }
   }
 
   /**
@@ -128,61 +118,6 @@ export class GlobalMiddleware {
   createState(context: GrammyContext) {
     if (!context.state) {
       context.state = {};
-    }
-  }
-
-  handleBotInvite(context: GrammyContext) {
-    // TODO rework with grammy queries
-    const addedMember = context.msg?.new_chat_members;
-    const foundMe = addedMember?.some((member) => member.id === context.me.id);
-
-    if (foundMe && context.chat?.type !== 'private' && context.chat?.id) {
-      return telegramUtil
-        .getChatAdmins(this.bot, context.chat.id)
-        .then(({ adminsString }) => context.replyWithHTML(getBotJoinMessage({ adminsString, isAdmin: context.chatSession.isBotAdmin })))
-        .catch(handleError);
-    }
-  }
-
-  handleBotKick(context: GrammyContext) {
-    // TODO rework with grammy queries
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const isBotRemoved = context.msg?.left_chat_participant?.id === context.me.id;
-    context.chatSession.botRemoved = isBotRemoved;
-
-    if (isBotRemoved) {
-      delete context.chatSession.isBotAdmin;
-      delete context.chatSession.botAdminDate;
-    }
-  }
-
-  async handlePromoteAndDemote(context: GrammyContext) {
-    const oldPermissionsMember = context.myChatMember?.old_chat_member;
-    const updatePermissionsMember = context.myChatMember?.new_chat_member;
-    const isUpdatedToAdmin = updatePermissionsMember?.user?.id === context.me.id && updatePermissionsMember?.status === 'administrator';
-    const isDemotedToMember =
-      updatePermissionsMember?.user?.id === context.me.id &&
-      updatePermissionsMember?.status === 'member' &&
-      oldPermissionsMember?.status === 'administrator';
-
-    if (isUpdatedToAdmin) {
-      if (context.chat?.type === 'channel') {
-        await context.replyWithHTML(getStartChannelMessage({ botName: context.me.username })).catch(handleError);
-      } else {
-        context.chatSession.botAdminDate = new Date();
-        context.chatSession.isBotAdmin = true;
-        context
-          .reply(updatePermissionsMember.can_delete_messages ? adminReadyMessage : adminReadyHasNoDeletePermissionMessage)
-          .catch(handleError);
-      }
-    }
-
-    if (isDemotedToMember) {
-      delete context.chatSession.botAdminDate;
-      context.chatSession.isBotAdmin = false;
-      context.reply(memberReadyMessage).catch(handleError);
     }
   }
 }

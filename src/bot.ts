@@ -38,6 +38,7 @@ import {
   performanceEndMiddleware,
   performanceStartMiddleware,
 } from './bot/middleware';
+import { botDemoteQuery, botInviteQuery, botKickQuery, botPromoteQuery } from './bot/queries';
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
 import { getAlarmMock } from './services/_mocks';
 import { environmentConfig } from './config';
@@ -99,7 +100,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   const redisSession = new RedisSession();
   const redisChatSession = new RedisChatSession();
 
-  const globalMiddleware = new GlobalMiddleware(bot);
+  const globalMiddleware = new GlobalMiddleware();
 
   const startMiddleware = new StartMiddleware(bot);
   const helpMiddleware = new HelpMiddleware(startTime);
@@ -202,8 +203,10 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   router.route('confirmation', botActiveMiddleware, onlyCreator, updatesMiddleware.confirmation());
   router.route('messageSending', botActiveMiddleware, onlyCreator, updatesMiddleware.messageSending());
 
+  bot.on('my_chat_member', botInviteQuery(bot), botPromoteQuery, botDemoteQuery, botKickQuery, emptyFunction);
+
   bot.on(
-    ['message', 'edited_message'],
+    ['message:text', 'edited_message:text'],
     botRedisActive,
     ignoreOld(60),
     botActiveMiddleware,
