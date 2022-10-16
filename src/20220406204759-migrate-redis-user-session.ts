@@ -6,6 +6,9 @@ import { forEach } from 'p-iteration';
  * @deprecated
  * @description
  * This migration is created for prod from user sessions and chat info to chat based sessions.
+ *
+ * Deleted in
+ * feat(UABOT-41): remove extra migration
  * */
 import Queue from 'queue-promise';
 
@@ -103,11 +106,12 @@ export default async (bot: Bot<GrammyContext>, botStartDate: Date) => {
         if (error instanceof GrammyError) {
           switch (error.description) {
             case 'Bad Request: chat not found':
-            case 'Bad Request: group chat was upgraded to a supergroup chat':
+            case 'Bad Request: group chat was upgraded to a supergroup chat': {
               return redisClient.removeKey(record.id);
+            }
 
             case 'Forbidden: bot was kicked from the supergroup chat':
-            case 'Forbidden: bot was kicked from the group chat':
+            case 'Forbidden: bot was kicked from the group chat': {
               chatSessionRecord = {
                 ...chatSessionRecord,
                 ...record.data,
@@ -119,14 +123,17 @@ export default async (bot: Bot<GrammyContext>, botStartDate: Date) => {
 
               await redisService.updateChatSession(chatId, chatSessionRecord).then(() => redisClient.removeKey(record.id));
               break;
+            }
 
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            case /Too Many Requests: retry after/.test(error.description):
+            case /Too Many Requests: retry after/.test(error.description): {
               throw error;
+            }
 
-            default:
+            default: {
               throw error;
+            }
           }
         }
       }

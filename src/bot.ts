@@ -83,18 +83,6 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   if (!environmentConfig.DEBUG) {
     bot.api.sendMessage(logsChat, '*** 20220406204759 Migration started...').catch(emptyFunction);
   }
-  // eslint-disable-next-line global-require
-  require('./20220406204759-migrate-redis-user-session')(bot, startTime)
-    .then(() => {
-      console.info('*** 20220406204759 Migration run successfully!!!');
-      if (!environmentConfig.DEBUG) {
-        bot.api.sendMessage(logsChat, '*** 20220406204759 Migration run successfully!!!').catch(emptyFunction);
-      }
-    })
-    .catch(async (migrationError) => {
-      await bot.api.sendMessage(logsChat, `Migration failed! Reason: ${migrationError.reason}`).catch(emptyFunction);
-      await bot.api.sendMessage(logsChat, JSON.stringify(migrationError)).catch(emptyFunction);
-    });
 
   const commandSetter = new CommandSetter(bot, startTime, !(await redisService.getIsBotDeactivated()));
   await commandSetter.updateCommands();
