@@ -1,11 +1,48 @@
-import type { Middleware, MiddlewareFn } from 'grammy';
-import { InputFile } from 'grammy';
+import type { ErrorHandler, MiddlewareFn } from 'grammy';
+import { GrammyError, HttpError, InputFile } from 'grammy';
 
 import { environmentConfig } from '../config';
 import { logsChat } from '../creator';
-import type { GrammyContext, GrammyMiddleware, RealGrammyContext } from '../types';
+import type { GrammyContext, RealGrammyContext } from '../types';
 
-import { handleError } from './error.util';
+import { emptyFunction } from './empty-functions.util';
+
+/**
+ * Handle single error with expected reason
+ * */
+export const handleError = (catchError: unknown, reason = '') => {
+  console.error('**** REASON-HANDLED ERROR ****', reason || '$NO_REASON', catchError);
+};
+
+/**
+ * Global error handler for the bot
+ * */
+export const globalErrorHandler: ErrorHandler<GrammyContext> = (botError) => {
+  const { ctx, error } = botError;
+  console.error(`Error while handling update ${ctx.update.update_id}:`);
+
+  if (error instanceof GrammyError) {
+    console.error('**** GLOBAL-HANDLED ERROR **** Error in request:', error.description);
+  } else if (error instanceof HttpError) {
+    console.error('**** GLOBAL-HANDLED ERROR **** Could not contact Telegram:', error);
+  } else {
+    console.error('**** GLOBAL-HANDLED ERROR **** Unknown error:', error);
+  }
+
+  const writeContext = JSON.parse(JSON.stringify(ctx)) as RealGrammyContext;
+  // noinspection JSConstantReassignment
+  delete writeContext.tg;
+  delete writeContext.telegram;
+  // noinspection JSConstantReassignment
+  delete writeContext.api;
+
+  console.error('*** GLOBAL-HANDLED ERROR CTX ***', writeContext);
+
+  if (environmentConfig.DEBUG) {
+    // eslint-disable-next-line no-console
+    console.trace('*** GLOBAL-HANDLED ERROR TRACE ***');
+  }
+};
 
 /**
  * Wrapper to catch async errors within a stage. Helps to avoid try catch blocks in there
@@ -30,7 +67,7 @@ export const errorHandler =
       // noinspection JSConstantReassignment
       delete writeContext.api;
 
-      console.error('*** CTX ***', writeContext);
+      console.error('*** FUNCTION-HANDLED ERROR CTX ***', writeContext);
 
       if (!environmentConfig.DEBUG && error instanceof Error) {
         context.api
@@ -52,6 +89,6 @@ export const errorHandler =
           .catch(handleError);
       }
 
-      return next();
+      return next().catch(emptyFunction);
     }
   };

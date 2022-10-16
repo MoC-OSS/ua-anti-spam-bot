@@ -45,7 +45,7 @@ import { settingsAvailableMessage } from './message';
 import { ALARM_EVENT_KEY, alarmChatService, alarmService, initSwindlersContainer, redisService, S3Service } from './services';
 import { initTensor } from './tensor';
 import type { GrammyContext, GrammyMenuContext, GrammyMiddleware } from './types';
-import { emptyFunction, errorHandler, handleError, sleep } from './utils';
+import { emptyFunction, errorHandler, globalErrorHandler, sleep } from './utils';
 
 moment.tz.setDefault('Europe/Kiev');
 moment.locale('uk');
@@ -78,10 +78,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   if (airRaidAlarmStates.states.length === 0) {
     // TODO add advance logic for this
     console.error('No states are available. Air raid feature is not working...');
-  }
-
-  if (!environmentConfig.DEBUG) {
-    bot.api.sendMessage(logsChat, '*** 20220406204759 Migration started...').catch(emptyFunction);
+    bot.api.sendMessage(logsChat, 'No states are available. Air raid feature is not working...').catch(emptyFunction);
   }
 
   const commandSetter = new CommandSetter(bot, startTime, !(await redisService.getIsBotDeactivated()));
@@ -127,7 +124,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   bot.use(redisSession.middleware());
   bot.use(redisChatSession.middleware());
 
-  bot.errorBoundary(handleError).use(rootMenu as unknown as Menu<GrammyContext>);
+  bot.use(rootMenu as unknown as Menu<GrammyContext>);
 
   bot.use(errorHandler(globalMiddleware.middleware()));
 
@@ -135,7 +132,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 
   bot.use(router);
 
-  bot.errorBoundary(handleError).command(
+  bot.command(
     'settings',
     deleteMessageMiddleware,
     onlyAdmin,
@@ -143,7 +140,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
       if (context.chat?.type !== 'private') {
         return next();
       }
-    }, errorHandler(settingsMiddleware.sendSettingsMenu())),
+    }, settingsMiddleware.sendSettingsMenu()),
     (context, next) => {
       if (context.chat.type === 'private') {
         return context.reply(settingsAvailableMessage);
@@ -153,14 +150,14 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
     },
   );
 
-  bot.errorBoundary(handleError).command('start', errorHandler(startMiddleware.middleware()));
-  bot.errorBoundary(handleError).command(['help', 'status'], errorHandler(helpMiddleware.middleware()));
-  bot.errorBoundary(handleError).command('swindlers_update', errorHandler(swindlersUpdateMiddleware.middleware()));
+  bot.command('start', startMiddleware.middleware());
+  bot.command(['help', 'status'], helpMiddleware.middleware());
+  bot.command('swindlers_update', swindlersUpdateMiddleware.middleware());
 
-  bot.errorBoundary(handleError).command('session', botActiveMiddleware, errorHandler(sessionMiddleware.middleware()));
-  bot.errorBoundary(handleError).command('statistics', botActiveMiddleware, errorHandler(statisticsMiddleware.middleware()));
+  bot.command('session', botActiveMiddleware, sessionMiddleware.middleware());
+  bot.command('statistics', botActiveMiddleware, statisticsMiddleware.middleware());
 
-  bot.errorBoundary(handleError).command('get_tensor', onlyCreator, async (context) => {
+  bot.command('get_tensor', onlyCreator, async (context) => {
     let positives = await redisService.getPositives();
     let negatives = await redisService.getNegatives();
 
@@ -196,154 +193,119 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
     console.info('Skip due to redis:', context.chat?.id);
   };
 
-  bot.command(
-    'set_rank',
-    onlyCreator,
-    errorHandler(async (context) => {
-      const newPercent = +context.match;
+  bot.command('set_rank', onlyCreator, async (context) => {
+    const newPercent = +context.match;
 
-      if (!context.match) {
-        const percent = await redisService.getBotTensorPercent();
-        return context.reply(`Current rank is: ${percent || 9999}`);
-      }
+    if (!context.match) {
+      const percent = await redisService.getBotTensorPercent();
+      return context.reply(`Current rank is: ${percent || 9999}`);
+    }
 
-      if (Number.isNaN(newPercent)) {
-        return context.reply(`Cannot parse is as a number:\n${context.match}`);
-      }
+    if (Number.isNaN(newPercent)) {
+      return context.reply(`Cannot parse is as a number:\n${context.match}`);
+    }
 
-      tensorService.setSpamThreshold(newPercent);
-      await redisService.setBotTensorPercent(newPercent);
-      return context.reply(`Set new tensor rank: ${newPercent}`);
-    }),
-  );
-
-  bot.command(
-    'set_training_start_rank',
-    onlyCreator,
-    errorHandler(async (context) => {
-      const newPercent = +context.match;
-
-      if (!context.match) {
-        const percent = await redisService.getTrainingStartRank();
-        return context.reply(`Current training start rank is: ${percent || 9998}`);
-      }
-
-      if (Number.isNaN(newPercent)) {
-        return context.reply(`Cannot parse is as a number:\n${context.match}`);
-      }
-
-      await redisService.setTrainingStartRank(newPercent);
-      return context.reply(`Set new training start rank rank: ${newPercent}`);
-    }),
-  );
-
-  bot.command(
-    'set_training_chat_whitelist',
-    onlyCreator,
-    errorHandler(async (context) => {
-      const newChats = context.match;
-
-      if (!context.match) {
-        const whitelist = await redisService.getTrainingChatWhitelist();
-        return context.reply(`Current training chat whitelist is:\n\n${whitelist.join(',')}`);
-      }
-
-      await redisService.setTrainingChatWhitelist(newChats);
-      return context.reply(`Set training chat whitelist is:\n\n${newChats}`);
-    }),
-  );
-
-  bot.command(
-    'update_training_chat_whitelist',
-    onlyCreator,
-    errorHandler(async (context) => {
-      const newChats = context.match;
-
-      if (!context.match) {
-        const whitelist = await redisService.getTrainingChatWhitelist();
-        return context.reply(`Current training chat whitelist is:\n\n${whitelist.join(',')}`);
-      }
-
-      await redisService.updateTrainingChatWhitelist(newChats);
-      return context.reply(`Set training chat whitelist is:\n\n${newChats}`);
-    }),
-  );
-
-  bot.command(
-    'disable',
-    onlyCreator,
-    errorHandler(async (context) => {
-      await redisService.setIsBotDeactivated(true);
-      await commandSetter.setActive(false);
-      await commandSetter.updateCommands();
-      return context.reply('⛔️ Я виключений глобально');
-    }),
-  );
-
-  bot.command(
-    'enable',
-    onlyCreator,
-    errorHandler(async (context) => {
-      await redisService.setIsBotDeactivated(false);
-      await commandSetter.setActive(true);
-      await commandSetter.updateCommands();
-      return context.reply('✅ Я включений глобально');
-    }),
-  );
-
-  bot.command(
-    'start_alarm',
-    onlyWhitelisted,
-    errorHandler(() => {
-      alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(true));
-    }),
-  );
-
-  bot.command(
-    'end_alarm',
-    onlyWhitelisted,
-    errorHandler(() => {
-      alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(false));
-    }),
-  );
-
-  bot.command('leave', onlyCreator, (context) => {
-    context.leaveChat().catch(emptyFunction);
+    tensorService.setSpamThreshold(newPercent);
+    await redisService.setBotTensorPercent(newPercent);
+    return context.reply(`Set new tensor rank: ${newPercent}`);
   });
+
+  bot.command('set_training_start_rank', onlyCreator, async (context) => {
+    const newPercent = +context.match;
+
+    if (!context.match) {
+      const percent = await redisService.getTrainingStartRank();
+      return context.reply(`Current training start rank is: ${percent || 9998}`);
+    }
+
+    if (Number.isNaN(newPercent)) {
+      return context.reply(`Cannot parse is as a number:\n${context.match}`);
+    }
+
+    await redisService.setTrainingStartRank(newPercent);
+    return context.reply(`Set new training start rank rank: ${newPercent}`);
+  });
+
+  bot.command('set_training_chat_whitelist', onlyCreator, async (context) => {
+    const newChats = context.match;
+
+    if (!context.match) {
+      const whitelist = await redisService.getTrainingChatWhitelist();
+      return context.reply(`Current training chat whitelist is:\n\n${whitelist.join(',')}`);
+    }
+
+    await redisService.setTrainingChatWhitelist(newChats);
+    return context.reply(`Set training chat whitelist is:\n\n${newChats}`);
+  });
+
+  bot.command('update_training_chat_whitelist', onlyCreator, async (context) => {
+    const newChats = context.match;
+
+    if (!context.match) {
+      const whitelist = await redisService.getTrainingChatWhitelist();
+      return context.reply(`Current training chat whitelist is:\n\n${whitelist.join(',')}`);
+    }
+
+    await redisService.updateTrainingChatWhitelist(newChats);
+    return context.reply(`Set training chat whitelist is:\n\n${newChats}`);
+  });
+
+  bot.command('disable', onlyCreator, async (context) => {
+    await redisService.setIsBotDeactivated(true);
+    await commandSetter.setActive(false);
+    await commandSetter.updateCommands();
+    return context.reply('⛔️ Я виключений глобально');
+  });
+
+  bot.command('enable', onlyCreator, async (context) => {
+    await redisService.setIsBotDeactivated(false);
+    await commandSetter.setActive(true);
+    await commandSetter.updateCommands();
+    return context.reply('✅ Я включений глобально');
+  });
+
+  bot.command('start_alarm', onlyWhitelisted, () => {
+    alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(true));
+  });
+
+  bot.command('end_alarm', onlyWhitelisted, () => {
+    alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(false));
+  });
+
+  bot.command('leave', onlyCreator, (context) => context.leaveChat());
 
   bot.command('restart', onlyWhitelisted, async (context) => {
     await context.reply('Restarting...');
     await commandSetter.setActive(false);
     await bot.stop();
+    // eslint-disable-next-line unicorn/no-process-exit
     process.exit(0);
   });
 
-  bot.command('updates', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.initialization()));
-  router.route('confirmation', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.confirmation()));
-  router.route('messageSending', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.messageSending()));
+  bot.command('updates', botActiveMiddleware, onlyCreator, updatesMiddleware.initialization());
+  router.route('confirmation', botActiveMiddleware, onlyCreator, updatesMiddleware.confirmation());
+  router.route('messageSending', botActiveMiddleware, onlyCreator, updatesMiddleware.messageSending());
 
-  bot
-    .errorBoundary(handleError)
-    .on(
-      ['message', 'edited_message'],
-      botRedisActive,
-      ignoreOld(60),
-      botActiveMiddleware,
-      errorHandler(tensorListener.middleware(trainingThrottler)),
-      onlyNotAdmin,
-      onlyNotForwarded,
-      onlyWithText,
-      onlyWhenBotAdmin,
-      nestedMiddleware(ignoreBySettingsMiddleware('disableSwindlerMessage'), deleteSwindlersMiddleware.middleware()),
-      nestedMiddleware(
-        ignoreBySettingsMiddleware('disableStrategicInfo'),
-        errorHandler(performanceStartMiddleware),
-        errorHandler(onTextListener.middleware()),
-        errorHandler(performanceEndMiddleware),
-      ),
-    );
+  bot.on(
+    ['message', 'edited_message'],
+    botRedisActive,
+    ignoreOld(60),
+    botActiveMiddleware,
+    errorHandler(tensorListener.middleware(trainingThrottler)),
+    onlyNotAdmin,
+    onlyNotForwarded,
+    onlyWithText,
+    onlyWhenBotAdmin,
+    nestedMiddleware(ignoreBySettingsMiddleware('disableSwindlerMessage'), deleteSwindlersMiddleware.middleware()),
+    nestedMiddleware(
+      ignoreBySettingsMiddleware('disableStrategicInfo'),
+      errorHandler(performanceStartMiddleware),
+      errorHandler(onTextListener.middleware()),
+      errorHandler(performanceEndMiddleware),
+    ),
+  );
 
-  bot.catch(handleError);
+  bot.catch(globalErrorHandler);
 
   await bot.start({
     onStart: () => {

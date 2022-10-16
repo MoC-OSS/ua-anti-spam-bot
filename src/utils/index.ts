@@ -6,21 +6,13 @@ import type { GrammyContext, RealGrammyContext } from '../types';
 import { MessageUtil } from './message.util';
 import { TelegramUtil } from './telegram.util';
 
-export * from './error.util';
-export * from './error-handler';
-export * from './remove-duplicates.util';
-export * from './reveal-hidden-urls.util';
-
 export const messageUtil = new MessageUtil();
 export const telegramUtil = new TelegramUtil();
 
-/**
- * Temporary fix for catch error handling
- * TODO rework with global grammy error handling
- * */
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-export const emptyFunction = () => {};
-export const emptyPromiseFunction = () => Promise.resolve();
+export * from './empty-functions.util';
+export * from './error-handler';
+export * from './remove-duplicates.util';
+export * from './reveal-hidden-urls.util';
 
 /**
  * @param {GrammyContext} context
