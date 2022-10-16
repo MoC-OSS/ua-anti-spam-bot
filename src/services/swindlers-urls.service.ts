@@ -17,6 +17,7 @@ export class SwindlersUrlsService {
   constructor(private dynamicStorageService: DynamicStorageService, private rate = 0.9) {
     this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
     console.info('swindlersRegex', this.swindlersRegex);
+
     this.initFuzzySet();
     this.dynamicStorageService.fetchEmitter.on('fetch', () => {
       this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
@@ -26,7 +27,8 @@ export class SwindlersUrlsService {
   }
 
   buildSiteRegex(sites: string[]): RegExp {
-    const regex = /(?:https?:\/\/)?([[eist]])(?!ua).+/;
+    // eslint-disable-next-line unicorn/better-regex
+    const regex = /(?:https?:\/\/)?([[sites]])(?!ua).+/;
     return new RegExp(regex.source.replace('[[sites]]', sites.join('|')));
   }
 

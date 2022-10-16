@@ -1,17 +1,15 @@
-const { swindlersGoogleService } = require('../src/services/swindlers-google.service');
-const { removeSimilar } = require('./remove-similar');
+import { swindlersGoogleService } from '../src/services';
+import { removeDuplicates } from '../src/utils';
 
-const [, , type] = process.argv;
+import { removeSimilar } from './remove-similar';
 
-function removeDuplicates(array) {
-  return [...new Set(array)];
-}
+const type = process.argv[2];
 
 const mentionRegexp = /\B@\w+/g;
 const urlRegexp =
-  /(https?:\/\/(?:www\.|(?!www))?[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|(https?:\/\/(?:www\.|(?!www)))?[a-zA-Z0-9-]+\.[^\s]{2,}|www\.?[a-zA-Z0-9]+\.[^\s]{2,})/g;
+  /(https?:\/\/(?:www\.|(?!www))?[\dA-Za-z][\dA-Za-z-]+[\dA-Za-z]\.\S{2,}|www\.[\dA-Za-z][\dA-Za-z-]+[\dA-Za-z]\.\S{2,}|(https?:\/\/(?:www\.|(?!www)))?[\dA-Za-z-]+\.\S{2,}|www\.?[\dA-Za-z]+\.\S{2,})/g;
 
-const processPromise = (response) =>
+const processPromise = (response: string[]) =>
   response.map((item) => ({
     value: item.replace(urlRegexp, ' ').replace(mentionRegexp, ' '),
     label: item,
@@ -74,4 +72,10 @@ const processPromise = (response) =>
 
   // const uniqueTestSwindlers = removeDuplicates(newTestData);
   // fs.writeFileSync(methods.debugPath, JSON.stringify(uniqueTestSwindlers, null, 2));
-})();
+
+  // eslint-disable-next-line unicorn/no-process-exit
+  process.exit(0);
+})().catch((error) => {
+  console.error('FATAL: Cannot optimize dataset. Reason:', error);
+  throw error;
+});

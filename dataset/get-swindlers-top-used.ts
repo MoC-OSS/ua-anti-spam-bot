@@ -1,12 +1,13 @@
-const fs = require('fs');
-const path = require('path');
+/* eslint-disable unicorn/prefer-module */
+import fs from 'node:fs';
+import path from 'node:path';
 
-const { getTopUsed } = require('./get-top-used');
+import { getTopUsed } from './get-top-used';
 
 /**
  * @param {string[]} dataset
  * */
-const getSwindlersTopUsed = (dataset) => {
+export const getSwindlersTopUsed = (dataset: string[]) => {
   const whitelist = ['україн'];
   const sorted = getTopUsed(dataset, whitelist, ' ');
   const sortedTwo = getTopUsed(dataset, whitelist, ' ', (item2, index, self) => {
@@ -32,8 +33,4 @@ const getSwindlersTopUsed = (dataset) => {
   console.info(sortedTwo);
 
   fs.writeFileSync(path.join(__dirname, './strings/swindlers_top_used.json'), JSON.stringify(result, null, 2));
-};
-
-module.exports = {
-  getSwindlersTopUsed,
 };

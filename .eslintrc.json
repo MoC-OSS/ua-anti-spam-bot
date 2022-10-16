@@ -7,6 +7,7 @@
   },
   "ignorePatterns": [
     "!src/**/*.{ts,js}",
+    "!dataset/**/*.{ts,js}",
     "node_modules"
   ],
   "root": true,
