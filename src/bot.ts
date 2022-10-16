@@ -382,6 +382,13 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   });
 
   // Enable graceful stop
-  process.once('SIGINT', () => bot.stop());
-  process.once('SIGTERM', () => bot.stop());
-})();
+  process.once('SIGINT', () => {
+    bot.stop().catch(emptyFunction);
+  });
+  process.once('SIGTERM', () => {
+    bot.stop().catch(emptyFunction);
+  });
+})().catch((error) => {
+  console.error('FATAL: Bot crashed with error:', error);
+  throw error;
+});

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import type { SetNonNullable } from 'type-fest';
 
+import { loadUserbotDatasetExtras } from '../../dataset/dataset';
 import { environmentConfig } from '../config';
 import { redisClient } from '../db';
 import { initSwindlersContainer } from '../services';
@@ -25,6 +26,8 @@ export interface ChatPeers {
 console.info('Start listener application');
 auth()
   .then(async (api) => {
+    const datasetExtras = await loadUserbotDatasetExtras();
+
     await redisClient.client.connect().then(() => console.info('Redis client successfully started'));
     const mtProtoClient = new MtProtoClient(api);
 
@@ -63,6 +66,7 @@ auth()
       swindlersBotsService,
       userbotStorage,
       swindlersDetectService,
+      datasetExtras,
     );
 
     // const testSwindlerResult = await updatesHandler.handleSwindlers(testMessage);

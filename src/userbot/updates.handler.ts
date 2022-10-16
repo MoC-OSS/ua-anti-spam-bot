@@ -5,7 +5,7 @@ import { forEachSeries } from 'p-iteration';
 import type { SetNonNullable } from 'type-fest';
 import { mentionRegexp, urlRegexp } from 'ukrainian-ml-optimizer';
 
-import { dataset } from '../../dataset/dataset';
+import type { loadUserbotDatasetExtras } from '../../dataset/dataset';
 import type { DynamicStorageService, SwindlersBotsService, SwindlersDetectService } from '../services';
 import { redisService, swindlersGoogleService } from '../services';
 import type { SwindlersTensorService, TensorService } from '../tensor';
@@ -26,13 +26,9 @@ const SWINDLER_SETTINGS = {
   APPEND_TO_SHEET: 0.85,
 };
 
-const swindlersTopUsed = Object.keys(dataset.swindlers_top_used || {});
-
-if (swindlersTopUsed.length === 0) {
-  console.info('WARN: swindlers_top_used are not generated! You need to run `npm run download-swindlers` to generate this file!');
-}
-
 export class UpdatesHandler {
+  swindlersTopUsed: string[];
+
   /**
    * @param {MtProtoClient} mtProtoClient
    * @param {SetNonNullable<ChatPeers, keyof ChatPeers>} chatPeers
@@ -42,6 +38,7 @@ export class UpdatesHandler {
    * @param {SwindlersBotsService} swindlersBotsService
    * @param {UserbotStorage} userbotStorage
    * @param {SwindlersDetectService} swindlersDetectService
+   * @param datasetExtras
    * */
   constructor(
     private mtProtoClient: MtProtoClient,
@@ -52,7 +49,14 @@ export class UpdatesHandler {
     private swindlersBotsService: SwindlersBotsService,
     private userbotStorage: UserbotStorage,
     private swindlersDetectService: SwindlersDetectService,
-  ) {}
+    private datasetExtras: Awaited<ReturnType<typeof loadUserbotDatasetExtras>>,
+  ) {
+    this.swindlersTopUsed = Object.keys(datasetExtras.swindlers_top_used);
+
+    if (this.swindlersTopUsed.length === 0) {
+      console.info('WARN: swindlers_top_used are not generated! You need to run `npm run download-swindlers` to generate this file!');
+    }
+  }
 
   /**
    * @param {ProtoUpdate} updateInfo
@@ -140,7 +144,7 @@ export class UpdatesHandler {
     /**
      * Help try
      * */
-    const isHelp = swindlersTopUsed.some((item) => finalMessage.toLowerCase().includes(item));
+    const isHelp = this.swindlersTopUsed.some((item) => finalMessage.toLowerCase().includes(item));
 
     if (isHelp) {
       const isUnique = await this.userbotStorage.handleHelpMessage(finalMessage);
