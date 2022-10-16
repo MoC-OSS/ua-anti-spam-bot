@@ -7,9 +7,6 @@ import type { GrammyMenuContext, GrammyMiddleware } from '../types';
  * Reimplementation of Grammy's menu to support menu-level middlewares.
  * */
 export class MiddlewareMenu<C extends GrammyMenuContext = GrammyMenuContext> extends Menu<C> {
-  /**
-   * @param {MenuMiddleware<C>} middlewares
-   * */
   menuMiddlewares: GrammyMiddleware[] = [];
 
   addGlobalMiddlewares(...middlewares: GrammyMiddleware[]) {

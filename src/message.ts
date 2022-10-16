@@ -144,12 +144,12 @@ export const getSettingsMenuMessage = (settings: ChatSessionData['chatSettings']
       : '⛔ Ти ще не вибрав свій регіон.'
   }
 📢 ${
-    settings.airRaidAlertSettings.notificationMessage === false
+    !settings.airRaidAlertSettings.notificationMessage
       ? '⛔️ Бот не повідомляє про початок і завершення повітряної тривоги у вашому регіоні.'
       : '✅ Бот повідомляє про початок і завершення повітряної тривоги у вашому регіоні.'
   }
 🤫 ${
-    settings.disableChatWhileAirRaidAlert === false
+    !settings.disableChatWhileAirRaidAlert
       ? '⛔️ Бот не вимикає чат під час повітряної тривоги у вашому регіоні.'
       : '✅ Бот вимикає чат під час повітряної тривоги у вашому регіоні.'
   }
@@ -180,12 +180,12 @@ Here you can adjust the settings:
 <b>Air raid alarm settings:</b>
 🏰 ${settings.airRaidAlertSettings.state ? `✅ Your region is ${settings.airRaidAlertSettings.state}.` : '⛔ No region is selected.'}
 📢 ${
-    settings.airRaidAlertSettings.notificationMessage === false
+    !settings.airRaidAlertSettings.notificationMessage
       ? '⛔️ Do not notify about the start and end of an air alert in your region.'
       : '✅ Notify about the start and end of an air alert in your region.'
   }
 🤫 ${
-    settings.disableChatWhileAirRaidAlert === false
+    !settings.disableChatWhileAirRaidAlert
       ? '⛔️ Do not disable the chat during an air alert in your region.'
       : '✅ Disable the chat during an air alert in your region.'
   }

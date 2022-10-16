@@ -110,7 +110,7 @@ export class TestTensorListener {
   }
 
   /**
-   * @param {Transformer<RawApi>} throttler - throttler need to be defined once to work.
+   * @param {Transformer} throttler - throttler need to be defined once to work.
    * So we can't init it each time in middleware because it has new instance, and it doesn't throttle,
    * */
   initMenu(throttler: Transformer): Menu<GrammyMenuContext> {
