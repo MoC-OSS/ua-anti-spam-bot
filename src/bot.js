@@ -335,6 +335,13 @@ const rootMenu = new Menu('root');
     ctx.leaveChat().catch(() => {});
   });
 
+  bot.command('restart', onlyWhitelisted, async (ctx) => {
+    await ctx.reply('Restarting...');
+    await commandSetter.setActive(false);
+    await bot.stop();
+    process.exit(0);
+  });
+
   bot.command('updates', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.initialization()));
   router.route('confirmation', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.confirmation()));
   router.route('messageSending', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.messageSending()));
