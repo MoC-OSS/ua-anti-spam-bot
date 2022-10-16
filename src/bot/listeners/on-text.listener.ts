@@ -1,9 +1,9 @@
-import { environmentConfig } from 'config';
 import type { Bot } from 'grammy';
 import { InputFile } from 'grammy';
 import type { NextFunction } from 'grammy/out/composer';
 
 import Keyv = require('keyv');
+import { environmentConfig } from '../../config';
 import { creatorId, logsChat, privateTrainingChat } from '../../creator';
 import { getCannotDeleteMessage, getDebugMessage, getDeleteMessage } from '../../message'; // spamDeleteMessage
 import { redisService } from '../../services';

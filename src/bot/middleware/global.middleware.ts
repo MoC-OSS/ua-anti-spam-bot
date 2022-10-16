@@ -1,7 +1,6 @@
-import { environmentConfig } from 'config';
 import type { Bot, NextFunction } from 'grammy';
-import type { AirRaidAlertSettings, ChatSettings, GrammyContext, GrammyMiddleware } from 'types';
 
+import { environmentConfig } from '../../config';
 import {
   adminReadyHasNoDeletePermissionMessage,
   adminReadyMessage,
@@ -9,6 +8,7 @@ import {
   getStartChannelMessage,
   memberReadyMessage,
 } from '../../message';
+import type { AirRaidAlertSettings, ChatSettings, GrammyContext, GrammyMiddleware } from '../../types';
 import { emptyFunction, handleError, logContext, telegramUtil } from '../../utils';
 
 export class GlobalMiddleware {
