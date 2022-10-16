@@ -14,3 +14,4 @@ export * from './only-whitelisted';
 export * from './only-with-text.middleware';
 export * from './performance-end.middleware';
 export * from './performance-start.middleware';
+export * from './throw-error.middleware';
