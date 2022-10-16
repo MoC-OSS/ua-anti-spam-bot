@@ -45,7 +45,7 @@ export class SwindlersUrlsService {
    */
   async processMessage(message: string): Promise<SwindlersBaseResult | SwindlersUrlsResult | null> {
     const urls = this.parseUrls(message);
-    if (urls) {
+    if (urls.length > 0) {
       let lastResult: SwindlersBaseResult | SwindlersUrlsResult | null = null;
       const getUrls = urls.map((url) => this.isSpamUrl(url));
       const allUrls = await Promise.all(getUrls);
@@ -65,7 +65,7 @@ export class SwindlersUrlsService {
   /**
    * @param {string} message - raw message from user to parse
    *
-   * @returns {string[]}
+   * @returns {string[] | false}
    */
   parseUrls(message: string): string[] {
     return (message.match(URL_REGEXP) || []).filter((url) => {
@@ -74,7 +74,7 @@ export class SwindlersUrlsService {
         const urlInstance = new URL(validUrl);
         return urlInstance && !EXCEPTION_DOMAINS.includes(urlInstance.host) && VALID_URL_REGEXP.test(validUrl);
       } catch {
-        return false;
+        return [];
       }
     });
   }

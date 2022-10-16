@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { mockDynamicStorageService, mockNewUrl } from './_mocks';
+import { mockDynamicStorageService, mockNewUrl } from './_mocks/index.mocks';
 import { EXCEPTION_DOMAINS } from './constants';
 import { SwindlersUrlsService } from './swindlers-urls.service';
 
