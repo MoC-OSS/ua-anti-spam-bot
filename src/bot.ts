@@ -2,13 +2,14 @@ import { Menu } from '@grammyjs/menu';
 import { hydrateReply } from '@grammyjs/parse-mode';
 import { Router } from '@grammyjs/router';
 import { apiThrottler } from '@grammyjs/transformer-throttler';
-import { Bot, InputFile } from 'grammy';
+import { Bot } from 'grammy';
 import Keyv from 'keyv';
 import moment from 'moment-timezone';
 
 import {
   CommandSetter,
   HelpMiddleware,
+  RankMiddleware,
   SessionMiddleware,
   SettingsMiddleware,
   StartMiddleware,
@@ -20,6 +21,7 @@ import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
 import {
   botActiveMiddleware,
+  botRedisActive,
   deleteMessageMiddleware,
   DeleteSwindlersMiddleware,
   GlobalMiddleware,
@@ -39,12 +41,12 @@ import {
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
 import { getAlarmMock } from './services/_mocks';
 import { environmentConfig } from './config';
-import { creatorId, logsChat } from './creator';
+import { logsChat } from './creator';
 import { redisClient } from './db';
 import { settingsAvailableMessage } from './message';
 import { ALARM_EVENT_KEY, alarmChatService, alarmService, initSwindlersContainer, redisService, S3Service } from './services';
 import { initTensor } from './tensor';
-import type { GrammyContext, GrammyMenuContext, GrammyMiddleware } from './types';
+import type { GrammyContext, GrammyMenuContext } from './types';
 import { emptyFunction, globalErrorHandler, sleep, wrapperErrorHandler } from './utils';
 
 moment.tz.setDefault('Europe/Kiev');
@@ -107,6 +109,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   const updatesMiddleware = new UpdatesMiddleware();
   const settingsMiddleware = new SettingsMiddleware(airRaidAlarmStates.states);
   const deleteSwindlersMiddleware = new DeleteSwindlersMiddleware(bot, swindlersDetectService);
+  const rankMiddleware = new RankMiddleware(tensorService);
 
   const messageHandler = new MessageHandler(tensorService);
 
@@ -157,98 +160,11 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   bot.command('session', botActiveMiddleware, sessionMiddleware.middleware());
   bot.command('statistics', botActiveMiddleware, statisticsMiddleware.middleware());
 
-  bot.command('get_tensor', onlyCreator, async (context) => {
-    let positives = await redisService.getPositives();
-    let negatives = await redisService.getNegatives();
-
-    positives = positives.map((singleCase) => singleCase.replace(/\n/g, ' '));
-    negatives = negatives.map((singleCase) => singleCase.replace(/\n/g, ' '));
-
-    if (positives.length > 0) {
-      await context.api.sendDocument(
-        creatorId,
-        new InputFile(Buffer.from(positives.join('\n')), `positives-${new Date().toISOString()}.csv`),
-      );
-    }
-
-    if (negatives.length > 0) {
-      await context.api.sendDocument(
-        creatorId,
-        new InputFile(Buffer.from(negatives.join('\n')), `negatives-${new Date().toISOString()}.csv`),
-      );
-    }
-
-    await redisService.deletePositives();
-    await redisService.deleteNegatives();
-  });
-
-  const botRedisActive: GrammyMiddleware = async (context, next) => {
-    const isDeactivated = await redisService.getIsBotDeactivated();
-    const isInLocal = context.chat?.type === 'private' && context.chat?.id === creatorId;
-
-    if (!isDeactivated || isInLocal) {
-      return next();
-    }
-
-    console.info('Skip due to redis:', context.chat?.id);
-  };
-
-  bot.command('set_rank', onlyCreator, async (context) => {
-    const newPercent = +context.match;
-
-    if (!context.match) {
-      const percent = await redisService.getBotTensorPercent();
-      return context.reply(`Current rank is: ${percent || 9999}`);
-    }
-
-    if (Number.isNaN(newPercent)) {
-      return context.reply(`Cannot parse is as a number:\n${context.match}`);
-    }
-
-    tensorService.setSpamThreshold(newPercent);
-    await redisService.setBotTensorPercent(newPercent);
-    return context.reply(`Set new tensor rank: ${newPercent}`);
-  });
-
-  bot.command('set_training_start_rank', onlyCreator, async (context) => {
-    const newPercent = +context.match;
-
-    if (!context.match) {
-      const percent = await redisService.getTrainingStartRank();
-      return context.reply(`Current training start rank is: ${percent || 9998}`);
-    }
-
-    if (Number.isNaN(newPercent)) {
-      return context.reply(`Cannot parse is as a number:\n${context.match}`);
-    }
-
-    await redisService.setTrainingStartRank(newPercent);
-    return context.reply(`Set new training start rank rank: ${newPercent}`);
-  });
-
-  bot.command('set_training_chat_whitelist', onlyCreator, async (context) => {
-    const newChats = context.match;
-
-    if (!context.match) {
-      const whitelist = await redisService.getTrainingChatWhitelist();
-      return context.reply(`Current training chat whitelist is:\n\n${whitelist.join(',')}`);
-    }
-
-    await redisService.setTrainingChatWhitelist(newChats);
-    return context.reply(`Set training chat whitelist is:\n\n${newChats}`);
-  });
-
-  bot.command('update_training_chat_whitelist', onlyCreator, async (context) => {
-    const newChats = context.match;
-
-    if (!context.match) {
-      const whitelist = await redisService.getTrainingChatWhitelist();
-      return context.reply(`Current training chat whitelist is:\n\n${whitelist.join(',')}`);
-    }
-
-    await redisService.updateTrainingChatWhitelist(newChats);
-    return context.reply(`Set training chat whitelist is:\n\n${newChats}`);
-  });
+  /* Training and tensor middlewares */
+  bot.command('set_rank', onlyCreator, rankMiddleware.setRankMiddleware());
+  bot.command('set_training_start_rank', onlyCreator, rankMiddleware.setTrainingStartRank());
+  bot.command('set_training_chat_whitelist', onlyCreator, rankMiddleware.setTrainingChatWhitelist());
+  bot.command('update_training_chat_whitelist', onlyCreator, rankMiddleware.updateTrainingChatWhitelist());
 
   bot.command('disable', onlyCreator, async (context) => {
     await redisService.setIsBotDeactivated(true);

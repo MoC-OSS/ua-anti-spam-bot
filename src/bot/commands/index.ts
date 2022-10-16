@@ -1,6 +1,7 @@
 export * from './air-raid-alarm/locations-menu-generator';
 export * from './command-setter';
 export * from './help.middleware';
+export * from './rank.middleware';
 export * from './session.middleware';
 export * from './settings.middleware';
 export * from './start.middleware';
