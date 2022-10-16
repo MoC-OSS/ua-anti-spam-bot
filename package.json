@@ -5,8 +5,8 @@
   "scripts": {
     "start:bot": "nodemon src/bot.ts --max_old_space_size=2048",
     "start:bot:prod": "node src/bot.ts",
-    "start:userbot:eternal": "forever ./src/userbot",
-    "start:userbot:prod": "ts-node ./src/userbot",
+    "start:userbot:eternal": "forever -c ts-node ./src/userbot/index.ts",
+    "start:userbot:prod": "ts-node ./src/userbot/index.ts",
     "start:server": "nodemon ./src/express.server.ts --max_old_space_size=2048",
     "start:server:prod": "ts-node ./src/express.server.ts",
     "start:server:cluster": "pm2 start ./src/express.server.ts -i 3 --watch || echo '*** Install PM2 globally'",

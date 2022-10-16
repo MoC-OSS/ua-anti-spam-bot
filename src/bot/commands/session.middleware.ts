@@ -2,27 +2,23 @@ import { InputFile } from 'grammy';
 
 import { creatorId } from '../../creator';
 import { redisClient } from '../../db';
-import type { GrammyContext } from '../../types';
+import type { GrammyMiddleware } from '../../types';
 
 export class SessionMiddleware {
   /**
    * @param {Date} startTime
    * */
-  startTime: Date;
-
-  constructor(startTime: Date) {
-    this.startTime = startTime;
-  }
+  constructor(private startTime: Date) {}
 
   /**
    * Handle /session
    * Returns session file
    * */
-  middleware() {
+  middleware(): GrammyMiddleware {
     /**
-     * @param {GrammyContext} ctx
+     * @param {GrammyContext} context
      * */
-    return async (context: GrammyContext) => {
+    return async (context) => {
       const chatId = context?.update?.message?.chat?.id;
 
       if (chatId === creatorId) {

@@ -1,23 +1,27 @@
 import { Menu } from '@grammyjs/menu';
-import { GrammyContext } from '../types';
+
+import type { GrammyMenuContext, GrammyMiddleware } from '../types';
 
 /**
  * @description
  * Reimplementation of Grammy's menu to support menu-level middlewares.
  * */
- export class MiddlewareMenu<C extends GrammyContext> extends Menu<C> {
+export class MiddlewareMenu<C extends GrammyMenuContext = GrammyMenuContext> extends Menu<C> {
   /**
    * @param {MenuMiddleware<C>} middlewares
    * */
+  menuMiddlewares: GrammyMiddleware[] = [];
 
-  addGlobalMiddlewares(...middlewares) {
+  addGlobalMiddlewares(...middlewares: GrammyMiddleware[]) {
     this.menuMiddlewares = middlewares;
     return this;
   }
 
-  text(text, ...middleware) {
+  text(text: string | unknown, ...middleware: GrammyMiddleware[]) {
     const newMiddlewares = [...(this.menuMiddlewares || []), ...middleware];
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     return this.add(typeof text === 'object' ? { ...text, middleware: newMiddlewares } : { text, middleware: newMiddlewares });
   }
 }

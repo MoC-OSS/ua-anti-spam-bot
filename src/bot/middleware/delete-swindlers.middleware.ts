@@ -1,10 +1,10 @@
-import type { Bot, Middleware, NextFunction } from 'grammy';
+import type { Bot } from 'grammy';
 import { InputFile } from 'grammy';
-import type { GrammyContext, SwindlerType } from 'types';
+import type { GrammyContext, GrammyMiddleware, SwindlerType } from 'types';
 
 import { logsChat } from '../../creator';
 import { getCannotDeleteMessage, swindlersWarningMessage } from '../../message';
-import type { SwindlersDetectService } from '../../services/swindlers-detect.service';
+import type { SwindlersDetectService } from '../../services';
 import { compareDatesWithOffset, getUserData, handleError, revealHiddenUrls, telegramUtil } from '../../utils';
 
 const SWINDLER_SETTINGS = {
@@ -14,11 +14,11 @@ const SWINDLER_SETTINGS = {
 export class DeleteSwindlersMiddleware {
   constructor(private bot: Bot<GrammyContext>, private swindlersDetectService: SwindlersDetectService) {}
 
-  middleware(): Middleware<GrammyContext> {
+  middleware(): GrammyMiddleware {
     /**
      * Delete messages that looks like from swindlers
      * */
-    const middleware = async (context: GrammyContext, next: NextFunction) => {
+    return async (context, next) => {
       const message = revealHiddenUrls(context);
 
       const result = await this.swindlersDetectService.isSwindlerMessage(message);
@@ -38,7 +38,6 @@ export class DeleteSwindlersMiddleware {
 
       return next();
     };
-    return middleware;
   }
 
   /**
@@ -113,7 +112,7 @@ export class DeleteSwindlersMiddleware {
 
         return telegramUtil
           .getChatAdmins(this.bot, context.chat.id)
-          .then(({ adminsString, admins }) => {
+          .then(({ adminsString }) => {
             context
               .replyWithHTML(getCannotDeleteMessage({ adminsString }), { reply_to_message_id: context.msg?.message_id })
               .catch(handleError);

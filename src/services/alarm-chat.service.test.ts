@@ -1,14 +1,6 @@
 import { sleep } from '../utils';
 
-import {
-  chartMock,
-  generateChat,
-  generateChatSessionData,
-  generateMockSessions,
-  getAlarmMock,
-  testId,
-  testState,
-} from './_mocks/alarm.mocks';
+import { chartMock, generateChat, generateChatSessionData, generateMockSessions, getAlarmMock, testId, testState } from './_mocks';
 import { ALARM_EVENT_KEY, alarmService } from './alarm.service';
 import { alarmChatService } from './alarm-chat.service';
 

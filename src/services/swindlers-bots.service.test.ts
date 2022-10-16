@@ -1,4 +1,4 @@
-import { mockDynamicStorageService, mockNewBot } from './_mocks/index.mocks';
+import { mockDynamicStorageService, mockNewBot } from './_mocks';
 import { SwindlersBotsService } from './swindlers-bots.service';
 
 const expectedMentions = ['@test_mention', '@another_mention'];
@@ -24,7 +24,7 @@ describe('SwindlersBotsService', () => {
     const initFuzzySetSpy = jest.spyOn(swindlersBotsService, 'initFuzzySet');
     const oldFuzzyMatch = swindlersBotsService.swindlersBotsFuzzySet;
 
-    expect(initFuzzySetSpy).not.toBeCalled();
+    expect(initFuzzySetSpy).not.toHaveBeenCalled();
     await mockDynamicStorageService.updateSwindlers();
     const newFuzzyMatch = swindlersBotsService.swindlersBotsFuzzySet;
 

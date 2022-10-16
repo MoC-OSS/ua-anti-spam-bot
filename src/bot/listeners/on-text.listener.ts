@@ -1,13 +1,13 @@
 import { environmentConfig } from 'config';
-import type { Bot, Middleware } from 'grammy';
+import type { Bot } from 'grammy';
 import { InputFile } from 'grammy';
-import Keyv = require('keyv');
 import type { NextFunction } from 'grammy/out/composer';
 
+import Keyv = require('keyv');
 import { creatorId, logsChat, privateTrainingChat } from '../../creator';
 import { getCannotDeleteMessage, getDebugMessage, getDeleteMessage } from '../../message'; // spamDeleteMessage
 import { redisService } from '../../services';
-import type { GrammyContext } from '../../types';
+import type { GrammyContext, GrammyMiddleware } from '../../types';
 import { compareDatesWithOffset, getUserData, handleError, telegramUtil } from '../../utils';
 import type { MessageHandler } from '../message.handler';
 import { getMessageReputation } from '../spam.handlers';
@@ -22,12 +22,12 @@ export class OnTextListener {
    * @param {MessageHandler} messageHandler
    */
 
-  constructor(private bot: Bot, private keyv: Keyv, private startTime: Date, private messageHandler: MessageHandler) {}
+  constructor(private bot: Bot<GrammyContext>, private keyv: Keyv, private startTime: Date, private messageHandler: MessageHandler) {}
 
   /**
    * Handles every received message
    * */
-  middleware(): Middleware<GrammyContext> {
+  middleware(): GrammyMiddleware {
     /**
      * @param {GrammyContext} context
      * @param {NextFunction} next
@@ -61,6 +61,9 @@ export class OnTextListener {
       const rep = await getMessageReputation(context, this.keyv, this.messageHandler);
 
       if (rep.byRules.dataset) {
+        // TODO define the same types
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         context.state.dataset = rep.byRules.dataset;
         const { deleteRank, tensor } = rep.byRules.dataset;
         const startRank = (await redisService.getTrainingStartRank()) || 0.6;
@@ -109,7 +112,7 @@ export class OnTextListener {
                     userId,
                     wordMessage: '',
                     debugMessage,
-                    withLocation: rep.byRules.dataset.location
+                    withLocation: rep.byRules.dataset.location,
                   }),
                 );
               }
@@ -117,22 +120,28 @@ export class OnTextListener {
             .catch(() => {
               if (
                 !context.chatSession.isLimitedDeletion ||
-                compareDatesWithOffset(new Date(context.chatSession.lastLimitedDeletionDate), new Date(), 1)
+                compareDatesWithOffset(new Date(context.chatSession.lastLimitedDeletionDate || 0), new Date(), 1)
               ) {
                 context.chatSession.isLimitedDeletion = true;
                 context.chatSession.lastLimitedDeletionDate = new Date();
 
+                if (!context.chat?.id) {
+                  return;
+                }
+
                 return telegramUtil
                   .getChatAdmins(this.bot, context.chat.id)
-                  .then(({ adminsString, admins }) => {
+                  .then(({ adminsString }) => {
                     context
-                      .replyWithHTML(getCannotDeleteMessage({ adminsString }), { reply_to_message_id: context.msg.message_id })
+                      .replyWithHTML(getCannotDeleteMessage({ adminsString }), { reply_to_message_id: context.msg?.message_id })
                       .catch(handleError);
 
                     this.bot.api
                       .sendMessage(
                         logsChat,
-                        `Cannot delete the following message from chat\n\n<code>${context.chat.title}</code>\n${context.msg.text}`,
+                        `Cannot delete the following message from chat\n\n<code>${telegramUtil.getChatTitle(context.chat)}</code>\n${
+                          context.msg?.text || ''
+                        }`,
                         {
                           parse_mode: 'HTML',
                         },

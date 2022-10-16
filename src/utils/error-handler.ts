@@ -3,7 +3,7 @@ import { InputFile } from 'grammy';
 
 import { environmentConfig } from '../config';
 import { logsChat } from '../creator';
-import type { GrammyContext, RealGrammyContext } from '../types';
+import type { GrammyContext, GrammyMiddleware, RealGrammyContext } from '../types';
 
 import { handleError } from './error.util';
 
@@ -12,7 +12,7 @@ import { handleError } from './error.util';
  * @param {function} callback - function to enter a stage
  */
 export const errorHandler =
-  (callback: MiddlewareFn<GrammyContext>): Middleware<GrammyContext> =>
+  <C extends GrammyContext = GrammyContext>(callback: MiddlewareFn<C>): MiddlewareFn<C> =>
   async (context, next) => {
     try {
       if (!callback) {

@@ -13,10 +13,6 @@ import percent_100 from './strings/percent_100.json';
 import strict_high_risk from './strings/strict_high_risk.json';
 import strict_locations from './strings/strict_locations.json';
 import strict_percent_100 from './strings/strict_percent_100.json';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-// eslint-disable-next-line import/no-unresolved
-import swindlers_top_used from './strings/swindlers_top_used.json';
 
 const translitRus = CyrillicToTranslit({ preset: 'ru' });
 const translitUa = CyrillicToTranslit({ preset: 'uk' });
@@ -26,6 +22,36 @@ function processMessage(dataset: string[]): string[] {
   const translitUkrainianDataset = dataset.map((word) => translitUa.transform(word, ' '));
 
   return removeDuplicates([...dataset, ...translitUkrainianDataset, ...translitRussianDataset]);
+}
+
+/**
+ * Load optional file or fallbacks to default value
+ * */
+export async function loadOptionalFile<T>(path: string, defaultValue: T): Promise<T> {
+  let resolvedFile = defaultValue;
+
+  await import(path)
+    .then((file) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      resolvedFile = file.default as T;
+    })
+    .catch(() => {
+      resolvedFile = defaultValue;
+    });
+
+  return resolvedFile;
+}
+
+/**
+ * Load non-existing files into dataset.
+ * Should be called before any project calls
+ * */
+export async function loadUserbotDatasetExtras() {
+  const swindlers_top_used = await loadOptionalFile<Record<string, number>>('./strings/swindlers_top_used.json', {});
+
+  console.info('Userbot dataset extras are loaded!');
+
+  return { swindlers_top_used };
 }
 
 /**
@@ -44,7 +70,6 @@ export const dataset = {
   strict_high_risk: processMessage(strict_high_risk),
   strict_locations: processMessage(strict_locations),
   strict_percent_100: processMessage(strict_percent_100),
-  swindlers_top_used,
 };
 
 /**

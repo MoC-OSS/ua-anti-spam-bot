@@ -1,5 +1,5 @@
 import { dataset } from '../../dataset/dataset';
-import { initSwindlersTensor } from '../tensor/swindlers-tensor.service';
+import { initSwindlersTensor } from '../tensor';
 
 import { DynamicStorageService } from './dynamic-storage.service';
 import { SwindlersBotsService } from './swindlers-bots.service';

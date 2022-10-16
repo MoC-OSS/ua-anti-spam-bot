@@ -1,3 +1,4 @@
+import type { MenuFlavor } from '@grammyjs/menu/out/menu';
 import type { ParseModeContext } from '@grammyjs/parse-mode';
 import type { Bot, Composer, Context, MiddlewareFn, SessionFlavor } from 'grammy';
 
@@ -9,6 +10,8 @@ export type GrammyContext = Context &
   SessionFlavor<SessionData> &
   ChatSessionFlavor<ChatSessionData> &
   StateFlavor<State>;
+
+export type GrammyMenuContext = GrammyContext & MenuFlavor;
 
 /**
  * Real object with hidden fields

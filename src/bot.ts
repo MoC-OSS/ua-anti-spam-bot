@@ -6,7 +6,16 @@ import { Bot, InputFile } from 'grammy';
 import Keyv from 'keyv';
 import moment from 'moment-timezone';
 
-import { CommandSetter, SettingsMiddleware, StatisticsMiddleware, SwindlersUpdateMiddleware, UpdatesMiddleware } from './bot/commands';
+import {
+  CommandSetter,
+  HelpMiddleware,
+  SessionMiddleware,
+  SettingsMiddleware,
+  StartMiddleware,
+  StatisticsMiddleware,
+  SwindlersUpdateMiddleware,
+  UpdatesMiddleware,
+} from './bot/commands';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
 import {
@@ -35,8 +44,8 @@ import { redisClient } from './db';
 import { settingsAvailableMessage } from './message';
 import { ALARM_EVENT_KEY, alarmChatService, alarmService, initSwindlersContainer, redisService, S3Service } from './services';
 import { initTensor } from './tensor';
-import type { GrammyContext } from './types';
-import { errorHandler, handleError, sleep } from './utils';
+import type { GrammyContext, GrammyMenuContext, GrammyMiddleware } from './types';
+import { emptyFunction, errorHandler, handleError, sleep } from './utils';
 
 /**
  * @typedef { import("grammy").GrammyError } GrammyError
@@ -58,7 +67,7 @@ moment.locale('uk');
 const keyv = new Keyv('sqlite://db.sqlite');
 keyv.on('error', (error_) => console.error('Connection Error', error_));
 
-const rootMenu = new Menu('root');
+const rootMenu = new Menu<GrammyMenuContext>('root');
 
 (async () => {
   console.info('Waiting for the old instance to down...');
@@ -80,23 +89,29 @@ const rootMenu = new Menu('root');
   await alarmChatService.init(bot.api);
   const airRaidAlarmStates = await alarmService.getStates();
 
+  if (airRaidAlarmStates.states.length === 0) {
+    // TODO add advance logic for this
+    console.error('No states are available. Air raid feature is not working...');
+  }
+
   if (!environmentConfig.DEBUG) {
-    bot.api.sendMessage(logsChat, '*** 20220406204759 Migration started...').catch(() => {});
+    bot.api.sendMessage(logsChat, '*** 20220406204759 Migration started...').catch(emptyFunction);
   }
   // eslint-disable-next-line global-require
   require('./20220406204759-migrate-redis-user-session')(bot, startTime)
     .then(() => {
       console.info('*** 20220406204759 Migration run successfully!!!');
       if (!environmentConfig.DEBUG) {
-        bot.api.sendMessage(logsChat, '*** 20220406204759 Migration run successfully!!!').catch(() => {});
+        bot.api.sendMessage(logsChat, '*** 20220406204759 Migration run successfully!!!').catch(emptyFunction);
       }
     })
-    .catch(async (migrationError: any) => {
-      await bot.api.sendMessage(logsChat, `Migration failed! Reason: ${migrationError.reason}`).catch(() => {});
-      await bot.api.sendMessage(logsChat, JSON.stringify(migrationError)).catch(() => {});
+    .catch(async (migrationError) => {
+      await bot.api.sendMessage(logsChat, `Migration failed! Reason: ${migrationError.reason}`).catch(emptyFunction);
+      await bot.api.sendMessage(logsChat, JSON.stringify(migrationError)).catch(emptyFunction);
     });
 
   const commandSetter = new CommandSetter(bot, startTime, !(await redisService.getIsBotDeactivated()));
+  await commandSetter.updateCommands();
 
   const trainingThrottler = apiThrottler({
     // group: {
@@ -118,7 +133,7 @@ const rootMenu = new Menu('root');
   const sessionMiddleware = new SessionMiddleware(startTime);
   const swindlersUpdateMiddleware = new SwindlersUpdateMiddleware(dynamicStorageService);
   const statisticsMiddleware = new StatisticsMiddleware(startTime);
-  const updatesMiddleware = new UpdatesMiddleware(startTime);
+  const updatesMiddleware = new UpdatesMiddleware();
   const settingsMiddleware = new SettingsMiddleware(airRaidAlarmStates.states);
   const deleteSwindlersMiddleware = new DeleteSwindlersMiddleware(bot, swindlersDetectService);
 
@@ -138,11 +153,11 @@ const rootMenu = new Menu('root');
   bot.use(redisSession.middleware());
   bot.use(redisChatSession.middleware());
 
-  bot.errorBoundary(handleError).use(rootMenu);
+  bot.errorBoundary(handleError).use(rootMenu as unknown as Menu<GrammyContext>);
 
   bot.use(errorHandler(globalMiddleware.middleware()));
 
-  const router = new Router((context) => context.session?.step || 'idle');
+  const router = new Router<GrammyContext>((context) => context.session?.step || 'idle');
 
   bot.use(router);
 
@@ -151,13 +166,13 @@ const rootMenu = new Menu('root');
     deleteMessageMiddleware,
     onlyAdmin,
     nestedMiddleware((context, next) => {
-      if (context.chat.type !== 'private') {
+      if (context.chat?.type !== 'private') {
         return next();
       }
     }, errorHandler(settingsMiddleware.sendSettingsMenu())),
     (context, next) => {
       if (context.chat.type === 'private') {
-        context.reply(settingsAvailableMessage);
+        return context.reply(settingsAvailableMessage);
       }
 
       return next();
@@ -196,15 +211,15 @@ const rootMenu = new Menu('root');
     await redisService.deleteNegatives();
   });
 
-  const botRedisActive = async (context, next) => {
+  const botRedisActive: GrammyMiddleware = async (context, next) => {
     const isDeactivated = await redisService.getIsBotDeactivated();
-    const isInLocal = context.chat.type === 'private' && context.chat.id === creatorId;
+    const isInLocal = context.chat?.type === 'private' && context.chat?.id === creatorId;
 
     if (!isDeactivated || isInLocal) {
       return next();
     }
 
-    console.info('Skip due to redis:', context.chat.id);
+    console.info('Skip due to redis:', context.chat?.id);
   };
 
   bot.command(
@@ -214,7 +229,8 @@ const rootMenu = new Menu('root');
       const newPercent = +context.match;
 
       if (!context.match) {
-        return context.reply(`Current rank is: ${await redisService.getBotTensorPercent()}`);
+        const percent = await redisService.getBotTensorPercent();
+        return context.reply(`Current rank is: ${percent || 9999}`);
       }
 
       if (Number.isNaN(newPercent)) {
@@ -223,7 +239,7 @@ const rootMenu = new Menu('root');
 
       tensorService.setSpamThreshold(newPercent);
       await redisService.setBotTensorPercent(newPercent);
-      context.reply(`Set new tensor rank: ${newPercent}`);
+      return context.reply(`Set new tensor rank: ${newPercent}`);
     }),
   );
 
@@ -234,7 +250,8 @@ const rootMenu = new Menu('root');
       const newPercent = +context.match;
 
       if (!context.match) {
-        return context.reply(`Current training start rank is: ${await redisService.getTrainingStartRank()}`);
+        const percent = await redisService.getTrainingStartRank();
+        return context.reply(`Current training start rank is: ${percent || 9998}`);
       }
 
       if (Number.isNaN(newPercent)) {
@@ -242,7 +259,7 @@ const rootMenu = new Menu('root');
       }
 
       await redisService.setTrainingStartRank(newPercent);
-      context.reply(`Set new training start rank rank: ${newPercent}`);
+      return context.reply(`Set new training start rank rank: ${newPercent}`);
     }),
   );
 
@@ -253,11 +270,12 @@ const rootMenu = new Menu('root');
       const newChats = context.match;
 
       if (!context.match) {
-        return context.reply(`Current training chat whitelist is:\n\n${(await redisService.getTrainingChatWhitelist()).join(',')}`);
+        const whitelist = await redisService.getTrainingChatWhitelist();
+        return context.reply(`Current training chat whitelist is:\n\n${whitelist.join(',')}`);
       }
 
       await redisService.setTrainingChatWhitelist(newChats);
-      context.reply(`Set training chat whitelist is:\n\n${newChats}`);
+      return context.reply(`Set training chat whitelist is:\n\n${newChats}`);
     }),
   );
 
@@ -272,7 +290,7 @@ const rootMenu = new Menu('root');
       }
 
       await redisService.updateTrainingChatWhitelist(newChats);
-      context.reply(`Set training chat whitelist is:\n\n${newChats}`);
+      return context.reply(`Set training chat whitelist is:\n\n${newChats}`);
     }),
   );
 
@@ -281,9 +299,9 @@ const rootMenu = new Menu('root');
     onlyCreator,
     errorHandler(async (context) => {
       await redisService.setIsBotDeactivated(true);
-      commandSetter.setActive(false);
-      commandSetter.updateCommands();
-      context.reply('⛔️ Я виключений глобально');
+      await commandSetter.setActive(false);
+      await commandSetter.updateCommands();
+      return context.reply('⛔️ Я виключений глобально');
     }),
   );
 
@@ -292,9 +310,9 @@ const rootMenu = new Menu('root');
     onlyCreator,
     errorHandler(async (context) => {
       await redisService.setIsBotDeactivated(false);
-      commandSetter.setActive(true);
-      commandSetter.updateCommands();
-      context.reply('✅ Я включений глобально');
+      await commandSetter.setActive(true);
+      await commandSetter.updateCommands();
+      return context.reply('✅ Я включений глобально');
     }),
   );
 
@@ -315,7 +333,7 @@ const rootMenu = new Menu('root');
   );
 
   bot.command('leave', onlyCreator, (context) => {
-    context.leaveChat().catch(() => {});
+    context.leaveChat().catch(emptyFunction);
   });
 
   bot.command('updates', botActiveMiddleware, onlyCreator, errorHandler(updatesMiddleware.initialization()));
@@ -364,6 +382,13 @@ const rootMenu = new Menu('root');
   });
 
   // Enable graceful stop
-  process.once('SIGINT', () => bot.stop());
-  process.once('SIGTERM', () => bot.stop());
-})();
+  process.once('SIGINT', () => {
+    bot.stop().catch(emptyFunction);
+  });
+  process.once('SIGTERM', () => {
+    bot.stop().catch(emptyFunction);
+  });
+})().catch((error) => {
+  console.error('FATAL: Bot crashed with error:', error);
+  throw error;
+});

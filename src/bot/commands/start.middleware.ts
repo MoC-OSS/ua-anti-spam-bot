@@ -1,7 +1,7 @@
 import type { Bot } from 'grammy';
 
 import { getGroupStartMessage, getStartMessage, makeAdminMessage } from '../../message';
-import type { GrammyContext } from '../../types';
+import type { GrammyContext, GrammyMiddleware } from '../../types';
 import { getUserData, handleError, telegramUtil } from '../../utils';
 
 export class StartMiddleware {
@@ -16,11 +16,11 @@ export class StartMiddleware {
    * Returns help message
    *
    * */
-  middleware() {
+  middleware(): GrammyMiddleware {
     /**
-     * @param {GrammyContext} ctx
+     * @param {GrammyContext} context
      * */
-    return async (context: GrammyContext) => {
+    return async (context) => {
       if (context.chat?.type === 'private') {
         return context.replyWithHTML(getStartMessage());
       }

@@ -1,5 +1,5 @@
 import { getHelpMessage } from '../../message';
-import type { GrammyContext } from '../../types';
+import type { GrammyMiddleware } from '../../types';
 import { formatDate, getUserData, handleError } from '../../utils';
 
 export class HelpMiddleware {
@@ -12,11 +12,11 @@ export class HelpMiddleware {
    * Handle /help
    * Returns help message
    * */
-  middleware() {
+  middleware(): GrammyMiddleware {
     /**
-     * @param {GrammyContext} ctx
+     * @param {GrammyContext} context
      * */
-    return async (context: GrammyContext) => {
+    return async (context) => {
       const startLocaleTime = formatDate(this.startTime);
 
       const isAdmin = context.chatSession.isBotAdmin;

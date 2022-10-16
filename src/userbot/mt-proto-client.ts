@@ -2,6 +2,21 @@ import type { Chat, ProtoUpdate } from '../types';
 
 import type { API } from './api';
 
+export type Peer =
+  | {
+      _: 'inputPeerChannel';
+      [key: string]: any;
+    }
+  | {
+      _: `inputPeerChat`;
+      chat_id: string;
+    }
+  | {
+      _: 'inputPeerChannel';
+      channel_id: string;
+      access_hash: string;
+    };
+
 export class MtProtoClient {
   constructor(private api: API) {}
 
@@ -9,7 +24,7 @@ export class MtProtoClient {
     return this.api.call<ProtoUpdate>('messages.getAllChats', { except_ids: [] });
   }
 
-  resolvePeer(chats: Chat[], title: string) {
+  resolvePeer(chats: Chat[], title: string): Peer | null {
     const peer = chats.find((chat) => chat.title === title);
 
     if (!peer) {

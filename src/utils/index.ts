@@ -20,6 +20,7 @@ export const telegramUtil = new TelegramUtil();
  * */
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 export const emptyFunction = () => {};
+export const emptyPromiseFunction = () => Promise.resolve();
 
 /**
  * @param {GrammyContext} context

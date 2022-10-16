@@ -57,7 +57,7 @@ describe('formatStateIntoAccusative', () => {
     'м. Київ',
   ];
   it('should format states right', () => {
-    const newStates = states.map(formatStateIntoAccusative);
+    const newStates = states.map((state) => formatStateIntoAccusative(state));
 
     expect(newStates).toEqual(expectedStates);
   });

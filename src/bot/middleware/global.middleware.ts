@@ -1,6 +1,6 @@
 import { environmentConfig } from 'config';
-import type { Bot, Middleware, NextFunction } from 'grammy';
-import type { AirRaidAlertSettings, ChatSettings, GrammyContext } from 'types';
+import type { Bot, NextFunction } from 'grammy';
+import type { AirRaidAlertSettings, ChatSettings, GrammyContext, GrammyMiddleware } from 'types';
 
 import {
   adminReadyHasNoDeletePermissionMessage,
@@ -18,7 +18,7 @@ export class GlobalMiddleware {
    * Global middleware.
    * Checks some bot information and updates the session
    * */
-  middleware(): Middleware<GrammyContext> {
+  middleware(): GrammyMiddleware {
     return async (context: GrammyContext, next: NextFunction) => {
       /**
        * Channels doesn't have session.
