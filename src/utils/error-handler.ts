@@ -48,12 +48,12 @@ export const globalErrorHandler: ErrorHandler<GrammyContext> = (botError) => {
  * Wrapper to catch async errors within a stage. Helps to avoid try catch blocks in there
  * @param {function} callback - function to enter a stage
  */
-export const errorHandler =
+export const wrapperErrorHandler =
   <C extends GrammyContext = GrammyContext>(callback: MiddlewareFn<C>): MiddlewareFn<C> =>
   async (context, next) => {
     try {
       if (!callback) {
-        console.error('errorHandler received an empty value instead of function.');
+        console.error('wrapperErrorHandler received an empty value instead of function.');
       }
 
       return await callback(context, next);

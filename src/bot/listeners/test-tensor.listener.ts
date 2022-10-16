@@ -8,7 +8,7 @@ import { getTensorTestResult } from '../../message';
 import { googleService, redisService } from '../../services';
 import type { TensorService } from '../../tensor';
 import type { GrammyContext, GrammyMenuContext, GrammyMiddleware } from '../../types';
-import { emptyFunction, emptyPromiseFunction, errorHandler } from '../../utils';
+import { emptyFunction, emptyPromiseFunction, wrapperErrorHandler } from '../../utils';
 
 const defaultTime = 30;
 const removeTime = 30;
@@ -47,7 +47,7 @@ export class TestTensorListener {
   constructor(private tensorService: TensorService) {}
 
   writeDataset(state: 'negatives' | 'positives' | string, word: string) {
-    // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const writeInFileFunction = () => {
       const fileName = `./${state}.json`;
 
@@ -61,7 +61,7 @@ export class TestTensorListener {
       fs.writeFileSync(fileName, `${JSON.stringify(newFile, null, 2)}\n`);
     };
 
-    // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const writeInRedisFunction = () => {
       switch (state) {
         case 'negatives': {
@@ -212,7 +212,7 @@ export class TestTensorListener {
       delete this.storage[this.getStorageKey(context)];
     };
 
-    const processButtonMiddleware = errorHandler((context) => {
+    const processButtonMiddleware = wrapperErrorHandler((context) => {
       const storage = this.storage[this.getStorageKey(context)];
       context
         .editMessageText(`${storage.originalMessage}\n\nЧекаю ${storage.time} сек...\n${new Date().toISOString()}`, {
@@ -246,7 +246,7 @@ export class TestTensorListener {
         .text(
           (context) => `✅ Це спам (${this.storage[this.getStorageKey(context)]?.positives?.length || 0})`,
           (context) => context.menu.update(),
-          errorHandler<GrammyMenuContext>((context) => {
+          wrapperErrorHandler<GrammyMenuContext>((context) => {
             this.initTensorSession(context, context.msg?.text || '');
 
             const storage = this.storage[this.getStorageKey(context)];
@@ -263,7 +263,7 @@ export class TestTensorListener {
         )
         .text(
           (context) => `⛔️ Це не спам (${this.storage[this.getStorageKey(context)]?.negatives?.length || 0})`,
-          errorHandler((context) => {
+          wrapperErrorHandler((context) => {
             this.initTensorSession(context, context.msg?.text || '');
 
             const storage = this.storage[this.getStorageKey(context)];
@@ -281,7 +281,7 @@ export class TestTensorListener {
         .row()
         .text(
           (context) => `⏭ Пропустити (${this.storage[this.getStorageKey(context)]?.skips?.length || 0})`,
-          errorHandler((context) => {
+          wrapperErrorHandler((context) => {
             this.initTensorSession(context, context.msg?.text || '');
 
             const storage = this.storage[this.getStorageKey(context)];

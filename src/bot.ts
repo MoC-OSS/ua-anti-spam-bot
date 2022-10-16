@@ -45,7 +45,7 @@ import { settingsAvailableMessage } from './message';
 import { ALARM_EVENT_KEY, alarmChatService, alarmService, initSwindlersContainer, redisService, S3Service } from './services';
 import { initTensor } from './tensor';
 import type { GrammyContext, GrammyMenuContext, GrammyMiddleware } from './types';
-import { emptyFunction, errorHandler, globalErrorHandler, sleep } from './utils';
+import { emptyFunction, globalErrorHandler, sleep, wrapperErrorHandler } from './utils';
 
 moment.tz.setDefault('Europe/Kiev');
 moment.locale('uk');
@@ -126,7 +126,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 
   bot.use(rootMenu as unknown as Menu<GrammyContext>);
 
-  bot.use(errorHandler(globalMiddleware.middleware()));
+  bot.use(wrapperErrorHandler(globalMiddleware.middleware()));
 
   const router = new Router<GrammyContext>((context) => context.session?.step || 'idle');
 
@@ -291,7 +291,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
     botRedisActive,
     ignoreOld(60),
     botActiveMiddleware,
-    errorHandler(tensorListener.middleware(trainingThrottler)),
+    wrapperErrorHandler(tensorListener.middleware(trainingThrottler)),
     onlyNotAdmin,
     onlyNotForwarded,
     onlyWithText,
@@ -299,9 +299,9 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
     nestedMiddleware(ignoreBySettingsMiddleware('disableSwindlerMessage'), deleteSwindlersMiddleware.middleware()),
     nestedMiddleware(
       ignoreBySettingsMiddleware('disableStrategicInfo'),
-      errorHandler(performanceStartMiddleware),
-      errorHandler(onTextListener.middleware()),
-      errorHandler(performanceEndMiddleware),
+      wrapperErrorHandler(performanceStartMiddleware),
+      wrapperErrorHandler(onTextListener.middleware()),
+      wrapperErrorHandler(performanceEndMiddleware),
     ),
   );
 
