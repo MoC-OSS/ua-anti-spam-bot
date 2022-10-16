@@ -1,4 +1,5 @@
 import { redisClient } from '../../db';
+import { GrammyContext } from '../../types';
 
 export class RedisSession {
   options: any;
@@ -8,13 +9,13 @@ export class RedisSession {
       property: 'session',
       state: {},
       format: {},
-      getSessionKey: (context) => {
+      getSessionKey: (context: GrammyContext) => {
         if (!context.from) return; // should never happen
         let chatInstance;
         if (context.chat) {
           chatInstance = context.chat.id;
         } else if (context.updateType === 'callback_query') {
-          chatInstance = context.callbackQuery.chat_instance;
+          chatInstance = context.callbackQuery?.chat_instance;
         } else {
           chatInstance = context.from.id;
         }
