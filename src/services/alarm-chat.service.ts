@@ -46,7 +46,7 @@ export class AlarmChatService {
       throw new Error(`This is an invalid chat id`);
     }
     const chatId = id.toString();
-    const index = this.chats?.findIndex((chat) => chat.id === chatId) || -1;
+    const index = this.chats ? this.chats.findIndex((chat) => chat.id === chatId) : -1;
     if (index !== -1) {
       if (!chatSession.chatSettings.disableChatWhileAirRaidAlert && !chatSession.chatSettings.airRaidAlertSettings.notificationMessage) {
         this.chats?.splice(index, 1);

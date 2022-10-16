@@ -95,4 +95,9 @@ export function generateMockSessions(
   return [...disableChatWhileAirRaidAlertOnArray, ...notificationMessageOnArray, ...bothOffArray];
 }
 
-export * from './helpers.mocks';
+export const redisMock = {
+  redisService: {
+    getChatSessions: () => generateMockSessions(),
+    updateChatSession: () => null,
+  },
+};

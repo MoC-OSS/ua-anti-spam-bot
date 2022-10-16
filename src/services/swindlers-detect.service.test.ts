@@ -58,7 +58,7 @@ describe('SwindlersDetectService', () => {
         axiosMock.get.mockImplementationOnce(() => Promise.reject({ response: { headers: { location: responseUrl } } }));
         const result = await swindlersDetectService.isSwindlerMessage(text);
 
-        expect(axiosMock.get.bind(this)).toHaveBeenCalledWith(responseUrl, { maxRedirects: 0 });
+        expect(axiosMock.get).toHaveBeenCalledWith(responseUrl, { maxRedirects: 0 });
         expect(result.isSpam).toEqual(true);
         expect(result.rate).toEqual(200);
         expect(result.reason).toEqual('site');

@@ -141,7 +141,7 @@ describe('SwindlersUrlsService', () => {
 
       const result = await swindlersUrlsService.isSpamUrl('https://bit.ly/test-swindler-mock');
 
-      expect(axiosMock.get.bind(this)).toHaveBeenCalled();
+      expect(axiosMock.get).toHaveBeenCalled();
       expect(result.isSpam).toEqual(false);
     });
   });
