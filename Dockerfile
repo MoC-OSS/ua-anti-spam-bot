@@ -15,4 +15,4 @@ RUN npm i --only=production
 # Bundle app source
 COPY . .
 
-CMD [ "npm", "run", "start:bot:prod" ]
+CMD [ "npm", "run", "start:bot:js:prod" ]
