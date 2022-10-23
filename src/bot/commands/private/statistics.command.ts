@@ -1,9 +1,9 @@
-import { getStatisticsMessage } from '../../message';
-import { redisService } from '../../services';
-import type { GrammyMiddleware } from '../../types';
-import { formatDate, handleError } from '../../utils';
+import { getStatisticsMessage } from '../../../message';
+import { redisService } from '../../../services';
+import type { GrammyMiddleware } from '../../../types';
+import { formatDate, handleError } from '../../../utils';
 
-export class StatisticsMiddleware {
+export class StatisticsCommand {
   /**
    * @param {Date} startTime
    * */

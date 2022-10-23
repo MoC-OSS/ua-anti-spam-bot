@@ -1,10 +1,10 @@
 import { InputFile } from 'grammy';
 
-import { creatorId } from '../../creator';
-import { redisClient } from '../../db';
-import type { GrammyMiddleware } from '../../types';
+import { creatorId } from '../../../creator';
+import { redisClient } from '../../../db';
+import type { GrammyMiddleware } from '../../../types';
 
-export class SessionMiddleware {
+export class SessionCommand {
   /**
    * @param {Date} startTime
    * */
