@@ -203,7 +203,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   router.route('confirmation', botActiveMiddleware, onlyCreator, updatesMiddleware.confirmation());
   router.route('messageSending', botActiveMiddleware, onlyCreator, updatesMiddleware.messageSending());
 
-  bot.on('my_chat_member', botInviteQuery(bot), botPromoteQuery, botDemoteQuery, botKickQuery, emptyFunction);
+  bot.on('my_chat_member', botInviteQuery(bot), botPromoteQuery, botDemoteQuery, botKickQuery);
 
   bot.on(
     ['message:text', 'edited_message:text'],
