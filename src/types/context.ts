@@ -1,7 +1,6 @@
-import type { MenuFlavor } from '@grammyjs/menu/out/menu';
+import type { MenuFlavor } from '@grammyjs/menu';
 import type { ParseModeContext } from '@grammyjs/parse-mode';
-import type { Bot, CommandContext, Composer, Context, MiddlewareFn, SessionFlavor } from 'grammy';
-import type { Filter, FilterQuery } from 'grammy/out/filter';
+import type { Bot, CommandContext, Composer, Context, Filter, FilterQuery, MiddlewareFn, SessionFlavor } from 'grammy';
 
 import type { ChatSessionData, ChatSessionFlavor, SessionData } from './session';
 import type { State, StateFlavor } from './state';

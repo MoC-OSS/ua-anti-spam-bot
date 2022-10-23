@@ -1,6 +1,5 @@
-import type { Bot } from 'grammy';
+import type { Bot, NextFunction } from 'grammy';
 import { InputFile } from 'grammy';
-import type { NextFunction } from 'grammy/out/composer';
 
 import Keyv = require('keyv');
 import { environmentConfig } from '../../config';

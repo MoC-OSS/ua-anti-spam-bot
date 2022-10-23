@@ -1,6 +1,5 @@
-import type { ChatFromGetChat } from '@grammyjs/types/manage';
+import type { Chat, ChatFromGetChat } from '@grammyjs/types/manage';
 import type { Bot } from 'grammy';
-import type { Chat } from 'grammy/out/types';
 import type { ChatMemberOwner } from 'typegram';
 
 import type { GrammyContext } from '../types';
