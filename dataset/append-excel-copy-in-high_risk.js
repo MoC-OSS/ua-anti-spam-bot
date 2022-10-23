@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('node:fs');
 
 const highRisk = require('./strings/high_risk.json');
 // eslint-disable-next-line import/no-unresolved

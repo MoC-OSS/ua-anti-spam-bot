@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('node:fs');
 
 const vocabTxt = fs.readFileSync('./temp/vocab.txt').toString();
 const vocabJson = vocabTxt

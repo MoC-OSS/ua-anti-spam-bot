@@ -3,7 +3,9 @@
     {
       "files": [
         "*.js",
+        "*.ts",
         "*.jsx",
+        "*.tsx",
         "*.vue"
       ],
       "rules": {
@@ -14,6 +16,7 @@
           "never",
           {
             "json": "always",
+            "ts": "always",
             "vue": "always",
             "svg": "always",
             "jpg": "always",

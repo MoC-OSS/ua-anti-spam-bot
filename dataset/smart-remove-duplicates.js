@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('node:fs');
 
 const strictLocations = require('./strings/strict_locations.json');
 const locations = require('./strings/locations.json');

@@ -1,8 +1,11 @@
+import type { JsonObject } from 'type-fest';
+
 export interface ChatPhoto {
   _: string;
 }
 
 export interface Chat {
+  migrated_to?: JsonObject;
   _: string;
   flags: number;
   creator: boolean;
@@ -29,7 +32,6 @@ export interface Chat {
   photo: ChatPhoto;
   date: number;
 }
-
 
 export interface FromId {
   _: string;
@@ -139,4 +141,15 @@ export interface ProtoUpdate {
   chats: Chat[];
   date: number;
   seq: number;
+}
+
+export interface MTProtoError {
+  error_code: number;
+  error_message: string;
+}
+
+export interface CheckPassword {
+  srp_id: string;
+  A: string;
+  M1: string;
 }

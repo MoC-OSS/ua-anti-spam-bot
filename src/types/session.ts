@@ -1,4 +1,7 @@
-import { Chat } from 'typegram/manage';
+import type { Chat } from 'typegram/manage';
+import type { MessageEntity } from 'typegram/message';
+
+import type { GrammyContext } from './context';
 
 export interface ChatSessionFlavor<S> {
   /**
@@ -21,44 +24,39 @@ export interface ChatSessionFlavor<S> {
 export interface UpdatesSessionData {
   step: string;
   updatesText: string;
-  textEntities: string;
+  textEntities: MessageEntity[];
 }
 
 export interface SessionData extends Partial<UpdatesSessionData> {
   isCurrentUserAdmin: boolean;
 }
 
+export interface AirRaidAlertSettings {
+  pageNumber: number;
+  state: string | null;
+  notificationMessage: boolean;
+}
+
+export interface ChatSettings {
+  airRaidAlertSettings: AirRaidAlertSettings;
+  disableChatWhileAirRaidAlert: boolean;
+  disableStrategicInfo?: boolean;
+  disableDeleteMessage?: boolean;
+  disableSwindlerMessage?: boolean;
+}
+
 export interface ChatSessionData {
-  chatType: Chat['type'];
+  chatType?: Chat['type'];
   chatTitle?: string;
   chatMembersCount: number;
   botRemoved: boolean;
-  isBotAdmin: boolean;
-  botAdminDate: Date;
+  isBotAdmin?: boolean;
+  botAdminDate?: Date | null;
   isLimitedDeletion?: boolean;
   lastLimitedDeletionDate?: Date;
   lastWarningDate?: Date;
-  chatSettings: {
-    airRaidAlertSettings: {
-      pageNumber: number;
-      state: string | null;
-      notificationMessage: boolean;
-    };
-    disableChatWhileAirRaidAlert: boolean;
-    disableStrategicInfo: boolean;
-    disableDeleteMessage: boolean;
-    disableSwindlerMessage: boolean;
-  }
-  chatPermissions?: {
-    can_send_messages: boolean;
-    can_send_media_messages: boolean;
-    can_send_polls: boolean;
-    can_send_other_messages: boolean;
-    can_add_web_page_previews: boolean;
-    can_change_info: boolean;
-    can_invite_users: boolean;
-    can_pin_messages: boolean;
-  }
+  chatSettings: ChatSettings;
+  chatPermissions?: Chat.MultiUserGetChat['permissions'];
 }
 
 export interface Session {
@@ -73,4 +71,11 @@ export interface ChatSession {
 
 export interface SessionObject {
   sessions: Session[];
+}
+
+export interface RedisSessionOptions {
+  property: 'session' | 'chatSession';
+  state: Record<string, unknown>;
+  format: Record<string, unknown>;
+  getSessionKey: (context: GrammyContext) => string;
 }

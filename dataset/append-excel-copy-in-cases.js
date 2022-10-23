@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('node:fs');
 
 // eslint-disable-next-line import/no-unresolved
 const phrases = require('./cases/true-negatives.json');

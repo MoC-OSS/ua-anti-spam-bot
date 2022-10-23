@@ -1,3 +1,5 @@
+import type { SwindlerTensorResult } from './swindlers';
+
 export interface StateFlavor<S> {
   /**
    * Session data on the context object.
@@ -27,12 +29,13 @@ interface PerformanceMiddlewareState {
   performanceStart?: DOMHighResTimeStamp;
 }
 
-
-export type State = OnlyWithTextMiddlewareState & PerformanceMiddlewareState & {
-  // TODO move into separate file src/types/swindlers.ts and add enum for reason
-  swindlersResult: {
-    isSpam: boolean;
-    rate: number;
-    reason: string;
+export type State = OnlyWithTextMiddlewareState &
+  PerformanceMiddlewareState & {
+    // TODO move into separate file src/types/swindlers.ts and add enum for reason
+    swindlersResult?: {
+      isSpam: boolean;
+      rate: number;
+      reason: string;
+    };
+    dataset?: SwindlerTensorResult;
   };
-};

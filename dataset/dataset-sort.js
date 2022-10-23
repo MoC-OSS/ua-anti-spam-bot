@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const types = {
   ALPHABET: 'alphabet',
@@ -38,16 +38,19 @@ datasetPaths.forEach((datasetPath) => {
     const datasetFile = require(filePath);
 
     switch (type) {
-      case types.SHORTEST:
+      case types.SHORTEST: {
         datasetFile.sort(sortShortest);
         break;
+      }
 
-      case types.ALPHABET:
+      case types.ALPHABET: {
         datasetFile.sort(sortAlphabet);
         break;
+      }
 
-      default:
+      default: {
         throw new Error(`Unknown type: ${type}. Use one of these: ${Object.values(types)}`);
+      }
     }
 
     fs.writeFileSync(filePath, `${JSON.stringify(datasetFile, null, 2)}\n`);
