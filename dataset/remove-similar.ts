@@ -35,6 +35,7 @@ export const removeSimilar = async (array: { value: string; label: string }[], c
     const q = queue({ results: [], timeout: 0, concurrency: 6000 });
 
     filteredArray.forEach((first, firstIndex, self) => {
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       q.push(async (): Promise<RemoveSimilarFinalResult> => {
         if (firstIndex % 100 === 0) {
           console.info(firstIndex, 'of', filteredArray.length, ((firstIndex / filteredArray.length) * 100).toFixed(2), '%');
