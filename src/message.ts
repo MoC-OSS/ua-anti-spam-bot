@@ -528,6 +528,7 @@ export const getSuccessfulMessage = ({ totalCount, successCount }: SuccessfulMes
 export interface BotJoinMessageProperties {
   adminsString?: string;
   isAdmin?: boolean;
+  canDelete: boolean;
 }
 
 /**
@@ -535,11 +536,11 @@ export interface BotJoinMessageProperties {
  * Message that bot sends when user invites in into a group
  *
  * */
-export const getBotJoinMessage = ({ adminsString, isAdmin = false }: BotJoinMessageProperties) =>
+export const getBotJoinMessage = ({ adminsString, isAdmin = false, canDelete }: BotJoinMessageProperties) =>
   `
 ${startMessageAtom}
 
-${getGroupStartMessage({ adminsString, isAdmin, canDelete: false, user: undefined, userId: undefined }).trim()}
+${getGroupStartMessage({ adminsString, isAdmin, canDelete, user: undefined, userId: undefined }).trim()}
 `.trim();
 
 export interface TensorTestResultProperties {

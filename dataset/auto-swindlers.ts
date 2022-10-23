@@ -116,9 +116,19 @@ export const autoSwindlers = async (
   console.info('notMatchedDomains\n');
   console.info(notMatchedDomains.join('\n'));
 
-  fs.writeFileSync(path.join(__dirname, '../temp/regexp.txt'), `${swindlersUrlsService.swindlersRegex.toString()}g`);
-  fs.writeFileSync(path.join(__dirname, '../temp/notMatchedUrls.txt'), notMatchedUrls.join('\n'));
-  fs.writeFileSync(path.join(__dirname, '../temp/notMatchedDomains.txt'), notMatchedDomains.join('\n'));
+  const regexpPath = path.join(__dirname, '../temp/regexp.txt');
+  const notMatchedUrlsPath = path.join(__dirname, '../temp/notMatchedUrls.txt');
+  const notMatchedDomainsPath = path.join(__dirname, '../temp/notMatchedDomains.txt');
+
+  fs.writeFileSync(regexpPath, `${swindlersUrlsService.swindlersRegex.toString()}g`);
+  fs.writeFileSync(notMatchedUrlsPath, notMatchedUrls.join('\n'));
+  fs.writeFileSync(notMatchedDomainsPath, notMatchedDomains.join('\n'));
+
+  console.info('*** Regex update info ***');
+  console.info('https://regex101.com/');
+  console.info(regexpPath, swindlersUrlsService.swindlersRegex.toString().length);
+  console.info(notMatchedUrlsPath, notMatchedUrls.length);
+  console.info(notMatchedDomainsPath, notMatchedDomains.length);
 
   await swindlersGoogleService.clearBots();
   await swindlersGoogleService.updateBots(newSwindlersBots);
