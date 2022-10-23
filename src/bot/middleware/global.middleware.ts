@@ -1,3 +1,4 @@
+import type { ChatMember } from '@grammyjs/types/manage';
 import type { NextFunction } from 'grammy';
 
 import { environmentConfig } from '../../config';
@@ -28,14 +29,16 @@ export class GlobalMiddleware {
       }
 
       this.createState(context);
-      this.updateChatInfo(context);
+      await this.updateChatInfo(context);
       await this.updateChatSessionIfEmpty(context);
 
       return next();
     };
   }
 
-  updateChatInfo(context: GrammyContext) {
+  async updateChatInfo(context: GrammyContext) {
+    const leftStatuses = new Set<ChatMember['status']>(['left', 'kicked']);
+
     context.chatSession.chatType = context.chat?.type;
     context.chatSession.chatTitle = telegramUtil.getChatTitle(context.chat);
 
@@ -62,13 +65,10 @@ export class GlobalMiddleware {
       context.chatSession.chatSettings.airRaidAlertSettings = defaultAirRaidAlertSettings;
     }
 
-    if (context.myChatMember?.new_chat_member.status !== 'left') {
-      context
-        .getChatMembersCount()
-        .then((count) => {
-          context.chatSession.chatMembersCount = count;
-        })
-        .catch(handleError);
+    if (!leftStatuses.has(context.myChatMember?.new_chat_member.status || 'left')) {
+      await context.getChatMembersCount().then((count) => {
+        context.chatSession.chatMembersCount = count;
+      });
     }
   }
 
