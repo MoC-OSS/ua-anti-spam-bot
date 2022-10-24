@@ -11,12 +11,12 @@ import {
   selectYourState,
   settingsSubmitMessage,
   turnOffChatWhileAlarmButton,
-} from '../../message';
-import { alarmChatService } from '../../services';
-import type { GrammyContext, GrammyMiddleware, State } from '../../types';
-import { handleError } from '../../utils';
-import { onlyAdmin } from '../middleware';
-import { MiddlewareMenu } from '../middleware-menu.menu';
+} from '../../../message';
+import { alarmChatService } from '../../../services';
+import type { GrammyContext, GrammyMiddleware, State } from '../../../types';
+import { handleError } from '../../../utils';
+import { onlyAdmin } from '../../middleware';
+import { MiddlewareMenu } from '../../middleware-menu.menu';
 
 import { dynamicLocationMenu } from './air-raid-alarm/locations-menu-generator';
 
@@ -57,7 +57,7 @@ const isAlarmNow: GrammyMiddleware = (context, next) => {
   }
 };
 
-export class SettingsMiddleware {
+export class SettingsCommand {
   /**
    * @param {State[]} airRaidAlarmStates
    * */

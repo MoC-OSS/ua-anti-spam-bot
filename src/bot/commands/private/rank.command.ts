@@ -1,8 +1,8 @@
-import { redisService } from '../../services';
-import type { TensorService } from '../../tensor';
-import type { GrammyCommandMiddleware } from '../../types';
+import { redisService } from '../../../services';
+import type { TensorService } from '../../../tensor';
+import type { GrammyCommandMiddleware } from '../../../types';
 
-export class RankMiddleware {
+export class RankCommand {
   constructor(private tensorService: TensorService) {}
 
   /**

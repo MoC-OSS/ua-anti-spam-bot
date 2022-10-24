@@ -1,12 +1,12 @@
 import { Menu } from '@grammyjs/menu';
 import Bottleneck from 'bottleneck';
 
-import { cancelMessageSending, confirmationMessage, getSuccessfulMessage, getUpdateMessage, getUpdatesMessage } from '../../message';
-import { redisService } from '../../services';
-import type { ChatSession, GrammyContext, GrammyMenuContext } from '../../types';
-import { handleError } from '../../utils';
+import { cancelMessageSending, confirmationMessage, getSuccessfulMessage, getUpdateMessage, getUpdatesMessage } from '../../../message';
+import { redisService } from '../../../services';
+import type { ChatSession, GrammyContext, GrammyMenuContext } from '../../../types';
+import { handleError } from '../../../utils';
 
-export class UpdatesMiddleware {
+export class UpdatesCommand {
   private menu: Menu<GrammyMenuContext> | undefined;
 
   public async middleware(context: GrammyContext) {

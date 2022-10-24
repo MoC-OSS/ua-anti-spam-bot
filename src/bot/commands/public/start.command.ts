@@ -1,10 +1,10 @@
 import type { Bot } from 'grammy';
 
-import { getGroupStartMessage, getStartMessage, makeAdminMessage } from '../../message';
-import type { GrammyContext, GrammyMiddleware } from '../../types';
-import { getUserData, handleError, telegramUtil } from '../../utils';
+import { getGroupStartMessage, getStartMessage, makeAdminMessage } from '../../../message';
+import type { GrammyContext, GrammyMiddleware } from '../../../types';
+import { getUserData, handleError, telegramUtil } from '../../../utils';
 
-export class StartMiddleware {
+export class StartCommand {
   /**
    * @param {Bot} bot
    * */

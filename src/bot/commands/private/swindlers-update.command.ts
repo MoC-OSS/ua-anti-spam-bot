@@ -1,8 +1,8 @@
-import { swindlersUpdateEndMessage, swindlersUpdateStartMessage } from '../../message';
-import type { DynamicStorageService } from '../../services';
-import type { GrammyContext } from '../../types';
+import { swindlersUpdateEndMessage, swindlersUpdateStartMessage } from '../../../message';
+import type { DynamicStorageService } from '../../../services';
+import type { GrammyContext } from '../../../types';
 
-export class SwindlersUpdateMiddleware {
+export class SwindlersUpdateCommand {
   /**
    * @param {DynamicStorageService} dynamicStorageService
    * */
