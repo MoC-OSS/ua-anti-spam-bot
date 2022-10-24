@@ -24,12 +24,24 @@ export interface PrivateCommandsComposerProperties {
 export const getPrivateCommandsComposer = ({ bot, commandSetter, dynamicStorageService, startTime }: PrivateCommandsComposerProperties) => {
   const privateCommandsComposer = new Composer<GrammyContext>();
 
+  const commandMap = new Map<string, string>();
+  commandMap.set('swindlers_update', 'Update swindlers database');
+  commandMap.set('session', 'Get bot session data');
+  commandMap.set('statistics', 'Get bot statistics');
+  commandMap.set('start_alarm', 'Start test alarm');
+  commandMap.set('end_alarm', 'End test alarm');
+  commandMap.set('restart', 'Kills the bot process and deletes it');
+
+  const commandString = [...commandMap.entries()].map(([name, description]) => `/${name} - ${description}`).join('\n');
+
   /* Commands */
   const sessionMiddleware = new SessionCommand(startTime);
   const swindlersUpdateMiddleware = new SwindlersUpdateCommand(dynamicStorageService);
   const statisticsMiddleware = new StatisticsCommand(startTime);
 
   privateCommandsComposer.use(onlyWhitelisted);
+
+  privateCommandsComposer.command('private', (context) => context.reply(commandString));
 
   privateCommandsComposer.command('swindlers_update', swindlersUpdateMiddleware.middleware());
   privateCommandsComposer.command('session', sessionMiddleware.middleware());
