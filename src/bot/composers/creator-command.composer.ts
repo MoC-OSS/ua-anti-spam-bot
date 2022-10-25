@@ -7,7 +7,7 @@ import type { TensorService } from '../../tensor';
 import type { GrammyContext, GrammyMenuContext } from '../../types';
 import type { CommandSetter } from '../commands';
 import { RankCommand, UpdatesCommand } from '../commands';
-import { onlyCreator } from '../middleware';
+import { onlyCreatorFilter } from '../filters';
 
 export interface CreatorCommandsComposerProperties {
   commandSetter: CommandSetter;
@@ -20,6 +20,8 @@ export interface CreatorCommandsComposerProperties {
  * */
 export const getCreatorCommandsComposer = ({ commandSetter, rootMenu, tensorService }: CreatorCommandsComposerProperties) => {
   const creatorCommandsComposer = new Composer<GrammyContext>();
+
+  const composer = creatorCommandsComposer.filter((context) => onlyCreatorFilter(context));
 
   const commandMap = new Map<string, string>();
   commandMap.set('updates', 'Global bot updates to all users');
@@ -35,9 +37,7 @@ export const getCreatorCommandsComposer = ({ commandSetter, rootMenu, tensorServ
 
   const updatesMiddleware = new UpdatesCommand();
 
-  creatorCommandsComposer.use(onlyCreator);
-
-  creatorCommandsComposer.command('creator', (context) => context.reply(commandString));
+  composer.command('creator', (context) => context.reply(commandString));
 
   const router = new Router<GrammyContext>((context) => context.session?.step || 'idle');
 
@@ -45,34 +45,34 @@ export const getCreatorCommandsComposer = ({ commandSetter, rootMenu, tensorServ
   router.route('confirmation', updatesMiddleware.confirmation());
   router.route('messageSending', updatesMiddleware.messageSending());
 
-  creatorCommandsComposer.use(router);
+  composer.use(router);
   const rankMiddleware = new RankCommand(tensorService);
 
   /* Commands */
 
-  creatorCommandsComposer.command('updates', updatesMiddleware.initialization());
+  composer.command('updates', updatesMiddleware.initialization());
 
-  creatorCommandsComposer.command('disable', async (context) => {
+  composer.command('disable', async (context) => {
     await redisService.setIsBotDeactivated(true);
     await commandSetter.setActive(false);
     await commandSetter.updateCommands();
     return context.reply('⛔️ Я виключений глобально');
   });
 
-  creatorCommandsComposer.command('enable', async (context) => {
+  composer.command('enable', async (context) => {
     await redisService.setIsBotDeactivated(false);
     await commandSetter.setActive(true);
     await commandSetter.updateCommands();
     return context.reply('✅ Я включений глобально');
   });
 
-  creatorCommandsComposer.command('leave', (context) => context.leaveChat());
+  composer.command('leave', (context) => context.leaveChat());
 
   /* Training and tensor middlewares */
-  creatorCommandsComposer.command('set_rank', rankMiddleware.setRankMiddleware());
-  creatorCommandsComposer.command('set_training_start_rank', rankMiddleware.setTrainingStartRank());
-  creatorCommandsComposer.command('set_training_chat_whitelist', rankMiddleware.setTrainingChatWhitelist());
-  creatorCommandsComposer.command('update_training_chat_whitelist', rankMiddleware.updateTrainingChatWhitelist());
+  composer.command('set_rank', rankMiddleware.setRankMiddleware());
+  composer.command('set_training_start_rank', rankMiddleware.setTrainingStartRank());
+  composer.command('set_training_chat_whitelist', rankMiddleware.setTrainingChatWhitelist());
+  composer.command('update_training_chat_whitelist', rankMiddleware.updateTrainingChatWhitelist());
 
   rootMenu.register(updatesMiddleware.initMenu());
 
