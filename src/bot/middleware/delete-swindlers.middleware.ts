@@ -44,10 +44,10 @@ export class DeleteSwindlersMiddleware {
     };
   }
 
-  checkMessage(message: string): Promise<SwindlersResult> {
+  async checkMessage(message: string): Promise<SwindlersResult> {
     try {
       if (environmentConfig.USE_SERVER) {
-        return axios.post<SwindlerResponseBody>(`${host}/swindlers`, { message }).then((response) => response.data.result);
+        return await axios.post<SwindlerResponseBody>(`${host}/swindlers`, { message }).then((response) => response.data.result);
       }
 
       return this.swindlersDetectService.isSwindlerMessage(message);
