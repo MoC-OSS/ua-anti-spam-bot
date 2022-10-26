@@ -8,7 +8,7 @@ import type { TensorService } from '../../tensor';
 import type { GrammyContext } from '../../types';
 import type { CommandSetter } from '../commands';
 import { SessionCommand, StatisticsCommand, SwindlersUpdateCommand } from '../commands';
-import { onlyWhitelisted } from '../middleware';
+import { onlyWhitelistedFilter } from '../filters';
 
 export interface PrivateCommandsComposerProperties {
   bot: Bot<GrammyContext>;
@@ -23,6 +23,8 @@ export interface PrivateCommandsComposerProperties {
  * */
 export const getPrivateCommandsComposer = ({ bot, commandSetter, dynamicStorageService, startTime }: PrivateCommandsComposerProperties) => {
   const privateCommandsComposer = new Composer<GrammyContext>();
+
+  const composer = privateCommandsComposer.filter((context) => onlyWhitelistedFilter(context));
 
   const commandMap = new Map<string, string>();
   commandMap.set('swindlers_update', 'Update swindlers database');
@@ -39,23 +41,21 @@ export const getPrivateCommandsComposer = ({ bot, commandSetter, dynamicStorageS
   const swindlersUpdateMiddleware = new SwindlersUpdateCommand(dynamicStorageService);
   const statisticsMiddleware = new StatisticsCommand(startTime);
 
-  privateCommandsComposer.use(onlyWhitelisted);
+  composer.command('private', (context) => context.reply(commandString));
 
-  privateCommandsComposer.command('private', (context) => context.reply(commandString));
+  composer.command('swindlers_update', swindlersUpdateMiddleware.middleware());
+  composer.command('session', sessionMiddleware.middleware());
+  composer.command('statistics', statisticsMiddleware.middleware());
 
-  privateCommandsComposer.command('swindlers_update', swindlersUpdateMiddleware.middleware());
-  privateCommandsComposer.command('session', sessionMiddleware.middleware());
-  privateCommandsComposer.command('statistics', statisticsMiddleware.middleware());
-
-  privateCommandsComposer.command('start_alarm', () => {
+  composer.command('start_alarm', () => {
     alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(true));
   });
 
-  privateCommandsComposer.command('end_alarm', () => {
+  composer.command('end_alarm', () => {
     alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(false));
   });
 
-  privateCommandsComposer.command('restart', async (context) => {
+  composer.command('restart', async (context) => {
     await context.reply('Restarting...');
     await commandSetter.setActive(false);
     await bot.stop();

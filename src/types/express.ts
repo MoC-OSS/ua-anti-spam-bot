@@ -1,5 +1,8 @@
-import type { SwindlerTensorResult } from './swindlers';
+import type { SwindlersResult, SwindlerTensorResult } from './swindlers';
 
+/**
+ * Process
+ * */
 export interface ProcessResponseBody {
   result: string | null;
   time: number;
@@ -12,6 +15,9 @@ export interface ProcessRequestBody {
   strict: boolean;
 }
 
+/**
+ * Tensor
+ * */
 export interface TensorResponseBody {
   result: SwindlerTensorResult;
   time: number;
@@ -21,4 +27,17 @@ export interface TensorResponseBody {
 export interface TensorRequestBody {
   message: string;
   rate: number;
+}
+
+/**
+ * Swindler
+ * */
+export interface SwindlerResponseBody {
+  result: SwindlersResult;
+  time: number;
+  expressStartTime: string;
+}
+
+export interface SwindlerRequestBody {
+  message: string;
 }

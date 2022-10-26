@@ -100,9 +100,9 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 
   bot.use(wrapperErrorHandler(globalMiddleware.middleware()));
 
-  bot.use(publicCommandsComposer);
-  bot.use(privateCommandsComposer);
   bot.use(creatorCommandsComposer);
+  bot.use(privateCommandsComposer);
+  bot.use(publicCommandsComposer);
   bot.use(messagesComposer);
 
   bot.catch(globalErrorHandler);

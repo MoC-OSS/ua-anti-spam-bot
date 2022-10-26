@@ -1,11 +1,15 @@
+import axios from 'axios';
 import type { Bot } from 'grammy';
 import { InputFile } from 'grammy';
-import type { GrammyContext, GrammyMiddleware, SwindlerType } from 'types';
+import type { GrammyContext, GrammyMiddleware, SwindlerResponseBody, SwindlersResult, SwindlerType } from 'types';
 
+import { environmentConfig } from '../../config';
 import { logsChat } from '../../creator';
 import { getCannotDeleteMessage, swindlersWarningMessage } from '../../message';
 import type { SwindlersDetectService } from '../../services';
 import { compareDatesWithOffset, getUserData, handleError, revealHiddenUrls, telegramUtil } from '../../utils';
+
+const host = `http://${environmentConfig.HOST}:${environmentConfig.PORT}`;
 
 const SWINDLER_SETTINGS = {
   WARNING_DELAY: 86_400_000 * 3,
@@ -21,7 +25,7 @@ export class DeleteSwindlersMiddleware {
     return async (context, next) => {
       const message = revealHiddenUrls(context);
 
-      const result = await this.swindlersDetectService.isSwindlerMessage(message);
+      const result = await this.checkMessage(message);
 
       context.state.swindlersResult = result;
 
@@ -38,6 +42,19 @@ export class DeleteSwindlersMiddleware {
 
       return next();
     };
+  }
+
+  async checkMessage(message: string): Promise<SwindlersResult> {
+    try {
+      if (environmentConfig.USE_SERVER) {
+        return await axios.post<SwindlerResponseBody>(`${host}/swindlers`, { message }).then((response) => response.data.result);
+      }
+
+      return this.swindlersDetectService.isSwindlerMessage(message);
+    } catch (error) {
+      handleError(error, 'API_DOWN');
+      return this.swindlersDetectService.isSwindlerMessage(message);
+    }
   }
 
   /**
