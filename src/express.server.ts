@@ -78,7 +78,7 @@ import type {
   );
 
   app.listen(environmentConfig.PORT, environmentConfig.HOST, () => {
-    console.info(`App started on http://locahost:${environmentConfig.PORT}`);
+    console.info(`App started on http://localhost:${environmentConfig.PORT}`);
   });
 })().catch((error) => {
   console.error('Cannot start server. Reason:', error);

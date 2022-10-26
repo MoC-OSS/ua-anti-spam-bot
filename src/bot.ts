@@ -1,6 +1,7 @@
 import { Menu } from '@grammyjs/menu';
 import { hydrateReply } from '@grammyjs/parse-mode';
 import { apiThrottler } from '@grammyjs/transformer-throttler';
+import express from 'express';
 import { Bot } from 'grammy';
 import Keyv from 'keyv';
 import moment from 'moment-timezone';
@@ -106,6 +107,12 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   bot.use(messagesComposer);
 
   bot.catch(globalErrorHandler);
+
+  const app = express();
+  app.get('/health-check', (request, response) => response.json({ status: 'ok' }));
+  app.listen(environmentConfig.PORT, environmentConfig.HOST, () => {
+    console.info(`App started on http://localhost:${environmentConfig.PORT}`);
+  });
 
   await bot.start({
     onStart: () => {
