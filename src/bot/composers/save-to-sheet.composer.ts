@@ -18,12 +18,16 @@ export const getSaveToSheetComposer = ({ chatId, rootMenu, updateMethod }: SaveT
 
   const menu = new Menu<GrammyMenuContext>(`saveToSheetMenu_${chatId}`);
 
-  menu.text('✅ Додати в базу', async (context) => {
-    await context.deleteMessage();
-    await updateMethod(context.msg?.text || `$no_value_${chatId}`).catch(() =>
-      context.reply('Дуже погана помилка, терміново подивіться sheet!'),
-    );
-  });
+  menu
+    .text('✅ Додати в базу', async (context) => {
+      await context.deleteMessage();
+      await updateMethod(context.msg?.text || `$no_value_${chatId}`).catch(() =>
+        context.reply('Дуже погана помилка, терміново подивіться sheet!'),
+      );
+    })
+    .text('⛔️ Не спам', async (context) => {
+      await context.deleteMessage();
+    });
 
   composer.on('message:text', async (context) => {
     const { text } = context.msg;
