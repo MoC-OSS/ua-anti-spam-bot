@@ -100,6 +100,20 @@ export class SwindlersGoogleService {
   }
 
   /**
+   * @description Fixes a problem append
+   * */
+  async smartAppendToSheet(range: string, value: string) {
+    const values = await this.getSheet(range, true);
+    await this.clearSheet(range);
+    return this.googleService.updateSheet(
+      environmentConfig.GOOGLE_SPREADSHEET_ID,
+      environmentConfig.GOOGLE_SWINDLERS_SHEET_NAME,
+      [...values, value],
+      range,
+    );
+  }
+
+  /**
    *
    * @namespace Training cases
    *
@@ -153,6 +167,10 @@ export class SwindlersGoogleService {
 
   getBots() {
     return this.getSheet(this.RANGES.BOTS, true);
+  }
+
+  appendBot(bot: string) {
+    return this.smartAppendToSheet(this.RANGES.BOTS, bot);
   }
 
   /**

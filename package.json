@@ -26,8 +26,6 @@
     "lint:js:fix": "npm run lint:js -- --fix"
   },
   "dependencies": {
-    "@swc/cli": "^0.1.57",
-    "@swc/core": "^1.3.10",
     "@grammyjs/menu": "^1.1.2",
     "@grammyjs/parse-mode": "^1.5.0",
     "@grammyjs/router": "^2.0.0",
@@ -35,6 +33,8 @@
     "@grammyjs/types": "^2.9.1",
     "@keyv/sqlite": "^3.6.2",
     "@mtproto/core": "6.2.0",
+    "@swc/cli": "^0.1.57",
+    "@swc/core": "^1.3.10",
     "@tensorflow/tfjs": "^4.0.0",
     "@tensorflow/tfjs-node": "^4.0.0",
     "@types/fuzzyset": "^1.0.4",
@@ -51,6 +51,7 @@
     "google-auth-library": "^8.6.0",
     "googleapis": "^108.0.0",
     "grammy": "^1.11.2",
+    "grammy-guard": "^0.3.1",
     "grapheme-splitter": "^1.0.4",
     "husky": "^8.0.1",
     "jest": "^29.2.1",
