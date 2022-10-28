@@ -6,15 +6,21 @@ import Keyv from 'keyv';
 import moment from 'moment-timezone';
 
 import { CommandSetter } from './bot/commands';
-import { getCreatorCommandsComposer, getMessagesComposer, getPrivateCommandsComposer, getPublicCommandsComposer } from './bot/composers';
+import {
+  getCreatorCommandsComposer,
+  getMessagesComposer,
+  getPrivateCommandsComposer,
+  getPublicCommandsComposer,
+  getSaveToSheetComposer,
+} from './bot/composers';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
 import { DeleteSwindlersMiddleware, GlobalMiddleware } from './bot/middleware';
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
 import { environmentConfig } from './config';
-import { logsChat } from './creator';
+import { logsChat, swindlerBotsChatId, swindlerMessageChatId } from './creator';
 import { redisClient } from './db';
-import { alarmChatService, alarmService, initSwindlersContainer, redisService, S3Service } from './services';
+import { alarmChatService, alarmService, initSwindlersContainer, redisService, S3Service, swindlersGoogleService } from './services';
 import { initTensor } from './tensor';
 import type { GrammyContext, GrammyMenuContext } from './types';
 import { emptyFunction, globalErrorHandler, sleep, wrapperErrorHandler } from './utils';
@@ -89,6 +95,19 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   const { creatorCommandsComposer } = getCreatorCommandsComposer({ commandSetter, rootMenu, tensorService });
   const { messagesComposer } = getMessagesComposer({ bot, onTextListener, tensorListener, trainingThrottler, deleteSwindlersMiddleware });
 
+  // Dev composers only
+  const { saveToSheetComposer: swindlerMessageSaveToSheetComposer } = getSaveToSheetComposer({
+    chatId: swindlerMessageChatId,
+    rootMenu,
+    updateMethod: swindlersGoogleService.appendTrainingPositives.bind(swindlersGoogleService),
+  });
+
+  const { saveToSheetComposer: swindlerBotsSaveToSheetComposer } = getSaveToSheetComposer({
+    chatId: swindlerBotsChatId,
+    rootMenu,
+    updateMethod: swindlersGoogleService.appendBot.bind(swindlersGoogleService),
+  });
+
   rootMenu.register(tensorListener.initMenu(trainingThrottler));
 
   bot.use(hydrateReply);
@@ -103,6 +122,8 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   bot.use(creatorCommandsComposer);
   bot.use(privateCommandsComposer);
   bot.use(publicCommandsComposer);
+  bot.use(swindlerMessageSaveToSheetComposer);
+  bot.use(swindlerBotsSaveToSheetComposer);
   bot.use(messagesComposer);
 
   bot.catch(globalErrorHandler);
