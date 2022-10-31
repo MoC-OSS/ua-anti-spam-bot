@@ -18,6 +18,7 @@
     "optimize-swindler": "ts-node dataset/optimize-swindler-dataset.ts positives && ts-node dataset/optimize-swindler-dataset.ts negatives",
     "prepare": "husky install",
     "test": "jest",
+    "health-check": "echo health-check",
     "lint": "npm-run-all --parallel lint:js",
     "lint:branch-name": "branch-name-lint ./.branchlintrc.json",
     "lint:commit-name": "commitlint --edit",
