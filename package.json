@@ -30,6 +30,7 @@
     "@grammyjs/menu": "^1.1.2",
     "@grammyjs/parse-mode": "^1.5.0",
     "@grammyjs/router": "^2.0.0",
+    "@grammyjs/runner": "^1.0.4",
     "@grammyjs/transformer-throttler": "^1.1.2",
     "@grammyjs/types": "^2.9.1",
     "@keyv/sqlite": "^3.6.2",
