@@ -8,6 +8,7 @@ import moment from 'moment-timezone';
 
 import { CommandSetter } from './bot/commands';
 import {
+  getBeforeAnyComposer,
   getCreatorCommandsComposer,
   getMessagesComposer,
   getPrivateCommandsComposer,
@@ -85,6 +86,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   const onTextListener = new OnTextListener(bot, keyv, startTime, messageHandler);
   const tensorListener = new TestTensorListener(tensorService);
 
+  const { beforeAnyComposer } = getBeforeAnyComposer({ bot });
   const { publicCommandsComposer } = getPublicCommandsComposer({ bot, rootMenu, startTime, states: airRaidAlarmStates.states });
   const { privateCommandsComposer } = getPrivateCommandsComposer({
     bot,
@@ -94,7 +96,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
     tensorService,
   });
   const { creatorCommandsComposer } = getCreatorCommandsComposer({ commandSetter, rootMenu, tensorService });
-  const { messagesComposer } = getMessagesComposer({ bot, onTextListener, tensorListener, trainingThrottler, deleteSwindlersMiddleware });
+  const { messagesComposer } = getMessagesComposer({ onTextListener, tensorListener, trainingThrottler, deleteSwindlersMiddleware });
 
   // Dev composers only
   const { saveToSheetComposer: swindlerMessageSaveToSheetComposer } = getSaveToSheetComposer({
@@ -120,6 +122,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 
   bot.use(wrapperErrorHandler(globalMiddleware.middleware()));
 
+  bot.use(beforeAnyComposer);
   bot.use(creatorCommandsComposer);
   bot.use(privateCommandsComposer);
   bot.use(publicCommandsComposer);
