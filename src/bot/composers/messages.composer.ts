@@ -1,4 +1,4 @@
-import type { Bot, Transformer } from 'grammy';
+import type { Transformer } from 'grammy';
 import { Composer } from 'grammy';
 
 import type { GrammyContext } from '../../types';
@@ -18,10 +18,8 @@ import {
   performanceEndMiddleware,
   performanceStartMiddleware,
 } from '../middleware';
-import { botDemoteQuery, botInviteQuery, botKickQuery, botPromoteQuery } from '../queries';
 
 export interface MessagesComposerProperties {
-  bot: Bot<GrammyContext>;
   tensorListener: TestTensorListener;
   trainingThrottler: Transformer;
   deleteSwindlersMiddleware: DeleteSwindlersMiddleware;
@@ -32,15 +30,12 @@ export interface MessagesComposerProperties {
  * @description Message handling composer
  * */
 export const getMessagesComposer = ({
-  bot,
   deleteSwindlersMiddleware,
   onTextListener,
   tensorListener,
   trainingThrottler,
 }: MessagesComposerProperties) => {
   const messagesComposer = new Composer<GrammyContext>();
-
-  messagesComposer.on('my_chat_member', botInviteQuery(bot), botPromoteQuery, botDemoteQuery, botKickQuery);
 
   messagesComposer.on(
     ['message:text', 'edited_message:text'],

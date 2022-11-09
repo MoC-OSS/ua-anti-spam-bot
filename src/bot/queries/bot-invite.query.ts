@@ -16,6 +16,7 @@ export const botInviteQuery =
 
     // Invite as a normal member or admin
     if (oldStatuses.has(context.myChatMember.old_chat_member.status) && newStatuses.has(context.myChatMember.new_chat_member.status)) {
+      context.chatSession.botRemoved = false;
       const { adminsString } = await telegramUtil.getChatAdmins(bot, context.chat.id);
       await context.replyWithHTML(getBotJoinMessage({ adminsString, isAdmin, canDelete }));
     }
