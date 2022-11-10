@@ -1,7 +1,6 @@
 import { Menu } from '@grammyjs/menu';
 import { hydrateReply } from '@grammyjs/parse-mode';
 import { apiThrottler } from '@grammyjs/transformer-throttler';
-import express from 'express';
 import { Bot } from 'grammy';
 import Keyv from 'keyv';
 import moment from 'moment-timezone';
@@ -19,6 +18,7 @@ import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
 import { DeleteSwindlersMiddleware, GlobalMiddleware } from './bot/middleware';
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
+import { runBotExpressServer } from './bot-express.server';
 import { environmentConfig } from './config';
 import { logsChat, swindlerBotsChatId, swindlerMessageChatId } from './creator';
 import { redisClient } from './db';
@@ -132,12 +132,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 
   bot.catch(globalErrorHandler);
 
-  const app = express();
-  app.get('/health-check', (request, response) => response.json({ status: 'ok' }));
-  app.listen(environmentConfig.BOT_PORT, environmentConfig.BOT_HOST, () => {
-    console.info(`App started on http://localhost:${environmentConfig.PORT}`);
-  });
-
+  runBotExpressServer();
   await bot.start({
     onStart: () => {
       console.info(`Bot @${bot.botInfo.username} started!`, new Date().toString());
