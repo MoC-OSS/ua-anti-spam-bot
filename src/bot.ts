@@ -14,6 +14,7 @@ import {
   getPublicCommandsComposer,
   getSaveToSheetComposer,
 } from './bot/composers';
+import { getHealthCheckComposer } from './bot/composers/health-check.composer';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
 import { DeleteSwindlersMiddleware, GlobalMiddleware } from './bot/middleware';
@@ -97,6 +98,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   });
   const { creatorCommandsComposer } = getCreatorCommandsComposer({ commandSetter, rootMenu, tensorService });
   const { messagesComposer } = getMessagesComposer({ onTextListener, tensorListener, trainingThrottler, deleteSwindlersMiddleware });
+  const { healthCheckComposer } = getHealthCheckComposer();
 
   // Dev composers only
   const { saveToSheetComposer: swindlerMessageSaveToSheetComposer } = getSaveToSheetComposer({
@@ -122,6 +124,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 
   bot.use(wrapperErrorHandler(globalMiddleware.middleware()));
 
+  bot.use(healthCheckComposer);
   bot.use(beforeAnyComposer);
   bot.use(creatorCommandsComposer);
   bot.use(privateCommandsComposer);
