@@ -134,7 +134,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 
   const app = express();
   app.get('/health-check', (request, response) => response.json({ status: 'ok' }));
-  app.listen(environmentConfig.PORT, environmentConfig.HOST, () => {
+  app.listen(environmentConfig.BOT_PORT, environmentConfig.BOT_HOST, () => {
     console.info(`App started on http://localhost:${environmentConfig.PORT}`);
   });
 
