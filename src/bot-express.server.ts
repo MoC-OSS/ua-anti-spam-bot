@@ -8,7 +8,7 @@ export const runBotExpressServer = () => {
   app.get('/health-check', (request, response) => response.json({ status: 'ok' }));
 
   app.listen(environmentConfig.BOT_PORT, environmentConfig.BOT_HOST, () => {
-    console.info(`App started on http://localhost:${environmentConfig.PORT}`);
+    console.info(`Bot-server started on http://${environmentConfig.BOT_HOST}:${environmentConfig.BOT_PORT}`);
   });
 
   return app;
