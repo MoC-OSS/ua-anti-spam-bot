@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "start:bot": "nodemon src/bot.ts --max_old_space_size=2048",
-    "start:bot:prod": "node dist/src/bot.js",
-    "start:bot:ts:prod": "ts-node src/bot.ts",
+    "start:bot:prod": "ts-node src/bot.ts",
+    "start:bot:js:prod": "node dist/src/bot.js",
     "start:userbot:eternal": "forever -c ts-node ./src/userbot/index.ts --transpile-only",
     "start:userbot:prod": "ts-node ./src/userbot/index.ts --transpile-only",
     "start:server": "nodemon ./src/express.server.ts --max_old_space_size=2048",
