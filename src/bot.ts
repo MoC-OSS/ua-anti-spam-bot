@@ -188,6 +188,10 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
     ],
   });
 
+  if (!bot.isInited()) {
+    await bot.init();
+  }
+
   console.info(`Bot @${bot.botInfo.username} started!`, new Date().toString());
   if (environmentConfig.DEBUG) {
     // For development
