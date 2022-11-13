@@ -21,7 +21,7 @@ import { DeleteSwindlersMiddleware, GlobalMiddleware } from './bot/middleware';
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
 import { runBotExpressServer } from './bot-express.server';
 import { environmentConfig } from './config';
-import { logsChat, swindlerBotsChatId, swindlerMessageChatId } from './creator';
+import { logsChat, swindlerBotsChatId, swindlerHelpChatId, swindlerMessageChatId } from './creator';
 import { redisClient } from './db';
 import { alarmChatService, alarmService, initSwindlersContainer, redisService, S3Service, swindlersGoogleService } from './services';
 import { initTensor } from './tensor';
@@ -113,6 +113,12 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
     updateMethod: swindlersGoogleService.appendBot.bind(swindlersGoogleService),
   });
 
+  const { saveToSheetComposer: swindlerHelpSaveToSheetComposer } = getSaveToSheetComposer({
+    chatId: swindlerHelpChatId,
+    rootMenu,
+    updateMethod: swindlersGoogleService.appendTrainingPositives.bind(swindlersGoogleService),
+  });
+
   rootMenu.register(tensorListener.initMenu(trainingThrottler));
 
   bot.use(hydrateReply);
@@ -124,13 +130,21 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 
   bot.use(wrapperErrorHandler(globalMiddleware.middleware()));
 
+  // Generic composers
   bot.use(healthCheckComposer);
   bot.use(beforeAnyComposer);
+
+  // Commands
   bot.use(creatorCommandsComposer);
   bot.use(privateCommandsComposer);
   bot.use(publicCommandsComposer);
+
+  // Swindlers helpers
   bot.use(swindlerMessageSaveToSheetComposer);
   bot.use(swindlerBotsSaveToSheetComposer);
+  bot.use(swindlerHelpSaveToSheetComposer);
+
+  // Main message composer
   bot.use(messagesComposer);
 
   bot.catch(globalErrorHandler);
