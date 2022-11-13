@@ -96,9 +96,12 @@ export const getRandomAlarmEndText = () => {
 
 /**
  * @param {ChatSessionData['chatSettings']} settings
+ * @param isRepeatedAlarm
  * */
-export const getAlarmStartNotificationMessage = (settings: ChatSessionData['chatSettings']) => `
-🔴 <b> ${getCurrentTimeAndDate()} Повітряна тривога в ${formatStateIntoAccusative(settings.airRaidAlertSettings.state || '')}!</b>
+export const getAlarmStartNotificationMessage = (settings: ChatSessionData['chatSettings'], isRepeatedAlarm = false) => `
+🔴 <b> ${getCurrentTimeAndDate()} ${isRepeatedAlarm ? 'Повторна повітряна' : 'Повітряна'} тривога в ${formatStateIntoAccusative(
+  settings.airRaidAlertSettings.state || '',
+)}!</b>
 ${getRandomAlarmStartText()}
 `;
 

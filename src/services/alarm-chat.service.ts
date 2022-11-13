@@ -70,6 +70,8 @@ export class AlarmChatService {
 
   subscribeToAlarms() {
     alarmService.updatesEmitter.on(ALARM_EVENT_KEY, (event) => {
+      const isRepeatedAlarm = this.isAlarmNow(event.state.name);
+
       if (event.state.alert) {
         this.alarms?.add(event.state.name);
       } else {
@@ -80,7 +82,7 @@ export class AlarmChatService {
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         forEach(this.chats, async (chat) => {
           if (chat.data.chatSettings.airRaidAlertSettings.state === event.state.name) {
-            await this.limiter.schedule(() => this.processChatAlarm(chat, event.state.alert).catch(handleError));
+            await this.limiter.schedule(() => this.processChatAlarm(chat, event.state.alert, isRepeatedAlarm).catch(handleError));
           }
         }).catch((error) => {
           console.error('Error while scheduling the limiter', error);
@@ -92,14 +94,15 @@ export class AlarmChatService {
   /**
    * @param {ChatSession} chat
    * @param {boolean} isAlarm
+   * @param isRepeatedAlarm
    * */
-  async processChatAlarm(chat: ChatSession, isAlarm: boolean) {
+  async processChatAlarm(chat: ChatSession, isAlarm: boolean, isRepeatedAlarm = false) {
     const chatInfo = await this.api?.getChat(chat.id);
     let startAlarmMessage = '';
     let endAlarmMessage = '';
 
     if (chat.data.chatSettings.airRaidAlertSettings.notificationMessage) {
-      startAlarmMessage += getAlarmStartNotificationMessage(chat.data.chatSettings);
+      startAlarmMessage += getAlarmStartNotificationMessage(chat.data.chatSettings, isRepeatedAlarm);
       endAlarmMessage += alarmEndNotificationMessage(chat.data.chatSettings);
     }
     if (chat.data.chatSettings.disableChatWhileAirRaidAlert) {
@@ -108,7 +111,7 @@ export class AlarmChatService {
     }
 
     if (isAlarm) {
-      if (chat.data.chatSettings.disableChatWhileAirRaidAlert) {
+      if (chat.data.chatSettings.disableChatWhileAirRaidAlert && !isRepeatedAlarm) {
         const newSession = { ...chat.data };
         newSession.chatPermissions = { ...(chatInfo as Chat.MultiUserGetChat).permissions };
         await redisService.updateChatSession(chat.id, newSession);
