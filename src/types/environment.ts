@@ -9,6 +9,8 @@ export interface GrammyEnvironmentConfig {
 export interface ServerEnvironmentConfig {
   PORT: number;
   HOST: string;
+  BOT_PORT: number;
+  BOT_HOST: string;
   USE_SERVER: boolean;
 }
 

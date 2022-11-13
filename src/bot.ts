@@ -3,25 +3,27 @@ import { Menu } from '@grammyjs/menu';
 import { hydrateReply } from '@grammyjs/parse-mode';
 import { run, sequentialize } from '@grammyjs/runner';
 import { apiThrottler } from '@grammyjs/transformer-throttler';
-import express from 'express';
 import { Bot } from 'grammy';
 import Keyv from 'keyv';
 import moment from 'moment-timezone';
 
 import { CommandSetter } from './bot/commands';
 import {
+  getBeforeAnyComposer,
   getCreatorCommandsComposer,
   getMessagesComposer,
   getPrivateCommandsComposer,
   getPublicCommandsComposer,
   getSaveToSheetComposer,
 } from './bot/composers';
+import { getHealthCheckComposer } from './bot/composers/health-check.composer';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
 import { DeleteSwindlersMiddleware, GlobalMiddleware } from './bot/middleware';
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
+import { runBotExpressServer } from './bot-express.server';
 import { environmentConfig } from './config';
-import { logsChat, swindlerBotsChatId, swindlerMessageChatId } from './creator';
+import { logsChat, swindlerBotsChatId, swindlerHelpChatId, swindlerMessageChatId } from './creator';
 import { redisClient } from './db';
 import { alarmChatService, alarmService, initSwindlersContainer, redisService, S3Service, swindlersGoogleService } from './services';
 import { initTensor } from './tensor';
@@ -87,6 +89,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   const onTextListener = new OnTextListener(bot, keyv, startTime, messageHandler);
   const tensorListener = new TestTensorListener(tensorService);
 
+  const { beforeAnyComposer } = getBeforeAnyComposer({ bot });
   const { publicCommandsComposer } = getPublicCommandsComposer({ bot, rootMenu, startTime, states: airRaidAlarmStates.states });
   const { privateCommandsComposer } = getPrivateCommandsComposer({
     bot,
@@ -96,7 +99,8 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
     tensorService,
   });
   const { creatorCommandsComposer } = getCreatorCommandsComposer({ commandSetter, rootMenu, tensorService });
-  const { messagesComposer } = getMessagesComposer({ bot, onTextListener, tensorListener, trainingThrottler, deleteSwindlersMiddleware });
+  const { messagesComposer } = getMessagesComposer({ onTextListener, tensorListener, trainingThrottler, deleteSwindlersMiddleware });
+  const { healthCheckComposer } = getHealthCheckComposer();
 
   // Dev composers only
   const { saveToSheetComposer: swindlerMessageSaveToSheetComposer } = getSaveToSheetComposer({
@@ -109,6 +113,12 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
     chatId: swindlerBotsChatId,
     rootMenu,
     updateMethod: swindlersGoogleService.appendBot.bind(swindlersGoogleService),
+  });
+
+  const { saveToSheetComposer: swindlerHelpSaveToSheetComposer } = getSaveToSheetComposer({
+    chatId: swindlerHelpChatId,
+    rootMenu,
+    updateMethod: swindlersGoogleService.appendTrainingPositives.bind(swindlersGoogleService),
   });
 
   rootMenu.register(tensorListener.initMenu(trainingThrottler));
@@ -137,20 +147,26 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 
   bot.use(wrapperErrorHandler(globalMiddleware.middleware()));
 
+  // Generic composers
+  bot.use(healthCheckComposer);
+  bot.use(beforeAnyComposer);
+
+  // Commands
   bot.use(creatorCommandsComposer);
   bot.use(privateCommandsComposer);
   bot.use(publicCommandsComposer);
+
+  // Swindlers helpers
   bot.use(swindlerMessageSaveToSheetComposer);
   bot.use(swindlerBotsSaveToSheetComposer);
+  bot.use(swindlerHelpSaveToSheetComposer);
+
+  // Main message composer
   bot.use(messagesComposer);
 
   bot.catch(globalErrorHandler);
 
-  const app = express();
-  app.get('/health-check', (request, response) => response.json({ status: 'ok' }));
-  app.listen(environmentConfig.PORT, environmentConfig.HOST, () => {
-    console.info(`App started on http://localhost:${environmentConfig.PORT}`);
-  });
+  runBotExpressServer();
 
   const runner = run(bot, 500, {
     allowed_updates: [
