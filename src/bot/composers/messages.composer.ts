@@ -43,7 +43,7 @@ export const getMessagesComposer = ({
   messagesComposer.on('my_chat_member', botInviteQuery(bot), botPromoteQuery, botDemoteQuery, botKickQuery);
 
   messagesComposer.on(
-    ['message:text', 'edited_message:text'],
+    ['message:text', 'edited_message:text', 'message:poll'],
     botRedisActive,
     ignoreOld(60),
     botActiveMiddleware,
