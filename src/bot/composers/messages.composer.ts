@@ -38,7 +38,7 @@ export const getMessagesComposer = ({
   const messagesComposer = new Composer<GrammyContext>();
 
   messagesComposer.on(
-    ['message:text', 'edited_message:text'],
+    ['message:text', 'edited_message:text', 'message:poll'],
     botRedisActive,
     ignoreOld(60),
     botActiveMiddleware,
