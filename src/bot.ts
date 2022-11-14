@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import { Menu } from '@grammyjs/menu';
 import { hydrateReply } from '@grammyjs/parse-mode';
+import { run, sequentialize } from '@grammyjs/runner';
 import { apiThrottler } from '@grammyjs/transformer-throttler';
 import { Bot } from 'grammy';
 import Keyv from 'keyv';
@@ -121,6 +123,21 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 
   rootMenu.register(tensorListener.initMenu(trainingThrottler));
 
+  bot.use(
+    sequentialize((context: GrammyContext) => {
+      const chat = context.chat?.id.toString();
+      const user = context.from?.id.toString();
+      const array: string[] = [];
+      if (chat !== undefined) {
+        array.push(chat);
+      }
+      if (user !== undefined) {
+        array.push(user);
+      }
+      return array;
+    }),
+  );
+
   bot.use(hydrateReply);
 
   bot.use(redisSession.middleware());
@@ -150,31 +167,47 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   bot.catch(globalErrorHandler);
 
   runBotExpressServer();
-  await bot.start({
-    onStart: () => {
-      console.info(`Bot @${bot.botInfo.username} started!`, new Date().toString());
 
-      if (environmentConfig.DEBUG) {
-        // For development
-      } else {
-        bot.api
-          .sendMessage(logsChat, `🎉 <b>Bot @${bot.botInfo.username} has been started!</b>\n<i>${new Date().toString()}</i>`, {
-            parse_mode: 'HTML',
-          })
-          .catch(() => {
-            console.error('This bot is not authorised in this LOGS chat!');
-          });
-      }
-    },
+  const runner = run(bot, 500, {
+    allowed_updates: [
+      'chat_member',
+      'edited_message',
+      'channel_post',
+      'edited_channel_post',
+      'inline_query',
+      'chosen_inline_result',
+      'callback_query',
+      'shipping_query',
+      'pre_checkout_query',
+      'poll',
+      'poll_answer',
+      'my_chat_member',
+      'chat_member',
+      'chat_join_request',
+      'message',
+    ],
   });
 
+  if (!bot.isInited()) {
+    await bot.init();
+  }
+
+  console.info(`Bot @${bot.botInfo.username} started!`, new Date().toString());
+  if (environmentConfig.DEBUG) {
+    // For development
+  } else {
+    bot.api
+      .sendMessage(logsChat, `🎉 <b>Bot @${bot.botInfo.username} has been started!</b>\n<i>${new Date().toString()}</i>`, {
+        parse_mode: 'HTML',
+      })
+      .catch(() => {
+        console.error('This bot is not authorized in this LOGS chat!');
+      });
+  }
   // Enable graceful stop
-  process.once('SIGINT', () => {
-    bot.stop().catch(emptyFunction);
-  });
-  process.once('SIGTERM', () => {
-    bot.stop().catch(emptyFunction);
-  });
+  const stopRunner = () => runner.isRunning() && runner.stop();
+  process.once('SIGINT', stopRunner);
+  process.once('SIGTERM', stopRunner);
 })().catch((error) => {
   console.error('FATAL: Bot crashed with error:', error);
   throw error;
