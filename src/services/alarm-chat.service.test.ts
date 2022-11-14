@@ -35,7 +35,7 @@ describe('AlarmChatService', () => {
       // eslint-disable-next-line no-promise-executor-return
       await sleep(3000);
       expect(alarmChatService.processChatAlarm).toHaveBeenCalledTimes(1);
-      expect(alarmChatService.processChatAlarm).toHaveBeenCalledWith(chat, true);
+      expect(alarmChatService.processChatAlarm).toHaveBeenCalledWith(chat, true, false);
     });
   });
 
