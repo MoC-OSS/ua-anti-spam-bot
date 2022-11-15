@@ -114,7 +114,10 @@ export class DeleteSwindlersMiddleware {
    * */
   async removeMessage(context: GrammyContext) {
     try {
-      return await context.deleteMessage();
+      return await context.deleteMessage().then((response) => {
+        context.state.isDeleted = true;
+        return response;
+      });
     } catch {
       if (
         !context.chatSession.isLimitedDeletion ||
