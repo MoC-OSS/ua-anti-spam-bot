@@ -11,7 +11,7 @@
     "start:server": "nodemon ./src/express.server.ts --max_old_space_size=2048",
     "start:server:prod": "ts-node --transpile-only ./src/express.server.ts",
     "start:server:js:prod": "node ./dist/src/express.server.js",
-    "start:server:cluster": "pm2 start ./src/express.server.ts -i 3 --watch || echo '*** Install PM2 globally'",
+    "start:server:cluster": "pm2 delete all && pm2 start ./src/express.server.ts -i max && pm2 monit || echo '*** Install PM2 globally'",
     "build": "FROM=src npm run build:folder && FROM=dataset npm run build:folder",
     "build:folder": "swc $FROM --copy-files --out-dir dist/$FROM --config-file .swcrc.json",
     "download-swindler": "ts-node dataset/download-swindler-dataset.ts && npm run optimize-swindler",
