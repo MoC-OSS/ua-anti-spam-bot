@@ -14,13 +14,18 @@ export class SwindlersUrlsService {
 
   swindlersFuzzySet!: FuzzySet;
 
+  exceptionUrls: string[];
+
   constructor(private dynamicStorageService: DynamicStorageService, private rate = 0.9) {
     this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
     console.info('swindlersRegex', this.swindlersRegex);
 
     this.initFuzzySet();
+    this.exceptionUrls = this.dynamicStorageService.notSwindlers;
+
     this.dynamicStorageService.fetchEmitter.on('fetch', () => {
       this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
+      this.exceptionUrls = this.dynamicStorageService.notSwindlers;
       console.info('swindlersRegex', this.swindlersRegex);
       this.initFuzzySet();
     });
@@ -156,6 +161,16 @@ export class SwindlersUrlsService {
     }
 
     const domain = this.getUrlDomain(redirectUrl);
+
+    const isUrlInException = this.exceptionUrls.includes(domain);
+
+    if (isUrlInException) {
+      return {
+        rate: 0,
+        isSpam: false,
+      } as SwindlersBaseResult;
+    }
+
     const isRegexpMatch = this.swindlersRegex.test(domain);
     if (isRegexpMatch) {
       return { isSpam: isRegexpMatch, rate: 200 } as SwindlersBaseResult;
