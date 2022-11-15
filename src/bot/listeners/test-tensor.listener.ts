@@ -354,11 +354,7 @@ export class TestTensorListener {
      * @param {GrammyContext} context
      * @param {Next} next
      * */
-    return async (context, next) => {
-      if (context.chat?.id !== trainingChat && !environmentConfig.TEST_TENSOR) {
-        return next();
-      }
-
+    return async (context) => {
       /**
        * We need to use throttler for Test Tensor because telegram could ban the bot
        * */

@@ -104,6 +104,8 @@ export class OnTextListener {
           await context
             .deleteMessage()
             .then(async () => {
+              context.state.isDeleted = true;
+
               if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
                 await context.replyWithHTML(
                   getDeleteMessage({

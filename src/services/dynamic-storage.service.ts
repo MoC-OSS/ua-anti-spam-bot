@@ -71,9 +71,9 @@ export class DynamicStorageService {
       this.swindlerMessages = removeDuplicates(swindlerPositives)
         .map((element) => optimizeText(element))
         .filter(Boolean);
-      this.swindlerBots = removeDuplicates(swindlerBots);
-      this.swindlerDomains = removeDuplicates(swindlerDomains);
       this.notSwindlers = removeDuplicates(notSwindlers);
+      this.swindlerBots = removeDuplicates(swindlerBots).filter((item) => !this.notSwindlers.includes(item));
+      this.swindlerDomains = removeDuplicates(swindlerDomains).filter((item) => !this.notSwindlers.includes(item));
       this.swindlerCards = removeDuplicates(swindlerCards);
       this.swindlerRegexSites = removeDuplicates(swindlerRegexSites);
       this.fetchEmitter.emit('fetch');

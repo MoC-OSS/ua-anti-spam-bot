@@ -17,6 +17,8 @@ import {
   getSaveToSheetComposer,
 } from './bot/composers';
 import { getHealthCheckComposer } from './bot/composers/health-check.composer';
+import { getStrategicComposer, getSwindlersComposer } from './bot/composers/messages';
+import { getTensorTrainingComposer } from './bot/composers/tensor-training.composer';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
 import { DeleteSwindlersMiddleware, GlobalMiddleware } from './bot/middleware';
@@ -89,7 +91,11 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   const onTextListener = new OnTextListener(bot, keyv, startTime, messageHandler);
   const tensorListener = new TestTensorListener(tensorService);
 
+  // Generic composers
   const { beforeAnyComposer } = getBeforeAnyComposer({ bot });
+  const { healthCheckComposer } = getHealthCheckComposer();
+
+  // Commands
   const { publicCommandsComposer } = getPublicCommandsComposer({ bot, rootMenu, startTime, states: airRaidAlarmStates.states });
   const { privateCommandsComposer } = getPrivateCommandsComposer({
     bot,
@@ -99,8 +105,6 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
     tensorService,
   });
   const { creatorCommandsComposer } = getCreatorCommandsComposer({ commandSetter, rootMenu, tensorService });
-  const { messagesComposer } = getMessagesComposer({ onTextListener, tensorListener, trainingThrottler, deleteSwindlersMiddleware });
-  const { healthCheckComposer } = getHealthCheckComposer();
 
   // Dev composers only
   const { saveToSheetComposer: swindlerMessageSaveToSheetComposer } = getSaveToSheetComposer({
@@ -120,6 +124,18 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
     rootMenu,
     updateMethod: swindlersGoogleService.appendTrainingPositives.bind(swindlersGoogleService),
   });
+
+  // Tensor testing old logic
+  const { tensorTrainingComposer } = getTensorTrainingComposer({
+    tensorListener,
+    trainingThrottler,
+  });
+
+  // Message composers
+  const { swindlersComposer } = getSwindlersComposer({ deleteSwindlersMiddleware });
+  const { strategicComposer } = getStrategicComposer({ onTextListener });
+
+  const { messagesComposer } = getMessagesComposer({ swindlersComposer, strategicComposer });
 
   rootMenu.register(tensorListener.initMenu(trainingThrottler));
 
@@ -160,6 +176,9 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   bot.use(swindlerMessageSaveToSheetComposer);
   bot.use(swindlerBotsSaveToSheetComposer);
   bot.use(swindlerHelpSaveToSheetComposer);
+
+  // Tensor testing old logic
+  bot.use(tensorTrainingComposer);
 
   // Main message composer
   bot.use(messagesComposer);
