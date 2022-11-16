@@ -156,6 +156,14 @@ export class SwindlersUrlsService {
     }
 
     const domain = this.getUrlDomain(redirectUrl);
+
+    if (EXCEPTION_DOMAINS.some((u) => domain.startsWith(u))) {
+      return {
+        rate: 0,
+        isSpam: false,
+      } as SwindlersBaseResult;
+    }
+
     const isRegexpMatch = this.swindlersRegex.test(domain);
     if (isRegexpMatch) {
       return { isSpam: isRegexpMatch, rate: 200 } as SwindlersBaseResult;
