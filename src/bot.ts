@@ -207,14 +207,16 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
     ],
   });
 
+  /**
+   * Check when the bot is run
+   * */
   if (!bot.isInited()) {
     await bot.init();
   }
 
   console.info(`Bot @${bot.botInfo.username} started!`, new Date().toString());
-  if (environmentConfig.DEBUG) {
-    // For development
-  } else {
+
+  if (!environmentConfig.DEBUG) {
     bot.api
       .sendMessage(logsChat, `🎉 <b>Bot @${bot.botInfo.username} has been started!</b>\n<i>${new Date().toString()}</i>`, {
         parse_mode: 'HTML',
@@ -223,6 +225,24 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
         console.error('This bot is not authorized in this LOGS chat!');
       });
   }
+
+  /**
+   * Enable alarm service only after bot is started
+   * */
+  alarmService.updatesEmitter.on('connect', () => {
+    bot.api.sendMessage(logsChat, '🎉 Air Raid Alarm API has been started!').catch(() => {
+      console.error('This bot is not authorized in this LOGS chat!');
+    });
+  });
+
+  alarmService.updatesEmitter.on('close', () => {
+    bot.api.sendMessage(logsChat, '⛔️ Air Raid Alarm API has been stopped!').catch(() => {
+      console.error('This bot is not authorized in this LOGS chat!');
+    });
+  });
+
+  alarmService.enable();
+
   // Enable graceful stop
   const stopRunner = () => runner.isRunning() && runner.stop();
   process.once('SIGINT', stopRunner);

@@ -1,6 +1,7 @@
 import { EventEmitter } from 'node:events';
 import axios from 'axios';
 import EventSource from 'eventsource';
+import ms from 'ms';
 import type TypedEmitter from 'typed-emitter';
 import type { AlarmNotification, AlarmStates } from 'types/alarm';
 
@@ -10,19 +11,26 @@ import { getAlarmMock } from './_mocks';
 
 const apiUrl = 'https://alerts.com.ua/api/states';
 const apiOptions = { headers: { 'X-API-Key': environmentConfig.ALARM_KEY } };
+
+export const ALARM_CONNECT_KEY = 'connect';
+export const ALARM_CLOSE_KEY = 'close';
 export const ALARM_EVENT_KEY = 'update';
 export const TEST_ALARM_STATE = 'Московська область';
 
 export type UpdatesEvents = {
+  connect: () => void;
+  close: () => void;
   update: (body: AlarmNotification) => void;
 };
 
 export class AlarmService {
-  updatesEmitter: TypedEmitter<UpdatesEvents>;
+  updatesEmitter = new EventEmitter() as TypedEmitter<UpdatesEvents>;
+
+  source?: EventSource;
+
+  reconnectInterval?: NodeJS.Timer;
 
   constructor() {
-    this.updatesEmitter = new EventEmitter() as TypedEmitter<UpdatesEvents>;
-    this.subscribeOnNotifications();
     this.initTestAlarms();
   }
 
@@ -40,23 +48,53 @@ export class AlarmService {
   }
 
   /**
+   * Starts the connection
+   * */
+  enable() {
+    this.subscribeOnNotifications();
+
+    if (environmentConfig.ENV === 'production') {
+      this.reconnectInterval = setInterval(() => {
+        this.subscribeOnNotifications();
+      }, ms('1d'));
+    }
+  }
+
+  /**
+   * Closes the connection
+   * */
+  disable() {
+    if (this.source) {
+      this.source.close();
+      this.updatesEmitter.emit(ALARM_CLOSE_KEY);
+    }
+
+    if (this.reconnectInterval) {
+      clearInterval(this.reconnectInterval);
+    }
+  }
+
+  /**
    * Creates SSE subscription to Alarm API events
    * */
   subscribeOnNotifications() {
-    const source = new EventSource(`${apiUrl}/live`, apiOptions);
-    source.addEventListener('error', (event: MessageEvent & Record<string, any>) => {
+    this.disable();
+
+    this.source = new EventSource(`${apiUrl}/live`, apiOptions);
+    this.source.addEventListener('error', (event: MessageEvent & Record<string, any>) => {
       console.info(`Subscribe to Alarm API fail:  ${event.message as string}`);
     });
 
-    source.addEventListener('open', () => {
+    this.source.addEventListener('open', () => {
       console.info('Opening a connection to Alarm API ...');
     });
 
-    source.addEventListener('hello', () => {
+    this.source.addEventListener('hello', () => {
       console.info('Connection to Alarm API opened successfully.');
+      this.updatesEmitter.emit(ALARM_CONNECT_KEY);
     });
 
-    source.addEventListener('update', (event: MessageEvent<string>) => {
+    this.source.addEventListener('update', (event: MessageEvent<string>) => {
       /**
        * SSE endpoint response
        * @see https://alerts.com.ua/en
