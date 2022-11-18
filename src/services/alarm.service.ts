@@ -48,6 +48,15 @@ export class AlarmService {
   }
 
   /**
+   * Restarts the connection
+   * */
+  restart() {
+    // It will automatically disconnect and reconnect again.
+    // We don't need to call extra disable
+    this.enable();
+  }
+
+  /**
    * Starts the connection
    * */
   enable() {
