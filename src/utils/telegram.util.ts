@@ -1,5 +1,4 @@
 import type { Chat, ChatFromGetChat } from '@grammyjs/types/manage';
-import type { Bot } from 'grammy';
 import type { ChatMemberOwner } from 'typegram';
 
 import type { GrammyContext } from '../types';
@@ -30,11 +29,11 @@ export class TelegramUtil {
   }
 
   /**
-   * @param {Bot} bot
+   * @param {GrammyContext} context
    * @param {number} chatId
    */
-  getChatAdmins(bot: Bot<GrammyContext>, chatId: number) {
-    return bot.api.getChatAdministrators(chatId).then((admins) => {
+  getChatAdmins(context: GrammyContext, chatId: number) {
+    return context.api.getChatAdministrators(chatId).then((admins) => {
       if (!admins || admins.length === 0) {
         return {};
       }

@@ -1,5 +1,4 @@
 import type { Menu } from '@grammyjs/menu';
-import type { Bot } from 'grammy';
 import { Composer } from 'grammy';
 
 import { settingsAvailableMessage } from '../../message';
@@ -8,7 +7,6 @@ import { HelpCommand, SettingsCommand, StartCommand } from '../commands';
 import { deleteMessageMiddleware, nestedMiddleware, onlyAdmin } from '../middleware';
 
 export interface PublicCommandsComposerProperties {
-  bot: Bot<GrammyContext>;
   rootMenu: Menu<GrammyMenuContext>;
   startTime: Date;
   states: State[];
@@ -17,11 +15,11 @@ export interface PublicCommandsComposerProperties {
 /**
  * @description Public commands that are available for users
  * */
-export const getPublicCommandsComposer = ({ bot, startTime, states, rootMenu }: PublicCommandsComposerProperties) => {
+export const getPublicCommandsComposer = ({ startTime, states, rootMenu }: PublicCommandsComposerProperties) => {
   const publicCommandsComposer = new Composer<GrammyContext>();
 
   /* Commands */
-  const startMiddleware = new StartCommand(bot);
+  const startMiddleware = new StartCommand();
   const helpMiddleware = new HelpCommand(startTime);
   const settingsMiddleware = new SettingsCommand(states);
 

@@ -92,11 +92,11 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   const tensorListener = new TestTensorListener(tensorService);
 
   // Generic composers
-  const { beforeAnyComposer } = getBeforeAnyComposer({ bot });
+  const { beforeAnyComposer } = getBeforeAnyComposer();
   const { healthCheckComposer } = getHealthCheckComposer();
 
   // Commands
-  const { publicCommandsComposer } = getPublicCommandsComposer({ bot, rootMenu, startTime, states: airRaidAlarmStates.states });
+  const { publicCommandsComposer } = getPublicCommandsComposer({ rootMenu, startTime, states: airRaidAlarmStates.states });
   const { privateCommandsComposer } = getPrivateCommandsComposer({
     bot,
     commandSetter,
