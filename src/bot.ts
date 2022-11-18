@@ -11,14 +11,14 @@ import { CommandSetter } from './bot/commands';
 import {
   getBeforeAnyComposer,
   getCreatorCommandsComposer,
+  getHealthCheckComposer,
   getMessagesComposer,
   getPrivateCommandsComposer,
   getPublicCommandsComposer,
   getSaveToSheetComposer,
+  getTensorTrainingComposer,
 } from './bot/composers';
-import { getHealthCheckComposer } from './bot/composers/health-check.composer';
 import { getStrategicComposer, getSwindlersComposer } from './bot/composers/messages';
-import { getTensorTrainingComposer } from './bot/composers/tensor-training.composer';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
 import { DeleteSwindlersMiddleware, GlobalMiddleware } from './bot/middleware';
@@ -42,7 +42,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 
 (async () => {
   console.info('Waiting for the old instance to down...');
-  await sleep(environmentConfig.DEBUG ? 0 : 5000);
+  await sleep(environmentConfig.ENV === 'local' ? 0 : 5000);
   console.info('Starting a new instance...');
 
   await redisClient.client.connect().then(() => console.info('Redis client successfully started'));
