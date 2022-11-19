@@ -89,6 +89,8 @@ export class AlarmService {
   subscribeOnNotifications() {
     this.disable();
 
+    let isConnected = false;
+
     this.source = new EventSource(`${apiUrl}/live`, apiOptions);
     this.source.addEventListener('error', (event: MessageEvent & Record<string, any>) => {
       console.info(`Subscribe to Alarm API fail:  ${event.message as string}`);
@@ -100,7 +102,12 @@ export class AlarmService {
 
     this.source.addEventListener('hello', () => {
       console.info('Connection to Alarm API opened successfully.');
-      this.updatesEmitter.emit(ALARM_CONNECT_KEY);
+
+      // Hello pings every 1h
+      if (!isConnected) {
+        this.updatesEmitter.emit(ALARM_CONNECT_KEY);
+        isConnected = true;
+      }
     });
 
     this.source.addEventListener('update', (event: MessageEvent<string>) => {
