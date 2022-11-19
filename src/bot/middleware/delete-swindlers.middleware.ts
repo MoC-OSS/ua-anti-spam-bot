@@ -131,7 +131,7 @@ export class DeleteSwindlersMiddleware {
         }
 
         return telegramUtil
-          .getChatAdmins(this.bot, context.chat.id)
+          .getChatAdmins(context, context.chat.id)
           .then(({ adminsString }) => {
             context
               .replyWithHTML(getCannotDeleteMessage({ adminsString }), { reply_to_message_id: context.msg?.message_id })

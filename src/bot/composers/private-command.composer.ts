@@ -32,6 +32,8 @@ export const getPrivateCommandsComposer = ({ bot, commandSetter, dynamicStorageS
   commandMap.set('statistics', 'Get bot statistics');
   commandMap.set('start_alarm', 'Start test alarm');
   commandMap.set('end_alarm', 'End test alarm');
+  commandMap.set('restart_alarm', 'Restart alarm logic');
+  commandMap.set('disable_alarm', 'Disable alarm logic at all');
   commandMap.set('restart', 'Kills the bot process and deletes it');
 
   const commandString = [...commandMap.entries()].map(([name, description]) => `/${name} - ${description}`).join('\n');
@@ -53,6 +55,14 @@ export const getPrivateCommandsComposer = ({ bot, commandSetter, dynamicStorageS
 
   composer.command('end_alarm', () => {
     alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(false));
+  });
+
+  composer.command('restart_alarm', () => {
+    alarmService.restart();
+  });
+
+  composer.command('disable_alarm', () => {
+    alarmService.disable();
   });
 
   composer.command('restart', async (context) => {

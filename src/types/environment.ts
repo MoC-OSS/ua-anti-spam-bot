@@ -15,6 +15,7 @@ export interface ServerEnvironmentConfig {
 }
 
 export interface MiscellaneousEnvironmentConfig {
+  ENV: 'local' | 'develop' | 'production';
   TEST_TENSOR: boolean;
   TENSOR_RANK: number;
   REDIS_URL: string;

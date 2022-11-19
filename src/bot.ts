@@ -6,19 +6,20 @@ import { apiThrottler } from '@grammyjs/transformer-throttler';
 import { Bot } from 'grammy';
 import Keyv from 'keyv';
 import moment from 'moment-timezone';
+import ms from 'ms';
 
 import { CommandSetter } from './bot/commands';
 import {
   getBeforeAnyComposer,
   getCreatorCommandsComposer,
+  getHealthCheckComposer,
   getMessagesComposer,
   getPrivateCommandsComposer,
   getPublicCommandsComposer,
   getSaveToSheetComposer,
+  getTensorTrainingComposer,
 } from './bot/composers';
-import { getHealthCheckComposer } from './bot/composers/health-check.composer';
 import { getStrategicComposer, getSwindlersComposer } from './bot/composers/messages';
-import { getTensorTrainingComposer } from './bot/composers/tensor-training.composer';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
 import { DeleteSwindlersMiddleware, GlobalMiddleware } from './bot/middleware';
@@ -42,7 +43,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 
 (async () => {
   console.info('Waiting for the old instance to down...');
-  await sleep(environmentConfig.DEBUG ? 0 : 5000);
+  await sleep(environmentConfig.ENV === 'local' ? 0 : ms('5s'));
   console.info('Starting a new instance...');
 
   await redisClient.client.connect().then(() => console.info('Redis client successfully started'));
@@ -92,11 +93,11 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   const tensorListener = new TestTensorListener(tensorService);
 
   // Generic composers
-  const { beforeAnyComposer } = getBeforeAnyComposer({ bot });
+  const { beforeAnyComposer } = getBeforeAnyComposer();
   const { healthCheckComposer } = getHealthCheckComposer();
 
   // Commands
-  const { publicCommandsComposer } = getPublicCommandsComposer({ bot, rootMenu, startTime, states: airRaidAlarmStates.states });
+  const { publicCommandsComposer } = getPublicCommandsComposer({ rootMenu, startTime, states: airRaidAlarmStates.states });
   const { privateCommandsComposer } = getPrivateCommandsComposer({
     bot,
     commandSetter,
@@ -207,14 +208,16 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
     ],
   });
 
+  /**
+   * Check when the bot is run
+   * */
   if (!bot.isInited()) {
     await bot.init();
   }
 
   console.info(`Bot @${bot.botInfo.username} started!`, new Date().toString());
-  if (environmentConfig.DEBUG) {
-    // For development
-  } else {
+
+  if (!environmentConfig.DEBUG) {
     bot.api
       .sendMessage(logsChat, `🎉 <b>Bot @${bot.botInfo.username} has been started!</b>\n<i>${new Date().toString()}</i>`, {
         parse_mode: 'HTML',
@@ -223,6 +226,24 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
         console.error('This bot is not authorized in this LOGS chat!');
       });
   }
+
+  /**
+   * Enable alarm service only after bot is started
+   * */
+  alarmService.updatesEmitter.on('connect', () => {
+    bot.api.sendMessage(logsChat, '🎉 Air Raid Alarm API has been started!').catch(() => {
+      console.error('This bot is not authorized in this LOGS chat!');
+    });
+  });
+
+  alarmService.updatesEmitter.on('close', () => {
+    bot.api.sendMessage(logsChat, '⛔️ Air Raid Alarm API has been stopped!').catch(() => {
+      console.error('This bot is not authorized in this LOGS chat!');
+    });
+  });
+
+  alarmService.enable();
+
   // Enable graceful stop
   const stopRunner = () => runner.isRunning() && runner.stop();
   process.once('SIGINT', stopRunner);
