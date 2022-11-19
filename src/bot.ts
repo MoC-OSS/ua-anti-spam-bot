@@ -6,6 +6,7 @@ import { apiThrottler } from '@grammyjs/transformer-throttler';
 import { Bot } from 'grammy';
 import Keyv from 'keyv';
 import moment from 'moment-timezone';
+import ms from 'ms';
 
 import { CommandSetter } from './bot/commands';
 import {
@@ -42,7 +43,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 
 (async () => {
   console.info('Waiting for the old instance to down...');
-  await sleep(environmentConfig.ENV === 'local' ? 0 : 5000);
+  await sleep(environmentConfig.ENV === 'local' ? 0 : ms('5s'));
   console.info('Starting a new instance...');
 
   await redisClient.client.connect().then(() => console.info('Redis client successfully started'));

@@ -120,7 +120,7 @@ export class AlarmService {
     setInterval(() => {
       this.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(alert, TEST_ALARM_STATE));
       alert = !alert;
-    }, 60_000);
+    }, ms('1m'));
   }
 }
 

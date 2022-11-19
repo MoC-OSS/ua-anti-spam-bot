@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+import ms from 'ms';
 import type { SetNonNullable } from 'type-fest';
 
 import { loadUserbotDatasetExtras } from '../../dataset/dataset';
@@ -117,7 +118,7 @@ auth()
       } catch (error) {
         console.error(JSON.stringify(error));
       }
-    }, 15_000);
+    }, ms('15s'));
   })
   .catch((error) => {
     console.error('Cannot start userbot. Reason:\n', error);
