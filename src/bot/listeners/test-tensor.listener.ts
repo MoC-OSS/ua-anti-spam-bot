@@ -372,7 +372,7 @@ export class TestTensorListener {
         }
       }
 
-      const message = context.msg?.text || context.msg?.caption;
+      const message = context.state.text;
 
       if (!message && context.chat?.id && context.msg?.message_id) {
         await context.api.deleteMessage(context.chat?.id, context.msg?.message_id).catch();

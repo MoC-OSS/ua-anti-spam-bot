@@ -2,6 +2,7 @@ import { Menu } from '@grammyjs/menu';
 import { Composer } from 'grammy';
 import { isChatId } from 'grammy-guard';
 
+import { messageQuery } from '../../const';
 import type { swindlersGoogleService } from '../../services';
 import type { GrammyContext, GrammyMenuContext } from '../../types';
 import { onlyWithText, parseText } from '../middleware';
@@ -30,7 +31,7 @@ export const getSaveToSheetComposer = ({ chatId, rootMenu, updateMethod }: SaveT
       await context.deleteMessage();
     });
 
-  composer.on('message:text', parseText, onlyWithText, async (context) => {
+  composer.on(messageQuery, parseText, onlyWithText, async (context) => {
     const text = context.state.text!;
 
     await context.deleteMessage();

@@ -24,3 +24,5 @@ export type GrammyQueryMiddleware<Q extends FilterQuery> = GrammyMiddleware<Filt
 
 export type GrammyBot = Bot<GrammyContext>;
 export type GrammyErrorHandler = Parameters<Composer<GrammyContext>['errorBoundary']>[0];
+
+export type GrammyFilter = (context: GrammyContext) => boolean;

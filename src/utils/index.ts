@@ -134,9 +134,11 @@ export function compareDatesWithOffset(initialDate: Date, compareDate: Date, hou
  * @param {number} id
  * */
 export function isIdWhitelisted(id: number | undefined) {
+  // If channel or no id for some reason, it's not whitelisted
   if (!id) {
-    throw new Error(`This is an invalid id`);
+    return false;
   }
+
   const whitelist = (environmentConfig.USERS_WHITELIST || '').split(', ');
   return whitelist.includes(id.toString());
 }

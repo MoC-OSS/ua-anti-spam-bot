@@ -1,7 +1,8 @@
 import { Composer } from 'grammy';
 
+import { messageQuery } from '../../const';
 import type { GrammyContext } from '../../types';
-import { onlyNotDeletedFilter } from '../filters/only-not-deleted.filter';
+import { isNotChannel, onlyNotDeletedFilter } from '../filters';
 import {
   botActiveMiddleware,
   botRedisActive,
@@ -30,7 +31,9 @@ export const getMessagesComposer = ({ strategicComposer, swindlersComposer }: Me
    * */
   const readyMessagesComposer = messagesComposer
     // Queries to follow
-    .on(['message:text', 'edited_message:text', 'message:poll'])
+    .on(messageQuery)
+    // Filtering messages from channel
+    .filter((context) => isNotChannel(context))
     // Filtering messages
     .use(botRedisActive, ignoreOld(60), botActiveMiddleware, onlyNotAdmin, onlyWhenBotAdmin)
     // Parse message text and add it to state
