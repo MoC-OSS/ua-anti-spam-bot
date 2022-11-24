@@ -2,6 +2,7 @@ import type { AxiosError } from 'axios';
 import axios from 'axios';
 import FuzzySet from 'fuzzyset';
 
+import { environmentConfig } from '../config';
 import type { SwindlersBaseResult, SwindlersUrlsResult } from '../types';
 
 import { EXCEPTION_DOMAINS, SHORTS, URL_REGEXP, VALID_URL_REGEXP } from './constants';
@@ -173,7 +174,12 @@ export class SwindlersUrlsService {
 
     const isRegexpMatch = this.swindlersRegex.test(domain);
     if (isRegexpMatch) {
-      return { isSpam: isRegexpMatch, rate: 200 } as SwindlersBaseResult;
+      const result = { isSpam: isRegexpMatch, rate: 200 } as SwindlersUrlsResult;
+      if (environmentConfig.ENV !== 'production') {
+        result.currentName = domain.match(this.swindlersRegex)?.[0] || '$error';
+      }
+
+      return result;
     }
 
     const [[rate, nearestName]] = this.swindlersFuzzySet.get(domain) || [[0]];
