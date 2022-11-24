@@ -1,5 +1,6 @@
 export * from './alarm';
 export * from './context';
+export * from './dataset';
 export * from './environment';
 export * from './express';
 export * from './google';

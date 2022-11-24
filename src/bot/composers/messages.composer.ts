@@ -9,6 +9,7 @@ import {
   onlyNotAdmin,
   onlyWhenBotAdmin,
   onlyWithText,
+  parseText,
   performanceEndMiddleware,
   performanceStartMiddleware,
 } from '../middleware';
@@ -33,7 +34,7 @@ export const getMessagesComposer = ({ strategicComposer, swindlersComposer }: Me
     // Filtering messages
     .use(botRedisActive, ignoreOld(60), botActiveMiddleware, onlyNotAdmin, onlyWhenBotAdmin)
     // Parse message text and add it to state
-    .use(onlyWithText)
+    .use(parseText, onlyWithText)
     // Handle performance start
     .use(performanceStartMiddleware);
 
