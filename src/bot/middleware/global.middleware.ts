@@ -17,7 +17,7 @@ export class GlobalMiddleware {
        * TODO create a middleware to skip it
        * */
       if (!context.chatSession || !context.session) {
-        if (environmentConfig.DEBUG) {
+        if (environmentConfig.DEBUG && context.chat?.type !== 'channel') {
           handleError(new Error('No session'), 'SESSION_ERROR');
         }
 
