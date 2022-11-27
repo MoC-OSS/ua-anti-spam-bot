@@ -62,8 +62,8 @@ export class AlarmChatService {
   }
 
   async getChatsWithAlarmModeOn() {
-    const sessions = await redisService.getChatSessions();
-    return sessions.filter(
+    const { records } = await redisService.getChatSessions();
+    return records.filter(
       (s) => s.data.chatSettings?.airRaidAlertSettings?.notificationMessage || s.data.chatSettings?.disableChatWhileAirRaidAlert,
     );
   }

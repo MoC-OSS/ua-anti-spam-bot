@@ -16,8 +16,8 @@ export class UpdatesCommand {
     context.session.textEntities = textEntities ?? undefined;
     context.session.step = 'messageSending';
     await context.replyWithChatAction('typing');
-    const rawSessions = await redisService.getChatSessions();
-    const sessions = rawSessions.filter(
+    const { records } = await redisService.getChatSessions();
+    const sessions = records.filter(
       (session) => (session.data.chatType === 'private' || session.data.chatType === 'supergroup') && !session.data.botRemoved,
     );
 
@@ -60,9 +60,9 @@ export class UpdatesCommand {
       context.session.step = 'idle';
       const payload = context.match;
       if (payload === 'approve') {
-        const sessions = await redisService.getChatSessions();
-        const superGroupSessions = sessions.filter((session) => session.data.chatType === 'supergroup' && !session.data.botRemoved);
-        const privateGroupSessions = sessions.filter((session) => session.data.chatType === 'private' && !session.data.botRemoved);
+        const { records } = await redisService.getChatSessions();
+        const superGroupSessions = records.filter((session) => session.data.chatType === 'supergroup' && !session.data.botRemoved);
+        const privateGroupSessions = records.filter((session) => session.data.chatType === 'private' && !session.data.botRemoved);
 
         await this.bulkSending(context, superGroupSessions, 'supergroup');
         await this.bulkSending(context, privateGroupSessions, 'private');

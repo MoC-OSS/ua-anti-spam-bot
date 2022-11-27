@@ -1,22 +1,11 @@
 import { redisClient } from '../db';
-import type { ChatSession, ChatSessionData, Session } from '../types';
+import type { ChatSessionData } from '../types';
 import { removeDuplicates } from '../utils';
 
 export class RedisService {
   redisClient = redisClient;
 
-  redisSelectors = {
-    isBotDeactivated: 'isBotDeactivated',
-    botTensorPercent: 'botTensorPercent',
-    positives: 'training:positives',
-    negatives: 'training:negatives',
-    trainingChatWhitelist: 'training:chatWhiteList',
-    trainingStartRank: 'training:startRank',
-    trainingTempMessages: 'training:tempMessages',
-    trainingBots: 'training:bots',
-    userSessions: /^-?\d+:-?\d+$/,
-    chatSessions: /^-?\d+$/,
-  };
+  redisSelectors = redisClient.redisSelectors;
 
   /**
    * @returns {Promise<string[]>}
@@ -171,14 +160,12 @@ export class RedisService {
     return redisClient.setRawValue(chatId, writeSession as any);
   }
 
-  async getUserSessions(): Promise<Session[]> {
-    const allSessions = await redisClient.getAllRecords();
-    return allSessions.filter((session) => this.redisSelectors.userSessions.test(session.id)) as Session[];
+  getUserSessions() {
+    return redisClient.getAllUserRecords();
   }
 
-  async getChatSessions(): Promise<ChatSession[]> {
-    const allSessions = await redisClient.getAllRecords();
-    return allSessions.filter((session) => this.redisSelectors.chatSessions.test(session.id)) as ChatSession[];
+  getChatSessions() {
+    return redisClient.getAllChatRecords();
   }
 
   /**

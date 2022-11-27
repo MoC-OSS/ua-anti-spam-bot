@@ -1,6 +1,6 @@
 import { Composer } from 'grammy';
 
-import { messageQuery } from '../../const';
+import { messageQuery } from '../../const/message-query.const';
 import type { GrammyContext } from '../../types';
 import { isNotChannel, onlyNotDeletedFilter } from '../filters';
 import {
