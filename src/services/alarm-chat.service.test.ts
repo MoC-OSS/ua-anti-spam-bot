@@ -1,3 +1,4 @@
+import type { GrammyBot } from '../types';
 import { sleep } from '../utils';
 
 import { chartMock, generateChat, generateChatSessionData, getAlarmMock, redisMock, testId, testState } from './_mocks';
@@ -5,10 +6,10 @@ import { ALARM_EVENT_KEY, alarmService } from './alarm.service';
 import { alarmChatService } from './alarm-chat.service';
 
 const apiMock = {
-  sendMessage: jest.fn(() => Promise.resolve(null)),
-  getChat: jest.fn(() => chartMock),
+  sendMessage: jest.fn(() => Promise.resolve(null as any)),
+  getChat: jest.fn(() => Promise.resolve(chartMock)),
   setChatPermissions: jest.fn(),
-};
+} as Partial<GrammyBot['api']> as GrammyBot['api'];
 
 jest.mock('./redis.service', () => redisMock);
 

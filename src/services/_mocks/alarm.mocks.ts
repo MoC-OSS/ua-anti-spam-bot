@@ -1,5 +1,8 @@
+import type { ChatFromGetChat } from '@grammyjs/types/manage';
+
 import type { AlarmNotification, ChatSessionData } from '../../types';
 import { getRandomItem } from '../../utils';
+import type { RedisService } from '../redis.service';
 
 import { generateRandomBoolean, generateRandomNumber, generateRandomString } from './helpers.mocks';
 
@@ -25,9 +28,8 @@ export const getAlarmMock = (alert = false, state = testState): AlarmNotificatio
 });
 
 export const chartMock = {
-  id: testId,
+  id: +testId,
   permissions: {
-    can_send_messages: true,
     can_send_media_messages: true,
     can_send_polls: true,
     can_send_other_messages: true,
@@ -36,7 +38,7 @@ export const chartMock = {
     can_invite_users: true,
     can_pin_messages: true,
   },
-};
+} as Partial<ChatFromGetChat>;
 
 export function generateChatSessionData(
   state = generateRandomString(10),
@@ -97,7 +99,7 @@ export function generateMockSessions(
 
 export const redisMock = {
   redisService: {
-    getChatSessions: () => generateMockSessions(),
-    updateChatSession: () => null,
-  },
+    getChatSessions: () => Promise.resolve({ records: generateMockSessions(), keys: [] }),
+    updateChatSession: () => Promise.resolve(null),
+  } as Partial<RedisService>,
 };
