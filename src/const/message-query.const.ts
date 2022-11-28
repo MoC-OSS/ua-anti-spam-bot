@@ -1,14 +1,10 @@
 import type { FilterQuery } from 'grammy';
 
 /**
- * Helps to create a valid union type
+ * Returns a valid tuple type for query.
+ * It returns the same type that has been passed but types it
  * */
-export type GetValidQueryType<T extends FilterQuery> = T extends FilterQuery ? T : never;
-
-/**
- * Required type to message query work
- * */
-export type MessageQueryType = GetValidQueryType<':text' | ':forward_date' | ':poll' | ':caption'>[];
+export const getValidQueryType = <T extends FilterQuery[]>(value: T): T => value;
 
 /**
  * @description
@@ -22,4 +18,4 @@ export type MessageQueryType = GetValidQueryType<':text' | ':forward_date' | ':p
  *
  * @use isNotChannel to exclude channels for this query
  * */
-export const messageQuery = [':text', ':forward_date', ':poll', ':caption'] as FilterQuery[] as MessageQueryType;
+export const messageQuery = getValidQueryType([':text', ':forward_date', ':poll', ':caption']);
