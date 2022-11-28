@@ -1,4 +1,14 @@
-import type { FilterQuery } from 'grammy/out/filter';
+import type { FilterQuery } from 'grammy';
+
+/**
+ * Helps to create a valid union type
+ * */
+export type GetValidQueryType<T extends FilterQuery> = T extends FilterQuery ? T : never;
+
+/**
+ * Required type to message query work
+ * */
+export type MessageQueryType = GetValidQueryType<':text' | ':forward_date' | ':poll' | ':caption'>[];
 
 /**
  * @description
@@ -12,4 +22,4 @@ import type { FilterQuery } from 'grammy/out/filter';
  *
  * @use isNotChannel to exclude channels for this query
  * */
-export const messageQuery: FilterQuery | FilterQuery[] = [':text', ':forward_date', ':poll', ':caption'];
+export const messageQuery = [':text', ':forward_date', ':poll', ':caption'] as FilterQuery[] as MessageQueryType;
