@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 import { mockDynamicStorageService, mockNewUrl } from './_mocks/index.mocks';
-import { EXCEPTION_DOMAINS } from './constants';
 import { SwindlersUrlsService } from './swindlers-urls.service';
+import { urlService } from './url.service';
 
 jest.mock('axios');
 
@@ -23,57 +23,6 @@ describe('SwindlersUrlsService', () => {
       const result = swindlersUrlsService.buildSiteRegex(sites);
 
       expect(result.source).toEqual('(?:https?:\\/\\/)?(test.com|example.com)(?!ua).+');
-    });
-  });
-
-  describe('parseUrls', () => {
-    it('should parse urls', () => {
-      const text = `test https://url.com/ test url.com`;
-      const result = swindlersUrlsService.parseUrls(text);
-
-      console.info(text);
-
-      expect(result).toEqual(['https://url.com/', 'url.com']);
-    });
-
-    it('should not parse invalid urls', () => {
-      const text = `100.000.000 | 1.Перейдіть | 30.06.2022.`;
-      const result = swindlersUrlsService.parseUrls(text);
-
-      expect(result).toEqual([]);
-    });
-
-    it('should not match no url', () => {
-      const text = 'бездротові Bluetooth Air3Ye XM-050';
-      const result = swindlersUrlsService.parseUrls(text);
-
-      expect(result).toEqual([]);
-    });
-
-    it('should not match excluded url', () => {
-      const text = `https://${EXCEPTION_DOMAINS.join(' https://')}`;
-      const result = swindlersUrlsService.parseUrls(text);
-
-      console.info(text);
-
-      expect(result).toEqual([]);
-    });
-
-    // TODO fix this case
-    it('should not parse extra characters', () => {
-      const text = 'https://test.site/get/0426053194✅🇺🇦/';
-      const result = swindlersUrlsService.parseUrls(text);
-
-      expect(result).toStrictEqual([]);
-    });
-  });
-
-  describe('getUrlDomain', () => {
-    it('should parse domain', () => {
-      const text = 'https://www.orpay.me/test/1234567890';
-      const result = swindlersUrlsService.getUrlDomain(text);
-
-      expect(result).toEqual('www.orpay.me/');
     });
   });
 
@@ -152,7 +101,7 @@ describe('SwindlersUrlsService', () => {
       axiosMock.get.mockImplementationOnce(() => Promise.resolve({ request: { res: { responseUrl: 'https://da-pay.me/' } } }));
       const result = await swindlersUrlsService.processMessage(text);
 
-      const parsedUrl = swindlersUrlsService.parseUrls(text)[0];
+      const parsedUrl = urlService.parseUrls(text)[0];
       axiosMock.get.mockImplementationOnce(() => Promise.resolve({ request: { res: { responseUrl: parsedUrl } } }));
       const isUrlSpam = await swindlersUrlsService.isSpamUrl(parsedUrl);
 
@@ -173,7 +122,7 @@ describe('SwindlersUrlsService', () => {
       axiosMock.get.mockImplementation(() => Promise.resolve({ request: { res: { responseUrl: 'https://t.me/+5v9SixsjZ9ZmMjBs' } } }));
       const result = await swindlersUrlsService.processMessage(text);
 
-      const parsedUrl = swindlersUrlsService.parseUrls(text)[0];
+      const parsedUrl = urlService.parseUrls(text)[0];
       axiosMock.get.mockImplementationOnce(() => Promise.resolve({ request: { res: { responseUrl: parsedUrl } } }));
       const isUrlSpam = await swindlersUrlsService.isSpamUrl(parsedUrl);
 
