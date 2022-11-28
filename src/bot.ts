@@ -19,7 +19,7 @@ import {
   getSaveToSheetComposer,
   getTensorTrainingComposer,
 } from './bot/composers';
-import { getStrategicComposer, getSwindlersComposer } from './bot/composers/messages';
+import { getNoUrlsComposer, getStrategicComposer, getSwindlersComposer } from './bot/composers/messages';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
 import { DeleteSwindlersMiddleware, GlobalMiddleware } from './bot/middleware';
@@ -133,10 +133,11 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   });
 
   // Message composers
+  const { noUrlsComposer } = getNoUrlsComposer();
   const { swindlersComposer } = getSwindlersComposer({ deleteSwindlersMiddleware });
   const { strategicComposer } = getStrategicComposer({ onTextListener });
 
-  const { messagesComposer } = getMessagesComposer({ swindlersComposer, strategicComposer });
+  const { messagesComposer } = getMessagesComposer({ noUrlsComposer, swindlersComposer, strategicComposer });
 
   rootMenu.register(tensorListener.initMenu(trainingThrottler));
 

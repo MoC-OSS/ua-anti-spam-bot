@@ -1,7 +1,7 @@
 import { Composer } from 'grammy';
 
 import { messageQuery } from '../../const';
-import type { GrammyContext } from '../../types';
+import type { GrammyContext, GrammyMiddleware } from '../../types';
 import { isNotChannel, onlyNotDeletedFilter } from '../filters';
 import {
   botActiveMiddleware,
@@ -11,11 +11,13 @@ import {
   onlyWhenBotAdmin,
   onlyWithText,
   parseText,
+  parseUrls,
   performanceEndMiddleware,
   performanceStartMiddleware,
 } from '../middleware';
 
 export interface MessagesComposerProperties {
+  noUrlsComposer: Composer<GrammyContext>;
   swindlersComposer: Composer<GrammyContext>;
   strategicComposer: Composer<GrammyContext>;
 }
@@ -23,7 +25,7 @@ export interface MessagesComposerProperties {
 /**
  * @description Message handling composer
  * */
-export const getMessagesComposer = ({ strategicComposer, swindlersComposer }: MessagesComposerProperties) => {
+export const getMessagesComposer = ({ noUrlsComposer, strategicComposer, swindlersComposer }: MessagesComposerProperties) => {
   const messagesComposer = new Composer<GrammyContext>();
 
   /**
@@ -44,14 +46,16 @@ export const getMessagesComposer = ({ strategicComposer, swindlersComposer }: Me
   /**
    * Registers a message handler module with correct filter to not make extra checks
    * */
-  const registerModule = (composer: Composer<GrammyContext>) => {
-    readyMessagesComposer.filter((context) => onlyNotDeletedFilter(context)).use(composer);
+  const registerModule = (middleware: Composer<GrammyContext> | GrammyMiddleware) => {
+    readyMessagesComposer.filter((context) => onlyNotDeletedFilter(context)).use(middleware);
   };
 
   /**
    * Register modules.
    * The order should be right
    * */
+  registerModule(parseUrls);
+  registerModule(noUrlsComposer);
   registerModule(swindlersComposer);
   registerModule(strategicComposer);
 
