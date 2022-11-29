@@ -21,7 +21,6 @@ export const getNoCardsComposer = () => {
       const featuresString = getEnabledFeaturesString(context.chatSession.chatSettings);
 
       await context.replyWithHTML(getDeleteFeatureMessage({ writeUsername, userId, featuresString }));
-      context.state.isDeleted = true;
     }
 
     return next();

@@ -31,6 +31,7 @@ import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
 import { DeleteSwindlersMiddleware, GlobalMiddleware } from './bot/middleware';
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
+import { deleteMessageTransformer } from './bot/transformers';
 import { runBotExpressServer } from './bot-express.server';
 import { environmentConfig } from './config';
 import { logsChat, swindlerBotsChatId, swindlerHelpChatId, swindlerMessageChatId } from './creator';
@@ -177,6 +178,12 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 
   bot.use(redisSession.middleware());
   bot.use(redisChatSession.middleware());
+
+  // Set message as deleted when deleteMessage method has been called
+  bot.use((context, next) => {
+    context.api.config.use(deleteMessageTransformer(context));
+    return next();
+  });
 
   bot.use(rootMenu as unknown as Menu<GrammyContext>);
 
