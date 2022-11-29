@@ -143,6 +143,7 @@ export const getSettingsMenuMessage = (settings: ChatSessionData['chatSettings']
 
 🔗 ${settings.enableDeleteUrls ? '✅ Бот видаляє повідомлення з посиланнями.' : '⛔ Бот не видаляє повідомлення з посиланнями.'}
 ⚓ ${settings.enableDeleteMentions ? '✅ Бот видаляє повідомлення зі згадуваннями.' : '⛔ Бот не видаляє повідомлення зі згадуваннями.'}
+↩️ ${settings.enableDeleteForwards ? '✅ Бот видаляє повідомлення з пересиланнями.' : '⛔ Бот не видаляє повідомлення з пересиланнями.'}
 
 <b>Налаштування повітряної тривоги.</b>
 🏰 ${
@@ -225,6 +226,7 @@ export const deleteSwindlerButton = '💰 Шахраї';
 
 export const deleteUrlsButton = '🔗 Посилання';
 export const deleteMentionButton = '⚓ Згадування';
+export const deleteForwardedButton = '↩️ Пересилання';
 
 export const airAlarmAlertButton = '🏰 Регіон';
 export const airAlarmNotificationMessage = '📢 Тривога';
@@ -239,6 +241,7 @@ export const englishDeleteSwindlerButton = '💰 Scam';
 
 export const englishDeleteUrlsButton = '🔗 Link';
 export const englishDeleteMentionButton = '⚓ Mention';
+export const englishDeleteForwardedButton = '↩️ Forward';
 
 export const englishAirAlarmAlertButton = '🏰 Region';
 export const englishAirAlarmNotificationMessage = '📢 Alarm';

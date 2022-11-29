@@ -2,6 +2,7 @@ import {
   airAlarmAlertButton,
   airAlarmNotificationMessage,
   blockWhenAlarm,
+  deleteForwardedButton,
   deleteMentionButton,
   deleteMessageButton,
   deleteSwindlerButton,
@@ -85,6 +86,7 @@ export class SettingsCommand {
       .row()
       .text(deleteUrlsButton, (context) => toggleSetting(context, 'enableDeleteUrls'))
       .text(deleteMentionButton, (context) => toggleSetting(context, 'enableDeleteMentions'))
+      .text(deleteForwardedButton, (context) => toggleSetting(context, 'enableDeleteForwards'))
       .row()
       .text(airAlarmAlertButton, isAlarmNow, async (context) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment

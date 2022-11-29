@@ -129,6 +129,7 @@ export function getEnabledFeaturesString(chatSettings: ChatSettings): string {
    * */
   featureNameMap.set('enableDeleteUrls', '🔗 посиланнями');
   featureNameMap.set('enableDeleteMentions', '⚓ згадками');
+  featureNameMap.set('enableDeleteForwards', '↩ пересиланнями');
 
   const settingsKeys = Object.keys(chatSettings) as (keyof ChatSettings)[];
 

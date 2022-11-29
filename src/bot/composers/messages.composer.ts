@@ -20,6 +20,7 @@ import {
 export interface MessagesComposerProperties {
   noUrlsComposer: Composer<GrammyContext>;
   noMentionsComposer: Composer<GrammyContext>;
+  noForwardsComposer: Composer<GrammyContext>;
   swindlersComposer: Composer<GrammyContext>;
   strategicComposer: Composer<GrammyContext>;
 }
@@ -30,6 +31,7 @@ export interface MessagesComposerProperties {
 export const getMessagesComposer = ({
   noUrlsComposer,
   noMentionsComposer,
+  noForwardsComposer,
   strategicComposer,
   swindlersComposer,
 }: MessagesComposerProperties) => {
@@ -65,6 +67,7 @@ export const getMessagesComposer = ({
   registerModule(noUrlsComposer);
   registerModule(parseMentions);
   registerModule(noMentionsComposer);
+  registerModule(noForwardsComposer);
   registerModule(swindlersComposer);
   registerModule(strategicComposer);
 
