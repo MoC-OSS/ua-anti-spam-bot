@@ -20,7 +20,7 @@ import { MiddlewareMenu } from '../../middleware-menu.menu';
 import { dynamicLocationMenu } from './air-raid-alarm/locations-menu-generator';
 
 const toggleSetting = (context: GrammyContext, key: string) => {
-  context.chatSession.chatSettings[key] = context.chatSession.chatSettings[key] === false;
+  context.chatSession.chatSettings[key] = !context.chatSession.chatSettings[key];
   const newText = getSettingsMenuMessage(context.chatSession.chatSettings);
 
   if (context.msg?.text !== newText) {

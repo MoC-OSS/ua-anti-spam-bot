@@ -25,6 +25,7 @@ export const somethingWentWrongMessage = 'Сталась якась помилк
 export const makeAdminMessage = '⛔️ Я не активований.\n<b>☝️Зроби мене адміністратором, щоб я міг видаляти повідомлення.</b>';
 export const hasDeletePermissionMessage = '✅ Я маю права на видалення повідомлень';
 export const hasNoDeletePermissionMessage = '⛔ Я не маю права на видалення повідомлень';
+export const featureNoAdminMessage = '⛔️ Я не активований.\n<b>☝️Зроби мене адміністратором, щоб я міг дати цей функціонал.</b>';
 
 /**
  * Generic - Swindlers

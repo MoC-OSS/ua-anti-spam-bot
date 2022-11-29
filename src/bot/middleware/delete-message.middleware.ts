@@ -1,10 +1,19 @@
-import type { NextFunction } from 'grammy';
-
-import type { GrammyContext } from '../../types';
+import type { GrammyMiddleware } from '../../types';
 
 /**
  * Delete user entered message
+ *
+ * @param reason - why bot could not delete the message
  * */
-export function deleteMessageMiddleware(context: GrammyContext, next: NextFunction) {
-  return context.deleteMessage().then(next);
-}
+export const deleteMessageMiddleware =
+  (reason: string): GrammyMiddleware =>
+  (context, next) => {
+    if (context.chatSession.isBotAdmin) {
+      return context
+        .deleteMessage()
+        .then(next)
+        .catch(() => (reason ? context.replyWithHTML(reason) : null));
+    }
+
+    return context.replyWithHTML(reason);
+  };

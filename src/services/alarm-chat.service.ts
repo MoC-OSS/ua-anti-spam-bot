@@ -116,7 +116,10 @@ export class AlarmChatService {
         newSession.chatPermissions = { ...(chatInfo as Chat.MultiUserGetChat).permissions };
         await redisService.updateChatSession(chat.id, newSession);
         const newPermissions = {};
-        await this.api?.setChatPermissions(chat.id, newPermissions);
+
+        if (chat.data.isBotAdmin) {
+          await this.api?.setChatPermissions(chat.id, newPermissions);
+        }
       }
 
       this.api?.sendMessage(chat.id, startAlarmMessage, { parse_mode: 'HTML' }).catch(handleError);
@@ -124,7 +127,10 @@ export class AlarmChatService {
       if (chat.data.chatSettings.disableChatWhileAirRaidAlert) {
         const currentSession = await redisService.getChatSession(chat.id);
         const newPermissions = { ...currentSession?.chatPermissions };
-        await this.api?.setChatPermissions(chat.id, newPermissions);
+
+        if (chat.data.isBotAdmin) {
+          await this.api?.setChatPermissions(chat.id, newPermissions);
+        }
       }
 
       this.api?.sendMessage(chat.id, endAlarmMessage, { parse_mode: 'HTML' }).catch(handleError);
