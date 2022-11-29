@@ -67,14 +67,19 @@ export const getMessagesComposer = ({
    * Register modules.
    * The order should be right
    * */
+  registerModule(swindlersComposer);
+
   registerModule(parseUrls);
   registerModule(noUrlsComposer);
+
   registerModule(parseMentions);
   registerModule(noMentionsComposer);
+
   registerModule(parseCards);
   registerModule(noCardsComposer);
+
   registerModule(noForwardsComposer);
-  registerModule(swindlersComposer);
+
   registerModule(strategicComposer);
 
   readyMessagesComposer.use(performanceEndMiddleware);
