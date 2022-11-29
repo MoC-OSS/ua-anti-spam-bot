@@ -3,7 +3,7 @@ import type { NextFunction } from 'grammy';
 
 import { environmentConfig } from '../../config';
 import type { AirRaidAlertSettings, ChatSettings, GrammyContext, GrammyMiddleware } from '../../types';
-import { emptyFunction, handleError, logContext, telegramUtil } from '../../utils';
+import { emptyFunction, handleError, telegramUtil } from '../../utils';
 
 export class GlobalMiddleware {
   /**
@@ -22,10 +22,6 @@ export class GlobalMiddleware {
         }
 
         return next();
-      }
-
-      if (!environmentConfig.TEST_TENSOR) {
-        logContext(context);
       }
 
       this.createState(context);

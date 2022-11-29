@@ -7,6 +7,7 @@ import {
   botActiveMiddleware,
   botRedisActive,
   ignoreOld,
+  logContextMiddleware,
   onlyNotAdmin,
   onlyWhenBotAdmin,
   onlyWithText,
@@ -77,6 +78,7 @@ export const getMessagesComposer = ({
   registerModule(strategicComposer);
 
   readyMessagesComposer.use(performanceEndMiddleware);
+  readyMessagesComposer.use(logContextMiddleware);
 
   return { messagesComposer };
 };
