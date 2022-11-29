@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 
 import { environmentConfig } from '../config';
-import type { GrammyContext, RealGrammyContext } from '../types';
+import type { ChatSettings, GrammyContext, RealGrammyContext } from '../types';
 
 import { MessageUtil } from './message.util';
 import { TelegramUtil } from './telegram.util';
@@ -93,6 +93,57 @@ export function getUserData(context: GrammyContext) {
     writeUsername,
     userId,
   };
+}
+
+/**
+ * @description Returns valid ukrainian conjunctions
+ *
+ * @param array - array to join into conjunctions
+ *
+ * @example
+ * ```ts
+ * joinUkrainianConjunctions(['слово']); // слово
+ * joinUkrainianConjunctions(['слово', 'діло']); // слово та діло
+ * joinUkrainianConjunctions(['слово', 'діло', 'справа', 'енергія']); // слово, діло, справа та енергія
+ * ```
+ * */
+export function joinUkrainianConjunctions(array: string[]): string {
+  if (array.length <= 1) {
+    return array.join(', ');
+  }
+
+  const lastItem = array[array.length - 1];
+  const joinSlice = array.slice(0, -1);
+
+  const resultSlice = joinSlice.join(', ');
+
+  return `${resultSlice} та ${lastItem}`;
+}
+
+export function getEnabledFeaturesString(chatSettings: ChatSettings): string {
+  const features: string[] = [];
+  const featureNameMap = new Map<keyof ChatSettings, string>();
+
+  /**
+   * Повідомлень з...
+   * */
+  featureNameMap.set('enableDeleteUrls', 'посиланнями');
+
+  const settingsKeys = Object.keys(chatSettings) as (keyof ChatSettings)[];
+
+  settingsKeys.forEach((setting) => {
+    const value = chatSettings[setting];
+
+    if (typeof value === 'boolean' && value) {
+      const featureName = featureNameMap.get(setting);
+
+      if (featureName) {
+        features.push(featureName);
+      }
+    }
+  });
+
+  return joinUkrainianConjunctions(features);
 }
 
 /**

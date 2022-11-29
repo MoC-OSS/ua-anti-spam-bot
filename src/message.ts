@@ -276,9 +276,17 @@ export const startMessageAtom = `
  * */
 export const getDeclinedMassSendingMessage = 'Вибач, але у тебе немає прав для цієї команди.😞'.trim();
 
-export interface DeleteMessageProperties {
+export interface DeleteMessageAtomProperties {
   writeUsername: string;
   userId?: number;
+}
+
+export const getDeleteUserAtomMessage = ({ writeUsername, userId }: DeleteMessageAtomProperties) =>
+  `
+❗️ ${userId && writeUsername ? `<a href="tg://user?id=${userId}">${writeUsername}</a>, <b>повідомлення` : '<b>Повідомлення'} видалено</b>.
+`.trim();
+
+export interface DeleteMessageProperties extends DeleteMessageAtomProperties {
   wordMessage: string;
   debugMessage: string;
   withLocation?: boolean;
@@ -291,7 +299,7 @@ export interface DeleteMessageProperties {
  * */
 export const getDeleteMessage = ({ writeUsername, userId, wordMessage, debugMessage, withLocation }: DeleteMessageProperties) =>
   `
-❗️ ${userId && writeUsername ? `<a href="tg://user?id=${userId}">${writeUsername}</a>, <b>повідомлення` : '<b>Повідомлення'} видалено</b>.
+${getDeleteUserAtomMessage({ writeUsername, userId })}
 
 ${getRandomItem(withLocation ? randomLocationBanEmojis : randomBanEmojis)} <b>Причина</b>: поширення потенційно стратегічної інформації${
     withLocation ? ' з повідомленням локації' : ''
@@ -305,6 +313,16 @@ ${getRandomItem(withLocation ? randomLocationBanEmojis : randomBanEmojis)} <b>П
 
 
 ${debugMessage}`.trim();
+
+export interface DeleteFeatureMessageProperties extends DeleteMessageAtomProperties {
+  featuresString: string;
+}
+
+export const getDeleteFeatureMessage = ({ writeUsername, userId, featuresString }: DeleteFeatureMessageProperties) => `
+${getDeleteUserAtomMessage({ writeUsername, userId })}
+
+Відправка повідомлень з ${featuresString} недоступна в по правилам цього чату.
+`;
 
 export interface DebugMessageProperties {
   message: string | undefined;
