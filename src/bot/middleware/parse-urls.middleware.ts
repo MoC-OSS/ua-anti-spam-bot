@@ -1,7 +1,7 @@
 import type { NextFunction } from 'grammy';
 import type { GrammyContext } from 'types';
 
-import { urlService } from '../../services/url.service';
+import { urlService } from '../../services';
 
 /**
  * @description
