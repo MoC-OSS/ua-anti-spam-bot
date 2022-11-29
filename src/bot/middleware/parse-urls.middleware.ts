@@ -9,10 +9,10 @@ import { urlService } from '../../services';
  * */
 export function parseUrls(context: GrammyContext, next: NextFunction) {
   if (context.state.text && !context.state.urls) {
-    const text = urlService.parseUrls(context.state.text);
+    const urls = urlService.parseUrls(context.state.text, true);
 
-    if (text) {
-      context.state.urls = text;
+    if (urls) {
+      context.state.urls = urls;
     }
   }
 

@@ -218,7 +218,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 
   console.info(`Bot @${bot.botInfo.username} started!`, new Date().toString());
 
-  if (!environmentConfig.DEBUG) {
+  if (environmentConfig.ENV !== 'local') {
     bot.api
       .sendMessage(logsChat, `🎉 <b>Bot @${bot.botInfo.username} has been started!</b>\n<i>${new Date().toString()}</i>`, {
         parse_mode: 'HTML',
@@ -226,22 +226,22 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
       .catch(() => {
         console.error('This bot is not authorized in this LOGS chat!');
       });
+
+    /**
+     * Enable alarm service only after bot is started
+     * */
+    alarmService.updatesEmitter.on('connect', () => {
+      bot.api.sendMessage(logsChat, '🎉 Air Raid Alarm API has been started!').catch(() => {
+        console.error('This bot is not authorized in this LOGS chat!');
+      });
+    });
+
+    alarmService.updatesEmitter.on('close', () => {
+      bot.api.sendMessage(logsChat, '⛔️ Air Raid Alarm API has been stopped!').catch(() => {
+        console.error('This bot is not authorized in this LOGS chat!');
+      });
+    });
   }
-
-  /**
-   * Enable alarm service only after bot is started
-   * */
-  alarmService.updatesEmitter.on('connect', () => {
-    bot.api.sendMessage(logsChat, '🎉 Air Raid Alarm API has been started!').catch(() => {
-      console.error('This bot is not authorized in this LOGS chat!');
-    });
-  });
-
-  alarmService.updatesEmitter.on('close', () => {
-    bot.api.sendMessage(logsChat, '⛔️ Air Raid Alarm API has been stopped!').catch(() => {
-      console.error('This bot is not authorized in this LOGS chat!');
-    });
-  });
 
   alarmService.enable();
 

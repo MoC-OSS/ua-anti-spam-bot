@@ -5,6 +5,7 @@ import {
   deleteMessageButton,
   deleteSwindlerButton,
   deleteTensorButton,
+  deleteUrlsButton,
   getAirRaidAlarmSettingsMessage,
   getSettingsMenuMessage,
   goBackButton,
@@ -13,13 +14,13 @@ import {
   turnOffChatWhileAlarmButton,
 } from '../../../message';
 import { alarmChatService } from '../../../services';
-import type { GrammyContext, GrammyMiddleware, State } from '../../../types';
+import type { ChatSessionData, GrammyContext, GrammyMiddleware, State } from '../../../types';
 import { onlyAdmin } from '../../middleware';
 import { MiddlewareMenu } from '../../middleware-menu.menu';
 
 import { dynamicLocationMenu } from './air-raid-alarm/locations-menu-generator';
 
-const toggleSetting = (context: GrammyContext, key: string) => {
+const toggleSetting = (context: GrammyContext, key: keyof Omit<ChatSessionData['chatSettings'], 'airRaidAlertSettings'>) => {
   context.chatSession.chatSettings[key] = !context.chatSession.chatSettings[key];
   const newText = getSettingsMenuMessage(context.chatSession.chatSettings);
 
@@ -80,6 +81,8 @@ export class SettingsCommand {
       .text(deleteTensorButton, (context) => toggleSetting(context, 'disableStrategicInfo'))
       .text(deleteMessageButton, (context) => toggleSetting(context, 'disableDeleteMessage'))
       .text(deleteSwindlerButton, (context) => toggleSetting(context, 'disableSwindlerMessage'))
+      .row()
+      .text(deleteUrlsButton, (context) => toggleSetting(context, 'enableDeleteUrls'))
       .row()
       .text(airAlarmAlertButton, isAlarmNow, async (context) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
