@@ -14,7 +14,6 @@ import {
 } from '../../../message';
 import { alarmChatService } from '../../../services';
 import type { GrammyContext, GrammyMiddleware, State } from '../../../types';
-import { handleError } from '../../../utils';
 import { onlyAdmin } from '../../middleware';
 import { MiddlewareMenu } from '../../middleware-menu.menu';
 
@@ -25,33 +24,30 @@ const toggleSetting = (context: GrammyContext, key: string) => {
   const newText = getSettingsMenuMessage(context.chatSession.chatSettings);
 
   if (context.msg?.text !== newText) {
-    context.editMessageText(newText, { parse_mode: 'HTML' }).catch(handleError);
+    return context.editMessageText(newText, { parse_mode: 'HTML' });
   }
 };
 
-const isStateSelected = (context: GrammyContext) => {
+const isStateSelected: GrammyMiddleware = (context, next) => {
   const { state } = context.chatSession.chatSettings.airRaidAlertSettings;
+
   if (!state) {
-    context
-      .answerCallbackQuery({
-        text: selectYourState,
-        show_alert: true,
-      })
-      .catch(handleError);
-    return false;
+    return context.answerCallbackQuery({
+      text: selectYourState,
+      show_alert: true,
+    });
   }
-  return true;
+
+  return next();
 };
 
-const isAlarmNow: GrammyMiddleware = (context, next) => {
+const isAlarmNow: GrammyMiddleware = async (context, next) => {
   const isAlarm = alarmChatService.isAlarmNow(context.chatSession.chatSettings.airRaidAlertSettings.state || '');
   if (isAlarm) {
-    context
-      .answerCallbackQuery({
-        text: blockWhenAlarm,
-        show_alert: true,
-      })
-      .catch(handleError);
+    await context.answerCallbackQuery({
+      text: blockWhenAlarm,
+      show_alert: true,
+    });
   } else {
     return next();
   }
@@ -85,32 +81,26 @@ export class SettingsCommand {
       .text(deleteMessageButton, (context) => toggleSetting(context, 'disableDeleteMessage'))
       .text(deleteSwindlerButton, (context) => toggleSetting(context, 'disableSwindlerMessage'))
       .row()
-      .text(airAlarmAlertButton, isAlarmNow, (context) => {
+      .text(airAlarmAlertButton, isAlarmNow, async (context) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
         context.menu.nav('settingsAirRaidAlertSubmenu');
-        context
-          .editMessageText(getAirRaidAlarmSettingsMessage(context.chatSession.chatSettings), { parse_mode: 'HTML' })
-          .catch(handleError);
+        await context.editMessageText(getAirRaidAlarmSettingsMessage(context.chatSession.chatSettings), { parse_mode: 'HTML' });
       })
-      .text(airAlarmNotificationMessage, isAlarmNow, (context) => {
-        if (isStateSelected(context)) {
-          context.chatSession.chatSettings.airRaidAlertSettings.notificationMessage =
-            !context.chatSession.chatSettings.airRaidAlertSettings.notificationMessage;
-          alarmChatService.updateChat(context.chatSession, context.chat?.id);
-          const newText = getSettingsMenuMessage(context.chatSession.chatSettings);
+      .text(airAlarmNotificationMessage, isAlarmNow, isStateSelected, async (context) => {
+        context.chatSession.chatSettings.airRaidAlertSettings.notificationMessage =
+          !context.chatSession.chatSettings.airRaidAlertSettings.notificationMessage;
+        alarmChatService.updateChat(context.chatSession, context.chat?.id);
+        const newText = getSettingsMenuMessage(context.chatSession.chatSettings);
 
-          if (context.msg?.text !== newText) {
-            context.editMessageText(newText, { parse_mode: 'HTML' }).catch(handleError);
-          }
+        if (context.msg?.text !== newText) {
+          await context.editMessageText(newText, { parse_mode: 'HTML' });
         }
       })
-      .text(turnOffChatWhileAlarmButton, isAlarmNow, (context) => {
-        if (isStateSelected(context)) {
-          toggleSetting(context, 'disableChatWhileAirRaidAlert');
-          alarmChatService.updateChat(context.chatSession, context.chat?.id);
-        }
+      .text(turnOffChatWhileAlarmButton, isAlarmNow, isStateSelected, async (context) => {
+        await toggleSetting(context, 'disableChatWhileAirRaidAlert');
+        alarmChatService.updateChat(context.chatSession, context.chat?.id);
       })
       // TODO UABOT-2 COMMENT UNTIL DESCRIPTION WILL BE AVAILABLE
       // .row()
@@ -128,9 +118,9 @@ export class SettingsCommand {
       .addGlobalMiddlewares(onlyAdmin)
       .dynamic((context, range) => dynamicLocationMenu(context, range, this.airRaidAlarmStates))
       .row()
-      .back(goBackButton, (context) => {
-        context.editMessageText(getSettingsMenuMessage(context.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
-      });
+      .back(goBackButton, (context) =>
+        context.editMessageText(getSettingsMenuMessage(context.chatSession.chatSettings), { parse_mode: 'HTML' }),
+      );
 
     return this.settingsAirRaidAlertObj;
   }
@@ -138,9 +128,9 @@ export class SettingsCommand {
   initDescriptionSubmenu() {
     this.settingsDescriptionObj = new MiddlewareMenu('settingsDescriptionSubmenu')
       .addGlobalMiddlewares(onlyAdmin)
-      .back(goBackButton, (context) => {
-        context.editMessageText(getSettingsMenuMessage(context.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
-      });
+      .back(goBackButton, (context) =>
+        context.editMessageText(getSettingsMenuMessage(context.chatSession.chatSettings), { parse_mode: 'HTML' }),
+      );
 
     return this.settingsDescriptionObj;
   }
