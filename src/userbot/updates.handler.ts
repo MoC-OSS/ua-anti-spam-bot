@@ -7,7 +7,7 @@ import { mentionRegexp, urlRegexp } from 'ukrainian-ml-optimizer';
 
 import type { loadUserbotDatasetExtras } from '../../dataset/dataset';
 import type { DynamicStorageService, SwindlersBotsService, SwindlersDetectService } from '../services';
-import { redisService, swindlersGoogleService } from '../services';
+import { mentionService, redisService, swindlersGoogleService } from '../services';
 import type { SwindlersTensorService, TensorService } from '../tensor';
 import type { ProtoUpdate, SwindlerType } from '../types';
 
@@ -102,7 +102,7 @@ export class UpdatesHandler {
       const isRateGood = from !== 'tensor' || spamRate > 0.95;
 
       if (isGoodMatch && isRateGood) {
-        const allMentions = this.swindlersBotsService.parseMentions(message);
+        const allMentions = mentionService.parseMentions(message);
         const trainingBots = await redisService.getTrainingBots();
         const newMentions = (allMentions || []).filter(
           (item) => ![...this.dynamicStorageService.swindlerBots, ...trainingBots].includes(item),

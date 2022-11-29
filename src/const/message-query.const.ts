@@ -1,4 +1,10 @@
-import type { FilterQuery } from 'grammy/out/filter';
+import type { FilterQuery } from 'grammy';
+
+/**
+ * Returns a valid tuple type for query.
+ * It returns the same type that has been passed but types it
+ * */
+export const getValidQueryType = <T extends FilterQuery[]>(value: T): T => value;
 
 /**
  * @description
@@ -12,4 +18,4 @@ import type { FilterQuery } from 'grammy/out/filter';
  *
  * @use isNotChannel to exclude channels for this query
  * */
-export const messageQuery: FilterQuery | FilterQuery[] = [':text', ':forward_date', ':poll', ':caption'];
+export const messageQuery = getValidQueryType([':text', ':forward_date', ':poll', ':caption']);

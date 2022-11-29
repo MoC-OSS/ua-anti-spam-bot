@@ -32,7 +32,6 @@ export interface SwindlerTensorResult {
   spamRate: number;
   deleteRank: number;
   isSpam: boolean;
-  tensorRank: number[];
   fileStat: fs.Stats;
 }
 

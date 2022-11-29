@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import type { SwindlersCardsService, SwindlersUrlsService } from '../src/services';
-import { swindlersGoogleService } from '../src/services';
+import { cardsService, swindlersGoogleService, urlService } from '../src/services';
 import { removeDuplicates } from '../src/utils';
 
 const notSwindlers = new Set([
@@ -37,10 +37,10 @@ async function processUrls(swindlersUrlsService: SwindlersUrlsService, savedSwin
   const notMatchedDomains: string[] = [];
   const swindlerUrlsCheckPromises = removeDuplicates([
     ...savedSwindlersUrls,
-    ...swindlers.flatMap((message) => swindlersUrlsService.parseUrls(message)),
+    ...swindlers.flatMap((message) => urlService.parseUrls(message)),
   ])
     .filter((url) => {
-      const urlDomain = swindlersUrlsService.getUrlDomain(url);
+      const urlDomain = urlService.getUrlDomain(url);
       return !!urlDomain;
     })
     .map(
@@ -48,7 +48,7 @@ async function processUrls(swindlersUrlsService: SwindlersUrlsService, savedSwin
        * @param {string} url
        * */
       (url) => {
-        const urlDomain = swindlersUrlsService.getUrlDomain(url);
+        const urlDomain = urlService.getUrlDomain(url);
         const validUrl = url.endsWith('/') ? url : `${url}/`;
         const isSwindler = swindlersUrlsService.isSpamUrl(validUrl);
 
@@ -109,7 +109,7 @@ export const autoSwindlers = async (
     .filter((item) => item !== 't.me');
 
   const newSwindlersBots = findSwindlersByPattern(swindlersBots, mentionRegexp).filter((bot) => !swindlersUsers.includes(bot));
-  const newSwindlersCards = removeDuplicates([...swindlersCards, ...swindlers.flatMap((item) => swindlersCardsService.parseCards(item))]);
+  const newSwindlersCards = removeDuplicates([...swindlersCards, ...swindlers.flatMap((item) => cardsService.parseCards(item))]);
 
   console.info('notMatchedUrls\n');
   console.info(notMatchedUrls.join('\n'));

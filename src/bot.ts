@@ -19,11 +19,19 @@ import {
   getSaveToSheetComposer,
   getTensorTrainingComposer,
 } from './bot/composers';
-import { getStrategicComposer, getSwindlersComposer } from './bot/composers/messages';
+import {
+  getNoCardsComposer,
+  getNoMentionsComposer,
+  getNoUrlsComposer,
+  getStrategicComposer,
+  getSwindlersComposer,
+} from './bot/composers/messages';
+import { getNoForwardsComposer } from './bot/composers/messages/no-forward.composer';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
 import { DeleteSwindlersMiddleware, GlobalMiddleware } from './bot/middleware';
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
+import { deleteMessageTransformer } from './bot/transformers';
 import { runBotExpressServer } from './bot-express.server';
 import { environmentConfig } from './config';
 import { logsChat, swindlerBotsChatId, swindlerHelpChatId, swindlerMessageChatId } from './creator';
@@ -133,10 +141,21 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   });
 
   // Message composers
+  const { noCardsComposer } = getNoCardsComposer();
+  const { noUrlsComposer } = getNoUrlsComposer();
+  const { noMentionsComposer } = getNoMentionsComposer();
+  const { noForwardsComposer } = getNoForwardsComposer();
   const { swindlersComposer } = getSwindlersComposer({ deleteSwindlersMiddleware });
   const { strategicComposer } = getStrategicComposer({ onTextListener });
 
-  const { messagesComposer } = getMessagesComposer({ swindlersComposer, strategicComposer });
+  const { messagesComposer } = getMessagesComposer({
+    noCardsComposer,
+    noUrlsComposer,
+    noMentionsComposer,
+    noForwardsComposer,
+    swindlersComposer,
+    strategicComposer,
+  });
 
   rootMenu.register(tensorListener.initMenu(trainingThrottler));
 
@@ -159,6 +178,12 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 
   bot.use(redisSession.middleware());
   bot.use(redisChatSession.middleware());
+
+  // Set message as deleted when deleteMessage method has been called
+  bot.use((context, next) => {
+    context.api.config.use(deleteMessageTransformer(context));
+    return next();
+  });
 
   bot.use(rootMenu as unknown as Menu<GrammyContext>);
 
@@ -217,7 +242,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 
   console.info(`Bot @${bot.botInfo.username} started!`, new Date().toString());
 
-  if (!environmentConfig.DEBUG) {
+  if (environmentConfig.ENV !== 'local') {
     bot.api
       .sendMessage(logsChat, `🎉 <b>Bot @${bot.botInfo.username} has been started!</b>\n<i>${new Date().toString()}</i>`, {
         parse_mode: 'HTML',
@@ -225,22 +250,22 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
       .catch(() => {
         console.error('This bot is not authorized in this LOGS chat!');
       });
+
+    /**
+     * Enable alarm service only after bot is started
+     * */
+    alarmService.updatesEmitter.on('connect', () => {
+      bot.api.sendMessage(logsChat, '🎉 Air Raid Alarm API has been started!').catch(() => {
+        console.error('This bot is not authorized in this LOGS chat!');
+      });
+    });
+
+    alarmService.updatesEmitter.on('close', () => {
+      bot.api.sendMessage(logsChat, '⛔️ Air Raid Alarm API has been stopped!').catch(() => {
+        console.error('This bot is not authorized in this LOGS chat!');
+      });
+    });
   }
-
-  /**
-   * Enable alarm service only after bot is started
-   * */
-  alarmService.updatesEmitter.on('connect', () => {
-    bot.api.sendMessage(logsChat, '🎉 Air Raid Alarm API has been started!').catch(() => {
-      console.error('This bot is not authorized in this LOGS chat!');
-    });
-  });
-
-  alarmService.updatesEmitter.on('close', () => {
-    bot.api.sendMessage(logsChat, '⛔️ Air Raid Alarm API has been stopped!').catch(() => {
-      console.error('This bot is not authorized in this LOGS chat!');
-    });
-  });
 
   alarmService.enable();
 
