@@ -321,7 +321,7 @@ export interface DeleteFeatureMessageProperties extends DeleteMessageAtomPropert
 export const getDeleteFeatureMessage = ({ writeUsername, userId, featuresString }: DeleteFeatureMessageProperties) => `
 ${getDeleteUserAtomMessage({ writeUsername, userId })}
 
-Відправка повідомлень з ${featuresString} недоступна в по правилам цього чату.
+Відправка повідомлень з ${featuresString} недоступна по правилам цього чату.
 `;
 
 export interface DebugMessageProperties {
