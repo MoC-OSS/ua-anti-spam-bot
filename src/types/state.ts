@@ -24,6 +24,7 @@ export interface StateFlavor<S> {
 interface OnlyWithTextMiddlewareState {
   text?: string;
   urls?: string[];
+  mentions?: string[];
 }
 
 interface PerformanceMiddlewareState {

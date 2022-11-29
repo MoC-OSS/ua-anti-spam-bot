@@ -10,6 +10,7 @@ import {
   onlyNotAdmin,
   onlyWhenBotAdmin,
   onlyWithText,
+  parseMentions,
   parseText,
   parseUrls,
   performanceEndMiddleware,
@@ -18,6 +19,7 @@ import {
 
 export interface MessagesComposerProperties {
   noUrlsComposer: Composer<GrammyContext>;
+  noMentionsComposer: Composer<GrammyContext>;
   swindlersComposer: Composer<GrammyContext>;
   strategicComposer: Composer<GrammyContext>;
 }
@@ -25,7 +27,12 @@ export interface MessagesComposerProperties {
 /**
  * @description Message handling composer
  * */
-export const getMessagesComposer = ({ noUrlsComposer, strategicComposer, swindlersComposer }: MessagesComposerProperties) => {
+export const getMessagesComposer = ({
+  noUrlsComposer,
+  noMentionsComposer,
+  strategicComposer,
+  swindlersComposer,
+}: MessagesComposerProperties) => {
   const messagesComposer = new Composer<GrammyContext>();
 
   /**
@@ -56,6 +63,8 @@ export const getMessagesComposer = ({ noUrlsComposer, strategicComposer, swindle
    * */
   registerModule(parseUrls);
   registerModule(noUrlsComposer);
+  registerModule(parseMentions);
+  registerModule(noMentionsComposer);
   registerModule(swindlersComposer);
   registerModule(strategicComposer);
 

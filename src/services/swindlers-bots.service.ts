@@ -1,18 +1,11 @@
 import FuzzySet from 'fuzzyset';
 
 import type { SwindlersBotsResult } from '../types';
-import { removeDuplicates } from '../utils';
 
 import type { DynamicStorageService } from './dynamic-storage.service';
+import { mentionService } from './mention.service';
 
 export class SwindlersBotsService {
-  readonly mentionRegexp = /\B@\w+/g;
-
-  readonly urlRegexp =
-    /(https?:\/\/(?:www\.|(?!www))?[\dA-Za-z][\dA-Za-z-]+[\dA-Za-z]\.\S{2,}|www\.[\dA-Za-z][\dA-Za-z-]+[\dA-Za-z]\.\S{2,}|(https?:\/\/(?:www\.|(?!www)))?[\dA-Za-z-]+\.\S{2,}|www\.?[\dA-Za-z]+\.\S{2,})/g;
-
-  readonly telegramDomainRegexp = /^(https?:\/\/)?(www\.)?t\.me\/(.{1,256})/g;
-
   exceptionMentions: string[] = [];
 
   swindlersBotsFuzzySet!: FuzzySet;
@@ -31,7 +24,7 @@ export class SwindlersBotsService {
    * @param {string} message - raw message from user to parse
    */
   processMessage(message: string): SwindlersBotsResult | null {
-    const mentions = this.parseMentions(message);
+    const mentions = mentionService.parseMentions(message, this.exceptionMentions);
     if (mentions) {
       let lastResult: null | SwindlersBotsResult = null;
 
@@ -54,21 +47,6 @@ export class SwindlersBotsService {
    * */
   initFuzzySet() {
     this.swindlersBotsFuzzySet = FuzzySet(this.dynamicStorageService.swindlerBots);
-  }
-
-  /**
-   * @param {string} message - raw message from user to parse
-   *
-   * @returns {string[]}
-   */
-  parseMentions(message: string): string[] {
-    const directMentions = message.match(this.mentionRegexp) || [];
-    const linkMentions = (message.match(this.urlRegexp) || [])
-      .filter((url) => url.split('/').includes('t.me'))
-      .map((url) => url.split('/').splice(-1)[0])
-      .map((mention) => (mention[mention.length - 1] === '.' ? `@${mention.slice(0, -1)}` : `@${mention}`));
-
-    return removeDuplicates([...directMentions, ...linkMentions]).filter((item) => !this.exceptionMentions.includes(item));
   }
 
   /**

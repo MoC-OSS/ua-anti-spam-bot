@@ -44,6 +44,7 @@ export interface ChatSettings {
   disableDeleteMessage?: boolean;
   disableSwindlerMessage?: boolean;
   enableDeleteUrls?: boolean;
+  enableDeleteMentions?: boolean;
 }
 
 export interface ChatSessionData {

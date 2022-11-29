@@ -140,7 +140,9 @@ export const getSettingsMenuMessage = (settings: ChatSessionData['chatSettings']
       : '✅ Бот повідомляє про видалену стратегічну інформацію.'
   }
 💰 ${settings.disableSwindlerMessage ? '⛔️ Бот не видаляє повідомлення шахраїв.' : '✅ Бот видаляє повідомлення шахраїв.'}
+
 🔗 ${settings.enableDeleteUrls ? '✅ Бот видаляє повідомлення з посиланнями.' : '⛔ Бот не видаляє повідомлення з посиланнями.'}
+⚓ ${settings.enableDeleteMentions ? '✅ Бот видаляє повідомлення зі згадуваннями.' : '⛔ Бот не видаляє повідомлення зі згадуваннями.'}
 
 <b>Налаштування повітряної тривоги.</b>
 🏰 ${
@@ -222,6 +224,7 @@ export const deleteMessageButton = '❗ Причина';
 export const deleteSwindlerButton = '💰 Шахраї';
 
 export const deleteUrlsButton = '🔗 Посилання';
+export const deleteMentionButton = '⚓ Згадування';
 
 export const airAlarmAlertButton = '🏰 Регіон';
 export const airAlarmNotificationMessage = '📢 Тривога';
@@ -234,7 +237,8 @@ export const englishDeleteTensorButton = `🚀 Incident`;
 export const englishDeleteMessageButton = '❗ Reason';
 export const englishDeleteSwindlerButton = '💰 Scam';
 
-export const englishUrlsButton = '🔗 Link';
+export const englishDeleteUrlsButton = '🔗 Link';
+export const englishDeleteMentionButton = '⚓ Mention';
 
 export const englishAirAlarmAlertButton = '🏰 Region';
 export const englishAirAlarmNotificationMessage = '📢 Alarm';
@@ -321,7 +325,7 @@ export interface DeleteFeatureMessageProperties extends DeleteMessageAtomPropert
 export const getDeleteFeatureMessage = ({ writeUsername, userId, featuresString }: DeleteFeatureMessageProperties) => `
 ${getDeleteUserAtomMessage({ writeUsername, userId })}
 
-Відправка повідомлень з ${featuresString} недоступна по правилам цього чату.
+🤫 Відправка повідомлень з <b>${featuresString}</b> недоступна по правилам цього чату.
 `;
 
 export interface DebugMessageProperties {
