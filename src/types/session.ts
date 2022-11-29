@@ -43,6 +43,7 @@ export interface ChatSettings {
   disableStrategicInfo?: boolean;
   disableDeleteMessage?: boolean;
   disableSwindlerMessage?: boolean;
+  enableDeleteCards?: boolean;
   enableDeleteUrls?: boolean;
   enableDeleteMentions?: boolean;
   enableDeleteForwards?: boolean;

@@ -13,6 +13,7 @@ export * from './only-not-forwarded.middleware';
 export * from './only-when-bot-admin.middleware';
 export * from './only-whitelisted';
 export * from './only-with-text.middleware';
+export * from './parse-cards.middleware';
 export * from './parse-mentions.middleware';
 export * from './parse-text.middleware';
 export * from './parse-urls.middleware';

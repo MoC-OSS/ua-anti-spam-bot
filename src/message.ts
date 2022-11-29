@@ -141,6 +141,8 @@ export const getSettingsMenuMessage = (settings: ChatSessionData['chatSettings']
   }
 💰 ${settings.disableSwindlerMessage ? '⛔️ Бот не видаляє повідомлення шахраїв.' : '✅ Бот видаляє повідомлення шахраїв.'}
 
+💳 ${settings.enableDeleteCards ? '✅ Бот видаляє повідомлення з катками.' : '⛔ Бот не видаляє повідомлення з катками.'}
+
 🔗 ${settings.enableDeleteUrls ? '✅ Бот видаляє повідомлення з посиланнями.' : '⛔ Бот не видаляє повідомлення з посиланнями.'}
 ⚓ ${settings.enableDeleteMentions ? '✅ Бот видаляє повідомлення зі згадуваннями.' : '⛔ Бот не видаляє повідомлення зі згадуваннями.'}
 ↩️ ${settings.enableDeleteForwards ? '✅ Бот видаляє повідомлення з пересиланнями.' : '⛔ Бот не видаляє повідомлення з пересиланнями.'}
@@ -224,6 +226,8 @@ export const deleteTensorButton = `🚀 Інцидент`;
 export const deleteMessageButton = '❗ Причина';
 export const deleteSwindlerButton = '💰 Шахраї';
 
+export const deleteCardsButton = '💳 Картки';
+
 export const deleteUrlsButton = '🔗 Посилання';
 export const deleteMentionButton = '⚓ Згадування';
 export const deleteForwardedButton = '↩️ Пересилання';
@@ -238,6 +242,8 @@ export const turnOffChatWhileAlarmButton = '🤫 Тиша';
 export const englishDeleteTensorButton = `🚀 Incident`;
 export const englishDeleteMessageButton = '❗ Reason';
 export const englishDeleteSwindlerButton = '💰 Scam';
+
+export const englishDeleteCardsButton = '💳 Cards';
 
 export const englishDeleteUrlsButton = '🔗 Link';
 export const englishDeleteMentionButton = '⚓ Mention';

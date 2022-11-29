@@ -25,6 +25,7 @@ interface OnlyWithTextMiddlewareState {
   text?: string;
   urls?: string[];
   mentions?: string[];
+  cards?: string[];
 }
 
 interface PerformanceMiddlewareState {

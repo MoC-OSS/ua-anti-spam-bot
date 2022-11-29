@@ -10,6 +10,7 @@ import {
   onlyNotAdmin,
   onlyWhenBotAdmin,
   onlyWithText,
+  parseCards,
   parseMentions,
   parseText,
   parseUrls,
@@ -18,6 +19,7 @@ import {
 } from '../middleware';
 
 export interface MessagesComposerProperties {
+  noCardsComposer: Composer<GrammyContext>;
   noUrlsComposer: Composer<GrammyContext>;
   noMentionsComposer: Composer<GrammyContext>;
   noForwardsComposer: Composer<GrammyContext>;
@@ -29,6 +31,7 @@ export interface MessagesComposerProperties {
  * @description Message handling composer
  * */
 export const getMessagesComposer = ({
+  noCardsComposer,
   noUrlsComposer,
   noMentionsComposer,
   noForwardsComposer,
@@ -67,6 +70,8 @@ export const getMessagesComposer = ({
   registerModule(noUrlsComposer);
   registerModule(parseMentions);
   registerModule(noMentionsComposer);
+  registerModule(parseCards);
+  registerModule(noCardsComposer);
   registerModule(noForwardsComposer);
   registerModule(swindlersComposer);
   registerModule(strategicComposer);

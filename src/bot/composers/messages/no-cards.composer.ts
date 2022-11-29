@@ -7,14 +7,14 @@ import { getEnabledFeaturesString, getUserData } from '../../../utils';
 /**
  * @description Remove strategic information logic
  * */
-export const getNoMentionsComposer = () => {
-  const noMentionsComposer = new Composer<GrammyContext>();
+export const getNoCardsComposer = () => {
+  const noCardsComposer = new Composer<GrammyContext>();
 
-  noMentionsComposer.use(async (context, next) => {
-    const isFeatureEnabled = context.chatSession.chatSettings.enableDeleteMentions;
-    const areMentionsIncluded = context.state.mentions && context.state.mentions.length > 0;
+  noCardsComposer.use(async (context, next) => {
+    const isFeatureEnabled = context.chatSession.chatSettings.enableDeleteCards;
+    const areCardsIncluded = context.state.cards && context.state.cards.length > 0;
 
-    if (isFeatureEnabled && areMentionsIncluded) {
+    if (isFeatureEnabled && areCardsIncluded) {
       await context.deleteMessage();
 
       const { writeUsername, userId } = getUserData(context);
@@ -27,5 +27,5 @@ export const getNoMentionsComposer = () => {
     return next();
   });
 
-  return { noMentionsComposer };
+  return { noCardsComposer };
 };

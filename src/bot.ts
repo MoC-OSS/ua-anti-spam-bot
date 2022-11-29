@@ -19,7 +19,13 @@ import {
   getSaveToSheetComposer,
   getTensorTrainingComposer,
 } from './bot/composers';
-import { getNoMentionsComposer, getNoUrlsComposer, getStrategicComposer, getSwindlersComposer } from './bot/composers/messages';
+import {
+  getNoCardsComposer,
+  getNoMentionsComposer,
+  getNoUrlsComposer,
+  getStrategicComposer,
+  getSwindlersComposer,
+} from './bot/composers/messages';
 import { getNoForwardsComposer } from './bot/composers/messages/no-forward.composer';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
@@ -134,6 +140,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   });
 
   // Message composers
+  const { noCardsComposer } = getNoCardsComposer();
   const { noUrlsComposer } = getNoUrlsComposer();
   const { noMentionsComposer } = getNoMentionsComposer();
   const { noForwardsComposer } = getNoForwardsComposer();
@@ -141,6 +148,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   const { strategicComposer } = getStrategicComposer({ onTextListener });
 
   const { messagesComposer } = getMessagesComposer({
+    noCardsComposer,
     noUrlsComposer,
     noMentionsComposer,
     noForwardsComposer,

@@ -2,6 +2,7 @@ import {
   airAlarmAlertButton,
   airAlarmNotificationMessage,
   blockWhenAlarm,
+  deleteCardsButton,
   deleteForwardedButton,
   deleteMentionButton,
   deleteMessageButton,
@@ -83,6 +84,8 @@ export class SettingsCommand {
       .text(deleteTensorButton, (context) => toggleSetting(context, 'disableStrategicInfo'))
       .text(deleteMessageButton, (context) => toggleSetting(context, 'disableDeleteMessage'))
       .text(deleteSwindlerButton, (context) => toggleSetting(context, 'disableSwindlerMessage'))
+      .row()
+      .text(deleteCardsButton, (context) => toggleSetting(context, 'enableDeleteCards'))
       .row()
       .text(deleteUrlsButton, (context) => toggleSetting(context, 'enableDeleteUrls'))
       .text(deleteMentionButton, (context) => toggleSetting(context, 'enableDeleteMentions'))
