@@ -3,7 +3,7 @@ export * from './bot-redis-active.middleware';
 export * from './delete-message.middleware';
 export * from './delete-swindlers.middleware';
 export * from './global.middleware';
-export * from './ignore-by-settings.middleware';
+export * from './ignore-by-default-settings.middleware';
 export * from './ignore-old.middleware';
 export * from './log-context.middleware';
 export * from './nested.middleware';

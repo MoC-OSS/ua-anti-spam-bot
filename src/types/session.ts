@@ -37,16 +37,24 @@ export interface AirRaidAlertSettings {
   notificationMessage: boolean;
 }
 
-export interface ChatSettings {
-  airRaidAlertSettings: AirRaidAlertSettings;
+export interface DefaultChatSettings {
   disableChatWhileAirRaidAlert: boolean;
   disableStrategicInfo?: boolean;
   disableDeleteMessage?: boolean;
   disableSwindlerMessage?: boolean;
+}
+
+export interface OptionalChatSettings {
   enableDeleteCards?: boolean;
   enableDeleteUrls?: boolean;
   enableDeleteMentions?: boolean;
   enableDeleteForwards?: boolean;
+}
+
+export type BooleanChatSettings = DefaultChatSettings & OptionalChatSettings;
+
+export interface ChatSettings extends BooleanChatSettings {
+  airRaidAlertSettings: AirRaidAlertSettings;
 }
 
 export interface ChatSessionData {

@@ -17,13 +17,13 @@ import {
   turnOffChatWhileAlarmButton,
 } from '../../../message';
 import { alarmChatService } from '../../../services';
-import type { ChatSessionData, GrammyContext, GrammyMiddleware, State } from '../../../types';
+import type { BooleanChatSettings, GrammyContext, GrammyMiddleware, State } from '../../../types';
 import { onlyAdmin } from '../../middleware';
 import { MiddlewareMenu } from '../../middleware-menu.menu';
 
 import { dynamicLocationMenu } from './air-raid-alarm/locations-menu-generator';
 
-const toggleSetting = (context: GrammyContext, key: keyof Omit<ChatSessionData['chatSettings'], 'airRaidAlertSettings'>) => {
+const toggleSetting = (context: GrammyContext, key: keyof BooleanChatSettings) => {
   context.chatSession.chatSettings[key] = !context.chatSession.chatSettings[key];
   const newText = getSettingsMenuMessage(context.chatSession.chatSettings);
 

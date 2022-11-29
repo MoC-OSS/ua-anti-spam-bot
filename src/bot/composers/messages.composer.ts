@@ -1,8 +1,8 @@
 import { Composer } from 'grammy';
 
 import { messageQuery } from '../../const';
-import type { GrammyContext, GrammyMiddleware } from '../../types';
-import { isNotChannel, onlyNotDeletedFilter } from '../filters';
+import type { DefaultChatSettings, GrammyContext, GrammyMiddleware, OptionalChatSettings } from '../../types';
+import { isNotChannel, onlyActiveDefaultSettingFilter, onlyActiveOptionalSettingFilter, onlyNotDeletedFilter } from '../filters';
 import {
   botActiveMiddleware,
   botRedisActive,
@@ -59,27 +59,42 @@ export const getMessagesComposer = ({
   /**
    * Registers a message handler module with correct filter to not make extra checks
    * */
-  const registerModule = (middleware: Composer<GrammyContext> | GrammyMiddleware) => {
-    readyMessagesComposer.filter((context) => onlyNotDeletedFilter(context)).use(middleware);
+  const registerModule = (...middlewares: (Composer<GrammyContext> | GrammyMiddleware)[]) => {
+    readyMessagesComposer.filter((context) => onlyNotDeletedFilter(context)).use(...middlewares);
+  };
+
+  /**
+   * Register a module that will be called only if optional settings is enabled
+   * */
+  const registerDefaultSettingModule = (key: keyof DefaultChatSettings, ...middlewares: (Composer<GrammyContext> | GrammyMiddleware)[]) => {
+    readyMessagesComposer
+      .filter((context) => onlyNotDeletedFilter(context))
+      .filter((context) => onlyActiveDefaultSettingFilter(key)(context))
+      .use(...middlewares);
+  };
+
+  /**
+   * Register a module that will be called only if optional settings is enabled
+   * */
+  const registerOptionalSettingModule = (
+    key: keyof OptionalChatSettings,
+    ...middlewares: (Composer<GrammyContext> | GrammyMiddleware)[]
+  ) => {
+    readyMessagesComposer
+      .filter((context) => onlyNotDeletedFilter(context))
+      .filter((context) => onlyActiveOptionalSettingFilter(key)(context))
+      .use(...middlewares);
   };
 
   /**
    * Register modules.
    * The order should be right
    * */
-  registerModule(swindlersComposer);
-
-  registerModule(parseUrls);
-  registerModule(noUrlsComposer);
-
-  registerModule(parseMentions);
-  registerModule(noMentionsComposer);
-
-  registerModule(parseCards);
-  registerModule(noCardsComposer);
-
-  registerModule(noForwardsComposer);
-
+  registerDefaultSettingModule('disableSwindlerMessage', swindlersComposer);
+  registerOptionalSettingModule('enableDeleteUrls', parseUrls, noUrlsComposer);
+  registerOptionalSettingModule('enableDeleteMentions', parseMentions, noMentionsComposer);
+  registerOptionalSettingModule('enableDeleteCards', parseCards, noCardsComposer);
+  registerOptionalSettingModule('enableDeleteForwards', noForwardsComposer);
   registerModule(strategicComposer);
 
   readyMessagesComposer.use(performanceEndMiddleware);
