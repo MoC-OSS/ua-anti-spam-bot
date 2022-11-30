@@ -37,6 +37,20 @@ describe('MentionService', () => {
       expect(result).toEqual(['@another_test', '@another_mention', '@test_mention']);
     });
 
+    it('should exclude special symbols', () => {
+      const text = `@UAdopamoga_bot,#$%^&*()-_= @UAdopamoga_bot,`;
+      const result = mentionService.parseMentions(text);
+
+      expect(result).toEqual(['@UAdopamoga_bot']);
+    });
+
+    it('should exclude special symbols from url', () => {
+      const text = `https://t.me/test, https://t.me/test. https://t.me/test!`;
+      const result = mentionService.parseMentions(text);
+
+      expect(result).toEqual(['@test']);
+    });
+
     it('should exclude mentions from exclude list', () => {
       const exceptionMentions = ['@exception_mention'];
       const text = `@another_test ${exceptionMentions[0]}`;
