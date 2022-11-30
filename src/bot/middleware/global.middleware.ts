@@ -3,7 +3,7 @@ import type { NextFunction } from 'grammy';
 
 import { environmentConfig } from '../../config';
 import type { AirRaidAlertSettings, ChatSettings, GrammyContext, GrammyMiddleware } from '../../types';
-import { emptyFunction, handleError, logContext, telegramUtil } from '../../utils';
+import { emptyFunction, handleError, telegramUtil } from '../../utils';
 
 export class GlobalMiddleware {
   /**
@@ -17,18 +17,13 @@ export class GlobalMiddleware {
        * TODO create a middleware to skip it
        * */
       if (!context.chatSession || !context.session) {
-        if (environmentConfig.DEBUG) {
+        if (environmentConfig.DEBUG && context.chat?.type !== 'channel') {
           handleError(new Error('No session'), 'SESSION_ERROR');
         }
 
         return next();
       }
 
-      if (!environmentConfig.TEST_TENSOR) {
-        logContext(context);
-      }
-
-      this.createState(context);
       await this.updateChatInfo(context);
       await this.updateChatSessionIfEmpty(context);
 
@@ -112,12 +107,6 @@ export class GlobalMiddleware {
           context.chatSession.botAdminDate = isBotAdmin ? new Date() : null;
         })
         .catch(emptyFunction);
-    }
-  }
-
-  createState(context: GrammyContext) {
-    if (!context.state) {
-      context.state = {};
     }
   }
 }

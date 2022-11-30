@@ -1,4 +1,5 @@
 import { EventEmitter } from 'node:events';
+import ms from 'ms';
 import type TypedEmitter from 'typed-emitter';
 import { optimizeText } from 'ukrainian-ml-optimizer';
 
@@ -54,7 +55,7 @@ export class DynamicStorageService {
       this.updateSwindlers().catch((error) => {
         console.error('Cannot update swindlers on interval. Reason:', error);
       });
-    }, 1000 * 60 * 60);
+    }, ms('1h'));
   }
 
   async updateSwindlers() {
@@ -71,9 +72,9 @@ export class DynamicStorageService {
       this.swindlerMessages = removeDuplicates(swindlerPositives)
         .map((element) => optimizeText(element))
         .filter(Boolean);
-      this.swindlerBots = removeDuplicates(swindlerBots);
-      this.swindlerDomains = removeDuplicates(swindlerDomains);
       this.notSwindlers = removeDuplicates(notSwindlers);
+      this.swindlerBots = removeDuplicates(swindlerBots).filter((item) => !this.notSwindlers.includes(item));
+      this.swindlerDomains = removeDuplicates(swindlerDomains).filter((item) => !this.notSwindlers.includes(item));
       this.swindlerCards = removeDuplicates(swindlerCards);
       this.swindlerRegexSites = removeDuplicates(swindlerRegexSites);
       this.fetchEmitter.emit('fetch');

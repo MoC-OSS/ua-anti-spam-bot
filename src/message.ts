@@ -25,6 +25,7 @@ export const somethingWentWrongMessage = 'Сталась якась помилк
 export const makeAdminMessage = '⛔️ Я не активований.\n<b>☝️Зроби мене адміністратором, щоб я міг видаляти повідомлення.</b>';
 export const hasDeletePermissionMessage = '✅ Я маю права на видалення повідомлень';
 export const hasNoDeletePermissionMessage = '⛔ Я не маю права на видалення повідомлень';
+export const featureNoAdminMessage = '⛔️ Я не активований.\n<b>☝️Зроби мене адміністратором, щоб я міг дати цей функціонал.</b>';
 
 /**
  * Generic - Swindlers
@@ -96,9 +97,12 @@ export const getRandomAlarmEndText = () => {
 
 /**
  * @param {ChatSessionData['chatSettings']} settings
+ * @param isRepeatedAlarm
  * */
-export const getAlarmStartNotificationMessage = (settings: ChatSessionData['chatSettings']) => `
-🔴 <b> ${getCurrentTimeAndDate()} Повітряна тривога в ${formatStateIntoAccusative(settings.airRaidAlertSettings.state || '')}!</b>
+export const getAlarmStartNotificationMessage = (settings: ChatSessionData['chatSettings'], isRepeatedAlarm = false) => `
+🔴 <b> ${getCurrentTimeAndDate()} ${isRepeatedAlarm ? 'Повторна повітряна' : 'Повітряна'} тривога в ${formatStateIntoAccusative(
+  settings.airRaidAlertSettings.state || '',
+)}!</b>
 ${getRandomAlarmStartText()}
 `;
 
@@ -136,6 +140,12 @@ export const getSettingsMenuMessage = (settings: ChatSessionData['chatSettings']
       : '✅ Бот повідомляє про видалену стратегічну інформацію.'
   }
 💰 ${settings.disableSwindlerMessage ? '⛔️ Бот не видаляє повідомлення шахраїв.' : '✅ Бот видаляє повідомлення шахраїв.'}
+
+💳 ${settings.enableDeleteCards ? '✅ Бот видаляє повідомлення з картками.' : '⛔ Бот не видаляє повідомлення з картками.'}
+🔗 ${settings.enableDeleteUrls ? '✅ Бот видаляє повідомлення з посиланнями.' : '⛔ Бот не видаляє повідомлення з посиланнями.'}
+
+⚓ ${settings.enableDeleteMentions ? '✅ Бот видаляє повідомлення зі @ згадуваннями.' : '⛔ Бот не видаляє повідомлення зі @ згадуваннями.'}
+↩️ ${settings.enableDeleteForwards ? '✅ Бот видаляє повідомлення з пересиланнями.' : '⛔ Бот не видаляє повідомлення з пересиланнями.'}
 
 <b>Налаштування повітряної тривоги.</b>
 🏰 ${
@@ -216,6 +226,12 @@ export const deleteTensorButton = `🚀 Інцидент`;
 export const deleteMessageButton = '❗ Причина';
 export const deleteSwindlerButton = '💰 Шахраї';
 
+export const deleteCardsButton = '💳 Картки';
+export const deleteUrlsButton = '🔗 Посилання';
+
+export const deleteMentionButton = '⚓ Згадування';
+export const deleteForwardedButton = '↩️ Пересилання';
+
 export const airAlarmAlertButton = '🏰 Регіон';
 export const airAlarmNotificationMessage = '📢 Тривога';
 export const turnOffChatWhileAlarmButton = '🤫 Тиша';
@@ -226,6 +242,12 @@ export const turnOffChatWhileAlarmButton = '🤫 Тиша';
 export const englishDeleteTensorButton = `🚀 Incident`;
 export const englishDeleteMessageButton = '❗ Reason';
 export const englishDeleteSwindlerButton = '💰 Scam';
+
+export const englishDeleteCardsButton = '💳 Cards';
+
+export const englishDeleteUrlsButton = '🔗 Link';
+export const englishDeleteMentionButton = '⚓ Mention';
+export const englishDeleteForwardedButton = '↩️ Forward';
 
 export const englishAirAlarmAlertButton = '🏰 Region';
 export const englishAirAlarmNotificationMessage = '📢 Alarm';
@@ -267,9 +289,17 @@ export const startMessageAtom = `
  * */
 export const getDeclinedMassSendingMessage = 'Вибач, але у тебе немає прав для цієї команди.😞'.trim();
 
-export interface DeleteMessageProperties {
+export interface DeleteMessageAtomProperties {
   writeUsername: string;
   userId?: number;
+}
+
+export const getDeleteUserAtomMessage = ({ writeUsername, userId }: DeleteMessageAtomProperties) =>
+  `
+❗️ ${userId && writeUsername ? `<a href="tg://user?id=${userId}">${writeUsername}</a>, <b>повідомлення` : '<b>Повідомлення'} видалено</b>.
+`.trim();
+
+export interface DeleteMessageProperties extends DeleteMessageAtomProperties {
   wordMessage: string;
   debugMessage: string;
   withLocation?: boolean;
@@ -282,7 +312,7 @@ export interface DeleteMessageProperties {
  * */
 export const getDeleteMessage = ({ writeUsername, userId, wordMessage, debugMessage, withLocation }: DeleteMessageProperties) =>
   `
-❗️ ${userId && writeUsername ? `<a href="tg://user?id=${userId}">${writeUsername}</a>, <b>повідомлення` : '<b>Повідомлення'} видалено</b>.
+${getDeleteUserAtomMessage({ writeUsername, userId })}
 
 ${getRandomItem(withLocation ? randomLocationBanEmojis : randomBanEmojis)} <b>Причина</b>: поширення потенційно стратегічної інформації${
     withLocation ? ' з повідомленням локації' : ''
@@ -296,6 +326,16 @@ ${getRandomItem(withLocation ? randomLocationBanEmojis : randomBanEmojis)} <b>П
 
 
 ${debugMessage}`.trim();
+
+export interface DeleteFeatureMessageProperties extends DeleteMessageAtomProperties {
+  featuresString: string;
+}
+
+export const getDeleteFeatureMessage = ({ writeUsername, userId, featuresString }: DeleteFeatureMessageProperties) => `
+${getDeleteUserAtomMessage({ writeUsername, userId })}
+
+🤫 Відправка повідомлень з <b>${featuresString}</b> недоступна по правилам цього чату.
+`;
 
 export interface DebugMessageProperties {
   message: string | undefined;

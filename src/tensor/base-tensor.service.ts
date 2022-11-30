@@ -85,7 +85,6 @@ export class BaseTensorService {
           spamRate: numericData[1],
           deleteRank,
           isSpam: numericData[1] > deleteRank,
-          tensorRank: tensorRank.tokenArray,
           fileStat,
         } as SwindlerTensorResult),
     ) as Promise<SwindlerTensorResult>;

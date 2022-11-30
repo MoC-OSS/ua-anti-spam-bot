@@ -1,4 +1,4 @@
-import { formatStateIntoAccusative } from './index';
+import { formatStateIntoAccusative, joinUkrainianConjunctions } from './index';
 
 describe('formatStateIntoAccusative', () => {
   const states = [
@@ -60,5 +60,25 @@ describe('formatStateIntoAccusative', () => {
     const newStates = states.map((state) => formatStateIntoAccusative(state));
 
     expect(newStates).toEqual(expectedStates);
+  });
+});
+
+describe('joinUkrainianConjunctions', () => {
+  it('should process one word', () => {
+    const result = joinUkrainianConjunctions(['слово']);
+
+    expect(result).toEqual('слово');
+  });
+
+  it('should process two words', () => {
+    const result = joinUkrainianConjunctions(['слово', 'діло']);
+
+    expect(result).toEqual('слово та діло');
+  });
+
+  it('should process two+ words', () => {
+    const result = joinUkrainianConjunctions(['слово', 'діло', 'справа', 'енергія']);
+
+    expect(result).toEqual('слово, діло, справа та енергія');
   });
 });

@@ -97,7 +97,7 @@ export class OnTextListener {
             debugMessage = getDebugMessage({ message, byRules: rep.byRules, startTime: this.startTime });
           }
 
-          if (trainingChatWhitelist && trainingChatWhitelist.includes(String(context.chat.id))) {
+          if (trainingChatWhitelist && Array.isArray(trainingChatWhitelist) && trainingChatWhitelist.includes(String(context.chat.id))) {
             context.api.sendMessage(privateTrainingChat, context.state.text || '').catch(() => handleError);
           }
 
@@ -129,7 +129,7 @@ export class OnTextListener {
                 }
 
                 return telegramUtil
-                  .getChatAdmins(this.bot, context.chat.id)
+                  .getChatAdmins(context, context.chat.id)
                   .then(({ adminsString }) => {
                     context
                       .replyWithHTML(getCannotDeleteMessage({ adminsString }), { reply_to_message_id: context.msg?.message_id })

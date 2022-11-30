@@ -23,13 +23,24 @@ export interface StateFlavor<S> {
  * */
 interface OnlyWithTextMiddlewareState {
   text?: string;
+  urls?: string[];
+  mentions?: string[];
+  cards?: string[];
 }
 
 interface PerformanceMiddlewareState {
   performanceStart?: DOMHighResTimeStamp;
 }
 
+/**
+ * It's used to skip text handlers when message already marked as deleted
+ * */
+interface IsDeletedState {
+  isDeleted?: boolean;
+}
+
 export type State = OnlyWithTextMiddlewareState &
+  IsDeletedState &
   PerformanceMiddlewareState & {
     // TODO move into separate file src/types/swindlers.ts and add enum for reason
     swindlersResult?: {

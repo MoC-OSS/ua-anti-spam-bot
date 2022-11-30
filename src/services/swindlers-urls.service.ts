@@ -2,10 +2,12 @@ import type { AxiosError } from 'axios';
 import axios from 'axios';
 import FuzzySet from 'fuzzyset';
 
+import { environmentConfig } from '../config';
 import type { SwindlersBaseResult, SwindlersUrlsResult } from '../types';
 
-import { EXCEPTION_DOMAINS, SHORTS, URL_REGEXP, VALID_URL_REGEXP } from './constants';
+import { EXCEPTION_DOMAINS, SHORTS } from './constants';
 import type { DynamicStorageService } from './dynamic-storage.service';
+import { urlService } from './url.service';
 
 const harmfulUrlStart = ['https://bitly.com/a/blocked'];
 
@@ -14,13 +16,18 @@ export class SwindlersUrlsService {
 
   swindlersFuzzySet!: FuzzySet;
 
+  exceptionUrls: string[];
+
   constructor(private dynamicStorageService: DynamicStorageService, private rate = 0.9) {
     this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
     console.info('swindlersRegex', this.swindlersRegex);
 
     this.initFuzzySet();
+    this.exceptionUrls = this.dynamicStorageService.notSwindlers;
+
     this.dynamicStorageService.fetchEmitter.on('fetch', () => {
       this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
+      this.exceptionUrls = this.dynamicStorageService.notSwindlers;
       console.info('swindlersRegex', this.swindlersRegex);
       this.initFuzzySet();
     });
@@ -44,7 +51,7 @@ export class SwindlersUrlsService {
    * @param {string} message - raw message from user to parse
    */
   async processMessage(message: string): Promise<SwindlersBaseResult | SwindlersUrlsResult | null> {
-    const urls = this.parseUrls(message);
+    const urls = urlService.parseUrls(message);
     if (urls.length > 0) {
       let lastResult: SwindlersBaseResult | SwindlersUrlsResult | null = null;
       const getUrls = urls.map((url) => this.isSpamUrl(url));
@@ -63,37 +70,6 @@ export class SwindlersUrlsService {
   }
 
   /**
-   * @param {string} message - raw message from user to parse
-   *
-   * @returns {string[] | false}
-   */
-  parseUrls(message: string): string[] {
-    return (message.match(URL_REGEXP) || []).filter((url) => {
-      const validUrl = url.slice(0, 4) === 'http' ? url : `https://${url}`;
-      try {
-        const urlInstance = new URL(validUrl);
-        return urlInstance && !EXCEPTION_DOMAINS.includes(urlInstance.host) && VALID_URL_REGEXP.test(validUrl);
-      } catch {
-        return [];
-      }
-    });
-  }
-
-  /**
-   * @param {string} url
-   * @returns {string | null}
-   */
-  getUrlDomain(url: string): string {
-    try {
-      const validUrl = url.slice(0, 4) === 'http' ? url : `https://${url}`;
-      return `${new URL(validUrl).host}/`;
-    } catch (error) {
-      console.error('Cannot get URL domain:', url, error);
-      return url;
-    }
-  }
-
-  /**
    * @param {string} url
    * @param {number} [customRate]
    */
@@ -108,7 +84,7 @@ export class SwindlersUrlsService {
     /**
      * @see https://loige.co/unshorten-expand-short-urls-with-node-js/
      * */
-    const redirectUrl = SHORTS.includes(this.getUrlDomain(url).slice(0, -1))
+    const redirectUrl = SHORTS.includes(urlService.getUrlDomain(url).slice(0, -1))
       ? await axios
           .get(url, { maxRedirects: 0 })
           .then(() => url)
@@ -155,7 +131,16 @@ export class SwindlersUrlsService {
       return { isSpam: true, rate: 300 } as SwindlersBaseResult;
     }
 
-    const domain = this.getUrlDomain(redirectUrl);
+    const domain = urlService.getUrlDomain(redirectUrl);
+
+    const isUrlInException = this.exceptionUrls.includes(domain);
+
+    if (isUrlInException) {
+      return {
+        rate: 0,
+        isSpam: false,
+      } as SwindlersBaseResult;
+    }
 
     if (EXCEPTION_DOMAINS.some((u) => domain.startsWith(u))) {
       return {
@@ -166,7 +151,12 @@ export class SwindlersUrlsService {
 
     const isRegexpMatch = this.swindlersRegex.test(domain);
     if (isRegexpMatch) {
-      return { isSpam: isRegexpMatch, rate: 200 } as SwindlersBaseResult;
+      const result = { isSpam: isRegexpMatch, rate: 200 } as SwindlersUrlsResult;
+      if (environmentConfig.ENV !== 'production') {
+        result.currentName = domain.match(this.swindlersRegex)?.[0] || '$error';
+      }
+
+      return result;
     }
 
     const [[rate, nearestName]] = this.swindlersFuzzySet.get(domain) || [[0]];

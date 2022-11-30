@@ -1,16 +1,8 @@
-import type { Bot } from 'grammy';
-
 import { getGroupStartMessage, getStartMessage, makeAdminMessage } from '../../../message';
-import type { GrammyContext, GrammyMiddleware } from '../../../types';
+import type { GrammyMiddleware } from '../../../types';
 import { getUserData, handleError, telegramUtil } from '../../../utils';
 
 export class StartCommand {
-  /**
-   * @param {Bot} bot
-   * */
-
-  constructor(private bot: Bot<GrammyContext>) {}
-
   /**
    * Handle /start
    * Returns help message
@@ -44,7 +36,7 @@ export class StartCommand {
       }
 
       return telegramUtil
-        .getChatAdmins(this.bot, context.chat?.id)
+        .getChatAdmins(context, context.chat?.id)
         .then(({ adminsString }) => {
           context
             .replyWithHTML(

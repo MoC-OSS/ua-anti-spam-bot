@@ -5,13 +5,10 @@ import { logSkipMiddleware } from '../../utils';
 
 /**
  * @description
- * Skip messages without text
+ * Skip messages without text and add text into state
  * */
 export function onlyWithText(context: GrammyContext, next: NextFunction) {
-  const text = context.msg?.text || context.msg?.caption;
-
-  if (text) {
-    context.state.text = text;
+  if (context.state.text) {
     return next();
   }
 
