@@ -5,7 +5,7 @@ import FuzzySet from 'fuzzyset';
 import { environmentConfig } from '../config';
 import type { SwindlersBaseResult, SwindlersUrlsResult } from '../types';
 
-import { SHORTS } from './constants';
+import { EXCEPTION_DOMAINS, SHORTS } from './constants';
 import type { DynamicStorageService } from './dynamic-storage.service';
 import { urlService } from './url.service';
 
@@ -136,6 +136,13 @@ export class SwindlersUrlsService {
     const isUrlInException = this.exceptionUrls.includes(domain);
 
     if (isUrlInException) {
+      return {
+        rate: 0,
+        isSpam: false,
+      } as SwindlersBaseResult;
+    }
+
+    if (EXCEPTION_DOMAINS.some((u) => domain.startsWith(u))) {
       return {
         rate: 0,
         isSpam: false,
