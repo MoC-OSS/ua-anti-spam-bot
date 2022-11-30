@@ -29,7 +29,7 @@ import {
 import { getNoForwardsComposer } from './bot/composers/messages/no-forward.composer';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
-import { DeleteSwindlersMiddleware, GlobalMiddleware } from './bot/middleware';
+import { DeleteSwindlersMiddleware, GlobalMiddleware, stateMiddleware } from './bot/middleware';
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
 import { deleteMessageTransformer } from './bot/transformers';
 import { runBotExpressServer } from './bot-express.server';
@@ -176,6 +176,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 
   bot.use(hydrateReply);
 
+  bot.use(stateMiddleware);
   bot.use(redisSession.middleware());
   bot.use(redisChatSession.middleware());
 
