@@ -24,7 +24,6 @@ export class GlobalMiddleware {
         return next();
       }
 
-      this.createState(context);
       await this.updateChatInfo(context);
       await this.updateChatSessionIfEmpty(context);
 
@@ -108,12 +107,6 @@ export class GlobalMiddleware {
           context.chatSession.botAdminDate = isBotAdmin ? new Date() : null;
         })
         .catch(emptyFunction);
-    }
-  }
-
-  createState(context: GrammyContext) {
-    if (!context.state) {
-      context.state = {};
     }
   }
 }
