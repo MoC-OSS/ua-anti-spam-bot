@@ -18,8 +18,8 @@ export const ALARM_EVENT_KEY = 'update';
 export const TEST_ALARM_STATE = 'Московська область';
 
 export type UpdatesEvents = {
-  connect: () => void;
-  close: () => void;
+  connect: (reason: string) => void;
+  close: (reason: string) => void;
   update: (body: AlarmNotification) => void;
 };
 
@@ -30,9 +30,7 @@ export class AlarmService {
 
   reconnectInterval?: NodeJS.Timer;
 
-  constructor() {
-    this.initTestAlarms();
-  }
+  testAlarmInterval?: NodeJS.Timer;
 
   getStates(): Promise<AlarmStates> {
     return axios
@@ -53,18 +51,19 @@ export class AlarmService {
   restart() {
     // It will automatically disconnect and reconnect again.
     // We don't need to call extra disable
-    this.enable();
+    this.enable('restart');
   }
 
   /**
    * Starts the connection
    * */
-  enable() {
-    this.subscribeOnNotifications();
+  enable(reason: string) {
+    this.subscribeOnNotifications(reason);
+    this.initTestAlarms();
 
     if (environmentConfig.ENV === 'production') {
       this.reconnectInterval = setInterval(() => {
-        this.subscribeOnNotifications();
+        this.subscribeOnNotifications('reconnect');
       }, ms('1d'));
     }
   }
@@ -72,22 +71,26 @@ export class AlarmService {
   /**
    * Closes the connection
    * */
-  disable() {
+  disable(reason: string) {
     if (this.source) {
       this.source.close();
-      this.updatesEmitter.emit(ALARM_CLOSE_KEY);
+      this.updatesEmitter.emit(ALARM_CLOSE_KEY, reason);
     }
 
     if (this.reconnectInterval) {
       clearInterval(this.reconnectInterval);
+    }
+
+    if (this.testAlarmInterval) {
+      clearInterval(this.testAlarmInterval);
     }
   }
 
   /**
    * Creates SSE subscription to Alarm API events
    * */
-  subscribeOnNotifications() {
-    this.disable();
+  subscribeOnNotifications(reason: string) {
+    this.disable(reason);
 
     let isConnected = false;
 
@@ -105,7 +108,7 @@ export class AlarmService {
 
       // Hello pings every 1h
       if (!isConnected) {
-        this.updatesEmitter.emit(ALARM_CONNECT_KEY);
+        this.updatesEmitter.emit(ALARM_CONNECT_KEY, reason);
         isConnected = true;
       }
     });
@@ -124,10 +127,10 @@ export class AlarmService {
 
   initTestAlarms() {
     let alert = true;
-    setInterval(() => {
+    this.testAlarmInterval = setInterval(() => {
       this.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(alert, TEST_ALARM_STATE));
       alert = !alert;
-    }, ms('1m'));
+    }, ms('0.5m'));
   }
 }
 

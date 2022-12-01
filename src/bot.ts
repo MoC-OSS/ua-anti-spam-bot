@@ -255,20 +255,20 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
     /**
      * Enable alarm service only after bot is started
      * */
-    alarmService.updatesEmitter.on('connect', () => {
-      bot.api.sendMessage(logsChat, '🎉 Air Raid Alarm API has been started!').catch(() => {
+    alarmService.updatesEmitter.on('connect', (reason) => {
+      bot.api.sendMessage(logsChat, `🎉 Air Raid Alarm API has been started by ${reason} reason!`).catch(() => {
         console.error('This bot is not authorized in this LOGS chat!');
       });
     });
 
-    alarmService.updatesEmitter.on('close', () => {
-      bot.api.sendMessage(logsChat, '⛔️ Air Raid Alarm API has been stopped!').catch(() => {
+    alarmService.updatesEmitter.on('close', (reason) => {
+      bot.api.sendMessage(logsChat, `⛔️ Air Raid Alarm API has been stopped by ${reason} reason!`).catch(() => {
         console.error('This bot is not authorized in this LOGS chat!');
       });
     });
   }
 
-  alarmService.enable();
+  alarmService.enable('bot_start');
 
   // Enable graceful stop
   const stopRunner = () => runner.isRunning() && runner.stop();

@@ -62,7 +62,7 @@ export const getPrivateCommandsComposer = ({ bot, commandSetter, dynamicStorageS
   });
 
   composer.command('disable_alarm', () => {
-    alarmService.disable();
+    alarmService.disable('disable_command');
   });
 
   composer.command('restart', async (context) => {
