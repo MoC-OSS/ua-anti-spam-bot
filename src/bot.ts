@@ -17,6 +17,7 @@ import {
   getMessagesComposer,
   getPrivateCommandsComposer,
   getPublicCommandsComposer,
+  getReportComposer,
   getSaveToSheetComposer,
   getTensorTrainingComposer,
 } from './bot/composers';
@@ -116,6 +117,9 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   });
   const { creatorCommandsComposer } = getCreatorCommandsComposer({ commandSetter, rootMenu, tensorService });
 
+  // Report command feature
+  const { reportComposer } = getReportComposer();
+
   // Dev composers only
   const { saveToSheetComposer: swindlerMessageSaveToSheetComposer } = getSaveToSheetComposer({
     chatId: swindlerMessageChatId,
@@ -202,6 +206,9 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   bot.use(creatorCommandsComposer);
   bot.use(privateCommandsComposer);
   bot.use(publicCommandsComposer);
+
+  // Report command feature
+  bot.use(reportComposer);
 
   // Swindlers helpers
   bot.use(swindlerMessageSaveToSheetComposer);

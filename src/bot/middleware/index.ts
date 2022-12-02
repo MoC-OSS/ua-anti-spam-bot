@@ -20,5 +20,6 @@ export * from './parse-text.middleware';
 export * from './parse-urls.middleware';
 export * from './performance-end.middleware';
 export * from './performance-start.middleware';
+export * from './remove-callback-messages.middleware';
 export * from './state.middleware';
 export * from './throw-error.middleware';
