@@ -105,7 +105,7 @@ describe('SwindlersUrlsService', () => {
       axiosMock.get.mockImplementationOnce(() => Promise.resolve({ request: { res: { responseUrl: parsedUrl } } }));
       const isUrlSpam = await swindlersUrlsService.isSpamUrl(parsedUrl);
 
-      expect(parsedUrl).toEqual('https://da-pay.me/');
+      expect(parsedUrl).toEqual('https://da-pay.me');
       expect(isUrlSpam.isSpam).toEqual(true);
       expect(result?.isSpam).toEqual(true);
       expect(result?.rate).toEqual(200);

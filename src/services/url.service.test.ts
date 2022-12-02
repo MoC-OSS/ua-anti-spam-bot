@@ -9,7 +9,16 @@ describe('UrlService', () => {
 
       console.info(text);
 
-      expect(result).toEqual(['https://url.com/', 'url.com']);
+      expect(result).toEqual(['https://url.com']);
+    });
+
+    it('should parse urls without special symbols at the end', () => {
+      const text = `test https://url.com/, test url.com. http://24.site/?order=946,`;
+      const result = urlService.parseUrls(text);
+
+      console.info(text);
+
+      expect(result).toEqual(['https://url.com', 'http://24.site/?order=946']);
     });
 
     it('should not parse invalid urls', () => {
@@ -51,6 +60,20 @@ describe('UrlService', () => {
 
       expect(result).toEqual('www.orpay.me/');
     });
+
+    it('should parse domain from string with /', () => {
+      const text = 'https://www.orpay.me/';
+      const result = urlService.getUrlDomain(text);
+
+      expect(result).toEqual('www.orpay.me/');
+    });
+
+    it('should parse domain from string without /', () => {
+      const text = 'https://www.orpay.me';
+      const result = urlService.getUrlDomain(text);
+
+      expect(result).toEqual('www.orpay.me/');
+    });
   });
 
   describe('processMessage', () => {
@@ -58,7 +81,7 @@ describe('UrlService', () => {
       const text = `https://da-pay.me/ тест`;
       const parsedUrl = urlService.parseUrls(text)[0];
 
-      expect(parsedUrl).toEqual('https://da-pay.me/');
+      expect(parsedUrl).toEqual('https://da-pay.me');
     });
 
     it('should not process telegram message', () => {
