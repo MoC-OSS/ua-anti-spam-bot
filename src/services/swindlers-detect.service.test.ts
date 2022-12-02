@@ -53,7 +53,7 @@ describe('SwindlersDetectService', () => {
 
       it('should match swindler unresolved short url as spam', async () => {
         const text = 'https://privat24.io/ тест';
-        const responseUrl = 'https://privat24.io/';
+        const responseUrl = 'https://privat24.io';
         // eslint-disable-next-line prefer-promise-reject-errors
         axiosMock.get.mockImplementationOnce(() => Promise.reject({ response: { headers: { location: responseUrl } } }));
         const result = await swindlersDetectService.isSwindlerMessage(text);
