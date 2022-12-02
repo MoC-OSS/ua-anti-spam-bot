@@ -13,6 +13,7 @@ import {
   getBeforeAnyComposer,
   getCreatorCommandsComposer,
   getHealthCheckComposer,
+  getJoinLeaveComposer,
   getMessagesComposer,
   getPrivateCommandsComposer,
   getPublicCommandsComposer,
@@ -134,6 +135,9 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
     updateMethod: swindlersGoogleService.appendTrainingPositives.bind(swindlersGoogleService),
   });
 
+  // Join and leave composer
+  const { joinLeaveComposer } = getJoinLeaveComposer();
+
   // Tensor testing old logic
   const { tensorTrainingComposer } = getTensorTrainingComposer({
     tensorListener,
@@ -203,6 +207,9 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   bot.use(swindlerMessageSaveToSheetComposer);
   bot.use(swindlerBotsSaveToSheetComposer);
   bot.use(swindlerHelpSaveToSheetComposer);
+
+  // Join and leave composer
+  bot.use(joinLeaveComposer);
 
   // Tensor testing old logic
   bot.use(tensorTrainingComposer);

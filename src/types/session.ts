@@ -42,6 +42,7 @@ export interface DefaultChatSettings {
   disableStrategicInfo?: boolean;
   disableDeleteMessage?: boolean;
   disableSwindlerMessage?: boolean;
+  disableDeleteServiceMessage?: boolean;
 }
 
 export interface OptionalChatSettings {
