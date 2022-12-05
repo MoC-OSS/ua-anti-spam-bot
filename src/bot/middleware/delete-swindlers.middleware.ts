@@ -1,4 +1,5 @@
 import axios from 'axios';
+import escapeHTML from 'escape-html';
 import type { Bot } from 'grammy';
 import { InputFile } from 'grammy';
 import type { GrammyContext, GrammyMiddleware, SwindlerResponseBody, SwindlersResult, SwindlerType } from 'types';
@@ -86,7 +87,7 @@ export class DeleteSwindlersMiddleware {
       logsChat,
       `Looks like swindler's message (${(maxChance * 100).toFixed(2)}%) from <code>${from}</code> by user ${userMention}:\n\n${
         chatMention || userMention
-      }\n${text}`,
+      }\n${escapeHTML(text)}`,
       {
         parse_mode: 'HTML',
       },
@@ -137,9 +138,9 @@ export class DeleteSwindlersMiddleware {
             context.api
               .sendMessage(
                 logsChat,
-                `Cannot delete the following message from chat\n\n<code>${telegramUtil.getChatTitle(context.chat)}</code>\n${
-                  context.msg?.text || ''
-                }`,
+                `Cannot delete the following message from chat\n\n<code>${telegramUtil.getChatTitle(context.chat)}</code>\n${escapeHTML(
+                  context.msg?.text || '',
+                )}`,
                 {
                   parse_mode: 'HTML',
                 },

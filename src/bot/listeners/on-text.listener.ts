@@ -1,3 +1,4 @@
+import escapeHTML from 'escape-html';
 import type { Bot, NextFunction } from 'grammy';
 import { InputFile } from 'grammy';
 
@@ -138,9 +139,9 @@ export class OnTextListener {
                     this.bot.api
                       .sendMessage(
                         logsChat,
-                        `Cannot delete the following message from chat\n\n<code>${telegramUtil.getChatTitle(context.chat)}</code>\n${
-                          context.msg?.text || ''
-                        }`,
+                        `Cannot delete the following message from chat\n\n<code>${telegramUtil.getChatTitle(
+                          context.chat,
+                        )}</code>\n${escapeHTML(context.msg?.text || '')}`,
                         {
                           parse_mode: 'HTML',
                         },
