@@ -2,7 +2,7 @@ import { Composer } from 'grammy';
 
 import { messageQuery } from '../../const';
 import type { DefaultChatSettings, GrammyContext, GrammyMiddleware, OptionalChatSettings } from '../../types';
-import { isNotChannel, onlyActiveDefaultSettingFilter, onlyActiveOptionalSettingFilter, onlyNotDeletedFilter } from '../filters';
+import { onlyActiveDefaultSettingFilter, onlyActiveOptionalSettingFilter, onlyNotDeletedFilter } from '../filters';
 import {
   botActiveMiddleware,
   botRedisActive,
@@ -47,8 +47,6 @@ export const getMessagesComposer = ({
   const readyMessagesComposer = messagesComposer
     // Queries to follow
     .on(messageQuery)
-    // Filtering messages from channel
-    .filter((context) => isNotChannel(context))
     // Filtering messages
     .use(botRedisActive, ignoreOld(60), botActiveMiddleware, onlyNotAdmin, onlyWhenBotAdmin)
     // Parse message text and add it to state
