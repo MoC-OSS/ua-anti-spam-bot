@@ -13,12 +13,12 @@ describe('UrlService', () => {
     });
 
     it('should parse urls without special symbols at the end', () => {
-      const text = `test https://url.com/, test url.com. http://24.site/?order=946,`;
+      const text = `test https://url.com/, test url.com. http://24.site/?order=946, http://24privat.site/?order=94696970126<`;
       const result = urlService.parseUrls(text);
 
       console.info(text);
 
-      expect(result).toEqual(['https://url.com', 'http://24.site/?order=946']);
+      expect(result).toEqual(['https://url.com', 'http://24.site/?order=946', 'http://24privat.site/?order=94696970126']);
     });
 
     it('should not parse invalid urls', () => {
