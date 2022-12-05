@@ -3,7 +3,7 @@ import { Menu } from '@grammyjs/menu';
 import { hydrateReply } from '@grammyjs/parse-mode';
 import { run, sequentialize } from '@grammyjs/runner';
 import { apiThrottler } from '@grammyjs/transformer-throttler';
-import { Bot } from 'grammy';
+import { Bot, Composer } from 'grammy';
 import Keyv from 'keyv';
 import moment from 'moment-timezone';
 import ms from 'ms';
@@ -28,6 +28,7 @@ import {
   getSwindlersComposer,
 } from './bot/composers/messages';
 import { getNoForwardsComposer } from './bot/composers/messages/no-forward.composer';
+import { isNotChannel } from './bot/filters';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
 import { DeleteSwindlersMiddleware, GlobalMiddleware, stateMiddleware } from './bot/middleware';
@@ -163,6 +164,11 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 
   rootMenu.register(tensorListener.initMenu(trainingThrottler));
 
+  // Not channel handlers
+  const notChannelRegisterComposer = new Composer<GrammyContext>();
+
+  const notChannelComposer = notChannelRegisterComposer.filter((context) => isNotChannel(context));
+
   bot.use(
     sequentialize((context: GrammyContext) => {
       const chat = context.chat?.id.toString();
@@ -195,27 +201,29 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   bot.use(wrapperErrorHandler(globalMiddleware.middleware()));
 
   // Generic composers
-  bot.use(healthCheckComposer);
   bot.use(beforeAnyComposer);
 
   // Commands
-  bot.use(creatorCommandsComposer);
-  bot.use(privateCommandsComposer);
-  bot.use(publicCommandsComposer);
+  notChannelComposer.use(healthCheckComposer);
+  notChannelComposer.use(creatorCommandsComposer);
+  notChannelComposer.use(privateCommandsComposer);
+  notChannelComposer.use(publicCommandsComposer);
 
   // Swindlers helpers
-  bot.use(swindlerMessageSaveToSheetComposer);
-  bot.use(swindlerBotsSaveToSheetComposer);
-  bot.use(swindlerHelpSaveToSheetComposer);
+  notChannelComposer.use(swindlerMessageSaveToSheetComposer);
+  notChannelComposer.use(swindlerBotsSaveToSheetComposer);
+  notChannelComposer.use(swindlerHelpSaveToSheetComposer);
 
   // Join and leave composer
-  bot.use(joinLeaveComposer);
+  notChannelComposer.use(joinLeaveComposer);
 
   // Tensor testing old logic
-  bot.use(tensorTrainingComposer);
+  notChannelComposer.use(tensorTrainingComposer);
 
   // Main message composer
-  bot.use(messagesComposer);
+  notChannelComposer.use(messagesComposer);
+
+  bot.use(notChannelRegisterComposer);
 
   bot.catch(globalErrorHandler);
 
