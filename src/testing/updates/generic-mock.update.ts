@@ -1,5 +1,7 @@
-import type { User } from '@grammyjs/types/manage';
+import type { Chat, User } from '@grammyjs/types/manage';
+import deepmerge from 'deepmerge';
 import type { Update } from 'grammy/out/types';
+import type { MergeDeep } from 'type-fest';
 
 export type PartialUpdate<U extends Update = Update> = Partial<{
   [key in keyof U]: Partial<U[key]>;
@@ -14,6 +16,12 @@ export abstract class GenericMockUpdate {
 
   readonly genericSentDate = Date.now() / 1000;
 
+  readonly genericSuperGroup: Chat.SupergroupChat = {
+    type: 'supergroup',
+    id: 202_212,
+    title: 'GrammyMock',
+  };
+
   /**
    * Generic user atom used for `from` and `chat` properties
    * */
@@ -24,11 +32,23 @@ export abstract class GenericMockUpdate {
     username: 'GrammyMock_Username',
   });
 
+  readonly genericUser2Atom = this.getValidUser({
+    last_name: 'GrammyMock LastName2',
+    id: 1_111_112,
+    first_name: 'GrammyMock FirstName2',
+    username: 'GrammyMock_Username2',
+  });
+
   /**
    * Generic default user
    * */
-  readonly genericUser: User = {
+  genericUser: User = {
     ...this.genericUserAtom,
+    is_bot: false,
+  };
+
+  readonly genericUser2: User = {
+    ...this.genericUser2Atom,
     is_bot: false,
   };
 
@@ -36,11 +56,6 @@ export abstract class GenericMockUpdate {
    * Minimal update for the update entity
    * */
   abstract readonly minimalUpdate;
-
-  /**
-   * Actual merged update
-   * */
-  abstract readonly update;
 
   /**
    * @param update - update to type
@@ -68,7 +83,7 @@ export abstract class GenericMockUpdate {
    * }
    * ```
    * */
-  abstract build();
+  abstract build(...parameters: any[]);
 
   /**
    * @param extra - addition to add
@@ -81,5 +96,12 @@ export abstract class GenericMockUpdate {
    * }
    * ```
    * */
-  abstract buildOverwrite<E extends PartialUpdate>(extra: E);
+  // abstract buildOverwrite<E extends PartialUpdate>(extra: E);
+
+  abstract buildOverwrite(...parameters: any[]);
+
+  deepMerge<A, B>(a: A, b: B): MergeDeep<A, B> {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    return deepmerge(a as any, b as any);
+  }
 }

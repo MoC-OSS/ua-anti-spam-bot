@@ -1,5 +1,4 @@
 import deepmerge from 'deepmerge';
-import type { MergeDeep } from 'type-fest';
 
 import type { PartialUpdate } from './generic-mock.update';
 import { GenericMockUpdate } from './generic-mock.update';
@@ -38,6 +37,6 @@ export class MessagePrivateMockUpdate extends GenericMockUpdate {
   }
 
   buildOverwrite<E extends PartialUpdate>(extra: E) {
-    return deepmerge(this.update, extra) as MergeDeep<typeof this.update, E>;
+    return this.deepMerge(this.update, extra);
   }
 }
