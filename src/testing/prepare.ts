@@ -2,6 +2,7 @@ import type { Api, Bot, Context, RawApi } from 'grammy';
 import type { AsyncReturnType } from 'type-fest';
 
 import { OutgoingRequests } from './outgoing-requests';
+import { NewMemberMockUpdate } from './updates';
 
 /**
  * Override api responses if needed
@@ -42,12 +43,11 @@ export const prepareBotForTesting = async <C extends Context, A extends Api = Ap
     return Promise.resolve({ ok: true, result: true as any });
   });
 
+  const genericUpdate = new NewMemberMockUpdate();
+
   // eslint-disable-next-line no-param-reassign
   bot.botInfo = {
-    id: 2022,
-    first_name: 'GrammyMock Bot',
-    is_bot: true,
-    username: 'GrammyMock_bot',
+    ...genericUpdate.genericUserBot,
     can_join_groups: true,
     can_read_all_group_messages: true,
     supports_inline_queries: false,

@@ -22,6 +22,14 @@ export abstract class GenericMockUpdate {
     title: 'GrammyMock',
   };
 
+  readonly genericUserBot = this.getValidUser({
+    id: 2022,
+    is_bot: true,
+    first_name: 'GrammyMock BotFirstName',
+    last_name: 'GrammyMock BotLastName',
+    username: 'GrammyMock_bot',
+  });
+
   /**
    * Generic user atom used for `from` and `chat` properties
    * */
@@ -42,7 +50,7 @@ export abstract class GenericMockUpdate {
   /**
    * Generic default user
    * */
-  genericUser: User = {
+  readonly genericUser: User = {
     ...this.genericUserAtom,
     is_bot: false,
   };
