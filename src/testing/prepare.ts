@@ -25,7 +25,7 @@ export type ApiResponses = {
  * }, 15_000);
  * ```
  * */
-export const prepareBotForTesting = async <C extends Context, A extends Api, B extends Bot<C, A> = Bot<C, A>>(
+export const prepareBotForTesting = async <C extends Context, A extends Api = Api, B extends Bot<C, A> = Bot<C, A>>(
   bot: B,
   apiResponses: ApiResponses = {},
 ) => {
