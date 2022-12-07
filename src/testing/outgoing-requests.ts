@@ -18,8 +18,16 @@ export interface Request<M extends Methods<RawApi> = Methods<RawApi>> {
 export class OutgoingRequests {
   /**
    * Collected requests
+   * @internal
    * */
   requests: Request[] = [];
+
+  /**
+   * Get length of the requests
+   * */
+  get length() {
+    return this.requests.length;
+  }
 
   /**
    * Add request at the end
