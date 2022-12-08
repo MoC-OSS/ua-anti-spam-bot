@@ -1,3 +1,4 @@
+import type { PartialUpdate } from './generic-mock.update';
 import { GenericMockUpdate } from './generic-mock.update';
 
 /**
@@ -32,4 +33,12 @@ export class KickMeMockUpdate extends GenericMockUpdate {
       },
     },
   } as const);
+
+  build() {
+    return this.minimalUpdate;
+  }
+
+  buildOverwrite<E extends PartialUpdate>(extra: E) {
+    return this.deepMerge(this.minimalUpdate, extra);
+  }
 }
