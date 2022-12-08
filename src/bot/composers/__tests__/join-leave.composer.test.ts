@@ -1,21 +1,21 @@
 import { Bot } from 'grammy';
+import type { PartialDeep } from 'type-fest';
 
-import { environmentConfig } from '../../../config';
 import type { OutgoingRequests } from '../../../testing';
 import { LeftMemberMockUpdate, NewMemberMockUpdate, prepareBotForTesting } from '../../../testing';
-import type { ChatSessionData, GrammyContext, RecursivePartial } from '../../../types';
+import type { ChatSessionData, GrammyContext } from '../../../types';
 import { stateMiddleware } from '../../middleware';
 import { getJoinLeaveComposer } from '../join-leave.composer';
 
 let outgoingRequests: OutgoingRequests;
 const { joinLeaveComposer } = getJoinLeaveComposer();
-const bot = new Bot<GrammyContext>(environmentConfig?.BOT_TOKEN);
+const bot = new Bot<GrammyContext>('mock');
 
 const chatSession = {
   chatSettings: {
     disableDeleteServiceMessage: false,
   },
-} as RecursivePartial<ChatSessionData> as ChatSessionData;
+} as PartialDeep<ChatSessionData> as ChatSessionData;
 
 describe('joinLeaveComposer main', () => {
   beforeAll(async () => {
