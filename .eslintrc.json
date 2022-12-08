@@ -6,17 +6,37 @@
     "es2021": true
   },
   "ignorePatterns": [
-    "!src/**/*.{ts,tsx,js,jsx,vue,html,css}",
+    "!src/**/*.{ts,js}",
+    "!dataset/**/*.{ts,js}",
     "node_modules"
   ],
   "root": true,
   "extends": [
-    "./.eslint/jest.eslintrc.json",
     "./.eslint/node.eslintrc.json",
     "./.eslint/smile-style.eslintrc.json",
+    "./.eslint/unicorn.eslintrc.json",
+    "./.eslint/ordered-imports.eslintrc.json5",
+    "./.eslint/jest.eslintrc.json",
+    "./.eslint/typescript.eslintrc.json",
     "./.eslint/prettier.eslintrc.json"
   ],
   "rules": {
-    "consistent-return": "off"
+    "consistent-return": "off",
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        "js": "never",
+        "ts": "never"
+      }
+    ]
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "paths": ["src"],
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
+    }
   }
 }

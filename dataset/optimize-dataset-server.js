@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const express = require('express');
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -16,24 +16,27 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.get('/optimize', (req, res) => {
+app.get('/optimize', (request, res) => {
   res.json(optimizeResult);
 });
 
-app.post('/remove', (req, res) => {
-  const { range, index, negativeIndex, type } = req.body;
+app.post('/remove', (request, res) => {
+  const { range, index, negativeIndex, type } = request.body;
 
   switch (type) {
-    case 'positive':
+    case 'positive': {
       optimizeResult[index].positive.resolved = true;
       break;
+    }
 
-    case 'negative':
+    case 'negative': {
       optimizeResult[index].negativesMatch[negativeIndex].resolved = true;
       break;
+    }
 
-    default:
+    default: {
       optimizeResult[index].resolved = true;
+    }
   }
 
   fs.writeFileSync(path.join(__dirname, './temp/optimize-result.json'), JSON.stringify(optimizeResult, null, 2));
