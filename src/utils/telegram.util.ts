@@ -1,4 +1,4 @@
-import type { Chat, ChatFromGetChat } from '@grammyjs/types/manage';
+import type { Chat, ChatFromGetChat, User } from '@grammyjs/types/manage';
 import type { ChatMemberOwner } from 'typegram';
 
 import type { GrammyContext } from '../types';
@@ -42,9 +42,19 @@ export class TelegramUtil {
       const promoteAdmins = admins.filter((user) => user.status === 'creator' || (user.can_promote_members && !!user.user.username));
 
       const finalAdmins = [...new Set([creator, ...promoteAdmins].filter(Boolean))];
-      const adminsString = finalAdmins.length > 0 ? `${finalAdmins.map((user) => `@${user.user.username || ''}`).join(', ')} ` : '';
+      const adminsString = finalAdmins.length > 0 ? `${finalAdmins.map((user) => this.getUserMentionOrName(user.user)).join(', ')} ` : '';
 
       return { creator, admins, promoteAdmins, adminsString, finalAdmins };
     });
+  }
+
+  /**
+   * @param {User} user
+   */
+  getUserMentionOrName(user: User): string {
+    if (user.username) {
+      return `@${user.username}`;
+    }
+    return `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}`;
   }
 }

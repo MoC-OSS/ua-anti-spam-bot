@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import { Menu } from '@grammyjs/menu';
 import { hydrateReply } from '@grammyjs/parse-mode';
-import { run, sequentialize } from '@grammyjs/runner';
+import { sequentialize } from '@grammyjs/runner';
 import { apiThrottler } from '@grammyjs/transformer-throttler';
-import { Bot } from 'grammy';
+import type { Bot } from 'grammy';
+import { Composer } from 'grammy';
 import Keyv from 'keyv';
 import moment from 'moment-timezone';
-import ms from 'ms';
 
 import { CommandSetter } from './bot/commands';
 import {
@@ -29,19 +29,20 @@ import {
   getSwindlersComposer,
 } from './bot/composers/messages';
 import { getNoForwardsComposer } from './bot/composers/messages/no-forward.composer';
+import { isNotChannel } from './bot/filters';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
 import { DeleteSwindlersMiddleware, GlobalMiddleware, stateMiddleware } from './bot/middleware';
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
 import { deleteMessageTransformer } from './bot/transformers';
-import { runBotExpressServer } from './bot-express.server';
 import { environmentConfig } from './config';
 import { logsChat, swindlerBotsChatId, swindlerHelpChatId, swindlerMessageChatId } from './creator';
 import { redisClient } from './db';
 import { alarmChatService, alarmService, initSwindlersContainer, redisService, S3Service, swindlersGoogleService } from './services';
 import { initTensor } from './tensor';
+import { logUpdates } from './testing';
 import type { GrammyContext, GrammyMenuContext } from './types';
-import { emptyFunction, globalErrorHandler, sleep, wrapperErrorHandler } from './utils';
+import { emptyFunction, globalErrorHandler, wrapperErrorHandler } from './utils';
 
 moment.tz.setDefault('Europe/Kiev');
 moment.locale('uk');
@@ -51,12 +52,20 @@ keyv.on('error', (error_) => console.error('Connection Error', error_));
 
 const rootMenu = new Menu<GrammyMenuContext>('root');
 
-(async () => {
-  console.info('Waiting for the old instance to down...');
-  await sleep(environmentConfig.ENV === 'local' ? 0 : ms('5s'));
-  console.info('Starting a new instance...');
-
-  await redisClient.client.connect().then(() => console.info('Redis client successfully started'));
+/**
+ * Gets main bot instance.
+ * Disables redis logic if used in unit testing
+ *
+ * @example
+ * ```ts
+ * const initialBot = new Bot<GrammyContext>(environmentConfig?.BOT_TOKEN);
+ * const bot = await getBot(initialBot);
+ * ```
+ * */
+export const getBot = async (bot: Bot<GrammyContext>) => {
+  if (!environmentConfig.UNIT_TESTING) {
+    await redisClient.client.connect().then(() => console.info('Redis client successfully started'));
+  }
 
   const s3Service = new S3Service();
   const tensorService = await initTensor(s3Service);
@@ -66,9 +75,12 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 
   const startTime = new Date();
 
-  const bot = new Bot<GrammyContext>(environmentConfig?.BOT_TOKEN);
+  logUpdates<GrammyContext>(bot);
 
-  await alarmChatService.init(bot.api);
+  if (!environmentConfig.UNIT_TESTING) {
+    await alarmChatService.init(bot.api);
+  }
+
   const airRaidAlarmStates = await alarmService.getStates();
 
   if (airRaidAlarmStates.states.length === 0) {
@@ -167,6 +179,11 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 
   rootMenu.register(tensorListener.initMenu(trainingThrottler));
 
+  // Not channel handlers
+  const notChannelRegisterComposer = new Composer<GrammyContext>();
+
+  const notChannelComposer = notChannelRegisterComposer.filter((context) => isNotChannel(context));
+
   bot.use(
     sequentialize((context: GrammyContext) => {
       const chat = context.chat?.id.toString();
@@ -185,8 +202,11 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   bot.use(hydrateReply);
 
   bot.use(stateMiddleware);
-  bot.use(redisSession.middleware());
-  bot.use(redisChatSession.middleware());
+
+  if (!environmentConfig.UNIT_TESTING) {
+    bot.use(redisSession.middleware());
+    bot.use(redisChatSession.middleware());
+  }
 
   // Set message as deleted when deleteMessage method has been called
   bot.use((context, next) => {
@@ -199,96 +219,34 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   bot.use(wrapperErrorHandler(globalMiddleware.middleware()));
 
   // Generic composers
-  bot.use(healthCheckComposer);
   bot.use(beforeAnyComposer);
 
   // Commands
-  bot.use(creatorCommandsComposer);
-  bot.use(privateCommandsComposer);
-  bot.use(publicCommandsComposer);
+  notChannelComposer.use(healthCheckComposer);
+  notChannelComposer.use(creatorCommandsComposer);
+  notChannelComposer.use(privateCommandsComposer);
+  notChannelComposer.use(publicCommandsComposer);
 
   // Report command feature
   bot.use(reportComposer);
 
   // Swindlers helpers
-  bot.use(swindlerMessageSaveToSheetComposer);
-  bot.use(swindlerBotsSaveToSheetComposer);
-  bot.use(swindlerHelpSaveToSheetComposer);
+  notChannelComposer.use(swindlerMessageSaveToSheetComposer);
+  notChannelComposer.use(swindlerBotsSaveToSheetComposer);
+  notChannelComposer.use(swindlerHelpSaveToSheetComposer);
 
   // Join and leave composer
-  bot.use(joinLeaveComposer);
+  notChannelComposer.use(joinLeaveComposer);
 
   // Tensor testing old logic
-  bot.use(tensorTrainingComposer);
+  notChannelComposer.use(tensorTrainingComposer);
 
   // Main message composer
-  bot.use(messagesComposer);
+  notChannelComposer.use(messagesComposer);
+
+  bot.use(notChannelRegisterComposer);
 
   bot.catch(globalErrorHandler);
 
-  runBotExpressServer();
-
-  const runner = run(bot, 500, {
-    allowed_updates: [
-      'chat_member',
-      'edited_message',
-      'channel_post',
-      'edited_channel_post',
-      'inline_query',
-      'chosen_inline_result',
-      'callback_query',
-      'shipping_query',
-      'pre_checkout_query',
-      'poll',
-      'poll_answer',
-      'my_chat_member',
-      'chat_member',
-      'chat_join_request',
-      'message',
-    ],
-  });
-
-  /**
-   * Check when the bot is run
-   * */
-  if (!bot.isInited()) {
-    await bot.init();
-  }
-
-  console.info(`Bot @${bot.botInfo.username} started!`, new Date().toString());
-
-  if (environmentConfig.ENV !== 'local') {
-    bot.api
-      .sendMessage(logsChat, `🎉 <b>Bot @${bot.botInfo.username} has been started!</b>\n<i>${new Date().toString()}</i>`, {
-        parse_mode: 'HTML',
-      })
-      .catch(() => {
-        console.error('This bot is not authorized in this LOGS chat!');
-      });
-
-    /**
-     * Enable alarm service only after bot is started
-     * */
-    alarmService.updatesEmitter.on('connect', (reason) => {
-      bot.api.sendMessage(logsChat, `🎉 Air Raid Alarm API has been started by ${reason} reason!`).catch(() => {
-        console.error('This bot is not authorized in this LOGS chat!');
-      });
-    });
-
-    alarmService.updatesEmitter.on('close', (reason) => {
-      bot.api.sendMessage(logsChat, `⛔️ Air Raid Alarm API has been stopped by ${reason} reason!`).catch(() => {
-        console.error('This bot is not authorized in this LOGS chat!');
-      });
-    });
-  }
-
-  alarmService.enable('bot_start');
-
-  // Enable graceful stop
-  const stopRunner = () => runner.isRunning() && runner.stop();
-  process.once('SIGINT', stopRunner);
-  process.once('SIGTERM', stopRunner);
-})().catch((error) => {
-  console.error('FATAL: Bot crashed with error:', error);
-  throw error;
-});
+  return bot;
+};
