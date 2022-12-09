@@ -22,6 +22,7 @@ import {
 } from './bot/composers';
 import {
   getNoCardsComposer,
+  getNoLocationsComposer,
   getNoMentionsComposer,
   getNoUrlsComposer,
   getStrategicComposer,
@@ -148,6 +149,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   // Message composers
   const { noCardsComposer } = getNoCardsComposer();
   const { noUrlsComposer } = getNoUrlsComposer();
+  const { noLocationsComposer } = getNoLocationsComposer();
   const { noMentionsComposer } = getNoMentionsComposer();
   const { noForwardsComposer } = getNoForwardsComposer();
   const { swindlersComposer } = getSwindlersComposer({ deleteSwindlersMiddleware });
@@ -156,6 +158,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
   const { messagesComposer } = getMessagesComposer({
     noCardsComposer,
     noUrlsComposer,
+    noLocationsComposer,
     noMentionsComposer,
     noForwardsComposer,
     swindlersComposer,
