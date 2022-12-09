@@ -11,11 +11,13 @@ export interface Request<M extends Methods<RawApi> = Methods<RawApi>> {
   signal?: AbortSignal;
 }
 
+export type RealApiMethodKeys = keyof RawApi;
+
 /**
  * Collects outgoing requests and gives API to process these requests.
- * Helps to saves typing.
+ * Helps to save typing.
  * */
-export class OutgoingRequests {
+export class OutgoingRequests<M extends RealApiMethodKeys = RealApiMethodKeys> {
   /**
    * Collected requests
    * @internal
@@ -32,7 +34,7 @@ export class OutgoingRequests {
   /**
    * Add request at the end
    * */
-  push(request: Request): this {
+  push(request: Request<M>): this {
     this.requests.push(request);
     return this;
   }
@@ -48,18 +50,25 @@ export class OutgoingRequests {
   /**
    * @returns last request
    * */
-  getLast(): Request | null {
+  getLast<A extends M>(): Request<A> | null {
     if (this.requests.length === 0) {
       return null;
     }
 
-    return this.requests[this.requests.length - 1];
+    return this.requests[this.requests.length - 1] as Request<A>;
   }
 
   /**
    * @returns two last request
    * */
-  getTwoLast(): Request[] {
-    return this.requests.slice(-2);
+  getTwoLast<A extends M, B extends M>() {
+    return this.requests.slice(-2) as Partial<[Request<A>, Request<B>]>;
+  }
+
+  /**
+   * @returns two last request
+   * */
+  getThreeLast<A extends M, B extends M, C extends M>() {
+    return this.requests.slice(-3) as Partial<[Request<A>, Request<B>, Request<C>]>;
   }
 }

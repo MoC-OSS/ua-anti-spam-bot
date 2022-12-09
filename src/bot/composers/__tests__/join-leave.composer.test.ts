@@ -44,7 +44,7 @@ describe('joinLeaveComposer main', () => {
       const update = new NewMemberMockUpdate().build();
       await bot.handleUpdate(update);
 
-      const apiCall = outgoingRequests.getLast();
+      const apiCall = outgoingRequests.getLast<'deleteMessage'>();
 
       expect(outgoingRequests.length).toEqual(1);
       expect(apiCall?.method).toEqual('deleteMessage');
@@ -54,7 +54,7 @@ describe('joinLeaveComposer main', () => {
       const update = new LeftMemberMockUpdate().build();
       await bot.handleUpdate(update);
 
-      const apiCall = outgoingRequests.getLast();
+      const apiCall = outgoingRequests.getLast<'deleteMessage'>();
 
       expect(outgoingRequests.length).toEqual(1);
       expect(apiCall?.method).toEqual('deleteMessage');

@@ -1,4 +1,5 @@
 import { run } from '@grammyjs/runner';
+import { Bot } from 'grammy';
 import ms from 'ms';
 
 import { getBot } from './bot';
@@ -6,6 +7,7 @@ import { runBotExpressServer } from './bot-express.server';
 import { environmentConfig } from './config';
 import { logsChat } from './creator';
 import { alarmService } from './services';
+import type { GrammyContext } from './types';
 import { sleep } from './utils';
 
 (async () => {
@@ -13,7 +15,8 @@ import { sleep } from './utils';
   await sleep(environmentConfig.ENV === 'local' ? 0 : ms('5s'));
   console.info('Starting a new instance...');
 
-  const bot = await getBot();
+  const initialBot = new Bot<GrammyContext>(environmentConfig?.BOT_TOKEN);
+  const bot = await getBot(initialBot);
 
   runBotExpressServer();
 

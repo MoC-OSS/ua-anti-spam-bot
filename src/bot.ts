@@ -3,7 +3,8 @@ import { Menu } from '@grammyjs/menu';
 import { hydrateReply } from '@grammyjs/parse-mode';
 import { sequentialize } from '@grammyjs/runner';
 import { apiThrottler } from '@grammyjs/transformer-throttler';
-import { Bot, Composer } from 'grammy';
+import type { Bot } from 'grammy';
+import { Composer } from 'grammy';
 import Keyv from 'keyv';
 import moment from 'moment-timezone';
 
@@ -50,8 +51,20 @@ keyv.on('error', (error_) => console.error('Connection Error', error_));
 
 const rootMenu = new Menu<GrammyMenuContext>('root');
 
-export const getBot = async () => {
-  await redisClient.client.connect().then(() => console.info('Redis client successfully started'));
+/**
+ * Gets main bot instance.
+ * Disables redis logic if used in unit testing
+ *
+ * @example
+ * ```ts
+ * const initialBot = new Bot<GrammyContext>(environmentConfig?.BOT_TOKEN);
+ * const bot = await getBot(initialBot);
+ * ```
+ * */
+export const getBot = async (bot: Bot<GrammyContext>) => {
+  if (!environmentConfig.UNIT_TESTING) {
+    await redisClient.client.connect().then(() => console.info('Redis client successfully started'));
+  }
 
   const s3Service = new S3Service();
   const tensorService = await initTensor(s3Service);
@@ -61,11 +74,12 @@ export const getBot = async () => {
 
   const startTime = new Date();
 
-  const bot = new Bot<GrammyContext>(environmentConfig?.BOT_TOKEN);
-
   logUpdates<GrammyContext>(bot);
 
-  await alarmChatService.init(bot.api);
+  if (!environmentConfig.UNIT_TESTING) {
+    await alarmChatService.init(bot.api);
+  }
+
   const airRaidAlarmStates = await alarmService.getStates();
 
   if (airRaidAlarmStates.states.length === 0) {
@@ -184,8 +198,11 @@ export const getBot = async () => {
   bot.use(hydrateReply);
 
   bot.use(stateMiddleware);
-  bot.use(redisSession.middleware());
-  bot.use(redisChatSession.middleware());
+
+  if (!environmentConfig.UNIT_TESTING) {
+    bot.use(redisSession.middleware());
+    bot.use(redisChatSession.middleware());
+  }
 
   // Set message as deleted when deleteMessage method has been called
   bot.use((context, next) => {
