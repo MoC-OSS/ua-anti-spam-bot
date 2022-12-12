@@ -1,7 +1,7 @@
 import { Composer } from 'grammy';
 
 import type { GrammyContext } from '../../types';
-import { onlyNotDeletedFilter } from '../filters';
+import { onlyNotDeletedFilter, onlyWhenBotAdminFilter } from '../filters';
 
 /**
  * @description Remove join and leave messages from chat
@@ -10,6 +10,7 @@ export const getJoinLeaveComposer = () => {
   const joinLeaveComposer = new Composer<GrammyContext>();
 
   joinLeaveComposer
+    .filter((context) => onlyWhenBotAdminFilter(context))
     // Filter that feature is enabled
     .filter((context) => !context.chatSession.chatSettings.disableDeleteServiceMessage)
     // Filter if the message is already deleted
