@@ -36,28 +36,58 @@ describe('joinLeaveComposer main', () => {
       chatSession.chatSettings.disableDeleteServiceMessage = false;
     });
 
-    beforeEach(() => {
-      outgoingRequests.clear();
+    describe('bot is admin', () => {
+      beforeAll(() => {
+        chatSession.isBotAdmin = true;
+      });
+
+      beforeEach(() => {
+        outgoingRequests.clear();
+      });
+
+      it('should delete new user service message', async () => {
+        const update = new NewMemberMockUpdate().build();
+        await bot.handleUpdate(update);
+
+        const apiCall = outgoingRequests.getLast<'deleteMessage'>();
+
+        expect(outgoingRequests.length).toEqual(1);
+        expect(apiCall?.method).toEqual('deleteMessage');
+      });
+
+      it('should delete left user service message', async () => {
+        const update = new LeftMemberMockUpdate().build();
+        await bot.handleUpdate(update);
+
+        const apiCall = outgoingRequests.getLast<'deleteMessage'>();
+
+        expect(outgoingRequests.length).toEqual(1);
+        expect(apiCall?.method).toEqual('deleteMessage');
+      });
     });
 
-    it('should delete new user service message', async () => {
-      const update = new NewMemberMockUpdate().build();
-      await bot.handleUpdate(update);
+    describe('bot is not admin', () => {
+      beforeAll(() => {
+        chatSession.isBotAdmin = false;
+      });
 
-      const apiCall = outgoingRequests.getLast<'deleteMessage'>();
+      beforeEach(() => {
+        outgoingRequests.clear();
+      });
 
-      expect(outgoingRequests.length).toEqual(1);
-      expect(apiCall?.method).toEqual('deleteMessage');
-    });
+      it('should not delete new user service message', async () => {
+        const update = new NewMemberMockUpdate().build();
+        await bot.handleUpdate(update);
 
-    it('should delete left user service message', async () => {
-      const update = new LeftMemberMockUpdate().build();
-      await bot.handleUpdate(update);
+        expect(outgoingRequests.length).toEqual(0);
+      });
 
-      const apiCall = outgoingRequests.getLast<'deleteMessage'>();
+      it('should not delete left user service message', async () => {
+        const update = new LeftMemberMockUpdate().build();
+        await bot.handleUpdate(update);
 
-      expect(outgoingRequests.length).toEqual(1);
-      expect(apiCall?.method).toEqual('deleteMessage');
+        expect(outgoingRequests.length).toEqual(0);
+      });
     });
   });
 
