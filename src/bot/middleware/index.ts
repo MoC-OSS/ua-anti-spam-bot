@@ -1,5 +1,6 @@
 export * from './bot-active.middleware';
 export * from './bot-redis-active.middleware';
+export * from './debug.middleware';
 export * from './delete-message.middleware';
 export * from './delete-swindlers.middleware';
 export * from './global.middleware';
