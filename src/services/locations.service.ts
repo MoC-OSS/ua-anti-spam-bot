@@ -1,4 +1,4 @@
-import locations from '../../dataset/strings/locations.json';
+import { dataset } from '../../dataset/dataset';
 
 export class LocationsService {
   /**
@@ -7,8 +7,13 @@ export class LocationsService {
    * @returns {string[]}
    */
   parseLocations(message: string): string[] {
-    const foundLocation = locations.find((location) => message.includes(location));
-    if (foundLocation === undefined) return [];
+    const lowerMessage = message.toLowerCase();
+    const foundLocation = dataset.locations.find((location) => lowerMessage.includes(location));
+
+    if (foundLocation === undefined) {
+      return [];
+    }
+
     return [foundLocation];
   }
 }
