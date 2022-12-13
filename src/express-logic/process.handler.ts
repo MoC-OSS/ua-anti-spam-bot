@@ -1,18 +1,19 @@
 import lodashGet from 'lodash.get';
 import { removeLatinPartialLetters, removeNumber, removeSpecialSymbols } from 'ukrainian-ml-optimizer';
 
+import type { DatasetKeys } from '../../dataset/dataset';
 import { dataset } from '../../dataset/dataset';
 import { messageUtil } from '../utils';
 
 class ProcessHandler {
   /**
    * @param {string} message
-   * @param {string} datasetPath
+   * @param {DatasetKeys} datasetPath
    * @param {boolean} strict
    *
    * @returns {string | null}
    * */
-  processHandler(message: string, datasetPath: string, strict = false) {
+  processHandler(message: string, datasetPath: DatasetKeys, strict = false) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     const words = lodashGet(dataset, datasetPath.replace('_$', '')) as string[];
 
