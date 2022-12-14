@@ -33,6 +33,7 @@ import { isNotChannel } from './bot/filters';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
 import { DeleteSwindlersMiddleware, GlobalMiddleware, stateMiddleware } from './bot/middleware';
+import { selfDestructedReply } from './bot/plugins';
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
 import { deleteMessageTransformer } from './bot/transformers';
 import { environmentConfig } from './config';
@@ -196,6 +197,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   );
 
   bot.use(hydrateReply);
+  bot.use(selfDestructedReply());
 
   bot.use(stateMiddleware);
 

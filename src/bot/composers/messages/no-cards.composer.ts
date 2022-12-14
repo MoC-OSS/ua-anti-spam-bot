@@ -20,7 +20,7 @@ export const getNoCardsComposer = () => {
       const { writeUsername, userId } = getUserData(context);
       const featuresString = getEnabledFeaturesString(context.chatSession.chatSettings);
 
-      await context.replyWithHTML(getDeleteFeatureMessage({ writeUsername, userId, featuresString }));
+      await context.replyWithSelfDestructedHTML(getDeleteFeatureMessage({ writeUsername, userId, featuresString }));
     }
 
     return next();
