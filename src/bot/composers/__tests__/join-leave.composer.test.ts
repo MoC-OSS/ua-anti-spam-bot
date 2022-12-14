@@ -1,9 +1,9 @@
 import { Bot } from 'grammy';
-import type { PartialDeep } from 'type-fest';
 
 import type { OutgoingRequests } from '../../../testing';
 import { LeftMemberMockUpdate, NewMemberMockUpdate, prepareBotForTesting } from '../../../testing';
-import type { ChatSessionData, GrammyContext } from '../../../types';
+import { mockChatSession } from '../../../testing-main';
+import type { GrammyContext } from '../../../types';
 import { stateMiddleware } from '../../middleware';
 import { getJoinLeaveComposer } from '../join-leave.composer';
 
@@ -11,20 +11,16 @@ let outgoingRequests: OutgoingRequests;
 const { joinLeaveComposer } = getJoinLeaveComposer();
 const bot = new Bot<GrammyContext>('mock');
 
-const chatSession = {
+const { chatSession, mockChatSessionMiddleware } = mockChatSession({
   chatSettings: {
     disableDeleteServiceMessage: false,
   },
-} as PartialDeep<ChatSessionData> as ChatSessionData;
+});
 
 describe('joinLeaveComposer main', () => {
   beforeAll(async () => {
     bot.use(stateMiddleware);
-    // Register mock chat session
-    bot.use((context, next) => {
-      context.chatSession = chatSession;
-      return next();
-    });
+    bot.use(mockChatSessionMiddleware);
 
     bot.use(joinLeaveComposer);
 

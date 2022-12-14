@@ -1,10 +1,10 @@
 import { hydrateReply } from '@grammyjs/parse-mode';
 import { Bot } from 'grammy';
-import type { PartialDeep } from 'type-fest';
 
 import type { OutgoingRequests } from '../../../../testing';
 import { MessagePrivateMockUpdate, prepareBotForTesting } from '../../../../testing';
-import type { ChatSessionData, GrammyContext } from '../../../../types';
+import { mockChatSession } from '../../../../testing-main';
+import type { GrammyContext } from '../../../../types';
 import { logContextMiddleware, parseLocations, parseText, stateMiddleware } from '../../../middleware';
 import { getNoLocationsComposer } from '../no-locations.composer';
 
@@ -12,11 +12,11 @@ let outgoingRequests: OutgoingRequests;
 const { noLocationsComposer } = getNoLocationsComposer();
 const bot = new Bot<GrammyContext>('mock');
 
-const chatSession = {
+const { chatSession, mockChatSessionMiddleware } = mockChatSession({
   chatSettings: {
     enableDeleteLocations: false,
   },
-} as PartialDeep<ChatSessionData> as ChatSessionData;
+});
 
 describe('noLocationsComposer', () => {
   beforeAll(async () => {
@@ -26,11 +26,7 @@ describe('noLocationsComposer', () => {
     bot.use(parseText);
     bot.use(parseLocations);
     bot.use(logContextMiddleware);
-    // Register mock chat session
-    bot.use((context, next) => {
-      context.chatSession = chatSession;
-      return next();
-    });
+    bot.use(mockChatSessionMiddleware);
 
     bot.use(noLocationsComposer);
 
