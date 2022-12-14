@@ -4,6 +4,7 @@ import {
   blockWhenAlarm,
   deleteCardsButton,
   deleteForwardedButton,
+  deleteLocationsButton,
   deleteMentionButton,
   deleteMessageButton,
   deleteServiceMessageButton,
@@ -88,6 +89,7 @@ export class SettingsCommand {
       .row()
       .text(deleteCardsButton, (context) => toggleSetting(context, 'enableDeleteCards'))
       .text(deleteUrlsButton, (context) => toggleSetting(context, 'enableDeleteUrls'))
+      .text(deleteLocationsButton, (context) => toggleSetting(context, 'enableDeleteLocations'))
       .row()
       .text(deleteMentionButton, (context) => toggleSetting(context, 'enableDeleteMentions'))
       .text(deleteForwardedButton, (context) => toggleSetting(context, 'enableDeleteForwards'))

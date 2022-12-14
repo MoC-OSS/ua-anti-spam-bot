@@ -26,6 +26,7 @@ interface OnlyWithTextMiddlewareState {
   urls?: string[];
   mentions?: string[];
   cards?: string[];
+  locations?: string[];
 }
 
 interface PerformanceMiddlewareState {

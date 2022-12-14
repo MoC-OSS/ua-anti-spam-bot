@@ -14,3 +14,5 @@ negatives.json
 positives.json
 creds.json
 coverage
+.DS_Store
+*/.DS_Store

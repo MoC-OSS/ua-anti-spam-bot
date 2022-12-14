@@ -129,6 +129,7 @@ export function getEnabledFeaturesString(chatSettings: ChatSettings): string {
    * */
   featureNameMap.set('enableDeleteUrls', '🔗 посиланнями');
   featureNameMap.set('enableDeleteMentions', '⚓ згадками');
+  featureNameMap.set('enableDeleteLocations', '📍 локаціями');
   featureNameMap.set('enableDeleteForwards', '↩️ пересиланнями');
   featureNameMap.set('enableDeleteCards', '💳 картками');
 

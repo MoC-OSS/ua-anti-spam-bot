@@ -12,6 +12,7 @@ import {
   onlyWhenBotAdmin,
   onlyWithText,
   parseCards,
+  parseLocations,
   parseMentions,
   parseText,
   parseUrls,
@@ -22,6 +23,7 @@ import {
 export interface MessagesComposerProperties {
   noCardsComposer: Composer<GrammyContext>;
   noUrlsComposer: Composer<GrammyContext>;
+  noLocationsComposer: Composer<GrammyContext>;
   noMentionsComposer: Composer<GrammyContext>;
   noForwardsComposer: Composer<GrammyContext>;
   swindlersComposer: Composer<GrammyContext>;
@@ -34,6 +36,7 @@ export interface MessagesComposerProperties {
 export const getMessagesComposer = ({
   noCardsComposer,
   noUrlsComposer,
+  noLocationsComposer,
   noMentionsComposer,
   noForwardsComposer,
   strategicComposer,
@@ -90,6 +93,7 @@ export const getMessagesComposer = ({
    * */
   registerDefaultSettingModule('disableSwindlerMessage', swindlersComposer);
   registerOptionalSettingModule('enableDeleteUrls', parseUrls, noUrlsComposer);
+  registerOptionalSettingModule('enableDeleteLocations', parseLocations, noLocationsComposer);
   registerOptionalSettingModule('enableDeleteMentions', parseMentions, noMentionsComposer);
   registerOptionalSettingModule('enableDeleteCards', parseCards, noCardsComposer);
   registerOptionalSettingModule('enableDeleteForwards', noForwardsComposer);
