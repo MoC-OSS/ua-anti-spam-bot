@@ -1,8 +1,8 @@
 import type { Context, MiddlewareFn } from 'grammy';
 import type { PartialDeep } from 'type-fest';
 
-export interface MockContextFieldReturnType<C extends Context, V extends C[keyof C]> {
-  mocked: V;
+export interface MockContextFieldReturnType<C extends Context, F extends keyof C> {
+  mocked: C[F];
   middleware: MiddlewareFn<C>;
 }
 
@@ -11,15 +11,26 @@ export interface MockContextFieldReturnType<C extends Context, V extends C[keyof
  *
  * @example
  * ```ts
- * export const mockSession = mockContextField<GrammyContext, 'session'>('session');
+ * export interface MockSessionResult<
+ *   R extends MockContextFieldReturnType<GrammyContext, 'session'> = MockContextFieldReturnType<GrammyContext, 'session'>,
+ * > {
+ *   session: R['mocked'];
+ *   mockSessionMiddleware: R['middleware'];
+ * }
+ *
+ * export const mockSession = mockContextField<GrammyContext, 'session', MockSessionResult>('session', ({ mocked, middleware }) => ({
+ *   session: mocked,
+ *   mockSessionMiddleware: middleware,
+ * }));
  * ```
  * */
 export const mockContextField =
-  <C extends Context, F extends keyof C>(fieldName: F) =>
-  (mocked: PartialDeep<C[F]>): MockContextFieldReturnType<C, C[F]> => ({
-    mocked: mocked as C[F],
-    middleware: (context, next) => {
-      context[fieldName] = mocked as C[F];
-      return next();
-    },
-  });
+  <C extends Context, F extends keyof C, R>(fieldName: F, remap: (value: MockContextFieldReturnType<C, F>) => R) =>
+  (mocked: PartialDeep<C[F]>) =>
+    remap({
+      mocked: mocked as C[F],
+      middleware: (context, next) => {
+        context[fieldName] = mocked as C[F];
+        return next();
+      },
+    });

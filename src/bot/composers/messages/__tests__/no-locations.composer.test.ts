@@ -12,7 +12,7 @@ let outgoingRequests: OutgoingRequests;
 const { noLocationsComposer } = getNoLocationsComposer();
 const bot = new Bot<GrammyContext>('mock');
 
-const { mocked: chatSession, middleware: mockChatSessionMiddleware } = mockChatSession({
+const { chatSession, mockChatSessionMiddleware } = mockChatSession({
   chatSettings: {
     enableDeleteLocations: false,
   },
