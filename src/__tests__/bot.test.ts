@@ -1,6 +1,5 @@
 import type { RawApi } from 'grammy';
 import { Bot } from 'grammy';
-import type { PartialDeep } from 'type-fest';
 
 // eslint-disable-next-line jest/no-mocks-import
 import { realSwindlerMessage } from '../__mocks__/bot.mocks';
@@ -9,7 +8,8 @@ import { environmentConfig } from '../config';
 import { logsChat } from '../creator';
 import type { OutgoingRequests } from '../testing';
 import { MessagePrivateMockUpdate, prepareBotForTesting } from '../testing';
-import type { ChatSessionData, GrammyContext, SessionData } from '../types';
+import { mockChatSession, mockSession } from '../testing-main';
+import type { GrammyContext } from '../types';
 
 /**
  * Enable unit testing
@@ -19,19 +19,16 @@ environmentConfig.UNIT_TESTING = true;
 let outgoingRequests: OutgoingRequests;
 let bot: Bot<GrammyContext>;
 
-const session = {} as PartialDeep<SessionData> as SessionData;
-const chatSession = {} as PartialDeep<ChatSessionData> as ChatSessionData;
+const { mockSessionMiddleware } = mockSession({});
+const { mockChatSessionMiddleware } = mockChatSession({});
 
 describe('e2e bot testing', () => {
   beforeAll(async () => {
     const initialBot = new Bot<GrammyContext>(environmentConfig?.BOT_TOKEN);
 
     // Add mock session data
-    initialBot.use((context, next) => {
-      context.session = session;
-      context.chatSession = chatSession;
-      return next();
-    });
+    initialBot.use(mockSessionMiddleware);
+    initialBot.use(mockChatSessionMiddleware);
 
     bot = await getBot(initialBot);
     outgoingRequests = await prepareBotForTesting<GrammyContext>(bot, {
