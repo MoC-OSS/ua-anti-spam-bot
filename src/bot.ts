@@ -40,7 +40,6 @@ import { logsChat, swindlerBotsChatId, swindlerHelpChatId, swindlerMessageChatId
 import { redisClient } from './db';
 import { alarmChatService, alarmService, initSwindlersContainer, redisService, S3Service, swindlersGoogleService } from './services';
 import { initTensor } from './tensor';
-import { logUpdates } from './testing';
 import type { GrammyContext, GrammyMenuContext } from './types';
 import { emptyFunction, globalErrorHandler, wrapperErrorHandler } from './utils';
 
@@ -74,8 +73,6 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const { dynamicStorageService, swindlersDetectService } = await initSwindlersContainer();
 
   const startTime = new Date();
-
-  logUpdates<GrammyContext>(bot);
 
   if (!environmentConfig.UNIT_TESTING) {
     await alarmChatService.init(bot.api);
