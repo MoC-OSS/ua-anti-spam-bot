@@ -11,10 +11,7 @@ export class MessagePrivateMockUpdate extends GenericMockUpdate {
     update_id: this.genericUpdateId,
     message: {
       date: this.genericSentDate,
-      chat: {
-        type: 'private',
-        ...this.genericUserAtom,
-      },
+      chat: this.genericPrivateChat,
       message_id: 1365,
       from: this.genericUser,
     },

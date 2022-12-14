@@ -6,6 +6,7 @@ import { MessagePrivateMockUpdate, prepareBotForTesting } from '../../../../test
 import { mockChatSession } from '../../../../testing-main';
 import type { GrammyContext } from '../../../../types';
 import { logContextMiddleware, parseLocations, parseText, stateMiddleware } from '../../../middleware';
+import { selfDestructedReply } from '../../../plugins';
 import { getNoLocationsComposer } from '../no-locations.composer';
 
 let outgoingRequests: OutgoingRequests;
@@ -21,6 +22,7 @@ const { chatSession, mockChatSessionMiddleware } = mockChatSession({
 describe('noLocationsComposer', () => {
   beforeAll(async () => {
     bot.use(hydrateReply);
+    bot.use(selfDestructedReply());
 
     bot.use(stateMiddleware);
     bot.use(parseText);
