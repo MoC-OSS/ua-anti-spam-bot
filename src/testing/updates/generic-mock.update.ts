@@ -60,6 +60,11 @@ export abstract class GenericMockUpdate {
     is_bot: false,
   };
 
+  readonly genericPrivateChat: Chat.PrivateChat = {
+    type: 'private',
+    ...this.genericUserAtom,
+  };
+
   /**
    * Minimal update for the update entity
    * */
