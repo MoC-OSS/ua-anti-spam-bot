@@ -14,8 +14,11 @@ export type SelfDestructedFlavor<C extends Context> = C & {
  * Default callback.
  * Just removes the sent message.
  * */
-const defaultDeleteCallback = <C extends Context>(context: C, replyResult: Message.TextMessage) =>
-  context.api.deleteMessage(replyResult.chat.id, replyResult.message_id);
+const defaultDeleteCallback = async <C extends Context>(context: C, replyResult: Message.TextMessage) => {
+  await context.api.deleteMessage(replyResult.chat.id, replyResult.message_id);
+};
+
+export type SelfDestructedCallback = typeof defaultDeleteCallback;
 
 /**
  * Build delete reply with parse modes
@@ -24,7 +27,7 @@ const buildReplyWithParseMode =
   <C extends Context>(
     context: SelfDestructedFlavor<C>,
     timeout: number,
-    callback: typeof defaultDeleteCallback,
+    callback: SelfDestructedCallback,
     parseMode?: ParseMode,
   ): C['reply'] =>
   async (text, other, signal) => {
@@ -70,7 +73,7 @@ const buildReplyWithParseMode =
  * ```
  * */
 export const selfDestructedReply =
-  (timeout = 60_000, callback = defaultDeleteCallback) =>
+  (timeout = 60_000, callback: SelfDestructedCallback = defaultDeleteCallback) =>
   <C extends Context>(context: SelfDestructedFlavor<C>, next: NextFunction) => {
     context.replyWithSelfDestructed = buildReplyWithParseMode(context, timeout, callback);
     context.replyWithSelfDestructedHTML = buildReplyWithParseMode(context, timeout, callback, 'HTML');
