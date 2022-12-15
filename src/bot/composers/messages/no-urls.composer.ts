@@ -20,7 +20,9 @@ export const getNoUrlsComposer = () => {
       const { writeUsername, userId } = getUserData(context);
       const featuresString = getEnabledFeaturesString(context.chatSession.chatSettings);
 
-      await context.replyWithSelfDestructedHTML(getDeleteFeatureMessage({ writeUsername, userId, featuresString }));
+      if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
+        await context.replyWithSelfDestructedHTML(getDeleteFeatureMessage({ writeUsername, userId, featuresString }));
+      }
     }
 
     return next();
