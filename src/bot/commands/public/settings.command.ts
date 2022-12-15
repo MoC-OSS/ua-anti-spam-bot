@@ -4,6 +4,7 @@ import {
   blockWhenAlarm,
   deleteCardsButton,
   deleteForwardedButton,
+  deleteLocationsButton,
   deleteMentionButton,
   deleteMessageButton,
   deleteServiceMessageButton,
@@ -82,12 +83,13 @@ export class SettingsCommand {
 
     this.settingsMenuObj = new MiddlewareMenu('settingsMenu', { autoAnswer: false })
       .addGlobalMiddlewares(onlyAdmin)
-      .text(deleteTensorButton, (context) => toggleSetting(context, 'disableStrategicInfo'))
       .text(deleteMessageButton, (context) => toggleSetting(context, 'disableDeleteMessage'))
+      .text(deleteTensorButton, (context) => toggleSetting(context, 'disableStrategicInfo'))
       .text(deleteSwindlerButton, (context) => toggleSetting(context, 'disableSwindlerMessage'))
       .row()
       .text(deleteCardsButton, (context) => toggleSetting(context, 'enableDeleteCards'))
       .text(deleteUrlsButton, (context) => toggleSetting(context, 'enableDeleteUrls'))
+      .text(deleteLocationsButton, (context) => toggleSetting(context, 'enableDeleteLocations'))
       .row()
       .text(deleteMentionButton, (context) => toggleSetting(context, 'enableDeleteMentions'))
       .text(deleteForwardedButton, (context) => toggleSetting(context, 'enableDeleteForwards'))

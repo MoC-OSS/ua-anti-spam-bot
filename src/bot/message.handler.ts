@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+import type { DatasetKeys } from '../../dataset/dataset';
 import { environmentConfig } from '../config';
 import { processHandler } from '../express-logic';
 import { redisService } from '../services';
@@ -15,24 +16,29 @@ export class MessageHandler {
    * */
   tensorService: TensorService;
 
-  datasetPaths: { [key: string]: string };
+  /**
+   * Sorted in the call order
+   * */
+  datasetPaths = this.getDatasetPaths({
+    immediately: 'immediately',
+    one_word: 'one_word',
+    strict_percent_100: 'strict_percent_100',
+    percent_100: 'percent_100',
+    strict_high_risk: 'strict_high_risk',
+    high_risk: 'high_risk',
+    strict_locations: 'strict_locations',
+    locations: 'locations',
+  } as const);
 
   constructor(tensorService: TensorService) {
     this.tensorService = tensorService;
+  }
 
-    /**
-     * Sorted in the call order
-     * */
-    this.datasetPaths = {
-      immediately: 'immediately',
-      one_word: 'one_word',
-      strict_percent_100: 'strict_percent_100',
-      percent_100: 'percent_100',
-      strict_high_risk: 'strict_high_risk',
-      high_risk: 'high_risk',
-      strict_locations: 'strict_locations',
-      locations: 'locations',
-    };
+  /**
+   * Strictly typing an object and return initial object as a const type
+   * */
+  getDatasetPaths<P extends { [key in DatasetKeys]?: key }>(paths: P): P {
+    return paths;
   }
 
   /**
@@ -262,10 +268,10 @@ export class MessageHandler {
    * Makes request on the server and receives found word {string} or {null}
    *
    * @param {string} message
-   * @param {string} datasetPath
+   * @param {DatasetKeys} datasetPath
    * @param {boolean} strict
    */
-  async processMessage(message: string, datasetPath: string, strict = false) {
+  async processMessage(message: string, datasetPath: DatasetKeys, strict = false) {
     const deleteRule: {
       dataset: string | null;
       rule: string | null;

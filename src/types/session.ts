@@ -48,6 +48,7 @@ export interface DefaultChatSettings {
 export interface OptionalChatSettings {
   enableDeleteCards?: boolean;
   enableDeleteUrls?: boolean;
+  enableDeleteLocations?: boolean;
   enableDeleteMentions?: boolean;
   enableDeleteForwards?: boolean;
 }

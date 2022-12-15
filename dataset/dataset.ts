@@ -64,13 +64,15 @@ export const dataset = {
   houses: processMessage(houses),
   immediately: processMessage(immediately),
   location_types: processMessage(location_types),
-  locations: processMessage(locations),
+  locations: processMessage(locations).map((item) => item.toLowerCase()),
   one_word: processMessage(one_word),
   percent_100: processMessage(percent_100),
   strict_high_risk: processMessage(strict_high_risk),
   strict_locations: processMessage(strict_locations),
   strict_percent_100: processMessage(strict_percent_100),
 };
+
+export type DatasetKeys = keyof typeof dataset;
 
 /**
  * Freeze the object

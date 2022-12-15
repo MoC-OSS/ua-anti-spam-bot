@@ -1,3 +1,5 @@
+import type { DatasetKeys } from '../../dataset/dataset';
+
 import type { SwindlersResult, SwindlerTensorResult } from './swindlers';
 
 /**
@@ -11,7 +13,7 @@ export interface ProcessResponseBody {
 
 export interface ProcessRequestBody {
   message: string;
-  datasetPath: string;
+  datasetPath: DatasetKeys;
   strict: boolean;
 }
 

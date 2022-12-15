@@ -1,4 +1,4 @@
-import { adminReadyHasNoDeletePermissionMessage, adminReadyMessage, getStartChannelMessage } from '../../message';
+import { adminReadyHasNoDeletePermissionMessage, getAdminReadyMessage, getStartChannelMessage } from '../../message';
 import type { GrammyQueryMiddleware } from '../../types';
 import { handleError } from '../../utils';
 
@@ -13,7 +13,11 @@ export const botPromoteQuery: GrammyQueryMiddleware<'my_chat_member'> = async (c
       context.chatSession.botAdminDate = new Date();
       context.chatSession.isBotAdmin = true;
       context
-        .reply(context.myChatMember.new_chat_member.can_delete_messages ? adminReadyMessage : adminReadyHasNoDeletePermissionMessage)
+        .replyWithHTML(
+          context.myChatMember.new_chat_member.can_delete_messages
+            ? getAdminReadyMessage({ botName: context.me.username })
+            : adminReadyHasNoDeletePermissionMessage,
+        )
         .catch(handleError);
     }
   }
