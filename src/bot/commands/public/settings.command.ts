@@ -83,8 +83,8 @@ export class SettingsCommand {
 
     this.settingsMenuObj = new MiddlewareMenu('settingsMenu', { autoAnswer: false })
       .addGlobalMiddlewares(onlyAdmin)
-      .text(deleteTensorButton, (context) => toggleSetting(context, 'disableStrategicInfo'))
       .text(deleteMessageButton, (context) => toggleSetting(context, 'disableDeleteMessage'))
+      .text(deleteTensorButton, (context) => toggleSetting(context, 'disableStrategicInfo'))
       .text(deleteSwindlerButton, (context) => toggleSetting(context, 'disableSwindlerMessage'))
       .row()
       .text(deleteCardsButton, (context) => toggleSetting(context, 'enableDeleteCards'))

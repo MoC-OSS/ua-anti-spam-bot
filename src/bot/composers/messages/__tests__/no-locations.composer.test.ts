@@ -16,6 +16,7 @@ const bot = new Bot<GrammyContext>('mock');
 const { chatSession, mockChatSessionMiddleware } = mockChatSession({
   chatSettings: {
     enableDeleteLocations: false,
+    disableDeleteMessage: false,
   },
 });
 
@@ -53,6 +54,17 @@ describe('noLocationsComposer', () => {
       expect(outgoingRequests.length).toEqual(2);
       expect(deleteMessageRequest?.method).toEqual('deleteMessage');
       expect(sendMessageRequest?.method).toEqual('sendMessage');
+    });
+
+    it('should delete location message and do not notify if disableDeleteMessage is true', async () => {
+      chatSession.chatSettings.disableDeleteMessage = true;
+      const update = new MessagePrivateMockUpdate('Тут ТеРемкИ без сВітла').build();
+      await bot.handleUpdate(update);
+
+      const deleteMessageRequest = outgoingRequests.getLast<'deleteMessage'>();
+
+      expect(outgoingRequests.length).toEqual(1);
+      expect(deleteMessageRequest?.method).toEqual('deleteMessage');
     });
 
     it('should not delete message without a location', async () => {
