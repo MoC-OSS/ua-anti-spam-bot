@@ -25,6 +25,7 @@ import {
   getNoLocationsComposer,
   getNoMentionsComposer,
   getNoUrlsComposer,
+  getNsfwFilterComposer,
   getStrategicComposer,
   getSwindlersComposer,
 } from './bot/composers/messages';
@@ -40,7 +41,7 @@ import { environmentConfig } from './config';
 import { logsChat, swindlerBotsChatId, swindlerHelpChatId, swindlerMessageChatId } from './creator';
 import { redisClient } from './db';
 import { alarmChatService, alarmService, initSwindlersContainer, redisService, S3Service, swindlersGoogleService } from './services';
-import { initTensor } from './tensor';
+import { initNsfwTensor, initTensor } from './tensor';
 import type { GrammyContext, GrammyMenuContext } from './types';
 import { emptyFunction, globalErrorHandler, wrapperErrorHandler } from './utils';
 
@@ -70,6 +71,8 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const s3Service = new S3Service();
   const tensorService = await initTensor(s3Service);
   tensorService.setSpamThreshold(await redisService.getBotTensorPercent());
+
+  const nsfwTensorService = await initNsfwTensor();
 
   const { dynamicStorageService, swindlersDetectService } = await initSwindlersContainer();
 
@@ -163,6 +166,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const { noForwardsComposer } = getNoForwardsComposer();
   const { swindlersComposer } = getSwindlersComposer({ deleteSwindlersMiddleware });
   const { strategicComposer } = getStrategicComposer({ onTextListener });
+  const { nsfwFilterComposer } = getNsfwFilterComposer({ nsfwTensorService });
 
   const { messagesComposer } = getMessagesComposer({
     noCardsComposer,
@@ -172,6 +176,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     noForwardsComposer,
     swindlersComposer,
     strategicComposer,
+    nsfwFilterComposer,
   });
 
   rootMenu.register(tensorListener.initMenu(trainingThrottler));

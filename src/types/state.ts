@@ -1,3 +1,6 @@
+import type { PhotoSize } from '@grammyjs/types/message';
+
+import type { NsfwTensorResult } from './nsfw';
 import type { SwindlerTensorResult } from './swindlers';
 
 export interface StateFlavor<S> {
@@ -18,11 +21,17 @@ export interface StateFlavor<S> {
   set state(session: S | null | undefined);
 }
 
+export interface StatePhoto {
+  meta: PhotoSize;
+  file: Buffer;
+}
+
 /**
  * It requires only-with-text.middleware.js
  * */
 interface OnlyWithTextMiddlewareState {
   text?: string;
+  photo?: StatePhoto | null;
   urls?: string[];
   mentions?: string[];
   cards?: string[];
@@ -49,5 +58,6 @@ export type State = OnlyWithTextMiddlewareState &
       rate: number;
       reason: string;
     };
+    nsfwResult?: NsfwTensorResult;
     dataset?: SwindlerTensorResult;
   };

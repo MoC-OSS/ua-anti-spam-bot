@@ -14,6 +14,7 @@ import {
   parseCards,
   parseLocations,
   parseMentions,
+  parsePhotos,
   parseText,
   parseUrls,
   performanceEndMiddleware,
@@ -28,6 +29,7 @@ export interface MessagesComposerProperties {
   noForwardsComposer: Composer<GrammyContext>;
   swindlersComposer: Composer<GrammyContext>;
   strategicComposer: Composer<GrammyContext>;
+  nsfwFilterComposer: Composer<GrammyContext>;
 }
 
 /**
@@ -41,6 +43,7 @@ export const getMessagesComposer = ({
   noForwardsComposer,
   strategicComposer,
   swindlersComposer,
+  nsfwFilterComposer,
 }: MessagesComposerProperties) => {
   const messagesComposer = new Composer<GrammyContext>();
 
@@ -92,6 +95,7 @@ export const getMessagesComposer = ({
    * The order should be right
    * */
   registerDefaultSettingModule('disableSwindlerMessage', swindlersComposer);
+  registerDefaultSettingModule('disableNsfwFilter', parsePhotos, nsfwFilterComposer);
   registerOptionalSettingModule('enableDeleteUrls', parseUrls, noUrlsComposer);
   registerOptionalSettingModule('enableDeleteLocations', parseLocations, noLocationsComposer);
   registerOptionalSettingModule('enableDeleteMentions', parseMentions, noMentionsComposer);
