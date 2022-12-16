@@ -25,6 +25,11 @@ export function logContext(context: GrammyContext) {
     const writeContext = JSON.parse(JSON.stringify(context)) as RealGrammyContext;
     // noinspection JSConstantReassignment
     delete writeContext.tg;
+
+    if (writeContext.state.photo?.file) {
+      writeContext.state.photo.file = Buffer.from([]);
+    }
+
     console.info(JSON.stringify(writeContext, null, 2));
 
     fs.writeFileSync('./last-ctx.json', `${JSON.stringify(writeContext, null, 2)}\n`);
