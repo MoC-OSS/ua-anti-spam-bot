@@ -1,3 +1,4 @@
+import * as tf from '@tensorflow/tfjs-node';
 import express from 'express';
 import type { RouteParameters } from 'express-serve-static-core';
 
@@ -15,6 +16,14 @@ import type {
 } from './types';
 
 (async () => {
+  /**
+   * Tensorflow.js offers two flags, enableProdMode and enableDebugMode.
+   * If you're going to use any TF model in production, be sure to enable prod mode before loading models.
+   * */
+  if (environmentConfig.ENV === 'production') {
+    tf.enableProdMode();
+  }
+
   const s3Service = new S3Service();
 
   const tensorService = await initTensor(s3Service);
