@@ -1,4 +1,5 @@
 export * from './no-cards.composer';
+export * from './no-forward.composer';
 export * from './no-locations.composer';
 export * from './no-mentions.composer';
 export * from './no-urls.composer';

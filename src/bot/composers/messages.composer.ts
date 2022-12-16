@@ -2,7 +2,7 @@ import { Composer } from 'grammy';
 
 import { messageQuery } from '../../const';
 import type { DefaultChatSettings, GrammyContext, GrammyMiddleware, OptionalChatSettings } from '../../types';
-import { onlyActiveDefaultSettingFilter, onlyActiveOptionalSettingFilter, onlyNotDeletedFilter } from '../filters';
+import { onlyActiveDefaultSettingFilter, onlyActiveOptionalSettingFilter, onlyNotDeletedFilter, onlyWithTextFilter } from '../filters';
 import {
   botActiveMiddleware,
   botRedisActive,
@@ -10,11 +10,9 @@ import {
   logContextMiddleware,
   onlyNotAdmin,
   onlyWhenBotAdmin,
-  onlyWithText,
   parseCards,
   parseLocations,
   parseMentions,
-  parsePhotos,
   parseText,
   parseUrls,
   performanceEndMiddleware,
@@ -29,7 +27,6 @@ export interface MessagesComposerProperties {
   noForwardsComposer: Composer<GrammyContext>;
   swindlersComposer: Composer<GrammyContext>;
   strategicComposer: Composer<GrammyContext>;
-  nsfwFilterComposer: Composer<GrammyContext>;
 }
 
 /**
@@ -43,7 +40,6 @@ export const getMessagesComposer = ({
   noForwardsComposer,
   strategicComposer,
   swindlersComposer,
-  nsfwFilterComposer,
 }: MessagesComposerProperties) => {
   const messagesComposer = new Composer<GrammyContext>();
 
@@ -56,7 +52,9 @@ export const getMessagesComposer = ({
     // Filtering messages
     .use(botRedisActive, ignoreOld(60), botActiveMiddleware, onlyNotAdmin, onlyWhenBotAdmin)
     // Parse message text and add it to state
-    .use(parseText, onlyWithText)
+    .use(parseText)
+    // Filter updates if there are no text
+    .filter((context) => onlyWithTextFilter(context))
     // Handle performance start
     .use(performanceStartMiddleware);
 
@@ -95,7 +93,6 @@ export const getMessagesComposer = ({
    * The order should be right
    * */
   registerDefaultSettingModule('disableSwindlerMessage', swindlersComposer);
-  registerDefaultSettingModule('disableNsfwFilter', parsePhotos, nsfwFilterComposer);
   registerOptionalSettingModule('enableDeleteUrls', parseUrls, noUrlsComposer);
   registerOptionalSettingModule('enableDeleteLocations', parseLocations, noLocationsComposer);
   registerOptionalSettingModule('enableDeleteMentions', parseMentions, noMentionsComposer);

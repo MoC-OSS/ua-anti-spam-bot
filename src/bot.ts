@@ -15,6 +15,7 @@ import {
   getHealthCheckComposer,
   getJoinLeaveComposer,
   getMessagesComposer,
+  getPhotoComposer,
   getPrivateCommandsComposer,
   getPublicCommandsComposer,
   getSaveToSheetComposer,
@@ -22,6 +23,7 @@ import {
 } from './bot/composers';
 import {
   getNoCardsComposer,
+  getNoForwardsComposer,
   getNoLocationsComposer,
   getNoMentionsComposer,
   getNoUrlsComposer,
@@ -29,7 +31,6 @@ import {
   getStrategicComposer,
   getSwindlersComposer,
 } from './bot/composers/messages';
-import { getNoForwardsComposer } from './bot/composers/messages/no-forward.composer';
 import { isNotChannel } from './bot/filters';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
@@ -158,6 +159,8 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     trainingThrottler,
   });
 
+  rootMenu.register(tensorListener.initMenu(trainingThrottler));
+
   // Message composers
   const { noCardsComposer } = getNoCardsComposer();
   const { noUrlsComposer } = getNoUrlsComposer();
@@ -166,7 +169,6 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const { noForwardsComposer } = getNoForwardsComposer();
   const { swindlersComposer } = getSwindlersComposer({ deleteSwindlersMiddleware });
   const { strategicComposer } = getStrategicComposer({ onTextListener });
-  const { nsfwFilterComposer } = getNsfwFilterComposer({ nsfwTensorService });
 
   const { messagesComposer } = getMessagesComposer({
     noCardsComposer,
@@ -176,10 +178,12 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     noForwardsComposer,
     swindlersComposer,
     strategicComposer,
-    nsfwFilterComposer,
   });
 
-  rootMenu.register(tensorListener.initMenu(trainingThrottler));
+  // Photo composers
+  const { nsfwFilterComposer } = getNsfwFilterComposer({ nsfwTensorService });
+
+  const { photosComposer } = getPhotoComposer({ nsfwFilterComposer });
 
   // Not channel handlers
   const notChannelRegisterComposer = new Composer<GrammyContext>();
@@ -243,6 +247,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
 
   // Main message composer
   notChannelComposer.use(messagesComposer);
+  notChannelComposer.use(photosComposer);
 
   bot.use(notChannelRegisterComposer);
 

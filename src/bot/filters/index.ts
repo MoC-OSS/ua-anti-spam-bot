@@ -5,3 +5,5 @@ export * from './only-creator.filter';
 export * from './only-not-deleted.filter';
 export * from './only-when-bot-admin.filter';
 export * from './only-whitelisted.filter';
+export * from './only-with-photo.filter';
+export * from './only-with-text.filter';
