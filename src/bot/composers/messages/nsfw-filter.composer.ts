@@ -26,11 +26,14 @@ export const getNsfwFilterComposer = ({ nsfwTensorService }: NsfwFilterComposerP
 
         if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
           await context.reply(
-            `Found ${predictionResult.deletePrediction.className} with ${
-              predictionResult.deletePrediction.probability
-            } probability.\n\nOverall scores:\n${JSON.stringify(predictionResult, null, 2)}`,
+            `✅ Found ${predictionResult.deletePrediction.className} with ${predictionResult.deletePrediction.probability} probability.`,
           );
         }
+      } else {
+        await context.reply(
+          `⛔️ Not found. Highest ${predictionResult.highestPrediction.className} with ${predictionResult.highestPrediction.probability} probability.`,
+          { reply_to_message_id: context.msg?.message_id },
+        );
       }
     }
 

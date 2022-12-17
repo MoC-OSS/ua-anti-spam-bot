@@ -9,7 +9,7 @@ import {
   logContextMiddleware,
   onlyNotAdmin,
   onlyWhenBotAdmin,
-  parsePhotos,
+  parsePhoto,
   performanceEndMiddleware,
   performanceStartMiddleware,
 } from '../middleware';
@@ -28,10 +28,12 @@ export const getPhotoComposer = ({ nsfwFilterComposer }: PhotosComposerPropertie
    * Only these photos will be processed in this composer
    * */
   const readyImageComposer = photosComposer
-    .on(':photo') // Filtering messages
+    // Queries to follow
+    .on([':photo', ':sticker'])
+    // Filtering messages
     .use(botRedisActive, ignoreOld(60), botActiveMiddleware, onlyNotAdmin, onlyWhenBotAdmin)
     // Parse message text and add it to state
-    .use(parsePhotos)
+    .use(parsePhoto)
     // Filter updates if there are no photo
     .filter((context) => onlyWithPhotoFilter(context))
     // Handle performance start
@@ -51,7 +53,7 @@ export const getPhotoComposer = ({ nsfwFilterComposer }: PhotosComposerPropertie
    * Register modules.
    * The order should be right
    * */
-  registerDefaultSettingModule('disableNsfwFilter', parsePhotos, nsfwFilterComposer);
+  registerDefaultSettingModule('disableNsfwFilter', parsePhoto, nsfwFilterComposer);
 
   readyImageComposer.use(performanceEndMiddleware);
   readyImageComposer.use(logContextMiddleware);

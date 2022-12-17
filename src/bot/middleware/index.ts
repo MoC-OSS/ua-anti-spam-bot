@@ -19,7 +19,7 @@ export * from './only-with-text.middleware';
 export * from './parse-cards.middleware';
 export * from './parse-locations.middleware';
 export * from './parse-mentions.middleware';
-export * from './parse-photos.middleware';
+export * from './parse-photo.middleware';
 export * from './parse-text.middleware';
 export * from './parse-urls.middleware';
 export * from './performance-end.middleware';
