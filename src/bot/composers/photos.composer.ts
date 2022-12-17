@@ -53,7 +53,7 @@ export const getPhotoComposer = ({ nsfwFilterComposer }: PhotosComposerPropertie
    * Register modules.
    * The order should be right
    * */
-  registerDefaultSettingModule('disableNsfwFilter', parsePhoto, nsfwFilterComposer);
+  registerDefaultSettingModule('disableNsfwFilter', nsfwFilterComposer);
 
   readyImageComposer.use(performanceEndMiddleware);
   readyImageComposer.use(logContextMiddleware);
