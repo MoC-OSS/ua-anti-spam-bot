@@ -43,7 +43,7 @@ export class HelpCommand {
             startLocaleTime,
             isAdmin,
             canDelete,
-            user: writeUsername !== '@GroupAnonymousBot' ? writeUsername : '',
+            user: writeUsername === '@GroupAnonymousBot' ? '' : writeUsername,
             userId,
           }),
         )

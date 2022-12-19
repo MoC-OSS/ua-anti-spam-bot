@@ -35,7 +35,7 @@ export async function onlyNotAdmin(context: GrammyContext, next: NextFunction) {
   /**
    * Skip channel admins message duplicated in chat
    * */
-  if (context.chat.type === 'channel') {
+  if (context.chat?.type === 'channel') {
     logSkipMiddleware(context, 'channel chat type');
     return;
   }
@@ -57,17 +57,19 @@ export async function onlyNotAdmin(context: GrammyContext, next: NextFunction) {
     return;
   }
 
+  const fromId = context.from?.id;
+
   /**
    * If no id - not an admin
    * */
-  if (!context.from?.id) {
+  if (!fromId) {
     return next();
   }
 
   /**
    * Check if the is admin. If so, skip.
    * */
-  const chatMember = await context.getChatMember(context.from.id);
+  const chatMember = await context.getChatMember(fromId);
   if (['creator', 'administrator'].includes(chatMember.status)) {
     logSkipMiddleware(context, 'Admin');
     return;
@@ -78,7 +80,7 @@ export async function onlyNotAdmin(context: GrammyContext, next: NextFunction) {
    * It means an admin wrote the message, so we need to skip it.
    * https://github.com/42wim/matterbridge/issues/1654
    * */
-  if (context.from?.id === CHANNEL_BOT_ID || context.from?.username === 'Channel_Bot') {
+  if (fromId === CHANNEL_BOT_ID || context.from?.username === 'Channel_Bot') {
     logSkipMiddleware(context, 'Channel_Bot');
     return;
   }
