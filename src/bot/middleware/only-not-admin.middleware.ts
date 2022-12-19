@@ -33,6 +33,14 @@ export async function onlyNotAdmin(context: GrammyContext, next: NextFunction) {
   }
 
   /**
+   * Private user is not admin.
+   * Bot should remove messages from private user messages.
+   * */
+  if (context.chat?.type === 'private') {
+    return next();
+  }
+
+  /**
    * Skip channel admins message duplicated in chat
    * */
   if (context.chat?.type === 'channel') {

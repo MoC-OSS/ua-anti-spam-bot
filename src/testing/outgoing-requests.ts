@@ -48,6 +48,13 @@ export class OutgoingRequests<M extends RealApiMethodKeys = RealApiMethodKeys> {
   }
 
   /**
+   * @returns first request
+   * */
+  getFirst<A extends M>(): Request<A> | null {
+    return (this.requests[0] as Request<A>) || null;
+  }
+
+  /**
    * @returns last request
    * */
   getLast<A extends M>(): Request<A> | null {

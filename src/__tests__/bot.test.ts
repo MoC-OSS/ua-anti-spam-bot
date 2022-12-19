@@ -111,6 +111,16 @@ describe('e2e bot testing', () => {
           chatSession.isBotAdmin = true;
         });
 
+        it('should check current user if its an admin to skip them', async () => {
+          const update = new MessageSuperGroupMockUpdate('regular message').build();
+          await bot.handleUpdate(update);
+
+          const getChatMemberRequest = outgoingRequests.getFirst<'getChatMember'>();
+
+          expect(getChatMemberRequest?.method).toEqual('getChatMember');
+          expect(getChatMemberRequest?.payload.user_id).toEqual(update.message.from.id);
+        });
+
         it('should request chat info if no is removed info', async () => {
           if (chatSession.botRemoved !== undefined) {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -121,17 +131,18 @@ describe('e2e bot testing', () => {
           const update = new MessageSuperGroupMockUpdate('regular message').build();
           await bot.handleUpdate(update);
 
-          const getChatRequest = outgoingRequests.getLast<'getChat'>();
+          const [getChatRequest, getChatMemberRequest] = outgoingRequests.getTwoLast<'getChat', 'getChatMember'>();
 
-          expect(outgoingRequests.requests).toHaveLength(1);
+          expect(outgoingRequests.requests).toHaveLength(2);
           expect(getChatRequest?.method).toEqual('getChat');
+          expect(getChatMemberRequest?.method).toEqual('getChatMember');
         });
 
         it('should not remove a super group message', async () => {
           const update = new MessageSuperGroupMockUpdate('regular message').build();
           await bot.handleUpdate(update);
 
-          expect(outgoingRequests.requests).toHaveLength(0);
+          expect(outgoingRequests.requests).toHaveLength(1);
         });
 
         it('should remove a swindler message and notify for first swindler in several hours', async () => {
@@ -149,7 +160,7 @@ describe('e2e bot testing', () => {
           expect(sendLogsMessageRequest?.payload.chat_id).toEqual(logsChat);
           expect(sendSwindlersMessageRequest?.method).toEqual('sendMessage');
           expect(deleteRequest?.method).toEqual('deleteMessage');
-          expect(outgoingRequests.requests).toHaveLength(5);
+          expect(outgoingRequests.requests).toHaveLength(6);
         });
 
         it('should remove a swindler message and dont notify after already notified', async () => {
@@ -167,7 +178,7 @@ describe('e2e bot testing', () => {
           expect(deleteRequest?.method).toEqual('deleteMessage');
           expect(sendLogsMessageRequest?.method).toEqual('sendMessage');
           expect(sendLogsMessageRequest?.payload.chat_id).toEqual(logsChat);
-          expect(outgoingRequests.requests).toHaveLength(4);
+          expect(outgoingRequests.requests).toHaveLength(5);
         });
       });
     });
