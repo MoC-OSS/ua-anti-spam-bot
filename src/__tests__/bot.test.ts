@@ -66,7 +66,7 @@ describe('e2e bot testing', () => {
         expect(sendLogsMessageRequest?.payload.chat_id).toEqual(logsChat);
         expect(sendSwindlersMessageRequest?.method).toEqual('sendMessage');
         expect(deleteRequest?.method).toEqual('deleteMessage');
-        expect(outgoingRequests.requests).toHaveLength(5);
+        expect(outgoingRequests.requests).toHaveLength(4);
       });
 
       it('should remove a swindler message and dont notify after already notified', async () => {
@@ -83,7 +83,7 @@ describe('e2e bot testing', () => {
         expect(deleteRequest?.method).toEqual('deleteMessage');
         expect(sendLogsMessageRequest?.method).toEqual('sendMessage');
         expect(sendLogsMessageRequest?.payload.chat_id).toEqual(logsChat);
-        expect(outgoingRequests.requests).toHaveLength(4);
+        expect(outgoingRequests.requests).toHaveLength(3);
       });
     });
   });
@@ -160,7 +160,7 @@ describe('e2e bot testing', () => {
           expect(sendLogsMessageRequest?.payload.chat_id).toEqual(logsChat);
           expect(sendSwindlersMessageRequest?.method).toEqual('sendMessage');
           expect(deleteRequest?.method).toEqual('deleteMessage');
-          expect(outgoingRequests.requests).toHaveLength(6);
+          expect(outgoingRequests.requests).toHaveLength(5);
         });
 
         it('should remove a swindler message and dont notify after already notified', async () => {
@@ -178,7 +178,7 @@ describe('e2e bot testing', () => {
           expect(deleteRequest?.method).toEqual('deleteMessage');
           expect(sendLogsMessageRequest?.method).toEqual('sendMessage');
           expect(sendLogsMessageRequest?.payload.chat_id).toEqual(logsChat);
-          expect(outgoingRequests.requests).toHaveLength(5);
+          expect(outgoingRequests.requests).toHaveLength(4);
         });
       });
     });
