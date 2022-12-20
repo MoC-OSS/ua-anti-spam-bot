@@ -8,7 +8,7 @@ import { environmentConfig } from '../../config';
 import { logsChat } from '../../creator';
 import { getCannotDeleteMessage, swindlersWarningMessage } from '../../message';
 import type { SwindlersDetectService } from '../../services';
-import { compareDatesWithOffset, getUserData, handleError, revealHiddenUrls, telegramUtil } from '../../utils';
+import { compareDatesWithOffset, handleError, revealHiddenUrls, telegramUtil } from '../../utils';
 
 const host = `http://${environmentConfig.HOST}:${environmentConfig.PORT}`;
 
@@ -65,23 +65,8 @@ export class DeleteSwindlersMiddleware {
    * @param {string} [message]
    * */
   async saveSwindlersMessage(context: GrammyContext, maxChance: number, from: SwindlerType | string, message?: string) {
-    const { writeUsername, userId } = getUserData(context);
-    const chatInfo = await context.getChat();
+    const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
     const text = message || context.state?.text || '';
-
-    const chatTitle = telegramUtil.getChatTitle(context.chat);
-    const inviteLink = telegramUtil.getInviteLink(chatInfo);
-
-    const chatMention = chatTitle && (inviteLink ? `<a href="${inviteLink}">${chatTitle}</a>` : `<code>${chatTitle}</code>`);
-
-    const userMention = userId ? `<a href="tg://user?id=${userId}">${writeUsername}</a>` : writeUsername;
-
-    if (!inviteLink) {
-      await context.api.sendDocument(
-        logsChat,
-        new InputFile(Buffer.from(JSON.stringify(chatInfo, null, 2)), `chat-info-${chatTitle}-${new Date().toISOString()}.csv`),
-      );
-    }
 
     return context.api.sendMessage(
       logsChat,
