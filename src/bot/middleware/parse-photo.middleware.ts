@@ -2,9 +2,11 @@ import type * as Buffer from 'node:buffer';
 import axios from 'axios';
 import type { NextFunction } from 'grammy';
 import sharp from 'sharp';
-import type { GrammyContext } from 'types';
 
 import { environmentConfig } from '../../config';
+import type { GrammyContext } from '../../types';
+import { ImageType } from '../../types';
+import type { StateImage } from '../../types/state';
 
 /**
  * @description
@@ -22,6 +24,13 @@ export async function parsePhoto(context: GrammyContext, next: NextFunction) {
     const stickerMeta = sticker && !sticker.is_video && !sticker.is_animated ? sticker : null;
 
     const imageMeta = photoMeta || stickerMeta;
+    let imageType: ImageType = ImageType.UNKNOWN;
+
+    if (photoMeta) {
+      imageType = ImageType.PHOTO;
+    } else if (stickerMeta) {
+      imageType = ImageType.STICKER;
+    }
 
     if (imageMeta) {
       const photoFile = await context.api.getFile(imageMeta.file_id).then((photoResponse) =>
@@ -35,10 +44,12 @@ export async function parsePhoto(context: GrammyContext, next: NextFunction) {
       );
 
       context.state.photo = photoFile
-        ? {
+        ? ({
             meta: imageMeta,
+            type: imageType,
             file: await sharp(photoFile).jpeg().toBuffer(),
-          }
+            caption: context.msg?.caption,
+          } as StateImage)
         : null;
     } else {
       context.state.photo = null;

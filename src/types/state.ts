@@ -1,5 +1,6 @@
-import type { PhotoSize } from '@grammyjs/types/message';
+import type { PhotoSize, Sticker } from '@grammyjs/types/message';
 
+import type { ImageType } from './image';
 import type { NsfwTensorResult } from './nsfw';
 import type { SwindlerTensorResult } from './swindlers';
 
@@ -21,17 +22,27 @@ export interface StateFlavor<S> {
   set state(session: S | null | undefined);
 }
 
-export interface StatePhoto {
+export interface StateImagePhoto {
   meta: PhotoSize;
+  type: ImageType.PHOTO;
+  file: Buffer;
+  caption?: string;
+}
+
+export interface StateImageSticker {
+  meta: Sticker;
+  type: ImageType.STICKER;
   file: Buffer;
 }
+
+export type StateImage = StateImagePhoto | StateImageSticker;
 
 /**
  * It requires only-with-text.middleware.js
  * */
 interface OnlyWithTextMiddlewareState {
   text?: string;
-  photo?: StatePhoto | null;
+  photo?: StateImage | null;
   urls?: string[];
   mentions?: string[];
   cards?: string[];
