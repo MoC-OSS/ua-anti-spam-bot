@@ -10,7 +10,7 @@ export class NsfwTensorService {
   constructor(private modelPath: string) {}
 
   async load() {
-    this.model = await nsfw.load();
+    this.model = await nsfw.load(`file://${this.modelPath}`);
   }
 
   async classify(image: Buffer): Promise<predictionType[]> {
