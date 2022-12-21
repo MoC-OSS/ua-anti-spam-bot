@@ -1,10 +1,12 @@
+import * as tf from '@tensorflow/tfjs-node';
 import express from 'express';
 import type { RouteParameters } from 'express-serve-static-core';
+import multer from 'multer';
 
 import { environmentConfig } from './config';
 import { processHandler } from './express-logic';
 import { initSwindlersContainer, S3Service } from './services';
-import { initTensor } from './tensor';
+import { initNsfwTensor, initTensor } from './tensor';
 import type {
   ProcessRequestBody,
   ProcessResponseBody,
@@ -14,10 +16,22 @@ import type {
   TensorResponseBody,
 } from './types';
 
+const uploadMemoryStorage = multer.memoryStorage();
+const uploadMiddleware = multer({ storage: uploadMemoryStorage });
+
 (async () => {
+  /**
+   * Tensorflow.js offers two flags, enableProdMode and enableDebugMode.
+   * If you're going to use any TF model in production, be sure to enable prod mode before loading models.
+   * */
+  if (environmentConfig.ENV === 'production') {
+    tf.enableProdMode();
+  }
+
   const s3Service = new S3Service();
 
   const tensorService = await initTensor(s3Service);
+  const nsfwTensorService = await initNsfwTensor();
   const { swindlersDetectService } = await initSwindlersContainer();
 
   const app = express();
@@ -74,6 +88,32 @@ import type {
       }
 
       response.json({ result, time, expressStartTime });
+    },
+  );
+
+  app.post<'/image', RouteParameters<'/image'>>(
+    '/image',
+    uploadMiddleware.single('image'),
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    async (request, response) => {
+      const startTime = performance.now();
+      const image = request.file;
+
+      if (!image) {
+        return response.status(400).json({ error: 'no image' });
+      }
+
+      const result = await nsfwTensorService.predict(image.buffer);
+
+      const endTime = performance.now();
+
+      const time = endTime - startTime;
+
+      if (environmentConfig.DEBUG) {
+        console.info({ route: '/image', result, time, expressStartTime });
+      }
+
+      return response.json({ result, time, expressStartTime });
     },
   );
 

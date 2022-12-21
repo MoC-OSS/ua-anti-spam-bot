@@ -36,6 +36,10 @@ export const globalErrorHandler: ErrorHandler<GrammyContext> = (botError) => {
   // noinspection JSConstantReassignment
   delete writeContext.api;
 
+  if (writeContext.state.photo?.file) {
+    writeContext.state.photo.file = Buffer.from([]);
+  }
+
   console.error('*** GLOBAL-HANDLED ERROR CTX ***', writeContext);
 
   if (environmentConfig.DEBUG) {
@@ -66,6 +70,10 @@ export const wrapperErrorHandler =
       delete writeContext.telegram;
       // noinspection JSConstantReassignment
       delete writeContext.api;
+
+      if (writeContext.state.photo?.file) {
+        writeContext.state.photo.file = Buffer.from([]);
+      }
 
       console.error('*** FUNCTION-HANDLED ERROR CTX ***', writeContext);
 

@@ -2,7 +2,7 @@ import { Composer } from 'grammy';
 
 import { messageQuery } from '../../const';
 import type { DefaultChatSettings, GrammyContext, GrammyMiddleware, OptionalChatSettings } from '../../types';
-import { onlyActiveDefaultSettingFilter, onlyActiveOptionalSettingFilter, onlyNotDeletedFilter } from '../filters';
+import { onlyActiveDefaultSettingFilter, onlyActiveOptionalSettingFilter, onlyNotDeletedFilter, onlyWithTextFilter } from '../filters';
 import {
   botActiveMiddleware,
   botRedisActive,
@@ -10,7 +10,6 @@ import {
   logContextMiddleware,
   onlyNotAdmin,
   onlyWhenBotAdmin,
-  onlyWithText,
   parseCards,
   parseLocations,
   parseMentions,
@@ -53,7 +52,9 @@ export const getMessagesComposer = ({
     // Filtering messages
     .use(botRedisActive, ignoreOld(60), botActiveMiddleware, onlyNotAdmin, onlyWhenBotAdmin)
     // Parse message text and add it to state
-    .use(parseText, onlyWithText)
+    .use(parseText)
+    // Filter updates if there are no text
+    .filter((context) => onlyWithTextFilter(context))
     // Handle performance start
     .use(performanceStartMiddleware);
 

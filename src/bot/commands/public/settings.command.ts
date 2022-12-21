@@ -7,6 +7,7 @@ import {
   deleteLocationsButton,
   deleteMentionButton,
   deleteMessageButton,
+  deleteNsfwButton,
   deleteServiceMessageButton,
   deleteSwindlerButton,
   deleteTensorButton,
@@ -86,6 +87,8 @@ export class SettingsCommand {
       .text(deleteMessageButton, (context) => toggleSetting(context, 'disableDeleteMessage'))
       .text(deleteTensorButton, (context) => toggleSetting(context, 'disableStrategicInfo'))
       .text(deleteSwindlerButton, (context) => toggleSetting(context, 'disableSwindlerMessage'))
+      .row()
+      .text(deleteNsfwButton, (context) => toggleSetting(context, 'disableNsfwFilter'))
       .row()
       .text(deleteCardsButton, (context) => toggleSetting(context, 'enableDeleteCards'))
       .text(deleteUrlsButton, (context) => toggleSetting(context, 'enableDeleteUrls'))

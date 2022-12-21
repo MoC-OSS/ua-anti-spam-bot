@@ -11,7 +11,7 @@ export class UrlService {
    */
   parseUrls(message: string, strict = false): string[] {
     return removeDuplicates(
-      (message.match(URL_REGEXP) || [])
+      (message.match(URL_REGEXP) || ([] as string[]))
         .map((url) => {
           const clearUrl = url.trim();
           const noSpecialSymbolUrl = NON_WORD_REGEX.test(clearUrl.slice(-1)) ? clearUrl.slice(0, -1) : clearUrl;

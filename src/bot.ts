@@ -15,6 +15,7 @@ import {
   getHealthCheckComposer,
   getJoinLeaveComposer,
   getMessagesComposer,
+  getPhotoComposer,
   getPrivateCommandsComposer,
   getPublicCommandsComposer,
   getSaveToSheetComposer,
@@ -22,13 +23,14 @@ import {
 } from './bot/composers';
 import {
   getNoCardsComposer,
+  getNoForwardsComposer,
   getNoLocationsComposer,
   getNoMentionsComposer,
   getNoUrlsComposer,
+  getNsfwFilterComposer,
   getStrategicComposer,
   getSwindlersComposer,
 } from './bot/composers/messages';
-import { getNoForwardsComposer } from './bot/composers/messages/no-forward.composer';
 import { isNotChannel } from './bot/filters';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
@@ -40,7 +42,7 @@ import { environmentConfig } from './config';
 import { logsChat, swindlerBotsChatId, swindlerHelpChatId, swindlerMessageChatId } from './creator';
 import { redisClient } from './db';
 import { alarmChatService, alarmService, initSwindlersContainer, redisService, S3Service, swindlersGoogleService } from './services';
-import { initTensor } from './tensor';
+import { initNsfwTensor, initTensor } from './tensor';
 import type { GrammyContext, GrammyMenuContext } from './types';
 import { emptyFunction, globalErrorHandler, wrapperErrorHandler } from './utils';
 
@@ -70,6 +72,8 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const s3Service = new S3Service();
   const tensorService = await initTensor(s3Service);
   tensorService.setSpamThreshold(await redisService.getBotTensorPercent());
+
+  const nsfwTensorService = await initNsfwTensor();
 
   const { dynamicStorageService, swindlersDetectService } = await initSwindlersContainer();
 
@@ -155,6 +159,8 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     trainingThrottler,
   });
 
+  rootMenu.register(tensorListener.initMenu(trainingThrottler));
+
   // Message composers
   const { noCardsComposer } = getNoCardsComposer();
   const { noUrlsComposer } = getNoUrlsComposer();
@@ -174,7 +180,10 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     strategicComposer,
   });
 
-  rootMenu.register(tensorListener.initMenu(trainingThrottler));
+  // Photo composers
+  const { nsfwFilterComposer } = getNsfwFilterComposer({ nsfwTensorService });
+
+  const { photosComposer } = getPhotoComposer({ nsfwFilterComposer });
 
   // Not channel handlers
   const notChannelRegisterComposer = new Composer<GrammyContext>();
@@ -238,6 +247,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
 
   // Main message composer
   notChannelComposer.use(messagesComposer);
+  notChannelComposer.use(photosComposer);
 
   bot.use(notChannelRegisterComposer);
 
