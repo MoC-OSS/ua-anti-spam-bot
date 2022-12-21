@@ -1,11 +1,16 @@
+import axios from 'axios';
+import FormData from 'form-data';
 import { Composer } from 'grammy';
 
+import { environmentConfig } from '../../../config';
 import { logsChat } from '../../../creator';
 import { getDeleteNsfwMessage } from '../../../message';
 import type { NsfwTensorService } from '../../../tensor';
-import type { GrammyContext, NsfwTensorPositiveResult } from '../../../types';
+import type { GrammyContext, NsfwTensorPositiveResult, NsfwTensorResult } from '../../../types';
 import { ImageType } from '../../../types';
-import { getUserData, telegramUtil } from '../../../utils';
+import { getUserData, handleError, telegramUtil } from '../../../utils';
+
+const host = `http://${environmentConfig.HOST}:${environmentConfig.PORT}`;
 
 /**
  * Save message into logs to review it and track logic
@@ -80,7 +85,24 @@ export const getNsfwFilterComposer = ({ nsfwTensorService }: NsfwFilterComposerP
     const parsedPhoto = context.state.photo;
 
     if (parsedPhoto) {
-      const predictionResult = await nsfwTensorService.predict(parsedPhoto.file);
+      let predictionResult: NsfwTensorResult;
+
+      try {
+        const formData = new FormData();
+        formData.append('image', parsedPhoto.file, { filename: 'image.jpeg' });
+
+        const getServerResponse = () =>
+          axios
+            .post(`${host}/image`, formData, {
+              headers: formData.getHeaders(),
+            })
+            .then((response: { data: { result: NsfwTensorResult } }) => response.data.result);
+
+        predictionResult = await (environmentConfig.USE_SERVER ? getServerResponse() : nsfwTensorService.predict(parsedPhoto.file));
+      } catch (error) {
+        handleError(error, 'API_DOWN');
+        predictionResult = await nsfwTensorService.predict(parsedPhoto.file);
+      }
 
       context.state.nsfwResult = predictionResult;
 
