@@ -8,6 +8,9 @@ WORKDIR /usr/src/app
 # where available (npm@5+)
 COPY package*.json ./
 
+# Copy packages
+COPY src/packages/* ./src/packages/
+
 #RUN npm install
 # If you are building your code for production
 RUN npm i --only=production
