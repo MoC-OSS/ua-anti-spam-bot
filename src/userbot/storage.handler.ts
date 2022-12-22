@@ -29,7 +29,7 @@ export class UserbotStorage {
       console.info('got TrainingTempMessages');
       this.lastMessages = [...positives, ...negatives];
       this.swindlerMessages = swindlerPositives;
-      this.helpMessages = [...helpMessages, ...(redisHelp || [])].filter(Boolean);
+      this.helpMessages = [...helpMessages, ...(Array.isArray(redisHelp) ? redisHelp : [])].filter(Boolean);
     });
   }
 
