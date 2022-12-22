@@ -34,7 +34,7 @@ export class DeleteSwindlersMiddleware {
         await this.saveSwindlersMessage(context, result.rate, result.displayReason || result.reason, message);
         await this.processWarningMessage(context);
         await this.removeMessage(context);
-        return;
+        return next();
       }
 
       if (!result.isSpam && result.reason === 'compare') {
