@@ -9,6 +9,7 @@ import { TelegramUtil } from './telegram.util';
 export const messageUtil = new MessageUtil();
 export const telegramUtil = new TelegramUtil();
 
+export * from './deep-copy.util';
 export * from './empty-functions.util';
 export * from './error-handler';
 export * from './remove-duplicates.util';

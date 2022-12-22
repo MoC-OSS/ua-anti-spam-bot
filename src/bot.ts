@@ -31,11 +31,11 @@ import {
   getStrategicComposer,
   getSwindlersComposer,
 } from './bot/composers/messages';
-import { isNotChannel } from './bot/filters';
+import { isNotChannel, onlyCreatorChatFilter } from './bot/filters';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
-import { DeleteSwindlersMiddleware, GlobalMiddleware, stateMiddleware } from './bot/middleware';
-import { selfDestructedReply } from './bot/plugins';
+import { DeleteSwindlersMiddleware, GlobalMiddleware, logCreatorState, stateMiddleware } from './bot/middleware';
+import { chainFilters, selfDestructedReply } from './bot/plugins';
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
 import { deleteMessageTransformer } from './bot/transformers';
 import { environmentConfig } from './config';
@@ -248,6 +248,11 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   // Main message composer
   notChannelComposer.use(messagesComposer);
   notChannelComposer.use(photosComposer);
+
+  // Log state for creator only chat
+  notChannelComposer
+    .filter((context) => chainFilters(onlyCreatorChatFilter, !!context.state.isDeleted || !!context.state.photo)(context))
+    .use(logCreatorState);
 
   bot.use(notChannelRegisterComposer);
 

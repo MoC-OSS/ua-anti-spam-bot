@@ -4,7 +4,7 @@ import { InputFile } from 'grammy';
 
 import Keyv = require('keyv');
 import { environmentConfig } from '../../config';
-import { creatorId, logsChat, privateTrainingChat } from '../../creator';
+import { logsChat, privateTrainingChat } from '../../creator';
 import { getCannotDeleteMessage, getDebugMessage, getDeleteMessage } from '../../message'; // spamDeleteMessage
 import { redisService } from '../../services';
 import type { GrammyContext, GrammyMiddleware } from '../../types';
@@ -70,20 +70,6 @@ export class OnTextListener {
 
         if (tensor && tensor > startRank && tensor < deleteRank) {
           context.api.sendMessage(privateTrainingChat, context.state.text || '').catch(handleError);
-        }
-
-        if (context.chat.id === creatorId) {
-          await context.reply(
-            JSON.stringify(
-              {
-                ...rep.byRules.dataset,
-                swindlersResult: context.state.swindlersResult,
-                message,
-              },
-              null,
-              2,
-            ),
-          );
         }
       }
 

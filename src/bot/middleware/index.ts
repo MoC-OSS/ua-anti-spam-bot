@@ -7,6 +7,7 @@ export * from './global.middleware';
 export * from './ignore-by-default-settings.middleware';
 export * from './ignore-old.middleware';
 export * from './log-context.middleware';
+export * from './log-creator-state.middleware';
 export * from './nested.middleware';
 export * from './only-admin.middleware';
 export * from './only-creator.middleware';
