@@ -61,6 +61,20 @@ const saveNsfwMessage = async (context: GrammyContext) => {
     }
 
     /**
+     * Save photo and video message
+     * */
+    case ImageType.VIDEO: {
+      const { caption, video } = imageData;
+
+      return context.api.sendVideo(logsChat, video.file_id, {
+        caption: `Looks like nsfw ${type} (${(deletePrediction.probability * 100).toFixed(2)}%) from <code>${
+          deletePrediction.className
+        }</code> by user ${userMention}:\n\n${chatMention || userMention}\n${caption || ''}`,
+        parse_mode: 'HTML',
+      });
+    }
+
+    /**
      * Unknown type handling
      * Never impossible
      * */
