@@ -29,7 +29,7 @@ export const getPhotoComposer = ({ nsfwFilterComposer }: PhotosComposerPropertie
    * */
   const readyImageComposer = photosComposer
     // Queries to follow
-    .on([':photo', ':sticker'])
+    .on([':photo', ':sticker', ':video'])
     // Check if photo has caption and already deleted
     .filter((context) => onlyNotDeletedFilter(context))
     // Filtering messages
