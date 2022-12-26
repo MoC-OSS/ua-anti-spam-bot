@@ -12,6 +12,8 @@ import ffmpeg from 'fluent-ffmpeg';
  * Service that helps to work with video content
  * */
 export class VideoService {
+  readonly saveFolderPath = `${__dirname}/temp`;
+
   /**
    * Create a `ffmpeg` command with specified `ffmpeg` and `ffprobe` binaries
    * */
@@ -30,18 +32,25 @@ export class VideoService {
   /**
    * @param video - MP4 buffer video
    * @param id - id of the file
+   * @param format - format of the video (mov, mp4)
+   * @param duration - duration of the video
    * */
-  async extractFrames(video: Buffer, id: string) {
-    const fileStat: FfprobeData = await this.getVideoProbe(video);
-    const { duration } = fileStat.streams[0];
+  async extractFrames(video: Buffer, id: string, format?: string, duration?: number) {
+    let localDuration = duration;
+    const videoFile = path.join(this.saveFolderPath, `${id}.${format || ''}`);
 
-    if (!duration) {
-      throw new Error('Video has no duration');
+    await fsp.writeFile(videoFile, video);
+
+    if (!localDuration) {
+      const fileStat: FfprobeData = await this.getVideoProbe(video);
+      if (!fileStat.streams[0].duration) {
+        throw new Error('Video has no duration');
+      }
+
+      localDuration = +fileStat.streams[0].duration;
     }
 
-    const timestamps = this.getTimeStampsForDuration(+duration);
-
-    return this.takeScreenshotsFs(video, id, timestamps);
+    return this.takeScreenshotsFs(videoFile, id, localDuration);
   }
 
   /**
@@ -56,33 +65,17 @@ export class VideoService {
   }
 
   /**
-   * Calculates timestamps for passed duration
-   *
-   * @param duration - duration to split into timestamps
-   *
-   * @returns second count for duration less 10s or (duration / 10) * index if more 10s
-   * */
-  getTimeStampsForDuration(duration: number) {
-    if (duration <= 10) {
-      return Array.from({ length: Math.ceil(duration) }).map((value, index) => index);
-    }
-
-    return Array.from({ length: 10 }).map((value, index) => (duration / 10) * index);
-  }
-
-  /**
    * @description Receives video, video name, and timestamps to generate buffers.<br>
    *
    * 1) It calls FFMPEG to capture screenshot on the passed timestamps;<br>
    * 2) FFMPEG generates them and saves in FS;<br>
    * 3) It reads these files, deletes, and returns them.
    *
-   * @param video - video to process
+   * @param videoFile - video file path to process
    * @param id - name or id of the file
-   * @param timestamps - timestamps to scrape from video
+   * @param duration - duration of the video
    * */
-  async takeScreenshotsFs(video: Buffer, id: string, timestamps: number[]) {
-    const videoStream = Readable.from(video);
+  async takeScreenshotsFs(videoFile: string, id: string, duration: number) {
     const command = this.spawnCommand();
     const saveFolderPath = `${__dirname}/temp`;
 
@@ -93,8 +86,7 @@ export class VideoService {
       let localFileNames: string[] = [];
 
       command
-        .input(videoStream)
-        .fps(1)
+        .input(videoFile)
         .on('filenames', (generatedFileNames: string[]) => {
           localFileNames = generatedFileNames;
         })
@@ -103,7 +95,7 @@ export class VideoService {
         })
         .screenshots({
           filename: id,
-          timestamps,
+          count: Math.min(10, Math.ceil(duration)),
           folder: saveFolderPath,
         });
     });
@@ -122,6 +114,7 @@ export class VideoService {
      * Remove files from FS
      * */
     await Promise.all(fullFileNamePaths.map((fullPath) => fsp.unlink(fullPath)));
+    await fsp.unlink(videoFile);
 
     return screenshotBuffers;
   }
