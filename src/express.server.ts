@@ -8,6 +8,8 @@ import { processHandler } from './express-logic';
 import { initSwindlersContainer, S3Service } from './services';
 import { initNsfwTensor, initTensor } from './tensor';
 import type {
+  ParseVideoRequestBody,
+  ParseVideoResponseBody,
   ProcessRequestBody,
   ProcessResponseBody,
   SwindlerRequestBody,
@@ -15,6 +17,7 @@ import type {
   TensorRequestBody,
   TensorResponseBody,
 } from './types';
+import { videoService } from './video';
 
 const uploadMemoryStorage = multer.memoryStorage();
 const uploadMiddleware = multer({ storage: uploadMemoryStorage });
@@ -88,6 +91,33 @@ const uploadMiddleware = multer({ storage: uploadMemoryStorage });
       }
 
       response.json({ result, time, expressStartTime });
+    },
+  );
+
+  app.post<'/parse-video', RouteParameters<'/parse-video'>, ParseVideoResponseBody, ParseVideoRequestBody>(
+    '/parse-video',
+    uploadMiddleware.single('video'),
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    async (request, response) => {
+      const startTime = performance.now();
+      const video = request.file;
+      const { duration } = request.body;
+
+      if (!video) {
+        return response.status(400).json({ error: 'no video' });
+      }
+
+      const screenshots = await videoService.extractFrames(video.buffer, video.originalname, duration ? +duration : undefined);
+
+      const endTime = performance.now();
+
+      const time = endTime - startTime;
+
+      if (environmentConfig.DEBUG) {
+        console.info({ route: '/parse-video', screenshots, time, expressStartTime });
+      }
+
+      return response.json({ screenshots: screenshots.map((screenshot) => screenshot.toJSON()), time, expressStartTime });
     },
   );
 

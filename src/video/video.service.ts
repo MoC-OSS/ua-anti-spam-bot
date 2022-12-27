@@ -31,13 +31,12 @@ export class VideoService {
 
   /**
    * @param video - MP4 buffer video
-   * @param id - id of the file
-   * @param format - format of the video (mov, mp4)
+   * @param filename - name to save in fs, should include extension
    * @param duration - duration of the video
    * */
-  async extractFrames(video: Buffer, id: string, format?: string, duration?: number) {
+  async extractFrames(video: Buffer, filename: string, duration?: number) {
     let localDuration = duration;
-    const videoFile = path.join(this.saveFolderPath, `${id}.${format || ''}`);
+    const videoFile = path.join(this.saveFolderPath, filename);
 
     await fsp.writeFile(videoFile, video);
 
@@ -50,7 +49,7 @@ export class VideoService {
       localDuration = +fileStat.streams[0].duration;
     }
 
-    return this.takeScreenshotsFs(videoFile, id, localDuration);
+    return this.takeScreenshotsFs(videoFile, filename, localDuration);
   }
 
   /**
@@ -72,10 +71,10 @@ export class VideoService {
    * 3) It reads these files, deletes, and returns them.
    *
    * @param videoFile - video file path to process
-   * @param id - name or id of the file
+   * @param filename - name to save in fs, should include extension
    * @param duration - duration of the video
    * */
-  async takeScreenshotsFs(videoFile: string, id: string, duration: number) {
+  async takeScreenshotsFs(videoFile: string, filename: string, duration: number) {
     const command = this.spawnCommand();
     const saveFolderPath = `${__dirname}/temp`;
 
@@ -94,7 +93,7 @@ export class VideoService {
           resolve(localFileNames);
         })
         .screenshots({
-          filename: id,
+          filename,
           count: Math.min(10, Math.ceil(duration)),
           folder: saveFolderPath,
         });
