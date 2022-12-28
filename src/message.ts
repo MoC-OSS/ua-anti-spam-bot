@@ -152,6 +152,12 @@ export const getSettingsMenuMessage = (settings: ChatSessionData['chatSettings']
 🚀 ${settings.disableStrategicInfo ? '⛔️ Бот не видаляє стратегічну інформацію.' : '✅ Бот видаляє стратегічну інформацію.'}
 💰 ${settings.disableSwindlerMessage ? '⛔️ Бот не видаляє повідомлення шахраїв.' : '✅ Бот видаляє повідомлення шахраїв.'}
 
+🔞 ${
+    settings.disableNsfwFilter
+      ? '⛔️ Бот не видаляє зображення відвертого змісту та дорослий контент.'
+      : '✅ Бот видаляє зображення відвертого змісту та дорослий контент.'
+  }
+
 💳 ${settings.enableDeleteCards ? '✅ Бот видаляє повідомлення з картками.' : '⛔ Бот не видаляє повідомлення з картками.'}
 🔗 ${settings.enableDeleteUrls ? '✅ Бот видаляє повідомлення з посиланнями.' : '⛔ Бот не видаляє повідомлення з посиланнями.'}
 📍 ${settings.enableDeleteLocations ? '✅ Бот видаляє повідомлення з локаціями.' : '⛔ Бот не видаляє повідомлення з локаціями.'}
@@ -171,14 +177,14 @@ export const getSettingsMenuMessage = (settings: ChatSessionData['chatSettings']
       : '⛔ Ти ще не вибрав свій регіон.'
   }
 📢 ${
-    !settings.airRaidAlertSettings.notificationMessage
-      ? '⛔️ Бот не повідомляє про початок і завершення повітряної тривоги у вашому регіоні.'
-      : '✅ Бот повідомляє про початок і завершення повітряної тривоги у вашому регіоні.'
+    settings.airRaidAlertSettings.notificationMessage
+      ? '✅ Бот повідомляє про початок і завершення повітряної тривоги у вашому регіоні.'
+      : '⛔️ Бот не повідомляє про початок і завершення повітряної тривоги у вашому регіоні.'
   }
 🤫 ${
-    !settings.disableChatWhileAirRaidAlert
-      ? '⛔️ Бот не вимикає чат під час повітряної тривоги у вашому регіоні.'
-      : '✅ Бот вимикає чат під час повітряної тривоги у вашому регіоні.'
+    settings.disableChatWhileAirRaidAlert
+      ? '✅ Бот вимикає чат під час повітряної тривоги у вашому регіоні.'
+      : '⛔️ Бот не вимикає чат під час повітряної тривоги у вашому регіоні.'
   }
 
 Для зміни налаштувань, натисніть на відповідну кнопку нижче. 👇
@@ -207,14 +213,14 @@ Here you can adjust the settings:
 <b>Air raid alarm settings:</b>
 🏰 ${settings.airRaidAlertSettings.state ? `✅ Your region is ${settings.airRaidAlertSettings.state}.` : '⛔ No region is selected.'}
 📢 ${
-    !settings.airRaidAlertSettings.notificationMessage
-      ? '⛔️ Do not notify about the start and end of an air alert in your region.'
-      : '✅ Notify about the start and end of an air alert in your region.'
+    settings.airRaidAlertSettings.notificationMessage
+      ? '✅ Notify about the start and end of an air alert in your region.'
+      : '⛔️ Do not notify about the start and end of an air alert in your region.'
   }
 🤫 ${
-    !settings.disableChatWhileAirRaidAlert
-      ? '⛔️ Do not disable the chat during an air alert in your region.'
-      : '✅ Disable the chat during an air alert in your region.'
+    settings.disableChatWhileAirRaidAlert
+      ? '✅ Disable the chat during an air alert in your region.'
+      : '⛔️ Do not disable the chat during an air alert in your region.'
   }
 
 To change the setting, click the appropriate button below. 👇
@@ -250,6 +256,8 @@ export const deleteLocationsButton = '📍 Локації';
 export const deleteMentionButton = '⚓ Згадування';
 export const deleteForwardedButton = '↩️ Пересилання';
 export const deleteServiceMessageButton = '✋ Приєднання';
+
+export const deleteNsfwButton = '🔞 Контент';
 
 export const airAlarmAlertButton = '🏰 Регіон';
 export const airAlarmNotificationMessage = '📢 Тривога';
@@ -309,6 +317,7 @@ export const startMessageAtom = `
 - ↩️ Блокування пересланих (forward) повідомлень чи коментарів зі згадуваннями @.
 - 🔗 Блокування коментарів, якщо в них є будь-які посилання.
 - 📍 Блокування коментарів з будь-якими локаціями.
+- 🔞 Блокування повідомлень з відвертим характером та дорослим контентом (18+).
 `.trim();
 
 /**
@@ -365,6 +374,13 @@ ${getDeleteUserAtomMessage({ writeUsername, userId })}
 
 🤫 Відправка повідомлень з <b>${featuresString}</b> недоступна по правилам цього чату.
 `;
+
+export const getDeleteNsfwMessage = ({ writeUsername, userId }: DeleteMessageAtomProperties) =>
+  `
+${getDeleteUserAtomMessage({ writeUsername, userId })}
+
+🔞 Зображення з <b>відвертим характером</b> та <b>дорослим контентом (18+)</b> заборонені.
+`.trim();
 
 export interface DebugMessageProperties {
   message: string | undefined;

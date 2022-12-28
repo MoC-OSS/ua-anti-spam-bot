@@ -1,3 +1,7 @@
+import type { PhotoSize, Sticker, Video } from '@grammyjs/types/message';
+
+import type { ImageType } from './image';
+import type { NsfwTensorResult } from './nsfw';
 import type { SwindlerTensorResult } from './swindlers';
 
 export interface StateFlavor<S> {
@@ -18,11 +22,35 @@ export interface StateFlavor<S> {
   set state(session: S | null | undefined);
 }
 
+export interface StateImagePhoto {
+  meta: PhotoSize;
+  type: ImageType.PHOTO;
+  file: Buffer;
+  caption?: string;
+}
+
+export interface StateImageSticker {
+  meta: Sticker;
+  type: ImageType.STICKER;
+  file: Buffer;
+}
+
+export interface StateImageVideo {
+  meta: PhotoSize;
+  type: ImageType.VIDEO;
+  file: Buffer;
+  video: Video;
+  caption?: string;
+}
+
+export type StateImage = StateImagePhoto | StateImageSticker | StateImageVideo;
+
 /**
  * It requires only-with-text.middleware.js
  * */
 interface OnlyWithTextMiddlewareState {
   text?: string;
+  photo?: StateImage | null;
   urls?: string[];
   mentions?: string[];
   cards?: string[];
@@ -49,5 +77,6 @@ export type State = OnlyWithTextMiddlewareState &
       rate: number;
       reason: string;
     };
+    nsfwResult?: NsfwTensorResult;
     dataset?: SwindlerTensorResult;
   };

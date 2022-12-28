@@ -1,4 +1,5 @@
 import { run } from '@grammyjs/runner';
+import * as tf from '@tensorflow/tfjs-node';
 import { Bot } from 'grammy';
 import ms from 'ms';
 
@@ -11,6 +12,14 @@ import type { GrammyContext } from './types';
 import { sleep } from './utils';
 
 (async () => {
+  /**
+   * Tensorflow.js offers two flags, enableProdMode and enableDebugMode.
+   * If you're going to use any TF model in production, be sure to enable prod mode before loading models.
+   * */
+  if (environmentConfig.ENV === 'production') {
+    tf.enableProdMode();
+  }
+
   console.info('Waiting for the old instance to down...');
   await sleep(environmentConfig.ENV === 'local' ? 0 : ms('5s'));
   console.info('Starting a new instance...');
