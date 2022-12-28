@@ -27,9 +27,9 @@ export class NsfwTensorService {
     const predictions = await this.classify(image);
 
     const predictionChecks = new Map<predictionType['className'], number>();
-    predictionChecks.set('Hentai', 0.7);
-    predictionChecks.set('Porn', 0.7);
-    predictionChecks.set('Sexy', 0.7);
+    predictionChecks.set('Hentai', 0.85);
+    predictionChecks.set('Porn', 0.85);
+    predictionChecks.set('Sexy', 0.75);
 
     let highestPrediction!: predictionType;
 
