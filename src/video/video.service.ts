@@ -93,7 +93,8 @@ export class VideoService {
           resolve(localFileNames);
         })
         .screenshots({
-          filename,
+          size: '640x?',
+          filename: `${filename}-%0i.png`,
           count: Math.min(10, Math.ceil(duration)),
           folder: saveFolderPath,
         });
