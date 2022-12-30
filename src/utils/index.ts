@@ -1,9 +1,10 @@
 import fs from 'node:fs';
 
 import { environmentConfig } from '../config';
-import type { ChatSettings, GrammyContext, RealGrammyContext } from '../types';
+import type { ChatSettings, GrammyContext } from '../types';
 
 import { MessageUtil } from './message.util';
+import { optimizeWriteContextUtil } from './optimize-write-context.util';
 import { TelegramUtil } from './telegram.util';
 
 export const messageUtil = new MessageUtil();
@@ -12,6 +13,7 @@ export const telegramUtil = new TelegramUtil();
 export * from './deep-copy.util';
 export * from './empty-functions.util';
 export * from './error-handler';
+export * from './optimize-write-context.util';
 export * from './remove-duplicates.util';
 export * from './reveal-hidden-urls.util';
 
@@ -20,16 +22,7 @@ export * from './reveal-hidden-urls.util';
  * */
 export function logContext(context: GrammyContext) {
   if (environmentConfig.DEBUG) {
-    /**
-     * @type {GrammyContext}
-     * */
-    const writeContext = JSON.parse(JSON.stringify(context)) as RealGrammyContext;
-    // noinspection JSConstantReassignment
-    delete writeContext.tg;
-
-    if (writeContext.state.photo?.file) {
-      writeContext.state.photo.file = Buffer.from([]);
-    }
+    const writeContext = optimizeWriteContextUtil(context);
 
     console.info(JSON.stringify(writeContext, null, 2));
 
