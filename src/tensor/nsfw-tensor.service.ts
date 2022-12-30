@@ -8,9 +8,9 @@ export class NsfwTensorService {
   model!: NSFWJS;
 
   readonly predictionChecks = new Map<predictionType['className'], number>([
-    ['Hentai', 0.7],
-    ['Porn', 0.7],
-    ['Sexy', 0.7],
+    ['Hentai', 0.85],
+    ['Porn', 0.85],
+    ['Sexy', 0.8],
   ]);
 
   constructor(private modelPath: string) {}
