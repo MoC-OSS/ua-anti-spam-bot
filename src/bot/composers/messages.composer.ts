@@ -61,6 +61,8 @@ export const getMessagesComposer = ({
   /**
    * Registers a message handler module with correct filter to not make extra checks
    * */
+  // TODO remove this
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const registerModule = (...middlewares: (Composer<GrammyContext> | GrammyMiddleware)[]) => {
     readyMessagesComposer.filter((context) => onlyNotDeletedFilter(context)).use(...middlewares);
   };
@@ -98,7 +100,8 @@ export const getMessagesComposer = ({
   registerOptionalSettingModule('enableDeleteMentions', parseMentions, noMentionsComposer);
   registerOptionalSettingModule('enableDeleteCards', parseCards, noCardsComposer);
   registerOptionalSettingModule('enableDeleteForwards', noForwardsComposer);
-  registerModule(strategicComposer);
+  // TODO optimize this module
+  registerDefaultSettingModule('disableStrategicInfo', strategicComposer);
 
   readyMessagesComposer.use(performanceEndMiddleware);
   readyMessagesComposer.use(logContextMiddleware);
