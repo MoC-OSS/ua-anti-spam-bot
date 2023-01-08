@@ -47,6 +47,19 @@ services:
     ports:
       - '6379:6379'
 
+  rabbitmq:
+    image: "rabbitmq:3.11-management-alpine"
+    container_name: "rabbitmq"
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    environment:
+      - "RABBITMQ_DEFAULT_PASS=${RABBITMQ_USER}"
+      - "RABBITMQ_DEFAULT_USER=${RABBITMQ_PASS}"
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+
 volumes:
   data_backend_libs:
     driver: local

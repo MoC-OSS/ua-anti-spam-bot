@@ -1,6 +1,12 @@
+import { v4 as uuidv4 } from 'uuid';
+
 import { redisClient } from '../db';
+import { pushToList } from '../db/redis';
 import type { ChatSession, ChatSessionData, Session } from '../types';
+import type { CustomJsonValue } from '../types/object';
 import { removeDuplicates } from '../utils';
+
+import { TASKS_QUEUE_KEY } from './constants/tasks-queue.constant';
 
 export class RedisService {
   redisClient = redisClient;
@@ -168,7 +174,7 @@ export class RedisService {
     } as ChatSessionData;
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    return redisClient.setRawValue(chatId, writeSession as any);
+    return redisClient.setRawValue(chatId, writeSession as never);
   }
 
   async getUserSessions(): Promise<Session[]> {
@@ -204,6 +210,23 @@ export class RedisService {
    * */
   setTrainingTempMessages(messages: string[]) {
     return redisClient.setRawValue(this.redisSelectors.trainingTempMessages, messages);
+  }
+
+  /**
+   * @returns {Promise<string[]>}
+   * */
+  async getFirstTask(): Promise<string | null> {
+    return redisClient.lPop(TASKS_QUEUE_KEY);
+  }
+
+  /**
+   * @param {CustomJsonValue} payload
+   * */
+  async setTask(payload: CustomJsonValue) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    const id: string = uuidv4() as string;
+    await redisClient.setRawValue(id, payload);
+    return pushToList(TASKS_QUEUE_KEY, id);
   }
 }
 

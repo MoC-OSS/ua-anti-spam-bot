@@ -32,10 +32,19 @@ export function setRawValue(key: string, value: Primitive | CustomJsonValue) {
   return client.set(key, JSON.stringify(value));
 }
 
+export function lPop(key: string) {
+  return client.lPop(key);
+}
+
 export function setValue(key: string, value: JsonObject) {
   if (!key || !value) return;
 
   return client.set(key, JSON.stringify(value));
+}
+
+export function pushToList(key: string, id: string) {
+  if (!id) return;
+  return client.RPUSH(key, id);
 }
 
 export function removeKey(key: string) {

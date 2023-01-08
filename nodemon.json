@@ -4,6 +4,7 @@
     "./telegraf-session.json",
     "./last-ctx.json",
     "./positives.json",
-    "./negatives.json"
+    "./negatives.json",
+    "./update.json"
   ]
 }

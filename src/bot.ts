@@ -34,6 +34,8 @@ import { MessageHandler } from './bot/message.handler';
 import { DeleteSwindlersMiddleware, GlobalMiddleware, stateMiddleware } from './bot/middleware';
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
 import { deleteMessageTransformer } from './bot/transformers';
+import { rabbitMQClient } from './rabbitmq/rabbitmq';
+import { queueService } from './services/queue.service';
 import { environmentConfig } from './config';
 import { logsChat, swindlerBotsChatId, swindlerHelpChatId, swindlerMessageChatId } from './creator';
 import { redisClient } from './db';
@@ -64,8 +66,9 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 export const getBot = async (bot: Bot<GrammyContext>) => {
   if (!environmentConfig.UNIT_TESTING) {
     await redisClient.client.connect().then(() => console.info('Redis client successfully started'));
+    await rabbitMQClient.connect().then(() => console.info('RabbitMQ client successfully started'));
   }
-
+  await queueService.init(bot.api);
   const s3Service = new S3Service();
   const tensorService = await initTensor(s3Service);
   tensorService.setSpamThreshold(await redisService.getBotTensorPercent());
