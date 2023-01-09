@@ -4,26 +4,61 @@ import Bottleneck from 'bottleneck';
 import { logsChat } from '../creator';
 import { rabbitMQClient } from '../rabbitmq/rabbitmq';
 import type { GrammyBot } from '../types';
-import type { Task } from '../types/task';
+import type { DeleteMessagePayload, SendMessagePayload, Task } from '../types/task';
 
 import { generateRandomString } from './_mocks';
+
+const LIMITER_OPTS = {
+  maxConcurrent: 1,
+  minTime: 10_000,
+};
 
 export class QueueService {
   api!: GrammyBot['api'];
 
   limiter!: Bottleneck;
 
-  async init(api: GrammyBot['api']) {
+  public async init(api: GrammyBot['api']) {
     this.api = api;
-    this.limiter = new Bottleneck({
-      maxConcurrent: 1,
-      minTime: 10_000,
-    });
+    this.limiter = new Bottleneck(LIMITER_OPTS);
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     await rabbitMQClient.consume(this.handleMessage.bind(this));
   }
 
-  async handleMessage(message: ConsumeMessage | null) {
+  public addTestTask() {
+    const mockPayload: Task = {
+      method: 'sendMessage',
+      payload: {
+        chat_id: logsChat.toString(),
+        text: `Test message is: ${generateRandomString(3)}`,
+      },
+    };
+    rabbitMQClient.produce(JSON.stringify(mockPayload));
+  }
+
+  public sendMessage(chatId: string, text: string) {
+    const payload: Task = {
+      method: 'sendMessage',
+      payload: {
+        chat_id: chatId,
+        text,
+      },
+    };
+    rabbitMQClient.produce(JSON.stringify(payload), 1);
+  }
+
+  public deleteMessage(chatId: string | number, messageId: number) {
+    const payload: Task = {
+      method: 'deleteMessage',
+      payload: {
+        chat_id: chatId,
+        message_id: messageId,
+      },
+    };
+    rabbitMQClient.produce(JSON.stringify(payload), 1);
+  }
+
+  private async handleMessage(message: ConsumeMessage | null) {
     if (message && message.content) {
       try {
         await this.limiter.schedule(() => this.worker(message));
@@ -36,29 +71,23 @@ export class QueueService {
     }
   }
 
-  public worker(message: ConsumeMessage): Promise<unknown> {
+  private worker(message: ConsumeMessage): Promise<unknown> {
     const task = JSON.parse(message.content.toString()) as Task;
     switch (task.method) {
       case 'sendMessage': {
         // eslint-disable-next-line camelcase
-        const { chat_id, text } = task.payload;
+        const { chat_id, text } = task.payload as SendMessagePayload;
         return this.api.sendMessage(chat_id, text);
+      }
+      case 'deleteMessage': {
+        // eslint-disable-next-line camelcase
+        const { chat_id, message_id } = task.payload as DeleteMessagePayload;
+        return this.api.deleteMessage(chat_id, message_id);
       }
       default: {
         throw new Error('Unknown API method');
       }
     }
-  }
-
-  addTestTask() {
-    const mockPayload: Task = {
-      method: 'sendMessage',
-      payload: {
-        chat_id: logsChat.toString(),
-        text: `Test message is: ${generateRandomString(3)}`,
-      },
-    };
-    rabbitMQClient.produce(JSON.stringify(mockPayload));
   }
 }
 

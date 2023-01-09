@@ -3,10 +3,11 @@ import client from 'amqplib';
 
 import { environmentConfig } from '../config';
 
+const QUEUE_NAME = 'taskQueue';
+const MAX_PRIORITY = 2;
+
 export class RabbitMQClient {
   channel: Channel | undefined;
-
-  QUEUE_NAME = 'taskQueue';
 
   /**
    * Starts the connection
@@ -18,7 +19,7 @@ export class RabbitMQClient {
       );
       this.channel = await connection.createChannel();
       await this.channel.prefetch(1);
-      await this.channel.assertQueue(this.QUEUE_NAME, { durable: true });
+      await this.channel.assertQueue(QUEUE_NAME, { durable: true, maxPriority: MAX_PRIORITY });
     } catch (error) {
       console.error('RabbitMQ connection error:', error);
     }
@@ -27,9 +28,10 @@ export class RabbitMQClient {
   /**
    * Send message to channel
    * @param {string} message
+   * @param {number} priority
    * */
-  produce(message: string) {
-    this.channel?.sendToQueue(this.QUEUE_NAME, Buffer.from(message));
+  produce(message: string, priority = 1) {
+    this.channel?.sendToQueue(QUEUE_NAME, Buffer.from(message), { priority });
   }
 
   /**
@@ -37,7 +39,7 @@ export class RabbitMQClient {
    * @param {function} callback
    * */
   async consume(callback: (message: ConsumeMessage | null) => void) {
-    await this.channel?.consume(this.QUEUE_NAME, callback, { noAck: false });
+    await this.channel?.consume(QUEUE_NAME, callback, { noAck: false });
   }
 }
 
