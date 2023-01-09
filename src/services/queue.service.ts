@@ -17,6 +17,10 @@ export class QueueService {
 
   limiter!: Bottleneck;
 
+  /**
+   * Init bot api, scheduler and subscribe to queue
+   * @param {GrammyBot['api']} api
+   * */
   public async init(api: GrammyBot['api']) {
     this.api = api;
     this.limiter = new Bottleneck(LIMITER_OPTS);
@@ -24,6 +28,9 @@ export class QueueService {
     await rabbitMQClient.consume(this.handleMessage.bind(this));
   }
 
+  /**
+   * For testing. Added 10 mock tasks to queue
+   * */
   public addTestTask() {
     const sendTasks = Array.from({ length: 10 }, () => ({
       method: 'sendMessage',
