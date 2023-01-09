@@ -1,7 +1,6 @@
 import type { ConsumeMessage } from 'amqplib';
 import Bottleneck from 'bottleneck';
 
-import { logsChat } from '../creator';
 import { rabbitMQClient } from '../rabbitmq/rabbitmq';
 import type { GrammyBot } from '../types';
 import type { DeleteMessagePayload, SendMessagePayload, Task } from '../types/task';
@@ -26,14 +25,14 @@ export class QueueService {
   }
 
   public addTestTask() {
-    const mockPayload: Task = {
+    const sendTasks = Array.from({ length: 10 }, () => ({
       method: 'sendMessage',
       payload: {
-        chat_id: logsChat.toString(),
+        chat_id: '-694504354',
         text: `Test message is: ${generateRandomString(3)}`,
       },
-    };
-    rabbitMQClient.produce(JSON.stringify(mockPayload));
+    }));
+    sendTasks.forEach((task) => rabbitMQClient.produce(JSON.stringify(task), 0));
   }
 
   public sendMessage(chatId: string, text: string) {
@@ -44,7 +43,7 @@ export class QueueService {
         text,
       },
     };
-    rabbitMQClient.produce(JSON.stringify(payload), 1);
+    rabbitMQClient.produce(JSON.stringify(payload), 0);
   }
 
   public deleteMessage(chatId: string | number, messageId: number) {
@@ -55,7 +54,7 @@ export class QueueService {
         message_id: messageId,
       },
     };
-    rabbitMQClient.produce(JSON.stringify(payload), 1);
+    rabbitMQClient.produce(JSON.stringify(payload), 5);
   }
 
   private async handleMessage(message: ConsumeMessage | null) {
@@ -73,6 +72,7 @@ export class QueueService {
 
   private worker(message: ConsumeMessage): Promise<unknown> {
     const task = JSON.parse(message.content.toString()) as Task;
+    console.info('Task to handle:', task.method);
     switch (task.method) {
       case 'sendMessage': {
         // eslint-disable-next-line camelcase

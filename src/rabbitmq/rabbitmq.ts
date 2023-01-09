@@ -4,7 +4,7 @@ import client from 'amqplib';
 import { environmentConfig } from '../config';
 
 const QUEUE_NAME = 'taskQueue';
-const MAX_PRIORITY = 2;
+const MAX_PRIORITY = 5;
 
 export class RabbitMQClient {
   channel: Channel | undefined;
@@ -30,7 +30,7 @@ export class RabbitMQClient {
    * @param {string} message
    * @param {number} priority
    * */
-  produce(message: string, priority = 1) {
+  produce(message: string, priority: number) {
     this.channel?.sendToQueue(QUEUE_NAME, Buffer.from(message), { priority });
   }
 
