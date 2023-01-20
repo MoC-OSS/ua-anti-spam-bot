@@ -97,8 +97,12 @@ export const getNsfwFilterComposer = ({ nsfwTensorService }: NsfwFilterComposerP
 
   nsfwFilterComposer.use(async (context, next) => {
     const parsedPhoto = context.state.photo;
+    const hasFrames = !!parsedPhoto && 'fileFrames' in parsedPhoto;
 
-    if (parsedPhoto) {
+    /**
+     * Check only real photos or thumbs
+     * */
+    if (parsedPhoto && !hasFrames) {
       let predictionResult: NsfwTensorResult;
 
       try {
@@ -130,6 +134,13 @@ export const getNsfwFilterComposer = ({ nsfwTensorService }: NsfwFilterComposerP
           await context.replyWithSelfDestructedHTML(getDeleteNsfwMessage({ writeUsername, userId }));
         }
       }
+    }
+
+    /**
+     * Check video content
+     * */
+    if (hasFrames && parsedPhoto.fileFrames) {
+      await context.reply(`Found frames: ${parsedPhoto.fileFrames.length}`);
     }
 
     return next();

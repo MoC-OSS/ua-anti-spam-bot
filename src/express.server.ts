@@ -123,17 +123,17 @@ const uploadMiddleware = multer({ storage: uploadMemoryStorage });
 
   app.post<'/image', RouteParameters<'/image'>>(
     '/image',
-    uploadMiddleware.single('image'),
+    uploadMiddleware.array('images', 10),
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     async (request, response) => {
       const startTime = performance.now();
-      const image = request.file;
+      const images = request.file?.['images'] as Buffer[];
 
-      if (!image) {
+      if (!images) {
         return response.status(400).json({ error: 'no image' });
       }
 
-      const result = await nsfwTensorService.predict(image.buffer);
+      const result = await nsfwTensorService.predictVideo(images);
 
       const endTime = performance.now();
 
