@@ -32,12 +32,18 @@ export interface StateImagePhoto {
 export interface StateImageSticker {
   meta: Sticker;
   type: ImageType.STICKER;
-  thumb?: PhotoSize;
   file: Buffer;
 }
 
 export interface StateImageParsedFrames {
   fileFrames?: Buffer[];
+}
+
+export interface StateImageVideoSticker extends StateImageParsedFrames {
+  meta: Sticker;
+  type: ImageType.VIDEO_STICKER;
+  thumb: PhotoSize;
+  file: Buffer;
 }
 
 export interface StateImageVideo extends StateImageParsedFrames {
@@ -56,7 +62,7 @@ export interface StateImageAnimation extends StateImageParsedFrames {
   caption?: string;
 }
 
-export type StateImage = StateImagePhoto | StateImageSticker | StateImageVideo | StateImageAnimation;
+export type StateImage = StateImagePhoto | StateImageSticker | StateImageVideoSticker | StateImageVideo | StateImageAnimation;
 
 /**
  * It requires only-with-text.middleware.js

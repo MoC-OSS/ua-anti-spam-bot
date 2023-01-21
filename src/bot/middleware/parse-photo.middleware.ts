@@ -36,8 +36,10 @@ export async function parsePhoto(context: GrammyContext, next: NextFunction) {
 
     if (photoMeta) {
       imageType = ImageType.PHOTO;
-    } else if (stickerMeta || videoStickerMeta) {
+    } else if (stickerMeta) {
       imageType = ImageType.STICKER;
+    } else if (videoStickerMeta) {
+      imageType = ImageType.VIDEO_STICKER;
     } else if (videoMeta) {
       imageType = ImageType.VIDEO;
     } else if (animationMeta) {

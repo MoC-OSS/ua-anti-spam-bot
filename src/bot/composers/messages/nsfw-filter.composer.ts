@@ -50,6 +50,7 @@ const saveNsfwMessage = async (context: GrammyContext) => {
     /**
      * Save sticker message
      * */
+    case ImageType.VIDEO_STICKER:
     case ImageType.STICKER: {
       const setNameAddition = meta.set_name ? `from <code>${meta.set_name}</code> sticker-pack` : '';
 

@@ -1,9 +1,11 @@
+import type { Sticker, Video } from '@grammyjs/types/message';
 import axios from 'axios';
 import FormData from 'form-data';
 
 import { environmentConfig } from '../../config';
-import type { GrammyMiddleware, ParseVideoSuccessResponseBody } from '../../types';
+import type { GrammyMiddleware, ImageVideoTypes, ParseVideoSuccessResponseBody } from '../../types';
 import { ImageType } from '../../types';
+import type { StateImageAnimation, StateImageParsedFrames, StateImageVideo, StateImageVideoSticker } from '../../types/state';
 import { handleError } from '../../utils';
 import { videoService } from '../../video';
 
@@ -25,23 +27,54 @@ export const parseVideoFrames: GrammyMiddleware = async (context, next) => {
     return next();
   }
 
-  const isVideo = photo.type === ImageType.VIDEO;
-  const isAnimation = photo.type === ImageType.ANIMATION;
+  /**
+   * Video types to parse
+   * */
+  const getFileNameMap = new Map<ImageVideoTypes, () => { video: Video | Sticker; fileName: string | undefined }>();
 
-  const isVideoContent = isVideo || isAnimation;
+  getFileNameMap.set(ImageType.VIDEO, () => {
+    const meta = photo as StateImageVideo;
 
-  if (isVideoContent) {
-    const videoMeta = isVideo ? photo.video : isAnimation ? photo.animation : null;
-    const isVideoSmall = videoMeta && (videoMeta.file_size || 0) < MAX_VIDEO_SIZE;
+    return {
+      video: meta.video,
+      fileName: meta.video.file_name,
+    };
+  });
+
+  getFileNameMap.set(ImageType.VIDEO_STICKER, () => {
+    const meta = photo as StateImageVideoSticker;
+
+    return {
+      video: meta.meta,
+      fileName: meta.meta.set_name,
+    };
+  });
+
+  getFileNameMap.set(ImageType.ANIMATION, () => {
+    const meta = photo as StateImageAnimation;
+
+    return {
+      video: meta.animation,
+      fileName: meta.animation.file_name,
+    };
+  });
+
+  /**
+   * Main logic
+   */
+  const videoMethods = getFileNameMap.get(photo.type as ImageVideoTypes);
+
+  if (videoMethods) {
+    const { video, fileName } = videoMethods();
+
+    const isVideoSmall = (video.file_size || 0) < MAX_VIDEO_SIZE;
 
     /**
      * Checks whatever is it video or animation and if it has a meta.
      * */
-    const isValidVideoContent = videoMeta && isVideoSmall;
-
-    if (isValidVideoContent) {
-      const videoName = `${videoMeta.file_unique_id}-${videoMeta.file_name?.toLowerCase() || 'unknown-type.mp4'}`;
-      const videoFile = await context.api.getFile(videoMeta.file_id).then((photoResponse) =>
+    if (isVideoSmall) {
+      const videoName = `${video.file_unique_id}-${fileName?.toLowerCase() || 'unknown-type.mp4'}`;
+      const videoFile = await context.api.getFile(video.file_id).then((photoResponse) =>
         photoResponse.file_path
           ? axios
               .get<Buffer>(`https://api.telegram.org/file/bot${environmentConfig.BOT_TOKEN}/${photoResponse.file_path}`, {
@@ -52,7 +85,7 @@ export const parseVideoFrames: GrammyMiddleware = async (context, next) => {
       );
 
       if (!videoFile) {
-        console.info('IMPOSSIBLE: There is no video.', videoMeta);
+        console.info('IMPOSSIBLE: There is no video.', video);
         return next();
       }
 
@@ -76,7 +109,7 @@ export const parseVideoFrames: GrammyMiddleware = async (context, next) => {
       }
 
       if (responseFiles && responseFiles.length > 0) {
-        photo.fileFrames = responseFiles;
+        (photo as StateImageParsedFrames).fileFrames = responseFiles;
       }
     }
   }
