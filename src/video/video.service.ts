@@ -40,12 +40,19 @@ export class VideoService {
     await fsp.writeFile(videoFile, video);
 
     if (!localDuration) {
-      const fileStat: FfprobeData = await this.getVideoProbe(videoFile);
-      if (!fileStat.format.duration) {
-        throw new Error('Video has no duration');
-      }
+      try {
+        const fileStat: FfprobeData = await this.getVideoProbe(videoFile);
+        if (!fileStat.format.duration || fileStat.format.duration < 0.1) {
+          throw new Error('Video has no duration');
+        }
 
-      localDuration = fileStat.format.duration;
+        localDuration = fileStat.format.duration;
+      } catch {
+        /**
+         * This is not a video so there is no frames
+         * */
+        return [];
+      }
     }
 
     return this.takeScreenshotsFs(videoFile, filename, localDuration);
