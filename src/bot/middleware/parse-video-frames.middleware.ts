@@ -14,7 +14,7 @@ const host = `http://${environmentConfig.HOST}:${environmentConfig.PORT}`;
  * Parse video frames and saves into `context.state.photo.fileFrames`
  * */
 export const parseVideoFrames: GrammyMiddleware = async (context, next) => {
-  const MAX_VIDEO_SIZE = 50_000_000; // 50Mb
+  const MAX_VIDEO_SIZE = 20_000_000; // 20Mb
 
   const { photo } = context.state;
 
