@@ -89,6 +89,9 @@ export type State = OnlyWithTextMiddlewareState &
       rate: number;
       reason: string;
     };
-    nsfwResult?: NsfwTensorResult;
+    nsfwResult?: {
+      tensor: NsfwTensorResult;
+      reason: 'preview' | 'frame';
+    };
     dataset?: SwindlerTensorResult;
   };

@@ -21,5 +21,9 @@ export function optimizeWriteContextUtil(context: GrammyContext): RealGrammyCont
     writeContext.state.photo.fileFrames = [];
   }
 
+  if (writeContext.state.nsfwResult && (writeContext.state.nsfwResult.tensor?.predictions?.length || 0 > 1)) {
+    writeContext.state.nsfwResult.tensor.predictions = [];
+  }
+
   return writeContext;
 }

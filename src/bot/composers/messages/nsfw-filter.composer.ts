@@ -16,9 +16,14 @@ const host = `http://${environmentConfig.HOST}:${environmentConfig.PORT}`;
  * Save message into logs to review it and track logic
  * */
 const saveNsfwMessage = async (context: GrammyContext) => {
+  if (!context.state.nsfwResult) {
+    return;
+  }
+
   const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
   const imageData = context.state.photo;
-  const { deletePrediction } = context.state.nsfwResult as NsfwTensorPositiveResult;
+
+  const { deletePrediction } = context.state.nsfwResult.tensor as NsfwTensorPositiveResult;
 
   if (!imageData) {
     return;
@@ -67,9 +72,9 @@ const saveNsfwMessage = async (context: GrammyContext) => {
       const { caption, video } = imageData;
 
       return context.api.sendVideo(logsChat, video.file_id, {
-        caption: `Looks like nsfw ${type} (${(deletePrediction.probability * 100).toFixed(2)}%) from <code>${
-          deletePrediction.className
-        }</code> by user ${userMention}:\n\n${chatMention || userMention}\n${caption || ''}`,
+        caption: `Looks like nsfw ${type} by ${context.state.nsfwResult.reason} (${(deletePrediction.probability * 100).toFixed(
+          2,
+        )}%) from <code>${deletePrediction.className}</code> by user ${userMention}:\n\n${chatMention || userMention}\n${caption || ''}`,
         parse_mode: 'HTML',
       });
     }
@@ -100,47 +105,49 @@ export const getNsfwFilterComposer = ({ nsfwTensorService }: NsfwFilterComposerP
     const hasFrames = !!parsedPhoto && 'fileFrames' in parsedPhoto;
 
     /**
-     * Check only real photos or thumbs
+     * Get preview or extracted frames to check
      * */
-    if (parsedPhoto && !hasFrames) {
-      let predictionResult: NsfwTensorResult;
+    const imageBuffers: Buffer[] = parsedPhoto && !hasFrames ? [parsedPhoto.file] : parsedPhoto?.fileFrames || [];
 
-      try {
-        const formData = new FormData();
-        formData.append('image', parsedPhoto.file, { filename: 'image.jpeg' });
-
-        const getServerResponse = () =>
-          axios
-            .post(`${host}/image`, formData, {
-              headers: formData.getHeaders(),
-            })
-            .then((response: { data: { result: NsfwTensorResult } }) => response.data.result);
-
-        predictionResult = await (environmentConfig.USE_SERVER ? getServerResponse() : nsfwTensorService.predict(parsedPhoto.file));
-      } catch (error) {
-        handleError(error, 'API_DOWN');
-        predictionResult = await nsfwTensorService.predict(parsedPhoto.file);
-      }
-
-      context.state.nsfwResult = predictionResult;
-
-      if (predictionResult.isSpam) {
-        await context.deleteMessage();
-        await saveNsfwMessage(context);
-
-        if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
-          const { writeUsername, userId } = getUserData(context);
-
-          await context.replyWithSelfDestructedHTML(getDeleteNsfwMessage({ writeUsername, userId }));
-        }
-      }
+    if (imageBuffers.length === 0) {
+      return next();
     }
 
-    /**
-     * Check video content
-     * */
-    if (hasFrames && parsedPhoto.fileFrames) {
-      await context.reply(`Found frames: ${parsedPhoto.fileFrames.length}`);
+    let predictionResult: NsfwTensorResult;
+
+    try {
+      const formData = new FormData();
+      imageBuffers.forEach((photo, index) => {
+        formData.append('image', photo, { filename: `image-${index}.jpeg` });
+      });
+
+      const getServerResponse = () =>
+        axios
+          .post(`${host}/image`, formData, {
+            headers: formData.getHeaders(),
+          })
+          .then((response: { data: { result: NsfwTensorResult } }) => response.data.result);
+
+      predictionResult = await (environmentConfig.USE_SERVER ? getServerResponse() : nsfwTensorService.predictVideo(imageBuffers));
+    } catch (error) {
+      handleError(error, 'API_DOWN');
+      predictionResult = await nsfwTensorService.predictVideo(imageBuffers);
+    }
+
+    context.state.nsfwResult = {
+      tensor: predictionResult,
+      reason: hasFrames ? 'frame' : 'preview',
+    };
+
+    if (predictionResult.isSpam) {
+      await context.deleteMessage();
+      await saveNsfwMessage(context);
+
+      if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
+        const { writeUsername, userId } = getUserData(context);
+
+        await context.replyWithSelfDestructedHTML(getDeleteNsfwMessage({ writeUsername, userId }));
+      }
     }
 
     return next();

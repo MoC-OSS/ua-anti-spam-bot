@@ -73,7 +73,7 @@ export class NsfwTensorService {
     let deletePrediction: predictionType | undefined;
 
     framesPredictions.some((predictions) => {
-      const predictionResult = this.findHighestPrediction(predictions);
+      const predictionResult = this.findHighestPrediction([highestPrediction, ...predictions].filter(Boolean));
       deletePrediction = predictionResult.deletePrediction;
       highestPrediction = predictionResult.highestPrediction;
 
