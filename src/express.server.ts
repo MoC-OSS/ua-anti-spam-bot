@@ -123,11 +123,13 @@ const uploadMiddleware = multer({ storage: uploadMemoryStorage });
 
   app.post<'/image', RouteParameters<'/image'>>(
     '/image',
-    uploadMiddleware.array('images', 10),
+    uploadMiddleware.array('image', 10),
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     async (request, response) => {
       const startTime = performance.now();
-      const images = request.file?.['images'] as Buffer[];
+      const images = ((request.files?.['image'] as Express.Multer.File[]) || request.files)
+        .filter((field) => field.fieldname === 'image')
+        .map((field) => field.buffer);
 
       if (!images) {
         return response.status(400).json({ error: 'no image' });
