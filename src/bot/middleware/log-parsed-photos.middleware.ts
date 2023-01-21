@@ -16,7 +16,7 @@ export const logParsedPhotosMiddleware: GrammyMiddleware = async (context, next)
     const files = photo.fileFrames.map((frame, index) => new InputFile(frame, `${photo.meta.file_id}${index}.png`));
 
     await context.replyWithMediaGroup(
-      files.map((file) => ({ type: 'photo', media: file, caption: 'test' })),
+      files.map((file) => ({ type: 'photo', media: file, caption: 'Parsed photo gallery screenshots' })),
       { reply_to_message_id: isDeleted ? undefined : context.msg?.message_id },
     );
   }

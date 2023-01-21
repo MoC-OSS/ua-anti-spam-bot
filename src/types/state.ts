@@ -32,6 +32,7 @@ export interface StateImagePhoto {
 export interface StateImageSticker {
   meta: Sticker;
   type: ImageType.STICKER;
+  thumb?: PhotoSize;
   file: Buffer;
 }
 

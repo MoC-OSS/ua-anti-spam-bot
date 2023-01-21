@@ -1,7 +1,6 @@
 /* eslint-disable unicorn/prefer-module */
 import fsp from 'node:fs/promises';
 import * as path from 'node:path';
-import { Readable } from 'node:stream';
 import * as util from 'node:util';
 import ffmpegPath from 'ffmpeg-static';
 import { path as ffprobePath } from 'ffprobe-static';
@@ -41,12 +40,12 @@ export class VideoService {
     await fsp.writeFile(videoFile, video);
 
     if (!localDuration) {
-      const fileStat: FfprobeData = await this.getVideoProbe(video);
-      if (!fileStat.streams[0].duration) {
+      const fileStat: FfprobeData = await this.getVideoProbe(videoFile);
+      if (!fileStat.format.duration) {
         throw new Error('Video has no duration');
       }
 
-      localDuration = +fileStat.streams[0].duration;
+      localDuration = fileStat.format.duration;
     }
 
     return this.takeScreenshotsFs(videoFile, filename, localDuration);
@@ -55,12 +54,11 @@ export class VideoService {
   /**
    * Returns video stats such as duration, width, height, and other meta
    *
-   * @param video - video to get meta
+   * @param videoFile - video to get meta
    * */
-  getVideoProbe(video: Buffer): Promise<FfprobeData> {
-    const videoStream = Readable.from(video);
+  getVideoProbe(videoFile: string): Promise<FfprobeData> {
     const command = this.spawnCommand();
-    return util.promisify<FfprobeData>((callback) => command.input(videoStream).ffprobe(callback))();
+    return util.promisify<FfprobeData>((callback) => command.input(videoFile).ffprobe(callback))();
   }
 
   /**
@@ -113,8 +111,8 @@ export class VideoService {
     /**
      * Remove files from FS
      * */
-    await Promise.all(fullFileNamePaths.map((fullPath) => fsp.unlink(fullPath)));
-    await fsp.unlink(videoFile);
+    // await Promise.all(fullFileNamePaths.map((fullPath) => fsp.unlink(fullPath)));
+    // await fsp.unlink(videoFile);
 
     return screenshotBuffers;
   }

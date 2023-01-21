@@ -91,6 +91,51 @@ import { sleep } from './utils';
   process.once('SIGINT', stopRunner);
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   process.once('SIGTERM', stopRunner);
+
+  // setTimeout(() => {
+  //   bot.handleUpdate({
+  //     update_id: 324_610_464,
+  //     message: {
+  //       message_id: 12_247,
+  //       from: {
+  //         id: 341_977_297,
+  //         is_bot: false,
+  //         first_name: 'Dmytro',
+  //         last_name: 'Vakulenko',
+  //         username: 'dimkasmile',
+  //         language_code: 'en',
+  //         is_premium: true,
+  //       },
+  //       chat: {
+  //         id: 341_977_297,
+  //         first_name: 'Dmytro',
+  //         last_name: 'Vakulenko',
+  //         username: 'dimkasmile',
+  //         type: 'private',
+  //       },
+  //       date: 1_674_320_742,
+  //       sticker: {
+  //         width: 512,
+  //         height: 512,
+  //         emoji: '😮',
+  //         set_name: 'f_r6nmde3_5398674526_by_fStikBot',
+  //         is_animated: false,
+  //         is_video: true,
+  //         type: 'regular',
+  //         thumb: {
+  //           file_id: 'AAMCAgADGQEAAi_XY8wbZm-BbZrt54WmiqdngCejP8oAAnoZAALyyKFLA3IZkPHXwqQBAAdtAAMtBA',
+  //           file_unique_id: 'AQADehkAAvLIoUty',
+  //           file_size: 10_860,
+  //           width: 320,
+  //           height: 320,
+  //         },
+  //         file_id: 'CAACAgIAAxkBAAIv12PMG2ZvgW2a7eeFpoqnZ4Anoz_KAAJ6GQAC8sihSwNyGZDx18KkLQQ',
+  //         file_unique_id: 'AgADehkAAvLIoUs',
+  //         file_size: 32_504,
+  //       },
+  //     },
+  //   });
+  // }, 1000);
 })().catch((error) => {
   console.error('FATAL: Bot crashed with error:', error);
   throw error;

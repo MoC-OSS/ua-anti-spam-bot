@@ -40,7 +40,7 @@ export const parseVideoFrames: GrammyMiddleware = async (context, next) => {
     const isValidVideoContent = videoMeta && isVideoSmall;
 
     if (isValidVideoContent) {
-      const videoName = `${videoMeta.file_unique_id}-${videoMeta.file_name?.toLowerCase() || 'unknown-type'}`;
+      const videoName = `${videoMeta.file_unique_id}-${videoMeta.file_name?.toLowerCase() || 'unknown-type.mp4'}`;
       const videoFile = await context.api.getFile(videoMeta.file_id).then((photoResponse) =>
         photoResponse.file_path
           ? axios

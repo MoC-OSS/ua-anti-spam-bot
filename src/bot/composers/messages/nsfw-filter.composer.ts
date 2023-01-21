@@ -8,6 +8,7 @@ import { getDeleteNsfwMessage } from '../../../message';
 import type { NsfwTensorService } from '../../../tensor';
 import type { GrammyContext, NsfwTensorPositiveResult, NsfwTensorResult } from '../../../types';
 import { ImageType } from '../../../types';
+import type { StateImageAnimation, StateImageVideo } from '../../../types/state';
 import { getUserData, handleError, telegramUtil } from '../../../utils';
 
 const host = `http://${environmentConfig.HOST}:${environmentConfig.PORT}`;
@@ -55,9 +56,9 @@ const saveNsfwMessage = async (context: GrammyContext) => {
       const stickerMessage = await context.api.sendSticker(logsChat, meta.file_id);
       return context.api.sendMessage(
         logsChat,
-        `Looks like nsfw ${type} ${setNameAddition} (${(deletePrediction.probability * 100).toFixed(2)}%) from <code>${
-          deletePrediction.className
-        }</code> by user ${userMention}:\n\n${chatMention || userMention}`,
+        `Looks like nsfw ${type} ${context.state.nsfwResult.reason} ${setNameAddition} (${(deletePrediction.probability * 100).toFixed(
+          2,
+        )}%) from <code>${deletePrediction.className}</code> by user ${userMention}:\n\n${chatMention || userMention}`,
         {
           parse_mode: 'HTML',
           reply_to_message_id: stickerMessage.message_id,
@@ -68,8 +69,11 @@ const saveNsfwMessage = async (context: GrammyContext) => {
     /**
      * Save photo and video message
      * */
+    case ImageType.ANIMATION:
     case ImageType.VIDEO: {
-      const { caption, video } = imageData;
+      const { caption } = imageData;
+
+      const video = (imageData as StateImageVideo).video || (imageData as StateImageAnimation).animation;
 
       return context.api.sendVideo(logsChat, video.file_id, {
         caption: `Looks like nsfw ${type} by ${context.state.nsfwResult.reason} (${(deletePrediction.probability * 100).toFixed(
