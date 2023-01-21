@@ -17,7 +17,7 @@ export async function parsePhoto(context: GrammyContext, next: NextFunction) {
   if (!context.state.photo && context.state.photo !== null) {
     const photo = context.msg?.photo;
     const sticker = context.msg?.sticker;
-    const video = context.msg?.video || sticker;
+    const video = context.msg?.video;
     const animation = context.msg?.animation;
 
     // Get the largest size picture
@@ -25,9 +25,9 @@ export async function parsePhoto(context: GrammyContext, next: NextFunction) {
     // Leaving only a regular sticker, not video and not animated
     const stickerMeta = sticker && !sticker.is_video && !sticker.is_animated ? sticker : null;
     // Video and animated stickers
-    const videoStickerMeta = sticker && sticker.is_video ? sticker : null;
+    const videoStickerMeta = sticker && sticker.is_video && !sticker.is_animated ? sticker : null;
     // Check only video thumb
-    const videoMeta = video && video?.thumb;
+    const videoMeta = (video || videoStickerMeta)?.thumb;
     // GIFs
     const animationMeta = animation && animation.thumb;
 

@@ -75,8 +75,8 @@ export const getPhotoComposer = ({ nsfwFilterComposer }: PhotosComposerPropertie
    * */
   registerModule(parseVideoFrames);
   registerDefaultSettingModule('disableNsfwFilter', nsfwFilterComposer);
-  registerModule(logParsedPhotosMiddleware);
 
+  readyImageComposer.use(logParsedPhotosMiddleware);
   readyImageComposer.use(performanceEndMiddleware);
   readyImageComposer.use(logContextMiddleware);
 
