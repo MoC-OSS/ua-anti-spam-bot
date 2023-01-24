@@ -15,6 +15,7 @@ import type { GrammyContext } from '../types';
  * Enable unit testing
  * */
 environmentConfig.UNIT_TESTING = true;
+environmentConfig.DEBUG = false;
 
 let outgoingRequests: OutgoingRequests;
 let bot: Bot<GrammyContext>;

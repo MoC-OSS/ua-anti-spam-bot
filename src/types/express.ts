@@ -43,3 +43,22 @@ export interface SwindlerResponseBody {
 export interface SwindlerRequestBody {
   message: string;
 }
+
+/**
+ * Parse video
+ * */
+export interface ParseVideoSuccessResponseBody {
+  screenshots: ReturnType<Buffer['toJSON']>[];
+  time: number;
+  expressStartTime: string;
+}
+
+export interface ParseVideoErrorResponseBody {
+  error: string;
+}
+
+export type ParseVideoResponseBody = ParseVideoSuccessResponseBody | ParseVideoErrorResponseBody;
+
+export interface ParseVideoRequestBody {
+  duration?: string;
+}
