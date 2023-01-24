@@ -118,8 +118,8 @@ export class VideoService {
     /**
      * Remove files from FS
      * */
-    // await Promise.all(fullFileNamePaths.map((fullPath) => fsp.unlink(fullPath)));
-    // await fsp.unlink(videoFile);
+    await Promise.all(fullFileNamePaths.map((fullPath) => fsp.unlink(fullPath)));
+    await fsp.unlink(videoFile);
 
     return screenshotBuffers;
   }
