@@ -16,6 +16,10 @@ const host = `http://${environmentConfig.HOST}:${environmentConfig.PORT}`;
  * Parse video frames and saves into `context.state.photo.fileFrames`
  * */
 export const parseVideoFrames: GrammyMiddleware = async (context, next) => {
+  /**
+   * @reason https://core.telegram.org/bots/faq#how-do-i-download-files
+   * @workaround https://stackoverflow.com/questions/63410408/is-there-any-workarounds-for-downloading-files-20-mb-that-are-sent-to-bot-i
+   * */
   const MAX_VIDEO_SIZE = 20_000_000; // 20Mb
 
   const { photo } = context.state;
