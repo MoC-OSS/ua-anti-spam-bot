@@ -69,6 +69,57 @@ export class VideoService {
   }
 
   /**
+   * Convert a video into a round video note square video.
+   * Resizes it to 512x512 with auto paddings.
+   * */
+  async convertToVideoNote(videoFile: string | Buffer): Promise<Buffer> {
+    let videoPath: string;
+    let outputVideoName: string;
+
+    if (typeof videoFile === 'string') {
+      /**
+       * A regular file, just read it
+       * */
+      videoPath = videoFile;
+      outputVideoName = `${videoFile.split('/').splice(-1)[0]}-video-note.mp4`;
+    } else {
+      /**
+       * Passed buffer, need to be saved and deleted after the operation
+       * */
+      videoPath = path.join(this.saveFolderPath, `${new Date().toString()}.mp4`);
+      outputVideoName = `${new Date().toString()}-video-note.mp4`;
+      await fsp.writeFile(videoFile, videoPath);
+    }
+
+    const outputVideoPath = path.join(this.saveFolderPath, outputVideoName);
+
+    const command = this.spawnCommand();
+
+    await new Promise((resolve) => {
+      command
+        .input(videoPath)
+        .size('512x?')
+        .aspect('1:1')
+        .autopad()
+        .output(outputVideoPath)
+        .on('end', () => {
+          resolve(null);
+        })
+        .run();
+    });
+
+    const outputVideoBuffer = await fsp.readFile(outputVideoPath);
+
+    /**
+     * Remove files from FS
+     * */
+    await fsp.unlink(videoPath);
+    await fsp.unlink(outputVideoPath);
+
+    return outputVideoBuffer;
+  }
+
+  /**
    * @description Receives video, video name, and timestamps to generate buffers.<br>
    *
    * 1) It calls FFMPEG to capture screenshot on the passed timestamps;<br>
