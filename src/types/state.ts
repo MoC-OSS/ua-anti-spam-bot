@@ -57,7 +57,7 @@ export interface StateImageVideo extends StateImageParsedFrames {
 export interface StateImageAnimation extends StateImageParsedFrames {
   meta: PhotoSize;
   type: ImageType.ANIMATION;
-  file: Buffer;
+  file: Buffer | null; // sometimes animations doesn't have preview?
   animation: Animation;
   caption?: string;
 }

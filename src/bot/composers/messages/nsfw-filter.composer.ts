@@ -109,10 +109,16 @@ export const getNsfwFilterComposer = ({ nsfwTensorService }: NsfwFilterComposerP
     const parsedPhoto = context.state.photo;
     const hasFrames = !!parsedPhoto && 'fileFrames' in parsedPhoto;
 
+    const isThumbnail = parsedPhoto && !hasFrames;
+
+    if (isThumbnail && parsedPhoto.file === null) {
+      return next();
+    }
+
     /**
      * Get preview or extracted frames to check
      * */
-    const imageBuffers: Buffer[] = parsedPhoto && !hasFrames ? [parsedPhoto.file] : parsedPhoto?.fileFrames || [];
+    const imageBuffers: Buffer[] = parsedPhoto && !hasFrames ? [parsedPhoto.file as Buffer] : parsedPhoto?.fileFrames || [];
 
     if (imageBuffers.length === 0) {
       return next();

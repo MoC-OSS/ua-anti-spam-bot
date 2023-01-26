@@ -42,35 +42,31 @@ export async function parsePhoto(context: GrammyContext, next: NextFunction) {
       imageType = ImageType.VIDEO_STICKER;
     } else if (videoMeta) {
       imageType = ImageType.VIDEO;
-    } else if (animationMeta) {
+    } else if (animation || animationMeta) {
       imageType = ImageType.ANIMATION;
     }
 
-    if (imageMeta) {
-      const photoFile = await context.api.getFile(videoStickerMeta?.thumb?.file_id || imageMeta.file_id).then((photoResponse) =>
-        photoResponse.file_path
-          ? axios
-              .get<Buffer>(`https://api.telegram.org/file/bot${environmentConfig.BOT_TOKEN}/${photoResponse.file_path}`, {
-                responseType: 'arraybuffer',
-              })
-              .then((response) => response.data)
-          : null,
-      );
+    const photoFile = imageMeta
+      ? await context.api.getFile(videoStickerMeta?.thumb?.file_id || imageMeta.file_id).then((photoResponse) =>
+          photoResponse.file_path
+            ? axios
+                .get<Buffer>(`https://api.telegram.org/file/bot${environmentConfig.BOT_TOKEN}/${photoResponse.file_path}`, {
+                  responseType: 'arraybuffer',
+                })
+                .then((response) => response.data)
+            : null,
+        )
+      : null;
 
-      context.state.photo = photoFile
-        ? ({
-            meta: imageMeta,
-            type: imageType,
-            file: await sharp(photoFile).jpeg().toBuffer(),
-            thumb: videoStickerMeta?.thumb,
-            caption: context.msg?.caption,
-            video,
-            animation,
-          } as StateImage)
-        : null;
-    } else {
-      context.state.photo = null;
-    }
+    context.state.photo = {
+      meta: imageMeta,
+      type: imageType,
+      file: photoFile ? await sharp(photoFile).jpeg().toBuffer() : null,
+      thumb: videoStickerMeta?.thumb,
+      caption: context.msg?.caption,
+      video,
+      animation,
+    } as StateImage;
   }
 
   return next();

@@ -38,6 +38,7 @@ import { DeleteSwindlersMiddleware, GlobalMiddleware, logCreatorState, stateMidd
 import { chainFilters, selfDestructedReply } from './bot/plugins';
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
 import { deleteMessageTransformer } from './bot/transformers';
+import { videoUtil } from './utils/video.util';
 import { environmentConfig } from './config';
 import { logsChat, swindlerBotsChatId, swindlerHelpChatId, swindlerMessageChatId } from './creator';
 import { redisClient } from './db';
@@ -257,6 +258,8 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   bot.use(notChannelRegisterComposer);
 
   bot.catch(globalErrorHandler);
+
+  videoUtil.init(bot.api);
 
   return bot;
 };
