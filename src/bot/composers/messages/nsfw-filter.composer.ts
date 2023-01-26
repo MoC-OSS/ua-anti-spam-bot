@@ -8,6 +8,7 @@ import { getDeleteNsfwMessage } from '../../../message';
 import type { NsfwTensorService } from '../../../tensor';
 import type { GrammyContext, NsfwTensorPositiveResult, NsfwTensorResult } from '../../../types';
 import { ImageType } from '../../../types';
+import type { StateImageAnimation, StateImageVideo } from '../../../types/state';
 import { getUserData, handleError, telegramUtil } from '../../../utils';
 
 const host = `http://${environmentConfig.HOST}:${environmentConfig.PORT}`;
@@ -16,9 +17,14 @@ const host = `http://${environmentConfig.HOST}:${environmentConfig.PORT}`;
  * Save message into logs to review it and track logic
  * */
 const saveNsfwMessage = async (context: GrammyContext) => {
+  if (!context.state.nsfwResult) {
+    return;
+  }
+
   const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
   const imageData = context.state.photo;
-  const { deletePrediction } = context.state.nsfwResult as NsfwTensorPositiveResult;
+
+  const { deletePrediction } = context.state.nsfwResult.tensor as NsfwTensorPositiveResult;
 
   if (!imageData) {
     return;
@@ -44,15 +50,16 @@ const saveNsfwMessage = async (context: GrammyContext) => {
     /**
      * Save sticker message
      * */
+    case ImageType.VIDEO_STICKER:
     case ImageType.STICKER: {
       const setNameAddition = meta.set_name ? `from <code>${meta.set_name}</code> sticker-pack` : '';
 
       const stickerMessage = await context.api.sendSticker(logsChat, meta.file_id);
       return context.api.sendMessage(
         logsChat,
-        `Looks like nsfw ${type} ${setNameAddition} (${(deletePrediction.probability * 100).toFixed(2)}%) from <code>${
-          deletePrediction.className
-        }</code> by user ${userMention}:\n\n${chatMention || userMention}`,
+        `Looks like nsfw ${type} ${context.state.nsfwResult.reason} ${setNameAddition} (${(deletePrediction.probability * 100).toFixed(
+          2,
+        )}%) from <code>${deletePrediction.className}</code> by user ${userMention}:\n\n${chatMention || userMention}`,
         {
           parse_mode: 'HTML',
           reply_to_message_id: stickerMessage.message_id,
@@ -63,13 +70,16 @@ const saveNsfwMessage = async (context: GrammyContext) => {
     /**
      * Save photo and video message
      * */
+    case ImageType.ANIMATION:
     case ImageType.VIDEO: {
-      const { caption, video } = imageData;
+      const { caption } = imageData;
+
+      const video = (imageData as StateImageVideo).video || (imageData as StateImageAnimation).animation;
 
       return context.api.sendVideo(logsChat, video.file_id, {
-        caption: `Looks like nsfw ${type} (${(deletePrediction.probability * 100).toFixed(2)}%) from <code>${
-          deletePrediction.className
-        }</code> by user ${userMention}:\n\n${chatMention || userMention}\n${caption || ''}`,
+        caption: `Looks like nsfw ${type} by ${context.state.nsfwResult.reason} (${(deletePrediction.probability * 100).toFixed(
+          2,
+        )}%) from <code>${deletePrediction.className}</code> by user ${userMention}:\n\n${chatMention || userMention}\n${caption || ''}`,
         parse_mode: 'HTML',
       });
     }
@@ -97,38 +107,51 @@ export const getNsfwFilterComposer = ({ nsfwTensorService }: NsfwFilterComposerP
 
   nsfwFilterComposer.use(async (context, next) => {
     const parsedPhoto = context.state.photo;
+    const hasFrames = !!parsedPhoto && 'fileFrames' in parsedPhoto;
 
-    if (parsedPhoto) {
-      let predictionResult: NsfwTensorResult;
+    /**
+     * Get preview or extracted frames to check
+     * */
+    const imageBuffers: Buffer[] = parsedPhoto && !hasFrames ? [parsedPhoto.file] : parsedPhoto?.fileFrames || [];
 
-      try {
-        const formData = new FormData();
-        formData.append('image', parsedPhoto.file, { filename: 'image.jpeg' });
+    if (imageBuffers.length === 0) {
+      return next();
+    }
 
-        const getServerResponse = () =>
-          axios
-            .post(`${host}/image`, formData, {
-              headers: formData.getHeaders(),
-            })
-            .then((response: { data: { result: NsfwTensorResult } }) => response.data.result);
+    let predictionResult: NsfwTensorResult;
 
-        predictionResult = await (environmentConfig.USE_SERVER ? getServerResponse() : nsfwTensorService.predict(parsedPhoto.file));
-      } catch (error) {
-        handleError(error, 'API_DOWN');
-        predictionResult = await nsfwTensorService.predict(parsedPhoto.file);
-      }
+    try {
+      const formData = new FormData();
+      imageBuffers.forEach((photo, index) => {
+        formData.append('image', photo, { filename: `image-${index}.jpeg` });
+      });
 
-      context.state.nsfwResult = predictionResult;
+      const getServerResponse = () =>
+        axios
+          .post(`${host}/image`, formData, {
+            headers: formData.getHeaders(),
+          })
+          .then((response: { data: { result: NsfwTensorResult } }) => response.data.result);
 
-      if (predictionResult.isSpam) {
-        await context.deleteMessage();
-        await saveNsfwMessage(context);
+      predictionResult = await (environmentConfig.USE_SERVER ? getServerResponse() : nsfwTensorService.predictVideo(imageBuffers));
+    } catch (error) {
+      handleError(error, 'API_DOWN');
+      predictionResult = await nsfwTensorService.predictVideo(imageBuffers);
+    }
 
-        if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
-          const { writeUsername, userId } = getUserData(context);
+    context.state.nsfwResult = {
+      tensor: predictionResult,
+      reason: hasFrames ? 'frame' : 'preview',
+    };
 
-          await context.replyWithSelfDestructedHTML(getDeleteNsfwMessage({ writeUsername, userId }));
-        }
+    if (predictionResult.isSpam) {
+      await context.deleteMessage();
+      await saveNsfwMessage(context);
+
+      if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
+        const { writeUsername, userId } = getUserData(context);
+
+        await context.replyWithSelfDestructedHTML(getDeleteNsfwMessage({ writeUsername, userId }));
       }
     }
 

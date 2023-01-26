@@ -7,6 +7,12 @@ import type { NsfwTensorNegativeResult, NsfwTensorPositiveResult, NsfwTensorResu
 export class NsfwTensorService {
   model!: NSFWJS;
 
+  readonly predictionChecks = new Map<predictionType['className'], number>([
+    ['Hentai', 0.85],
+    ['Porn', 0.85],
+    ['Sexy', 0.8],
+  ]);
+
   constructor(private modelPath: string) {}
 
   async load() {
@@ -23,18 +29,81 @@ export class NsfwTensorService {
     return predictions;
   }
 
+  /**
+   * Classifies a video from the 5 classes returning a map of
+   * the most likely class names to their probability.
+   *
+   * @param imageArray
+   */
+  classifyVideo(imageArray: Buffer[]): Promise<predictionType[][]> {
+    return Promise.all(imageArray.map((image) => this.classify(image)));
+  }
+
+  /**
+   * @returns prediction result for a frame
+   * */
   async predict(image: Buffer): Promise<NsfwTensorResult> {
     const predictions = await this.classify(image);
 
-    const predictionChecks = new Map<predictionType['className'], number>();
-    predictionChecks.set('Hentai', 0.85);
-    predictionChecks.set('Porn', 0.85);
-    predictionChecks.set('Sexy', 0.8);
+    const { deletePrediction, highestPrediction } = this.findHighestPrediction(predictions);
 
+    if (!deletePrediction) {
+      return {
+        isSpam: false,
+        predictions,
+        highestPrediction,
+      } as NsfwTensorNegativeResult;
+    }
+
+    return {
+      isSpam: true,
+      predictions,
+      deletePrediction,
+      deleteRank: this.predictionChecks.get(deletePrediction.className),
+    } as NsfwTensorPositiveResult;
+  }
+
+  /**
+   * @returns prediction result for array of image frames
+   * */
+  async predictVideo(imageArray: Buffer[]): Promise<NsfwTensorResult> {
+    const framesPredictions = await this.classifyVideo(imageArray);
+
+    let highestPrediction!: predictionType;
+    let deletePrediction: predictionType | undefined;
+
+    framesPredictions.some((predictions) => {
+      const predictionResult = this.findHighestPrediction([highestPrediction, ...predictions].filter(Boolean));
+      deletePrediction = predictionResult.deletePrediction;
+      highestPrediction = predictionResult.highestPrediction;
+
+      return !!deletePrediction;
+    });
+
+    if (!deletePrediction) {
+      return {
+        isSpam: false,
+        predictions: framesPredictions,
+        highestPrediction,
+      } as NsfwTensorNegativeResult;
+    }
+
+    return {
+      isSpam: true,
+      predictions: framesPredictions,
+      deletePrediction,
+      deleteRank: this.predictionChecks.get(deletePrediction.className),
+    } as NsfwTensorPositiveResult;
+  }
+
+  /**
+   * @description finds highest and delete prediction
+   * */
+  private findHighestPrediction(predictions: predictionType[]) {
     let highestPrediction!: predictionType;
 
     const deletePrediction = predictions.find((currentPrediction) => {
-      const spamThreshold = predictionChecks.get(currentPrediction.className);
+      const spamThreshold = this.predictionChecks.get(currentPrediction.className);
 
       if (!spamThreshold) {
         return false;
@@ -50,20 +119,7 @@ export class NsfwTensorService {
       return currentPrediction.probability > spamThreshold;
     });
 
-    if (!deletePrediction) {
-      return {
-        isSpam: false,
-        predictions,
-        highestPrediction,
-      } as NsfwTensorNegativeResult;
-    }
-
-    return {
-      isSpam: true,
-      predictions,
-      deletePrediction,
-      deleteRank: predictionChecks.get(deletePrediction.className),
-    } as NsfwTensorPositiveResult;
+    return { highestPrediction, deletePrediction };
   }
 }
 
