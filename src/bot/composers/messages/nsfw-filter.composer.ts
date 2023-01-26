@@ -85,6 +85,25 @@ const saveNsfwMessage = async (context: GrammyContext) => {
     }
 
     /**
+     * Round video notes
+     * */
+    case ImageType.VIDEO_NOTE: {
+      const { videoNote } = imageData;
+
+      const videoNoteMessage = await context.api.sendVideoNote(logsChat, videoNote.file_id);
+      return context.api.sendMessage(
+        logsChat,
+        `Looks like nsfw ${type} ${context.state.nsfwResult.reason} (${(deletePrediction.probability * 100).toFixed(2)}%) from <code>${
+          deletePrediction.className
+        }</code> by user ${userMention}:\n\n${chatMention || userMention}`,
+        {
+          parse_mode: 'HTML',
+          reply_to_message_id: videoNoteMessage.message_id,
+        },
+      );
+    }
+
+    /**
      * Unknown type handling
      * Never impossible
      * */
@@ -109,10 +128,16 @@ export const getNsfwFilterComposer = ({ nsfwTensorService }: NsfwFilterComposerP
     const parsedPhoto = context.state.photo;
     const hasFrames = !!parsedPhoto && 'fileFrames' in parsedPhoto;
 
+    const isThumbnail = parsedPhoto && !hasFrames;
+
+    if (isThumbnail && parsedPhoto.file === null) {
+      return next();
+    }
+
     /**
      * Get preview or extracted frames to check
      * */
-    const imageBuffers: Buffer[] = parsedPhoto && !hasFrames ? [parsedPhoto.file] : parsedPhoto?.fileFrames || [];
+    const imageBuffers: Buffer[] = parsedPhoto && !hasFrames ? [parsedPhoto.file as Buffer] : parsedPhoto?.fileFrames || [];
 
     if (imageBuffers.length === 0) {
       return next();

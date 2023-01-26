@@ -1,4 +1,4 @@
-import type { Animation, PhotoSize, Sticker, Video } from '@grammyjs/types/message';
+import type { Animation, PhotoSize, Sticker, Video, VideoNote } from '@grammyjs/types/message';
 
 import type { ImageType } from './image';
 import type { NsfwTensorResult } from './nsfw';
@@ -54,15 +54,30 @@ export interface StateImageVideo extends StateImageParsedFrames {
   caption?: string;
 }
 
+export interface StateImageVideoNote extends StateImageParsedFrames {
+  meta: PhotoSize;
+  type: ImageType.VIDEO_NOTE;
+  file: Buffer | null;
+  videoNote: VideoNote;
+}
+
 export interface StateImageAnimation extends StateImageParsedFrames {
   meta: PhotoSize;
   type: ImageType.ANIMATION;
-  file: Buffer;
+  file: Buffer | null; // sometimes animations doesn't have preview?
   animation: Animation;
   caption?: string;
 }
 
-export type StateImage = StateImagePhoto | StateImageSticker | StateImageVideoSticker | StateImageVideo | StateImageAnimation;
+export type StateImage =
+  | StateImagePhoto
+  | StateImageSticker
+  | StateImageVideoSticker
+  | StateImageVideo
+  | StateImageVideoNote
+  | StateImageAnimation;
+
+export type StateVideoFormats = Video | Sticker | Animation | VideoNote;
 
 /**
  * It requires only-with-text.middleware.js

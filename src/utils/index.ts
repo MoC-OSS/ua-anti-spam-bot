@@ -16,6 +16,7 @@ export * from './error-handler';
 export * from './optimize-write-context.util';
 export * from './remove-duplicates.util';
 export * from './reveal-hidden-urls.util';
+export * from './video.util';
 
 /**
  * @param {GrammyContext} context
