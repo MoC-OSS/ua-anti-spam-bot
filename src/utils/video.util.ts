@@ -1,10 +1,9 @@
-import type { Animation, Sticker, Video } from '@grammyjs/types/message';
 import axios from 'axios';
 
 import { environmentConfig } from '../config';
 import type { GrammyBot, GrammyContext, ImageVideoTypes } from '../types';
 import { ImageType } from '../types';
-import type { StateImageAnimation, StateImageVideo, StateImageVideoSticker } from '../types/state';
+import type { StateImageAnimation, StateImageVideo, StateImageVideoNote, StateImageVideoSticker, StateVideoFormats } from '../types/state';
 
 /**
  * Helps to manage video across the bot
@@ -15,10 +14,7 @@ export class VideoUtil {
   /**
    * Way to parse video info from context
    * */
-  private parsePhotoMap = new Map<
-    ImageVideoTypes,
-    (context: GrammyContext) => { video: Video | Sticker | Animation; fileName: string | undefined }
-  >([
+  private parsePhotoMap = new Map<ImageVideoTypes, (context: GrammyContext) => { video: StateVideoFormats; fileName: string | undefined }>([
     [
       ImageType.VIDEO,
       (context) => {
@@ -49,6 +45,17 @@ export class VideoUtil {
         return {
           video: meta.animation,
           fileName: meta.animation.file_name,
+        };
+      },
+    ],
+    [
+      ImageType.VIDEO_NOTE,
+      (context) => {
+        const meta = context.state.photo as StateImageVideoNote;
+
+        return {
+          video: meta.videoNote,
+          fileName: meta.videoNote.file_unique_id,
         };
       },
     ],
@@ -94,7 +101,7 @@ export class VideoUtil {
   /**
    * Downloads and returns the video
    * */
-  async downloadVideo(video: Video | Sticker | Animation, fileName: string | undefined) {
+  async downloadVideo(video: StateVideoFormats, fileName: string | undefined) {
     const videoName = `${video.file_unique_id}-${fileName?.toLowerCase() || 'unknown-type.mp4'}`;
     const videoFile = await this.api.getFile(video.file_id).then((photoResponse) =>
       photoResponse.file_path

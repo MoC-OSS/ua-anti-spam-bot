@@ -19,6 +19,7 @@ export async function parsePhoto(context: GrammyContext, next: NextFunction) {
     const sticker = context.msg?.sticker;
     const video = context.msg?.video;
     const animation = context.msg?.animation;
+    const videoNote = context.msg?.video_note;
 
     // Get the largest size picture
     const photoMeta = photo?.[2];
@@ -30,8 +31,10 @@ export async function parsePhoto(context: GrammyContext, next: NextFunction) {
     const videoMeta = (video || videoStickerMeta)?.thumb;
     // GIFs
     const animationMeta = animation && animation.thumb;
+    // Round video messages
+    const videoNoteMeta = videoNote && videoNote.thumb;
 
-    const imageMeta = photoMeta || stickerMeta || videoStickerMeta || videoMeta || animationMeta;
+    const imageMeta = photoMeta || stickerMeta || videoStickerMeta || videoMeta || animationMeta || videoNoteMeta;
     let imageType: ImageType = ImageType.UNKNOWN;
 
     if (photoMeta) {
@@ -44,6 +47,8 @@ export async function parsePhoto(context: GrammyContext, next: NextFunction) {
       imageType = ImageType.VIDEO;
     } else if (animation || animationMeta) {
       imageType = ImageType.ANIMATION;
+    } else if (videoNote || videoNoteMeta) {
+      imageType = ImageType.VIDEO_NOTE;
     }
 
     const photoFile = imageMeta
@@ -64,6 +69,7 @@ export async function parsePhoto(context: GrammyContext, next: NextFunction) {
       file: photoFile ? await sharp(photoFile).jpeg().toBuffer() : null,
       thumb: videoStickerMeta?.thumb,
       caption: context.msg?.caption,
+      videoNote,
       video,
       animation,
     } as StateImage;

@@ -85,6 +85,25 @@ const saveNsfwMessage = async (context: GrammyContext) => {
     }
 
     /**
+     * Round video notes
+     * */
+    case ImageType.VIDEO_NOTE: {
+      const { videoNote } = imageData;
+
+      const videoNoteMessage = await context.api.sendVideoNote(logsChat, videoNote.file_id);
+      return context.api.sendMessage(
+        logsChat,
+        `Looks like nsfw ${type} ${context.state.nsfwResult.reason} (${(deletePrediction.probability * 100).toFixed(2)}%) from <code>${
+          deletePrediction.className
+        }</code> by user ${userMention}:\n\n${chatMention || userMention}`,
+        {
+          parse_mode: 'HTML',
+          reply_to_message_id: videoNoteMessage.message_id,
+        },
+      );
+    }
+
+    /**
      * Unknown type handling
      * Never impossible
      * */
