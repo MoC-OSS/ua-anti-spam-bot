@@ -72,7 +72,11 @@ export class VideoService {
    * Convert a video into a round video note square video.
    * Resizes it to 512x512 with auto paddings.
    * */
-  async convertToVideoNote(videoFile: string | Buffer): Promise<Buffer> {
+  async convertToVideoNote(videoFile: string, fileName: never): Promise<Buffer>;
+
+  async convertToVideoNote(videoFile: Buffer, fileName: string): Promise<Buffer>;
+
+  async convertToVideoNote(videoFile: string | Buffer, fileName: string): Promise<Buffer> {
     let videoPath: string;
     let outputVideoName: string;
 
@@ -86,9 +90,9 @@ export class VideoService {
       /**
        * Passed buffer, need to be saved and deleted after the operation
        * */
-      videoPath = path.join(this.saveFolderPath, `${new Date().toString()}.mp4`);
+      videoPath = path.join(this.saveFolderPath, `${fileName}.mp4`);
       outputVideoName = `${new Date().toString()}-video-note.mp4`;
-      await fsp.writeFile(videoFile, videoPath);
+      await fsp.writeFile(videoPath, videoFile);
     }
 
     const outputVideoPath = path.join(this.saveFolderPath, outputVideoName);
