@@ -11,6 +11,7 @@ import {
   onlyNotAdmin,
   onlyWhenBotAdmin,
   parseCards,
+  parseIsRussianMiddleware,
   parseLocations,
   parseMentions,
   parseText,
@@ -27,6 +28,8 @@ export interface MessagesComposerProperties {
   noForwardsComposer: Composer<GrammyContext>;
   swindlersComposer: Composer<GrammyContext>;
   strategicComposer: Composer<GrammyContext>;
+  noRussianComposer: Composer<GrammyContext>;
+  warnRussianComposer: Composer<GrammyContext>;
 }
 
 /**
@@ -40,6 +43,8 @@ export const getMessagesComposer = ({
   noForwardsComposer,
   strategicComposer,
   swindlersComposer,
+  noRussianComposer,
+  warnRussianComposer,
 }: MessagesComposerProperties) => {
   const messagesComposer = new Composer<GrammyContext>();
 
@@ -100,6 +105,8 @@ export const getMessagesComposer = ({
   registerOptionalSettingModule('enableDeleteMentions', parseMentions, noMentionsComposer);
   registerOptionalSettingModule('enableDeleteCards', parseCards, noCardsComposer);
   registerOptionalSettingModule('enableDeleteForwards', noForwardsComposer);
+  registerOptionalSettingModule('enableDeleteRussian', parseIsRussianMiddleware, noRussianComposer);
+  registerOptionalSettingModule('enableWarnRussian', parseIsRussianMiddleware, warnRussianComposer);
   // TODO optimize this module
   registerDefaultSettingModule('disableStrategicInfo', strategicComposer);
 

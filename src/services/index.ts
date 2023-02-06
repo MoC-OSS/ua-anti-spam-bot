@@ -3,6 +3,7 @@ export * from './alarm-chat.service';
 export * from './cards.service';
 export * from './dynamic-storage.service';
 export * from './google.service';
+export * from './language-detect.service';
 export * from './locations.service';
 export * from './mention.service';
 export * from './redis.service';

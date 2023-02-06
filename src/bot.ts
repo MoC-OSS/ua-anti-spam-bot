@@ -26,10 +26,12 @@ import {
   getNoForwardsComposer,
   getNoLocationsComposer,
   getNoMentionsComposer,
+  getNoRussianComposer,
   getNoUrlsComposer,
   getNsfwFilterComposer,
   getStrategicComposer,
   getSwindlersComposer,
+  getWarnRussianComposer,
 } from './bot/composers/messages';
 import { isNotChannel, onlyCreatorChatFilter } from './bot/filters';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
@@ -165,6 +167,8 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   // Message composers
   const { noCardsComposer } = getNoCardsComposer();
   const { noUrlsComposer } = getNoUrlsComposer();
+  const { noRussianComposer } = getNoRussianComposer();
+  const { warnRussianComposer } = getWarnRussianComposer();
   const { noLocationsComposer } = getNoLocationsComposer();
   const { noMentionsComposer } = getNoMentionsComposer();
   const { noForwardsComposer } = getNoForwardsComposer();
@@ -177,6 +181,8 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     noLocationsComposer,
     noMentionsComposer,
     noForwardsComposer,
+    noRussianComposer,
+    warnRussianComposer,
     swindlersComposer,
     strategicComposer,
   });

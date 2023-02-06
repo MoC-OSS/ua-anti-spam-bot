@@ -19,6 +19,7 @@ export * from './only-whitelisted';
 export * from './only-with-photo.middleware';
 export * from './only-with-text.middleware';
 export * from './parse-cards.middleware';
+export * from './parse-is-russian.middleware';
 export * from './parse-locations.middleware';
 export * from './parse-mentions.middleware';
 export * from './parse-photo.middleware';
