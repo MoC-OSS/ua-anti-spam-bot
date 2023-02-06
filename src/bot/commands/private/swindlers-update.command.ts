@@ -23,7 +23,7 @@ export class SwindlersUpdateCommand {
         // eslint-disable-next-line camelcase,@typescript-eslint/ban-ts-comment
         // @ts-ignore
         // eslint-disable-next-line camelcase
-        await this.dynamicStorageService.updateSwindlers().then(() => context.editMessageText(swindlersUpdateEndMessage, { message_id }));
+        await this.dynamicStorageService.updateStorage().then(() => context.editMessageText(swindlersUpdateEndMessage, { message_id }));
       });
     };
   }

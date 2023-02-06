@@ -170,6 +170,11 @@ export const getSettingsMenuMessage = (settings: ChatSessionData['chatSettings']
       : '✅ Бот видаляє повідомлення приєдання та прощання.'
   }
 
+☢️ ${settings.enableWarnRussian ? '✅ Бот попереджає про заборону російської мови.' : '⛔️ Бот не попереджає про заборону російської мови.'}
+🪆 ${
+    settings.enableDeleteRussian ? '✅ Бот видаляє повідомлення з російською мовою.' : '⛔️ Бот не видаляє повідомлення з російською мовою.'
+  }
+
 <b>Налаштування повітряної тривоги.</b>
 🏰 ${
     settings.airRaidAlertSettings.state
@@ -258,6 +263,9 @@ export const deleteForwardedButton = '↩️ Пересилання';
 export const deleteServiceMessageButton = '✋ Приєднання';
 
 export const deleteNsfwButton = '🔞 Контент';
+
+export const warnRussianLanguageButton = '☢️ Російська';
+export const deleteRussianLanguageButton = '🪆 Російська';
 
 export const airAlarmAlertButton = '🏰 Регіон';
 export const airAlarmNotificationMessage = '📢 Тривога';
@@ -637,3 +645,19 @@ export const getTensorTestResult = ({ chance, isSpam }: TensorTestResultProperti
 🎲 Шанс спаму - <b>${chance}</b>
 🤔 Я вважаю...<b>${isSpam ? '✅ Це спам' : '⛔️ Це не спам'}</b>
 `.trim();
+
+/**
+ * Russian warn/delete messages
+ * */
+
+export interface DeleteRussianMessageProperties extends DeleteMessageAtomProperties {
+  message: string;
+}
+
+export const getWarnRussianMessage = (message: string) => `🇷🇺 ➡️ 🇺🇦 ${message}`;
+
+export const getDeleteRussianMessage = ({ writeUsername, userId, message }: DeleteRussianMessageProperties) => `
+${getDeleteUserAtomMessage({ writeUsername, userId })}
+
+${getWarnRussianMessage(message)}
+`;

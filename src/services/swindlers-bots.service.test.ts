@@ -22,7 +22,7 @@ describe('SwindlersBotsService', () => {
     const oldFuzzyMatch = swindlersBotsService.swindlersBotsFuzzySet;
 
     expect(initFuzzySetSpy).not.toHaveBeenCalled();
-    await mockDynamicStorageService.updateSwindlers();
+    await mockDynamicStorageService.updateStorage();
     const newFuzzyMatch = swindlersBotsService.swindlersBotsFuzzySet;
 
     expect(oldFuzzyMatch).not.toEqual(newFuzzyMatch);

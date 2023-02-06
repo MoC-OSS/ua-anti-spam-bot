@@ -89,6 +89,7 @@ interface OnlyWithTextMiddlewareState {
   mentions?: string[];
   cards?: string[];
   locations?: string[];
+  isRussian?: boolean;
 }
 
 interface PerformanceMiddlewareState {

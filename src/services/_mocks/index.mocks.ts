@@ -34,8 +34,7 @@ getCompactSheet.mockReturnValueOnce(Promise.resolve(['test message from swindler
 /**
  * @type {GoogleService}
  * */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const mockGoogleService = {
+export const mockGoogleService = {
   getSheet,
 } as Partial<GoogleService> as GoogleService;
 
@@ -68,4 +67,4 @@ export const mockDataset = {
   swindlers_regex_sites: ['privat24.', 'orpay', 'da-pay', '-pay'],
 } as LocalDataset;
 
-export const mockDynamicStorageService = new DynamicStorageService(mockSwindlersGoogleService, mockDataset);
+export const mockDynamicStorageService = new DynamicStorageService(mockSwindlersGoogleService, mockGoogleService, mockDataset);

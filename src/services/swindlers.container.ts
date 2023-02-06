@@ -2,6 +2,7 @@ import { dataset } from '../../dataset/dataset';
 import { initSwindlersTensor } from '../tensor';
 
 import { DynamicStorageService } from './dynamic-storage.service';
+import { googleService } from './google.service';
 import { SwindlersBotsService } from './swindlers-bots.service';
 import { SwindlersCardsService } from './swindlers-cards.service';
 import { SwindlersDetectService } from './swindlers-detect.service';
@@ -16,7 +17,7 @@ export const initSwindlersContainer = async () => {
   // It throws an error if it's not working
   await swindlersTensorService.predict('test', null);
 
-  const dynamicStorageService = new DynamicStorageService(swindlersGoogleService, dataset);
+  const dynamicStorageService = new DynamicStorageService(swindlersGoogleService, googleService, dataset);
   await dynamicStorageService.init();
 
   const swindlersBotsService = new SwindlersBotsService(dynamicStorageService, 0.6);
