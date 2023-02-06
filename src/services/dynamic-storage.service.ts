@@ -4,8 +4,10 @@ import type TypedEmitter from 'typed-emitter';
 import { optimizeText } from 'ukrainian-ml-optimizer';
 
 import type { dataset } from '../../dataset/dataset';
+import { environmentConfig } from '../config';
 import { removeDuplicates } from '../utils';
 
+import type { GoogleService } from './google.service';
 import type { SwindlersGoogleService } from './swindlers-google.service';
 
 export type FetchEvents = {
@@ -33,13 +35,16 @@ export class DynamicStorageService {
 
   notSwindlers: string[] = [];
 
+  ukrainianLanguageResponses: string[] = [];
+
   fetchEmitter: TypedEmitter<FetchEvents>;
 
   /**
    * @param {SwindlersGoogleService} swindlersGoogleService
+   * @param {GoogleService} googleService
    * @param {any} localDataset
    * */
-  constructor(private swindlersGoogleService: SwindlersGoogleService, localDataset: LocalDataset) {
+  constructor(private swindlersGoogleService: SwindlersGoogleService, private googleService: GoogleService, localDataset: LocalDataset) {
     this.swindlerMessages = [];
     this.swindlerBots = localDataset.swindlers_bots || [];
     this.swindlerDomains = localDataset.swindlers_domains || [];
@@ -50,15 +55,15 @@ export class DynamicStorageService {
   }
 
   async init() {
-    await this.updateSwindlers();
+    await this.updateStorage();
     setInterval(() => {
-      this.updateSwindlers().catch((error) => {
+      this.updateStorage().catch((error) => {
         console.error('Cannot update swindlers on interval. Reason:', error);
       });
     }, ms('1h'));
   }
 
-  async updateSwindlers() {
+  async updateStorage() {
     const cases = Promise.all([
       this.swindlersGoogleService.getTrainingPositives(true),
       this.swindlersGoogleService.getBots(),
@@ -66,19 +71,23 @@ export class DynamicStorageService {
       this.swindlersGoogleService.getNotSwindlers(),
       this.swindlersGoogleService.getCards(),
       this.swindlersGoogleService.getSiteRegex(),
+      this.googleService.getSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, 'Ukrainian_phrases', 'A4:A', true),
     ]);
 
-    return cases.then(([swindlerPositives, swindlerBots, swindlerDomains, notSwindlers, swindlerCards, swindlerRegexSites]) => {
-      this.swindlerMessages = removeDuplicates(swindlerPositives)
-        .map((element) => optimizeText(element))
-        .filter(Boolean);
-      this.notSwindlers = removeDuplicates(notSwindlers);
-      this.swindlerBots = removeDuplicates(swindlerBots).filter((item) => !this.notSwindlers.includes(item));
-      this.swindlerDomains = removeDuplicates(swindlerDomains).filter((item) => !this.notSwindlers.includes(item));
-      this.swindlerCards = removeDuplicates(swindlerCards);
-      this.swindlerRegexSites = removeDuplicates(swindlerRegexSites);
-      this.fetchEmitter.emit('fetch');
-      console.info('got DynamicStorageService messages', new Date());
-    });
+    return cases.then(
+      ([swindlerPositives, swindlerBots, swindlerDomains, notSwindlers, swindlerCards, swindlerRegexSites, ukrainianLanguageResponses]) => {
+        this.swindlerMessages = removeDuplicates(swindlerPositives)
+          .map((element) => optimizeText(element))
+          .filter(Boolean);
+        this.notSwindlers = removeDuplicates(notSwindlers);
+        this.swindlerBots = removeDuplicates(swindlerBots).filter((item) => !this.notSwindlers.includes(item));
+        this.swindlerDomains = removeDuplicates(swindlerDomains).filter((item) => !this.notSwindlers.includes(item));
+        this.swindlerCards = removeDuplicates(swindlerCards);
+        this.swindlerRegexSites = removeDuplicates(swindlerRegexSites);
+        this.ukrainianLanguageResponses = ukrainianLanguageResponses;
+        this.fetchEmitter.emit('fetch');
+        console.info('got DynamicStorageService messages', new Date());
+      },
+    );
   }
 }

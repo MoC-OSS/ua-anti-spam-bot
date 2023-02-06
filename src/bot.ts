@@ -167,8 +167,8 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   // Message composers
   const { noCardsComposer } = getNoCardsComposer();
   const { noUrlsComposer } = getNoUrlsComposer();
-  const { noRussianComposer } = getNoRussianComposer();
-  const { warnRussianComposer } = getWarnRussianComposer();
+  const { noRussianComposer } = getNoRussianComposer({ dynamicStorageService });
+  const { warnRussianComposer } = getWarnRussianComposer({ dynamicStorageService });
   const { noLocationsComposer } = getNoLocationsComposer();
   const { noMentionsComposer } = getNoMentionsComposer();
   const { noForwardsComposer } = getNoForwardsComposer();

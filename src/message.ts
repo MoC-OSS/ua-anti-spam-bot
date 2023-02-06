@@ -650,15 +650,14 @@ export const getTensorTestResult = ({ chance, isSpam }: TensorTestResultProperti
  * Russian warn/delete messages
  * */
 
-export const warnRussianMessages = [
-  "Українська мова об'єднує. Російська - вбиває.",
-  'Твоя русофобія недостатня, переходь на українську мову.',
-];
+export interface DeleteRussianMessageProperties extends DeleteMessageAtomProperties {
+  message: string;
+}
 
-export const getWarnRussianMessage = () => `🇺🇦 ${getRandomItem(warnRussianMessages)}`;
+export const getWarnRussianMessage = (message: string) => `🇷🇺 ➡️ 🇺🇦 ${message}`;
 
-export const getDeleteRussianMessage = ({ writeUsername, userId }: DeleteMessageAtomProperties) => `
+export const getDeleteRussianMessage = ({ writeUsername, userId, message }: DeleteRussianMessageProperties) => `
 ${getDeleteUserAtomMessage({ writeUsername, userId })}
 
-${getWarnRussianMessage()}
+${getWarnRussianMessage(message)}
 `;

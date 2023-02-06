@@ -1,4 +1,4 @@
-import { mockDataset, mockSwindlersGoogleService } from './_mocks/index.mocks';
+import { mockDataset, mockGoogleService, mockSwindlersGoogleService } from './_mocks/index.mocks';
 import { DynamicStorageService } from './dynamic-storage.service';
 
 /**
@@ -7,7 +7,7 @@ import { DynamicStorageService } from './dynamic-storage.service';
 let dynamicStorageService: DynamicStorageService;
 describe('DynamicStorageService', () => {
   beforeAll(() => {
-    dynamicStorageService = new DynamicStorageService(mockSwindlersGoogleService, mockDataset);
+    dynamicStorageService = new DynamicStorageService(mockSwindlersGoogleService, mockGoogleService, mockDataset);
   });
 
   it('should init with mock dataset', () => {
@@ -17,7 +17,7 @@ describe('DynamicStorageService', () => {
   });
 
   it('should fetch dataset', async () => {
-    await dynamicStorageService.updateSwindlers();
+    await dynamicStorageService.updateStorage();
 
     expect(dynamicStorageService.swindlerMessages).toHaveLength(1);
     expect(dynamicStorageService.swindlerBots).toEqual(['@Diia_move_bot']);
@@ -29,6 +29,6 @@ describe('DynamicStorageService', () => {
       expect(true).toBeTruthy();
     });
 
-    await dynamicStorageService.updateSwindlers();
+    await dynamicStorageService.updateStorage();
   });
 });
