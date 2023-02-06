@@ -11,7 +11,7 @@ import {
   onlyNotAdmin,
   onlyWhenBotAdmin,
   parseCards,
-  parseIsRussianMiddleware,
+  parseIsRussian,
   parseLocations,
   parseMentions,
   parseText,
@@ -105,8 +105,8 @@ export const getMessagesComposer = ({
   registerOptionalSettingModule('enableDeleteMentions', parseMentions, noMentionsComposer);
   registerOptionalSettingModule('enableDeleteCards', parseCards, noCardsComposer);
   registerOptionalSettingModule('enableDeleteForwards', noForwardsComposer);
-  registerOptionalSettingModule('enableDeleteRussian', parseIsRussianMiddleware, noRussianComposer);
-  registerOptionalSettingModule('enableWarnRussian', parseIsRussianMiddleware, warnRussianComposer);
+  registerOptionalSettingModule('enableDeleteRussian', parseIsRussian, noRussianComposer);
+  registerOptionalSettingModule('enableWarnRussian', parseIsRussian, warnRussianComposer);
   // TODO optimize this module
   registerDefaultSettingModule('disableStrategicInfo', strategicComposer);
 

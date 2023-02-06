@@ -78,4 +78,23 @@ export class OutgoingRequests<M extends RealApiMethodKeys = RealApiMethodKeys> {
   getThreeLast<A extends M, B extends M, C extends M>() {
     return this.requests.slice(-3) as Partial<[Request<A>, Request<B>, Request<C>]>;
   }
+
+  /**
+   * Returns all typed requests
+   * */
+  /* eslint-disable prettier/prettier */
+  getAll<A extends M>(): Partial<[Request<A>]>;
+
+  getAll<A extends M, B extends M>(): Partial<[Request<A>, Request<B>]>;
+
+  getAll<A extends M, B extends M, C extends M>(): Partial<[Request<A>, Request<B>, Request<C>]>;
+
+  getAll<A extends M, B extends M, C extends M, D extends M>(): Partial<[Request<A>, Request<B>, Request<C>, Request<D>]>;
+
+  getAll<A extends M, B extends M, C extends M, D extends M, E extends M>(): Partial<[Request<A>, Request<B>, Request<C>, Request<D>, Request<E>]>;
+  /* eslint-enable prettier/prettier */
+
+  getAll() {
+    return this.requests as Partial<Request[]>;
+  }
 }

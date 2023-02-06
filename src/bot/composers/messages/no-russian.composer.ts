@@ -22,10 +22,12 @@ export const getNoRussianComposer = ({ dynamicStorageService }: NoRussianCompose
     if (isFeatureEnabled && isRussianIncluded) {
       await context.deleteMessage();
 
-      const { writeUsername, userId } = getUserData(context);
-      await context.replyWithSelfDestructedHTML(
-        getDeleteRussianMessage({ writeUsername, userId, message: getRandomItem(dynamicStorageService.ukrainianLanguageResponses) }),
-      );
+      if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
+        const { writeUsername, userId } = getUserData(context);
+        await context.replyWithSelfDestructedHTML(
+          getDeleteRussianMessage({ writeUsername, userId, message: getRandomItem(dynamicStorageService.ukrainianLanguageResponses) }),
+        );
+      }
     }
 
     return next();
