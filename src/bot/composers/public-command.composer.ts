@@ -1,6 +1,7 @@
 import type { Menu } from '@grammyjs/menu';
 import { Composer } from 'grammy';
 
+import { creatorId } from '../../creator';
 import { featureNoAdminMessage, settingsAvailableMessage } from '../../message';
 import type { GrammyContext, GrammyMenuContext, State } from '../../types';
 import { HelpCommand, SettingsCommand, StartCommand } from '../commands';
@@ -31,7 +32,7 @@ export const getPublicCommandsComposer = ({ startTime, states, rootMenu }: Publi
     deleteMessageMiddleware(featureNoAdminMessage),
     onlyAdmin,
     nestedMiddleware((context, next) => {
-      if (context.chat?.type !== 'private') {
+      if (context.chat?.type !== 'private' || context.chat.id === creatorId) {
         return next();
       }
     }, settingsMiddleware.sendSettingsMenu()),
