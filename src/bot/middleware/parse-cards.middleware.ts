@@ -9,11 +9,7 @@ import { cardsService } from '../../services';
  * */
 export function parseCards(context: GrammyContext, next: NextFunction) {
   if (context.state.text && !context.state.cards) {
-    const cards = cardsService.parseCards(context.state.text);
-
-    if (cards) {
-      context.state.cards = cards;
-    }
+    context.state.cards = cardsService.parseCards(context.state.text);
   }
 
   return next();
