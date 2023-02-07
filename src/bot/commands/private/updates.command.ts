@@ -1,10 +1,9 @@
 import { Menu } from '@grammyjs/menu';
-import Bottleneck from 'bottleneck';
 
 import { cancelMessageSending, confirmationMessage, getSuccessfulMessage, getUpdateMessage, getUpdatesMessage } from '../../../message';
 import { redisService } from '../../../services';
+import { queueService } from '../../../services/queue.service';
 import type { ChatSession, GrammyContext, GrammyMenuContext } from '../../../types';
-import { handleError } from '../../../utils';
 
 export class UpdatesCommand {
   private menu: Menu<GrammyMenuContext> | undefined;
@@ -62,10 +61,11 @@ export class UpdatesCommand {
       if (payload === 'approve') {
         const sessions = await redisService.getChatSessions();
         const superGroupSessions = sessions.filter((session) => session.data.chatType === 'supergroup' && !session.data.botRemoved);
-        const privateGroupSessions = sessions.filter((session) => session.data.chatType === 'private' && !session.data.botRemoved);
+        // const privateGroupSessions = sessions.filter((session) => session.data.chatType === 'private' && !session.data.botRemoved);
+        const privateGroupSessions = sessions.filter((session) => session.data.chatType === 'group' && !session.data.botRemoved);
 
-        await this.bulkSending(context, superGroupSessions, 'supergroup');
-        await this.bulkSending(context, privateGroupSessions, 'private');
+        this.bulkSending(context, superGroupSessions, 'supergroup');
+        this.bulkSending(context, privateGroupSessions, 'private');
       } else {
         await context.reply(cancelMessageSending);
       }
@@ -76,50 +76,25 @@ export class UpdatesCommand {
    * @param {GrammyContext} context
    * @param {ChatSession[]} sessions
    * @param {string} type
-   *
-   * @returns {Promise<void>}
    * */
   bulkSending(context: GrammyContext, sessions: ChatSession[], type: string) {
-    return new Promise<void>((resolve) => {
-      const limiter = new Bottleneck({
-        maxConcurrent: 1,
-        minTime: 2000,
-      });
+    const updatesMessage = context.session.updatesText;
+    const updatesMessageEntities = context.session.textEntities;
 
-      const updatesMessage = context.session.updatesText;
-      const updatesMessageEntities = context.session.textEntities;
+    const totalCount = sessions.length;
+    const chunkSize = Math.ceil(totalCount / 10);
 
-      const totalCount = sessions.length;
-      const chunkSize = Math.ceil(totalCount / 10);
-      let finishedCount = 0;
-      let successCount = 0;
+    let sentCount = 0;
 
-      sessions.forEach((chartSession) => {
-        limiter
-          .schedule(() =>
-            context.api
-              .sendMessage(chartSession.id, updatesMessage || '', { entities: updatesMessageEntities ?? undefined })
-              .then(() => {
-                successCount += 1;
-              })
-              .catch(handleError)
-              .finally(() => {
-                finishedCount += 1;
-              }),
-          )
-          .catch(handleError);
-      });
-
-      limiter.on('done', () => {
-        if (finishedCount % chunkSize === 0) {
-          context.reply(getUpdateMessage({ totalCount, successCount, finishedCount, type })).catch(handleError);
-        }
-      });
-
-      limiter.on('empty', () => {
-        context.reply(getSuccessfulMessage({ totalCount, successCount })).catch(handleError);
-        resolve();
-      });
+    sessions.forEach((chartSession) => {
+      queueService.sendMessage(chartSession.id, updatesMessage || '', { entities: updatesMessageEntities ?? undefined });
+      sentCount += 1;
+      if (sentCount % chunkSize === 0) {
+        queueService.sendMessage(context.from?.id.toString() || '', getUpdateMessage({ totalCount, sentCount, type }));
+      }
+      if (sentCount === totalCount) {
+        queueService.sendMessage(context.from?.id.toString() || '', getSuccessfulMessage({ totalCount, sentCount }));
+      }
     });
   }
 }

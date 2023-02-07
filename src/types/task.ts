@@ -1,6 +1,11 @@
+import type { MessageEntity } from 'typegram/message';
+
 export interface SendMessagePayload {
   chat_id: string | number;
   text: string;
+  other?: {
+    entities: MessageEntity[] | undefined;
+  };
 }
 
 export interface DeleteMessagePayload {

@@ -1,5 +1,6 @@
 import type { ConsumeMessage } from 'amqplib';
 import Bottleneck from 'bottleneck';
+import type { MessageEntity } from 'typegram/message';
 
 import { rabbitMQClient } from '../rabbitmq/rabbitmq';
 import type { GrammyBot } from '../types';
@@ -9,7 +10,7 @@ import { generateRandomString } from './_mocks';
 
 const LIMITER_OPTS = {
   maxConcurrent: 1,
-  minTime: 10_000,
+  minTime: 30_000,
 };
 
 export class QueueService {
@@ -42,12 +43,13 @@ export class QueueService {
     sendTasks.forEach((task) => rabbitMQClient.produce(JSON.stringify(task), 0));
   }
 
-  public sendMessage(chatId: string, text: string) {
+  public sendMessage(chatId: string, text: string, other?: { entities: MessageEntity[] | undefined }) {
     const payload: Task = {
       method: 'sendMessage',
       payload: {
         chat_id: chatId,
         text,
+        other,
       },
     };
     rabbitMQClient.produce(JSON.stringify(payload), 0);
@@ -79,7 +81,6 @@ export class QueueService {
 
   private worker(message: ConsumeMessage): Promise<unknown> {
     const task = JSON.parse(message.content.toString()) as Task;
-    console.info('Task to handle:', task.method);
     switch (task.method) {
       case 'sendMessage': {
         // eslint-disable-next-line camelcase

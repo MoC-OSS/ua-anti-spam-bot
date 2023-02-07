@@ -48,6 +48,7 @@ services:
       - '6379:6379'
 
   rabbitmq:
+    hostname: 'dev-rabbitmq'
     image: "rabbitmq:3.11-management-alpine"
     container_name: "rabbitmq"
     ports:
