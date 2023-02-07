@@ -11,6 +11,7 @@ import {
   onlyNotAdmin,
   onlyWhenBotAdmin,
   parseCards,
+  parseEntities,
   parseIsRussian,
   parseLocations,
   parseMentions,
@@ -61,7 +62,7 @@ export const getMessagesComposer = ({
     // Filter updates if there are no text
     .filter((context) => onlyWithTextFilter(context))
     // Handle performance start
-    .use(performanceStartMiddleware);
+    .use(performanceStartMiddleware, parseEntities);
 
   /**
    * Registers a message handler module with correct filter to not make extra checks
