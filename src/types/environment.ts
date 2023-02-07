@@ -17,7 +17,7 @@ export interface ServerEnvironmentConfig {
 export interface MiscellaneousEnvironmentConfig {
   ENV: 'local' | 'develop' | 'production';
   UNIT_TESTING?: boolean;
-  TEST_TENSOR: boolean;
+  TEST_TENSOR: boolean; // deprecated
   TENSOR_RANK: number;
   REDIS_URL: string;
   ONLY_WORK_IN_COMMENTS: boolean; // deprecated
