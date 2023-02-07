@@ -2,7 +2,6 @@ import escapeHTML from 'escape-html';
 import type { Bot, NextFunction } from 'grammy';
 import { InputFile } from 'grammy';
 
-import Keyv = require('keyv');
 import { environmentConfig } from '../../config';
 import { logsChat, privateTrainingChat } from '../../creator';
 import { getCannotDeleteMessage, getDebugMessage, getDeleteMessage } from '../../message'; // spamDeleteMessage
@@ -10,19 +9,18 @@ import { redisService } from '../../services';
 import type { GrammyContext, GrammyMiddleware } from '../../types';
 import { compareDatesWithOffset, getUserData, handleError, telegramUtil } from '../../utils';
 import type { MessageHandler } from '../message.handler';
-import { getMessageReputation } from '../spam.handlers';
+import { isFilteredByRules } from '../spam.handlers';
 
 // const slavaWords = ['слава україні', 'слава украине', 'слава зсу'];
 
 export class OnTextListener {
   /**
    * @param {Bot} bot
-   * @param {Keyv} keyv
    * @param {Date} startTime
    * @param {MessageHandler} messageHandler
    */
 
-  constructor(private bot: Bot<GrammyContext>, private keyv: Keyv, private startTime: Date, private messageHandler: MessageHandler) {}
+  constructor(private bot: Bot<GrammyContext>, private startTime: Date, private messageHandler: MessageHandler) {}
 
   /**
    * Handles every received message
@@ -58,14 +56,14 @@ export class OnTextListener {
         return next();
       }
 
-      const rep = await getMessageReputation(context, this.keyv, this.messageHandler);
+      const rep = await isFilteredByRules(context, this.messageHandler);
 
-      if (rep.byRules.dataset) {
+      if (rep.dataset) {
         // TODO define the same types
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        context.state.dataset = rep.byRules.dataset;
-        const { deleteRank, tensor } = rep.byRules.dataset;
+        context.state.dataset = rep.dataset;
+        const { deleteRank, tensor } = rep.dataset;
         const startRank = (await redisService.getTrainingStartRank()) || 0.6;
 
         if (tensor && tensor > startRank && tensor < deleteRank) {
@@ -73,7 +71,7 @@ export class OnTextListener {
         }
       }
 
-      if (rep.byRules?.rule) {
+      if (rep?.rule) {
         try {
           const trainingChatWhitelist = await redisService.getTrainingChatWhitelist();
           const { writeUsername, userId } = getUserData(context);
@@ -81,7 +79,7 @@ export class OnTextListener {
           let debugMessage = '';
 
           if (environmentConfig.DEBUG) {
-            debugMessage = getDebugMessage({ message, byRules: rep.byRules, startTime: this.startTime });
+            debugMessage = getDebugMessage({ message, byRules: rep, startTime: this.startTime });
           }
 
           if (trainingChatWhitelist && Array.isArray(trainingChatWhitelist) && trainingChatWhitelist.includes(String(context.chat.id))) {
@@ -98,7 +96,7 @@ export class OnTextListener {
                     userId,
                     wordMessage: '',
                     debugMessage,
-                    withLocation: rep.byRules.dataset.location,
+                    withLocation: rep.dataset.location,
                   }),
                 );
               }
@@ -149,21 +147,6 @@ export class OnTextListener {
           console.error('Cannot delete the message. Reason:', error);
         }
       }
-
-      /*
-      if (rep.reputation <= 0 || (rep.userRep <= 0 && !environmentConfig.DISABLE_USER_REP)) {
-        try {
-          await ctx
-            .deleteMessage()
-
-            .then(() => {
-              ctx.reply(spamDeleteMessage);
-            });
-        } catch (e) {
-          console.error('Cannot delete the message. Reason:', e);
-        }
-      }
-      */
 
       return next();
     };

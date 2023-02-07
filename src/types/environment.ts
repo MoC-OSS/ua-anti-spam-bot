@@ -42,21 +42,6 @@ export interface PostgresEnvironmentConfig {
   PGPORT: string;
 }
 
-export interface SpamReputationEnvironmentConfig {
-  DISABLE_USER_REP: boolean;
-  START_REPUTATION: number;
-  CHANNEL_START_REPUTATION: number;
-  EMOJI_REPUTATION: number;
-  FORMATTINGS_REPUTATION: number;
-  URLS_REPUTATION: number;
-  NEW_MESSAGE_REPUTATION: number;
-  START_MSG_REPUTATION: number;
-  FORMATTINGS_MSG_REPUTATION: number;
-  EMOJI_MSG_REPUTATION: number;
-  URLS_MSG_REPUTATION: number;
-  CHANNEL_MSG_REPUTATION: number;
-}
-
 export interface GoogleEnvironmentConfig {
   GOOGLE_CREDITS: string;
   GOOGLE_SPREADSHEET_ID: string;
@@ -76,6 +61,5 @@ export type EnvironmentConfig = GrammyEnvironmentConfig &
   MiscellaneousEnvironmentConfig &
   UserbotEnvironmentConfig &
   PostgresEnvironmentConfig &
-  SpamReputationEnvironmentConfig &
   GoogleEnvironmentConfig &
   AwsEnvironmentConfig;
