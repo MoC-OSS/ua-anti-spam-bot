@@ -48,10 +48,6 @@ export class OnTextListener {
         return next();
       }
 
-      if (environmentConfig.ONLY_WORK_IN_COMMENTS && !telegramUtil.isInComments(context)) {
-        return next();
-      }
-
       if (context.session?.isCurrentUserAdmin && !environmentConfig.DEBUG) {
         return next();
       }

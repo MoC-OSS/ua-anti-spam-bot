@@ -2,7 +2,6 @@ export interface GrammyEnvironmentConfig {
   BOT_TOKEN: string;
   CHAT_WHITELIST?: number[] | null; // deprecated
   CREATOR_ID?: string | null;
-  ONLY_WORK_IN_COMMENTS: boolean; // deprecated
   USERS_WHITELIST: string;
 }
 
@@ -20,7 +19,6 @@ export interface MiscellaneousEnvironmentConfig {
   TEST_TENSOR: boolean; // deprecated
   TENSOR_RANK: number;
   REDIS_URL: string;
-  ONLY_WORK_IN_COMMENTS: boolean; // deprecated
   DEBUG: boolean;
   DEBUG_MIDDLEWARE: boolean;
   ALARM_KEY: string;
