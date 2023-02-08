@@ -1,6 +1,5 @@
 export interface GrammyEnvironmentConfig {
   BOT_TOKEN: string;
-  CHAT_WHITELIST?: number[] | null; // deprecated
   CREATOR_ID?: string | null;
   USERS_WHITELIST: string;
 }
