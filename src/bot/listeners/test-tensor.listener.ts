@@ -3,6 +3,7 @@ import { Menu } from '@grammyjs/menu';
 import type { Transformer } from 'grammy';
 
 import { environmentConfig } from '../../config';
+import { GOOGLE_SHEETS_NAMES } from '../../const';
 import { creatorId, trainingChat } from '../../creator';
 import { getTensorTestResult } from '../../message';
 import { googleService, redisService } from '../../services';
@@ -80,8 +81,8 @@ export class TestTensorListener {
 
     const writeInGoogleSheetFunction = () => {
       const sheetId = environmentConfig.GOOGLE_SPREADSHEET_ID;
-      const sheetPositiveName = environmentConfig.GOOGLE_POSITIVE_SHEET_NAME;
-      const sheetNegativeName = environmentConfig.GOOGLE_NEGATIVE_SHEET_NAME;
+      const sheetPositiveName = GOOGLE_SHEETS_NAMES.STRATEGIC_POSITIVE;
+      const sheetNegativeName = GOOGLE_SHEETS_NAMES.STRATEGIC_NEGATIVE;
       switch (state) {
         case 'negatives': {
           return googleService.appendToSheet(sheetId, sheetNegativeName, word);

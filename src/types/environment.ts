@@ -42,9 +42,6 @@ export interface PostgresEnvironmentConfig {
 export interface GoogleEnvironmentConfig {
   GOOGLE_CREDITS: string;
   GOOGLE_SPREADSHEET_ID: string;
-  GOOGLE_POSITIVE_SHEET_NAME: string;
-  GOOGLE_NEGATIVE_SHEET_NAME: string;
-  GOOGLE_SWINDLERS_SHEET_NAME: string;
 }
 
 export interface AwsEnvironmentConfig {
