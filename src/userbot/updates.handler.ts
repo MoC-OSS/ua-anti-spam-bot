@@ -175,7 +175,9 @@ export class UpdatesHandler {
     clearMessageText = clearMessageText.replace(mentionRegexp, ' ');
     clearMessageText = clearMessageText.replace(urlRegexp, ' ');
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     deleteFromMessage.forEach((deleteWord) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       clearMessageText = clearMessageText.replace(deleteWord, ' ');
     });
 
@@ -189,8 +191,8 @@ export class UpdatesHandler {
 
       if (telegramLinks.length > 0) {
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        await forEachSeries(telegramLinks, async (mention) => {
-          if (!deleteFromMessage.includes(mention) && !sentMentionsFromStart.includes(mention)) {
+        await forEachSeries(telegramLinks as never, async (mention: never) => {
+          if (!deleteFromMessage?.includes(mention) && !sentMentionsFromStart.includes(mention)) {
             sentMentionsFromStart.push(mention);
             deleteFromMessage.push(mention);
 
