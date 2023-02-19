@@ -43,13 +43,17 @@ export interface DefaultChatSettings {
   disableDeleteMessage?: boolean;
   disableSwindlerMessage?: boolean;
   disableDeleteServiceMessage?: boolean;
+  disableNsfwFilter?: boolean;
 }
 
 export interface OptionalChatSettings {
   enableDeleteCards?: boolean;
   enableDeleteUrls?: boolean;
+  enableDeleteLocations?: boolean;
   enableDeleteMentions?: boolean;
   enableDeleteForwards?: boolean;
+  enableDeleteRussian?: boolean;
+  enableWarnRussian?: boolean;
 }
 
 export type BooleanChatSettings = DefaultChatSettings & OptionalChatSettings;

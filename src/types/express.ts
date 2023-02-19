@@ -1,3 +1,5 @@
+import type { DatasetKeys } from '../../dataset/dataset';
+
 import type { SwindlersResult, SwindlerTensorResult } from './swindlers';
 
 /**
@@ -11,7 +13,7 @@ export interface ProcessResponseBody {
 
 export interface ProcessRequestBody {
   message: string;
-  datasetPath: string;
+  datasetPath: DatasetKeys;
   strict: boolean;
 }
 
@@ -40,4 +42,23 @@ export interface SwindlerResponseBody {
 
 export interface SwindlerRequestBody {
   message: string;
+}
+
+/**
+ * Parse video
+ * */
+export interface ParseVideoSuccessResponseBody {
+  screenshots: ReturnType<Buffer['toJSON']>[];
+  time: number;
+  expressStartTime: string;
+}
+
+export interface ParseVideoErrorResponseBody {
+  error: string;
+}
+
+export type ParseVideoResponseBody = ParseVideoSuccessResponseBody | ParseVideoErrorResponseBody;
+
+export interface ParseVideoRequestBody {
+  duration?: string;
 }

@@ -4,8 +4,11 @@ import {
   blockWhenAlarm,
   deleteCardsButton,
   deleteForwardedButton,
+  deleteLocationsButton,
   deleteMentionButton,
   deleteMessageButton,
+  deleteNsfwButton,
+  deleteRussianLanguageButton,
   deleteServiceMessageButton,
   deleteSwindlerButton,
   deleteTensorButton,
@@ -16,6 +19,7 @@ import {
   selectYourState,
   settingsSubmitMessage,
   turnOffChatWhileAlarmButton,
+  warnRussianLanguageButton,
 } from '../../../message';
 import { alarmChatService } from '../../../services';
 import type { BooleanChatSettings, GrammyContext, GrammyMiddleware, State } from '../../../types';
@@ -82,16 +86,22 @@ export class SettingsCommand {
 
     this.settingsMenuObj = new MiddlewareMenu('settingsMenu', { autoAnswer: false })
       .addGlobalMiddlewares(onlyAdmin)
-      .text(deleteTensorButton, (context) => toggleSetting(context, 'disableStrategicInfo'))
       .text(deleteMessageButton, (context) => toggleSetting(context, 'disableDeleteMessage'))
+      .text(deleteTensorButton, (context) => toggleSetting(context, 'disableStrategicInfo'))
       .text(deleteSwindlerButton, (context) => toggleSetting(context, 'disableSwindlerMessage'))
+      .row()
+      .text(deleteNsfwButton, (context) => toggleSetting(context, 'disableNsfwFilter'))
       .row()
       .text(deleteCardsButton, (context) => toggleSetting(context, 'enableDeleteCards'))
       .text(deleteUrlsButton, (context) => toggleSetting(context, 'enableDeleteUrls'))
+      .text(deleteLocationsButton, (context) => toggleSetting(context, 'enableDeleteLocations'))
       .row()
       .text(deleteMentionButton, (context) => toggleSetting(context, 'enableDeleteMentions'))
       .text(deleteForwardedButton, (context) => toggleSetting(context, 'enableDeleteForwards'))
       .text(deleteServiceMessageButton, (context) => toggleSetting(context, 'disableDeleteServiceMessage'))
+      .row()
+      .text(warnRussianLanguageButton, (context) => toggleSetting(context, 'enableWarnRussian'))
+      .text(deleteRussianLanguageButton, (context) => toggleSetting(context, 'enableDeleteRussian'))
       .row()
       .text(airAlarmAlertButton, isAlarmNow, async (context) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment

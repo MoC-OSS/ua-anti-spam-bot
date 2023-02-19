@@ -1,9 +1,9 @@
 import { Bot } from 'grammy';
-import type { PartialDeep } from 'type-fest';
 
 import type { OutgoingRequests } from '../../../testing';
 import { LeftMemberMockUpdate, NewMemberMockUpdate, prepareBotForTesting } from '../../../testing';
-import type { ChatSessionData, GrammyContext } from '../../../types';
+import { mockChatSession } from '../../../testing-main';
+import type { GrammyContext } from '../../../types';
 import { stateMiddleware } from '../../middleware';
 import { getJoinLeaveComposer } from '../join-leave.composer';
 
@@ -11,20 +11,16 @@ let outgoingRequests: OutgoingRequests;
 const { joinLeaveComposer } = getJoinLeaveComposer();
 const bot = new Bot<GrammyContext>('mock');
 
-const chatSession = {
+const { chatSession, mockChatSessionMiddleware } = mockChatSession({
   chatSettings: {
     disableDeleteServiceMessage: false,
   },
-} as PartialDeep<ChatSessionData> as ChatSessionData;
+});
 
 describe('joinLeaveComposer main', () => {
   beforeAll(async () => {
     bot.use(stateMiddleware);
-    // Register mock chat session
-    bot.use((context, next) => {
-      context.chatSession = chatSession;
-      return next();
-    });
+    bot.use(mockChatSessionMiddleware);
 
     bot.use(joinLeaveComposer);
 
@@ -36,28 +32,58 @@ describe('joinLeaveComposer main', () => {
       chatSession.chatSettings.disableDeleteServiceMessage = false;
     });
 
-    beforeEach(() => {
-      outgoingRequests.clear();
+    describe('bot is admin', () => {
+      beforeAll(() => {
+        chatSession.isBotAdmin = true;
+      });
+
+      beforeEach(() => {
+        outgoingRequests.clear();
+      });
+
+      it('should delete new user service message', async () => {
+        const update = new NewMemberMockUpdate().build();
+        await bot.handleUpdate(update);
+
+        const apiCall = outgoingRequests.getLast<'deleteMessage'>();
+
+        expect(outgoingRequests.length).toEqual(1);
+        expect(apiCall?.method).toEqual('deleteMessage');
+      });
+
+      it('should delete left user service message', async () => {
+        const update = new LeftMemberMockUpdate().build();
+        await bot.handleUpdate(update);
+
+        const apiCall = outgoingRequests.getLast<'deleteMessage'>();
+
+        expect(outgoingRequests.length).toEqual(1);
+        expect(apiCall?.method).toEqual('deleteMessage');
+      });
     });
 
-    it('should delete new user service message', async () => {
-      const update = new NewMemberMockUpdate().build();
-      await bot.handleUpdate(update);
+    describe('bot is not admin', () => {
+      beforeAll(() => {
+        chatSession.isBotAdmin = false;
+      });
 
-      const apiCall = outgoingRequests.getLast<'deleteMessage'>();
+      beforeEach(() => {
+        outgoingRequests.clear();
+      });
 
-      expect(outgoingRequests.length).toEqual(1);
-      expect(apiCall?.method).toEqual('deleteMessage');
-    });
+      it('should not delete new user service message', async () => {
+        const update = new NewMemberMockUpdate().build();
+        await bot.handleUpdate(update);
 
-    it('should delete left user service message', async () => {
-      const update = new LeftMemberMockUpdate().build();
-      await bot.handleUpdate(update);
+        expect(outgoingRequests.length).toEqual(0);
+      });
 
-      const apiCall = outgoingRequests.getLast<'deleteMessage'>();
+      it('should not delete left user service message', async () => {
+        const update = new LeftMemberMockUpdate().build();
+        await bot.handleUpdate(update);
 
-      expect(outgoingRequests.length).toEqual(1);
-      expect(apiCall?.method).toEqual('deleteMessage');
+        expect(outgoingRequests.length).toEqual(0);
+      });
     });
   });
 

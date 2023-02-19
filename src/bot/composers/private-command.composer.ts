@@ -11,6 +11,8 @@ import type { CommandSetter } from '../commands';
 import { SessionCommand, StatisticsCommand, SwindlersUpdateCommand } from '../commands';
 import { onlyWhitelistedFilter } from '../filters';
 
+import { getGetVideoNoteConverterComposer } from './video-note-converter.composer';
+
 export interface PrivateCommandsComposerProperties {
   bot: Bot<GrammyContext>;
   commandSetter: CommandSetter;
@@ -25,6 +27,8 @@ export interface PrivateCommandsComposerProperties {
 export const getPrivateCommandsComposer = ({ bot, commandSetter, dynamicStorageService, startTime }: PrivateCommandsComposerProperties) => {
   const privateCommandsComposer = new Composer<GrammyContext>();
 
+  const { videoNoteConverterComposer } = getGetVideoNoteConverterComposer();
+
   const composer = privateCommandsComposer.filter((context) => onlyWhitelistedFilter(context));
 
   const commandMap = new Map<string, string>();
@@ -36,6 +40,7 @@ export const getPrivateCommandsComposer = ({ bot, commandSetter, dynamicStorageS
   commandMap.set('restart_alarm', 'Restart alarm logic');
   commandMap.set('disable_alarm', 'Disable alarm logic at all');
   commandMap.set('restart', 'Kills the bot process and deletes it');
+  commandMap.set('video_note', 'Send a video with /video_note caption to convert it into video note');
 
   const commandString = [...commandMap.entries()].map(([name, description]) => `/${name} - ${description}`).join('\n');
 
@@ -73,6 +78,8 @@ export const getPrivateCommandsComposer = ({ bot, commandSetter, dynamicStorageS
     // eslint-disable-next-line unicorn/no-process-exit
     process.exit(0);
   });
+
+  composer.use(videoNoteConverterComposer);
 
   composer.command('add_task', () => {
     queueService.addTestTask();

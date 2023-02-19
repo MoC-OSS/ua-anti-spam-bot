@@ -2,7 +2,7 @@ import { Composer } from 'grammy';
 
 import { messageQuery } from '../../const';
 import type { DefaultChatSettings, GrammyContext, GrammyMiddleware, OptionalChatSettings } from '../../types';
-import { onlyActiveDefaultSettingFilter, onlyActiveOptionalSettingFilter, onlyNotDeletedFilter } from '../filters';
+import { onlyActiveDefaultSettingFilter, onlyActiveOptionalSettingFilter, onlyNotDeletedFilter, onlyWithTextFilter } from '../filters';
 import {
   botActiveMiddleware,
   botRedisActive,
@@ -10,8 +10,10 @@ import {
   logContextMiddleware,
   onlyNotAdmin,
   onlyWhenBotAdmin,
-  onlyWithText,
   parseCards,
+  parseEntities,
+  parseIsRussian,
+  parseLocations,
   parseMentions,
   parseText,
   parseUrls,
@@ -22,10 +24,13 @@ import {
 export interface MessagesComposerProperties {
   noCardsComposer: Composer<GrammyContext>;
   noUrlsComposer: Composer<GrammyContext>;
+  noLocationsComposer: Composer<GrammyContext>;
   noMentionsComposer: Composer<GrammyContext>;
   noForwardsComposer: Composer<GrammyContext>;
   swindlersComposer: Composer<GrammyContext>;
   strategicComposer: Composer<GrammyContext>;
+  noRussianComposer: Composer<GrammyContext>;
+  warnRussianComposer: Composer<GrammyContext>;
 }
 
 /**
@@ -34,10 +39,13 @@ export interface MessagesComposerProperties {
 export const getMessagesComposer = ({
   noCardsComposer,
   noUrlsComposer,
+  noLocationsComposer,
   noMentionsComposer,
   noForwardsComposer,
   strategicComposer,
   swindlersComposer,
+  noRussianComposer,
+  warnRussianComposer,
 }: MessagesComposerProperties) => {
   const messagesComposer = new Composer<GrammyContext>();
 
@@ -50,13 +58,17 @@ export const getMessagesComposer = ({
     // Filtering messages
     .use(botRedisActive, ignoreOld(60), botActiveMiddleware, onlyNotAdmin, onlyWhenBotAdmin)
     // Parse message text and add it to state
-    .use(parseText, onlyWithText)
+    .use(parseText)
+    // Filter updates if there are no text
+    .filter((context) => onlyWithTextFilter(context))
     // Handle performance start
-    .use(performanceStartMiddleware);
+    .use(performanceStartMiddleware, parseEntities);
 
   /**
    * Registers a message handler module with correct filter to not make extra checks
    * */
+  // TODO remove this
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const registerModule = (...middlewares: (Composer<GrammyContext> | GrammyMiddleware)[]) => {
     readyMessagesComposer.filter((context) => onlyNotDeletedFilter(context)).use(...middlewares);
   };
@@ -90,10 +102,14 @@ export const getMessagesComposer = ({
    * */
   registerDefaultSettingModule('disableSwindlerMessage', swindlersComposer);
   registerOptionalSettingModule('enableDeleteUrls', parseUrls, noUrlsComposer);
+  registerOptionalSettingModule('enableDeleteLocations', parseLocations, noLocationsComposer);
   registerOptionalSettingModule('enableDeleteMentions', parseMentions, noMentionsComposer);
   registerOptionalSettingModule('enableDeleteCards', parseCards, noCardsComposer);
   registerOptionalSettingModule('enableDeleteForwards', noForwardsComposer);
-  registerModule(strategicComposer);
+  registerOptionalSettingModule('enableDeleteRussian', parseIsRussian, noRussianComposer);
+  registerOptionalSettingModule('enableWarnRussian', parseIsRussian, warnRussianComposer);
+  // TODO optimize this module
+  registerDefaultSettingModule('disableStrategicInfo', strategicComposer);
 
   readyMessagesComposer.use(performanceEndMiddleware);
   readyMessagesComposer.use(logContextMiddleware);

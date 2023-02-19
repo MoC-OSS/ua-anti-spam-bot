@@ -3,6 +3,8 @@ import type { ChatMemberOwner } from 'typegram';
 
 import type { GrammyContext } from '../types';
 
+import { getUserData, telegramUtil } from './index';
+
 export class TelegramUtil {
   /**
    * @param {GrammyContext} context
@@ -56,5 +58,22 @@ export class TelegramUtil {
       return `@${user.username}`;
     }
     return `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}`;
+  }
+
+  /**
+   * Get logs message parts for save a message into logs
+   * */
+  async getLogsSaveMessageParts(context: GrammyContext) {
+    const { writeUsername, userId } = getUserData(context);
+    const chatInfo = await context.getChat();
+
+    const chatTitle = telegramUtil.getChatTitle(context.chat);
+    const inviteLink = telegramUtil.getInviteLink(chatInfo);
+
+    const chatMention = chatTitle && (inviteLink ? `<a href="${inviteLink}">${chatTitle}</a>` : `<code>${chatTitle}</code>`);
+
+    const userMention = userId ? `<a href="tg://user?id=${userId}">${writeUsername}</a>` : writeUsername;
+
+    return { userMention, chatMention };
   }
 }

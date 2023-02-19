@@ -3,9 +3,10 @@ import { GrammyError, HttpError, InputFile } from 'grammy';
 
 import { environmentConfig } from '../config';
 import { logsChat } from '../creator';
-import type { GrammyContext, RealGrammyContext } from '../types';
+import type { GrammyContext } from '../types';
 
 import { emptyFunction } from './empty-functions.util';
+import { optimizeWriteContextUtil } from './optimize-write-context.util';
 
 /**
  * Handle single error with expected reason
@@ -29,12 +30,7 @@ export const globalErrorHandler: ErrorHandler<GrammyContext> = (botError) => {
     console.error('**** GLOBAL-HANDLED ERROR **** Unknown error:', error);
   }
 
-  const writeContext = JSON.parse(JSON.stringify(ctx)) as RealGrammyContext;
-  // noinspection JSConstantReassignment
-  delete writeContext.tg;
-  delete writeContext.telegram;
-  // noinspection JSConstantReassignment
-  delete writeContext.api;
+  const writeContext = optimizeWriteContextUtil(ctx);
 
   console.error('*** GLOBAL-HANDLED ERROR CTX ***', writeContext);
 
@@ -60,12 +56,7 @@ export const wrapperErrorHandler =
     } catch (error) {
       handleError(error);
 
-      const writeContext = JSON.parse(JSON.stringify(context)) as RealGrammyContext;
-      // noinspection JSConstantReassignment
-      delete writeContext.tg;
-      delete writeContext.telegram;
-      // noinspection JSConstantReassignment
-      delete writeContext.api;
+      const writeContext = optimizeWriteContextUtil(context);
 
       console.error('*** FUNCTION-HANDLED ERROR CTX ***', writeContext);
 

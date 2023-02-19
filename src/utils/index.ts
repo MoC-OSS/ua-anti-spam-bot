@@ -1,30 +1,30 @@
 import fs from 'node:fs';
 
 import { environmentConfig } from '../config';
-import type { ChatSettings, GrammyContext, RealGrammyContext } from '../types';
+import type { ChatSettings, GrammyContext } from '../types';
 
 import { MessageUtil } from './message.util';
+import { optimizeWriteContextUtil } from './optimize-write-context.util';
 import { TelegramUtil } from './telegram.util';
 
 export const messageUtil = new MessageUtil();
 export const telegramUtil = new TelegramUtil();
 
+export * from './deep-copy.util';
 export * from './empty-functions.util';
 export * from './error-handler';
+export * from './optimize-write-context.util';
 export * from './remove-duplicates.util';
 export * from './reveal-hidden-urls.util';
+export * from './video.util';
 
 /**
  * @param {GrammyContext} context
  * */
 export function logContext(context: GrammyContext) {
   if (environmentConfig.DEBUG) {
-    /**
-     * @type {GrammyContext}
-     * */
-    const writeContext = JSON.parse(JSON.stringify(context)) as RealGrammyContext;
-    // noinspection JSConstantReassignment
-    delete writeContext.tg;
+    const writeContext = optimizeWriteContextUtil(context);
+
     console.info(JSON.stringify(writeContext, null, 2));
 
     fs.writeFileSync('./last-ctx.json', `${JSON.stringify(writeContext, null, 2)}\n`);
@@ -129,6 +129,7 @@ export function getEnabledFeaturesString(chatSettings: ChatSettings): string {
    * */
   featureNameMap.set('enableDeleteUrls', '🔗 посиланнями');
   featureNameMap.set('enableDeleteMentions', '⚓ згадками');
+  featureNameMap.set('enableDeleteLocations', '📍 локаціями');
   featureNameMap.set('enableDeleteForwards', '↩️ пересиланнями');
   featureNameMap.set('enableDeleteCards', '💳 картками');
 

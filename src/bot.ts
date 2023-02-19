@@ -15,6 +15,7 @@ import {
   getHealthCheckComposer,
   getJoinLeaveComposer,
   getMessagesComposer,
+  getPhotoComposer,
   getPrivateCommandsComposer,
   getPublicCommandsComposer,
   getSaveToSheetComposer,
@@ -22,26 +23,30 @@ import {
 } from './bot/composers';
 import {
   getNoCardsComposer,
+  getNoForwardsComposer,
   getNoMentionsComposer,
+  getNoRussianComposer,
   getNoUrlsComposer,
+  getNsfwFilterComposer,
   getStrategicComposer,
   getSwindlersComposer,
+  getWarnRussianComposer,
 } from './bot/composers/messages';
-import { getNoForwardsComposer } from './bot/composers/messages/no-forward.composer';
-import { isNotChannel } from './bot/filters';
+import { isNotChannel, onlyCreatorChatFilter } from './bot/filters';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
-import { DeleteSwindlersMiddleware, GlobalMiddleware, stateMiddleware } from './bot/middleware';
+import { DeleteSwindlersMiddleware, GlobalMiddleware, logCreatorState, stateMiddleware } from './bot/middleware';
+import { chainFilters, selfDestructedReply } from './bot/plugins';
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
 import { deleteMessageTransformer } from './bot/transformers';
+import { videoUtil } from './utils/video.util';
 import { rabbitMQClient } from './rabbitmq/rabbitmq';
 import { queueService } from './services/queue.service';
 import { environmentConfig } from './config';
 import { logsChat, swindlerBotsChatId, swindlerHelpChatId, swindlerMessageChatId } from './creator';
 import { redisClient } from './db';
 import { alarmChatService, alarmService, initSwindlersContainer, redisService, S3Service, swindlersGoogleService } from './services';
-import { initTensor } from './tensor';
-import { logUpdates } from './testing';
+import { initNsfwTensor, initTensor } from './tensor';
 import type { GrammyContext, GrammyMenuContext } from './types';
 import { emptyFunction, globalErrorHandler, wrapperErrorHandler } from './utils';
 
@@ -73,11 +78,11 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const tensorService = await initTensor(s3Service);
   tensorService.setSpamThreshold(await redisService.getBotTensorPercent());
 
+  const nsfwTensorService = await initNsfwTensor();
+
   const { dynamicStorageService, swindlersDetectService } = await initSwindlersContainer();
 
   const startTime = new Date();
-
-  logUpdates<GrammyContext>(bot);
 
   if (!environmentConfig.UNIT_TESTING) {
     await alarmChatService.init(bot.api);
@@ -159,9 +164,14 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     trainingThrottler,
   });
 
+  rootMenu.register(tensorListener.initMenu(trainingThrottler));
+
   // Message composers
   const { noCardsComposer } = getNoCardsComposer();
   const { noUrlsComposer } = getNoUrlsComposer();
+  const { noRussianComposer } = getNoRussianComposer({ dynamicStorageService });
+  const { warnRussianComposer } = getWarnRussianComposer({ dynamicStorageService });
+  const { noLocationsComposer } = getNoLocationsComposer();
   const { noMentionsComposer } = getNoMentionsComposer();
   const { noForwardsComposer } = getNoForwardsComposer();
   const { swindlersComposer } = getSwindlersComposer({ deleteSwindlersMiddleware });
@@ -170,13 +180,19 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const { messagesComposer } = getMessagesComposer({
     noCardsComposer,
     noUrlsComposer,
+    noLocationsComposer,
     noMentionsComposer,
     noForwardsComposer,
+    noRussianComposer,
+    warnRussianComposer,
     swindlersComposer,
     strategicComposer,
   });
 
-  rootMenu.register(tensorListener.initMenu(trainingThrottler));
+  // Photo composers
+  const { nsfwFilterComposer } = getNsfwFilterComposer({ nsfwTensorService });
+
+  const { photosComposer } = getPhotoComposer({ nsfwFilterComposer });
 
   // Not channel handlers
   const notChannelRegisterComposer = new Composer<GrammyContext>();
@@ -199,6 +215,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   );
 
   bot.use(hydrateReply);
+  bot.use(selfDestructedReply());
 
   bot.use(stateMiddleware);
 
@@ -239,10 +256,18 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
 
   // Main message composer
   notChannelComposer.use(messagesComposer);
+  notChannelComposer.use(photosComposer);
+
+  // Log state for creator only chat
+  notChannelComposer
+    .filter((context) => chainFilters(onlyCreatorChatFilter, !!context.state.isDeleted || !!context.state.photo)(context))
+    .use(logCreatorState);
 
   bot.use(notChannelRegisterComposer);
 
   bot.catch(globalErrorHandler);
+
+  videoUtil.init(bot.api);
 
   return bot;
 };

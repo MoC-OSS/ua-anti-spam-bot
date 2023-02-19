@@ -1,3 +1,8 @@
+import type { User } from '@grammyjs/types/manage';
+import type { Animation, MessageEntity, PhotoSize, Sticker, Video, VideoNote } from '@grammyjs/types/message';
+
+import type { ImageType } from './image';
+import type { NsfwTensorResult } from './nsfw';
 import type { SwindlerTensorResult } from './swindlers';
 
 export interface StateFlavor<S> {
@@ -18,14 +23,79 @@ export interface StateFlavor<S> {
   set state(session: S | null | undefined);
 }
 
+export interface StateImagePhoto {
+  meta: PhotoSize;
+  type: ImageType.PHOTO;
+  file: Buffer;
+  caption?: string;
+}
+
+export interface StateImageSticker {
+  meta: Sticker;
+  type: ImageType.STICKER;
+  file: Buffer;
+}
+
+export interface StateImageParsedFrames {
+  fileFrames?: Buffer[];
+}
+
+export interface StateImageVideoSticker extends StateImageParsedFrames {
+  meta: Sticker;
+  type: ImageType.VIDEO_STICKER;
+  thumb: PhotoSize;
+  file: Buffer;
+}
+
+export interface StateImageVideo extends StateImageParsedFrames {
+  meta: PhotoSize;
+  type: ImageType.VIDEO;
+  file: Buffer;
+  video: Video;
+  caption?: string;
+}
+
+export interface StateImageVideoNote extends StateImageParsedFrames {
+  meta: PhotoSize;
+  type: ImageType.VIDEO_NOTE;
+  file: Buffer | null;
+  videoNote: VideoNote;
+}
+
+export interface StateImageAnimation extends StateImageParsedFrames {
+  meta: PhotoSize;
+  type: ImageType.ANIMATION;
+  file: Buffer | null; // sometimes animations doesn't have preview?
+  animation: Animation;
+  caption?: string;
+}
+
+export type StateImage =
+  | StateImagePhoto
+  | StateImageSticker
+  | StateImageVideoSticker
+  | StateImageVideo
+  | StateImageVideoNote
+  | StateImageAnimation;
+
+export type StateVideoFormats = Video | Sticker | Animation | VideoNote;
+
+export type StateEntity =
+  | (Exclude<MessageEntity, MessageEntity.TextMentionMessageEntity> & { value: string })
+  | (MessageEntity.TextMentionMessageEntity & { value: User });
+
 /**
  * It requires only-with-text.middleware.js
  * */
 interface OnlyWithTextMiddlewareState {
   text?: string;
+  photo?: StateImage | null;
   urls?: string[];
   mentions?: string[];
   cards?: string[];
+  locations?: string[];
+  isRussian?: boolean;
+  entities?: StateEntity[];
 }
 
 interface PerformanceMiddlewareState {
@@ -47,6 +117,10 @@ export type State = OnlyWithTextMiddlewareState &
       isSpam: boolean;
       rate: number;
       reason: string;
+    };
+    nsfwResult?: {
+      tensor: NsfwTensorResult;
+      reason: 'preview' | 'frame';
     };
     dataset?: SwindlerTensorResult;
   };

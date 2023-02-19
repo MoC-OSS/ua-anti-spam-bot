@@ -1,6 +1,5 @@
 import type { RawApi } from 'grammy';
 import { Bot } from 'grammy';
-import type { PartialDeep } from 'type-fest';
 
 // eslint-disable-next-line jest/no-mocks-import
 import { realSwindlerMessage } from '../__mocks__/bot.mocks';
@@ -8,30 +7,32 @@ import { getBot } from '../bot';
 import { environmentConfig } from '../config';
 import { logsChat } from '../creator';
 import type { OutgoingRequests } from '../testing';
-import { MessagePrivateMockUpdate, prepareBotForTesting } from '../testing';
-import type { ChatSessionData, GrammyContext, SessionData } from '../types';
+import { MessagePrivateMockUpdate, MessageSuperGroupMockUpdate, prepareBotForTesting } from '../testing';
+import { mockChatSession, mockSession } from '../testing-main';
+import type { GrammyContext } from '../types';
 
 /**
  * Enable unit testing
  * */
 environmentConfig.UNIT_TESTING = true;
+environmentConfig.DEBUG = false;
 
 let outgoingRequests: OutgoingRequests;
 let bot: Bot<GrammyContext>;
 
-const session = {} as PartialDeep<SessionData> as SessionData;
-const chatSession = {} as PartialDeep<ChatSessionData> as ChatSessionData;
+const { mockSessionMiddleware } = mockSession({});
+const { chatSession, mockChatSessionMiddleware } = mockChatSession({
+  isBotAdmin: true,
+  botRemoved: false,
+});
 
 describe('e2e bot testing', () => {
   beforeAll(async () => {
     const initialBot = new Bot<GrammyContext>(environmentConfig?.BOT_TOKEN);
 
     // Add mock session data
-    initialBot.use((context, next) => {
-      context.session = session;
-      context.chatSession = chatSession;
-      return next();
-    });
+    initialBot.use(mockSessionMiddleware);
+    initialBot.use(mockChatSessionMiddleware);
 
     bot = await getBot(initialBot);
     outgoingRequests = await prepareBotForTesting<GrammyContext>(bot, {
@@ -39,50 +40,148 @@ describe('e2e bot testing', () => {
     });
   }, 15_000);
 
-  beforeEach(() => {
-    outgoingRequests.clear();
+  describe('private flow', () => {
+    describe('check regular message', () => {
+      beforeEach(() => {
+        outgoingRequests.clear();
+      });
+
+      it('should not remove a regular message and have 0 api calls', async () => {
+        const update = new MessagePrivateMockUpdate('regular message').build();
+        await bot.handleUpdate(update);
+
+        expect(outgoingRequests.requests).toHaveLength(0);
+      });
+
+      it('should remove a swindler message and notify for first swindler in several hours', async () => {
+        const update = new MessagePrivateMockUpdate(realSwindlerMessage).build();
+        await bot.handleUpdate(update);
+
+        const [sendLogsMessageRequest, sendSwindlersMessageRequest, deleteRequest] = outgoingRequests.getThreeLast<
+          'sendMessage',
+          'sendMessage',
+          'deleteMessage'
+        >();
+
+        expect(sendLogsMessageRequest?.method).toEqual('sendMessage');
+        expect(sendLogsMessageRequest?.payload.chat_id).toEqual(logsChat);
+        expect(sendSwindlersMessageRequest?.method).toEqual('sendMessage');
+        expect(deleteRequest?.method).toEqual('deleteMessage');
+        expect(outgoingRequests.requests).toHaveLength(4);
+      });
+
+      it('should remove a swindler message and dont notify after already notified', async () => {
+        const update = new MessagePrivateMockUpdate(realSwindlerMessage).build();
+        await bot.handleUpdate(update);
+
+        const [anyRequest, sendLogsMessageRequest, deleteRequest] = outgoingRequests.getThreeLast<
+          keyof RawApi,
+          'sendMessage',
+          'deleteMessage'
+        >();
+
+        expect(anyRequest?.method).not.toEqual('sendMessage');
+        expect(deleteRequest?.method).toEqual('deleteMessage');
+        expect(sendLogsMessageRequest?.method).toEqual('sendMessage');
+        expect(sendLogsMessageRequest?.payload.chat_id).toEqual(logsChat);
+        expect(outgoingRequests.requests).toHaveLength(3);
+      });
+    });
   });
 
-  describe('check regular message', () => {
-    it('should not remove a regular message', async () => {
-      const update = new MessagePrivateMockUpdate('regular message').build();
-      await bot.handleUpdate(update);
+  describe('group or super group flow', () => {
+    describe('check regular message', () => {
+      beforeEach(() => {
+        outgoingRequests.clear();
+      });
 
-      expect(outgoingRequests.requests).toHaveLength(2);
-    });
+      it('should check is bot admin if isAdmin is empty', async () => {
+        chatSession.isBotAdmin = undefined;
 
-    it('should remove a swindler message and notify for first swindler in several hours', async () => {
-      const update = new MessagePrivateMockUpdate(realSwindlerMessage).build();
-      await bot.handleUpdate(update);
+        const update = new MessageSuperGroupMockUpdate('regular message').build();
+        await bot.handleUpdate(update);
 
-      const [sendLogsMessageRequest, sendSwindlersMessageRequest, deleteRequest] = outgoingRequests.getThreeLast<
-        'sendMessage',
-        'sendMessage',
-        'deleteMessage'
-      >();
+        const getChatAdminsRequest = outgoingRequests.getLast<'getChatAdministrators'>();
 
-      expect(sendLogsMessageRequest?.method).toEqual('sendMessage');
-      expect(sendLogsMessageRequest?.payload.chat_id).toEqual(logsChat);
-      expect(sendSwindlersMessageRequest?.method).toEqual('sendMessage');
-      expect(deleteRequest?.method).toEqual('deleteMessage');
-      expect(outgoingRequests.requests).toHaveLength(6);
-    });
+        expect(getChatAdminsRequest?.method).toEqual('getChatAdministrators');
+        expect(outgoingRequests.length).toEqual(1);
+      });
 
-    it('should remove a swindler message and dont notify after already notified', async () => {
-      const update = new MessagePrivateMockUpdate(realSwindlerMessage).build();
-      await bot.handleUpdate(update);
+      describe('bot is admin', () => {
+        beforeAll(() => {
+          chatSession.isBotAdmin = true;
+        });
 
-      const [anyRequest, sendLogsMessageRequest, deleteRequest] = outgoingRequests.getThreeLast<
-        keyof RawApi,
-        'sendMessage',
-        'deleteMessage'
-      >();
+        it('should check current user if its an admin to skip them', async () => {
+          const update = new MessageSuperGroupMockUpdate('regular message').build();
+          await bot.handleUpdate(update);
 
-      expect(anyRequest?.method).not.toEqual('sendMessage');
-      expect(deleteRequest?.method).toEqual('deleteMessage');
-      expect(sendLogsMessageRequest?.method).toEqual('sendMessage');
-      expect(sendLogsMessageRequest?.payload.chat_id).toEqual(logsChat);
-      expect(outgoingRequests.requests).toHaveLength(5);
+          const getChatMemberRequest = outgoingRequests.getFirst<'getChatMember'>();
+
+          expect(getChatMemberRequest?.method).toEqual('getChatMember');
+          expect(getChatMemberRequest?.payload.user_id).toEqual(update.message.from.id);
+        });
+
+        it('should request chat info if no is removed info', async () => {
+          if (chatSession.botRemoved !== undefined) {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            delete chatSession.botRemoved;
+          }
+
+          const update = new MessageSuperGroupMockUpdate('regular message').build();
+          await bot.handleUpdate(update);
+
+          const [getChatRequest, getChatMemberRequest] = outgoingRequests.getTwoLast<'getChat', 'getChatMember'>();
+
+          expect(outgoingRequests.requests).toHaveLength(2);
+          expect(getChatRequest?.method).toEqual('getChat');
+          expect(getChatMemberRequest?.method).toEqual('getChatMember');
+        });
+
+        it('should not remove a super group message', async () => {
+          const update = new MessageSuperGroupMockUpdate('regular message').build();
+          await bot.handleUpdate(update);
+
+          expect(outgoingRequests.requests).toHaveLength(1);
+        });
+
+        it('should remove a swindler message and notify for first swindler in several hours', async () => {
+          chatSession.lastWarningDate = new Date(0);
+          const update = new MessageSuperGroupMockUpdate(realSwindlerMessage).build();
+          await bot.handleUpdate(update);
+
+          const [sendLogsMessageRequest, sendSwindlersMessageRequest, deleteRequest] = outgoingRequests.getThreeLast<
+            'sendMessage',
+            'sendMessage',
+            'deleteMessage'
+          >();
+
+          expect(sendLogsMessageRequest?.method).toEqual('sendMessage');
+          expect(sendLogsMessageRequest?.payload.chat_id).toEqual(logsChat);
+          expect(sendSwindlersMessageRequest?.method).toEqual('sendMessage');
+          expect(deleteRequest?.method).toEqual('deleteMessage');
+          expect(outgoingRequests.requests).toHaveLength(5);
+        });
+
+        it('should remove a swindler message and dont notify after already notified', async () => {
+          chatSession.lastWarningDate = new Date();
+          const update = new MessageSuperGroupMockUpdate(realSwindlerMessage).build();
+          await bot.handleUpdate(update);
+
+          const [anyRequest, sendLogsMessageRequest, deleteRequest] = outgoingRequests.getThreeLast<
+            keyof RawApi,
+            'sendMessage',
+            'deleteMessage'
+          >();
+
+          expect(anyRequest?.method).not.toEqual('sendMessage');
+          expect(deleteRequest?.method).toEqual('deleteMessage');
+          expect(sendLogsMessageRequest?.method).toEqual('sendMessage');
+          expect(sendLogsMessageRequest?.payload.chat_id).toEqual(logsChat);
+          expect(outgoingRequests.requests).toHaveLength(4);
+        });
+      });
     });
   });
 });
