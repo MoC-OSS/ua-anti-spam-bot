@@ -2,6 +2,7 @@
 import stringSimilarity from 'string-similarity';
 
 import { environmentConfig } from '../config';
+import { GOOGLE_SHEETS_NAMES } from '../const';
 import { googleService, redisService, swindlersGoogleService } from '../services';
 
 const limits = {
@@ -18,8 +19,8 @@ export class UserbotStorage {
 
   async init() {
     const cases = Promise.all([
-      googleService.getSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, environmentConfig.GOOGLE_POSITIVE_SHEET_NAME, undefined, true),
-      googleService.getSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, environmentConfig.GOOGLE_NEGATIVE_SHEET_NAME, undefined, true),
+      googleService.getSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, GOOGLE_SHEETS_NAMES.STRATEGIC_POSITIVE, undefined, true),
+      googleService.getSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, GOOGLE_SHEETS_NAMES.STRATEGIC_NEGATIVE, undefined, true),
       swindlersGoogleService.getTrainingPositives(),
       swindlersGoogleService.getTrainingNegatives(),
       redisService.redisClient.getRawValue<string[]>('training:help'),

@@ -3,7 +3,6 @@ import ms from 'ms';
 import type { SetNonNullable } from 'type-fest';
 
 import { loadUserbotDatasetExtras } from '../../dataset/dataset';
-import { environmentConfig } from '../config';
 import { redisClient } from '../db';
 import { initSwindlersContainer } from '../services';
 import { initTensor } from '../tensor';
@@ -46,7 +45,7 @@ auth()
 
     const allChats = await mtProtoClient.messagesGetAllChats();
     const chatPeers: ChatPeers = {
-      trainingChat: mtProtoClient.resolvePeer(allChats.chats, environmentConfig.USERBOT_TRAING_CHAT_NAME),
+      trainingChat: mtProtoClient.resolvePeer(allChats.chats, 'UA Anti Spam Bot - Test'),
       helpChat: mtProtoClient.resolvePeer(allChats.chats, 'UA Anti Spam Bot - Help'),
       swindlersChat: mtProtoClient.resolvePeer(allChats.chats, 'UA Anti Spam Bot - Swindlers'),
       botsChat: mtProtoClient.resolvePeer(allChats.chats, 'UA Anti Spam Bot - Bots'),
