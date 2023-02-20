@@ -7,6 +7,7 @@ import type { GrammyBot } from '../types';
 import type { DeleteMessagePayload, SendMessagePayload, Task } from '../types/task';
 
 import { generateRandomString } from './_mocks';
+import { creatorId } from '../creator';
 
 const LIMITER_OPTS = {
   maxConcurrent: 1,
@@ -36,7 +37,7 @@ export class QueueService {
     const sendTasks = Array.from({ length: 10 }, () => ({
       method: 'sendMessage',
       payload: {
-        chat_id: '-694504354',
+        chat_id: creatorId,
         text: `Test message is: ${generateRandomString(3)}`,
       },
     }));

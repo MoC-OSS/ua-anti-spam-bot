@@ -23,6 +23,7 @@ import {
 import {
   getNoCardsComposer,
   getNoForwardsComposer,
+  getNoLocationsComposer,
   getNoMentionsComposer,
   getNoRussianComposer,
   getNoUrlsComposer,

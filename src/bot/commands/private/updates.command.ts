@@ -61,11 +61,12 @@ export class UpdatesCommand {
       if (payload === 'approve') {
         const sessions = await redisService.getChatSessions();
         const superGroupSessions = sessions.filter((session) => session.data.chatType === 'supergroup' && !session.data.botRemoved);
-        // const privateGroupSessions = sessions.filter((session) => session.data.chatType === 'private' && !session.data.botRemoved);
-        const privateGroupSessions = sessions.filter((session) => session.data.chatType === 'group' && !session.data.botRemoved);
+        const groupSessions = sessions.filter((session) => session.data.chatType === 'group' && !session.data.botRemoved);
+        const privateSessions = sessions.filter((session) => session.data.chatType === 'private' && !session.data.botRemoved);
 
         this.bulkSending(context, superGroupSessions, 'supergroup');
-        this.bulkSending(context, privateGroupSessions, 'private');
+        this.bulkSending(context, groupSessions, 'group');
+        this.bulkSending(context, privateSessions, 'private');
       } else {
         await context.reply(cancelMessageSending);
       }
