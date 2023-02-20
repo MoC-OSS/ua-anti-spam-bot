@@ -41,7 +41,7 @@ export const getNoRussianComposer = ({ dynamicStorageService }: NoRussianCompose
     const isFeatureEnabled = context.chatSession.chatSettings.enableDeleteRussian;
     const russianFeature = context.state.isRussian;
 
-    if (isFeatureEnabled && russianFeature) {
+    if (isFeatureEnabled && russianFeature?.result) {
       await context.deleteMessage();
       await saveRussianMessage(context, russianFeature.percent, context.state.text);
 

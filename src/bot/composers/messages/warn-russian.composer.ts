@@ -41,7 +41,7 @@ export const getWarnRussianComposer = ({ dynamicStorageService }: WarnRussianCom
     const isFeatureEnabled = context.chatSession.chatSettings.enableWarnRussian;
     const russianFeature = context.state.isRussian;
 
-    if (isFeatureEnabled && russianFeature) {
+    if (isFeatureEnabled && russianFeature?.result) {
       await saveRussianMessage(context, russianFeature.percent, context.state.text);
 
       await context.replyWithSelfDestructedHTML(getWarnRussianMessage(getRandomItem(dynamicStorageService.ukrainianLanguageResponses)), {
