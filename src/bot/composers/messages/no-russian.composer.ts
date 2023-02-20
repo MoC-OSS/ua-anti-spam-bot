@@ -1,9 +1,11 @@
+import escapeHTML from 'escape-html';
 import { Composer } from 'grammy';
 
+import { logsChat } from '../../../creator';
 import { getDeleteRussianMessage } from '../../../message';
 import type { DynamicStorageService } from '../../../services';
 import type { GrammyContext } from '../../../types';
-import { getRandomItem, getUserData } from '../../../utils';
+import { getRandomItem, getUserData, telegramUtil } from '../../../utils';
 
 export interface NoRussianComposerProperties {
   dynamicStorageService: DynamicStorageService;
@@ -15,12 +17,33 @@ export interface NoRussianComposerProperties {
 export const getNoRussianComposer = ({ dynamicStorageService }: NoRussianComposerProperties) => {
   const noRussianComposer = new Composer<GrammyContext>();
 
+  /**
+   * @param {GrammyContext} context
+   * @param {number} maxChance
+   * @param {string} [message]
+   * */
+  async function saveRussianMessage(context: GrammyContext, maxChance: number, message?: string) {
+    const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
+    const text = message || context.state?.text || '';
+
+    return context.api.sendMessage(
+      logsChat,
+      `Deleted russian message (${(maxChance * 100).toFixed(2)}%) by user ${userMention}:\n\n${chatMention || userMention}\n${escapeHTML(
+        text,
+      )}`,
+      {
+        parse_mode: 'HTML',
+      },
+    );
+  }
+
   noRussianComposer.use(async (context, next) => {
     const isFeatureEnabled = context.chatSession.chatSettings.enableDeleteRussian;
-    const isRussianIncluded = context.state.isRussian;
+    const russianFeature = context.state.isRussian;
 
-    if (isFeatureEnabled && isRussianIncluded) {
+    if (isFeatureEnabled && russianFeature?.result) {
       await context.deleteMessage();
+      await saveRussianMessage(context, russianFeature.percent, context.state.text);
 
       if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
         const { writeUsername, userId } = getUserData(context);

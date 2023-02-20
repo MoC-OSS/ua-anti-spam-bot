@@ -5,6 +5,7 @@ export * from './environment';
 export * from './express';
 export * from './google';
 export * from './image';
+export * from './language-detection';
 export * from './mtproto';
 export * from './nsfw';
 export * from './session';

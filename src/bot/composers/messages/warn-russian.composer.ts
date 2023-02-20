@@ -1,9 +1,11 @@
+import escapeHTML from 'escape-html';
 import { Composer } from 'grammy';
 
+import { logsChat } from '../../../creator';
 import { getWarnRussianMessage } from '../../../message';
 import type { DynamicStorageService } from '../../../services';
 import type { GrammyContext } from '../../../types';
-import { getRandomItem } from '../../../utils';
+import { getRandomItem, telegramUtil } from '../../../utils';
 
 export interface WarnRussianComposerProperties {
   dynamicStorageService: DynamicStorageService;
@@ -15,11 +17,33 @@ export interface WarnRussianComposerProperties {
 export const getWarnRussianComposer = ({ dynamicStorageService }: WarnRussianComposerProperties) => {
   const warnRussianComposer = new Composer<GrammyContext>();
 
+  /**
+   * @param {GrammyContext} context
+   * @param {number} maxChance
+   * @param {string} [message]
+   * */
+  async function saveRussianMessage(context: GrammyContext, maxChance: number, message?: string) {
+    const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
+    const text = message || context.state?.text || '';
+
+    return context.api.sendMessage(
+      logsChat,
+      `Warn russian message (${(maxChance * 100).toFixed(2)}%) by user ${userMention}:\n\n${chatMention || userMention}\n${escapeHTML(
+        text,
+      )}`,
+      {
+        parse_mode: 'HTML',
+      },
+    );
+  }
+
   warnRussianComposer.use(async (context, next) => {
     const isFeatureEnabled = context.chatSession.chatSettings.enableWarnRussian;
-    const isRussianIncluded = context.state.isRussian;
+    const russianFeature = context.state.isRussian;
 
-    if (isFeatureEnabled && isRussianIncluded) {
+    if (isFeatureEnabled && russianFeature?.result) {
+      await saveRussianMessage(context, russianFeature.percent, context.state.text);
+
       await context.replyWithSelfDestructedHTML(getWarnRussianMessage(getRandomItem(dynamicStorageService.ukrainianLanguageResponses)), {
         reply_to_message_id: context.msg?.message_id,
       });
