@@ -1,4 +1,5 @@
 import { environmentConfig } from '../config';
+import { GOOGLE_SHEETS_NAMES } from '../const';
 
 import type { GoogleService } from './google.service';
 import { googleService as localGoogleService } from './google.service';
@@ -51,12 +52,7 @@ export class SwindlersGoogleService {
    * */
   getSheet<T extends boolean | true | false = true>(range: string, compact: T) {
     const isCompact = compact === undefined ? (true as T) : compact;
-    return this.googleService.getSheet<T>(
-      environmentConfig.GOOGLE_SPREADSHEET_ID,
-      environmentConfig.GOOGLE_SWINDLERS_SHEET_NAME,
-      range,
-      isCompact,
-    );
+    return this.googleService.getSheet<T>(environmentConfig.GOOGLE_SPREADSHEET_ID, GOOGLE_SHEETS_NAMES.SWINDLERS, range, isCompact);
   }
 
   /**
@@ -64,7 +60,7 @@ export class SwindlersGoogleService {
    * @param {string} range - range from {this.RANGES}
    * */
   clearSheet(range: string) {
-    return this.googleService.clearSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, environmentConfig.GOOGLE_SWINDLERS_SHEET_NAME, range);
+    return this.googleService.clearSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, GOOGLE_SHEETS_NAMES.SWINDLERS, range);
   }
 
   /**
@@ -75,12 +71,7 @@ export class SwindlersGoogleService {
    * @returns Promise<any>
    * */
   updateSheet(range: string, values: string[]) {
-    return this.googleService.updateSheet(
-      environmentConfig.GOOGLE_SPREADSHEET_ID,
-      environmentConfig.GOOGLE_SWINDLERS_SHEET_NAME,
-      values,
-      range,
-    );
+    return this.googleService.updateSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, GOOGLE_SHEETS_NAMES.SWINDLERS, values, range);
   }
 
   /**
@@ -91,12 +82,7 @@ export class SwindlersGoogleService {
    * @returns Promise<any>
    * */
   appendToSheet(range: string, value: string) {
-    return this.googleService.appendToSheet(
-      environmentConfig.GOOGLE_SPREADSHEET_ID,
-      environmentConfig.GOOGLE_SWINDLERS_SHEET_NAME,
-      value,
-      range,
-    );
+    return this.googleService.appendToSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, GOOGLE_SHEETS_NAMES.SWINDLERS, value, range);
   }
 
   /**
@@ -107,7 +93,7 @@ export class SwindlersGoogleService {
     await this.clearSheet(range);
     return this.googleService.updateSheet(
       environmentConfig.GOOGLE_SPREADSHEET_ID,
-      environmentConfig.GOOGLE_SWINDLERS_SHEET_NAME,
+      GOOGLE_SHEETS_NAMES.SWINDLERS,
       [...values, value],
       range,
     );

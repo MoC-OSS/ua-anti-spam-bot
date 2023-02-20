@@ -2,11 +2,12 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const { env } = require('typed-dotenv').config();
 // eslint-disable-next-line import/no-extraneous-dependencies
 const stringSimilarity = require('string-similarity');
 
-const { googleService } = require('../src/services/google.service');
+const { googleService } = require('../src/services');
+const { GOOGLE_SHEETS_NAMES } = require('../src/const');
+const { environmentConfig } = require('../src/config');
 
 /**
  * @param {any[]} positives
@@ -39,8 +40,8 @@ function processCases(positives, negatives) {
 // eslint-disable-next-line no-unused-vars
 function processFromGoogle() {
   const cases = Promise.all([
-    googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_POSITIVE_SHEET_NAME),
-    googleService.getSheet(env.GOOGLE_SPREADSHEET_ID, env.GOOGLE_NEGATIVE_SHEET_NAME),
+    googleService.getSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, GOOGLE_SHEETS_NAMES.STRATEGIC_POSITIVE),
+    googleService.getSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, GOOGLE_SHEETS_NAMES.STRATEGIC_NEGATIVE),
   ]);
 
   cases.then(([positives, negatives]) => {
@@ -59,7 +60,7 @@ function processFromGoogle() {
 //   processCases(positivesLocal, negativesLocal);
 // }
 
-// googleService.removeSheetRange(env.GOOGLE_SPREADSHEET_ID, `${env.GOOGLE_POSITIVE_SHEET_NAME}!A8`).then(() => {
+// googleService.removeSheetRange(env.GOOGLE_SPREADSHEET_ID, `${GOOGLE_SHEETS_NAMES.STRATEGIC_POSITIVE}!A8`).then(() => {
 //   console.info('removed!');
 // });
 

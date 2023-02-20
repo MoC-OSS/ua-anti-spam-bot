@@ -1,6 +1,8 @@
-import type { Animation, PhotoSize, Sticker, Video, VideoNote } from '@grammyjs/types/message';
+import type { User } from '@grammyjs/types/manage';
+import type { Animation, MessageEntity, PhotoSize, Sticker, Video, VideoNote } from '@grammyjs/types/message';
 
 import type { ImageType } from './image';
+import type { LanguageDetectionResult } from './language-detection';
 import type { NsfwTensorResult } from './nsfw';
 import type { SwindlerTensorResult } from './swindlers';
 
@@ -79,6 +81,10 @@ export type StateImage =
 
 export type StateVideoFormats = Video | Sticker | Animation | VideoNote;
 
+export type StateEntity =
+  | (Exclude<MessageEntity, MessageEntity.TextMentionMessageEntity> & { value: string })
+  | (MessageEntity.TextMentionMessageEntity & { value: User });
+
 /**
  * It requires only-with-text.middleware.js
  * */
@@ -89,6 +95,8 @@ interface OnlyWithTextMiddlewareState {
   mentions?: string[];
   cards?: string[];
   locations?: string[];
+  isRussian?: LanguageDetectionResult;
+  entities?: StateEntity[];
 }
 
 interface PerformanceMiddlewareState {

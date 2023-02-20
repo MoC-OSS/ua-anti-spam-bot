@@ -52,6 +52,8 @@ export interface OptionalChatSettings {
   enableDeleteLocations?: boolean;
   enableDeleteMentions?: boolean;
   enableDeleteForwards?: boolean;
+  enableDeleteRussian?: boolean;
+  enableWarnRussian?: boolean;
 }
 
 export type BooleanChatSettings = DefaultChatSettings & OptionalChatSettings;

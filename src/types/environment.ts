@@ -1,8 +1,6 @@
 export interface GrammyEnvironmentConfig {
   BOT_TOKEN: string;
-  CHAT_WHITELIST?: number[] | null; // deprecated
   CREATOR_ID?: string | null;
-  ONLY_WORK_IN_COMMENTS: boolean; // deprecated
   USERS_WHITELIST: string;
 }
 
@@ -17,10 +15,9 @@ export interface ServerEnvironmentConfig {
 export interface MiscellaneousEnvironmentConfig {
   ENV: 'local' | 'develop' | 'production';
   UNIT_TESTING?: boolean;
-  TEST_TENSOR: boolean;
+  TEST_TENSOR: boolean; // deprecated
   TENSOR_RANK: number;
   REDIS_URL: string;
-  ONLY_WORK_IN_COMMENTS: boolean; // deprecated
   DEBUG: boolean;
   DEBUG_MIDDLEWARE: boolean;
   ALARM_KEY: string;
@@ -42,27 +39,9 @@ export interface PostgresEnvironmentConfig {
   PGPORT: string;
 }
 
-export interface SpamReputationEnvironmentConfig {
-  DISABLE_USER_REP: boolean;
-  START_REPUTATION: number;
-  CHANNEL_START_REPUTATION: number;
-  EMOJI_REPUTATION: number;
-  FORMATTINGS_REPUTATION: number;
-  URLS_REPUTATION: number;
-  NEW_MESSAGE_REPUTATION: number;
-  START_MSG_REPUTATION: number;
-  FORMATTINGS_MSG_REPUTATION: number;
-  EMOJI_MSG_REPUTATION: number;
-  URLS_MSG_REPUTATION: number;
-  CHANNEL_MSG_REPUTATION: number;
-}
-
 export interface GoogleEnvironmentConfig {
   GOOGLE_CREDITS: string;
   GOOGLE_SPREADSHEET_ID: string;
-  GOOGLE_POSITIVE_SHEET_NAME: string;
-  GOOGLE_NEGATIVE_SHEET_NAME: string;
-  GOOGLE_SWINDLERS_SHEET_NAME: string;
 }
 
 export interface AwsEnvironmentConfig {
@@ -76,6 +55,5 @@ export type EnvironmentConfig = GrammyEnvironmentConfig &
   MiscellaneousEnvironmentConfig &
   UserbotEnvironmentConfig &
   PostgresEnvironmentConfig &
-  SpamReputationEnvironmentConfig &
   GoogleEnvironmentConfig &
   AwsEnvironmentConfig;

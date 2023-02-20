@@ -14,14 +14,6 @@ export class TelegramUtil {
     return context.from?.first_name === 'Channel' && context.from?.username === 'Channel_Bot';
   }
 
-  /**
-   * @param {GrammyContext} context
-   * @returns {boolean}
-   * */
-  isInComments(context: GrammyContext): boolean {
-    return context.msg?.reply_to_message?.from?.id === 777_000;
-  }
-
   getChatTitle(chat?: Chat): string {
     return (chat && 'title' in chat && chat.title) || '$title';
   }

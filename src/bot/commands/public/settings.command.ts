@@ -8,6 +8,7 @@ import {
   deleteMentionButton,
   deleteMessageButton,
   deleteNsfwButton,
+  deleteRussianLanguageButton,
   deleteServiceMessageButton,
   deleteSwindlerButton,
   deleteTensorButton,
@@ -18,6 +19,7 @@ import {
   selectYourState,
   settingsSubmitMessage,
   turnOffChatWhileAlarmButton,
+  warnRussianLanguageButton,
 } from '../../../message';
 import { alarmChatService } from '../../../services';
 import type { BooleanChatSettings, GrammyContext, GrammyMiddleware, State } from '../../../types';
@@ -97,6 +99,9 @@ export class SettingsCommand {
       .text(deleteMentionButton, (context) => toggleSetting(context, 'enableDeleteMentions'))
       .text(deleteForwardedButton, (context) => toggleSetting(context, 'enableDeleteForwards'))
       .text(deleteServiceMessageButton, (context) => toggleSetting(context, 'disableDeleteServiceMessage'))
+      .row()
+      .text(warnRussianLanguageButton, (context) => toggleSetting(context, 'enableWarnRussian'))
+      .text(deleteRussianLanguageButton, (context) => toggleSetting(context, 'enableDeleteRussian'))
       .row()
       .text(airAlarmAlertButton, isAlarmNow, async (context) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment

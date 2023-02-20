@@ -5,7 +5,6 @@ import { sequentialize } from '@grammyjs/runner';
 import { apiThrottler } from '@grammyjs/transformer-throttler';
 import type { Bot } from 'grammy';
 import { Composer } from 'grammy';
-import Keyv from 'keyv';
 import moment from 'moment-timezone';
 
 import { CommandSetter } from './bot/commands';
@@ -26,10 +25,12 @@ import {
   getNoForwardsComposer,
   getNoLocationsComposer,
   getNoMentionsComposer,
+  getNoRussianComposer,
   getNoUrlsComposer,
   getNsfwFilterComposer,
   getStrategicComposer,
   getSwindlersComposer,
+  getWarnRussianComposer,
 } from './bot/composers/messages';
 import { isNotChannel, onlyCreatorChatFilter } from './bot/filters';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
@@ -49,9 +50,6 @@ import { emptyFunction, globalErrorHandler, wrapperErrorHandler } from './utils'
 
 moment.tz.setDefault('Europe/Kiev');
 moment.locale('uk');
-
-const keyv = new Keyv('sqlite://db.sqlite');
-keyv.on('error', (error_) => console.error('Connection Error', error_));
 
 const rootMenu = new Menu<GrammyMenuContext>('root');
 
@@ -114,7 +112,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
 
   const messageHandler = new MessageHandler(tensorService);
 
-  const onTextListener = new OnTextListener(bot, keyv, startTime, messageHandler);
+  const onTextListener = new OnTextListener(bot, startTime, messageHandler);
   const tensorListener = new TestTensorListener(tensorService);
 
   // Generic composers
@@ -165,6 +163,8 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   // Message composers
   const { noCardsComposer } = getNoCardsComposer();
   const { noUrlsComposer } = getNoUrlsComposer();
+  const { noRussianComposer } = getNoRussianComposer({ dynamicStorageService });
+  const { warnRussianComposer } = getWarnRussianComposer({ dynamicStorageService });
   const { noLocationsComposer } = getNoLocationsComposer();
   const { noMentionsComposer } = getNoMentionsComposer();
   const { noForwardsComposer } = getNoForwardsComposer();
@@ -177,6 +177,8 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     noLocationsComposer,
     noMentionsComposer,
     noForwardsComposer,
+    noRussianComposer,
+    warnRussianComposer,
     swindlersComposer,
     strategicComposer,
   });
