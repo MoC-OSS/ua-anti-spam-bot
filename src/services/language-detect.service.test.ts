@@ -6,14 +6,14 @@ describe('LanguageDetectService', () => {
       const text = 'съешь еще этих французских булок';
       const result = await languageDetectService.isRussian(text);
 
-      expect(result).toEqual(true);
+      expect(result.result).toEqual(true);
     });
 
     it('should return false if ukrainian', async () => {
       const text = 'Інтернет були взірцем для наслідування для всіх, хто хоче говорити українською правильно';
       const result = await languageDetectService.isRussian(text);
 
-      expect(result).toEqual(false);
+      expect(result.result).toEqual(false);
     });
   });
 

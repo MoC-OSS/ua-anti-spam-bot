@@ -33,7 +33,11 @@ describe('noRussianComposer', () => {
 
     bot.use(noRussianComposer);
 
-    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot);
+    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot, {
+      getChat: {
+        invite_link: '',
+      },
+    });
   }, 5000);
 
   describe('enabled feature', () => {
@@ -49,10 +53,17 @@ describe('noRussianComposer', () => {
       const update = new MessageSuperGroupMockUpdate('съешь еще этих французских булок').build();
       await bot.handleUpdate(update);
 
-      const [deleteMessageRequest, sendMessageRequest] = outgoingRequests.getAll<'deleteMessage', 'sendMessage'>();
+      const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest, sendMessageRequest] = outgoingRequests.getAll<
+        'deleteMessage',
+        'getChat',
+        'sendMessage',
+        'sendMessage'
+      >();
 
-      expect(outgoingRequests.length).toEqual(2);
+      expect(outgoingRequests.length).toEqual(4);
       expect(deleteMessageRequest?.method).toEqual('deleteMessage');
+      expect(getChatRequest?.method).toEqual('getChat');
+      expect(sendLogsMessageRequest?.method).toEqual('sendMessage');
       expect(sendMessageRequest?.method).toEqual('sendMessage');
     });
 
@@ -61,10 +72,16 @@ describe('noRussianComposer', () => {
       const update = new MessageSuperGroupMockUpdate('съешь еще этих французских булок').build();
       await bot.handleUpdate(update);
 
-      const deleteMessageRequest = outgoingRequests.getLast<'deleteMessage'>();
+      const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest] = outgoingRequests.getAll<
+        'deleteMessage',
+        'getChat',
+        'sendMessage'
+      >();
 
-      expect(outgoingRequests.length).toEqual(1);
+      expect(outgoingRequests.length).toEqual(3);
       expect(deleteMessageRequest?.method).toEqual('deleteMessage');
+      expect(getChatRequest?.method).toEqual('getChat');
+      expect(sendLogsMessageRequest?.method).toEqual('sendMessage');
     });
 
     it('should not delete if not russian', async () => {

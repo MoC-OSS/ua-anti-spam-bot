@@ -33,7 +33,11 @@ describe('warnRussianComposer', () => {
 
     bot.use(warnRussianComposer);
 
-    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot);
+    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot, {
+      getChat: {
+        invite_link: '',
+      },
+    });
   }, 5000);
 
   describe('enabled feature', () => {
@@ -49,9 +53,15 @@ describe('warnRussianComposer', () => {
       const update = new MessageSuperGroupMockUpdate('съешь еще этих французских булок').build();
       await bot.handleUpdate(update);
 
-      const [sendMessageRequest] = outgoingRequests.getAll<'sendMessage'>();
+      const [getChatRequest, sendLogsMessageRequest, sendMessageRequest] = outgoingRequests.getAll<
+        'getChat',
+        'sendMessage',
+        'sendMessage'
+      >();
 
-      expect(outgoingRequests.length).toEqual(1);
+      expect(outgoingRequests.length).toEqual(3);
+      expect(getChatRequest?.method).toEqual('getChat');
+      expect(sendLogsMessageRequest?.method).toEqual('sendMessage');
       expect(sendMessageRequest?.method).toEqual('sendMessage');
     });
 
@@ -60,9 +70,15 @@ describe('warnRussianComposer', () => {
       const update = new MessageSuperGroupMockUpdate('съешь еще этих французских булок').build();
       await bot.handleUpdate(update);
 
-      const [sendMessageRequest] = outgoingRequests.getAll<'sendMessage'>();
+      const [getChatRequest, sendLogsMessageRequest, sendMessageRequest] = outgoingRequests.getAll<
+        'getChat',
+        'sendMessage',
+        'sendMessage'
+      >();
 
-      expect(outgoingRequests.length).toEqual(1);
+      expect(outgoingRequests.length).toEqual(3);
+      expect(getChatRequest?.method).toEqual('getChat');
+      expect(sendLogsMessageRequest?.method).toEqual('sendMessage');
       expect(sendMessageRequest?.method).toEqual('sendMessage');
     });
 
