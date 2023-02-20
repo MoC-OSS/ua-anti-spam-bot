@@ -23,7 +23,6 @@ import {
 import {
   getNoCardsComposer,
   getNoForwardsComposer,
-  getNoLocationsComposer,
   getNoMentionsComposer,
   getNoRussianComposer,
   getNoUrlsComposer,
@@ -40,6 +39,8 @@ import { chainFilters, selfDestructedReply } from './bot/plugins';
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
 import { deleteMessageTransformer } from './bot/transformers';
 import { videoUtil } from './utils/video.util';
+import { rabbitMQClient } from './rabbitmq/rabbitmq';
+import { queueService } from './services/queue.service';
 import { environmentConfig } from './config';
 import { logsChat, swindlerBotsChatId, swindlerHelpChatId, swindlerMessageChatId } from './creator';
 import { redisClient } from './db';
@@ -66,8 +67,9 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 export const getBot = async (bot: Bot<GrammyContext>) => {
   if (!environmentConfig.UNIT_TESTING) {
     await redisClient.client.connect().then(() => console.info('Redis client successfully started'));
+    await rabbitMQClient.connect().then(() => console.info('RabbitMQ client successfully started'));
   }
-
+  await queueService.init(bot.api);
   const s3Service = new S3Service();
   const tensorService = await initTensor(s3Service);
   tensorService.setSpamThreshold(await redisService.getBotTensorPercent());

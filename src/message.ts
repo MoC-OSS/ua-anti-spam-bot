@@ -587,20 +587,18 @@ export const getUpdatesMessage = () =>
 
 export interface UpdateMessageProperties {
   totalCount: number;
-  finishedCount: number;
-  successCount: number;
+  sentCount: number;
   type: string; // TODO add type
 }
 
-export const getUpdateMessage = ({ totalCount, finishedCount, successCount, type }: UpdateMessageProperties) =>
+export const getUpdateMessage = ({ totalCount, sentCount, type }: UpdateMessageProperties) =>
   `
-Було опрацьовано ${finishedCount}/${totalCount} повідомлень для ${type}...
-Успішно ${successCount} повідомлень.
+Було опрацьовано ${sentCount}/${totalCount} повідомлень для ${type}...
 `.trim();
 
 export interface SuccessfulMessageProperties {
   totalCount: number;
-  successCount: number;
+  sentCount: number;
 }
 
 /**
@@ -608,10 +606,10 @@ export interface SuccessfulMessageProperties {
  * Message that bots sends before confirmation
  *
  * */
-export const getSuccessfulMessage = ({ totalCount, successCount }: SuccessfulMessageProperties) =>
+export const getSuccessfulMessage = ({ totalCount, sentCount }: SuccessfulMessageProperties) =>
   `
 Розсилка завершена!
-Було відправлено ${successCount}/${totalCount} повідомлень.
+Було відправлено ${sentCount}/${totalCount} повідомлень.
 `.trim();
 
 export interface BotJoinMessageProperties {

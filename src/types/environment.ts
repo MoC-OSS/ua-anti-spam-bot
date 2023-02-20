@@ -50,10 +50,16 @@ export interface AwsEnvironmentConfig {
   AWS_REGION: string;
 }
 
+export interface RabbitMQEnvironmentConfig {
+  RABBITMQ_USER: string;
+  RABBITMQ_PASS: string;
+}
+
 export type EnvironmentConfig = GrammyEnvironmentConfig &
   ServerEnvironmentConfig &
   MiscellaneousEnvironmentConfig &
   UserbotEnvironmentConfig &
   PostgresEnvironmentConfig &
   GoogleEnvironmentConfig &
-  AwsEnvironmentConfig;
+  AwsEnvironmentConfig &
+  RabbitMQEnvironmentConfig;

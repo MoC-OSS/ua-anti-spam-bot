@@ -4,6 +4,7 @@ import { Composer } from 'grammy';
 import type { DynamicStorageService } from '../../services';
 import { ALARM_EVENT_KEY, alarmService } from '../../services';
 import { getAlarmMock } from '../../services/_mocks';
+import { queueService } from '../../services/queue.service';
 import type { TensorService } from '../../tensor';
 import type { GrammyContext } from '../../types';
 import type { CommandSetter } from '../commands';
@@ -80,6 +81,9 @@ export const getPrivateCommandsComposer = ({ bot, commandSetter, dynamicStorageS
 
   composer.use(videoNoteConverterComposer);
 
+  composer.command('add_task', () => {
+    queueService.addTestTask();
+  });
   /* Menu Register */
 
   return { privateCommandsComposer };
