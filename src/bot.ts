@@ -39,9 +39,9 @@ import { DeleteSwindlersMiddleware, GlobalMiddleware, logCreatorState, stateMidd
 import { chainFilters, selfDestructedReply } from './bot/plugins';
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
 import { deleteMessageTransformer } from './bot/transformers';
-import { videoUtil } from './utils/video.util';
 import { rabbitMQClient } from './rabbitmq/rabbitmq';
 import { queueService } from './services/queue.service';
+import { videoUtil } from './utils/video.util';
 import { environmentConfig } from './config';
 import { logsChat, swindlerBotsChatId, swindlerHelpChatId, swindlerMessageChatId } from './creator';
 import { redisClient } from './db';
