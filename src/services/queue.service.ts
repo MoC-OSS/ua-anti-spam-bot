@@ -2,12 +2,12 @@ import type { ConsumeMessage } from 'amqplib';
 import Bottleneck from 'bottleneck';
 import type { MessageEntity } from 'typegram/message';
 
+import { creatorId } from '../creator';
 import { rabbitMQClient } from '../rabbitmq/rabbitmq';
 import type { GrammyBot } from '../types';
 import type { DeleteMessagePayload, SendMessagePayload, Task } from '../types/task';
 
 import { generateRandomString } from './_mocks';
-import { creatorId } from '../creator';
 
 const LIMITER_OPTS = {
   maxConcurrent: 1,

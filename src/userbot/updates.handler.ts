@@ -12,7 +12,7 @@ import type { SwindlersTensorService, TensorService } from '../tensor';
 import type { ProtoUpdate, SwindlerType } from '../types';
 
 // eslint-disable-next-line import/no-unresolved
-import deleteFromMessage from './from-entities.json';
+import _deleteFromMessage from './from-entities.json';
 import type { ChatPeers } from './index';
 import type { MtProtoClient } from './mt-proto-client';
 import type { UserbotStorage } from './storage.handler';
@@ -28,6 +28,8 @@ const SWINDLER_SETTINGS = {
 
 export class UpdatesHandler {
   swindlersTopUsed: string[];
+
+  deleteFromMessage: string[] = _deleteFromMessage as string[];
 
   /**
    * @param {MtProtoClient} mtProtoClient
@@ -176,7 +178,7 @@ export class UpdatesHandler {
     clearMessageText = clearMessageText.replace(urlRegexp, ' ');
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    deleteFromMessage.forEach((deleteWord) => {
+    this.deleteFromMessage.forEach((deleteWord) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       clearMessageText = clearMessageText.replace(deleteWord, ' ');
     });
@@ -191,12 +193,12 @@ export class UpdatesHandler {
 
       if (telegramLinks.length > 0) {
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        await forEachSeries(telegramLinks as never, async (mention: never) => {
-          if (!deleteFromMessage?.includes(mention) && !sentMentionsFromStart.includes(mention)) {
+        await forEachSeries(telegramLinks, async (mention) => {
+          if (!this.deleteFromMessage?.includes(mention) && !sentMentionsFromStart.includes(mention)) {
             sentMentionsFromStart.push(mention);
-            deleteFromMessage.push(mention);
+            this.deleteFromMessage.push(mention);
 
-            fs.writeFileSync(path.join(__dirname, './from-entities.json'), JSON.stringify(deleteFromMessage, null, 2));
+            fs.writeFileSync(path.join(__dirname, './from-entities.json'), JSON.stringify(this.deleteFromMessage, null, 2));
 
             await this.mtProtoClient.sendSelfMessage(mention);
           }
