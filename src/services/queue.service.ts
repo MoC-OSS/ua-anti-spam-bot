@@ -30,18 +30,12 @@ export class QueueService {
     await rabbitMQClient.consume(this.handleMessage.bind(this));
   }
 
-  /**
-   * For testing. Added 10 mock tasks to queue
-   * */
-  public addTestTask() {
-    const sendTasks = Array.from({ length: 10 }, () => ({
-      method: 'sendMessage',
-      payload: {
-        chat_id: creatorId,
-        text: `Test message is: ${generateRandomString(3)}`,
-      },
-    }));
-    sendTasks.forEach((task) => rabbitMQClient.produce(JSON.stringify(task), 0));
+  private addDelayedTask(payload: string) {
+
+  }
+
+  private addDelayedTask(payload: string) {
+
   }
 
   public sendMessage(chatId: string, text: string, other?: { entities: MessageEntity[] | undefined }) {
@@ -97,6 +91,20 @@ export class QueueService {
         throw new Error('Unknown API method');
       }
     }
+  }
+
+  /**
+   * For testing. Added 10 mock tasks to queue
+   * */
+  public addTestTask() {
+    const sendTasks = Array.from({ length: 10 }, () => ({
+      method: 'sendMessage',
+      payload: {
+        chat_id: creatorId,
+        text: `Test message is: ${generateRandomString(3)}`,
+      },
+    }));
+    sendTasks.forEach((task) => rabbitMQClient.produce(JSON.stringify(task), 0));
   }
 }
 

@@ -3,7 +3,8 @@ import client from 'amqplib';
 
 import { environmentConfig } from '../config';
 
-const QUEUE_NAME = 'taskQueue';
+const IMMEDIATELY_QUEUE_NAME = 'immediatelyTaskQueue';
+const DELAYED_QUEUE_NAME = 'delayedTaskQueue';
 const MAX_PRIORITY = 5;
 
 export class RabbitMQClient {
@@ -19,7 +20,8 @@ export class RabbitMQClient {
       );
       this.channel = await connection.createChannel();
       await this.channel.prefetch(1);
-      await this.channel.assertQueue(QUEUE_NAME, { durable: true, maxPriority: MAX_PRIORITY });
+      await this.channel.assertQueue(IMMEDIATELY_QUEUE_NAME, { durable: true, maxPriority: MAX_PRIORITY });
+      await this.channel.assertQueue(DELAYED_QUEUE_NAME, { durable: true, deadLetterExchange: IMMEDIATELY_QUEUE_NAME });
     } catch (error) {
       console.error('RabbitMQ connection error:', error);
     }
@@ -29,9 +31,10 @@ export class RabbitMQClient {
    * Send message to channel
    * @param {string} message
    * @param {number} priority
+   * @param {number)} expiration expiration time in ms
    * */
-  produce(message: string, priority: number) {
-    this.channel?.sendToQueue(QUEUE_NAME, Buffer.from(message), { priority });
+  produce(message: string, priority: number, expiration?: number) {
+    this.channel?.sendToQueue(IMMEDIATELY_QUEUE_NAME, Buffer.from(message), { priority, expiration });
   }
 
   /**
@@ -39,7 +42,7 @@ export class RabbitMQClient {
    * @param {function} callback
    * */
   async consume(callback: (message: ConsumeMessage | null) => void) {
-    await this.channel?.consume(QUEUE_NAME, callback, { noAck: false });
+    await this.channel?.consume(IMMEDIATELY_QUEUE_NAME, callback, { noAck: false });
   }
 }
 
