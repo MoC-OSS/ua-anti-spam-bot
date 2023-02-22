@@ -36,17 +36,16 @@ import { isNotChannel, onlyCreatorChatFilter } from './bot/filters';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
 import { DeleteSwindlersMiddleware, GlobalMiddleware, logCreatorState, stateMiddleware } from './bot/middleware';
-import { chainFilters, selfDestructedReply } from './bot/plugins';
+import { autoThread, chainFilters, selfDestructedReply } from './bot/plugins';
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
 import { deleteMessageTransformer } from './bot/transformers';
-import { videoUtil } from './utils/video.util';
 import { environmentConfig } from './config';
 import { logsChat, swindlerBotsChatId, swindlerHelpChatId, swindlerMessageChatId } from './creator';
 import { redisClient } from './db';
 import { alarmChatService, alarmService, initSwindlersContainer, redisService, S3Service, swindlersGoogleService } from './services';
 import { initNsfwTensor, initTensor } from './tensor';
 import type { GrammyContext, GrammyMenuContext } from './types';
-import { emptyFunction, globalErrorHandler, wrapperErrorHandler } from './utils';
+import { emptyFunction, globalErrorHandler, videoUtil, wrapperErrorHandler } from './utils';
 
 moment.tz.setDefault('Europe/Kiev');
 moment.locale('uk');
@@ -210,6 +209,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
 
   bot.use(hydrateReply);
   bot.use(selfDestructedReply());
+  bot.use(autoThread());
 
   bot.use(stateMiddleware);
 
