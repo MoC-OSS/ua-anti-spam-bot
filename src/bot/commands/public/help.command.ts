@@ -38,7 +38,7 @@ export class HelpCommand {
       }
 
       context
-        .replyWithHTML(
+        .replyWithSelfDestructedHTML(
           getHelpMessage({
             startLocaleTime,
             isAdmin,

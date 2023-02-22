@@ -26,7 +26,7 @@ export class StartCommand {
       const { writeUsername, userId } = getUserData(context);
 
       if (!isAdmin || !canDelete) {
-        return context.replyWithHTML(
+        return context.replyWithSelfDestructedHTML(
           getGroupStartMessage({ isAdmin, canDelete, user: writeUsername === '@GroupAnonymousBot' ? '' : writeUsername, userId }),
         );
       }
@@ -39,7 +39,7 @@ export class StartCommand {
         .getChatAdmins(context, context.chat?.id)
         .then(({ adminsString }) => {
           context
-            .replyWithHTML(
+            .replyWithSelfDestructedHTML(
               getGroupStartMessage({ adminsString, isAdmin, canDelete, user: writeUsername === '@GroupAnonymousBot' ? '' : writeUsername }),
             )
             .catch(async (getAdminsError) => {
