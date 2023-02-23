@@ -17,6 +17,7 @@ import {
   getSettingsMenuMessage,
   goBackButton,
   selectYourState,
+  settingsSet,
   settingsSubmitMessage,
   turnOffChatWhileAlarmButton,
   warnRussianLanguageButton,
@@ -28,13 +29,28 @@ import { MiddlewareMenu } from '../../middleware-menu.menu';
 
 import { dynamicLocationMenu } from './air-raid-alarm/locations-menu-generator';
 
-const toggleSetting = (context: GrammyContext, key: keyof BooleanChatSettings) => {
+const toggleSetting = async (context: GrammyContext, key: keyof BooleanChatSettings) => {
   context.chatSession.chatSettings[key] = !context.chatSession.chatSettings[key];
   const newText = getSettingsMenuMessage(context.chatSession.chatSettings);
 
   if (context.msg?.text !== newText) {
-    return context.editMessageText(newText, { parse_mode: 'HTML' });
+    await context.editMessageText(newText, { parse_mode: 'HTML' });
   }
+
+  const featureEnableText = '✅ Це налаштування тепер увімкнено';
+  const featureDisableText = '⛔️ Це налаштування тепер вимкнено';
+
+  const newSettingAlertText = key.startsWith('enable')
+    ? context.chatSession.chatSettings[key]
+      ? featureEnableText
+      : featureDisableText
+    : context.chatSession.chatSettings[key]
+    ? featureDisableText
+    : featureEnableText;
+
+  await context.answerCallbackQuery({
+    text: newSettingAlertText,
+  });
 };
 
 const isStateSelected: GrammyMiddleware = (context, next) => {
@@ -130,7 +146,13 @@ export class SettingsCommand {
       //   ctx.editMessageText(detailedSettingsDescription).catch(handleError);
       // })
       .row()
-      .text(settingsSubmitMessage, (context) => context.deleteMessage());
+      .text(settingsSubmitMessage, async (context) => {
+        await context.answerCallbackQuery({
+          text: settingsSet,
+          show_alert: true,
+        });
+        await context.deleteMessage();
+      });
 
     return this.settingsMenuObj;
   }

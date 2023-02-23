@@ -3,6 +3,7 @@ import FormData from 'form-data';
 import { Composer } from 'grammy';
 
 import { environmentConfig } from '../../../config';
+import { LOGS_CHAT_THREAD_IDS } from '../../../const';
 import { logsChat } from '../../../creator';
 import { getDeleteNsfwMessage } from '../../../message';
 import type { NsfwTensorService } from '../../../tensor';
@@ -44,6 +45,7 @@ const saveNsfwMessage = async (context: GrammyContext) => {
           deletePrediction.className
         }</code> by user ${userMention}:\n\n${chatMention || userMention}\n${caption || ''}`,
         parse_mode: 'HTML',
+        message_thread_id: LOGS_CHAT_THREAD_IDS.PORN,
       });
     }
 
@@ -62,6 +64,7 @@ const saveNsfwMessage = async (context: GrammyContext) => {
         )}%) from <code>${deletePrediction.className}</code> by user ${userMention}:\n\n${chatMention || userMention}`,
         {
           parse_mode: 'HTML',
+          message_thread_id: LOGS_CHAT_THREAD_IDS.PORN,
           reply_to_message_id: stickerMessage.message_id,
         },
       );
@@ -81,6 +84,7 @@ const saveNsfwMessage = async (context: GrammyContext) => {
           2,
         )}%) from <code>${deletePrediction.className}</code> by user ${userMention}:\n\n${chatMention || userMention}\n${caption || ''}`,
         parse_mode: 'HTML',
+        message_thread_id: LOGS_CHAT_THREAD_IDS.PORN,
       });
     }
 
@@ -99,6 +103,7 @@ const saveNsfwMessage = async (context: GrammyContext) => {
         {
           parse_mode: 'HTML',
           reply_to_message_id: videoNoteMessage.message_id,
+          message_thread_id: LOGS_CHAT_THREAD_IDS.PORN,
         },
       );
     }
@@ -109,7 +114,9 @@ const saveNsfwMessage = async (context: GrammyContext) => {
      * */
     default: {
       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      return context.api.sendMessage(logsChat, `Unknown unhandled image type ${type} with meta ${JSON.stringify(meta)}`);
+      return context.api.sendMessage(logsChat, `Unknown unhandled image type ${type} with meta ${JSON.stringify(meta)}`, {
+        message_thread_id: LOGS_CHAT_THREAD_IDS.PORN,
+      });
     }
   }
 };

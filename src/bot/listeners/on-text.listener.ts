@@ -3,6 +3,7 @@ import type { Bot, NextFunction } from 'grammy';
 import { InputFile } from 'grammy';
 
 import { environmentConfig } from '../../config';
+import { LOGS_CHAT_THREAD_IDS } from '../../const';
 import { logsChat, privateTrainingChat } from '../../creator';
 import { getCannotDeleteMessage, getDebugMessage, getDeleteMessage } from '../../message'; // spamDeleteMessage
 import { redisService } from '../../services';
@@ -124,6 +125,7 @@ export class OnTextListener {
                         )}</code>\n${escapeHTML(context.msg?.text || '')}`,
                         {
                           parse_mode: 'HTML',
+                          message_thread_id: LOGS_CHAT_THREAD_IDS.STRATEGIC,
                         },
                       )
                       .then(() => {
@@ -131,6 +133,9 @@ export class OnTextListener {
                           .sendDocument(
                             logsChat,
                             new InputFile(Buffer.from(JSON.stringify(context, null, 2)), `ctx-${new Date().toISOString()}.json`),
+                            {
+                              message_thread_id: LOGS_CHAT_THREAD_IDS.STRATEGIC,
+                            },
                           )
                           .catch(handleError);
                       })

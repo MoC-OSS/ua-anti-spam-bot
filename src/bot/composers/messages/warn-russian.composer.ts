@@ -1,6 +1,7 @@
 import escapeHTML from 'escape-html';
 import { Composer } from 'grammy';
 
+import { LOGS_CHAT_THREAD_IDS } from '../../../const';
 import { logsChat } from '../../../creator';
 import { getWarnRussianMessage } from '../../../message';
 import type { DynamicStorageService } from '../../../services';
@@ -31,6 +32,7 @@ export const getWarnRussianComposer = ({ dynamicStorageService }: WarnRussianCom
       `Warn russian message (${maxChance.toFixed(2)}%) by user ${userMention}:\n\n${chatMention || userMention}\n${escapeHTML(text)}`,
       {
         parse_mode: 'HTML',
+        message_thread_id: LOGS_CHAT_THREAD_IDS.ANTI_RUSSIAN,
       },
     );
   }
