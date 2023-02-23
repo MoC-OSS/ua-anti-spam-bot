@@ -5,6 +5,7 @@ import { InputFile } from 'grammy';
 import type { GrammyContext, GrammyMiddleware, SwindlerResponseBody, SwindlersResult, SwindlerType } from 'types';
 
 import { environmentConfig } from '../../config';
+import { LOGS_CHAT_THREAD_IDS } from '../../const';
 import { logsChat } from '../../creator';
 import { getCannotDeleteMessage, swindlersWarningMessage } from '../../message';
 import type { SwindlersDetectService } from '../../services';
@@ -75,6 +76,7 @@ export class DeleteSwindlersMiddleware {
       }\n${escapeHTML(text)}`,
       {
         parse_mode: 'HTML',
+        message_thread_id: LOGS_CHAT_THREAD_IDS.SWINDLERS,
       },
     );
   }
@@ -128,6 +130,7 @@ export class DeleteSwindlersMiddleware {
                 )}`,
                 {
                   parse_mode: 'HTML',
+                  message_thread_id: LOGS_CHAT_THREAD_IDS.SWINDLERS,
                 },
               )
               .then(() => {
@@ -135,6 +138,9 @@ export class DeleteSwindlersMiddleware {
                   .sendDocument(
                     logsChat,
                     new InputFile(Buffer.from(JSON.stringify(context, null, 2)), `ctx-${new Date().toISOString()}.json`),
+                    {
+                      message_thread_id: LOGS_CHAT_THREAD_IDS.SWINDLERS,
+                    },
                   )
                   .catch(handleError);
               })
