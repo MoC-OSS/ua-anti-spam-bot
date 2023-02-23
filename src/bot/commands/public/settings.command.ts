@@ -17,6 +17,7 @@ import {
   getSettingsMenuMessage,
   goBackButton,
   selectYourState,
+  settingsSet,
   settingsSubmitMessage,
   turnOffChatWhileAlarmButton,
   warnRussianLanguageButton,
@@ -130,7 +131,13 @@ export class SettingsCommand {
       //   ctx.editMessageText(detailedSettingsDescription).catch(handleError);
       // })
       .row()
-      .text(settingsSubmitMessage, (context) => context.deleteMessage());
+      .text(settingsSubmitMessage, async (context) => {
+        await context.answerCallbackQuery({
+          text: settingsSet,
+          show_alert: true,
+        });
+        await context.deleteMessage();
+      });
 
     return this.settingsMenuObj;
   }
