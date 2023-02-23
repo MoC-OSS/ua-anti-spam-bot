@@ -1,0 +1,86 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LanguageDetectService detect should detect russian 1`] = `
+{
+  "chunks": [
+    {
+      "bytes": 60,
+      "code": "ru",
+      "name": "RUSSIAN",
+      "offset": 0,
+    },
+  ],
+  "languages": [
+    {
+      "code": "ru",
+      "name": "RUSSIAN",
+      "percent": 98,
+      "score": 688,
+    },
+  ],
+  "reliable": true,
+  "textBytes": 62,
+}
+`;
+
+exports[`LanguageDetectService detect should detect surzhik 1`] = `
+{
+  "chunks": [],
+  "languages": [
+    {
+      "code": "uk",
+      "name": "UKRAINIAN",
+      "percent": 99,
+      "score": 338,
+    },
+  ],
+  "reliable": true,
+  "textBytes": 116,
+}
+`;
+
+exports[`LanguageDetectService detect should detect ukrainian 1`] = `
+{
+  "chunks": [
+    {
+      "bytes": 163,
+      "code": "uk",
+      "name": "UKRAINIAN",
+      "offset": 0,
+    },
+  ],
+  "languages": [
+    {
+      "code": "uk",
+      "name": "UKRAINIAN",
+      "percent": 99,
+      "score": 886,
+    },
+  ],
+  "reliable": true,
+  "textBytes": 165,
+}
+`;
+
+exports[`LanguageDetectService detect should not detect russian when mixed 1`] = `
+{
+  "chunks": [
+    {
+      "bytes": 224,
+      "code": "uk",
+      "name": "UKRAINIAN",
+      "offset": 0,
+    },
+  ],
+  "languages": [
+    {
+      "code": "uk",
+      "name": "UKRAINIAN",
+      "percent": 99,
+      "score": 646,
+    },
+  ],
+  "reliable": true,
+  "textBytes": 226,
+}
+`;

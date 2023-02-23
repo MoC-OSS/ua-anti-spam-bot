@@ -9,6 +9,24 @@ describe('LanguageDetectService', () => {
       expect(result.result).toEqual(true);
     });
 
+    it('should return true if russian edge case', async () => {
+      const text =
+        '🗂 Номер телефона\n' +
+        '\n' +
+        'Вам необходимо подтвердить номер телефона для того, чтобы завершить идентификацию.\n' +
+        'Для этого нажмите кнопку ниже.';
+      const result = await languageDetectService.isRussian(text);
+
+      expect(result.result).toEqual(true);
+    });
+
+    it('should return false if ukrainian edge case', async () => {
+      const text = 'Нажерлись гречки і серуть';
+      const result = await languageDetectService.isRussian(text);
+
+      expect(result.result).toEqual(false);
+    });
+
     it('should return false if ukrainian', async () => {
       const text = 'Інтернет були взірцем для наслідування для всіх, хто хоче говорити українською правильно';
       const result = await languageDetectService.isRussian(text);
