@@ -45,7 +45,6 @@
     "aws-sdk": "^2.1276.0",
     "axios": "^1.2.1",
     "bottleneck": "^2.19.5",
-    "cld": "^2.8.4",
     "cyrillic-to-translit-js": "^3.2.1",
     "deepmerge": "^4.2.2",
     "diff": "^5.1.0",
