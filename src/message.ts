@@ -664,7 +664,7 @@ export interface DeleteRussianMessageProperties extends DeleteMessageAtomPropert
   message: string;
 }
 
-export const getWarnRussianMessage = (message: string) => `🇷🇺 ➡️ 🇺🇦 ${message}`;
+export const getWarnRussianMessage = (message: string) => `🫶🇺🇦 ${message}`;
 
 export const getDeleteRussianMessage = ({ writeUsername, userId, message }: DeleteRussianMessageProperties) => `
 ${getDeleteUserAtomMessage({ writeUsername, userId })}
