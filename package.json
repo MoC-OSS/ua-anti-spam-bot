@@ -75,6 +75,7 @@
     "redis": "^4.5.1",
     "sharp": "^0.31.2",
     "string-similarity": "^4.0.4",
+    "tinyld": "^1.3.3",
     "typed-dotenv": "^10.0.2",
     "typegram": "^4.1.1",
     "ukrainian-ml-optimizer": "github:DrSmile444/ukrainian-ml-optimizer",
