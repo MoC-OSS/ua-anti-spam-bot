@@ -44,7 +44,7 @@ export class LanguageDetectService {
         };
       }
 
-      return { result: russianDetect.accuracy > 70, percent: russianDetect.accuracy };
+      return { result: russianDetect.accuracy > 0.7, percent: russianDetect.accuracy };
     } catch {
       /**
        * If tinyld cannot find the language, it returns an error.
