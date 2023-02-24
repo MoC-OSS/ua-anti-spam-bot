@@ -1,4 +1,5 @@
-import { detectAll } from 'tinyld';
+// eslint-disable-next-line import/no-unresolved
+import { detectAll } from 'tinyld/heavy';
 import { removeExtraSpaces, removeSpecialSymbols } from 'ukrainian-ml-optimizer';
 
 import type { LanguageDetectionResult } from '../types';
