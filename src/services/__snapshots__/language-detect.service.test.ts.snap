@@ -1,86 +1,102 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`LanguageDetectService detect should detect russian 1`] = `
-{
-  "chunks": [
-    {
-      "bytes": 60,
-      "code": "ru",
-      "name": "RUSSIAN",
-      "offset": 0,
-    },
-  ],
-  "languages": [
-    {
-      "code": "ru",
-      "name": "RUSSIAN",
-      "percent": 98,
-      "score": 688,
-    },
-  ],
-  "reliable": true,
-  "textBytes": 62,
-}
+[
+  {
+    "accuracy": 1,
+    "lang": "ru",
+  },
+]
 `;
 
-exports[`LanguageDetectService detect should detect surzhik 1`] = `
-{
-  "chunks": [],
-  "languages": [
-    {
-      "code": "uk",
-      "name": "UKRAINIAN",
-      "percent": 99,
-      "score": 338,
-    },
-  ],
-  "reliable": true,
-  "textBytes": 116,
-}
+exports[`LanguageDetectService detect should detect surzhik as ukrainian 1`] = `
+[
+  {
+    "accuracy": 1,
+    "lang": "uk",
+  },
+]
 `;
 
 exports[`LanguageDetectService detect should detect ukrainian 1`] = `
-{
-  "chunks": [
-    {
-      "bytes": 163,
-      "code": "uk",
-      "name": "UKRAINIAN",
-      "offset": 0,
-    },
-  ],
-  "languages": [
-    {
-      "code": "uk",
-      "name": "UKRAINIAN",
-      "percent": 99,
-      "score": 886,
-    },
-  ],
-  "reliable": true,
-  "textBytes": 165,
-}
+[
+  {
+    "accuracy": 1,
+    "lang": "uk",
+  },
+]
 `;
 
 exports[`LanguageDetectService detect should not detect russian when mixed 1`] = `
-{
-  "chunks": [
+[
+  {
+    "accuracy": 1,
+    "lang": "uk",
+  },
+]
+`;
+
+exports[`LanguageDetectService isRussian should except ukrainian for all messages 1`] = `
+[
+  [
     {
-      "bytes": 224,
-      "code": "uk",
-      "name": "UKRAINIAN",
-      "offset": 0,
+      "accuracy": 0.18993,
+      "lang": "ru",
+    },
+    {
+      "accuracy": 0.18524000000000002,
+      "lang": "uk",
     },
   ],
-  "languages": [
+  [
     {
-      "code": "uk",
-      "name": "UKRAINIAN",
-      "percent": 99,
-      "score": 646,
+      "accuracy": 0.125,
+      "lang": "ru",
+    },
+    {
+      "accuracy": 0.1076,
+      "lang": "uk",
     },
   ],
-  "reliable": true,
-  "textBytes": 226,
-}
+  [
+    {
+      "accuracy": 1,
+      "lang": "uk",
+    },
+  ],
+  [
+    {
+      "accuracy": 1,
+      "lang": "uk",
+    },
+  ],
+  [
+    {
+      "accuracy": 1,
+      "lang": "uk",
+    },
+  ],
+  [
+    {
+      "accuracy": 1,
+      "lang": "uk",
+    },
+  ],
+  [
+    {
+      "accuracy": 0.125,
+      "lang": "uk",
+    },
+    {
+      "accuracy": 0.10893749999999999,
+      "lang": "ru",
+    },
+  ],
+  [
+    {
+      "accuracy": 1,
+      "lang": "uk",
+    },
+  ],
+]
 `;

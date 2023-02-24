@@ -29,7 +29,9 @@ export const getWarnRussianComposer = ({ dynamicStorageService }: WarnRussianCom
 
     return context.api.sendMessage(
       logsChat,
-      `Warn russian message (${maxChance.toFixed(2)}%) by user ${userMention}:\n\n${chatMention || userMention}\n${escapeHTML(text)}`,
+      `Warn russian message (${(maxChance * 100).toFixed(2)}%) by user ${userMention}:\n\n${chatMention || userMention}\n${escapeHTML(
+        text,
+      )}`,
       {
         parse_mode: 'HTML',
         message_thread_id: LOGS_CHAT_THREAD_IDS.ANTI_RUSSIAN,

@@ -1,4 +1,4 @@
-import * as cld from 'cld';
+import { detectAll } from 'tinyld';
 import { removeExtraSpaces, removeSpecialSymbols } from 'ukrainian-ml-optimizer';
 
 import type { LanguageDetectionResult } from '../types';
@@ -11,7 +11,7 @@ export class LanguageDetectService {
   /**
    * Helper function that detects if the message in russian
    * */
-  async isRussian(message: string): Promise<LanguageDetectionResult> {
+  isRussian(message: string): LanguageDetectionResult {
     /**
      * If the message contains russian letters, we assume that this is russian
      * */
@@ -23,9 +23,9 @@ export class LanguageDetectService {
     }
 
     try {
-      const detectResult = await this.detect(message);
+      const detectResult = this.detect(message);
 
-      const russianDetect = detectResult.languages.find((language) => language.code === 'ru');
+      const russianDetect = detectResult.find((result) => result.lang === 'ru');
 
       if (!russianDetect) {
         return {
@@ -44,10 +44,10 @@ export class LanguageDetectService {
         };
       }
 
-      return { result: russianDetect.percent > 70, percent: russianDetect.percent };
+      return { result: russianDetect.accuracy > 70, percent: russianDetect.accuracy };
     } catch {
       /**
-       * If CLD cannot find the language, it returns an error.
+       * If tinyld cannot find the language, it returns an error.
        * So in this case we assume that this is not russian
        * */
       return {
@@ -66,11 +66,7 @@ export class LanguageDetectService {
   detect(message: string) {
     const clearMessage = removeExtraSpaces(removeSpecialSymbols(message)).toLowerCase();
 
-    return cld.detect(removeSpecialSymbols(clearMessage), {
-      isHTML: false,
-      languageHint: 'RUSSIAN',
-      tldHint: 'ru',
-    });
+    return detectAll(clearMessage, { only: ['uk', 'ru'] });
   }
 }
 
