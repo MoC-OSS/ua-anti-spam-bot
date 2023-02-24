@@ -29,7 +29,9 @@ export const getNoRussianComposer = ({ dynamicStorageService }: NoRussianCompose
 
     return context.api.sendMessage(
       logsChat,
-      `Deleted russian message (${maxChance.toFixed(2)}%) by user ${userMention}:\n\n${chatMention || userMention}\n${escapeHTML(text)}`,
+      `Deleted russian message (${(maxChance * 100).toFixed(2)}%) by user ${userMention}:\n\n${chatMention || userMention}\n${escapeHTML(
+        text,
+      )}`,
       {
         parse_mode: 'HTML',
         message_thread_id: LOGS_CHAT_THREAD_IDS.ANTI_RUSSIAN,
