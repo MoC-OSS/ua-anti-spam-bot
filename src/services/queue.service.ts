@@ -9,9 +9,9 @@ import type { DeleteMessagePayload, SendMessagePayload, Task } from '../types/ta
 
 import { generateRandomString } from './_mocks';
 
-const LIMITER_OPTS = {
+const LIMITER_OPTS: Bottleneck.ConstructorOptions = {
   maxConcurrent: 1,
-  minTime: 30_000,
+  minTime: 2000,
 };
 
 export class QueueService {
@@ -30,15 +30,7 @@ export class QueueService {
     await rabbitMQClient.consume(this.handleMessage.bind(this));
   }
 
-  private addDelayedTask(payload: string) {
-
-  }
-
-  private addDelayedTask(payload: string) {
-
-  }
-
-  public sendMessage(chatId: string, text: string, other?: { entities: MessageEntity[] | undefined }) {
+  public sendMessage(chatId: string, text: string, other?: { entities: MessageEntity[] | undefined }, expiration?: number) {
     const payload: Task = {
       method: 'sendMessage',
       payload: {
@@ -47,10 +39,10 @@ export class QueueService {
         other,
       },
     };
-    rabbitMQClient.produce(JSON.stringify(payload), 0);
+    rabbitMQClient.produce(JSON.stringify(payload), expiration);
   }
 
-  public deleteMessage(chatId: string | number, messageId: number) {
+  public deleteMessage(chatId: string | number, messageId: number, expiration?: number) {
     const payload: Task = {
       method: 'deleteMessage',
       payload: {
@@ -58,7 +50,7 @@ export class QueueService {
         message_id: messageId,
       },
     };
-    rabbitMQClient.produce(JSON.stringify(payload), 5);
+    rabbitMQClient.produce(JSON.stringify(payload), expiration);
   }
 
   private async handleMessage(message: ConsumeMessage | null) {
@@ -104,7 +96,10 @@ export class QueueService {
         text: `Test message is: ${generateRandomString(3)}`,
       },
     }));
-    sendTasks.forEach((task) => rabbitMQClient.produce(JSON.stringify(task), 0));
+    sendTasks.forEach((task, index) => {
+      rabbitMQClient.produce(JSON.stringify(task), index * 5000);
+      // rabbitMQClient.produce(JSON.stringify(task));
+    });
   }
 }
 
