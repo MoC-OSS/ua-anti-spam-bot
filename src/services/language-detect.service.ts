@@ -67,6 +67,13 @@ export class LanguageDetectService {
   detect(message: string) {
     const clearMessage = removeExtraSpaces(removeSpecialSymbols(message)).toLowerCase();
 
+    /**
+     * If the message is too short - no lang should be decided
+     * */
+    if (clearMessage.length < 3) {
+      return [];
+    }
+
     return detectAll(clearMessage, { only: ['uk', 'ru'] });
   }
 }
