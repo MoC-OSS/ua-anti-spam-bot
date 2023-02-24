@@ -3,7 +3,7 @@ import { Composer } from 'grammy';
 
 import { LOGS_CHAT_THREAD_IDS } from '../../../const';
 import { logsChat } from '../../../creator';
-import { getWarnRussianMessage } from '../../../message';
+import { getUkrainianMessageExtra, getWarnRussianMessage } from '../../../message';
 import type { DynamicStorageService } from '../../../services';
 import type { GrammyContext } from '../../../types';
 import { getRandomItem, telegramUtil } from '../../../utils';
@@ -46,9 +46,13 @@ export const getWarnRussianComposer = ({ dynamicStorageService }: WarnRussianCom
     if (isFeatureEnabled && russianFeature?.result) {
       await saveRussianMessage(context, russianFeature.percent, context.state.text);
 
-      await context.replyWithSelfDestructedHTML(getWarnRussianMessage(getRandomItem(dynamicStorageService.ukrainianLanguageResponses)), {
-        reply_to_message_id: context.msg?.message_id,
-      });
+      await context.replyWithSelfDestructedHTML(
+        getWarnRussianMessage(getRandomItem(dynamicStorageService.ukrainianLanguageResponses)) +
+          getUkrainianMessageExtra(russianFeature.percent),
+        {
+          reply_to_message_id: context.msg?.message_id,
+        },
+      );
     }
 
     return next();

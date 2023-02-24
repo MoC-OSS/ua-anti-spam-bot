@@ -3,7 +3,7 @@ import { Composer } from 'grammy';
 
 import { LOGS_CHAT_THREAD_IDS } from '../../../const';
 import { logsChat } from '../../../creator';
-import { getDeleteRussianMessage } from '../../../message';
+import { getDeleteRussianMessage, getUkrainianMessageExtra } from '../../../message';
 import type { DynamicStorageService } from '../../../services';
 import type { GrammyContext } from '../../../types';
 import { getRandomItem, getUserData, telegramUtil } from '../../../utils';
@@ -50,7 +50,8 @@ export const getNoRussianComposer = ({ dynamicStorageService }: NoRussianCompose
       if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
         const { writeUsername, userId } = getUserData(context);
         await context.replyWithSelfDestructedHTML(
-          getDeleteRussianMessage({ writeUsername, userId, message: getRandomItem(dynamicStorageService.ukrainianLanguageResponses) }),
+          getDeleteRussianMessage({ writeUsername, userId, message: getRandomItem(dynamicStorageService.ukrainianLanguageResponses) }) +
+            getUkrainianMessageExtra(russianFeature.percent),
         );
       }
     }
