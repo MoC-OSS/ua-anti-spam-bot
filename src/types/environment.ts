@@ -20,6 +20,7 @@ export interface MiscellaneousEnvironmentConfig {
   REDIS_URL: string;
   DEBUG: boolean;
   DEBUG_MIDDLEWARE: boolean;
+  DISABLE_LOGS_CHAT: boolean;
   ALARM_KEY: string;
 }
 
