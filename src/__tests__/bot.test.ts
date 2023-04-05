@@ -15,6 +15,7 @@ import type { GrammyContext } from '../types';
  * Enable unit testing
  * */
 environmentConfig.UNIT_TESTING = true;
+environmentConfig.DISABLE_LOGS_CHAT = false;
 environmentConfig.DEBUG = false;
 
 let outgoingRequests: OutgoingRequests;
