@@ -205,4 +205,4 @@ Don't forget to setup your IDE:
 
 ## Credits
 
-Made with love to save Ukraine 🇺🇦 2023
+Made with ❤️ to save Ukraine 🇺🇦 2023
