@@ -12,6 +12,35 @@ grammY is a powerful and user-friendly framework for building Telegram bots usin
 
 The framework comes with comprehensive documentation available at https://grammy.dev, which covers everything from getting started with installing and configuring the framework to more advanced topics like handling bot commands, keyboard interactions, and file uploads. The documentation is easy to follow and provides plenty of examples to help you get started with building your own Telegram bot.
 
+## Table of Content
+
+- [Before you start](#before-you-start)
+  - [1. Files](#1-files)
+  - [2. Github Access](#2-github-access)
+- [Installation](#installation)
+  - [1. Cloning](#1-cloning)
+  - [2. Installing `Node.js`](#2-installing-nodejs)
+    - [NVM (recommended)](#nvm-recommended)
+    - [Node](#node)
+  - [3. Installing Redis](#3-installing-redis)
+    - [Docker-compose (recommended)](#docker-compose-recommended)
+    - [Install in System](#install-in-system)
+  - [4. Installing `node_modules`](#4-installing-node_modules)
+  - [5. Copy `.env` file](#5-copy-env-file)
+  - [6. Create your bot](#6-create-your-bot)
+  - [7. Set your Telegram ID](#7-set-your-telegram-id)
+  - [8. Set local testing `.env` variables](#8-set-local-testing-env-variables)
+  - [9. Set Google Credits (confidential)](#9-set-google-credits-confidential)
+  - [10. Set Alarm Credits (confidential)](#10-set-alarm-credits-confidential)
+  - [11. Copy tensor files](#11-copy-tensor-files)
+- [Running your bot](#running-your-bot)
+- [Code Style](#code-style)
+  - [Branch names](#branch-names)
+  - [Commit names](#commit-names)
+  - [Code Rules](#code-rules)
+  - [IDE Setup](#ide-setup)
+- [Credits](#credits)
+
 ## Before you start
 
 If you from [Master of Code Global](https://masterofcode.com/) (MOC), PM me for next things:
