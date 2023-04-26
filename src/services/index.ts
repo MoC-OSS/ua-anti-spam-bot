@@ -8,6 +8,7 @@ export * from './locations.service';
 export * from './mention.service';
 export * from './redis.service';
 export * from './s3.service';
+export * from './spam-media-groups-storage.service';
 export * from './swindlers.container';
 export * from './swindlers-bots.service';
 export * from './swindlers-cards.service';
