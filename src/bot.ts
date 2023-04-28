@@ -38,7 +38,7 @@ import { MessageHandler } from './bot/message.handler';
 import { DeleteSwindlersMiddleware, GlobalMiddleware, logCreatorState, stateMiddleware } from './bot/middleware';
 import { autoThread, chainFilters, selfDestructedReply } from './bot/plugins';
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
-import { deleteMessageTransformer } from './bot/transformers';
+import { deleteMessageTransformer, disableLogsChatTransformer } from './bot/transformers';
 import { environmentConfig } from './config';
 import { logsChat, swindlerBotsChatId, swindlerHelpChatId, swindlerMessageChatId } from './creator';
 import { redisClient } from './db';
@@ -223,6 +223,13 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     context.api.config.use(deleteMessageTransformer(context));
     return next();
   });
+
+  if (environmentConfig.DISABLE_LOGS_CHAT) {
+    bot.use((context, next) => {
+      context.api.config.use(disableLogsChatTransformer);
+      return next();
+    });
+  }
 
   bot.use(rootMenu as unknown as Menu<GrammyContext>);
 

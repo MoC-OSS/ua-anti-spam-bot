@@ -9,6 +9,8 @@ import type { CommandSetter } from '../commands';
 import { RankCommand, UpdatesCommand } from '../commands';
 import { onlyCreatorFilter } from '../filters';
 
+import { featurePollComposer } from './feature-poll.composer';
+
 export interface CreatorCommandsComposerProperties {
   commandSetter: CommandSetter;
   rootMenu: Menu<GrammyMenuContext>;
@@ -73,6 +75,8 @@ export const getCreatorCommandsComposer = ({ commandSetter, rootMenu, tensorServ
   composer.command('set_training_start_rank', rankMiddleware.setTrainingStartRank());
   composer.command('set_training_chat_whitelist', rankMiddleware.setTrainingChatWhitelist());
   composer.command('update_training_chat_whitelist', rankMiddleware.updateTrainingChatWhitelist());
+
+  composer.use(featurePollComposer);
 
   rootMenu.register(updatesMiddleware.initMenu());
 
