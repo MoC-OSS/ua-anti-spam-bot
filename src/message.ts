@@ -174,6 +174,11 @@ export const getSettingsMenuMessage = (settings: ChatSessionData['chatSettings']
 🪆 ${
     settings.enableDeleteRussian ? '✅ Бот видаляє повідомлення з російською мовою.' : '⛔️ Бот не видаляє повідомлення з російською мовою.'
   }
+🏃 ${
+    settings.enableDeleteCounteroffensive
+      ? '✅ Бот видаляє повідомлення з контрнаступом.'
+      : '⛔️ Бот не видаляє повідомлення з контрнаступом.'
+  }
 
 <b>Налаштування повітряної тривоги.</b>
 🏰 ${
@@ -266,6 +271,7 @@ export const deleteNsfwButton = '🔞 Контент';
 
 export const warnRussianLanguageButton = '☢️ Російська';
 export const deleteRussianLanguageButton = '🪆 Російська';
+export const deleteCounteroffensiveButton = '🏃 Контрнаступ';
 
 export const airAlarmAlertButton = '🏰 Регіон';
 export const airAlarmNotificationMessage = '📢 Тривога';
@@ -399,6 +405,12 @@ ${getDeleteUserAtomMessage({ writeUsername, userId })}
 
 🔞 Зображення з <b>відвертим характером</b> та <b>дорослим контентом (18+)</b> заборонені.
 `.trim();
+
+export const getDeleteCounteroffensiveMessage = ({ writeUsername, userId }: DeleteMessageAtomProperties) => `
+${getDeleteUserAtomMessage({ writeUsername, userId })}
+
+🤫 Відправка повідомлень про контрнаступ суворо заборонена!
+`;
 
 export interface DebugMessageProperties {
   message: string | undefined;
