@@ -1,7 +1,7 @@
 import { Composer } from 'grammy';
 
 import { messageQuery } from '../../const';
-import type { DynamicStorageService } from '../../services';
+import type { CounteroffensiveService } from '../../services';
 import type { DefaultChatSettings, GrammyContext, GrammyMiddleware, OptionalChatSettings } from '../../types';
 import { onlyActiveDefaultSettingFilter, onlyActiveOptionalSettingFilter, onlyNotDeletedFilter, onlyWithTextFilter } from '../filters';
 import {
@@ -24,7 +24,7 @@ import {
 } from '../middleware';
 
 export interface MessagesComposerProperties {
-  dynamicStorageService: DynamicStorageService;
+  counteroffensiveService: CounteroffensiveService;
   noCardsComposer: Composer<GrammyContext>;
   noUrlsComposer: Composer<GrammyContext>;
   noLocationsComposer: Composer<GrammyContext>;
@@ -41,7 +41,7 @@ export interface MessagesComposerProperties {
  * @description Message handling composer
  * */
 export const getMessagesComposer = ({
-  dynamicStorageService,
+  counteroffensiveService,
   noCardsComposer,
   noUrlsComposer,
   noLocationsComposer,
@@ -114,7 +114,11 @@ export const getMessagesComposer = ({
   registerOptionalSettingModule('enableDeleteForwards', noForwardsComposer);
   registerOptionalSettingModule('enableDeleteRussian', parseIsRussian, noRussianComposer);
   registerOptionalSettingModule('enableWarnRussian', parseIsRussian, warnRussianComposer);
-  registerOptionalSettingModule('enableDeleteCounteroffensive', parseIsCounteroffensive(dynamicStorageService), noCounterOffensiveComposer);
+  registerOptionalSettingModule(
+    'enableDeleteCounteroffensive',
+    parseIsCounteroffensive(counteroffensiveService),
+    noCounterOffensiveComposer,
+  );
   // TODO optimize this module
   registerDefaultSettingModule('disableStrategicInfo', strategicComposer);
 
