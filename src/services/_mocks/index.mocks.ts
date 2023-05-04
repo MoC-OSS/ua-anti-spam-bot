@@ -1,3 +1,4 @@
+import type { GoogleFullCellData, GoogleShortCellData } from '../../types';
 import type { LocalDataset } from '../dynamic-storage.service';
 import { DynamicStorageService } from '../dynamic-storage.service';
 import type { GoogleService } from '../google.service';
@@ -6,15 +7,28 @@ import type { SwindlersGoogleService } from '../swindlers-google.service';
 export const mockNewBot = '@Diia_move_bot';
 export const mockNewUrl = 'https://olx.new-darpay.site/some/234234234';
 
-export const getSheet = jest.fn(() =>
-  Promise.resolve([
-    {
-      value: mockNewBot,
-      index: 0,
-      sheetKey: 'mock_key',
-      fullPath: `mock_path`,
-    },
-  ]),
+export const getSheet = jest.fn(
+  <T extends boolean | true | false = false>(
+    spreadsheetId: string,
+    sheetName: string,
+    range?: string,
+    compact?: T,
+  ): Promise<T extends true ? GoogleShortCellData[] : GoogleFullCellData[]> => {
+    if (compact) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return Promise.resolve([mockNewBot]) as any;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return Promise.resolve([
+      {
+        value: mockNewBot,
+        index: 0,
+        sheetKey: 'mock_key',
+        fullPath: `mock_path`,
+      },
+    ] as GoogleFullCellData[]) as any;
+  },
 );
 
 getSheet.mockReturnValueOnce(
