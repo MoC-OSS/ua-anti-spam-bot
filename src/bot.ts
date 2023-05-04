@@ -170,9 +170,10 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const { noForwardsComposer } = getNoForwardsComposer();
   const { swindlersComposer } = getSwindlersComposer({ deleteSwindlersMiddleware });
   const { strategicComposer } = getStrategicComposer({ onTextListener });
-  const { noCounterOffensiveComposer } = getNoCounterOffensiveComposer({ dynamicStorageService });
+  const { noCounterOffensiveComposer } = getNoCounterOffensiveComposer();
 
   const { messagesComposer } = getMessagesComposer({
+    dynamicStorageService,
     noCardsComposer,
     noUrlsComposer,
     noLocationsComposer,
@@ -266,6 +267,8 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   notChannelComposer
     .filter((context) => chainFilters(onlyCreatorChatFilter, !!context.state.isDeleted || !!context.state.photo)(context))
     .use(logCreatorState);
+
+  bot.command('echo', (context) => context.reply(JSON.stringify(context.msg)));
 
   bot.use(notChannelRegisterComposer);
 
