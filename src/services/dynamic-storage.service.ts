@@ -23,6 +23,8 @@ export type LocalDataset = typeof dataset &
   }>;
 
 export class DynamicStorageService {
+  private readonly REGEX_KEYWORD = 'REGEX:';
+
   swindlerMessages: string[] = [];
 
   swindlerBots: string[] = [];
@@ -36,6 +38,8 @@ export class DynamicStorageService {
   notSwindlers: string[] = [];
 
   ukrainianLanguageResponses: string[] = [];
+
+  counteroffensiveTriggers: (string | RegExp)[] = [];
 
   fetchEmitter: TypedEmitter<FetchEvents>;
 
@@ -72,10 +76,20 @@ export class DynamicStorageService {
       this.swindlersGoogleService.getCards(),
       this.swindlersGoogleService.getSiteRegex(),
       this.googleService.getSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, 'Ukrainian_phrases', 'A4:A', true),
+      this.googleService.getSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, 'Counter_offensive', 'A4:A', true),
     ]);
 
     return cases.then(
-      ([swindlerPositives, swindlerBots, swindlerDomains, notSwindlers, swindlerCards, swindlerRegexSites, ukrainianLanguageResponses]) => {
+      ([
+        swindlerPositives,
+        swindlerBots,
+        swindlerDomains,
+        notSwindlers,
+        swindlerCards,
+        swindlerRegexSites,
+        ukrainianLanguageResponses,
+        counteroffensiveTriggers,
+      ]) => {
         this.swindlerMessages = removeDuplicates(swindlerPositives)
           .map((element) => optimizeText(element))
           .filter(Boolean);
@@ -85,9 +99,20 @@ export class DynamicStorageService {
         this.swindlerCards = removeDuplicates(swindlerCards);
         this.swindlerRegexSites = removeDuplicates(swindlerRegexSites);
         this.ukrainianLanguageResponses = ukrainianLanguageResponses;
+        this.counteroffensiveTriggers = this.parseRegexItems(counteroffensiveTriggers);
         this.fetchEmitter.emit('fetch');
         console.info('got DynamicStorageService messages', new Date());
       },
     );
+  }
+
+  private parseRegexItems(strings: string[]): (string | RegExp)[] {
+    return strings.map((string) => {
+      if (string.startsWith(this.REGEX_KEYWORD)) {
+        return new RegExp(string.slice(this.REGEX_KEYWORD.length));
+      }
+
+      return string;
+    });
   }
 }
