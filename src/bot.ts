@@ -22,6 +22,7 @@ import {
 } from './bot/composers';
 import {
   getNoCardsComposer,
+  getNoCounterOffensiveComposer,
   getNoForwardsComposer,
   getNoLocationsComposer,
   getNoMentionsComposer,
@@ -169,6 +170,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const { noForwardsComposer } = getNoForwardsComposer();
   const { swindlersComposer } = getSwindlersComposer({ deleteSwindlersMiddleware });
   const { strategicComposer } = getStrategicComposer({ onTextListener });
+  const { noCounterOffensiveComposer } = getNoCounterOffensiveComposer({ dynamicStorageService });
 
   const { messagesComposer } = getMessagesComposer({
     noCardsComposer,
@@ -180,6 +182,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     warnRussianComposer,
     swindlersComposer,
     strategicComposer,
+    noCounterOffensiveComposer,
   });
 
   // Photo composers

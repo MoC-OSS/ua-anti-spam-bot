@@ -3,6 +3,7 @@ import {
   airAlarmNotificationMessage,
   blockWhenAlarm,
   deleteCardsButton,
+  deleteCounteroffensiveButton,
   deleteForwardedButton,
   deleteLocationsButton,
   deleteMentionButton,
@@ -118,6 +119,7 @@ export class SettingsCommand {
       .row()
       .text(warnRussianLanguageButton, (context) => toggleSetting(context, 'enableWarnRussian'))
       .text(deleteRussianLanguageButton, (context) => toggleSetting(context, 'enableDeleteRussian'))
+      .text(deleteCounteroffensiveButton, (context) => toggleSetting(context, 'enableDeleteCounteroffensive'))
       .row()
       .text(airAlarmAlertButton, isAlarmNow, async (context) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
