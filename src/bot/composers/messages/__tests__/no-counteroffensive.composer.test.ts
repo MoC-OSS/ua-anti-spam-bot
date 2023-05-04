@@ -66,6 +66,24 @@ describe('noCounteroffensiveComposer', () => {
       expect(sendMessageRequest?.method).toEqual('sendMessage');
     });
 
+    it('should delete if counteroffensive regex is used', async () => {
+      const update = new MessageSuperGroupMockUpdate('Сьогодні планується контр-наступ о 10:00').build();
+      await bot.handleUpdate(update);
+
+      const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest, sendMessageRequest] = outgoingRequests.getAll<
+        'deleteMessage',
+        'getChat',
+        'sendMessage',
+        'sendMessage'
+      >();
+
+      expect(outgoingRequests.length).toEqual(4);
+      expect(deleteMessageRequest?.method).toEqual('deleteMessage');
+      expect(getChatRequest?.method).toEqual('getChat');
+      expect(sendLogsMessageRequest?.method).toEqual('sendMessage');
+      expect(sendMessageRequest?.method).toEqual('sendMessage');
+    });
+
     it('should delete if counteroffensive is used and do not notify if disableDeleteMessage is true', async () => {
       chatSession.chatSettings.disableDeleteMessage = true;
       const update = new MessageSuperGroupMockUpdate('Сьогодні планується контрнаступ о 10:00').build();
