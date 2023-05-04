@@ -1,6 +1,7 @@
 import { Composer } from 'grammy';
 
 import { messageQuery } from '../../const';
+import type { DynamicStorageService } from '../../services';
 import type { DefaultChatSettings, GrammyContext, GrammyMiddleware, OptionalChatSettings } from '../../types';
 import { onlyActiveDefaultSettingFilter, onlyActiveOptionalSettingFilter, onlyNotDeletedFilter, onlyWithTextFilter } from '../filters';
 import {
@@ -12,6 +13,7 @@ import {
   onlyWhenBotAdmin,
   parseCards,
   parseEntities,
+  parseIsCounteroffensive,
   parseIsRussian,
   parseLocations,
   parseMentions,
@@ -22,6 +24,7 @@ import {
 } from '../middleware';
 
 export interface MessagesComposerProperties {
+  dynamicStorageService: DynamicStorageService;
   noCardsComposer: Composer<GrammyContext>;
   noUrlsComposer: Composer<GrammyContext>;
   noLocationsComposer: Composer<GrammyContext>;
@@ -31,12 +34,14 @@ export interface MessagesComposerProperties {
   strategicComposer: Composer<GrammyContext>;
   noRussianComposer: Composer<GrammyContext>;
   warnRussianComposer: Composer<GrammyContext>;
+  noCounterOffensiveComposer: Composer<GrammyContext>;
 }
 
 /**
  * @description Message handling composer
  * */
 export const getMessagesComposer = ({
+  dynamicStorageService,
   noCardsComposer,
   noUrlsComposer,
   noLocationsComposer,
@@ -46,6 +51,7 @@ export const getMessagesComposer = ({
   swindlersComposer,
   noRussianComposer,
   warnRussianComposer,
+  noCounterOffensiveComposer,
 }: MessagesComposerProperties) => {
   const messagesComposer = new Composer<GrammyContext>();
 
@@ -108,6 +114,7 @@ export const getMessagesComposer = ({
   registerOptionalSettingModule('enableDeleteForwards', noForwardsComposer);
   registerOptionalSettingModule('enableDeleteRussian', parseIsRussian, noRussianComposer);
   registerOptionalSettingModule('enableWarnRussian', parseIsRussian, warnRussianComposer);
+  registerOptionalSettingModule('enableDeleteCounteroffensive', parseIsCounteroffensive(dynamicStorageService), noCounterOffensiveComposer);
   // TODO optimize this module
   registerDefaultSettingModule('disableStrategicInfo', strategicComposer);
 

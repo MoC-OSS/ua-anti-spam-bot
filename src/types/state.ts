@@ -85,6 +85,19 @@ export type StateEntity =
   | (Exclude<MessageEntity, MessageEntity.TextMentionMessageEntity> & { value: string })
   | (MessageEntity.TextMentionMessageEntity & { value: User });
 
+export interface CounterOffensivePositiveResult {
+  result: true;
+  percent: number;
+  reason: string | RegExp;
+}
+
+export interface CounterOffensiveNegativeResult {
+  result: false;
+  percent: 0;
+}
+
+export type CounterOffensiveResult = CounterOffensivePositiveResult | CounterOffensiveNegativeResult;
+
 /**
  * It requires only-with-text.middleware.js
  * */
@@ -96,6 +109,7 @@ interface OnlyWithTextMiddlewareState {
   cards?: string[];
   locations?: string[];
   isRussian?: LanguageDetectionResult;
+  isCounterOffensive?: CounterOffensiveResult;
   entities?: StateEntity[];
 }
 

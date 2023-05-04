@@ -52,6 +52,7 @@ export interface OptionalChatSettings {
   enableDeleteLocations?: boolean;
   enableDeleteMentions?: boolean;
   enableDeleteForwards?: boolean;
+  enableDeleteCounteroffensive?: boolean;
   enableDeleteRussian?: boolean;
   enableWarnRussian?: boolean;
 }
