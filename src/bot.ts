@@ -268,8 +268,6 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     .filter((context) => chainFilters(onlyCreatorChatFilter, !!context.state.isDeleted || !!context.state.photo)(context))
     .use(logCreatorState);
 
-  bot.command('echo', (context) => context.reply(JSON.stringify(context.msg)));
-
   bot.use(notChannelRegisterComposer);
 
   bot.catch(globalErrorHandler);
