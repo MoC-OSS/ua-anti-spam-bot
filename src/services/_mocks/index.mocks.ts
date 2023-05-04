@@ -79,7 +79,7 @@ export const mockDataset = {
   immediately: ['test'],
   swindlers_domains: ['olx-ua.darpays.site', 'olx-ua.europe-pays.site', 'olx-ua.glob-payments.site', 'olx-ua.lightpays.online'],
   swindlers_regex_sites: ['privat24.', 'orpay', 'da-pay', '-pay'],
-  counteroffensiveTriggers: ['контрнаступ', /контр.наступ/],
+  counteroffensiveTriggers: ['контрнаступ', /контр.{0,2}наступ/],
 } as LocalDataset;
 
 export const mockDynamicStorageService = new DynamicStorageService(mockSwindlersGoogleService, mockGoogleService, mockDataset);

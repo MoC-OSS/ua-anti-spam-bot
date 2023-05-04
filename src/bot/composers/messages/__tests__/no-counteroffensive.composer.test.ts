@@ -1,6 +1,7 @@
 import { hydrateReply } from '@grammyjs/parse-mode';
 import { Bot } from 'grammy';
 
+import { CounteroffensiveService } from '../../../../services';
 import { mockDynamicStorageService } from '../../../../services/_mocks/index.mocks';
 import type { OutgoingRequests } from '../../../../testing';
 import { MessageSuperGroupMockUpdate, prepareBotForTesting } from '../../../../testing';
@@ -20,6 +21,8 @@ const { chatSession, mockChatSessionMiddleware } = mockChatSession({
   },
 });
 
+const counteroffensiveService = new CounteroffensiveService(mockDynamicStorageService);
+
 describe('noCounteroffensiveComposer', () => {
   beforeAll(async () => {
     bot.use(hydrateReply);
@@ -27,7 +30,7 @@ describe('noCounteroffensiveComposer', () => {
 
     bot.use(stateMiddleware);
     bot.use(parseText);
-    bot.use(parseIsCounteroffensive(mockDynamicStorageService));
+    bot.use(parseIsCounteroffensive(counteroffensiveService));
     bot.use(mockChatSessionMiddleware);
 
     bot.use(noCounterOffensiveComposer);
