@@ -36,9 +36,10 @@ export const getNoCounterOffensiveComposer = () => {
   }
 
   noCounterOffensiveComposer.use(async (context, next) => {
+    const isFeatureEnabled = context.chatSession.chatSettings.enableDeleteCounteroffensive;
     const { isCounterOffensive, text } = context.state;
 
-    if (isCounterOffensive?.result) {
+    if (isFeatureEnabled && isCounterOffensive?.result) {
       const { reason, percent } = isCounterOffensive;
       await context.deleteMessage();
       await saveCounteroffensiveMessage(context, reason, percent, text);

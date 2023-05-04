@@ -20,6 +20,7 @@ export type LocalDataset = typeof dataset &
     swindlers_domains: string[];
     swindlers_cards: string[];
     swindlers_regex_sites: string[];
+    counteroffensiveTriggers: (string | RegExp)[];
   }>;
 
 export class DynamicStorageService {
@@ -54,6 +55,7 @@ export class DynamicStorageService {
     this.swindlerDomains = localDataset.swindlers_domains || [];
     this.swindlerCards = localDataset.swindlers_cards || [];
     this.swindlerRegexSites = localDataset.swindlers_regex_sites || [];
+    this.counteroffensiveTriggers = localDataset.counteroffensiveTriggers || [];
     this.notSwindlers = [];
     this.fetchEmitter = new EventEmitter() as TypedEmitter<FetchEvents>;
   }
