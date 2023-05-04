@@ -112,13 +112,13 @@ export const getMessagesComposer = ({
   registerOptionalSettingModule('enableDeleteMentions', parseMentions, noMentionsComposer);
   registerOptionalSettingModule('enableDeleteCards', parseCards, noCardsComposer);
   registerOptionalSettingModule('enableDeleteForwards', noForwardsComposer);
-  registerOptionalSettingModule('enableDeleteRussian', parseIsRussian, noRussianComposer);
-  registerOptionalSettingModule('enableWarnRussian', parseIsRussian, warnRussianComposer);
   registerOptionalSettingModule(
     'enableDeleteCounteroffensive',
     parseIsCounteroffensive(counteroffensiveService),
     noCounterOffensiveComposer,
   );
+  registerOptionalSettingModule('enableDeleteRussian', parseIsRussian, noRussianComposer);
+  registerOptionalSettingModule('enableWarnRussian', parseIsRussian, warnRussianComposer);
   // TODO optimize this module
   registerDefaultSettingModule('disableStrategicInfo', strategicComposer);
 
