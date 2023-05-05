@@ -1,6 +1,7 @@
 export * from './alarm.service';
 export * from './alarm-chat.service';
 export * from './cards.service';
+export * from './counteroffensive.service';
 export * from './dynamic-storage.service';
 export * from './google.service';
 export * from './language-detect.service';

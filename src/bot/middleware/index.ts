@@ -20,6 +20,7 @@ export * from './only-with-photo.middleware';
 export * from './only-with-text.middleware';
 export * from './parse-cards.middleware';
 export * from './parse-entities.middleware';
+export * from './parse-is-counteroffensive.middleware';
 export * from './parse-is-russian.middleware';
 export * from './parse-locations.middleware';
 export * from './parse-mentions.middleware';
