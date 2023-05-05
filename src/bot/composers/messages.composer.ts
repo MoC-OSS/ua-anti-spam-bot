@@ -107,16 +107,16 @@ export const getMessagesComposer = ({
    * The order should be right
    * */
   registerDefaultSettingModule('disableSwindlerMessage', swindlersComposer);
-  registerOptionalSettingModule('enableDeleteUrls', parseUrls, noUrlsComposer);
-  registerOptionalSettingModule('enableDeleteLocations', parseLocations, noLocationsComposer);
-  registerOptionalSettingModule('enableDeleteMentions', parseMentions, noMentionsComposer);
-  registerOptionalSettingModule('enableDeleteCards', parseCards, noCardsComposer);
-  registerOptionalSettingModule('enableDeleteForwards', noForwardsComposer);
   registerOptionalSettingModule(
     'enableDeleteCounteroffensive',
     parseIsCounteroffensive(counteroffensiveService),
     noCounterOffensiveComposer,
   );
+  registerOptionalSettingModule('enableDeleteUrls', parseUrls, noUrlsComposer);
+  registerOptionalSettingModule('enableDeleteLocations', parseLocations, noLocationsComposer);
+  registerOptionalSettingModule('enableDeleteMentions', parseMentions, noMentionsComposer);
+  registerOptionalSettingModule('enableDeleteCards', parseCards, noCardsComposer);
+  registerOptionalSettingModule('enableDeleteForwards', noForwardsComposer);
   registerOptionalSettingModule('enableDeleteRussian', parseIsRussian, noRussianComposer);
   registerOptionalSettingModule('enableWarnRussian', parseIsRussian, warnRussianComposer);
   // TODO optimize this module

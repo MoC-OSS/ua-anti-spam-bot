@@ -409,7 +409,7 @@ ${getDeleteUserAtomMessage({ writeUsername, userId })}
 export const getDeleteCounteroffensiveMessage = ({ writeUsername, userId }: DeleteMessageAtomProperties) => `
 ${getDeleteUserAtomMessage({ writeUsername, userId })}
 
-🤫 Міноборони рекомендує не обговорювати контрнаступ ЗСУ. Тому, будь ласка, уникайте коментарів на цю тему
+🤫 Міноборони рекомендує не обговорювати контрнаступ ЗСУ. Тому, будь ласка, уникайте коментарів на цю тему!
 `;
 
 export interface DebugMessageProperties {
