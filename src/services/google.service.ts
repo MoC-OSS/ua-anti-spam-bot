@@ -4,7 +4,7 @@ import { google } from 'googleapis';
 
 import { environmentConfig } from '../config';
 import type { GoogleFullCellData, GoogleShortCellData } from '../types';
-import { handleError } from '../utils';
+import { coerceArray, handleError } from '../utils';
 
 const sheets = google.sheets('v4');
 
@@ -116,17 +116,18 @@ export class GoogleService {
   /**
    * @param {string} spreadsheetId
    * @param {string} sheetName
-   * @param {string} value
+   * @param {T|T[]} value
    * @param {string} [range]
    * */
-  async appendToSheet(spreadsheetId: string, sheetName: string, value: string, range?: string) {
+  async appendToSheet<T>(spreadsheetId: string, sheetName: string, value: T | T[], range?: string) {
+    const data = coerceArray(value);
     try {
       await sheets.spreadsheets.values.append({
         spreadsheetId,
         range: `${sheetName}!${range || RANGE}`,
         valueInputOption: 'USER_ENTERED',
         requestBody: {
-          values: [[value]],
+          values: [data],
         },
       });
     } catch (error: unknown) {

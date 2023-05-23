@@ -1,5 +1,8 @@
+import moment from 'moment-timezone';
+
 import { getStatisticsMessage } from '../../../message';
 import { redisService } from '../../../services';
+import { statisticsGoogleService } from '../../../services/statistics-google.service';
 import type { GrammyMiddleware } from '../../../types';
 import { formatDate, handleError } from '../../../utils';
 
@@ -21,6 +24,7 @@ export class StatisticsCommand {
       try {
         await context.replyWithChatAction('typing');
         const chatSessions = await redisService.getChatSessions();
+        const currentDate = moment().locale('en').format('LLL');
 
         const superGroupsSessions = chatSessions.filter((session) => session.data.chatType === 'supergroup');
         const groupSessions = chatSessions.filter((session) => session.data.chatType === 'group');
@@ -54,6 +58,18 @@ export class StatisticsCommand {
             totalUserCounts,
           }),
         );
+        await statisticsGoogleService.appendToSheet([
+          currentDate,
+          totalSessionCount,
+          totalUserCounts,
+          superGroupsCount,
+          groupCount,
+          adminsChatsCount,
+          memberChatsCount,
+          botRemovedCount,
+          privateCount,
+          channelCount,
+        ]);
       } catch (error) {
         handleError(error);
         await context.reply('Cannot get statistics');
