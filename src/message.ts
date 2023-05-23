@@ -503,6 +503,13 @@ export interface HelpMessageProperties {
 
 /**
  *
+ * Message that bot sends on /get_new_statistic where no new data
+ *
+ * */
+export const noNewStatisticMessage = 'Немає нових записів.';
+
+/**
+ *
  * Help handler
  *
  * */
