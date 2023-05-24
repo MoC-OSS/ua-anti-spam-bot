@@ -351,21 +351,54 @@ export const startMessageAtom = `
  * */
 export const getDeclinedMassSendingMessage = 'Вибач, але у тебе немає прав для цієї команди.😞'.trim();
 
-export interface DeleteMessageAtomProperties {
+export interface UserNameAtomProperties {
   writeUsername: string;
   userId?: number;
 }
 
-export const getDeleteUserAtomMessage = ({ writeUsername, userId }: DeleteMessageAtomProperties) =>
+export const getUserNameMessage = ({ writeUsername, userId }: UserNameAtomProperties) =>
+  userId && writeUsername ? `<a href="tg://user?id=${userId}">${writeUsername}</a>` : '';
+
+export const getDeleteUserAtomMessage = ({ writeUsername, userId }: UserNameAtomProperties) =>
   `
 ❗️ ${userId && writeUsername ? `<a href="tg://user?id=${userId}">${writeUsername}</a>, <b>повідомлення` : '<b>Повідомлення'} видалено</b>.
 `.trim();
 
-export interface DeleteMessageProperties extends DeleteMessageAtomProperties {
+export interface DeleteMessageProperties extends UserNameAtomProperties {
   wordMessage: string;
   debugMessage: string;
   withLocation?: boolean;
 }
+
+/**
+ *
+ * Report
+ *
+ * */
+
+export interface ReportHelpCommandMessagePropeties extends UserNameAtomProperties {
+  botName: string;
+}
+
+export const getReportHelpCommandMessage = ({ writeUsername, userId, botName }: ReportHelpCommandMessagePropeties) =>
+  `
+👮🏻‍♂️✋ ${getUserNameMessage({
+    writeUsername,
+    userId,
+  })} Ця команда створена для відправки повідомлення на перевірку адміністраторам @${botName}.
+
+Якщо повідомлення містить <b>стратегічну інформацію, шахрайство, віруси або фейкове прохання про допомогу</b>, Вам необхідно його виділити і відповісти на нього з командою /report.
+`.trim();
+
+export const reportHelpAgreeMessage = '😉Зрозуміло';
+
+export const getReportCommandMessage = ({ writeUsername, userId }: UserNameAtomProperties) =>
+  `
+${getUserNameMessage({ writeUsername, userId })} Повідомлення відправлено на перевірку!
+
+Якщо воно пройде перевірку, ми його видалимо і автоматично додамо в базу!
+Дякуємо!
+`.trim();
 
 /**
  *
@@ -389,7 +422,7 @@ ${getRandomItem(withLocation ? randomLocationBanEmojis : randomBanEmojis)} <b>П
 
 ${debugMessage}`.trim();
 
-export interface DeleteFeatureMessageProperties extends DeleteMessageAtomProperties {
+export interface DeleteFeatureMessageProperties extends UserNameAtomProperties {
   featuresString: string;
 }
 

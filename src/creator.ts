@@ -7,6 +7,8 @@ export const logsChat = -1_001_599_612_617;
 export const trainingChat = -1_001_527_463_076;
 export const privateTrainingChat = -788_538_459;
 
+export const groupAnonymousBotId = 1_087_968_824;
+
 export const swindlerMessageChatId = -1_001_769_124_427;
 export const swindlerBotsChatId = -672_793_621;
 export const swindlerHelpChatId = -1_001_750_209_242;

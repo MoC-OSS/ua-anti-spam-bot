@@ -1,3 +1,4 @@
+export * from './is-callback-from-author.filter';
 export * from './is-not-channel.filter';
 export * from './only-active-default-setting.filter';
 export * from './only-active-optional-setting.filter';

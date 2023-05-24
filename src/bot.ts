@@ -17,6 +17,7 @@ import {
   getPhotoComposer,
   getPrivateCommandsComposer,
   getPublicCommandsComposer,
+  getReportComposer,
   getSaveToSheetComposer,
   getTensorTrainingComposer,
 } from './bot/composers';
@@ -140,6 +141,9 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   });
   const { creatorCommandsComposer } = getCreatorCommandsComposer({ commandSetter, rootMenu, tensorService });
 
+  // Report command feature
+  const { reportComposer } = getReportComposer();
+
   // Dev composers only
   const { saveToSheetComposer: swindlerMessageSaveToSheetComposer } = getSaveToSheetComposer({
     chatId: swindlerMessageChatId,
@@ -257,6 +261,9 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   notChannelComposer.use(creatorCommandsComposer);
   notChannelComposer.use(privateCommandsComposer);
   notChannelComposer.use(publicCommandsComposer);
+
+  // Report command feature
+  bot.use(reportComposer);
 
   // Swindlers helpers
   notChannelComposer.use(swindlerMessageSaveToSheetComposer);

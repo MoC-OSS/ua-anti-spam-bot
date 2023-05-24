@@ -6,5 +6,6 @@ export * from './messages.composer';
 export * from './photos.composer';
 export * from './private-command.composer';
 export * from './public-command.composer';
+export * from './report.composer';
 export * from './save-to-sheet.composer';
 export * from './tensor-training.composer';
