@@ -36,7 +36,6 @@ export class OnTextListener {
       // console.info('enter onText ******', ctx.chat?.title, '******', ctx.state.text);
 
       const message = context.state.text;
-
       /**
        * Removed because ask to reduce chat messages
        * */

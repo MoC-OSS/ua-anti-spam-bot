@@ -33,6 +33,7 @@ import {
   getSwindlersComposer,
   getWarnRussianComposer,
 } from './bot/composers/messages';
+import { getSwindlersStatisticCommandsComposer } from './bot/composers/swindlers-statististics.composer';
 import { isNotChannel, onlyCreatorChatFilter } from './bot/filters';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
@@ -138,6 +139,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     startTime,
     tensorService,
   });
+  const { swindlersStatisticComposer } = getSwindlersStatisticCommandsComposer();
   const { creatorCommandsComposer } = getCreatorCommandsComposer({ commandSetter, rootMenu, tensorService });
 
   // Dev composers only
@@ -256,6 +258,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   notChannelComposer.use(healthCheckComposer);
   notChannelComposer.use(creatorCommandsComposer);
   notChannelComposer.use(privateCommandsComposer);
+  notChannelComposer.use(swindlersStatisticComposer);
   notChannelComposer.use(publicCommandsComposer);
 
   // Swindlers helpers
