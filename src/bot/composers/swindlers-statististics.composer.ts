@@ -27,14 +27,20 @@ const getStatisticFromSheet = async (): Promise<{ [key: string]: string[] }> => 
     swindlersGoogleService.getSiteRegex(),
   ]);
 
-  return statistic.then(([swindlerPositives, swindlerBots, swindlerDomains, notSwindlers, swindlerCards, swindlerRegexSites]) => ({
-    swindlerPositives: removeDuplicates(swindlerPositives),
-    swindlerBots: removeDuplicates(swindlerBots),
-    swindlerDomains: removeDuplicates(swindlerDomains),
-    notSwindlers: removeDuplicates(notSwindlers),
-    swindlerCards: removeDuplicates(swindlerCards),
-    swindlerRegexSites: removeDuplicates(swindlerRegexSites),
-  }));
+  return statistic.then((data) => {
+    const [swindlerPositives, swindlerBots, swindlerDomains, notSwindlers, swindlerCards, swindlerRegexSites] = data.map((element) =>
+      removeDuplicates(element),
+    );
+
+    return {
+      swindlerPositives,
+      swindlerBots,
+      swindlerDomains,
+      notSwindlers,
+      swindlerCards,
+      swindlerRegexSites,
+    };
+  });
 };
 
 export const getSwindlersStatisticCommandsComposer = () => {
