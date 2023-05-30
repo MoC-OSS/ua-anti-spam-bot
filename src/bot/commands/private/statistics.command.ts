@@ -3,8 +3,12 @@ import moment from 'moment-timezone';
 import { getStatisticsMessage } from '../../../message';
 import { redisService } from '../../../services';
 import { statisticsGoogleService } from '../../../services/statistics-google.service';
-import type { GrammyMiddleware } from '../../../types';
+import type { AirRaidAlertSettings, DefaultChatSettings, GrammyMiddleware, OptionalChatSettings } from '../../../types';
 import { formatDate, handleError } from '../../../utils';
+
+type FeaturesSessionsData = {
+  [Property in keyof Required<DefaultChatSettings & OptionalChatSettings & Pick<AirRaidAlertSettings, 'notificationMessage'>>]: number;
+};
 
 export class StatisticsCommand {
   /**
@@ -43,6 +47,34 @@ export class StatisticsCommand {
         const adminsChatsCount = [...superGroupsSessions, ...groupSessions].filter((session) => session.data.isBotAdmin).length;
         const memberChatsCount = [...superGroupsSessions, ...groupSessions].filter((session) => !session.data.isBotAdmin).length;
         const botRemovedCount = [...superGroupsSessions, ...groupSessions].filter((session) => session.data.botRemoved).length;
+
+        // features
+
+        const features: FeaturesSessionsData = {
+          notificationMessage: 0,
+          disableChatWhileAirRaidAlert: 0,
+          disableStrategicInfo: 0,
+          disableDeleteMessage: 0,
+          disableSwindlerMessage: 0,
+          disableDeleteServiceMessage: 0,
+          disableNsfwFilter: 0,
+          enableDeleteCards: 0,
+          enableDeleteUrls: 0,
+          enableDeleteLocations: 0,
+          enableDeleteMentions: 0,
+          enableDeleteForwards: 0,
+          enableDeleteCounteroffensive: 0,
+          enableDeleteRussian: 0,
+          enableWarnRussian: 0,
+        };
+
+        chatSessions.forEach((session) => {
+          Object.keys(features).forEach((key) => {
+            features[key] += +session.data.chatSettings[key];
+          });
+        });
+
+        console.info('features', features);
 
         await context.replyWithHTML(
           getStatisticsMessage({
