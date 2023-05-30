@@ -199,6 +199,10 @@ export function isIdWhitelisted(id: number | undefined) {
   return whitelist.includes(id.toString());
 }
 
+export function coerceArray<T>(value: T | T[]): T[] {
+  return Array.isArray(value) ? value : [value];
+}
+
 export function isIdWhitelistedForSwindlersStatistic(id: number | undefined) {
   // If channel or no id for some reason, it's not whitelisted
   if (!id) {
