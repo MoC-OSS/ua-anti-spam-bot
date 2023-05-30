@@ -165,6 +165,7 @@ export function getRandomItem<T>(array: T[]): T {
  * @param {string} reason
  * @param {any} [extra]
  * */
+// eslint-disable-next-line  @typescript-eslint/no-explicit-any
 export function logSkipMiddleware(context: GrammyContext, reason: string, extra?: any) {
   if (environmentConfig.DEBUG || environmentConfig.DEBUG_MIDDLEWARE) {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -200,4 +201,14 @@ export function isIdWhitelisted(id: number | undefined) {
 
 export function coerceArray<T>(value: T | T[]): T[] {
   return Array.isArray(value) ? value : [value];
+}
+
+export function isIdWhitelistedForSwindlersStatistic(id: number | undefined) {
+  // If channel or no id for some reason, it's not whitelisted
+  if (!id) {
+    return false;
+  }
+
+  const whitelist = (environmentConfig.USERS_FOR_SWINDLERS_STATISTIC_WHITELIST || '').split(', ');
+  return whitelist.includes(id.toString());
 }

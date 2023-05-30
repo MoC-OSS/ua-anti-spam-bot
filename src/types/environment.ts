@@ -2,6 +2,7 @@ export interface GrammyEnvironmentConfig {
   BOT_TOKEN: string;
   CREATOR_ID?: string | null;
   USERS_WHITELIST: string;
+  USERS_FOR_SWINDLERS_STATISTIC_WHITELIST: string;
 }
 
 export interface ServerEnvironmentConfig {
