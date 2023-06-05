@@ -3,7 +3,7 @@ import { Composer } from 'grammy';
 
 import { LOGS_CHAT_THREAD_IDS } from '../../../const';
 import { logsChat } from '../../../creator';
-import { getDeleteFeatureMessage } from '../../../message';
+import { getDeleteFeatureMessage, mentionLogsStartMessage } from '../../../message';
 import type { GrammyContext } from '../../../types';
 import { getEnabledFeaturesString, getUserData, telegramUtil } from '../../../utils';
 
@@ -24,7 +24,7 @@ export const getNoMentionsComposer = () => {
 
     return context.api.sendMessage(
       logsChat,
-      `Deleted mention message (${mentions.join(', ')}) by user ${userMention}:\n\n${chatMention || userMention}\n${escapeHTML(text)}`,
+      `${mentionLogsStartMessage} (${mentions.join(', ')}) by user ${userMention}:\n\n${chatMention || userMention}\n${escapeHTML(text)}`,
       {
         parse_mode: 'HTML',
         message_thread_id: LOGS_CHAT_THREAD_IDS.MENTIONS,

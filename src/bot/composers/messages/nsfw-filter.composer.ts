@@ -5,7 +5,7 @@ import { Composer } from 'grammy';
 import { environmentConfig } from '../../../config';
 import { LOGS_CHAT_THREAD_IDS } from '../../../const';
 import { logsChat } from '../../../creator';
-import { getDeleteNsfwMessage } from '../../../message';
+import { getDeleteNsfwMessage, nsfwLogsStartMessage } from '../../../message';
 import type { NsfwTensorService } from '../../../tensor';
 import type { GrammyContext, NsfwTensorPositiveResult, NsfwTensorResult } from '../../../types';
 import { ImageType } from '../../../types';
@@ -41,7 +41,7 @@ const saveNsfwMessage = async (context: GrammyContext) => {
       const { caption } = imageData;
 
       return context.api.sendPhoto(logsChat, meta.file_id, {
-        caption: `Looks like nsfw ${type} (${(deletePrediction.probability * 100).toFixed(2)}%) from <code>${
+        caption: `${nsfwLogsStartMessage} ${type} (${(deletePrediction.probability * 100).toFixed(2)}%) from <code>${
           deletePrediction.className
         }</code> by user ${userMention}:\n\n${chatMention || userMention}\n${caption || ''}`,
         parse_mode: 'HTML',
@@ -59,9 +59,9 @@ const saveNsfwMessage = async (context: GrammyContext) => {
       const stickerMessage = await context.api.sendSticker(logsChat, meta.file_id);
       return context.api.sendMessage(
         logsChat,
-        `Looks like nsfw ${type} ${context.state.nsfwResult.reason} ${setNameAddition} (${(deletePrediction.probability * 100).toFixed(
-          2,
-        )}%) from <code>${deletePrediction.className}</code> by user ${userMention}:\n\n${chatMention || userMention}`,
+        `${nsfwLogsStartMessage} ${type} ${context.state.nsfwResult.reason} ${setNameAddition} (${(
+          deletePrediction.probability * 100
+        ).toFixed(2)}%) from <code>${deletePrediction.className}</code> by user ${userMention}:\n\n${chatMention || userMention}`,
         {
           parse_mode: 'HTML',
           message_thread_id: LOGS_CHAT_THREAD_IDS.PORN,
@@ -80,7 +80,7 @@ const saveNsfwMessage = async (context: GrammyContext) => {
       const video = (imageData as StateImageVideo).video || (imageData as StateImageAnimation).animation;
 
       return context.api.sendVideo(logsChat, video.file_id, {
-        caption: `Looks like nsfw ${type} by ${context.state.nsfwResult.reason} (${(deletePrediction.probability * 100).toFixed(
+        caption: `${nsfwLogsStartMessage} ${type} by ${context.state.nsfwResult.reason} (${(deletePrediction.probability * 100).toFixed(
           2,
         )}%) from <code>${deletePrediction.className}</code> by user ${userMention}:\n\n${chatMention || userMention}\n${caption || ''}`,
         parse_mode: 'HTML',
@@ -97,9 +97,9 @@ const saveNsfwMessage = async (context: GrammyContext) => {
       const videoNoteMessage = await context.api.sendVideoNote(logsChat, videoNote.file_id);
       return context.api.sendMessage(
         logsChat,
-        `Looks like nsfw ${type} ${context.state.nsfwResult.reason} (${(deletePrediction.probability * 100).toFixed(2)}%) from <code>${
-          deletePrediction.className
-        }</code> by user ${userMention}:\n\n${chatMention || userMention}`,
+        `${nsfwLogsStartMessage} ${type} ${context.state.nsfwResult.reason} (${(deletePrediction.probability * 100).toFixed(
+          2,
+        )}%) from <code>${deletePrediction.className}</code> by user ${userMention}:\n\n${chatMention || userMention}`,
         {
           parse_mode: 'HTML',
           reply_to_message_id: videoNoteMessage.message_id,
