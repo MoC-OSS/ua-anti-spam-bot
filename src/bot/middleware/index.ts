@@ -30,5 +30,6 @@ export * from './parse-urls.middleware';
 export * from './parse-video-frames.middleware';
 export * from './performance-end.middleware';
 export * from './performance-start.middleware';
+export * from './remove-system-information.middleware';
 export * from './state.middleware';
 export * from './throw-error.middleware';

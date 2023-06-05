@@ -5,7 +5,7 @@ import { isChatId } from 'grammy-guard';
 import { messageQuery } from '../../const';
 import type { swindlersGoogleService } from '../../services';
 import type { GrammyContext, GrammyMenuContext } from '../../types';
-import { onlyWithText, parseText } from '../middleware';
+import { onlyWithText, parseText, removeSystemInformationMiddleware } from '../middleware';
 
 export interface SaveToSheetComposerProperties {
   chatId: number;
@@ -31,8 +31,8 @@ export const getSaveToSheetComposer = ({ chatId, rootMenu, updateMethod }: SaveT
       await context.deleteMessage();
     });
 
-  composer.on(messageQuery, parseText, onlyWithText, async (context) => {
-    const text = context.state.text!;
+  composer.on(messageQuery, parseText, onlyWithText, removeSystemInformationMiddleware, async (context) => {
+    const text = context.state.clearText!;
 
     await context.deleteMessage();
     await context.reply(text, {

@@ -3,7 +3,7 @@ import { Composer } from 'grammy';
 
 import { LOGS_CHAT_THREAD_IDS } from '../../../const';
 import { logsChat } from '../../../creator';
-import { getDeleteFeatureMessage } from '../../../message';
+import { cardLogsStartMessage, getDeleteFeatureMessage } from '../../../message';
 import type { GrammyContext } from '../../../types';
 import { getEnabledFeaturesString, getUserData, telegramUtil } from '../../../utils';
 
@@ -24,7 +24,7 @@ export const getNoCardsComposer = () => {
 
     return context.api.sendMessage(
       logsChat,
-      `Deleted card message (${cards.join(', ')}) by user ${userMention}:\n\n${chatMention || userMention}\n${escapeHTML(text)}`,
+      `${cardLogsStartMessage} (${cards.join(', ')}) by user ${userMention}:\n\n${chatMention || userMention}\n${escapeHTML(text)}`,
       {
         parse_mode: 'HTML',
         message_thread_id: LOGS_CHAT_THREAD_IDS.CARDS,

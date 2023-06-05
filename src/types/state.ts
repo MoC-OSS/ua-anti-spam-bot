@@ -103,6 +103,7 @@ export type CounterOffensiveResult = CounterOffensivePositiveResult | CounterOff
  * */
 interface OnlyWithTextMiddlewareState {
   text?: string;
+  clearText?: string;
   photo?: StateImage | null;
   urls?: string[];
   mentions?: string[];

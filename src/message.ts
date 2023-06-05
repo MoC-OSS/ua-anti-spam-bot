@@ -692,3 +692,30 @@ ${getWarnRussianMessage(message)}
 `;
 
 export const getUkrainianMessageExtra = (percent) => (percent === 200 ? '\nВ українській мові немає букв ъ, ы, э, та ё 🇺🇦' : '');
+
+/**
+ * Logs
+ * */
+export const swindlerLogsStartMessage = "Looks like swindler's message";
+export const russianDeleteLogsStartMessage = 'Deleted russian message';
+export const russianWarnLogsStartMessage = 'Warn russian message';
+export const nsfwLogsStartMessage = 'Looks like nsfw';
+export const cannotDeleteMessage = 'Cannot delete the following message from chat';
+export const urlLogsStartMessage = 'Deleted URLs message';
+export const locationLogsStartMessage = 'Deleted location message';
+export const mentionLogsStartMessage = 'Deleted mention message';
+export const cardLogsStartMessage = 'Deleted card message';
+export const counteroffensiveLogsStartMessage = 'Deleted counteroffensive message by';
+
+export const logsStartMessages = new Set([
+  swindlerLogsStartMessage,
+  russianDeleteLogsStartMessage,
+  russianWarnLogsStartMessage,
+  nsfwLogsStartMessage,
+  cannotDeleteMessage,
+  urlLogsStartMessage,
+  locationLogsStartMessage,
+  mentionLogsStartMessage,
+  cardLogsStartMessage,
+  counteroffensiveLogsStartMessage,
+]);
