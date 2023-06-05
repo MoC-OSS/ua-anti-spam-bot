@@ -3,7 +3,7 @@ import { Composer } from 'grammy';
 
 import { LOGS_CHAT_THREAD_IDS } from '../../../const';
 import { logsChat } from '../../../creator';
-import { getDeleteFeatureMessage } from '../../../message';
+import { getDeleteFeatureMessage, urlLogsStartMessage } from '../../../message';
 import type { GrammyContext } from '../../../types';
 import { getEnabledFeaturesString, getUserData, telegramUtil } from '../../../utils';
 
@@ -24,7 +24,7 @@ export const getNoUrlsComposer = () => {
 
     return context.api.sendMessage(
       logsChat,
-      `Deleted URLs message (${urls.join(', ')}) by user ${userMention}:\n\n${chatMention || userMention}\n${escapeHTML(text)}`,
+      `${urlLogsStartMessage} (${urls.join(', ')}) by user ${userMention}:\n\n${chatMention || userMention}\n${escapeHTML(text)}`,
       {
         parse_mode: 'HTML',
         message_thread_id: LOGS_CHAT_THREAD_IDS.URLS,

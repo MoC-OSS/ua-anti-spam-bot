@@ -3,7 +3,7 @@ import { Composer } from 'grammy';
 
 import { LOGS_CHAT_THREAD_IDS } from '../../../const';
 import { logsChat } from '../../../creator';
-import { getDeleteCounteroffensiveMessage } from '../../../message';
+import { counteroffensiveLogsStartMessage, getDeleteCounteroffensiveMessage } from '../../../message';
 import type { GrammyContext } from '../../../types';
 import { getUserData, telegramUtil } from '../../../utils';
 
@@ -25,7 +25,7 @@ export const getNoCounterOffensiveComposer = () => {
 
     return context.api.sendMessage(
       logsChat,
-      `Deleted counteroffensive message by ${reason instanceof RegExp ? 'regex' : 'string'} '${reason.toString()}' reason (${(
+      `${counteroffensiveLogsStartMessage} ${reason instanceof RegExp ? 'regex' : 'string'} '${reason.toString()}' reason (${(
         maxChance * 100
       ).toFixed(2)}%) by user ${userMention}:\n\n${chatMention || userMention}\n${escapeHTML(text)}`,
       {
