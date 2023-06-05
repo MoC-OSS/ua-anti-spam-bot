@@ -15,6 +15,7 @@ export * from './empty-functions.util';
 export * from './error-handler';
 export * from './optimize-write-context.util';
 export * from './remove-duplicates.util';
+export * from './remove-system-information.util';
 export * from './reveal-hidden-urls.util';
 export * from './video.util';
 
