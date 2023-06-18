@@ -9,3 +9,7 @@ export const LOGS_CHAT_THREAD_IDS = {
   MENTIONS: 44_044,
   COUNTEROFFENSIVE: 103_325,
 };
+
+export const SECOND_LOGS_CHAT_THREAD_IDS = {
+  SWINDLERS: 5,
+};
