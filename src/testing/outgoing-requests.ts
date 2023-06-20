@@ -32,6 +32,20 @@ export class OutgoingRequests<M extends RealApiMethodKeys = RealApiMethodKeys> {
   }
 
   /**
+   * Builds an array of methods with strong and loose autocomplete
+   */
+  buildMethods<T extends M>(methods: T[]): T[] {
+    return methods;
+  }
+
+  /**
+   * Get the outgoing request methods
+   */
+  getMethods(): M[] {
+    return this.requests.map((request) => request.method as M);
+  }
+
+  /**
    * Add request at the end
    * */
   push(request: Request<M>): this {
@@ -92,6 +106,8 @@ export class OutgoingRequests<M extends RealApiMethodKeys = RealApiMethodKeys> {
   getAll<A extends M, B extends M, C extends M, D extends M>(): Partial<[Request<A>, Request<B>, Request<C>, Request<D>]>;
 
   getAll<A extends M, B extends M, C extends M, D extends M, E extends M>(): Partial<[Request<A>, Request<B>, Request<C>, Request<D>, Request<E>]>;
+
+  getAll<A extends M, B extends M, C extends M, D extends M, E extends M, F extends M>(): Partial<[Request<A>, Request<B>, Request<C>, Request<D>, Request<E>, Request<F>]>;
   /* eslint-enable prettier/prettier */
 
   getAll() {

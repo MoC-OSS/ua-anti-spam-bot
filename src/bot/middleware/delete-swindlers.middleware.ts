@@ -5,9 +5,9 @@ import { InputFile } from 'grammy';
 import type { GrammyContext, GrammyMiddleware, SwindlerResponseBody, SwindlersResult, SwindlerType } from 'types';
 
 import { environmentConfig } from '../../config';
-import { LOGS_CHAT_THREAD_IDS } from '../../const';
-import { logsChat } from '../../creator';
-import { getCannotDeleteMessage, swindlersWarningMessage } from '../../message';
+import { LOGS_CHAT_THREAD_IDS, SECOND_LOGS_CHAT_THREAD_IDS } from '../../const';
+import { logsChat, secondLogsChat } from '../../creator';
+import { cannotDeleteMessage, getCannotDeleteMessage, swindlerLogsStartMessage, swindlersWarningMessage } from '../../message';
 import type { SwindlersDetectService } from '../../services';
 import { compareDatesWithOffset, handleError, revealHiddenUrls, telegramUtil } from '../../utils';
 
@@ -69,14 +69,25 @@ export class DeleteSwindlersMiddleware {
     const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
     const text = message || context.state?.text || '';
 
-    return context.api.sendMessage(
+    await context.api.sendMessage(
       logsChat,
-      `Looks like swindler's message (${(maxChance * 100).toFixed(2)}%) from <code>${from}</code> by user ${userMention}:\n\n${
+      `${swindlerLogsStartMessage} (${(maxChance * 100).toFixed(2)}%) from <code>${from}</code> by user ${userMention}:\n\n${
         chatMention || userMention
       }\n${escapeHTML(text)}`,
       {
         parse_mode: 'HTML',
         message_thread_id: LOGS_CHAT_THREAD_IDS.SWINDLERS,
+      },
+    );
+
+    return context.api.sendMessage(
+      secondLogsChat,
+      `${swindlerLogsStartMessage} (${(maxChance * 100).toFixed(2)}%) from <code>${from}</code> by user ${userMention}:\n\n${
+        chatMention || userMention
+      }\n${escapeHTML(text)}`,
+      {
+        parse_mode: 'HTML',
+        message_thread_id: SECOND_LOGS_CHAT_THREAD_IDS.SWINDLERS,
       },
     );
   }
@@ -125,9 +136,7 @@ export class DeleteSwindlersMiddleware {
             context.api
               .sendMessage(
                 logsChat,
-                `Cannot delete the following message from chat\n\n<code>${telegramUtil.getChatTitle(context.chat)}</code>\n${escapeHTML(
-                  context.msg?.text || '',
-                )}`,
+                `${cannotDeleteMessage}\n\n<code>${telegramUtil.getChatTitle(context.chat)}</code>\n${escapeHTML(context.msg?.text || '')}`,
                 {
                   parse_mode: 'HTML',
                   message_thread_id: LOGS_CHAT_THREAD_IDS.SWINDLERS,
