@@ -99,5 +99,5 @@ export interface RedisSessionOptions {
 }
 
 export type FeaturesSessionsData = {
-  [Property in keyof Required<DefaultChatSettings & OptionalChatSettings & Pick<AirRaidAlertSettings, 'notificationMessage'>>]: number;
+  [Property in keyof Required<BooleanChatSettings & Pick<AirRaidAlertSettings, 'notificationMessage'>>]: number;
 };
