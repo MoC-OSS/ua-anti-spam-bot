@@ -97,3 +97,7 @@ export interface RedisSessionOptions {
   format: Record<string, unknown>;
   getSessionKey: (context: GrammyContext) => string;
 }
+
+export type FeaturesSessionsData = {
+  [Property in keyof Required<DefaultChatSettings & OptionalChatSettings & Pick<AirRaidAlertSettings, 'notificationMessage'>>]: number;
+};

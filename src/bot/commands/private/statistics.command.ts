@@ -3,19 +3,10 @@ import moment from 'moment-timezone';
 import { getStatisticsMessage } from '../../../message';
 import { redisService } from '../../../services';
 import { statisticsGoogleService } from '../../../services/statistics-google.service';
-import type { AirRaidAlertSettings, DefaultChatSettings, GrammyMiddleware, OptionalChatSettings } from '../../../types';
-import { formatDate, handleError } from '../../../utils';
-
-type FeaturesSessionsData = {
-  [Property in keyof Required<DefaultChatSettings & OptionalChatSettings & Pick<AirRaidAlertSettings, 'notificationMessage'>>]: number;
-};
+import type { FeaturesSessionsData, GrammyMiddleware } from '../../../types';
+import { handleError } from '../../../utils';
 
 export class StatisticsCommand {
-  /**
-   * @param {Date} startTime
-   * */
-  constructor(private startTime: Date) {}
-
   /**
    * Handle /statistics
    * Returns current statistics
@@ -70,17 +61,17 @@ export class StatisticsCommand {
 
         chatSessions.forEach((session) => {
           Object.keys(features).forEach((key) => {
-            features[key] += +session.data.chatSettings[key];
+            features[key] +=
+              key === 'notificationMessage'
+                ? (features[key] += +session.data.chatSettings.airRaidAlertSettings.notificationMessage)
+                : +!!session.data.chatSettings[key];
           });
         });
-
-        console.info('features', features);
 
         await context.replyWithHTML(
           getStatisticsMessage({
             adminsChatsCount,
             botRemovedCount,
-            botStartTime: formatDate(this.startTime),
             channelCount,
             groupCount,
             memberChatsCount,
@@ -88,6 +79,7 @@ export class StatisticsCommand {
             superGroupsCount,
             totalSessionCount,
             totalUserCounts,
+            features,
           }),
         );
         await statisticsGoogleService.appendToSheet([
@@ -101,6 +93,7 @@ export class StatisticsCommand {
           botRemovedCount,
           privateCount,
           channelCount,
+          ...Object.values(features),
         ]);
       } catch (error) {
         handleError(error);
