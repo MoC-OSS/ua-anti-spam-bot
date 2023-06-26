@@ -46,7 +46,7 @@ export const getPrivateCommandsComposer = ({ bot, commandSetter, dynamicStorageS
   /* Commands */
   const sessionMiddleware = new SessionCommand(startTime);
   const swindlersUpdateMiddleware = new SwindlersUpdateCommand(dynamicStorageService);
-  const statisticsMiddleware = new StatisticsCommand(startTime);
+  const statisticsMiddleware = new StatisticsCommand();
 
   composer.command('private', (context) => context.reply(commandString));
 

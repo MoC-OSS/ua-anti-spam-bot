@@ -3,15 +3,10 @@ import moment from 'moment-timezone';
 import { getStatisticsMessage } from '../../../message';
 import { redisService } from '../../../services';
 import { statisticsGoogleService } from '../../../services/statistics-google.service';
-import type { GrammyMiddleware } from '../../../types';
-import { formatDate, handleError } from '../../../utils';
+import type { FeaturesSessionsData, GrammyMiddleware } from '../../../types';
+import { handleError } from '../../../utils';
 
 export class StatisticsCommand {
-  /**
-   * @param {Date} startTime
-   * */
-  constructor(private startTime: Date) {}
-
   /**
    * Handle /statistics
    * Returns current statistics
@@ -44,11 +39,39 @@ export class StatisticsCommand {
         const memberChatsCount = [...superGroupsSessions, ...groupSessions].filter((session) => !session.data.isBotAdmin).length;
         const botRemovedCount = [...superGroupsSessions, ...groupSessions].filter((session) => session.data.botRemoved).length;
 
+        // features
+
+        const features: FeaturesSessionsData = {
+          notificationMessage: 0,
+          disableChatWhileAirRaidAlert: 0,
+          disableStrategicInfo: 0,
+          disableDeleteMessage: 0,
+          disableSwindlerMessage: 0,
+          disableDeleteServiceMessage: 0,
+          disableNsfwFilter: 0,
+          enableDeleteCards: 0,
+          enableDeleteUrls: 0,
+          enableDeleteLocations: 0,
+          enableDeleteMentions: 0,
+          enableDeleteForwards: 0,
+          enableDeleteCounteroffensive: 0,
+          enableDeleteRussian: 0,
+          enableWarnRussian: 0,
+        };
+
+        chatSessions.forEach((session) => {
+          Object.keys(features).forEach((key) => {
+            features[key] +=
+              key === 'notificationMessage'
+                ? (features[key] += +session.data.chatSettings.airRaidAlertSettings.notificationMessage)
+                : +!!session.data.chatSettings[key];
+          });
+        });
+
         await context.replyWithHTML(
           getStatisticsMessage({
             adminsChatsCount,
             botRemovedCount,
-            botStartTime: formatDate(this.startTime),
             channelCount,
             groupCount,
             memberChatsCount,
@@ -56,6 +79,7 @@ export class StatisticsCommand {
             superGroupsCount,
             totalSessionCount,
             totalUserCounts,
+            features,
           }),
         );
         await statisticsGoogleService.appendToSheet([
@@ -69,6 +93,7 @@ export class StatisticsCommand {
           botRemovedCount,
           privateCount,
           channelCount,
+          ...Object.values(features),
         ]);
       } catch (error) {
         handleError(error);
