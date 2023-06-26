@@ -62,9 +62,7 @@ export class StatisticsCommand {
         chatSessions.forEach((session) => {
           Object.keys(features).forEach((key) => {
             features[key] +=
-              key === 'notificationMessage'
-                ? (features[key] += +session.data.chatSettings.airRaidAlertSettings.notificationMessage)
-                : +!!session.data.chatSettings[key];
+              key === 'notificationMessage' ? +session.data.chatSettings.airRaidAlertSettings[key] : +!!session.data.chatSettings[key];
           });
         });
 
