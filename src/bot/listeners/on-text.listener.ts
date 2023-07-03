@@ -5,7 +5,7 @@ import { InputFile } from 'grammy';
 import { environmentConfig } from '../../config';
 import { LOGS_CHAT_THREAD_IDS } from '../../const';
 import { logsChat, privateTrainingChat } from '../../creator';
-import { getCannotDeleteMessage, getDebugMessage, getDeleteMessage } from '../../message'; // spamDeleteMessage
+import { cannotDeleteMessage, getCannotDeleteMessage, getDebugMessage, getDeleteMessage } from '../../message'; // spamDeleteMessage
 import { redisService } from '../../services';
 import type { GrammyContext, GrammyMiddleware } from '../../types';
 import { compareDatesWithOffset, getUserData, handleError, telegramUtil } from '../../utils';
@@ -36,7 +36,6 @@ export class OnTextListener {
       // console.info('enter onText ******', ctx.chat?.title, '******', ctx.state.text);
 
       const message = context.state.text;
-
       /**
        * Removed because ask to reduce chat messages
        * */
@@ -120,9 +119,9 @@ export class OnTextListener {
                     this.bot.api
                       .sendMessage(
                         logsChat,
-                        `Cannot delete the following message from chat\n\n<code>${telegramUtil.getChatTitle(
-                          context.chat,
-                        )}</code>\n${escapeHTML(context.msg?.text || '')}`,
+                        `${cannotDeleteMessage}\n\n<code>${telegramUtil.getChatTitle(context.chat)}</code>\n${escapeHTML(
+                          context.msg?.text || '',
+                        )}`,
                         {
                           parse_mode: 'HTML',
                           message_thread_id: LOGS_CHAT_THREAD_IDS.STRATEGIC,

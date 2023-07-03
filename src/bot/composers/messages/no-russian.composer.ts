@@ -3,7 +3,7 @@ import { Composer } from 'grammy';
 
 import { LOGS_CHAT_THREAD_IDS } from '../../../const';
 import { logsChat } from '../../../creator';
-import { getDeleteRussianMessage, getUkrainianMessageExtra } from '../../../message';
+import { getDeleteRussianMessage, getUkrainianMessageExtra, russianDeleteLogsStartMessage } from '../../../message';
 import type { DynamicStorageService } from '../../../services';
 import type { GrammyContext } from '../../../types';
 import { getRandomItem, getUserData, telegramUtil } from '../../../utils';
@@ -29,9 +29,9 @@ export const getNoRussianComposer = ({ dynamicStorageService }: NoRussianCompose
 
     return context.api.sendMessage(
       logsChat,
-      `Deleted russian message (${(maxChance * 100).toFixed(2)}%) by user ${userMention}:\n\n${chatMention || userMention}\n${escapeHTML(
-        text,
-      )}`,
+      `${russianDeleteLogsStartMessage} (${(maxChance * 100).toFixed(2)}%) by user ${userMention}:\n\n${
+        chatMention || userMention
+      }\n${escapeHTML(text)}`,
       {
         parse_mode: 'HTML',
         message_thread_id: LOGS_CHAT_THREAD_IDS.ANTI_RUSSIAN,

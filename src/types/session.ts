@@ -53,6 +53,7 @@ export interface OptionalChatSettings {
   enableDeleteLocations?: boolean;
   enableDeleteMentions?: boolean;
   enableDeleteForwards?: boolean;
+  enableDeleteCounteroffensive?: boolean;
   enableDeleteRussian?: boolean;
   enableWarnRussian?: boolean;
 }
@@ -102,6 +103,10 @@ export interface RedisSessionOptions {
   format: Record<string, unknown>;
   getSessionKey: (context: GrammyContext) => string;
 }
+
+export type FeaturesSessionsData = {
+  [Property in keyof Required<BooleanChatSettings & Pick<AirRaidAlertSettings, 'notificationMessage'>>]: number;
+};
 
 export interface ChatDetails {
   id: string;

@@ -2,6 +2,7 @@ export interface GrammyEnvironmentConfig {
   BOT_TOKEN: string;
   CREATOR_ID?: string | null;
   USERS_WHITELIST: string;
+  USERS_FOR_SWINDLERS_STATISTIC_WHITELIST: string;
 }
 
 export interface ServerEnvironmentConfig {
@@ -22,6 +23,7 @@ export interface MiscellaneousEnvironmentConfig {
   REDIS_URL: string;
   DEBUG: boolean;
   DEBUG_MIDDLEWARE: boolean;
+  DISABLE_LOGS_CHAT: boolean;
   ALARM_KEY: string;
 }
 
