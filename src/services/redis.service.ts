@@ -1,5 +1,5 @@
 import { redisClient } from '../db';
-import type { ChatSession, ChatSessionData, Session } from '../types';
+import type { ChatSession, ChatSessionData, ChatSettings, Session } from '../types';
 import { removeDuplicates } from '../utils';
 
 export class RedisService {
@@ -171,9 +171,32 @@ export class RedisService {
     return redisClient.setRawValue(chatId, writeSession as any);
   }
 
+  async updateChatSettings(chatId: string, newSettings: ChatSettings) {
+    if (!this.redisSelectors.chatSessions.test(chatId)) {
+      throw new Error(`This is an invalid chat id: ${chatId}`);
+    }
+    const currentSession = await redisClient.getRawValue<ChatSessionData>(chatId);
+    const updatedSession = {
+      ...currentSession,
+      chatSettings: newSettings,
+    } as ChatSessionData;
+
+    return redisClient.setRawValue(chatId, updatedSession);
+  }
+
   async getUserSessions(): Promise<Session[]> {
     const allSessions = await redisClient.getAllRecords();
     return allSessions.filter((session) => this.redisSelectors.userSessions.test(session.id)) as Session[];
+  }
+
+  async getUserSession(userId: string) {
+    const key = `${userId}:${userId}`;
+    return redisClient.getRawValue<Session>(key);
+  }
+
+  async setUserSession(userId: string, session: Session) {
+    const key = `${userId}:${userId}`;
+    return redisClient.setRawValue(key, session);
   }
 
   async getChatSessions(): Promise<ChatSession[]> {
