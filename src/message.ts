@@ -127,6 +127,16 @@ ${getRandomAlarmEndText()}
 /**
  * Generic - Settings
  * */
+
+export const linkToWebView = `⚙️Відкрити налаштування:
+
+🔗 ${environmentConfig.WEB_VIEW_URL}`;
+export const hasNoLinkedChats = `
+⛔️ У Вас немає прив'язаних чатів.
+
+Будь ласка, зайдіть  у групу і натисніть /settings.`;
+export const isNotAdminMessage = '😔 Ви не є адміністратором чату!';
+
 export const settingsAvailableMessage = '👨‍👩‍👧‍👦 Налаштування доступні тільки для групових чатів.';
 export const settingsDeleteItemMessage = 'Повідомлення про видалення';
 export const settingsSubmitMessage = '💾 Зберегти';

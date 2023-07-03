@@ -25,7 +25,7 @@ export const getChatAvatar = async (filePath: string | undefined) => {
     const avatar = arrayBuffer.data.toString('base64');
     return `data:image/jpeg;base64, ${avatar}`;
   } catch (error) {
-    console.info(error, 'SSSSSSSSSS');
+    console.info(error);
     return '';
   }
 };
