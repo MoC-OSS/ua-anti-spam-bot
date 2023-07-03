@@ -8,6 +8,7 @@ export class RedisService {
   redisSelectors = {
     isBotDeactivated: 'isBotDeactivated',
     botTensorPercent: 'botTensorPercent',
+    swindlersStatistic: 'swindlersStatistic',
     positives: 'training:positives',
     negatives: 'training:negatives',
     trainingChatWhitelist: 'training:chatWhiteList',
@@ -167,7 +168,7 @@ export class RedisService {
       ...newSession,
     } as ChatSessionData;
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    // eslint-disable-next-line  @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
     return redisClient.setRawValue(chatId, writeSession as any);
   }
 
@@ -227,6 +228,20 @@ export class RedisService {
    * */
   setTrainingTempMessages(messages: string[]) {
     return redisClient.setRawValue(this.redisSelectors.trainingTempMessages, messages);
+  }
+
+  /**
+   * @param {{ [key: string]: string[] }} statistic
+   * */
+  setSwindlersStatistic(statistic: { [key: string]: string[] }) {
+    return redisClient.setRawValue(this.redisSelectors.swindlersStatistic, statistic);
+  }
+
+  /**
+   * @returns {Promise<{[key: string]: string[] }>}
+   * */
+  async getSwindlersStatistic() {
+    return (await redisClient.getRawValue<{ [key: string]: string[] }>(this.redisSelectors.swindlersStatistic)) || {};
   }
 }
 

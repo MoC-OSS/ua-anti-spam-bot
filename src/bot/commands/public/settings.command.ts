@@ -1,44 +1,53 @@
-import { environmentConfig } from '../../../config';
-import { redisService } from '../../../services';
-import type { GrammyMiddleware, Session } from '../../../types';
-// Todo change messages with needed text
-export class SettingsCommand {
+import { getGroupStartMessage, getStartMessage, makeAdminMessage } from '../../../message';
+import type { GrammyMiddleware } from '../../../types';
+import { getUserData, handleError, telegramUtil } from '../../../utils';
+
+export class StartCommand {
+  /**
+   * Handle /start
+   * Returns help message
+   *
+   * */
   middleware(): GrammyMiddleware {
+    /**
+     * @param {GrammyContext} context
+     * */
     return async (context) => {
-      const isChatPrivate = context.chat?.type === 'private';
-      const userId = context.from?.id.toString() ?? '';
-      const chatId = context.chat?.id.toString() ?? '';
-      const linkToWebView = `Відкрити налаштування: ${environmentConfig.WEB_VIEW_URL}`;
-
-      if (!userId) {
-        throw new Error('Invalid user id');
+      if (context.chat?.type === 'private') {
+        return context.replyWithHTML(getStartMessage());
       }
 
-      if (isChatPrivate) {
-        const userSession = await redisService.getUserSession(userId);
-        const chats = userSession?.linkedChats || [];
-        return chats.length > 0
-          ? context.reply(linkToWebView)
-          : context.reply(`You don't linked chats yet. Please, go in group and press /settings.`);
+      const isAdmin = context.chatSession.isBotAdmin;
+      const canDelete = await context
+        .deleteMessage()
+        .then(() => true)
+        .catch(() => false);
+
+      const { writeUsername, userId } = getUserData(context);
+
+      if (!isAdmin || !canDelete) {
+        return context.replyWithSelfDestructedHTML(
+          getGroupStartMessage({ isAdmin, canDelete, user: writeUsername === '@GroupAnonymousBot' ? '' : writeUsername, userId }),
+        );
       }
 
-      if (!isChatPrivate) {
-        const admins = await context.api.getChatAdministrators(chatId);
-        if (!admins.some((object) => object.user.id.toString() === userId)) {
-          return context.reply(`You are not admin`);
-        }
-
-        const userSession = await redisService.getUserSession(userId);
-        const chats = userSession?.linkedChats || [];
-        const chatIndex = chats.findIndex((chat) => chat.id.toString() === chatId);
-
-        if (chatIndex === -1) {
-          const newData = { ...userSession, linkedChats: [...chats, { id: chatId, name: context.chat?.title }] } as Session;
-          await redisService.setUserSession(userId, newData);
-        }
-
-        return context.reply(linkToWebView);
+      if (!context.chat?.id) {
+        throw new Error('StartMiddleware error: chat.id is undefined');
       }
+
+      return telegramUtil
+        .getChatAdmins(context, context.chat?.id)
+        .then(({ adminsString }) => {
+          context
+            .replyWithSelfDestructedHTML(
+              getGroupStartMessage({ adminsString, isAdmin, canDelete, user: writeUsername === '@GroupAnonymousBot' ? '' : writeUsername }),
+            )
+            .catch(async (getAdminsError) => {
+              handleError(getAdminsError);
+              await context.replyWithHTML(makeAdminMessage);
+            });
+        })
+        .catch(handleError);
     };
   }
 }
