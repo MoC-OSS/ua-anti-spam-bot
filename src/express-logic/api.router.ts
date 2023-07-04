@@ -40,6 +40,7 @@ export const apiRouter = (bot: Bot<GrammyContext>) => {
         disableNsfwFilter: false,
         enableDeleteCards: false,
         enableDeleteUrls: false,
+        enableDeleteCounteroffensive: false,
         enableDeleteLocations: false,
         enableDeleteMentions: false,
         enableDeleteForwards: false,
@@ -56,8 +57,7 @@ export const apiRouter = (bot: Bot<GrammyContext>) => {
       const chatInfo = await bot.api.getChat(id);
       const chatMembers = await bot.api.getChatMemberCount(id);
       const chatSession = await redisService.getChatSession(id);
-      const photo = await bot.api.getFile(<string>chatInfo.photo?.small_file_id);
-      const avatar = await getChatAvatar(photo.file_path);
+      const avatar = await getChatAvatar(bot, chatInfo.photo?.small_file_id ?? '');
       const title = 'title' in chatInfo ? chatInfo.title : '';
 
       const data: Required<ChatData> = {

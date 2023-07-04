@@ -16,12 +16,16 @@ export const getLinkedChats = async (userId: string) => {
   return userSessions?.linkedChats || [];
 };
 
-export const getChatAvatar = async (filePath: string | undefined) => {
+export const getChatAvatar = async (bot: Bot<GrammyContext>, filePath: string) => {
   if (!filePath) return '';
   try {
-    const arrayBuffer = await axios.get<Buffer>(`https://api.telegram.org/file/bot${environmentConfig.BOT_TOKEN}/${filePath}`, {
-      responseType: 'arraybuffer',
-    });
+    const photo = await bot.api.getFile(filePath);
+    const arrayBuffer = await axios.get<Buffer>(
+      `https://api.telegram.org/file/bot${environmentConfig.BOT_TOKEN}/${photo?.file_path ?? ''}`,
+      {
+        responseType: 'arraybuffer',
+      },
+    );
     const avatar = arrayBuffer.data.toString('base64');
     return `data:image/jpeg;base64, ${avatar}`;
   } catch (error) {
@@ -39,8 +43,7 @@ export const updateChatsList = async (linkedChats: LinkedChat[], bot: Bot<Grammy
       const admins = await bot.api.getChatAdministrators(chat.id);
       const isAdmin = admins.some((admin) => admin.user.id.toString() === userId);
       const [info, members] = await Promise.all([chatInfo, chatMembers]);
-      const photo = await bot.api.getFile(info.photo?.small_file_id ?? '');
-      const avatar = await getChatAvatar(photo.file_path);
+      const avatar = await getChatAvatar(bot, info.photo?.small_file_id ?? '');
       const title = 'title' in info ? info.title : '';
 
       if (title !== chat.name) {
