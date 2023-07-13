@@ -6,6 +6,14 @@ import { statisticsGoogleService } from '../../../services/statistics-google.ser
 import type { FeaturesSessionsData, GrammyMiddleware } from '../../../types';
 import { handleError } from '../../../utils';
 
+const REVERSE_FEATURES_KEYS = new Set([
+  'disableStrategicInfo',
+  'disableDeleteMessage',
+  'disableSwindlerMessage',
+  'disableDeleteServiceMessage',
+  'disableNsfwFilter',
+]);
+
 export class StatisticsCommand {
   /**
    * Handle /statistics
@@ -62,7 +70,11 @@ export class StatisticsCommand {
         chatSessions.forEach((session) => {
           Object.keys(features).forEach((key) => {
             features[key] +=
-              key === 'notificationMessage' ? +session.data.chatSettings.airRaidAlertSettings[key] : +!!session.data.chatSettings[key];
+              key === 'notificationMessage'
+                ? +session.data.chatSettings.airRaidAlertSettings[key]
+                : REVERSE_FEATURES_KEYS.has(key)
+                ? +!session.data.chatSettings[key]
+                : +!!session.data.chatSettings[key];
           });
         });
 
