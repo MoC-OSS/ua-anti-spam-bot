@@ -11,6 +11,8 @@ export interface ServerEnvironmentConfig {
   BOT_PORT: number;
   BOT_HOST: string;
   USE_SERVER: boolean;
+  FRONTEND_HOST: string;
+  WEB_VIEW_URL: string;
 }
 
 export interface MiscellaneousEnvironmentConfig {

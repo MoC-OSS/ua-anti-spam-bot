@@ -27,7 +27,7 @@ import { sleep } from './utils';
   const initialBot = new Bot<GrammyContext>(environmentConfig?.BOT_TOKEN);
   const bot = await getBot(initialBot);
 
-  runBotExpressServer();
+  runBotExpressServer(bot);
 
   const runner = run(bot, 500, {
     allowed_updates: [
