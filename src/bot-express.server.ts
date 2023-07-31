@@ -10,7 +10,7 @@ export const runBotExpressServer = (bot: Bot<GrammyContext>) => {
   const app = express();
   app.use(express.json());
   app.use(cors({ origin: environmentConfig.FRONTEND_HOST }));
-  app.use('/', apiRouter(bot));
+  app.use('/api', apiRouter(bot));
 
   app.get('/health-check', (request, response) => response.json({ status: 'ok' }));
 
