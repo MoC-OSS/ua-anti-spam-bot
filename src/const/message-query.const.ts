@@ -18,4 +18,17 @@ export const getValidQueryType = <T extends FilterQuery[]>(value: T): T => value
  *
  * @use isNotChannel to exclude channels for this query
  * */
-export const messageQuery = getValidQueryType([':text', ':forward_date', ':poll', ':caption']);
+export const messageQuery = getValidQueryType([
+  ':text',
+  ':forward_date',
+  ':poll',
+  ':caption',
+  // You need to add it explicitly because it won't work with omit values.
+  // It could be a bug in this specific grammy version so we need to try to update it later and check if it works without it.
+  // It works with unit tests but doesn't work in real bot so we need to check it in real telegram.
+  // DO NOT REMOVE!
+  'edited_message:text',
+  'edited_message:forward_date',
+  'edited_message:poll',
+  'edited_message:caption',
+]);
