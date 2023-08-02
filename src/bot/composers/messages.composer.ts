@@ -38,21 +38,10 @@ export interface MessagesComposerProperties {
 }
 
 /**
- * @description Message handling composer
- * */
-export const getMessagesComposer = ({
-  counteroffensiveService,
-  noCardsComposer,
-  noUrlsComposer,
-  noLocationsComposer,
-  noMentionsComposer,
-  noForwardsComposer,
-  strategicComposer,
-  swindlersComposer,
-  noRussianComposer,
-  warnRussianComposer,
-  noCounterOffensiveComposer,
-}: MessagesComposerProperties) => {
+ * Returns an object containing message handler registration functions and Composer instances.
+ * Use it to add features on it
+ */
+export const getMessagesRegisterComposer = () => {
   const messagesComposer = new Composer<GrammyContext>();
 
   /**
@@ -73,8 +62,6 @@ export const getMessagesComposer = ({
   /**
    * Registers a message handler module with correct filter to not make extra checks
    * */
-  // TODO remove this
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const registerModule = (...middlewares: (Composer<GrammyContext> | GrammyMiddleware)[]) => {
     readyMessagesComposer.filter((context) => onlyNotDeletedFilter(context)).use(...middlewares);
   };
@@ -101,6 +88,28 @@ export const getMessagesComposer = ({
       .filter((context) => onlyActiveOptionalSettingFilter(key)(context))
       .use(...middlewares);
   };
+
+  return { messagesComposer, readyMessagesComposer, registerModule, registerDefaultSettingModule, registerOptionalSettingModule };
+};
+
+/**
+ * @description Message handling composer
+ * */
+export const getMessagesComposer = ({
+  counteroffensiveService,
+  noCardsComposer,
+  noUrlsComposer,
+  noLocationsComposer,
+  noMentionsComposer,
+  noForwardsComposer,
+  strategicComposer,
+  swindlersComposer,
+  noRussianComposer,
+  warnRussianComposer,
+  noCounterOffensiveComposer,
+}: MessagesComposerProperties) => {
+  const { messagesComposer, readyMessagesComposer, registerDefaultSettingModule, registerOptionalSettingModule } =
+    getMessagesRegisterComposer();
 
   /**
    * Register modules.
