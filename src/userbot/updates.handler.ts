@@ -10,6 +10,7 @@ import type { DynamicStorageService, SwindlersBotsService, SwindlersDetectServic
 import { mentionService, redisService, swindlersGoogleService } from '../services';
 import type { SwindlersTensorService, TensorService } from '../tensor';
 import type { ProtoUpdate, SwindlerType } from '../types';
+import { removeSystemInformationUtil } from '../utils';
 
 // eslint-disable-next-line import/no-unresolved
 import deleteFromMessage from './from-entities.json';
@@ -80,11 +81,7 @@ export class UpdatesHandler {
    * @param {string} message
    * */
   async handleSwindlers(message: string) {
-    const finalMessage =
-      message.includes("Looks like swindler's message") || message.includes('Cannot delete the following message from chat')
-        ? message.split('\n').slice(3).join('\n')
-        : message;
-
+    const finalMessage = removeSystemInformationUtil(message);
     const matchArray = new Set<SwindlerType>(['tensor', 'site', 'mention']);
 
     if (!mentionRegexp.test(finalMessage) && !urlRegexp.test(finalMessage)) {

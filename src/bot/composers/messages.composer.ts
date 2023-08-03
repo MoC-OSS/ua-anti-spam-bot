@@ -1,6 +1,7 @@
 import { Composer } from 'grammy';
 
 import { messageQuery } from '../../const';
+import type { CounteroffensiveService } from '../../services';
 import type { DefaultChatSettings, GrammyContext, GrammyMiddleware, OptionalChatSettings } from '../../types';
 import { onlyActiveDefaultSettingFilter, onlyActiveOptionalSettingFilter, onlyNotDeletedFilter, onlyWithTextFilter } from '../filters';
 import {
@@ -12,6 +13,7 @@ import {
   onlyWhenBotAdmin,
   parseCards,
   parseEntities,
+  parseIsCounteroffensive,
   parseIsRussian,
   parseLocations,
   parseMentions,
@@ -22,6 +24,7 @@ import {
 } from '../middleware';
 
 export interface MessagesComposerProperties {
+  counteroffensiveService: CounteroffensiveService;
   noCardsComposer: Composer<GrammyContext>;
   noUrlsComposer: Composer<GrammyContext>;
   noLocationsComposer: Composer<GrammyContext>;
@@ -31,22 +34,14 @@ export interface MessagesComposerProperties {
   strategicComposer: Composer<GrammyContext>;
   noRussianComposer: Composer<GrammyContext>;
   warnRussianComposer: Composer<GrammyContext>;
+  noCounterOffensiveComposer: Composer<GrammyContext>;
 }
 
 /**
- * @description Message handling composer
- * */
-export const getMessagesComposer = ({
-  noCardsComposer,
-  noUrlsComposer,
-  noLocationsComposer,
-  noMentionsComposer,
-  noForwardsComposer,
-  strategicComposer,
-  swindlersComposer,
-  noRussianComposer,
-  warnRussianComposer,
-}: MessagesComposerProperties) => {
+ * Returns an object containing message handler registration functions and Composer instances.
+ * Use it to add features on it
+ */
+export const getMessagesRegisterComposer = () => {
   const messagesComposer = new Composer<GrammyContext>();
 
   /**
@@ -67,8 +62,6 @@ export const getMessagesComposer = ({
   /**
    * Registers a message handler module with correct filter to not make extra checks
    * */
-  // TODO remove this
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const registerModule = (...middlewares: (Composer<GrammyContext> | GrammyMiddleware)[]) => {
     readyMessagesComposer.filter((context) => onlyNotDeletedFilter(context)).use(...middlewares);
   };
@@ -96,11 +89,38 @@ export const getMessagesComposer = ({
       .use(...middlewares);
   };
 
+  return { messagesComposer, readyMessagesComposer, registerModule, registerDefaultSettingModule, registerOptionalSettingModule };
+};
+
+/**
+ * @description Message handling composer
+ * */
+export const getMessagesComposer = ({
+  counteroffensiveService,
+  noCardsComposer,
+  noUrlsComposer,
+  noLocationsComposer,
+  noMentionsComposer,
+  noForwardsComposer,
+  strategicComposer,
+  swindlersComposer,
+  noRussianComposer,
+  warnRussianComposer,
+  noCounterOffensiveComposer,
+}: MessagesComposerProperties) => {
+  const { messagesComposer, readyMessagesComposer, registerDefaultSettingModule, registerOptionalSettingModule } =
+    getMessagesRegisterComposer();
+
   /**
    * Register modules.
    * The order should be right
    * */
   registerDefaultSettingModule('disableSwindlerMessage', swindlersComposer);
+  registerOptionalSettingModule(
+    'enableDeleteCounteroffensive',
+    parseIsCounteroffensive(counteroffensiveService),
+    noCounterOffensiveComposer,
+  );
   registerOptionalSettingModule('enableDeleteUrls', parseUrls, noUrlsComposer);
   registerOptionalSettingModule('enableDeleteLocations', parseLocations, noLocationsComposer);
   registerOptionalSettingModule('enableDeleteMentions', parseMentions, noMentionsComposer);
