@@ -22,6 +22,7 @@ import {
 } from './bot/composers';
 import {
   getNoCardsComposer,
+  getNoCounterOffensiveComposer,
   getNoForwardsComposer,
   getNoLocationsComposer,
   getNoMentionsComposer,
@@ -32,6 +33,7 @@ import {
   getSwindlersComposer,
   getWarnRussianComposer,
 } from './bot/composers/messages';
+import { getSwindlersStatisticCommandsComposer } from './bot/composers/swindlers-statististics.composer';
 import { isNotChannel, onlyCreatorChatFilter } from './bot/filters';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
@@ -48,7 +50,15 @@ import { deleteMessageTransformer, disableLogsChatTransformer } from './bot/tran
 import { environmentConfig } from './config';
 import { logsChat, swindlerBotsChatId, swindlerHelpChatId, swindlerMessageChatId } from './creator';
 import { redisClient } from './db';
-import { alarmChatService, alarmService, initSwindlersContainer, redisService, S3Service, swindlersGoogleService } from './services';
+import {
+  alarmChatService,
+  alarmService,
+  CounteroffensiveService,
+  initSwindlersContainer,
+  redisService,
+  S3Service,
+  swindlersGoogleService,
+} from './services';
 import { initNsfwTensor, initTensor } from './tensor';
 import type { GrammyContext, GrammyMenuContext } from './types';
 import { emptyFunction, globalErrorHandler, videoUtil, wrapperErrorHandler } from './utils';
@@ -111,6 +121,8 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const redisSession = new RedisSession();
   const redisChatSession = new RedisChatSession();
 
+  const counteroffensiveService = new CounteroffensiveService(dynamicStorageService);
+
   const globalMiddleware = new GlobalMiddleware();
 
   const deleteSwindlersMiddleware = new DeleteSwindlersMiddleware(bot, swindlersDetectService);
@@ -133,6 +145,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     startTime,
     tensorService,
   });
+  const { swindlersStatisticComposer } = getSwindlersStatisticCommandsComposer();
   const { creatorCommandsComposer } = getCreatorCommandsComposer({ commandSetter, rootMenu, tensorService });
 
   // Dev composers only
@@ -175,8 +188,10 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const { noForwardsComposer } = getNoForwardsComposer();
   const { swindlersComposer } = getSwindlersComposer({ deleteSwindlersMiddleware });
   const { strategicComposer } = getStrategicComposer({ onTextListener });
+  const { noCounterOffensiveComposer } = getNoCounterOffensiveComposer();
 
   const { messagesComposer } = getMessagesComposer({
+    counteroffensiveService,
     noCardsComposer,
     noUrlsComposer,
     noLocationsComposer,
@@ -186,6 +201,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     warnRussianComposer,
     swindlersComposer,
     strategicComposer,
+    noCounterOffensiveComposer,
   });
 
   // Photo composers
@@ -251,6 +267,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   notChannelComposer.use(healthCheckComposer);
   notChannelComposer.use(creatorCommandsComposer);
   notChannelComposer.use(privateCommandsComposer);
+  notChannelComposer.use(swindlersStatisticComposer);
   notChannelComposer.use(publicCommandsComposer);
 
   // Swindlers helpers

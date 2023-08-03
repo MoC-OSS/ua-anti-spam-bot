@@ -1,11 +1,10 @@
-import type { RawApi } from 'grammy';
 import { Bot } from 'grammy';
 
 // eslint-disable-next-line jest/no-mocks-import
 import { realSwindlerMessage } from '../__mocks__/bot.mocks';
 import { getBot } from '../bot';
 import { environmentConfig } from '../config';
-import { logsChat } from '../creator';
+import { logsChat, secondLogsChat } from '../creator';
 import type { OutgoingRequests } from '../testing';
 import { MessagePrivateMockUpdate, MessageSuperGroupMockUpdate, prepareBotForTesting } from '../testing';
 import { mockChatSession, mockSession } from '../testing-main';
@@ -58,34 +57,41 @@ describe('e2e bot testing', () => {
         const update = new MessagePrivateMockUpdate(realSwindlerMessage).build();
         await bot.handleUpdate(update);
 
-        const [sendLogsMessageRequest, sendSwindlersMessageRequest, deleteRequest] = outgoingRequests.getThreeLast<
+        const expectedMethods = outgoingRequests.buildMethods(['getChat', 'sendMessage', 'sendMessage', 'sendMessage', 'deleteMessage']);
+        const [, sendLogsMessageRequest, sendSecondLogsMessageRequest] = outgoingRequests.getAll<
+          'getChat',
+          'sendMessage',
           'sendMessage',
           'sendMessage',
           'deleteMessage'
         >();
 
-        expect(sendLogsMessageRequest?.method).toEqual('sendMessage');
+        const actualMethods = outgoingRequests.getMethods();
+
+        expect(expectedMethods).toEqual(actualMethods);
         expect(sendLogsMessageRequest?.payload.chat_id).toEqual(logsChat);
-        expect(sendSwindlersMessageRequest?.method).toEqual('sendMessage');
-        expect(deleteRequest?.method).toEqual('deleteMessage');
-        expect(outgoingRequests.requests).toHaveLength(4);
+        expect(sendSecondLogsMessageRequest?.payload.chat_id).toEqual(secondLogsChat);
+        expect(outgoingRequests.requests).toHaveLength(5);
       });
 
       it('should remove a swindler message and dont notify after already notified', async () => {
         const update = new MessagePrivateMockUpdate(realSwindlerMessage).build();
         await bot.handleUpdate(update);
 
-        const [anyRequest, sendLogsMessageRequest, deleteRequest] = outgoingRequests.getThreeLast<
-          keyof RawApi,
+        const expectedMethods = outgoingRequests.buildMethods(['getChat', 'sendMessage', 'sendMessage', 'deleteMessage']);
+        const [, sendLogsMessageRequest, sendSecondLogsMessageRequest] = outgoingRequests.getAll<
+          'getChat',
+          'sendMessage',
           'sendMessage',
           'deleteMessage'
         >();
 
-        expect(anyRequest?.method).not.toEqual('sendMessage');
-        expect(deleteRequest?.method).toEqual('deleteMessage');
-        expect(sendLogsMessageRequest?.method).toEqual('sendMessage');
+        const actualMethods = outgoingRequests.getMethods();
+
+        expect(expectedMethods).toEqual(actualMethods);
         expect(sendLogsMessageRequest?.payload.chat_id).toEqual(logsChat);
-        expect(outgoingRequests.requests).toHaveLength(3);
+        expect(sendSecondLogsMessageRequest?.payload.chat_id).toEqual(secondLogsChat);
+        expect(outgoingRequests.requests).toHaveLength(4);
       });
     });
   });
@@ -152,17 +158,30 @@ describe('e2e bot testing', () => {
           const update = new MessageSuperGroupMockUpdate(realSwindlerMessage).build();
           await bot.handleUpdate(update);
 
-          const [sendLogsMessageRequest, sendSwindlersMessageRequest, deleteRequest] = outgoingRequests.getThreeLast<
+          const expectedMethods = outgoingRequests.buildMethods([
+            'getChatMember',
+            'getChat',
+            'sendMessage',
+            'sendMessage',
+            'sendMessage',
+            'deleteMessage',
+          ]);
+          const requests = outgoingRequests.getAll<
+            'getChatMember',
+            'getChat',
+            'sendMessage',
             'sendMessage',
             'sendMessage',
             'deleteMessage'
           >();
+          const sendLogsMessageRequest = requests[2];
+          const sendSecondLogsMessageRequest = requests[3];
 
-          expect(sendLogsMessageRequest?.method).toEqual('sendMessage');
+          const actualMethods = outgoingRequests.getMethods();
+
+          expect(expectedMethods).toEqual(actualMethods);
           expect(sendLogsMessageRequest?.payload.chat_id).toEqual(logsChat);
-          expect(sendSwindlersMessageRequest?.method).toEqual('sendMessage');
-          expect(deleteRequest?.method).toEqual('deleteMessage');
-          expect(outgoingRequests.requests).toHaveLength(5);
+          expect(sendSecondLogsMessageRequest?.payload.chat_id).toEqual(secondLogsChat);
         });
 
         it('should remove a swindler message and dont notify after already notified', async () => {
@@ -170,17 +189,22 @@ describe('e2e bot testing', () => {
           const update = new MessageSuperGroupMockUpdate(realSwindlerMessage).build();
           await bot.handleUpdate(update);
 
-          const [anyRequest, sendLogsMessageRequest, deleteRequest] = outgoingRequests.getThreeLast<
-            keyof RawApi,
+          const expectedMethods = outgoingRequests.buildMethods([
+            'getChatMember',
+            'getChat',
             'sendMessage',
-            'deleteMessage'
-          >();
+            'sendMessage',
+            'deleteMessage',
+          ]);
+          const requests = outgoingRequests.getAll<'getChatMember', 'getChat', 'sendMessage', 'sendMessage', 'deleteMessage'>();
+          const sendLogsMessageRequest = requests[2];
+          const sendSecondLogsMessageRequest = requests[3];
 
-          expect(anyRequest?.method).not.toEqual('sendMessage');
-          expect(deleteRequest?.method).toEqual('deleteMessage');
-          expect(sendLogsMessageRequest?.method).toEqual('sendMessage');
+          const actualMethods = outgoingRequests.getMethods();
+
+          expect(expectedMethods).toEqual(actualMethods);
           expect(sendLogsMessageRequest?.payload.chat_id).toEqual(logsChat);
-          expect(outgoingRequests.requests).toHaveLength(4);
+          expect(sendSecondLogsMessageRequest?.payload.chat_id).toEqual(secondLogsChat);
         });
       });
     });

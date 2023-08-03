@@ -3,7 +3,7 @@ import { Composer } from 'grammy';
 
 import { LOGS_CHAT_THREAD_IDS } from '../../../const';
 import { logsChat } from '../../../creator';
-import { getDeleteFeatureMessage } from '../../../message';
+import { getDeleteFeatureMessage, locationLogsStartMessage } from '../../../message';
 import type { GrammyContext } from '../../../types';
 import { getEnabledFeaturesString, getUserData, telegramUtil } from '../../../utils';
 
@@ -24,7 +24,7 @@ export const getNoLocationsComposer = () => {
 
     return context.api.sendMessage(
       logsChat,
-      `Deleted location message (${locations.join(', ')}) by user ${userMention}:\n\n${chatMention || userMention}\n${escapeHTML(text)}`,
+      `${locationLogsStartMessage} (${locations.join(', ')}) by user ${userMention}:\n\n${chatMention || userMention}\n${escapeHTML(text)}`,
       {
         parse_mode: 'HTML',
         message_thread_id: LOGS_CHAT_THREAD_IDS.LOCATIONS,
