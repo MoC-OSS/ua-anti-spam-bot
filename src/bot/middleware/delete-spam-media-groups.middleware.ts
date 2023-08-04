@@ -11,6 +11,11 @@ import type { GrammyContext } from '../../types';
  * */
 export async function deleteSpamMediaGroupMiddleware(context: GrammyContext, next: NextFunction) {
   const isMediaGroup = context.message?.media_group_id;
+
+  if (!isMediaGroup) {
+    return next();
+  }
+
   const { isDeleted } = context.state;
   const isSpam = spamMediaGroupsStorage.isSpamMediaGroup(context);
 

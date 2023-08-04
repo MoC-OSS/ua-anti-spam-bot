@@ -261,7 +261,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   bot.use(beforeAnyComposer);
 
   // Generic non-channel composer
-  notChannelComposer.use(wrapperErrorHandler(deleteSpamMediaGroupMiddleware));
+  notChannelComposer.use(deleteSpamMediaGroupMiddleware);
 
   // Commands
   notChannelComposer.use(healthCheckComposer);
