@@ -8,6 +8,7 @@ export class SettingsCommand {
       const isChatPrivate = context.chat?.type === 'private';
       const userId = context.from?.id.toString() ?? '';
       const chatId = context.chat?.id.toString() ?? '';
+      const { isBotAdmin } = context.chatSession;
 
       if (!userId) {
         throw new Error('Invalid user id');
@@ -30,7 +31,7 @@ export class SettingsCommand {
         const chats = userSession?.linkedChats || [];
         const isChatMissing = !chats.some((chat) => chat.id.toString() === chatId);
 
-        if (isChatMissing) {
+        if (isChatMissing && isBotAdmin) {
           const newData = { ...userSession, linkedChats: [...chats, { id: chatId, name: context.chat?.title }] } as Session;
           await redisService.setUserSession(userId, newData);
         }
