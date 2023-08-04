@@ -119,6 +119,10 @@ describe('e2e bot testing', () => {
           chatSession.isBotAdmin = true;
         });
 
+        beforeEach(() => {
+          delete chatSession.lastWarningDate;
+        });
+
         it('should check current user if its an admin to skip them', async () => {
           const update = new MessageSuperGroupMockUpdate('regular message').build();
           await bot.handleUpdate(update);
@@ -205,6 +209,40 @@ describe('e2e bot testing', () => {
           expect(expectedMethods).toEqual(actualMethods);
           expect(sendLogsMessageRequest?.payload.chat_id).toEqual(logsChat);
           expect(sendSecondLogsMessageRequest?.payload.chat_id).toEqual(secondLogsChat);
+        });
+
+        it('should delete swindler message if they are send in media group', async () => {
+          const updateCaption = new MessageSuperGroupMockUpdate('').buildOverwrite({
+            message: { media_group_id: '1', photo: [], caption: realSwindlerMessage },
+          });
+          const updatePhoto2 = new MessageSuperGroupMockUpdate('').buildOverwrite({
+            message: { media_group_id: '1', photo: [] },
+          });
+          const updatePhoto3 = new MessageSuperGroupMockUpdate('').buildOverwrite({
+            message: { media_group_id: '1', photo: [] },
+          });
+
+          await bot.handleUpdate(updateCaption);
+          await bot.handleUpdate(updatePhoto2);
+          await bot.handleUpdate(updatePhoto3);
+
+          const expectedMethods = outgoingRequests.buildMethods([
+            'getChatMember',
+            'getChat',
+            'sendMessage',
+            'sendMessage',
+            'sendMessage',
+            'deleteMessage',
+            'deleteMessage',
+            'getChatMember',
+            'deleteMessage',
+            'getChatMember',
+          ]);
+
+          const actualMethods = outgoingRequests.getMethods();
+
+          expect(actualMethods.filter((method) => method === 'deleteMessage')).toHaveLength(3);
+          expect(expectedMethods).toEqual(actualMethods);
         });
       });
     });
