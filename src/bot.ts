@@ -37,7 +37,13 @@ import { getSwindlersStatisticCommandsComposer } from './bot/composers/swindlers
 import { isNotChannel, onlyCreatorChatFilter } from './bot/filters';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
-import { DeleteSwindlersMiddleware, GlobalMiddleware, logCreatorState, stateMiddleware } from './bot/middleware';
+import {
+  deleteSpamMediaGroupMiddleware,
+  DeleteSwindlersMiddleware,
+  GlobalMiddleware,
+  logCreatorState,
+  stateMiddleware,
+} from './bot/middleware';
 import { autoThread, chainFilters, selfDestructedReply } from './bot/plugins';
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
 import { deleteMessageTransformer, disableLogsChatTransformer } from './bot/transformers';
@@ -253,6 +259,9 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
 
   // Generic composers
   bot.use(beforeAnyComposer);
+
+  // Generic non-channel composer
+  notChannelComposer.use(deleteSpamMediaGroupMiddleware);
 
   // Commands
   notChannelComposer.use(healthCheckComposer);

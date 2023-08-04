@@ -21,6 +21,7 @@ import {
   parseUrls,
   performanceEndMiddleware,
   performanceStartMiddleware,
+  saveSpamMediaGroupMiddleware,
 } from '../middleware';
 
 export interface MessagesComposerProperties {
@@ -131,6 +132,7 @@ export const getMessagesComposer = ({
   // TODO optimize this module
   registerDefaultSettingModule('disableStrategicInfo', strategicComposer);
 
+  readyMessagesComposer.use(saveSpamMediaGroupMiddleware);
   readyMessagesComposer.use(performanceEndMiddleware);
   readyMessagesComposer.use(logContextMiddleware);
 
