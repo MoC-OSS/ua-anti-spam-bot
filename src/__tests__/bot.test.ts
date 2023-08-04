@@ -244,6 +244,30 @@ describe('e2e bot testing', () => {
           expect(actualMethods.filter((method) => method === 'deleteMessage')).toHaveLength(3);
           expect(expectedMethods).toEqual(actualMethods);
         });
+
+        it('should delete swindler message if they are send in media group but dont delete another group', async () => {
+          const updateCaption = new MessageSuperGroupMockUpdate('').buildOverwrite({
+            message: { media_group_id: '1', photo: [], caption: realSwindlerMessage },
+          });
+          const updatePhoto2 = new MessageSuperGroupMockUpdate('').buildOverwrite({
+            message: { media_group_id: '1', photo: [] },
+          });
+          const updateCaption2 = new MessageSuperGroupMockUpdate('').buildOverwrite({
+            message: { media_group_id: '2', photo: [], caption: 'just a regular message' },
+          });
+          const updatePhoto22 = new MessageSuperGroupMockUpdate('').buildOverwrite({
+            message: { media_group_id: '2', photo: [] },
+          });
+
+          await bot.handleUpdate(updateCaption);
+          await bot.handleUpdate(updatePhoto2);
+          await bot.handleUpdate(updateCaption2);
+          await bot.handleUpdate(updatePhoto22);
+
+          const actualMethods = outgoingRequests.getMethods();
+
+          expect(actualMethods.filter((method) => method === 'deleteMessage')).toHaveLength(2);
+        });
       });
     });
   });
