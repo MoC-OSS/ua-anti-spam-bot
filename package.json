@@ -2,6 +2,7 @@
   "name": "ua-anti-spam-bot",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "start:bot": "nodemon src/index.ts --max_old_space_size=2048",
     "start:bot:prod": "ts-node --transpile-only src/index.ts",

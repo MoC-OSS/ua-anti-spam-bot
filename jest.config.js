@@ -1,9 +1,11 @@
 /* eslint-disable unicorn/prefer-module */
 /** @type {import('ts-jest').JestConfigWithTsJest} */
-module.exports = {
+const jestConfig = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   transform: {
     '^.+\\.(t|j)sx?$': ['@swc/jest'],
   },
 };
+
+export default jestConfig;

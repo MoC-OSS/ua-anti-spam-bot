@@ -1,5 +1,5 @@
 import Bottleneck from 'bottleneck';
-import { forEach } from 'p-iteration';
+import pIteration from 'p-iteration';
 import type { Chat } from 'typegram/manage';
 
 import { alarmEndNotificationMessage, chatIsMutedMessage, chatIsUnmutedMessage, getAlarmStartNotificationMessage } from '../message';
@@ -79,14 +79,16 @@ export class AlarmChatService {
       }
 
       if (this.chats) {
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        forEach(this.chats, async (chat) => {
-          if (chat.data.chatSettings.airRaidAlertSettings.state === event.state.name) {
-            await this.limiter.schedule(() => this.processChatAlarm(chat, event.state.alert, isRepeatedAlarm).catch(handleError));
-          }
-        }).catch((error) => {
-          console.error('Error while scheduling the limiter', error);
-        });
+        pIteration
+          // eslint-disable-next-line @typescript-eslint/no-misused-promises,unicorn/no-array-method-this-argument,unicorn/no-array-callback-reference
+          .forEach(this.chats, async (chat) => {
+            if (chat.data.chatSettings.airRaidAlertSettings.state === event.state.name) {
+              await this.limiter.schedule(() => this.processChatAlarm(chat, event.state.alert, isRepeatedAlarm).catch(handleError));
+            }
+          })
+          .catch((error) => {
+            console.error('Error while scheduling the limiter', error);
+          });
       }
     });
   }

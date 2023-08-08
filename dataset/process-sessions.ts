@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/prefer-module */
 import fs from 'node:fs';
 import type { Chat } from 'typegram';
 
@@ -37,4 +36,4 @@ const csvHeaders = [...headersMap.keys()].join(delimeter);
 
 const csv = [csvHeaders, ...csvValues].join('\n');
 
-fs.writeFileSync(`${__dirname}/temp/processed-telegraf-session.tsv`, csv, { encoding: 'utf8' });
+fs.writeFileSync(new URL('temp/processed-telegraf-session.tsv', import.meta.url), csv, { encoding: 'utf8' });

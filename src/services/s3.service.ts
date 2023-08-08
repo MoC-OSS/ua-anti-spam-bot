@@ -20,14 +20,14 @@ export class S3Service {
   /**
    * Download tensor flow model into the specific folder
    * */
-  downloadTensorFlowModel(fsFolderPath: string) {
+  downloadTensorFlowModel(fsFolderPath: URL) {
     const loadFilePromises = this.mlFiles.map((fileName) =>
       this.s3
         .getObject({ Bucket: this.config.bucket || '', Key: path.join(this.config.path, fileName) })
         .promise()
         .then((response) => {
-          console.info(path.join(fsFolderPath, fileName));
-          fs.writeFileSync(path.join(fsFolderPath, fileName), response.Body?.toString() || '');
+          console.info(new URL(fileName, fsFolderPath));
+          fs.writeFileSync(new URL(fileName, fsFolderPath), response.Body?.toString() || '');
         }),
     );
 

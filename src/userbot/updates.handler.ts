@@ -1,6 +1,5 @@
 /* eslint-disable no-restricted-syntax,no-await-in-loop,no-unreachable,unicorn/prefer-module */
 import fs from 'node:fs';
-import path from 'node:path';
 import { forEachSeries } from 'p-iteration';
 import type { SetNonNullable } from 'type-fest';
 import { mentionRegexp, urlRegexp } from 'ukrainian-ml-optimizer';
@@ -191,7 +190,7 @@ export class UpdatesHandler {
             sentMentionsFromStart.push(mention);
             deleteFromMessage.push(mention);
 
-            fs.writeFileSync(path.join(__dirname, './from-entities.json'), JSON.stringify(deleteFromMessage, null, 2));
+            fs.writeFileSync(new URL('from-entities.json', import.meta.url), JSON.stringify(deleteFromMessage, null, 2));
 
             await this.mtProtoClient.sendSelfMessage(mention);
           }

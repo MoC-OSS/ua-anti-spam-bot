@@ -1,6 +1,5 @@
-/* eslint-disable unicorn/prefer-module */
 import fsp from 'node:fs/promises';
-import * as path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import * as util from 'node:util';
 import ffmpegPath from 'ffmpeg-static';
 import { path as ffprobePath } from 'ffprobe-static';
@@ -11,7 +10,7 @@ import ffmpeg from 'fluent-ffmpeg';
  * Service that helps to work with video content
  * */
 export class VideoService {
-  readonly saveFolderPath = `${__dirname}/temp`;
+  readonly saveFolderPath = new URL('temp', import.meta.url);
 
   /**
    * Create a `ffmpeg` command with specified `ffmpeg` and `ffprobe` binaries
@@ -35,7 +34,7 @@ export class VideoService {
    * */
   async extractFrames(video: Buffer, filename: string, duration?: number) {
     let localDuration = duration;
-    const videoFile = path.join(this.saveFolderPath, filename);
+    const videoFile = new URL(filename, this.saveFolderPath);
 
     await fsp.writeFile(videoFile, video);
 
@@ -63,49 +62,49 @@ export class VideoService {
    *
    * @param videoFile - video to get meta
    * */
-  getVideoProbe(videoFile: string): Promise<FfprobeData> {
+  getVideoProbe(videoFile: URL): Promise<FfprobeData> {
     const command = this.spawnCommand();
-    return util.promisify<FfprobeData>((callback) => command.input(videoFile).ffprobe(callback))();
+    return util.promisify<FfprobeData>((callback) => command.input(fileURLToPath(videoFile)).ffprobe(callback))();
   }
 
   /**
    * Convert a video into a round video note square video.
    * Resizes it to 512x512 with auto paddings.
    * */
-  async convertToVideoNote(videoFile: string, fileName: never): Promise<Buffer>;
+  async convertToVideoNote(videoFile: URL, fileName: never): Promise<Buffer>;
 
   async convertToVideoNote(videoFile: Buffer, fileName: string): Promise<Buffer>;
 
-  async convertToVideoNote(videoFile: string | Buffer, fileName: string): Promise<Buffer> {
-    let videoPath: string;
+  async convertToVideoNote(videoFile: URL | Buffer, fileName: string): Promise<Buffer> {
+    let videoPath: URL;
     let outputVideoName: string;
 
-    if (typeof videoFile === 'string') {
+    if (videoFile instanceof URL) {
       /**
        * A regular file, just read it
        * */
       videoPath = videoFile;
-      outputVideoName = `${videoFile.split('/').splice(-1)[0]}-video-note.mp4`;
+      outputVideoName = `${fileURLToPath(videoFile).split('/').splice(-1)[0]}-video-note.mp4`;
     } else {
       /**
        * Passed buffer, need to be saved and deleted after the operation
        * */
-      videoPath = path.join(this.saveFolderPath, `${fileName}.mp4`);
+      videoPath = new URL(`${fileName}.mp4`, this.saveFolderPath);
       outputVideoName = `${new Date().toString()}-video-note.mp4`;
       await fsp.writeFile(videoPath, videoFile);
     }
 
-    const outputVideoPath = path.join(this.saveFolderPath, outputVideoName);
+    const outputVideoPath = new URL(outputVideoName, this.saveFolderPath);
 
     const command = this.spawnCommand();
 
     await new Promise((resolve) => {
       command
-        .input(videoPath)
+        .input(fileURLToPath(videoPath))
         .size('512x?')
         .aspect('1:1')
         .autopad()
-        .output(outputVideoPath)
+        .output(fileURLToPath(outputVideoPath))
         .on('end', () => {
           resolve(null);
         })
@@ -134,9 +133,8 @@ export class VideoService {
    * @param filename - name to save in fs, should include extension
    * @param duration - duration of the video
    * */
-  async takeScreenshotsFs(videoFile: string, filename: string, duration: number) {
+  async takeScreenshotsFs(videoFile: URL, filename: string, duration: number) {
     const command = this.spawnCommand();
-    const saveFolderPath = `${__dirname}/temp`;
 
     /**
      * Convert video into screenshots and return files
@@ -145,7 +143,7 @@ export class VideoService {
       let localFileNames: string[] = [];
 
       command
-        .input(videoFile)
+        .input(fileURLToPath(videoFile))
         .on('filenames', (generatedFileNames: string[]) => {
           localFileNames = generatedFileNames;
         })
@@ -156,14 +154,14 @@ export class VideoService {
           size: '640x?',
           filename: `${filename}-%0i.png`,
           count: Math.min(10, Math.ceil(duration)),
-          folder: saveFolderPath,
+          folder: fileURLToPath(this.saveFolderPath),
         });
     });
 
     /**
      * Join to have full paths
      * */
-    const fullFileNamePaths = fileNamePaths.map((filePath) => path.join(saveFolderPath, filePath));
+    const fullFileNamePaths = fileNamePaths.map((filePath) => new URL(filePath, this.saveFolderPath));
 
     /**
      * Load files from FS
