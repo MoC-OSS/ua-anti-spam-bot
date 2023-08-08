@@ -1,6 +1,4 @@
-/* eslint-disable unicorn/prefer-module */
 import fs from 'node:fs';
-import path from 'node:path';
 
 import type { SwindlersCardsService, SwindlersUrlsService } from '../src/services';
 import { cardsService, swindlersGoogleService, urlService } from '../src/services';
@@ -116,9 +114,9 @@ export const autoSwindlers = async (
   console.info('notMatchedDomains\n');
   console.info(notMatchedDomains.join('\n'));
 
-  const regexpPath = path.join(__dirname, '../temp/regexp.txt');
-  const notMatchedUrlsPath = path.join(__dirname, '../temp/notMatchedUrls.txt');
-  const notMatchedDomainsPath = path.join(__dirname, '../temp/notMatchedDomains.txt');
+  const regexpPath = new URL('../temp/regexp.txt', import.meta.url);
+  const notMatchedUrlsPath = new URL('../temp/notMatchedUrls.txt', import.meta.url);
+  const notMatchedDomainsPath = new URL('../temp/notMatchedDomains.txt', import.meta.url);
 
   fs.writeFileSync(regexpPath, `${swindlersUrlsService.swindlersRegex.toString()}g`);
   fs.writeFileSync(notMatchedUrlsPath, notMatchedUrls.join('\n'));

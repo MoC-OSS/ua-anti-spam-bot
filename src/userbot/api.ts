@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import MTProto from '@mtproto/core';
 import type { JsonObject } from 'type-fest';
 
@@ -28,8 +28,7 @@ export class API {
       api_hash: environmentConfig.USERBOT_API_HASH,
 
       storageOptions: {
-        // eslint-disable-next-line unicorn/prefer-module
-        path: path.resolve(__dirname, './data/1.json'),
+        path: fileURLToPath(new URL('data/1.json', import.meta.url)),
       },
     });
   }

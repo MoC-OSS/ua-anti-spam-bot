@@ -1,6 +1,4 @@
-/* eslint-disable unicorn/prefer-module */
 import fs from 'node:fs';
-import path from 'node:path';
 import type { LayersModel } from '@tensorflow/tfjs';
 import type { ModelArtifacts } from '@tensorflow/tfjs-core/dist/io/types';
 import * as tf from '@tensorflow/tfjs-node';
@@ -31,8 +29,8 @@ export class BaseTensorService {
 
   loadModelMetadata(modelPath: string, vocabPath: string) {
     try {
-      this.DICTIONARY = JSON.parse(fs.readFileSync(path.join(__dirname, vocabPath)).toString()) as string[];
-      this.MODEL = JSON.parse(fs.readFileSync(path.join(__dirname, modelPath)).toString()) as ModelArtifacts;
+      this.DICTIONARY = JSON.parse(fs.readFileSync(new URL(vocabPath, import.meta.url)).toString()) as string[];
+      this.MODEL = JSON.parse(fs.readFileSync(new URL(modelPath, import.meta.url)).toString()) as ModelArtifacts;
     } catch (error) {
       console.error('Cannot parse model! Reason:');
       console.error(error);
@@ -51,15 +49,15 @@ export class BaseTensorService {
   }
 
   async loadModel() {
-    const fullModelPath = path.join(__dirname, this.modelPath);
+    const fullModelPath = new URL(this.modelPath, import.meta.url);
 
-    this.model = await tf.loadLayersModel(`file://${fullModelPath}`);
+    this.model = await tf.loadLayersModel(fullModelPath.toString());
   }
 
   predict(word: string, rate: number | null): Promise<SwindlerTensorResult> {
     const tensorRank = this.tokenize(word);
     const tensorPredict = this.model?.predict(tensorRank.tensor);
-    const fullModelPath = path.join(__dirname, this.modelPath);
+    const fullModelPath = new URL(this.modelPath, import.meta.url);
 
     const deleteRank = rate || this.SPAM_THRESHOLD;
 

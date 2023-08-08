@@ -13,10 +13,10 @@ export class NsfwTensorService {
     ['Sexy', 0.8],
   ]);
 
-  constructor(private modelPath: string) {}
+  constructor(private modelPath: URL) {}
 
   async load() {
-    this.model = await nsfw.load(`file://${this.modelPath}`);
+    this.model = await nsfw.load(this.modelPath.toString());
   }
 
   async classify(image: Buffer): Promise<predictionType[]> {
@@ -124,8 +124,7 @@ export class NsfwTensorService {
 }
 
 export const initNsfwTensor = async () => {
-  // eslint-disable-next-line unicorn/prefer-module
-  const tensorService = new NsfwTensorService(`${__dirname}/nsfw-temp/model.json`);
+  const tensorService = new NsfwTensorService(new URL('nsfw-temp/model.json', import.meta.url));
   await tensorService.load();
 
   return tensorService;

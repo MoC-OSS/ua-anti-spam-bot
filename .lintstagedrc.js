@@ -1,4 +1,4 @@
-const path = require('path');
+import path from 'node:path';
 
 const getLintFlags = (absolutePaths) => {
   const cwd = process.cwd();
@@ -25,7 +25,7 @@ const getLintFlags = (absolutePaths) => {
   };
 };
 
-module.exports = {
+export default {
   '**/*.{js,ts}': (absolutePaths) => {
     const { filePathLengthLimit, isTooManyFilesToLint, relativePaths } = getLintFlags(absolutePaths);
 
