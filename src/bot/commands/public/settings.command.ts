@@ -10,6 +10,11 @@ export class SettingsCommand {
       const chatId = context.chat?.id.toString() ?? '';
       const { isBotAdmin } = context.chatSession;
 
+      await context
+        .deleteMessage()
+        .then(() => true)
+        .catch(() => false);
+
       if (!userId) {
         throw new Error('Invalid user id');
       }
