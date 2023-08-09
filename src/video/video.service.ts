@@ -10,7 +10,7 @@ import ffmpeg from 'fluent-ffmpeg';
  * Service that helps to work with video content
  * */
 export class VideoService {
-  readonly saveFolderPath = new URL('temp', import.meta.url);
+  readonly saveFolderPath = new URL('temp/', import.meta.url);
 
   /**
    * Create a `ffmpeg` command with specified `ffmpeg` and `ffprobe` binaries
