@@ -1,4 +1,4 @@
-import { hasNoLinkedChats, isNotAdminMessage, linkToWebView } from '../../../message';
+import { featureNoAdminMessage, hasNoLinkedChats, isNotAdminMessage, linkToWebView } from '../../../message';
 import { redisService } from '../../../services';
 import type { GrammyMiddleware, Session } from '../../../types';
 
@@ -28,8 +28,13 @@ export class SettingsCommand {
       if (!isChatPrivate) {
         const admins = await context.api.getChatAdministrators(chatId);
         const isNotAdmin = !admins.some((admin) => admin.user.id.toString() === userId);
+
         if (isNotAdmin) {
-          return context.reply(isNotAdminMessage);
+          return context.replyWithSelfDestructedHTML(isNotAdminMessage);
+        }
+
+        if (!isBotAdmin) {
+          return context.replyWithSelfDestructedHTML(featureNoAdminMessage);
         }
 
         const userSession = await redisService.getUserSession(userId);
@@ -41,7 +46,7 @@ export class SettingsCommand {
           await redisService.setUserSession(userId, newData);
         }
 
-        return context.reply(linkToWebView);
+        return context.replyWithSelfDestructedHTML(linkToWebView);
       }
     };
   }
