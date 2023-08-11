@@ -56,6 +56,8 @@ export interface OptionalChatSettings {
   enableDeleteCounteroffensive?: boolean;
   enableDeleteRussian?: boolean;
   enableWarnRussian?: boolean;
+  enableDeleteObscene?: boolean;
+  enableWarnObscene?: boolean;
 }
 
 export type BooleanChatSettings = DefaultChatSettings & OptionalChatSettings;
