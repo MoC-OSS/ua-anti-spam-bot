@@ -1,0 +1,6 @@
+// These words are not right trimmed so we need to exclude them
+ass
+azz
+bbw
+kkk
+xxx

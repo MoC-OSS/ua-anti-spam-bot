@@ -7,6 +7,7 @@ export * from './google.service';
 export * from './language-detect.service';
 export * from './locations.service';
 export * from './mention.service';
+export * from './obscene.service';
 export * from './redis.service';
 export * from './s3.service';
 export * from './spam-media-groups-storage.service';
