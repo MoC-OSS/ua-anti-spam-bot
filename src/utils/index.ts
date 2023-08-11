@@ -17,6 +17,7 @@ export * from './optimize-write-context.util';
 export * from './remove-duplicates.util';
 export * from './remove-system-information.util';
 export * from './reveal-hidden-urls.util';
+export * from './search-set';
 export * from './video.util';
 
 /**
