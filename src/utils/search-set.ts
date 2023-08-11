@@ -24,8 +24,12 @@ export class SearchSet extends Set {
     const words = optimizedString.split(' ');
     const trimmedWords = trimmedString.split(' ');
 
+    const twoWords = words.map((word, index) => `${word} ${words[index + 1] || ''}`.trim());
+
+    const wordsToSearch = removeDuplicates([...trimmedWords, ...words, ...twoWords]);
+
     let foundWordIndex = -1;
-    const foundWord = removeDuplicates([...trimmedWords, ...words]).find((word, index) => {
+    const foundWord = wordsToSearch.find((word, index) => {
       if (this.has(word)) {
         foundWordIndex = index;
         return true;
