@@ -11,6 +11,7 @@ export const messageUtil = new MessageUtil();
 export const telegramUtil = new TelegramUtil();
 
 export * from './deep-copy.util';
+export * from './domain-allow-list';
 export * from './empty-functions.util';
 export * from './error-handler';
 export * from './optimize-write-context.util';
