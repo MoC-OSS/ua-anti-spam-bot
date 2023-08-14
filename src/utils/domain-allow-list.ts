@@ -1,12 +1,15 @@
 import { urlService } from '../services';
 
 export class DomainAllowList {
-  private readonly allowDomains: Set<string>;
+  private allowDomains: Set<string> = new Set();
+
+  private allowDomainPatterns: RegExp[] = [];
 
   constructor(allowDomains: string[]) {
     const baseUrls = allowDomains.filter((domain) => !domain.startsWith('@')).map((url) => this.processLink(url));
 
     this.allowDomains = new Set(baseUrls.sort((a, b) => a.localeCompare(b)));
+    this.allowDomainPatterns = baseUrls.filter((url) => url.includes('*')).map((patternUrl) => this.createRegexFromPattern(patternUrl));
   }
 
   processLink(url: string): string {
@@ -42,8 +45,23 @@ export class DomainAllowList {
       return true;
     }
 
+    if (this.allowDomainPatterns.some((pattern) => pattern.test(clearUrl))) {
+      return true;
+    }
+
     const domain = urlService.getUrlDomain(clearUrl).slice(0, -1);
 
     return this.allowDomains.has(domain);
+  }
+
+  createRegexFromPattern(pattern: string) {
+    // Escape special characters in the pattern and replace '*' with '.*'
+    const escapedPattern = pattern
+      .replace(/[$()*+.?[\\\]^{|}]/g, '\\$&')
+      .replace(/\*/g, '.*')
+      .replace(/\\.\*/g, '.*');
+
+    // Create a regular expression with the pattern
+    return new RegExp(`^${escapedPattern}$`, 'i');
   }
 }

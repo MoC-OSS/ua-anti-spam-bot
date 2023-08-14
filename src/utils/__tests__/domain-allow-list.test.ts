@@ -49,4 +49,11 @@ describe('DomainAllowList', () => {
 
     expect(result).toBeTruthy();
   });
+
+  it('should match link by domain pattern', () => {
+    const domainAllowList = new DomainAllowList(['*example.com*']);
+    const result = domainAllowList.isAllowed('any.example.com/path');
+
+    expect(result).toBeTruthy();
+  });
 });
