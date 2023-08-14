@@ -1,17 +1,27 @@
 import { urlService } from '../services';
 
+/**
+ * Domain allow list for filtering URLs.
+ */
 export class DomainAllowList {
   private allowDomains: Set<string> = new Set();
 
   private allowDomainPatterns: RegExp[] = [];
 
   constructor(allowDomains: string[]) {
+    this.updateDomains(allowDomains);
+  }
+
+  updateDomains(allowDomains: string[]) {
     const baseUrls = allowDomains.filter((domain) => !domain.startsWith('@')).map((url) => this.processLink(url));
 
     this.allowDomains = new Set(baseUrls.sort((a, b) => a.localeCompare(b)));
     this.allowDomainPatterns = baseUrls.filter((url) => url.includes('*')).map((patternUrl) => this.createRegexFromPattern(patternUrl));
   }
 
+  /**
+   * Processes a URL by removing common prefixes and suffixes.
+   */
   processLink(url: string): string {
     let newUrl = url;
 
@@ -54,6 +64,9 @@ export class DomainAllowList {
     return this.allowDomains.has(domain);
   }
 
+  /**
+   * Creates a regular expression from a domain pattern.
+   */
   createRegexFromPattern(pattern: string) {
     // Escape special characters in the pattern and replace '*' with '.*'
     const escapedPattern = pattern
