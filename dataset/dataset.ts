@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import CyrillicToTranslit from 'cyrillic-to-translit-js';
 
-import { removeDuplicates } from '../src/utils';
+import { removeDuplicates } from '../src/utils/remove-duplicates.util';
 
 import high_risk from './strings/high_risk.json';
 import houses from './strings/houses.json';
