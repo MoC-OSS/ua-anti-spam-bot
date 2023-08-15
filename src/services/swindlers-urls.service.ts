@@ -114,6 +114,10 @@ export class SwindlersUrlsService {
                 return url;
               }
 
+              if (error.code === 'DEPTH_ZERO_SELF_SIGNED_CERT') {
+                return url;
+              }
+
               try {
                 if (!error.response) {
                   console.error(error);
@@ -132,9 +136,7 @@ export class SwindlersUrlsService {
       return { isSpam: true, rate: 300 } as SwindlersBaseResult;
     }
 
-    const domain = urlService.getUrlDomain(redirectUrl);
-
-    const isUrlInException = this.domainAllowList.isAllowed(domain);
+    const isUrlInException = this.domainAllowList.isAllowed(redirectUrl);
 
     if (isUrlInException) {
       return {
@@ -142,6 +144,8 @@ export class SwindlersUrlsService {
         isSpam: false,
       } as SwindlersBaseResult;
     }
+
+    const domain = urlService.getUrlDomain(redirectUrl);
 
     if (EXCEPTION_DOMAINS.some((u) => domain.startsWith(u))) {
       return {
