@@ -60,6 +60,63 @@ describe('joinLeaveComposer main', () => {
         expect(outgoingRequests.length).toEqual(1);
         expect(apiCall?.method).toEqual('deleteMessage');
       });
+
+      it('should not delete left bot service message', async () => {
+        const updateConstructor = new LeftMemberMockUpdate();
+        const update = updateConstructor.buildOverwrite({
+          my_chat_member: {
+            chat: updateConstructor.genericSuperGroup,
+            from: updateConstructor.genericUser,
+            date: updateConstructor.genericSentDate,
+            old_chat_member: {
+              status: 'member',
+              user: updateConstructor.genericUserBot,
+            },
+            new_chat_member: {
+              status: 'kicked',
+              user: updateConstructor.genericUserBot,
+              until_date: updateConstructor.genericSentDate,
+            },
+          },
+          message: {
+            left_chat_member: updateConstructor.genericUserBot,
+          },
+        });
+
+        await bot.handleUpdate(update);
+
+        expect(outgoingRequests.length).toEqual(0);
+      });
+
+      it('should delete new bot service message', async () => {
+        const updateConstructor = new NewMemberMockUpdate();
+        const update = updateConstructor.buildOverwrite({
+          my_chat_member: {
+            chat: updateConstructor.genericSuperGroup,
+            from: updateConstructor.genericUser,
+            date: updateConstructor.genericSentDate,
+            old_chat_member: {
+              status: 'member',
+              user: updateConstructor.genericUserBot,
+            },
+            new_chat_member: {
+              status: 'member',
+              user: updateConstructor.genericUserBot,
+              until_date: updateConstructor.genericSentDate,
+            },
+          },
+          message: {
+            new_chat_members: [updateConstructor.genericUserBot],
+          },
+        });
+
+        await bot.handleUpdate(update);
+
+        const apiCall = outgoingRequests.getLast<'deleteMessage'>();
+
+        expect(outgoingRequests.length).toEqual(1);
+        expect(apiCall?.method).toEqual('deleteMessage');
+      });
     });
 
     describe('bot is not admin', () => {
