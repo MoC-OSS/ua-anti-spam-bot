@@ -26,6 +26,7 @@ export class AlarmChatService {
       maxConcurrent: 1,
       minTime: 2000,
     });
+    await this.getChatsWithAlarm();
     this.subscribeToAlarms();
   }
 
@@ -66,6 +67,17 @@ export class AlarmChatService {
     return sessions.filter(
       (s) => s.data.chatSettings?.airRaidAlertSettings?.notificationMessage || s.data.chatSettings?.disableChatWhileAirRaidAlert,
     );
+  }
+
+  async getChatsWithAlarm() {
+    const airRaidAlarmStates = await alarmService.getStates();
+    airRaidAlarmStates.states.forEach((state) => {
+      if (state.alert) {
+        this.alarms?.add(state.name);
+      } else {
+        this.alarms?.delete(state.name);
+      }
+    });
   }
 
   subscribeToAlarms() {
