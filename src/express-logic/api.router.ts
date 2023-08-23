@@ -46,6 +46,8 @@ export const apiRouter = (bot: Bot<GrammyContext>) => {
         enableDeleteForwards: false,
         enableDeleteRussian: false,
         enableWarnRussian: false,
+        enableDeleteObscene: false,
+        enableWarnObscene: false,
         airRaidAlertSettings: {
           pageNumber: 0,
           state: '',
