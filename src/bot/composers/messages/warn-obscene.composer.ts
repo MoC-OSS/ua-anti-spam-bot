@@ -42,11 +42,9 @@ export const getWarnObsceneComposer = () => {
     if (isFeatureEnabled && isObscene) {
       await saveObsceneMessage(context, isObscene);
 
-      if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
-        await context.replyWithSelfDestructedHTML(getWarnObsceneMessage(), {
-          reply_to_message_id: context.msg?.message_id,
-        });
-      }
+      await context.replyWithSelfDestructedHTML(getWarnObsceneMessage(), {
+        reply_to_message_id: context.msg?.message_id,
+      });
     }
 
     return next();
