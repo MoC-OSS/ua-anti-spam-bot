@@ -116,6 +116,7 @@ export interface ChatDetails {
   photo: string;
   users: number;
   isAdministrator?: boolean;
+  airAlarm: boolean;
 }
 
 export interface ChatData {

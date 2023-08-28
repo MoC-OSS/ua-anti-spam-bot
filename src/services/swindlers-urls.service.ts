@@ -4,6 +4,7 @@ import FuzzySet from 'fuzzyset';
 
 import { environmentConfig } from '../config';
 import type { SwindlersBaseResult, SwindlersUrlsResult } from '../types';
+import { DomainAllowList } from '../utils';
 
 import { EXCEPTION_DOMAINS, SHORTS } from './constants';
 import type { DynamicStorageService } from './dynamic-storage.service';
@@ -16,18 +17,18 @@ export class SwindlersUrlsService {
 
   swindlersFuzzySet!: FuzzySet;
 
-  exceptionUrls: string[];
+  domainAllowList: DomainAllowList;
 
   constructor(private dynamicStorageService: DynamicStorageService, private rate = 0.9) {
     this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
     console.info('swindlersRegex', this.swindlersRegex);
 
     this.initFuzzySet();
-    this.exceptionUrls = this.dynamicStorageService.notSwindlers;
+    this.domainAllowList = new DomainAllowList(this.dynamicStorageService.notSwindlers);
 
     this.dynamicStorageService.fetchEmitter.on('fetch', () => {
       this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
-      this.exceptionUrls = this.dynamicStorageService.notSwindlers;
+      this.domainAllowList.updateDomains(this.dynamicStorageService.notSwindlers);
       console.info('swindlersRegex', this.swindlersRegex);
       this.initFuzzySet();
     });
@@ -113,6 +114,10 @@ export class SwindlersUrlsService {
                 return url;
               }
 
+              if (error.code === 'DEPTH_ZERO_SELF_SIGNED_CERT') {
+                return url;
+              }
+
               try {
                 if (!error.response) {
                   console.error(error);
@@ -131,9 +136,7 @@ export class SwindlersUrlsService {
       return { isSpam: true, rate: 300 } as SwindlersBaseResult;
     }
 
-    const domain = urlService.getUrlDomain(redirectUrl);
-
-    const isUrlInException = this.exceptionUrls.includes(domain);
+    const isUrlInException = this.domainAllowList.isAllowed(redirectUrl);
 
     if (isUrlInException) {
       return {
@@ -141,6 +144,8 @@ export class SwindlersUrlsService {
         isSpam: false,
       } as SwindlersBaseResult;
     }
+
+    const domain = urlService.getUrlDomain(redirectUrl);
 
     if (EXCEPTION_DOMAINS.some((u) => domain.startsWith(u))) {
       return {

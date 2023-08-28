@@ -3,7 +3,7 @@ import { Router } from 'express';
 import asyncHandler from 'express-async-handler';
 import type { Bot } from 'grammy';
 
-import { alarmService, redisService } from '../services';
+import { alarmChatService, alarmService, redisService } from '../services';
 import type { ChatData, ChatSettings, GrammyContext, Session } from '../types';
 
 import { getChatAvatar, getLinkedChats, getUserIdFromAuthorizationHeader, updateChatsList } from './helpers';
@@ -61,6 +61,8 @@ export const apiRouter = (bot: Bot<GrammyContext>) => {
       const chatSession = await redisService.getChatSession(id);
       const avatar = await getChatAvatar(bot, chatInfo.photo?.small_file_id ?? '');
       const title = 'title' in chatInfo ? chatInfo.title : '';
+      const state = chatSession?.chatSettings?.airRaidAlertSettings?.state ?? '';
+      const isAirAlarmNow = alarmChatService.isAlarmNow(state) || false;
 
       const data: Required<ChatData> = {
         chat: {
@@ -68,6 +70,7 @@ export const apiRouter = (bot: Bot<GrammyContext>) => {
           name: title,
           photo: avatar,
           users: chatMembers,
+          airAlarm: isAirAlarmNow,
         },
         settings: { ...defaultSettings, ...chatSession?.chatSettings },
         states: airRaidAlarmStates.states,

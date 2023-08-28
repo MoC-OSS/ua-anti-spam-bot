@@ -1,6 +1,14 @@
 import { sleep } from '../utils';
 
-import { chartMock, generateChat, generateChatSessionData, getAlarmMock, redisMock, testId, testState } from './_mocks';
+import {
+  chartMock,
+  generateChat,
+  generateChatSessionData,
+  generateMockSessions,
+  getAlarmMock,
+  testId,
+  testState,
+} from './_mocks/alarm.mocks';
 import { ALARM_EVENT_KEY, alarmService } from './alarm.service';
 import { alarmChatService } from './alarm-chat.service';
 
@@ -10,7 +18,12 @@ const apiMock = {
   setChatPermissions: jest.fn(),
 };
 
-jest.mock('./redis.service', () => redisMock);
+jest.mock('./redis.service', () => ({
+  redisService: {
+    getChatSessions: () => generateMockSessions(),
+    updateChatSession: () => null,
+  },
+}));
 
 describe('AlarmChatService', () => {
   beforeAll(async () => {
