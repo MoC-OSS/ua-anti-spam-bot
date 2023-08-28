@@ -5,7 +5,7 @@ import type { OutgoingRequests } from '../../../../testing';
 import { MessageSuperGroupMockUpdate, prepareBotForTesting } from '../../../../testing';
 import { mockChatSession } from '../../../../testing-main';
 import type { GrammyContext } from '../../../../types';
-import { parseIsRussian, parseText, stateMiddleware } from '../../../middleware';
+import { parseText, stateMiddleware } from '../../../middleware';
 import { selfDestructedReply } from '../../../plugins';
 import { getNoObsceneComposer } from '../no-obscene.composer';
 
@@ -27,7 +27,6 @@ describe('noObsceneComposer', () => {
 
     bot.use(stateMiddleware);
     bot.use(parseText);
-    bot.use(parseIsRussian);
     bot.use(mockChatSessionMiddleware);
 
     bot.use(noObsceneComposerTest);
