@@ -19,6 +19,7 @@
     "build:folder": "swc $FROM --copy-files --out-dir dist/$FROM --config-file .swcrc.json",
     "download-swindler": "ts-node dataset/download-swindler-dataset.ts && npm run optimize-swindler",
     "optimize-swindler": "ts-node dataset/optimize-swindler-dataset.ts positives && ts-node dataset/optimize-swindler-dataset.ts negatives",
+    "optimize-obscene": "ts-node ./dataset/obscene-optimization.ts",
     "prepare": "husky install",
     "test": "jest",
     "health-check": "echo health-check",

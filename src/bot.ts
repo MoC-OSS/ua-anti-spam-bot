@@ -31,8 +31,10 @@ import {
   getNsfwFilterComposer,
   getStrategicComposer,
   getSwindlersComposer,
+  getWarnObsceneComposer,
   getWarnRussianComposer,
 } from './bot/composers/messages';
+import { getNoObsceneComposer } from './bot/composers/messages/no-obscene.composer';
 import { getSwindlersStatisticCommandsComposer } from './bot/composers/swindlers-statististics.composer';
 import { isNotChannel, onlyCreatorChatFilter } from './bot/filters';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
@@ -189,6 +191,8 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const { swindlersComposer } = getSwindlersComposer({ deleteSwindlersMiddleware });
   const { strategicComposer } = getStrategicComposer({ onTextListener });
   const { noCounterOffensiveComposer } = getNoCounterOffensiveComposer();
+  const { noObsceneComposer } = getNoObsceneComposer();
+  const { warnObsceneComposer } = getWarnObsceneComposer();
 
   const { messagesComposer } = getMessagesComposer({
     counteroffensiveService,
@@ -202,6 +206,8 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     swindlersComposer,
     strategicComposer,
     noCounterOffensiveComposer,
+    noObsceneComposer,
+    warnObsceneComposer,
   });
 
   // Photo composers

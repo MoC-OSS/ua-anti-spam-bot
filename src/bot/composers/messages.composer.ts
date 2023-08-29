@@ -36,6 +36,8 @@ export interface MessagesComposerProperties {
   noRussianComposer: Composer<GrammyContext>;
   warnRussianComposer: Composer<GrammyContext>;
   noCounterOffensiveComposer: Composer<GrammyContext>;
+  noObsceneComposer: Composer<GrammyContext>;
+  warnObsceneComposer: Composer<GrammyContext>;
 }
 
 /**
@@ -108,6 +110,8 @@ export const getMessagesComposer = ({
   noRussianComposer,
   warnRussianComposer,
   noCounterOffensiveComposer,
+  noObsceneComposer,
+  warnObsceneComposer,
 }: MessagesComposerProperties) => {
   const { messagesComposer, readyMessagesComposer, registerDefaultSettingModule, registerOptionalSettingModule } =
     getMessagesRegisterComposer();
@@ -129,6 +133,8 @@ export const getMessagesComposer = ({
   registerOptionalSettingModule('enableDeleteForwards', noForwardsComposer);
   registerOptionalSettingModule('enableDeleteRussian', parseIsRussian, noRussianComposer);
   registerOptionalSettingModule('enableWarnRussian', parseIsRussian, warnRussianComposer);
+  registerOptionalSettingModule('enableDeleteObscene', noObsceneComposer);
+  registerOptionalSettingModule('enableWarnObscene', warnObsceneComposer);
   // TODO optimize this module
   registerDefaultSettingModule('disableStrategicInfo', strategicComposer);
 

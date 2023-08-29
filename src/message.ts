@@ -6,6 +6,8 @@ import { helpChat } from './creator';
 import type { ChatSessionData, FeaturesSessionsData } from './types';
 import { formatStateIntoAccusative, getRandomItem } from './utils';
 
+export * from './message/index';
+
 export const randomBanEmojis = ['👮🏻‍♀️', '🤦🏼‍♀️', '🙅🏻‍♀️'];
 export const randomLocationBanEmojis = ['🏡', '🏘️', '🌳'];
 
@@ -733,6 +735,8 @@ export const locationLogsStartMessage = 'Deleted location message';
 export const mentionLogsStartMessage = 'Deleted mention message';
 export const cardLogsStartMessage = 'Deleted card message';
 export const counteroffensiveLogsStartMessage = 'Deleted counteroffensive message by';
+export const obsceneDeleteLogsStartMessage = 'Delete obscene message';
+export const obsceneWarnLogsStartMessage = 'Warn obscene message';
 
 export const logsStartMessages = new Set([
   swindlerLogsStartMessage,
@@ -745,4 +749,6 @@ export const logsStartMessages = new Set([
   mentionLogsStartMessage,
   cardLogsStartMessage,
   counteroffensiveLogsStartMessage,
+  obsceneDeleteLogsStartMessage,
+  obsceneWarnLogsStartMessage,
 ]);
