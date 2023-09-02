@@ -1,4 +1,3 @@
-// https://github.com/saganoren/obscene-ukr/blob/master/obscene_dictionary.txt
 blyad
 blіat
 ctrlбля
