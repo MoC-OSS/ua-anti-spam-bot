@@ -1,6 +1,6 @@
 import CyrillicToTranslit from 'cyrillic-to-translit-js';
 
-import { removeDuplicates } from '../src/utils';
+import { removeDuplicates } from '../src/utils/remove-duplicates.util';
 
 const translitRus = CyrillicToTranslit({ preset: 'ru' });
 const translitUa = CyrillicToTranslit({ preset: 'uk' });
