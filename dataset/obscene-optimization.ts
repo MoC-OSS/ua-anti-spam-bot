@@ -17,8 +17,8 @@ const processDictionary = (text: string): string[] =>
       .sort((a, b) => a.localeCompare(b)),
   );
 
-fs.writeFileSync(obsceneDictionaryUaUrl, processDictionary(obsceneDictionaryUa).join('\n'));
-fs.writeFileSync(obsceneDictionaryRuUrl, processDictionary(obsceneDictionaryRu).join('\n'));
-fs.writeFileSync(obsceneDictionaryEnUrl, processDictionary(obsceneDictionaryEn).join('\n'));
+fs.writeFileSync(obsceneDictionaryUaUrl, `${processDictionary(obsceneDictionaryUa).join('\n')}\n`);
+fs.writeFileSync(obsceneDictionaryRuUrl, `${processDictionary(obsceneDictionaryRu).join('\n')}\n`);
+fs.writeFileSync(obsceneDictionaryEnUrl, `${processDictionary(obsceneDictionaryEn).join('\n')}\n`);
 
 console.info('Done');
