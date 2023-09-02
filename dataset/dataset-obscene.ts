@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 
-import { removeRepeatedLettersUtil } from '../src/utils';
+import { removeRepeatedLettersUtil } from '../src/utils/remove-repeated-letters.util';
 import { SearchSet } from '../src/utils/search-set';
 
 import { processMessage, processTxtMessage } from './dataset-helpers';
