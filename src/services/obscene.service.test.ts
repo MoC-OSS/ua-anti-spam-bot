@@ -14,4 +14,11 @@ describe('ObsceneService', () => {
 
     expect(actual).toBeNull();
   });
+
+  it('should not delete russian warship', () => {
+    const message = 'Русский военный корабль, иди на хуй!';
+    const actual = obsceneService.checkObscene(message);
+
+    expect(actual).toBeNull();
+  });
 });
