@@ -12,8 +12,13 @@ export interface SearchSetResult {
   wordIndex: number;
 }
 
+export interface SearchSetTokens {
+  words: string[];
+  wordsToSearch: string[];
+}
+
 export class SearchSet extends Set {
-  search(string: string): SearchSetResult | null {
+  tokenize(string: string): SearchSetTokens {
     /**
      * Optimizes the input string for searching by converting to lowercase, removing punctuation,
      * and normalizing white spaces.
@@ -27,6 +32,14 @@ export class SearchSet extends Set {
     const twoWords = words.map((word, index) => `${word} ${words[index + 1] || ''}`.trim());
 
     const wordsToSearch = removeDuplicates([...trimmedWords, ...words, ...twoWords]);
+
+    return { wordsToSearch, words };
+  }
+
+  search(string: string | SearchSetTokens): SearchSetResult | null {
+    const { wordsToSearch, words } = (string as SearchSetTokens).wordsToSearch
+      ? (string as SearchSetTokens)
+      : this.tokenize(string as string);
 
     let foundWordIndex = -1;
     const foundWord = wordsToSearch.find((word, index) => {
