@@ -34,6 +34,7 @@ import {
   getWarnObsceneComposer,
   getWarnRussianComposer,
 } from './bot/composers/messages';
+import { getNoAntisemitismComposer } from './bot/composers/messages/no-antisemitism.composer';
 import { getNoObsceneComposer } from './bot/composers/messages/no-obscene.composer';
 import { getSwindlersStatisticCommandsComposer } from './bot/composers/swindlers-statististics.composer';
 import { isNotChannel, onlyCreatorChatFilter } from './bot/filters';
@@ -193,6 +194,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const { noCounterOffensiveComposer } = getNoCounterOffensiveComposer();
   const { noObsceneComposer } = getNoObsceneComposer();
   const { warnObsceneComposer } = getWarnObsceneComposer();
+  const { noAntisemitismComposer } = getNoAntisemitismComposer();
 
   const { messagesComposer } = getMessagesComposer({
     counteroffensiveService,
@@ -208,6 +210,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     noCounterOffensiveComposer,
     noObsceneComposer,
     warnObsceneComposer,
+    noAntisemitismComposer,
   });
 
   // Photo composers
