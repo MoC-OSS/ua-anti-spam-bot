@@ -1,5 +1,5 @@
 import { dataset } from '../../dataset/dataset';
-import { SearchSet } from '../utils';
+import { SearchSet } from '../utils/search-set';
 
 export class ObsceneService {
   private readonly warshipAllowList = new SearchSet(['корабль', 'корабель', 'кораблю']);
