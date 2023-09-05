@@ -9,6 +9,7 @@ import percent_100 from './strings/percent_100.json' assert { type: 'json' };
 import strict_high_risk from './strings/strict_high_risk.json' assert { type: 'json' };
 import strict_locations from './strings/strict_locations.json' assert { type: 'json' };
 import strict_percent_100 from './strings/strict_percent_100.json' assert { type: 'json' };
+import { antisemitismDictionary } from './dataset-antisemitism';
 import { processMessage } from './dataset-helpers';
 import { obsceneDictionary } from './dataset-obscene';
 
@@ -59,6 +60,7 @@ export const dataset = {
   strict_locations: processMessage(strict_locations),
   strict_percent_100: processMessage(strict_percent_100),
   obscene_dictionary: obsceneDictionary,
+  antisemitism_dictionary: antisemitismDictionary,
 };
 
 export type DatasetKeys = keyof typeof dataset;

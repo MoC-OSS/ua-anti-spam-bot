@@ -38,6 +38,7 @@ export interface MessagesComposerProperties {
   noCounterOffensiveComposer: Composer<GrammyContext>;
   noObsceneComposer: Composer<GrammyContext>;
   warnObsceneComposer: Composer<GrammyContext>;
+  noAntisemitismComposer: Composer<GrammyContext>;
 }
 
 /**
@@ -112,6 +113,7 @@ export const getMessagesComposer = ({
   noCounterOffensiveComposer,
   noObsceneComposer,
   warnObsceneComposer,
+  noAntisemitismComposer,
 }: MessagesComposerProperties) => {
   const { messagesComposer, readyMessagesComposer, registerDefaultSettingModule, registerOptionalSettingModule } =
     getMessagesRegisterComposer();
@@ -120,6 +122,7 @@ export const getMessagesComposer = ({
    * Register modules.
    * The order should be right
    * */
+  registerDefaultSettingModule('disableDeleteAntisemitism', noAntisemitismComposer);
   registerDefaultSettingModule('disableSwindlerMessage', swindlersComposer);
   registerOptionalSettingModule(
     'enableDeleteCounteroffensive',

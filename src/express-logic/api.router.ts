@@ -38,6 +38,7 @@ export const apiRouter = (bot: Bot<GrammyContext>) => {
         disableSwindlerMessage: false,
         disableDeleteServiceMessage: false,
         disableNsfwFilter: false,
+        disableDeleteAntisemitism: false,
         enableDeleteCards: false,
         enableDeleteUrls: false,
         enableDeleteCounteroffensive: false,

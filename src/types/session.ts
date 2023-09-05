@@ -45,6 +45,7 @@ export interface DefaultChatSettings {
   disableSwindlerMessage?: boolean;
   disableDeleteServiceMessage?: boolean;
   disableNsfwFilter?: boolean;
+  disableDeleteAntisemitism?: boolean;
 }
 
 export interface OptionalChatSettings {

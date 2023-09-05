@@ -737,6 +737,7 @@ export const cardLogsStartMessage = 'Deleted card message';
 export const counteroffensiveLogsStartMessage = 'Deleted counteroffensive message by';
 export const obsceneDeleteLogsStartMessage = 'Delete obscene message';
 export const obsceneWarnLogsStartMessage = 'Warn obscene message';
+export const antisemitismDeleteLogsStartMessage = 'Delete antisemitism message';
 
 export const logsStartMessages = new Set([
   swindlerLogsStartMessage,
@@ -751,4 +752,5 @@ export const logsStartMessages = new Set([
   counteroffensiveLogsStartMessage,
   obsceneDeleteLogsStartMessage,
   obsceneWarnLogsStartMessage,
+  antisemitismDeleteLogsStartMessage,
 ]);
