@@ -2,11 +2,17 @@ import fs from 'node:fs';
 
 import { removeDuplicates } from '../src/utils';
 
+import { antisemitismDictionaryActionUrl, antisemitismDictionaryNounsUrl, antisemitismDictionaryThreadsUrl } from './dataset-antisemitism';
 import { obsceneDictionaryEnUrl, obsceneDictionaryRuUrl, obsceneDictionaryUaUrl } from './dataset-obscene';
 
-const obsceneDictionaryUa = fs.readFileSync(obsceneDictionaryUaUrl).toString();
-const obsceneDictionaryRu = fs.readFileSync(obsceneDictionaryRuUrl).toString();
-const obsceneDictionaryEn = fs.readFileSync(obsceneDictionaryEnUrl).toString();
+const filesToOptimize: URL[] = [
+  obsceneDictionaryUaUrl,
+  obsceneDictionaryRuUrl,
+  obsceneDictionaryEnUrl,
+  antisemitismDictionaryActionUrl,
+  antisemitismDictionaryNounsUrl,
+  antisemitismDictionaryThreadsUrl,
+];
 
 const processDictionary = (text: string): string[] =>
   removeDuplicates(
@@ -17,8 +23,10 @@ const processDictionary = (text: string): string[] =>
       .sort((a, b) => a.localeCompare(b)),
   );
 
-fs.writeFileSync(obsceneDictionaryUaUrl, `${processDictionary(obsceneDictionaryUa).join('\n')}\n`);
-fs.writeFileSync(obsceneDictionaryRuUrl, `${processDictionary(obsceneDictionaryRu).join('\n')}\n`);
-fs.writeFileSync(obsceneDictionaryEnUrl, `${processDictionary(obsceneDictionaryEn).join('\n')}\n`);
+filesToOptimize.forEach((url) => {
+  const file = fs.readFileSync(url).toString();
+  fs.writeFileSync(url, `${processDictionary(file).join('\n')}\n`);
+  console.info('Optimize file:', url.pathname);
+});
 
 console.info('Done');
