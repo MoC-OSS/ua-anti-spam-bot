@@ -17,5 +17,5 @@ export function processMessage(dataset: string[]): string[] {
 }
 
 export function processTxtMessage(dataset: string): string[] {
-  return dataset.toLowerCase().split('\n').slice(1).filter(Boolean);
+  return dataset.toLowerCase().split('\n').filter(Boolean);
 }
