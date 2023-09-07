@@ -15,3 +15,7 @@ export const LOGS_CHAT_THREAD_IDS = {
 export const SECOND_LOGS_CHAT_THREAD_IDS = {
   SWINDLERS: 5,
 };
+
+export const SECOND_LOGS_CHAT_THREAD_IDS = {
+  SWINDLERS: 5,
+};
