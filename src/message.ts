@@ -3,8 +3,10 @@ import moment from 'moment-timezone';
 import type { CustomJsonObject } from './types/object';
 import { environmentConfig } from './config';
 import { helpChat } from './creator';
-import type { ChatSessionData } from './types';
+import type { ChatSessionData, FeaturesSessionsData } from './types';
 import { formatStateIntoAccusative, getRandomItem } from './utils';
+
+export * from './message/index';
 
 export const randomBanEmojis = ['👮🏻‍♀️', '🤦🏼‍♀️', '🙅🏻‍♀️'];
 export const randomLocationBanEmojis = ['🏡', '🏘️', '🌳'];
@@ -127,6 +129,16 @@ ${getRandomAlarmEndText()}
 /**
  * Generic - Settings
  * */
+
+export const linkToWebView = `⚙️Відкрити налаштування:
+
+🔗 ${environmentConfig.WEB_VIEW_URL}`;
+export const hasNoLinkedChats = `
+⛔️ У Вас немає прив'язаних чатів.
+
+Будь ласка, зайдіть  у групу і натисніть /settings.`;
+export const isNotAdminMessage = '😔 Ви не є адміністратором чату!';
+
 export const settingsAvailableMessage = '👨‍👩‍👧‍👦 Налаштування доступні тільки для групових чатів.';
 export const settingsDeleteItemMessage = 'Повідомлення про видалення';
 export const settingsSubmitMessage = '💾 Зберегти';
@@ -442,7 +454,6 @@ ${startTime.toString()}
 export interface StatisticsMessageProperties {
   adminsChatsCount: number;
   botRemovedCount: number;
-  botStartTime: string;
   channelCount: number;
   groupCount: number;
   memberChatsCount: number;
@@ -450,6 +461,7 @@ export interface StatisticsMessageProperties {
   superGroupsCount: number;
   totalSessionCount: number;
   totalUserCounts: number;
+  features: FeaturesSessionsData;
 }
 
 /**
@@ -460,7 +472,6 @@ export interface StatisticsMessageProperties {
 export const getStatisticsMessage = ({
   adminsChatsCount,
   botRemovedCount,
-  botStartTime,
   channelCount,
   groupCount,
   memberChatsCount,
@@ -468,6 +479,7 @@ export const getStatisticsMessage = ({
   superGroupsCount,
   totalSessionCount,
   totalUserCounts,
+  features,
 }: StatisticsMessageProperties) =>
   `
 <b>Кількість всіх: </b>
@@ -489,8 +501,25 @@ export const getStatisticsMessage = ({
 💁‍♂️ Приватних чатів: <b>${privateCount}</b>
 🔔 Каналів: <b>${channelCount}</b>
 
-<i>Статистика від:
-${botStartTime}</i>
+<b>Статистика по фічам</b>
+
+📢 Бот повідомляє про початок і завершення повітряної тривоги: <b>${features.notificationMessage}</b>
+🤫 Бот вимикає чат під час повітряної тривоги: <b>${features.disableChatWhileAirRaidAlert}</b>
+🚀 Бот видаляє стратегічну інформацію: <b>${features.disableStrategicInfo}</b>
+❗ Бот повідомляє про причину видалення повідомлення: <b>${features.disableDeleteMessage}</b>
+💰 Бот видаляє повідомлення шахраїв: <b>${features.disableSwindlerMessage}</b>
+✋ Бот видаляє повідомлення приєдання та прощання: <b>${features.disableDeleteServiceMessage}</b>
+🔞 Бот видаляє зображення відвертого змісту та дорослий контент: <b>${features.disableNsfwFilter}</b>
+💳 Бот видаляє повідомлення з картками: <b>${features.enableDeleteCards}</b>
+🔗 Бот видаляє повідомлення з посиланнями: <b>${features.enableDeleteUrls}</b>
+📍 Бот видаляє повідомлення з локаціями: <b>${features.enableDeleteLocations}</b>
+⚓ Бот видаляє повідомлення зі @ згадуваннями: <b>${features.enableDeleteMentions}</b>
+↩️ Бот видаляє повідомлення з пересиланнями: <b>${features.enableDeleteForwards}</b>
+🏃 Бот видаляє повідомлення з контрнаступом: <b>${features.enableDeleteCounteroffensive}</b>
+🪆 Бот видаляє повідомлення з російською мовою: <b>${features.enableDeleteRussian}</b>
+☢ Бот попереджає про заборону російської мови: <b>${features.enableWarnRussian}</b>
+
+
 `.trim();
 
 export interface HelpMessageProperties {
@@ -500,6 +529,13 @@ export interface HelpMessageProperties {
   user: string;
   userId: number;
 }
+
+/**
+ *
+ * Message that bot sends on /get_new_statistic where no new data
+ *
+ * */
+export const noNewStatisticMessage = 'Немає нових записів.';
 
 /**
  *
@@ -699,6 +735,9 @@ export const locationLogsStartMessage = 'Deleted location message';
 export const mentionLogsStartMessage = 'Deleted mention message';
 export const cardLogsStartMessage = 'Deleted card message';
 export const counteroffensiveLogsStartMessage = 'Deleted counteroffensive message by';
+export const obsceneDeleteLogsStartMessage = 'Delete obscene message';
+export const obsceneWarnLogsStartMessage = 'Warn obscene message';
+export const antisemitismDeleteLogsStartMessage = 'Delete antisemitism message';
 
 export const logsStartMessages = new Set([
   swindlerLogsStartMessage,
@@ -711,4 +750,7 @@ export const logsStartMessages = new Set([
   mentionLogsStartMessage,
   cardLogsStartMessage,
   counteroffensiveLogsStartMessage,
+  obsceneDeleteLogsStartMessage,
+  obsceneWarnLogsStartMessage,
+  antisemitismDeleteLogsStartMessage,
 ]);

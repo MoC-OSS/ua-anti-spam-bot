@@ -1,6 +1,7 @@
 import type { Chat } from 'typegram/manage';
 import type { MessageEntity } from 'typegram/message';
 
+import type { State } from './alarm';
 import type { GrammyContext } from './context';
 
 export interface ChatSessionFlavor<S> {
@@ -44,6 +45,7 @@ export interface DefaultChatSettings {
   disableSwindlerMessage?: boolean;
   disableDeleteServiceMessage?: boolean;
   disableNsfwFilter?: boolean;
+  disableDeleteAntisemitism?: boolean;
 }
 
 export interface OptionalChatSettings {
@@ -55,6 +57,8 @@ export interface OptionalChatSettings {
   enableDeleteCounteroffensive?: boolean;
   enableDeleteRussian?: boolean;
   enableWarnRussian?: boolean;
+  enableDeleteObscene?: boolean;
+  enableWarnObscene?: boolean;
 }
 
 export type BooleanChatSettings = DefaultChatSettings & OptionalChatSettings;
@@ -77,9 +81,14 @@ export interface ChatSessionData {
   chatPermissions?: Chat.MultiUserGetChat['permissions'];
 }
 
+export interface LinkedChat {
+  id: string;
+  name: string;
+}
 export interface Session {
   id: string;
   data: SessionData;
+  linkedChats?: LinkedChat[];
 }
 
 export interface ChatSession {
@@ -96,4 +105,23 @@ export interface RedisSessionOptions {
   state: Record<string, unknown>;
   format: Record<string, unknown>;
   getSessionKey: (context: GrammyContext) => string;
+}
+
+export type FeaturesSessionsData = {
+  [Property in keyof Required<BooleanChatSettings & Pick<AirRaidAlertSettings, 'notificationMessage'>>]: number;
+};
+
+export interface ChatDetails {
+  id: string;
+  name: string;
+  photo: string;
+  users: number;
+  isAdministrator?: boolean;
+  airAlarm: boolean;
+}
+
+export interface ChatData {
+  chat: ChatDetails;
+  settings: ChatSettings;
+  states: State[];
 }

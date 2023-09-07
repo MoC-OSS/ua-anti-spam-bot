@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/prefer-module */
 import { environmentConfig } from '../config';
 
 import { BaseTensorService } from './base-tensor.service';
@@ -14,7 +13,7 @@ export const initSwindlersTensor = async () => {
   // if (environmentConfig.S3_BUCKET && s3Service) {
   //   try {
   //     console.info('* Staring new tensorflow S3 logic...');
-  //     await s3Service.downloadTensorFlowModel(path.join(__dirname, 'swindlers-temp'));
+  //     await s3Service.downloadTensorFlowModel(new URL('swindlers-temp/', import.meta.url);
   //     console.info('Tensor flow model has been loaded from S3.');
   //   } catch (e) {
   //     console.error('Cannot download tensor flow model from S3.\nReason: ', e);

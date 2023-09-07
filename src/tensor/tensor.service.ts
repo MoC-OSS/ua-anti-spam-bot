@@ -1,6 +1,3 @@
-/* eslint-disable unicorn/prefer-module */
-import path from 'node:path';
-
 import { environmentConfig } from '../config';
 import type { S3Service } from '../services';
 
@@ -17,7 +14,7 @@ export const initTensor = async (s3Service?: S3Service) => {
   if (environmentConfig.S3_BUCKET && s3Service) {
     try {
       console.info('* Staring new tensorflow S3 logic...');
-      await s3Service.downloadTensorFlowModel(path.join(__dirname, 'temp'));
+      await s3Service.downloadTensorFlowModel(new URL('temp/', import.meta.url));
       console.info('Tensor flow model has been loaded from S3.');
     } catch (error) {
       console.error('Cannot download tensor flow model from S3.\nReason:', error);

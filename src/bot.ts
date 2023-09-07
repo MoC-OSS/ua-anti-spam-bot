@@ -31,8 +31,12 @@ import {
   getNsfwFilterComposer,
   getStrategicComposer,
   getSwindlersComposer,
+  getWarnObsceneComposer,
   getWarnRussianComposer,
 } from './bot/composers/messages';
+import { getNoAntisemitismComposer } from './bot/composers/messages/no-antisemitism.composer';
+import { getNoObsceneComposer } from './bot/composers/messages/no-obscene.composer';
+import { getSwindlersStatisticCommandsComposer } from './bot/composers/swindlers-statististics.composer';
 import { isNotChannel, onlyCreatorChatFilter } from './bot/filters';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
@@ -144,6 +148,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     startTime,
     tensorService,
   });
+  const { swindlersStatisticComposer } = getSwindlersStatisticCommandsComposer();
   const { creatorCommandsComposer } = getCreatorCommandsComposer({ commandSetter, rootMenu, tensorService });
 
   // Dev composers only
@@ -187,6 +192,9 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const { swindlersComposer } = getSwindlersComposer({ deleteSwindlersMiddleware });
   const { strategicComposer } = getStrategicComposer({ onTextListener });
   const { noCounterOffensiveComposer } = getNoCounterOffensiveComposer();
+  const { noObsceneComposer } = getNoObsceneComposer();
+  const { warnObsceneComposer } = getWarnObsceneComposer();
+  const { noAntisemitismComposer } = getNoAntisemitismComposer();
 
   const { messagesComposer } = getMessagesComposer({
     counteroffensiveService,
@@ -200,6 +208,9 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     swindlersComposer,
     strategicComposer,
     noCounterOffensiveComposer,
+    noObsceneComposer,
+    warnObsceneComposer,
+    noAntisemitismComposer,
   });
 
   // Photo composers
@@ -265,6 +276,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   notChannelComposer.use(healthCheckComposer);
   notChannelComposer.use(creatorCommandsComposer);
   notChannelComposer.use(privateCommandsComposer);
+  notChannelComposer.use(swindlersStatisticComposer);
   notChannelComposer.use(publicCommandsComposer);
 
   // Swindlers helpers

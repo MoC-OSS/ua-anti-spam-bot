@@ -1,198 +1,52 @@
-import {
-  airAlarmAlertButton,
-  airAlarmNotificationMessage,
-  blockWhenAlarm,
-  deleteCardsButton,
-  deleteCounteroffensiveButton,
-  deleteForwardedButton,
-  deleteLocationsButton,
-  deleteMentionButton,
-  deleteMessageButton,
-  deleteNsfwButton,
-  deleteRussianLanguageButton,
-  deleteServiceMessageButton,
-  deleteSwindlerButton,
-  deleteTensorButton,
-  deleteUrlsButton,
-  getAirRaidAlarmSettingsMessage,
-  getSettingsMenuMessage,
-  goBackButton,
-  selectYourState,
-  settingsSet,
-  settingsSubmitMessage,
-  turnOffChatWhileAlarmButton,
-  warnRussianLanguageButton,
-} from '../../../message';
-import { alarmChatService } from '../../../services';
-import type { BooleanChatSettings, GrammyContext, GrammyMiddleware, State } from '../../../types';
-import { onlyAdmin } from '../../middleware';
-import { MiddlewareMenu } from '../../middleware-menu.menu';
-
-import { dynamicLocationMenu } from './air-raid-alarm/locations-menu-generator';
-
-const toggleSetting = async (context: GrammyContext, key: keyof BooleanChatSettings) => {
-  context.chatSession.chatSettings[key] = !context.chatSession.chatSettings[key];
-  const newText = getSettingsMenuMessage(context.chatSession.chatSettings);
-
-  if (context.msg?.text !== newText) {
-    await context.editMessageText(newText, { parse_mode: 'HTML' });
-  }
-
-  const featureEnableText = '✅ Це налаштування тепер увімкнено';
-  const featureDisableText = '⛔️ Це налаштування тепер вимкнено';
-
-  const newSettingAlertText = key.startsWith('enable')
-    ? context.chatSession.chatSettings[key]
-      ? featureEnableText
-      : featureDisableText
-    : context.chatSession.chatSettings[key]
-    ? featureDisableText
-    : featureEnableText;
-
-  await context.answerCallbackQuery({
-    text: newSettingAlertText,
-  });
-};
-
-const isStateSelected: GrammyMiddleware = (context, next) => {
-  const { state } = context.chatSession.chatSettings.airRaidAlertSettings;
-
-  if (!state) {
-    return context.answerCallbackQuery({
-      text: selectYourState,
-      show_alert: true,
-    });
-  }
-
-  return next();
-};
-
-const isAlarmNow: GrammyMiddleware = async (context, next) => {
-  const isAlarm = alarmChatService.isAlarmNow(context.chatSession.chatSettings.airRaidAlertSettings.state || '');
-  if (isAlarm) {
-    await context.answerCallbackQuery({
-      text: blockWhenAlarm,
-      show_alert: true,
-    });
-  } else {
-    return next();
-  }
-};
+import { featureNoAdminMessage, hasNoLinkedChats, isNotAdminMessage, linkToWebView } from '../../../message';
+import { redisService } from '../../../services';
+import type { GrammyMiddleware, Session } from '../../../types';
 
 export class SettingsCommand {
-  /**
-   * @param {State[]} airRaidAlarmStates
-   * */
-  settingsMenuObj: MiddlewareMenu | null;
-
-  settingsDescriptionObj: MiddlewareMenu | null;
-
-  settingsAirRaidAlertObj: MiddlewareMenu | null;
-
-  constructor(private airRaidAlarmStates: State[]) {
-    this.settingsMenuObj = null;
-    this.settingsDescriptionObj = null;
-    this.settingsAirRaidAlertObj = null;
-  }
-
-  initMenu() {
-    /**
-     * @param {GrammyContext} context
-     * @param {keyof ChatSessionData['chatSettings']} key
-     * */
-
-    this.settingsMenuObj = new MiddlewareMenu('settingsMenu', { autoAnswer: false })
-      .addGlobalMiddlewares(onlyAdmin)
-      .text(deleteMessageButton, (context) => toggleSetting(context, 'disableDeleteMessage'))
-      .text(deleteTensorButton, (context) => toggleSetting(context, 'disableStrategicInfo'))
-      .text(deleteSwindlerButton, (context) => toggleSetting(context, 'disableSwindlerMessage'))
-      .row()
-      .text(deleteNsfwButton, (context) => toggleSetting(context, 'disableNsfwFilter'))
-      .row()
-      .text(deleteCardsButton, (context) => toggleSetting(context, 'enableDeleteCards'))
-      .text(deleteUrlsButton, (context) => toggleSetting(context, 'enableDeleteUrls'))
-      .text(deleteLocationsButton, (context) => toggleSetting(context, 'enableDeleteLocations'))
-      .row()
-      .text(deleteMentionButton, (context) => toggleSetting(context, 'enableDeleteMentions'))
-      .text(deleteForwardedButton, (context) => toggleSetting(context, 'enableDeleteForwards'))
-      .text(deleteServiceMessageButton, (context) => toggleSetting(context, 'disableDeleteServiceMessage'))
-      .row()
-      .text(warnRussianLanguageButton, (context) => toggleSetting(context, 'enableWarnRussian'))
-      .text(deleteRussianLanguageButton, (context) => toggleSetting(context, 'enableDeleteRussian'))
-      .text(deleteCounteroffensiveButton, (context) => toggleSetting(context, 'enableDeleteCounteroffensive'))
-      .row()
-      .text(airAlarmAlertButton, isAlarmNow, async (context) => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-        context.menu.nav('settingsAirRaidAlertSubmenu');
-        await context.editMessageText(getAirRaidAlarmSettingsMessage(context.chatSession.chatSettings), { parse_mode: 'HTML' });
-      })
-      .text(airAlarmNotificationMessage, isAlarmNow, isStateSelected, async (context) => {
-        context.chatSession.chatSettings.airRaidAlertSettings.notificationMessage =
-          !context.chatSession.chatSettings.airRaidAlertSettings.notificationMessage;
-        alarmChatService.updateChat(context.chatSession, context.chat?.id);
-        const newText = getSettingsMenuMessage(context.chatSession.chatSettings);
-
-        if (context.msg?.text !== newText) {
-          await context.editMessageText(newText, { parse_mode: 'HTML' });
-        }
-      })
-      .text(turnOffChatWhileAlarmButton, isAlarmNow, isStateSelected, async (context) => {
-        await toggleSetting(context, 'disableChatWhileAirRaidAlert');
-        alarmChatService.updateChat(context.chatSession, context.chat?.id);
-      })
-      // TODO UABOT-2 COMMENT UNTIL DESCRIPTION WILL BE AVAILABLE
-      // .row()
-      // .submenu(settingsDescriptionButton, 'settingsDescriptionSubmenu', (ctx) => {
-      //   ctx.editMessageText(detailedSettingsDescription).catch(handleError);
-      // })
-      .row()
-      .text(settingsSubmitMessage, async (context) => {
-        await context.answerCallbackQuery({
-          text: settingsSet,
-          show_alert: true,
-        });
-        await context.deleteMessage();
-      });
-
-    return this.settingsMenuObj;
-  }
-
-  initAirRaidAlertSubmenu() {
-    this.settingsAirRaidAlertObj = new MiddlewareMenu('settingsAirRaidAlertSubmenu')
-      .addGlobalMiddlewares(onlyAdmin)
-      .dynamic((context, range) => dynamicLocationMenu(context, range, this.airRaidAlarmStates))
-      .row()
-      .back(goBackButton, (context) =>
-        context.editMessageText(getSettingsMenuMessage(context.chatSession.chatSettings), { parse_mode: 'HTML' }),
-      );
-
-    return this.settingsAirRaidAlertObj;
-  }
-
-  initDescriptionSubmenu() {
-    this.settingsDescriptionObj = new MiddlewareMenu('settingsDescriptionSubmenu')
-      .addGlobalMiddlewares(onlyAdmin)
-      .back(goBackButton, (context) =>
-        context.editMessageText(getSettingsMenuMessage(context.chatSession.chatSettings), { parse_mode: 'HTML' }),
-      );
-
-    return this.settingsDescriptionObj;
-  }
-
-  sendSettingsMenu(): GrammyMiddleware {
-    /**
-     * @param {GrammyContext} context
-     * */
-
+  middleware(): GrammyMiddleware {
     return async (context) => {
-      if (this.settingsMenuObj) {
-        await context
-          .replyWithHTML(getSettingsMenuMessage(context.chatSession.chatSettings), { reply_markup: this.settingsMenuObj })
-          .catch((error: Error) => {
-            console.info(`sendSettingsMenu error ${error.message}`);
-          });
+      const isChatPrivate = context.chat?.type === 'private';
+      const userId = context.from?.id.toString() ?? '';
+      const chatId = context.chat?.id.toString() ?? '';
+      const { isBotAdmin } = context.chatSession;
+
+      await context
+        .deleteMessage()
+        .then(() => true)
+        .catch(() => false);
+
+      if (!userId) {
+        throw new Error('Invalid user id');
+      }
+
+      if (isChatPrivate) {
+        const userSession = await redisService.getUserSession(userId);
+        const chats = userSession?.linkedChats || [];
+        return chats.length > 0 ? context.reply(linkToWebView) : context.reply(hasNoLinkedChats);
+      }
+
+      if (!isChatPrivate) {
+        const admins = await context.api.getChatAdministrators(chatId);
+        const isNotAdmin = !admins.some((admin) => admin.user.id.toString() === userId);
+
+        if (isNotAdmin) {
+          return context.replyWithSelfDestructedHTML(isNotAdminMessage);
+        }
+
+        if (!isBotAdmin) {
+          return context.replyWithSelfDestructedHTML(featureNoAdminMessage);
+        }
+
+        const userSession = await redisService.getUserSession(userId);
+        const chats = userSession?.linkedChats || [];
+        const isChatMissing = !chats.some((chat) => chat.id.toString() === chatId);
+
+        if (isChatMissing && isBotAdmin) {
+          const newData = { ...userSession, linkedChats: [...chats, { id: chatId, name: context.chat?.title }] } as Session;
+          await redisService.setUserSession(userId, newData);
+        }
+
+        return context.replyWithSelfDestructedHTML(linkToWebView);
       }
     };
   }

@@ -1,28 +1,17 @@
 /* eslint-disable camelcase */
-import CyrillicToTranslit from 'cyrillic-to-translit-js';
-
-import { removeDuplicates } from '../src/utils/remove-duplicates.util';
-
-import high_risk from './strings/high_risk.json';
-import houses from './strings/houses.json';
-import immediately from './strings/immediately.json';
-import location_types from './strings/location_types.json';
-import locations from './strings/locations.json';
-import one_word from './strings/one_word.json';
-import percent_100 from './strings/percent_100.json';
-import strict_high_risk from './strings/strict_high_risk.json';
-import strict_locations from './strings/strict_locations.json';
-import strict_percent_100 from './strings/strict_percent_100.json';
-
-const translitRus = CyrillicToTranslit({ preset: 'ru' });
-const translitUa = CyrillicToTranslit({ preset: 'uk' });
-
-function processMessage(dataset: string[]): string[] {
-  const translitRussianDataset = dataset.map((word) => translitRus.transform(word, ' '));
-  const translitUkrainianDataset = dataset.map((word) => translitUa.transform(word, ' '));
-
-  return removeDuplicates([...dataset, ...translitUkrainianDataset, ...translitRussianDataset]);
-}
+import high_risk from './strings/high_risk.json' assert { type: 'json' };
+import houses from './strings/houses.json' assert { type: 'json' };
+import immediately from './strings/immediately.json' assert { type: 'json' };
+import location_types from './strings/location_types.json' assert { type: 'json' };
+import locations from './strings/locations.json' assert { type: 'json' };
+import one_word from './strings/one_word.json' assert { type: 'json' };
+import percent_100 from './strings/percent_100.json' assert { type: 'json' };
+import strict_high_risk from './strings/strict_high_risk.json' assert { type: 'json' };
+import strict_locations from './strings/strict_locations.json' assert { type: 'json' };
+import strict_percent_100 from './strings/strict_percent_100.json' assert { type: 'json' };
+import { antisemitismDictionary } from './dataset-antisemitism';
+import { processMessage } from './dataset-helpers';
+import { obsceneDictionary } from './dataset-obscene';
 
 /**
  * Load optional file or fallbacks to default value
@@ -70,6 +59,8 @@ export const dataset = {
   strict_high_risk: processMessage(strict_high_risk),
   strict_locations: processMessage(strict_locations),
   strict_percent_100: processMessage(strict_percent_100),
+  obscene_dictionary: obsceneDictionary,
+  antisemitism_dictionary: antisemitismDictionary,
 };
 
 export type DatasetKeys = keyof typeof dataset;
