@@ -28,8 +28,9 @@ export class SettingsCommand {
       if (!isChatPrivate) {
         const admins = await context.api.getChatAdministrators(chatId);
         const isNotAdmin = !admins.some((admin) => admin.user.id.toString() === userId);
+        const isNotAnonymous = context.from?.username !== 'GroupAnonymousBot';
 
-        if (isNotAdmin) {
+        if (isNotAdmin && isNotAnonymous) {
           return context.replyWithSelfDestructedHTML(isNotAdminMessage);
         }
 
