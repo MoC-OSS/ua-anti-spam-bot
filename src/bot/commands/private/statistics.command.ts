@@ -1,10 +1,12 @@
+import { InputFile } from 'grammy';
 import moment from 'moment-timezone';
 
+import { logsChat } from '../../../creator';
 import { getStatisticsMessage } from '../../../message';
 import { redisService } from '../../../services';
 import { statisticsGoogleService } from '../../../services/statistics-google.service';
 import type { FeaturesSessionsData, GrammyMiddleware } from '../../../types';
-import { handleError } from '../../../utils';
+import { handleError, optimizeWriteContextUtil } from '../../../utils';
 
 const REVERSE_FEATURES_KEYS = new Set([
   'disableStrategicInfo',
@@ -106,7 +108,29 @@ export class StatisticsCommand {
           ...Object.values(features),
         ]);
       } catch (error) {
+        const writeContext = optimizeWriteContextUtil(context);
+
         handleError(error);
+        if (error instanceof Error) {
+          await context.api
+            .sendMessage(
+              logsChat,
+              ['<b>Bot failed with message:</b>', error.message, '', '<b>Stack:</b>', `<code>${error.stack || ''}</code>`].join('\n'),
+              {
+                parse_mode: 'HTML',
+              },
+            )
+            .then(() =>
+              context.api
+                .sendDocument(
+                  logsChat,
+                  new InputFile(Buffer.from(JSON.stringify(writeContext, null, 2)), `ctx-${new Date().toISOString()}.json`),
+                )
+                .catch(handleError),
+            )
+            .catch(handleError);
+        }
+
         await context.reply('Cannot get statistics');
       }
     };
