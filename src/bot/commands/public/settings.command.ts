@@ -1,6 +1,7 @@
 import { featureNoAdminMessage, hasNoLinkedChats, isNotAdminMessage, linkToWebView } from '../../../message';
 import { redisService } from '../../../services';
 import type { GrammyMiddleware, Session } from '../../../types';
+import { onlyNotAdminFilter, onlyWhenBotAdminFilter } from '../../filters';
 
 export class SettingsCommand {
   middleware(): GrammyMiddleware {
@@ -8,7 +9,8 @@ export class SettingsCommand {
       const isChatPrivate = context.chat?.type === 'private';
       const userId = context.from?.id.toString() ?? '';
       const chatId = context.chat?.id.toString() ?? '';
-      const { isBotAdmin } = context.chatSession;
+      const isNotAdmin = await onlyNotAdminFilter(context);
+      const isBotAdmin = onlyWhenBotAdminFilter(context);
 
       await context
         .deleteMessage()
@@ -26,9 +28,6 @@ export class SettingsCommand {
       }
 
       if (!isChatPrivate) {
-        const admins = await context.api.getChatAdministrators(chatId);
-        const isNotAdmin = !admins.some((admin) => admin.user.id.toString() === userId);
-
         if (isNotAdmin) {
           return context.replyWithSelfDestructedHTML(isNotAdminMessage);
         }
