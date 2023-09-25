@@ -1,4 +1,4 @@
-import { featureNoAdminMessage, hasNoLinkedChats, isNotAdminMessage, linkToWebView } from '../../../message';
+import { featureNoAdminMessage, hasNoLinkedChats, isGroupAnonymousBotMessage, isNotAdminMessage, linkToWebView } from '../../../message';
 import { redisService } from '../../../services';
 import type { GrammyMiddleware, Session } from '../../../types';
 import { onlyNotAdminFilter, onlyWhenBotAdminFilter } from '../../filters';
@@ -11,6 +11,7 @@ export class SettingsCommand {
       const chatId = context.chat?.id.toString() ?? '';
       const isNotAdmin = await onlyNotAdminFilter(context);
       const isBotAdmin = onlyWhenBotAdminFilter(context);
+      const isGroupAnonymousBot = context.from?.username === 'GroupAnonymousBot';
 
       await context
         .deleteMessage()
@@ -28,6 +29,10 @@ export class SettingsCommand {
       }
 
       if (!isChatPrivate) {
+        if (isGroupAnonymousBot) {
+          return context.replyWithSelfDestructedHTML(isGroupAnonymousBotMessage);
+        }
+
         if (isNotAdmin) {
           return context.replyWithSelfDestructedHTML(isNotAdminMessage);
         }
