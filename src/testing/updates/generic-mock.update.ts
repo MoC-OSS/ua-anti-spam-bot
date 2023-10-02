@@ -1,4 +1,4 @@
-import type { Chat, User } from '@grammyjs/types/manage';
+import type { Chat, ChatMemberAdministrator, ChatMemberOwner, User } from '@grammyjs/types/manage';
 import deepmerge from 'deepmerge';
 import type { Update } from 'grammy/out/types';
 import type { MergeDeep } from 'type-fest';
@@ -63,6 +63,29 @@ export abstract class GenericMockUpdate {
   readonly genericPrivateChat: Chat.PrivateChat = {
     type: 'private',
     ...this.genericUserAtom,
+  };
+
+  readonly genericOwner: ChatMemberOwner = {
+    status: 'creator',
+    user: this.genericUser,
+    custom_title: 'Super Creator Title',
+    is_anonymous: false,
+  };
+
+  readonly genericAdmin: ChatMemberAdministrator = {
+    status: 'administrator',
+    user: this.genericUser2,
+    custom_title: 'Super Admin Title',
+    is_anonymous: true,
+    can_be_edited: true,
+    can_change_info: true,
+    can_delete_messages: true,
+    can_edit_messages: true,
+    can_invite_users: true,
+    can_manage_chat: true,
+    can_manage_video_chats: true,
+    can_promote_members: true,
+    can_restrict_members: true,
   };
 
   /**
