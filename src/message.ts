@@ -32,8 +32,6 @@ export const getAdminReadyMessage = ({ botName }: GenericBotProperties) =>
 export const adminReadyHasNoDeletePermissionMessage = '😢 Тепер я адміністратор. Але не маю права на видалення повідомлень.';
 export const startAdminReadyMessage = '✅ Я активований і виконую свою роботу.';
 export const memberReadyMessage = '😴 Тепер я деактивований. Відпочиваю... ';
-export const spamDeleteMessage = '❗️ Повідомлення видалено.\n\n* Причина: спам.';
-export const somethingWentWrongMessage = 'Сталась якась помилка :(';
 export const makeAdminMessage = `⛔️ Я не активований!
 <b>☝️Зроби мене адміністратором, щоб я міг видаляти повідомлення, а також все інше що я вмію, за твоїм бажанням.</b>`;
 export const hasDeletePermissionMessage = '✅ Я маю права на видалення повідомлень.';
@@ -126,144 +124,11 @@ export const alarmEndNotificationMessage = (settings: ChatSessionData['chatSetti
 🟢 <b>${getCurrentTimeAndDate()} Відбій тривоги в ${formatStateIntoAccusative(settings.airRaidAlertSettings.state || '')}!</b>
 ${getRandomAlarmEndText()}
 `;
-/**
- * Generic - Settings
- * */
 
-export const linkToWebView = `⚙️Відкрити налаштування:
-
-🔗 ${environmentConfig.WEB_VIEW_URL}`;
-export const hasNoLinkedChats = `
-⛔️ У Вас немає прив'язаних чатів.
-
-Будь ласка, зайдіть  у групу і натисніть /settings.`;
-export const isNotAdminMessage = '😔 Ви не є адміністратором чату!';
-export const isGroupAnonymousBotMessage = `
-<b>🕵️‍♂️ Ви являєтесь анонімним адміністратором.</b>
-
-😢 На даний момент функціонал для анонімних адміністраторів тимчасово недоступний.
-
-🚧 Для того, щоб продовжити використовувати цей функціонал, вам потрібно тимчасово зняти статус анонімного адміністратора.
-
-<b>Для цього, будь ласка, виконайте наступні кроки:</b>
-1) Клікніть на свій профіль в списку адміністраторів
-2) Вимкніть функціонал анонімного адміністратора
-3) Викликайте команду /settings
-4) Знову активуйте функціонал анонімного адміністратора
-
-<b>🚧 Це тимчасовий захід, поки ми вирішуємо проблему.</b>
-Ми будемо повідомляти вас про подальші оновлення та виправлення.
-Дякуємо за ваше розуміння та терпіння.
-`.trim();
-
-export const settingsAvailableMessage = '👨‍👩‍👧‍👦 Налаштування доступні тільки для групових чатів.';
-export const settingsDeleteItemMessage = 'Повідомлення про видалення';
-export const settingsSubmitMessage = '💾 Зберегти';
-export const englishSettingsSubmitMessage = '💾 Save';
 export const cancelMessageSending = 'Розсилка була відмінена!';
 /**
  * Complex - Settings
  * */
-
-/**
- * @param {ChatSessionData['chatSettings']} settings
- * */
-export const getSettingsMenuMessage = (settings: ChatSessionData['chatSettings']) =>
-  `
-<b>🤖 Налаштування бота в поточному чаті.</b>
-Тут ви можете регулювати параметри.
-
-❗ ${
-    settings.disableDeleteMessage
-      ? '⛔️ Бот не повідомляє про причину видалення повідомлення.'
-      : '✅ Бот повідомляє про причину видалення повідомлення.'
-  }
-🚀 ${settings.disableStrategicInfo ? '⛔️ Бот не видаляє стратегічну інформацію.' : '✅ Бот видаляє стратегічну інформацію.'}
-💰 ${settings.disableSwindlerMessage ? '⛔️ Бот не видаляє повідомлення шахраїв.' : '✅ Бот видаляє повідомлення шахраїв.'}
-
-🔞 ${
-    settings.disableNsfwFilter
-      ? '⛔️ Бот не видаляє зображення відвертого змісту та дорослий контент.'
-      : '✅ Бот видаляє зображення відвертого змісту та дорослий контент.'
-  }
-
-💳 ${settings.enableDeleteCards ? '✅ Бот видаляє повідомлення з картками.' : '⛔ Бот не видаляє повідомлення з картками.'}
-🔗 ${settings.enableDeleteUrls ? '✅ Бот видаляє повідомлення з посиланнями.' : '⛔ Бот не видаляє повідомлення з посиланнями.'}
-📍 ${settings.enableDeleteLocations ? '✅ Бот видаляє повідомлення з локаціями.' : '⛔ Бот не видаляє повідомлення з локаціями.'}
-
-⚓ ${settings.enableDeleteMentions ? '✅ Бот видаляє повідомлення зі @ згадуваннями.' : '⛔ Бот не видаляє повідомлення зі @ згадуваннями.'}
-↩️ ${settings.enableDeleteForwards ? '✅ Бот видаляє повідомлення з пересиланнями.' : '⛔ Бот не видаляє повідомлення з пересиланнями.'}
-✋ ${
-    settings.disableDeleteServiceMessage
-      ? '⛔ Бот не видаляє повідомлення приєдання та прощання.'
-      : '✅ Бот видаляє повідомлення приєдання та прощання.'
-  }
-
-☢️ ${settings.enableWarnRussian ? '✅ Бот попереджає про заборону російської мови.' : '⛔️ Бот не попереджає про заборону російської мови.'}
-🪆 ${
-    settings.enableDeleteRussian ? '✅ Бот видаляє повідомлення з російською мовою.' : '⛔️ Бот не видаляє повідомлення з російською мовою.'
-  }
-🏃 ${
-    settings.enableDeleteCounteroffensive
-      ? '✅ Бот видаляє повідомлення з контрнаступом.'
-      : '⛔️ Бот не видаляє повідомлення з контрнаступом.'
-  }
-
-<b>Налаштування повітряної тривоги.</b>
-🏰 ${
-    settings.airRaidAlertSettings.state
-      ? `✅ ${settings.airRaidAlertSettings.state} - твій вибраний регіон.`
-      : '⛔ Ти ще не вибрав свій регіон.'
-  }
-📢 ${
-    settings.airRaidAlertSettings.notificationMessage
-      ? '✅ Бот повідомляє про початок і завершення повітряної тривоги у вашому регіоні.'
-      : '⛔️ Бот не повідомляє про початок і завершення повітряної тривоги у вашому регіоні.'
-  }
-🤫 ${
-    settings.disableChatWhileAirRaidAlert
-      ? '✅ Бот вимикає чат під час повітряної тривоги у вашому регіоні.'
-      : '⛔️ Бот не вимикає чат під час повітряної тривоги у вашому регіоні.'
-  }
-
-Для зміни налаштувань, натисніть на відповідну кнопку нижче. 👇
-`.trim();
-
-/**
- * @param {ChatSessionData['chatSettings']} settings
- * */
-export const getEnglishSettingsMenuMessage = (settings: ChatSessionData['chatSettings']) =>
-  `
-<b>🤖 Bot Settings</b>
-Here you can adjust the settings:
-
-🚀 ${
-    settings.disableStrategicInfo === true
-      ? '⛔️ Do not delete messages containing strategic information.'
-      : '✅ Delete messages containing strategic information.'
-  }
-❗ ${
-    settings.disableStrategicInfo === true || settings.disableDeleteMessage === true
-      ? '⛔️ Do not post reports on the removed messages containing strategic information.'
-      : '✅ Post reports on the removed messages containing strategic information.'
-  }
-💰 ${settings.disableSwindlerMessage === true ? '⛔️ Do not detect and delete scam messages.' : '✅ Detect and delete scam messages.'}
-
-<b>Air raid alarm settings:</b>
-🏰 ${settings.airRaidAlertSettings.state ? `✅ Your region is ${settings.airRaidAlertSettings.state}.` : '⛔ No region is selected.'}
-📢 ${
-    settings.airRaidAlertSettings.notificationMessage
-      ? '✅ Notify about the start and end of an air alert in your region.'
-      : '⛔️ Do not notify about the start and end of an air alert in your region.'
-  }
-🤫 ${
-    settings.disableChatWhileAirRaidAlert
-      ? '✅ Disable the chat during an air alert in your region.'
-      : '⛔️ Do not disable the chat during an air alert in your region.'
-  }
-
-To change the setting, click the appropriate button below. 👇
-`.trim();
 
 export const getAirRaidAlarmSettingsMessage = (settings: ChatSessionData['chatSettings']) =>
   `
@@ -279,66 +144,8 @@ export const getAirRaidAlarmSettingsMessage = (settings: ChatSessionData['chatSe
 Для зміни налаштувань, натисніть на відповідну кнопку нижче. 👇
 `.trim();
 
-export const settingsDescriptionButton = '📋 Опис налаштувань бота в поточному чаті';
-
-/**
- * Ukrainian buttons
- * */
-export const deleteTensorButton = `🚀 Інцидент`;
-export const deleteMessageButton = '❗ Причина';
-export const deleteSwindlerButton = '💰 Шахраї';
-
-export const deleteCardsButton = '💳 Картки';
-export const deleteUrlsButton = '🔗 Посилання';
-export const deleteLocationsButton = '📍 Локації';
-
-export const deleteMentionButton = '⚓ Згадування';
-export const deleteForwardedButton = '↩️ Пересилання';
-export const deleteServiceMessageButton = '✋ Приєднання';
-
-export const deleteNsfwButton = '🔞 Контент';
-
-export const warnRussianLanguageButton = '☢️ Російська';
-export const deleteRussianLanguageButton = '🪆 Російська';
-export const deleteCounteroffensiveButton = '🏃 Контрнаступ';
-
-export const airAlarmAlertButton = '🏰 Регіон';
-export const airAlarmNotificationMessage = '📢 Тривога';
-export const turnOffChatWhileAlarmButton = '🤫 Тиша';
-
-/**
- * English buttons
- * */
-export const englishDeleteTensorButton = `🚀 Incident`;
-export const englishDeleteMessageButton = '❗ Reason';
-export const englishDeleteSwindlerButton = '💰 Scam';
-
-export const englishDeleteCardsButton = '💳 Cards';
-export const englishDeleteUrlsButton = '🔗 Link';
-
-export const englishDeleteMentionButton = '⚓ Mention';
-export const englishDeleteForwardedButton = '↩️ Forward';
-export const englishDeleteServiceMessageButton = '✋ Join';
-
-export const englishAirAlarmAlertButton = '🏰 Region';
-export const englishAirAlarmNotificationMessage = '📢 Alarm';
-export const englishTurnOffChatWhileAlarmButton = '🤫 Silent';
-
-export const goBackButton = '⬅️ Повернутись назад';
-
 export const nextPage = 'Наступна сторінка ⏩';
 export const previousPage = '⏪ Попередня сторінка';
-
-export const selectYourState = '🏰 Будь ласка, оберіть свій регіон.';
-
-export const blockWhenAlarm = '📢 Це налаштування заблоковано під час тривоги. Будь ласка, зробіть це після відміни тривоги.';
-export const settingsSet = `
-✅ Налаштування збережені!
-
-💁‍♂️ Якщо ви тестуєте функціонал самостійно, не хвилюйтеся - бот не перевіряє повідомлення від адміністрації і не видалить їх!
-`.trim();
-
-export const detailedSettingsDescription = '📋 Детальний опиc всіх налаштувань';
 
 /**
  *
