@@ -2,6 +2,7 @@ import type { GoogleFullCellData, GoogleShortCellData } from '../../types';
 import type { LocalDataset } from '../dynamic-storage.service';
 import { DynamicStorageService } from '../dynamic-storage.service';
 import type { GoogleService } from '../google.service';
+import type { RedisService } from '../redis.service';
 import type { SwindlersGoogleService } from '../swindlers-google.service';
 
 export const mockNewBot = '@Diia_move_bot';
@@ -63,6 +64,20 @@ export const mockSwindlersGoogleService = {
   getNotSwindlers: () => Promise.resolve([]),
   getSiteRegex: () => Promise.resolve([]),
 } as Partial<SwindlersGoogleService> as SwindlersGoogleService;
+
+export const mockRedisService = {
+  getUserSession(id) {
+    return Promise.resolve({
+      id,
+      data: {
+        isCurrentUserAdmin: false,
+      },
+    });
+  },
+  setUserSession(id) {
+    return Promise.resolve(id);
+  },
+} as Partial<RedisService> as RedisService;
 
 export const mockDataset = {
   swindlers_bots: [
