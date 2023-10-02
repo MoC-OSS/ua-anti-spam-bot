@@ -1,9 +1,13 @@
-import { featureNoAdminMessage, hasNoLinkedChats, isGroupAnonymousBotMessage, isNotAdminMessage, linkToWebView } from '../../../message';
-import { redisService } from '../../../services';
+import pIteration from 'p-iteration';
+
+import { featureNoAdminMessage, hasNoLinkedChats, isNotAdminMessage, linkToWebView } from '../../../message';
+import type { RedisService } from '../../../services';
 import type { GrammyMiddleware, Session } from '../../../types';
 import { onlyNotAdminFilter, onlyWhenBotAdminFilter } from '../../filters';
 
 export class SettingsCommand {
+  constructor(private redisService: RedisService) {}
+
   middleware(): GrammyMiddleware {
     return async (context) => {
       const isChatPrivate = context.chat?.type === 'private';
@@ -11,7 +15,6 @@ export class SettingsCommand {
       const chatId = context.chat?.id.toString() ?? '';
       const isNotAdmin = await onlyNotAdminFilter(context);
       const isBotAdmin = onlyWhenBotAdminFilter(context);
-      const isGroupAnonymousBot = context.from?.username === 'GroupAnonymousBot';
 
       await context
         .deleteMessage()
@@ -23,16 +26,12 @@ export class SettingsCommand {
       }
 
       if (isChatPrivate) {
-        const userSession = await redisService.getUserSession(userId);
+        const userSession = await this.redisService.getUserSession(userId);
         const chats = userSession?.linkedChats || [];
         return chats.length > 0 ? context.reply(linkToWebView) : context.reply(hasNoLinkedChats);
       }
 
       if (!isChatPrivate) {
-        if (isGroupAnonymousBot) {
-          return context.replyWithSelfDestructedHTML(isGroupAnonymousBotMessage);
-        }
-
         if (isNotAdmin) {
           return context.replyWithSelfDestructedHTML(isNotAdminMessage);
         }
@@ -41,14 +40,22 @@ export class SettingsCommand {
           return context.replyWithSelfDestructedHTML(featureNoAdminMessage);
         }
 
-        const userSession = await redisService.getUserSession(userId);
-        const chats = userSession?.linkedChats || [];
-        const isChatMissing = !chats.some((chat) => chat.id.toString() === chatId);
+        const chatTitle = context.chat?.title;
+        const admins = await context.getChatAdministrators();
 
-        if (isChatMissing && isBotAdmin) {
-          const newData = { ...userSession, linkedChats: [...chats, { id: chatId, name: context.chat?.title }] } as Session;
-          await redisService.setUserSession(userId, newData);
-        }
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        await pIteration.forEachSeries(admins, async (admin) => {
+          const adminUserId = admin.user.id.toString();
+          const userSession = await this.redisService.getUserSession(adminUserId);
+
+          const chats = userSession?.linkedChats || [];
+          const isChatMissing = !chats.some((chat) => chat.id.toString() === chatId);
+
+          if (isChatMissing && isBotAdmin) {
+            const newData = { ...userSession, linkedChats: [...chats, { id: chatId, name: chatTitle }] } as Session;
+            await this.redisService.setUserSession(adminUserId, newData);
+          }
+        });
 
         return context.replyWithSelfDestructedHTML(linkToWebView);
       }
