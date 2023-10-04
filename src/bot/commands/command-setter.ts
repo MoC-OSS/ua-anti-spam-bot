@@ -49,6 +49,7 @@ export class CommandSetter {
       { command: 'start', description: '🇺🇦 Почати роботу' },
       { command: 'help', description: '🙋🏻 Отримати допомогу' },
       { command: 'settings', description: '⚙️ Налаштування' },
+      { command: 'hotline_security', description: '🚓 Гаряча лінія з цифрової безпеки' },
       { command: 'status', description: this.buildStatus() },
     ];
 

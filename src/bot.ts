@@ -12,6 +12,7 @@ import {
   getBeforeAnyComposer,
   getCreatorCommandsComposer,
   getHealthCheckComposer,
+  getHotlineSecurityComposer,
   getJoinLeaveComposer,
   getMessagesComposer,
   getPhotoComposer,
@@ -138,6 +139,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   // Generic composers
   const { beforeAnyComposer } = getBeforeAnyComposer();
   const { healthCheckComposer } = getHealthCheckComposer();
+  const { hotlineSecurityComposer } = getHotlineSecurityComposer();
 
   // Commands
   const { publicCommandsComposer } = getPublicCommandsComposer({ rootMenu, startTime, states: airRaidAlarmStates.states });
@@ -274,6 +276,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
 
   // Commands
   notChannelComposer.use(healthCheckComposer);
+  notChannelComposer.use(hotlineSecurityComposer);
   notChannelComposer.use(creatorCommandsComposer);
   notChannelComposer.use(privateCommandsComposer);
   notChannelComposer.use(swindlersStatisticComposer);
