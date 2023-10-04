@@ -42,7 +42,6 @@ import { isNotChannel, onlyCreatorChatFilter } from './bot/filters';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
 import {
-  debugMiddleware,
   deleteSpamMediaGroupMiddleware,
   DeleteSwindlersMiddleware,
   GlobalMiddleware,
@@ -240,8 +239,6 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
       return array;
     }),
   );
-
-  bot.use(debugMiddleware('photo'));
 
   bot.use(hydrateReply);
   bot.use(selfDestructedReply());
