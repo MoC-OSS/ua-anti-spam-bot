@@ -15,6 +15,8 @@ export const swindlersWarningMessage = `<b>❗УВАГА! UA Anti Spam Bot 🇺�
 
 Отримати фахову консультацію:
 👉 @nadiyno_bot
+
+Детальніше за командою /hotline_security
 `;
 
 export const swindlersHelpMessage = `
@@ -29,4 +31,7 @@ export const swindlersHelpMessage = `
 
 Запитайте у фахівця!
 👉 @nadiyno_bot
+
+Детальніше про платформу:
+💻 https://nadiyno.org/
 `.trim();
