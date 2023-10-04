@@ -1,6 +1,7 @@
 export * from './before-any.composer';
 export * from './creator-command.composer';
 export * from './health-check.composer';
+export * from './hotline-security.composer';
 export * from './join-leave.composer';
 export * from './messages.composer';
 export * from './photos.composer';

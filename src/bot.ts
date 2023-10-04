@@ -12,6 +12,7 @@ import {
   getBeforeAnyComposer,
   getCreatorCommandsComposer,
   getHealthCheckComposer,
+  getHotlineSecurityComposer,
   getJoinLeaveComposer,
   getMessagesComposer,
   getPhotoComposer,
@@ -41,6 +42,7 @@ import { isNotChannel, onlyCreatorChatFilter } from './bot/filters';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
 import {
+  debugMiddleware,
   deleteSpamMediaGroupMiddleware,
   DeleteSwindlersMiddleware,
   GlobalMiddleware,
@@ -138,6 +140,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   // Generic composers
   const { beforeAnyComposer } = getBeforeAnyComposer();
   const { healthCheckComposer } = getHealthCheckComposer();
+  const { hotlineSecurityComposer } = getHotlineSecurityComposer();
 
   // Commands
   const { publicCommandsComposer } = getPublicCommandsComposer({ rootMenu, startTime, states: airRaidAlarmStates.states });
@@ -238,6 +241,8 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     }),
   );
 
+  bot.use(debugMiddleware('photo'));
+
   bot.use(hydrateReply);
   bot.use(selfDestructedReply());
   bot.use(autoThread());
@@ -274,6 +279,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
 
   // Commands
   notChannelComposer.use(healthCheckComposer);
+  notChannelComposer.use(hotlineSecurityComposer);
   notChannelComposer.use(creatorCommandsComposer);
   notChannelComposer.use(privateCommandsComposer);
   notChannelComposer.use(swindlersStatisticComposer);
