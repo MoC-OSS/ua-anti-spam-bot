@@ -8,13 +8,14 @@ export type SelfDestructedFlavor<C extends Context> = C & {
   replyWithSelfDestructedMarkdown: C['reply'];
   replyWithSelfDestructedMarkdownV1: C['reply'];
   replyWithSelfDestructedMarkdownV2: C['reply'];
+  replyWithPhotoWithSelfDestructedHTML: C['replyWithPhoto'];
 };
 
 /**
  * Default callback.
  * Just removes the sent message.
  * */
-const defaultDeleteCallback = async <C extends Context>(context: C, replyResult: Message.TextMessage) => {
+const defaultDeleteCallback = async <C extends Context>(context: C, replyResult: Message.TextMessage | Message.PhotoMessage) => {
   await context.api.deleteMessage(replyResult.chat.id, replyResult.message_id);
 };
 
@@ -33,6 +34,29 @@ const buildReplyWithParseMode =
   async (text, other, signal) => {
     const otherParameters = parseMode ? { ...other, parse_mode: parseMode } : other;
     const replyResult = await context.reply(text, otherParameters, signal);
+
+    setTimeout(() => {
+      callback(context, replyResult).catch((error) => {
+        console.error('Cannot self destruct the message. Error:', error);
+      });
+    }, timeout);
+
+    return replyResult;
+  };
+
+/**
+ * Build delete reply with parse modes
+ * */
+const buildReplyPhotoWithParseMode =
+  <C extends Context>(
+    context: SelfDestructedFlavor<C>,
+    timeout: number,
+    callback: SelfDestructedCallback,
+    parseMode?: ParseMode,
+  ): C['replyWithPhoto'] =>
+  async (text, other, signal) => {
+    const otherParameters = parseMode ? { ...other, parse_mode: parseMode } : other;
+    const replyResult = await context.replyWithPhoto(text, otherParameters, signal);
 
     setTimeout(() => {
       callback(context, replyResult).catch((error) => {
@@ -80,6 +104,7 @@ export const selfDestructedReply =
     context.replyWithSelfDestructedMarkdown = buildReplyWithParseMode(context, timeout, callback, 'MarkdownV2');
     context.replyWithSelfDestructedMarkdownV1 = buildReplyWithParseMode(context, timeout, callback, 'Markdown');
     context.replyWithSelfDestructedMarkdownV2 = buildReplyWithParseMode(context, timeout, callback, 'MarkdownV2');
+    context.replyWithPhotoWithSelfDestructedHTML = buildReplyPhotoWithParseMode(context, timeout, callback, 'HTML');
 
     return next();
   };
