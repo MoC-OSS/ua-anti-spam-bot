@@ -111,25 +111,29 @@ export class StatisticsCommand {
         const writeContext = optimizeWriteContextUtil(context);
 
         handleError(error);
-        if (error instanceof Error) {
-          await context.api
-            .sendMessage(
-              logsChat,
-              ['<b>Bot failed with message:</b>', error.message, '', '<b>Stack:</b>', `<code>${error.stack || ''}</code>`].join('\n'),
-              {
-                parse_mode: 'HTML',
-              },
-            )
-            .then(() =>
-              context.api
-                .sendDocument(
-                  logsChat,
-                  new InputFile(Buffer.from(JSON.stringify(writeContext, null, 2)), `ctx-${new Date().toISOString()}.json`),
-                )
-                .catch(handleError),
-            )
-            .catch(handleError);
-        }
+        await context.api
+          .sendMessage(
+            logsChat,
+            [
+              '<b>Bot failed with message:</b>',
+              (error as Error).message,
+              '',
+              '<b>Stack:</b>',
+              `<code>${(error as Error).stack || ''}</code>`,
+            ].join('\n'),
+            {
+              parse_mode: 'HTML',
+            },
+          )
+          .then(() =>
+            context.api
+              .sendDocument(
+                logsChat,
+                new InputFile(Buffer.from(JSON.stringify(writeContext, null, 2)), `ctx-${new Date().toISOString()}.json`),
+              )
+              .catch(handleError),
+          )
+          .catch(handleError);
 
         await context.reply('Cannot get statistics');
       }
