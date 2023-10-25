@@ -1,7 +1,6 @@
 import { InputFile } from 'grammy';
 import moment from 'moment-timezone';
 
-import { logsChat } from '../../../creator';
 import { getChatStatisticsMessage, getFeaturesStatisticsMessage } from '../../../message';
 import { redisService } from '../../../services';
 import { statisticsGoogleService } from '../../../services/statistics-google.service';
@@ -115,29 +114,18 @@ export class StatisticsCommand {
         const writeContext = optimizeWriteContextUtil(context);
 
         handleError(error);
-        await context.api
-          .sendMessage(
-            logsChat,
-            [
-              '<b>Bot failed with message:</b>',
-              (error as Error).message,
-              '',
-              '<b>Stack:</b>',
-              `<code>${(error as Error).stack || ''}</code>`,
-            ].join('\n'),
-            {
-              parse_mode: 'HTML',
-            },
-          )
-          .then(() =>
-            context.api
-              .sendDocument(
-                logsChat,
-                new InputFile(Buffer.from(JSON.stringify(writeContext, null, 2)), `ctx-${new Date().toISOString()}.json`),
-              )
-              .catch(handleError),
-          )
-          .catch(handleError);
+        await context
+          .reply(`<b>Bot statistics failed with message:</b>\n${(error as Error).message}`)
+          .catch(() => context.reply('cannot send error message.'));
+        await context
+          .reply(`<b>Stack:</b>\n<code>${(error as Error).stack || ''}</code>`)
+          .catch(() => context.reply('cannot send error trace'));
+        await context
+          .replyWithDocument(new InputFile(Buffer.from(JSON.stringify(writeContext, null, 2)), `ctx-${new Date().toISOString()}.json`))
+          .catch(() => context.reply('cannot send context'));
+        await context
+          .replyWithDocument(new InputFile(Buffer.from(JSON.stringify(error, null, 2)), `ctx-${new Date().toISOString()}.json`))
+          .catch(() => context.reply('cannot send error file'));
 
         await context.reply('Cannot get statistics');
       }
