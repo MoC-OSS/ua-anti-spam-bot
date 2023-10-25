@@ -107,9 +107,8 @@ export interface RedisSessionOptions {
   getSessionKey: (context: GrammyContext) => string;
 }
 
-export type FeaturesSessionsData = {
-  [Property in keyof Required<BooleanChatSettings & Pick<AirRaidAlertSettings, 'notificationMessage'>>]: number;
-};
+export type FeaturesSessionsDataKeys = keyof (BooleanChatSettings & Pick<AirRaidAlertSettings, 'notificationMessage'>);
+export type FeaturesSessionsData = Record<FeaturesSessionsDataKeys, number>;
 
 export interface ChatDetails {
   id: string;
