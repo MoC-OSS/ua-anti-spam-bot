@@ -23,7 +23,7 @@
     "prepare": "husky install",
     "test": "jest",
     "health-check": "echo health-check",
-    "lint": "npm-run-all --parallel lint:js lint:type-check",
+    "lint": "npm-run-all --parallel lint:js lint:type-check test",
     "lint:branch-name": "branch-name-lint ./.branchlintrc.json",
     "lint:commit-name": "commitlint --edit",
     "track-time": "smile-track",
