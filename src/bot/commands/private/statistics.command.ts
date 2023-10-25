@@ -2,7 +2,7 @@ import { InputFile } from 'grammy';
 import moment from 'moment-timezone';
 
 import { logsChat } from '../../../creator';
-import { getStatisticsMessage } from '../../../message';
+import { getChatStatisticsMessage, getFeaturesStatisticsMessage } from '../../../message';
 import { redisService } from '../../../services';
 import { statisticsGoogleService } from '../../../services/statistics-google.service';
 import type { FeaturesSessionsData, GrammyMiddleware } from '../../../types';
@@ -81,7 +81,7 @@ export class StatisticsCommand {
         });
 
         await context.replyWithHTML(
-          getStatisticsMessage({
+          getChatStatisticsMessage({
             adminsChatsCount,
             botRemovedCount,
             channelCount,
@@ -91,6 +91,10 @@ export class StatisticsCommand {
             superGroupsCount,
             totalSessionCount,
             totalUserCounts,
+          }),
+        );
+        await context.replyWithHTML(
+          getFeaturesStatisticsMessage({
             features,
           }),
         );
