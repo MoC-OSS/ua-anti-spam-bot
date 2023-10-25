@@ -22,10 +22,10 @@ export class SessionCommand {
       const chatId = context?.update?.message?.chat?.id;
 
       if (chatId === creatorId) {
-        const sessions = await redisClient.getAllRecords();
+        const sessions = await redisClient.getAllChatRecords();
         const sessionDocument = new InputFile(
           Buffer.from(JSON.stringify({ sessions }, null, 2)),
-          `telegraf-session-${this.startTime.toISOString()}.json`,
+          `telegraf-chat-session-${this.startTime.toISOString()}.json`,
         );
         await context.replyWithDocument(sessionDocument);
       }

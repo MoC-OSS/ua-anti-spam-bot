@@ -55,7 +55,7 @@ export const updateChatsList = async (linkedChats: LinkedChat[], bot: Bot<Grammy
         await redisService.setUserSession(userId, chatsWitUpdates);
       }
 
-      const formattedChat: Required<ChatDetails> = {
+      const formattedChat: Required<Omit<ChatDetails, 'airAlarm'>> = {
         id: info.id.toString(),
         name: title,
         photo: avatar,
