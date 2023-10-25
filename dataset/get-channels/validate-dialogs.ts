@@ -2,6 +2,8 @@
 import fs from 'node:fs';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import * as input from 'input';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import dialogs = require('./dialogs.json');
 
 export interface Dialog {

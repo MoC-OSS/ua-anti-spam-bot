@@ -58,6 +58,7 @@ export class StatisticsCommand {
           disableSwindlerMessage: 0,
           disableDeleteServiceMessage: 0,
           disableNsfwFilter: 0,
+          disableDeleteAntisemitism: 0,
           enableDeleteCards: 0,
           enableDeleteUrls: 0,
           enableDeleteLocations: 0,
@@ -66,6 +67,8 @@ export class StatisticsCommand {
           enableDeleteCounteroffensive: 0,
           enableDeleteRussian: 0,
           enableWarnRussian: 0,
+          enableDeleteObscene: 0,
+          enableWarnObscene: 0,
         };
 
         chatSessions.forEach((session) => {

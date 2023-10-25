@@ -142,7 +142,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const { hotlineSecurityComposer } = getHotlineSecurityComposer();
 
   // Commands
-  const { publicCommandsComposer } = getPublicCommandsComposer({ rootMenu, startTime, states: airRaidAlarmStates.states });
+  const { publicCommandsComposer } = getPublicCommandsComposer({ startTime });
   const { privateCommandsComposer } = getPrivateCommandsComposer({
     bot,
     commandSetter,
