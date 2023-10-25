@@ -5,6 +5,20 @@ import { environmentConfig } from '../config';
 import type { ChatSession, ChatSessionData, Session } from '../types';
 import type { CustomJsonValue } from '../types/object';
 
+export const redisSelectors = {
+  isBotDeactivated: 'isBotDeactivated',
+  botTensorPercent: 'botTensorPercent',
+  swindlersStatistic: 'swindlersStatistic',
+  positives: 'training:positives',
+  negatives: 'training:negatives',
+  trainingChatWhitelist: 'training:chatWhiteList',
+  trainingStartRank: 'training:startRank',
+  trainingTempMessages: 'training:tempMessages',
+  trainingBots: 'training:bots',
+  userSessions: /^-?\d+:-?\d+$/,
+  chatSessions: /^-?\d+$/,
+};
+
 export const client = redis.createClient({ url: environmentConfig.REDIS_URL });
 
 export async function getRawValue<T>(key: string | null | undefined): Promise<T | null> {
@@ -44,6 +58,48 @@ export function removeKey(key: string) {
   }
 
   return client.del(key);
+}
+
+export async function getAllUserKeys(): Promise<string[]> {
+  const keys = await client.keys('*:*');
+  return keys.filter((key) => redisSelectors.userSessions.test(key));
+}
+
+export async function getAllUserRecords(): Promise<Session[]> {
+  const filteredKeys = await getAllUserKeys();
+  const values = await client.mGet(filteredKeys);
+
+  return values
+    .map((value, index) => {
+      try {
+        return {
+          id: filteredKeys[index],
+          data: JSON.parse(value || '{}') as Session['data'],
+        } as Session;
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean) as Session[];
+}
+
+export async function getAllChatRecords(): Promise<ChatSession[]> {
+  const keys = await client.keys('*');
+  const filteredKeys = keys.filter((key) => redisSelectors.chatSessions.test(key));
+  const values = await client.mGet(filteredKeys);
+
+  return values
+    .map((value, index) => {
+      try {
+        return {
+          id: filteredKeys[index],
+          data: JSON.parse(value || '{}') as ChatSession['data'],
+        } as ChatSession;
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean) as ChatSession[];
 }
 
 export async function getAllRecords(): Promise<(Session | ChatSession)[]> {

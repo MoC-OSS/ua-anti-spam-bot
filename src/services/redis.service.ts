@@ -5,19 +5,7 @@ import { removeDuplicates } from '../utils';
 export class RedisService {
   redisClient = redisClient;
 
-  redisSelectors = {
-    isBotDeactivated: 'isBotDeactivated',
-    botTensorPercent: 'botTensorPercent',
-    swindlersStatistic: 'swindlersStatistic',
-    positives: 'training:positives',
-    negatives: 'training:negatives',
-    trainingChatWhitelist: 'training:chatWhiteList',
-    trainingStartRank: 'training:startRank',
-    trainingTempMessages: 'training:tempMessages',
-    trainingBots: 'training:bots',
-    userSessions: /^-?\d+:-?\d+$/,
-    chatSessions: /^-?\d+$/,
-  };
+  redisSelectors = redisClient.redisSelectors;
 
   /**
    * @returns {Promise<string[]>}
@@ -186,8 +174,7 @@ export class RedisService {
   }
 
   async getUserSessions(): Promise<Session[]> {
-    const allSessions = await redisClient.getAllRecords();
-    return allSessions.filter((session) => this.redisSelectors.userSessions.test(session.id)) as Session[];
+    return redisClient.getAllUserRecords();
   }
 
   async getUserSession(userId: string) {
@@ -201,8 +188,7 @@ export class RedisService {
   }
 
   async getChatSessions(): Promise<ChatSession[]> {
-    const allSessions = await redisClient.getAllRecords();
-    return allSessions.filter((session) => this.redisSelectors.chatSessions.test(session.id)) as ChatSession[];
+    return redisClient.getAllChatRecords();
   }
 
   /**
