@@ -115,6 +115,7 @@ export class StatisticsCommand {
         ]);
       } catch (error) {
         const writeContext = optimizeWriteContextUtil(context);
+        const chatSessions = await redisService.getChatSessions();
 
         handleError(error);
         await context
@@ -127,7 +128,12 @@ export class StatisticsCommand {
           .replyWithDocument(new InputFile(Buffer.from(JSON.stringify(writeContext, null, 2)), `ctx-${new Date().toISOString()}.json`))
           .catch(() => context.reply('cannot send context'));
         await context
-          .replyWithDocument(new InputFile(Buffer.from(JSON.stringify(error, null, 2)), `ctx-${new Date().toISOString()}.json`))
+          .replyWithDocument(new InputFile(Buffer.from(JSON.stringify(error, null, 2)), `error-${new Date().toISOString()}.json`))
+          .catch(() => context.reply('cannot send error file'));
+        await context
+          .replyWithDocument(
+            new InputFile(Buffer.from(JSON.stringify(chatSessions, null, 2)), `chatSessions-${new Date().toISOString()}.json`),
+          )
           .catch(() => context.reply('cannot send error file'));
 
         await context.reply('Cannot get statistics');
