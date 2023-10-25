@@ -261,7 +261,7 @@ Last deploy:
 ${startTime.toString()}
 `.trim();
 
-export interface StatisticsMessageProperties {
+export interface ChatStatisticsMessageProperties {
   adminsChatsCount: number;
   botRemovedCount: number;
   channelCount: number;
@@ -271,6 +271,9 @@ export interface StatisticsMessageProperties {
   superGroupsCount: number;
   totalSessionCount: number;
   totalUserCounts: number;
+}
+
+export interface FeaturesStatisticsMessageProperties {
   features: FeaturesSessionsData;
 }
 
@@ -279,7 +282,7 @@ export interface StatisticsMessageProperties {
  * Message that bot sends on /statistics
  *
  * */
-export const getStatisticsMessage = ({
+export const getChatStatisticsMessage = ({
   adminsChatsCount,
   botRemovedCount,
   channelCount,
@@ -289,8 +292,7 @@ export const getStatisticsMessage = ({
   superGroupsCount,
   totalSessionCount,
   totalUserCounts,
-  features,
-}: StatisticsMessageProperties) =>
+}: ChatStatisticsMessageProperties) =>
   `
 <b>Кількість всіх: </b>
 • Чатів - ${totalSessionCount} 🎉
@@ -311,6 +313,16 @@ export const getStatisticsMessage = ({
 💁‍♂️ Приватних чатів: <b>${privateCount}</b>
 🔔 Каналів: <b>${channelCount}</b>
 
+
+`.trim();
+
+/**
+ *
+ * Message that bot sends on /statistics
+ *
+ * */
+export const getFeaturesStatisticsMessage = ({ features }: FeaturesStatisticsMessageProperties) =>
+  `
 <b>Статистика по фічам</b>
 
 📢 Бот повідомляє про початок і завершення повітряної тривоги: <b>${features.notificationMessage}</b>
