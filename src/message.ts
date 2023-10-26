@@ -349,6 +349,9 @@ export const getFeaturesStatisticsMessage = ({ features, chatsCount }: FeaturesS
 🔞 Бот видаляє зображення відвертого змісту та дорослий контент: <b>${features.disableNsfwFilter} (${getPercentage(
     features.disableNsfwFilter / chatsCount,
   )}%)</b>
+🚫 Бот видаляє повідомлення антисемітського змісту: <b>${features.disableDeleteAntisemitism} (${getPercentage(
+    features.disableDeleteAntisemitism / chatsCount,
+  )}%)</b>
 
 <b>🟢 Включений опціональний функціонал:</b>
 💳 Бот видаляє повідомлення з картками: <b>${features.enableDeleteCards} (${getPercentage(features.enableDeleteCards / chatsCount)}%)</b>
@@ -374,6 +377,13 @@ export const getFeaturesStatisticsMessage = ({ features, chatsCount }: FeaturesS
 📢 Бот повідомляє про початок і завершення повітряної тривоги: <b>${features.notificationMessage} (${getPercentage(
     features.notificationMessage / chatsCount,
   )}%)</b>
+🤬 Бот видаляє повідомлення з нецензурною лексикою: <b>${features.enableDeleteObscene} (${getPercentage(
+    features.enableDeleteObscene / chatsCount,
+  )}%)</b>
+⚠ Бот попереджає про заборону нецензурної лексики: <b>${features.enableWarnObscene} (${getPercentage(
+    features.enableWarnObscene / chatsCount,
+  )}%)</b>
+
 
 
 `.trim();
