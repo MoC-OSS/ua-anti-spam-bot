@@ -317,7 +317,9 @@ export const getChatStatisticsMessage = ({
 
 `.trim();
 
-// TODO Add percentage function
+function getPercentage(digits: number) {
+  return (digits * 100).toFixed(2);
+}
 
 /**
  *
@@ -329,26 +331,49 @@ export const getFeaturesStatisticsMessage = ({ features, chatsCount }: FeaturesS
 <b>Статистика по фічам з ${chatsCount} чатів</b>
 
 <b>🔴 Виключений дефолтний функціонал:</b>
-🤫 Бот вимикає чат під час повітряної тривоги: <b>${features.disableChatWhileAirRaidAlert} (${(
-    (features.disableChatWhileAirRaidAlert / chatsCount) *
-    100
-  ).toFixed(2)}%)</b>
-🚀 Бот видаляє стратегічну інформацію: <b>${features.disableStrategicInfo}</b>
-❗ Бот повідомляє про причину видалення повідомлення: <b>${features.disableDeleteMessage}</b>
-💰 Бот видаляє повідомлення шахраїв: <b>${features.disableSwindlerMessage}</b>
-✋ Бот видаляє повідомлення приєдання та прощання: <b>${features.disableDeleteServiceMessage}</b>
-🔞 Бот видаляє зображення відвертого змісту та дорослий контент: <b>${features.disableNsfwFilter}</b>
+🤫 Бот вимикає чат під час повітряної тривоги: <b>${features.disableChatWhileAirRaidAlert} (${getPercentage(
+    features.disableChatWhileAirRaidAlert / chatsCount,
+  )}%)</b>
+🚀 Бот видаляє стратегічну інформацію: <b>${features.disableStrategicInfo} (${getPercentage(
+    features.disableStrategicInfo / chatsCount,
+  )}%)</b>
+❗ Бот повідомляє про причину видалення повідомлення: <b>${features.disableDeleteMessage} (${getPercentage(
+    features.disableDeleteMessage / chatsCount,
+  )}%)</b>
+💰 Бот видаляє повідомлення шахраїв: <b>${features.disableSwindlerMessage} (${getPercentage(
+    features.disableSwindlerMessage / chatsCount,
+  )}%)</b>
+✋ Бот видаляє повідомлення приєдання та прощання: <b>${features.disableDeleteServiceMessage} (${getPercentage(
+    features.disableDeleteServiceMessage / chatsCount,
+  )}%)</b>
+🔞 Бот видаляє зображення відвертого змісту та дорослий контент: <b>${features.disableNsfwFilter} (${getPercentage(
+    features.disableNsfwFilter / chatsCount,
+  )}%)</b>
 
 <b>🟢 Включений опціональний функціонал:</b>
-💳 Бот видаляє повідомлення з картками: <b>${features.enableDeleteCards}</b>
-🔗 Бот видаляє повідомлення з посиланнями: <b>${features.enableDeleteUrls}</b>
-📍 Бот видаляє повідомлення з локаціями: <b>${features.enableDeleteLocations}</b>
-⚓ Бот видаляє повідомлення зі @ згадуваннями: <b>${features.enableDeleteMentions}</b>
-↩️ Бот видаляє повідомлення з пересиланнями: <b>${features.enableDeleteForwards}</b>
-🏃 Бот видаляє повідомлення з контрнаступом: <b>${features.enableDeleteCounteroffensive}</b>
-🪆 Бот видаляє повідомлення з російською мовою: <b>${features.enableDeleteRussian}</b>
-☢ Бот попереджає про заборону російської мови: <b>${features.enableWarnRussian}</b>
-📢 Бот повідомляє про початок і завершення повітряної тривоги: <b>${features.notificationMessage}</b>
+💳 Бот видаляє повідомлення з картками: <b>${features.enableDeleteCards} (${getPercentage(features.enableDeleteCards / chatsCount)}%)</b>
+🔗 Бот видаляє повідомлення з посиланнями: <b>${features.enableDeleteUrls} (${getPercentage(features.enableDeleteUrls / chatsCount)}%)</b>
+📍 Бот видаляє повідомлення з локаціями: <b>${features.enableDeleteLocations} (${getPercentage(
+    features.enableDeleteLocations / chatsCount,
+  )}%)</b>
+⚓ Бот видаляє повідомлення зі @ згадуваннями: <b>${features.enableDeleteMentions} (${getPercentage(
+    features.enableDeleteMentions / chatsCount,
+  )}%)</b>
+↩️ Бот видаляє повідомлення з пересиланнями: <b>${features.enableDeleteForwards} (${getPercentage(
+    features.enableDeleteForwards / chatsCount,
+  )}%)</b>
+🏃 Бот видаляє повідомлення з контрнаступом: <b>${features.enableDeleteCounteroffensive} (${getPercentage(
+    features.enableDeleteCounteroffensive / chatsCount,
+  )}%)</b>
+🪆 Бот видаляє повідомлення з російською мовою: <b>${features.enableDeleteRussian} (${getPercentage(
+    features.enableDeleteRussian / chatsCount,
+  )}%)</b>
+☢ Бот попереджає про заборону російської мови: <b>${features.enableWarnRussian} (${getPercentage(
+    features.enableWarnRussian / chatsCount,
+  )}%)</b>
+📢 Бот повідомляє про початок і завершення повітряної тривоги: <b>${features.notificationMessage} (${getPercentage(
+    features.notificationMessage / chatsCount,
+  )}%)</b>
 
 
 `.trim();
