@@ -275,6 +275,7 @@ export interface ChatStatisticsMessageProperties {
 
 export interface FeaturesStatisticsMessageProperties {
   features: FeaturesSessionsData;
+  chatsCount: number;
 }
 
 /**
@@ -316,22 +317,29 @@ export const getChatStatisticsMessage = ({
 
 `.trim();
 
+// TODO Add percentage function
+
 /**
  *
  * Message that bot sends on /statistics
  *
  * */
-export const getFeaturesStatisticsMessage = ({ features }: FeaturesStatisticsMessageProperties) =>
+export const getFeaturesStatisticsMessage = ({ features, chatsCount }: FeaturesStatisticsMessageProperties) =>
   `
-<b>Статистика по фічам</b>
+<b>Статистика по фічам з ${chatsCount} чатів</b>
 
-📢 Бот повідомляє про початок і завершення повітряної тривоги: <b>${features.notificationMessage}</b>
-🤫 Бот вимикає чат під час повітряної тривоги: <b>${features.disableChatWhileAirRaidAlert}</b>
+<b>🔴 Виключений дефолтний функціонал:</b>
+🤫 Бот вимикає чат під час повітряної тривоги: <b>${features.disableChatWhileAirRaidAlert} (${(
+    (features.disableChatWhileAirRaidAlert / chatsCount) *
+    100
+  ).toFixed(2)}%)</b>
 🚀 Бот видаляє стратегічну інформацію: <b>${features.disableStrategicInfo}</b>
 ❗ Бот повідомляє про причину видалення повідомлення: <b>${features.disableDeleteMessage}</b>
 💰 Бот видаляє повідомлення шахраїв: <b>${features.disableSwindlerMessage}</b>
 ✋ Бот видаляє повідомлення приєдання та прощання: <b>${features.disableDeleteServiceMessage}</b>
 🔞 Бот видаляє зображення відвертого змісту та дорослий контент: <b>${features.disableNsfwFilter}</b>
+
+<b>🟢 Включений опціональний функціонал:</b>
 💳 Бот видаляє повідомлення з картками: <b>${features.enableDeleteCards}</b>
 🔗 Бот видаляє повідомлення з посиланнями: <b>${features.enableDeleteUrls}</b>
 📍 Бот видаляє повідомлення з локаціями: <b>${features.enableDeleteLocations}</b>
@@ -340,6 +348,7 @@ export const getFeaturesStatisticsMessage = ({ features }: FeaturesStatisticsMes
 🏃 Бот видаляє повідомлення з контрнаступом: <b>${features.enableDeleteCounteroffensive}</b>
 🪆 Бот видаляє повідомлення з російською мовою: <b>${features.enableDeleteRussian}</b>
 ☢ Бот попереджає про заборону російської мови: <b>${features.enableWarnRussian}</b>
+📢 Бот повідомляє про початок і завершення повітряної тривоги: <b>${features.notificationMessage}</b>
 
 
 `.trim();

@@ -88,6 +88,7 @@ export class StatisticsCommand {
         await context.replyWithHTML(
           getFeaturesStatisticsMessage({
             features,
+            chatsCount: chatSessions.length,
           }),
         );
         await statisticsGoogleService.appendToSheet([
