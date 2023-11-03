@@ -331,9 +331,6 @@ export const getFeaturesStatisticsMessage = ({ features, chatsCount }: FeaturesS
 <b>Статистика по фічам з ${chatsCount} чатів</b>
 
 <b>🔴 Виключений дефолтний функціонал:</b>
-🤫 Бот вимикає чат під час повітряної тривоги: <b>${features.disableChatWhileAirRaidAlert} (${getPercentage(
-    features.disableChatWhileAirRaidAlert / chatsCount,
-  )}%)</b>
 🚀 Бот видаляє стратегічну інформацію: <b>${features.disableStrategicInfo} (${getPercentage(
     features.disableStrategicInfo / chatsCount,
   )}%)</b>
@@ -354,6 +351,9 @@ export const getFeaturesStatisticsMessage = ({ features, chatsCount }: FeaturesS
   )}%)</b>
 
 <b>🟢 Включений опціональний функціонал:</b>
+🤫 Бот вимикає чат під час повітряної тривоги: <b>${features.disableChatWhileAirRaidAlert} (${getPercentage(
+    features.disableChatWhileAirRaidAlert / chatsCount,
+  )}%)</b>
 💳 Бот видаляє повідомлення з картками: <b>${features.enableDeleteCards} (${getPercentage(features.enableDeleteCards / chatsCount)}%)</b>
 🔗 Бот видаляє повідомлення з посиланнями: <b>${features.enableDeleteUrls} (${getPercentage(features.enableDeleteUrls / chatsCount)}%)</b>
 📍 Бот видаляє повідомлення з локаціями: <b>${features.enableDeleteLocations} (${getPercentage(
