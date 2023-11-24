@@ -1,7 +1,7 @@
 import type { RawApi, Transformer } from 'grammy';
 import type { Payload } from 'grammy/out/core/client';
 
-import { logsChat } from '../../creator';
+import { logsChat, secondLogsChat } from '../../creator';
 import type { RealApiMethodKeys } from '../../testing';
 
 export const disableLogsChatTransformer: Transformer = (previous, method, payload, signal) => {
@@ -28,7 +28,7 @@ export const disableLogsChatTransformer: Transformer = (previous, method, payloa
   const chatId = payload && typeof payload === 'object' && (payload as Payload<'sendMessage', RawApi>).chat_id;
 
   const isSendMethod = sendMethods.has(method);
-  const isLogsChatRequest = chatId === logsChat;
+  const isLogsChatRequest = chatId === logsChat || chatId === secondLogsChat;
 
   if (isSendMethod && isLogsChatRequest) {
     console.info(`Disabled log into logs chat. Method: ${method}. Payload:`, payload);
