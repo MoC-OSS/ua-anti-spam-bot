@@ -62,6 +62,10 @@ export function removeKey(key: string) {
 
 export async function getAllUserKeys(): Promise<string[]> {
   const keys = await client.keys('*:*');
+  if (keys.length === 0) {
+    return [];
+  }
+
   return keys.filter((key) => redisSelectors.userSessions.test(key));
 }
 
@@ -85,9 +89,12 @@ export async function getAllUserRecords(): Promise<Session[]> {
 
 export async function getAllChatRecords(): Promise<ChatSession[]> {
   const keys = await client.keys('*');
+  if (keys.length === 0) {
+    return [];
+  }
+
   const filteredKeys = keys.filter((key) => redisSelectors.chatSessions.test(key));
   const values = await client.mGet(filteredKeys);
-
   return values
     .map((value, index) => {
       try {
