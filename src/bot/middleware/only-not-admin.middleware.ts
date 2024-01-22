@@ -12,10 +12,9 @@ import { onlyNotAdminFilter } from '../filters';
  * */
 export async function onlyNotAdmin(context: GrammyContext, next: NextFunction) {
   const isNotAdmin = await onlyNotAdminFilter(context);
-
-  if (isNotAdmin) {
+  const isAdminCheckEnabled = context.chatSession.chatSettings.enableAdminCheck;
+  if (isNotAdmin || isAdminCheckEnabled) {
     return next();
   }
-
   logSkipMiddleware(context, 'message is older than bot admin');
 }

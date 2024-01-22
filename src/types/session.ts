@@ -80,6 +80,7 @@ export interface ChatSessionData {
   lastWarningDate?: Date;
   chatSettings: ChatSettings;
   chatPermissions?: Chat.MultiUserGetChat['permissions'];
+  isCheckAdminNotified?: boolean;
 }
 
 export interface LinkedChat {

@@ -50,12 +50,12 @@ export const apiRouter = (bot: Bot<GrammyContext>) => {
         enableWarnRussian: false,
         enableDeleteObscene: false,
         enableWarnObscene: false,
+        enableAdminCheck: false,
         airRaidAlertSettings: {
           pageNumber: 0,
           state: '',
           notificationMessage: false,
         },
-        enableAdminCheck: false,
       };
 
       const airRaidAlarmStates = await alarmService.getStates();
