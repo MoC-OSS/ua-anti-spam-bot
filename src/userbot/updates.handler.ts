@@ -11,8 +11,6 @@ import type { SwindlersTensorService, TensorService } from '../tensor';
 import type { ProtoUpdate, SwindlerType } from '../types';
 import { removeSystemInformationUtil } from '../utils';
 
-// eslint-disable-next-line import/no-unresolved
-import deleteFromMessage from './from-entities.json';
 import type { ChatPeers } from './index';
 import type { MtProtoClient } from './mt-proto-client';
 import type { UserbotStorage } from './storage.handler';
@@ -162,44 +160,57 @@ export class UpdatesHandler {
    * */
   async handleTraining(message: string) {
     let clearMessageText = message;
+    const deleteFromMessagePath = './from-entities.json';
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, import/no-unresolved
+      const { default: deleteFromMessage } = await import(deleteFromMessagePath);
 
-    const mentions = clearMessageText.match(mentionRegexp);
-    const urls = clearMessageText.match(urlRegexp);
-
-    const telegramLinks = [...(mentions || []), ...(urls || [])];
-
-    clearMessageText = clearMessageText.replace(mentionRegexp, ' ');
-    clearMessageText = clearMessageText.replace(urlRegexp, ' ');
-
-    deleteFromMessage.forEach((deleteWord) => {
-      clearMessageText = clearMessageText.replace(deleteWord, ' ');
-    });
-
-    clearMessageText = clearMessageText.replace(/  +/g, ' ').split(' ').slice(0, 15).join(' ');
-
-    const { isSpam, spamRate } = await this.tensorService.predict(clearMessageText, 0.7);
-    console.info(isSpam, spamRate, message);
-
-    if (isSpam && spamRate < 0.9) {
-      const isNew = await this.userbotStorage.handleMessage(clearMessageText);
-
-      if (telegramLinks.length > 0) {
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        await forEachSeries(telegramLinks, async (mention) => {
-          if (!deleteFromMessage.includes(mention) && !sentMentionsFromStart.includes(mention)) {
-            sentMentionsFromStart.push(mention);
-            deleteFromMessage.push(mention);
-
-            fs.writeFileSync(new URL('from-entities.json', import.meta.url), JSON.stringify(deleteFromMessage, null, 2));
-
-            await this.mtProtoClient.sendSelfMessage(mention);
-          }
-        });
+      if (!deleteFromMessage || !Array.isArray(deleteFromMessage)) {
+        return;
       }
+      const mentions = clearMessageText.match(mentionRegexp);
+      const urls = clearMessageText.match(urlRegexp);
 
-      if (isNew) {
-        this.mtProtoClient.sendPeerMessage(clearMessageText, this.chatPeers.trainingChat).catch(() => console.error('send message error'));
+      const telegramLinks = [...(mentions || []), ...(urls || [])];
+
+      clearMessageText = clearMessageText.replace(mentionRegexp, ' ');
+      clearMessageText = clearMessageText.replace(urlRegexp, ' ');
+
+      deleteFromMessage.forEach((deleteWord) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        clearMessageText = clearMessageText.replace(deleteWord, ' ');
+      });
+
+      clearMessageText = clearMessageText.replace(/  +/g, ' ').split(' ').slice(0, 15).join(' ');
+
+      const { isSpam, spamRate } = await this.tensorService.predict(clearMessageText, 0.7);
+      console.info(isSpam, spamRate, message);
+
+      if (isSpam && spamRate < 0.9) {
+        const isNew = await this.userbotStorage.handleMessage(clearMessageText);
+
+        if (telegramLinks.length > 0) {
+          // eslint-disable-next-line @typescript-eslint/no-misused-promises
+          await forEachSeries(telegramLinks, async (mention) => {
+            if (!deleteFromMessage.includes(mention) && !sentMentionsFromStart.includes(mention)) {
+              sentMentionsFromStart.push(mention);
+              deleteFromMessage.push(mention);
+
+              fs.writeFileSync(new URL('from-entities.json', import.meta.url), JSON.stringify(deleteFromMessage, null, 2));
+
+              await this.mtProtoClient.sendSelfMessage(mention);
+            }
+          });
+        }
+
+        if (isNew) {
+          this.mtProtoClient
+            .sendPeerMessage(clearMessageText, this.chatPeers.trainingChat)
+            .catch(() => console.error('send message error'));
+        }
       }
+    } catch (error) {
+      console.error('Failed to load entities:', error);
     }
   }
 }
