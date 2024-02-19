@@ -9,10 +9,13 @@ import { logSkipMiddleware } from '../../utils';
 export async function adminCheckNotify(context: GrammyContext, next: NextFunction) {
   const { isCheckAdminNotified } = context.chatSession;
   const { isDeleted, isUserAdmin } = context.state;
-  if (!isCheckAdminNotified && isUserAdmin && isDeleted) {
+  const isChatNotPrivate = context.chat?.type !== 'private';
+
+  if (!isCheckAdminNotified && isUserAdmin && isDeleted && isChatNotPrivate) {
     context.chatSession.isCheckAdminNotified = true;
     return context.replyWithSelfDestructedHTML(checkAdminNotification);
   }
+
   logSkipMiddleware(context, 'bot kicked or not admin', context.chatSession);
   return next();
 }
