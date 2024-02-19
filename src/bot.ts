@@ -42,6 +42,7 @@ import { isNotChannel, onlyCreatorChatFilter } from './bot/filters';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
 import {
+  adminCheckNotify,
   deleteSpamMediaGroupMiddleware,
   DeleteSwindlersMiddleware,
   GlobalMiddleware,
@@ -296,7 +297,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   // Main message composer
   notChannelComposer.use(messagesComposer);
   notChannelComposer.use(photosComposer);
-
+  notChannelComposer.use(adminCheckNotify);
   // Log state for creator only chat
   notChannelComposer
     .filter((context) => chainFilters(onlyCreatorChatFilter, !!context.state.isDeleted || !!context.state.photo)(context))
