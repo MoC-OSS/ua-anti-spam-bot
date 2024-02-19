@@ -134,7 +134,7 @@ describe('SettingsCommand', () => {
 
       await bot.handleUpdate(getSettingsCommandUpdate());
 
-      const expectedMethods = outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']);
+      const expectedMethods = outgoingRequests.buildMethods(['deleteMessage', 'sendMessage']);
 
       const actualMethods = outgoingRequests.getMethods();
 
@@ -146,7 +146,7 @@ describe('SettingsCommand', () => {
 
       await bot.handleUpdate(getSettingsCommandUpdate());
 
-      const expectedMethods = outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']);
+      const expectedMethods = outgoingRequests.buildMethods(['deleteMessage', 'sendMessage']);
 
       const actualMethods = outgoingRequests.getMethods();
 

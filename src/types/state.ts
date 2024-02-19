@@ -124,10 +124,14 @@ interface PerformanceMiddlewareState {
 interface IsDeletedState {
   isDeleted?: boolean;
 }
+interface StateIsAdmin {
+  isUserAdmin: boolean;
+}
 
 export type State = OnlyWithTextMiddlewareState &
   IsDeletedState &
-  PerformanceMiddlewareState & {
+  PerformanceMiddlewareState &
+  StateIsAdmin & {
     // TODO move into separate file src/types/swindlers.ts and add enum for reason
     swindlersResult?: {
       isSpam: boolean;
