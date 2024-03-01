@@ -32,6 +32,7 @@
     "lint:type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@grammyjs/auto-thread": "github:grammyjs/auto-thread",
     "@grammyjs/menu": "^1.1.2",
     "@grammyjs/parse-mode": "^1.5.0",
     "@grammyjs/router": "^2.0.0",
