@@ -34,6 +34,7 @@ The framework comes with comprehensive documentation available at https://grammy
   - [10. Set Alarm Credits (confidential)](#10-set-alarm-credits-confidential)
   - [11. Copy tensor files](#11-copy-tensor-files)
 - [Running your bot](#running-your-bot)
+  - [Enable bot in `Telegram`](#enable-bot-in-telegram)
 - [Code Style](#code-style)
   - [Branch names](#branch-names)
   - [Commit names](#commit-names)
@@ -163,8 +164,10 @@ Extract and copy `ua-anti-spam-bot-ml-v3.zip` to `src/tensor/temp`.
 To start your bot, simply run the following command:
 
 ```bash
-npm start
+npm run start:bot
 ```
+
+### Enable bot in `Telegram`
 
 After it, navigate to your bot and call `/start` command. If you receive the answer, your bot is working.
 
@@ -177,8 +180,8 @@ Then, try to call `/enable` command. If you receive the answer, your bot is set 
 We use `branch-name-lint`.
 To push a branch, be sure you have right prefix, ticket name in uppercase, and description split by underscore. Example branch name:
 
-  * feature/LBAT-8_create_lp_ui_elements
-  * hotfix/LBAT-11_add_missing_login_routes
+  * feature/UABOT-8_create_lp_ui_elements
+  * hotfix/UABOT-11_add_missing_login_routes
 
 Read more: https://github.com/barzik/branch-name-lint
 
@@ -187,8 +190,8 @@ Read more: https://github.com/barzik/branch-name-lint
 We use Conversational Commits Conversational with `commitlint`.
 To make a commit, be sure you follow it. Example:
 
-* feat(LBAT-20): add the users page
-* refactor(LBAT-10): refactor tests
+* feat(UABOT-20): add the users page
+* refactor(UABOT-10): refactor tests
 
 Read more: https://www.conventionalcommits.org
 
