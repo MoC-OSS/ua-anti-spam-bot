@@ -16,7 +16,7 @@ The framework comes with comprehensive documentation available at https://grammy
 
 - [Before you start](#before-you-start)
   - [1. Files](#1-files)
-  - [2. Github Access](#2-github-access)
+  - [2. GitHub Access](#2-github-access)
 - [Installation](#installation)
   - [1. Cloning](#1-cloning)
   - [2. Installing `Node.js`](#2-installing-nodejs)
@@ -35,6 +35,7 @@ The framework comes with comprehensive documentation available at https://grammy
   - [11. Copy tensor files](#11-copy-tensor-files)
 - [Running your bot](#running-your-bot)
   - [Enable bot in `Telegram`](#enable-bot-in-telegram)
+  - [Docker](#docker)
 - [Code Style](#code-style)
   - [Branch names](#branch-names)
   - [Commit names](#commit-names)
@@ -172,6 +173,14 @@ npm run start:bot
 After it, navigate to your bot and call `/start` command. If you receive the answer, your bot is working.
 
 Then, try to call `/enable` command. If you receive the answer, your bot is set correctly and ready to be used.
+
+### Docker
+If you want to run the bot via Docker, make sure that you have [Docker](https://docs.docker.com/engine/install) and [Docker Compose](https://docs.docker.com/compose/install) installed.
+Then, run the following command to start the bot in Docker:
+
+```bash
+docker-compose up --build
+```
 
 ## Code Style
 
