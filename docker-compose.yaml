@@ -3,13 +3,14 @@ version: "3"
 services:
   bot:
     container_name: "uaasb_bot"
-    build: .
+    build:
+      dockerfile: Dockerfile.local
     volumes:
       - ".:/usr/src/app"
       - "/usr/src/app/node_modules"
     env_file: ".env"
     depends_on:
-      - postgres
+#      - postgres
       - redis
     environment:
       REDIS_URL: redis://redis:6379
@@ -34,12 +35,12 @@ services:
 #      options:
 #        max-size: "50m"
 
-  postgres:
-    container_name: "uaasb_postgres"
-    image: "postgres:13.6-alpine"
-    ports:
-      - "${PGPORT}:${PGPORT}"
-    env_file: ".env"
+#  postgres:
+#    container_name: "uaasb_postgres"
+#    image: "postgres:13.6-alpine"
+#    ports:
+#      - "${PGPORT}:${PGPORT}"
+#    env_file: ".env"
 
   redis:
     container_name: "uaasb_redis"

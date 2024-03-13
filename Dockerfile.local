@@ -1,0 +1,22 @@
+FROM public.ecr.aws/f2g8j8i0/node:16
+
+# Create app directory
+WORKDIR /usr/src/app
+
+# Install app dependencies
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+# where available (npm@5+)
+COPY package*.json ./
+
+# Copy packages
+COPY src/packages/* ./src/packages/
+
+#RUN npm install
+# If you are building your code for production
+RUN npm i
+RUN npm i nodemon -g
+
+# Bundle app source
+COPY . .
+
+CMD [ "npm", "run", "start:bot" ]
