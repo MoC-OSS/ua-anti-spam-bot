@@ -160,7 +160,7 @@ ALARM_KEY=
 
 Extract and copy `ua-anti-spam-bot-ml-v3.zip` to `src/tensor/temp`.
 
-If you're outside the MOC organization, use the copy-swindlers.sh script to copy the `swindlers-temp` models into the `temp` folder:
+If you're outside the MOC organization, use the copy-swindlers.sh script to copy models from `./src/tensor/swindlers-temp` into the `./src/tensor/temp` destination:
 
 ```bash
 ./copy-swindlers.sh
