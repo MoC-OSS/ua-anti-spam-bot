@@ -44,6 +44,7 @@ export interface PostgresEnvironmentConfig {
 }
 
 export interface GoogleEnvironmentConfig {
+  DISABLE_GOOGLE_API: boolean;
   GOOGLE_CREDITS: string;
   GOOGLE_SPREADSHEET_ID: string;
 }
