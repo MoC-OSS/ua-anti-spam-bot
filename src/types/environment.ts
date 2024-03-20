@@ -25,6 +25,7 @@ export interface MiscellaneousEnvironmentConfig {
   DEBUG_MIDDLEWARE: boolean;
   DISABLE_LOGS_CHAT: boolean;
   ALARM_KEY: string;
+  DISABLE_ALARM_API: boolean;
 }
 
 export interface UserbotEnvironmentConfig {
