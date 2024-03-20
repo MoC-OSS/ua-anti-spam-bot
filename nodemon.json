@@ -4,6 +4,8 @@
     "./telegraf-session.json",
     "./last-ctx.json",
     "./positives.json",
-    "./negatives.json"
-  ]
+    "./negatives.json",
+    "node_modules"
+  ],
+  "watch": ["src", ".env", "package.json", "tsconfig.json"]
 }
