@@ -23,10 +23,20 @@ export class MessageSuperGroupMockUpdate extends GenericMockUpdate {
     },
   });
 
-  readonly update = deepmerge(this.minimalUpdate, this.paramsUpdate);
+  public update = deepmerge(this.minimalUpdate, this.paramsUpdate);
 
   constructor(private text: string) {
     super();
+  }
+
+  setUserAsAdmin() {
+    const userUpdate = {
+      message: {
+        from: this.genericAdmin,
+      },
+    };
+    this.update = deepmerge(this.update, userUpdate);
+    return this;
   }
 
   build() {

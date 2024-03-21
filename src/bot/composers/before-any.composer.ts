@@ -21,7 +21,6 @@ export const getBeforeAnyComposer = () => {
       context.state.isUserAdmin = true;
       return next();
     }
-
     const chatMember = await context.getChatMember(fromId);
     context.state.isUserAdmin = ['creator', 'administrator'].includes(chatMember.status);
     return next();

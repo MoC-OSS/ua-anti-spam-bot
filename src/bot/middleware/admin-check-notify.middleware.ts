@@ -10,9 +10,9 @@ export async function adminCheckNotify(context: GrammyContext, next: NextFunctio
   const { isCheckAdminNotified } = context.chatSession;
   const { isDeleted, isUserAdmin } = context.state;
   const isChatNotPrivate = context.chat?.type !== 'private';
-
+  // context.chatSession.isCheckAdminNotified = false;
   if (!isCheckAdminNotified && isUserAdmin && isDeleted && isChatNotPrivate) {
-    context.chatSession.isCheckAdminNotified = true;
+    // context.chatSession.isCheckAdminNotified = true;
     return context.replyWithSelfDestructedHTML(checkAdminNotification);
   }
 
