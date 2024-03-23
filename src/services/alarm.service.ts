@@ -121,7 +121,6 @@ export class AlarmService {
       }
     });
 
-    
     this.source.addEventListener('update', (event: MessageEvent<string>) => {
       /**
        * SSE endpoint response
