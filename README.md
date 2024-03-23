@@ -163,6 +163,7 @@ ALARM_KEY=
 
 Extract and copy `ua-anti-spam-bot-ml-v3.zip` to `src/tensor/temp`.
 
+
 ## For external users
 
 If you are an external user, you need to set the following parameters for the following fields in `.env`
@@ -181,6 +182,11 @@ If you don't have `ALARM_KEY`, you need to specify the value like this:
 
 ```bash
 DISABLE_ALARM_API=true
+
+If you're outside the MOC organization, use the copy-swindlers.sh script to copy models from `./src/tensor/swindlers-temp` into the `./src/tensor/temp` destination:
+
+```bash
+./copy-swindlers.sh
 ```
 
 ## Running your bot
