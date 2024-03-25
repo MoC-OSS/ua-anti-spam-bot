@@ -33,7 +33,7 @@ export class AlarmService {
   testAlarmInterval?: NodeJS.Timer;
 
   getStates(): Promise<AlarmStates> {
-    if (Boolean(environmentConfig.DISABLE_ALARM_API) === true) {
+    if (environmentConfig.DISABLE_ALARM_API) {
       return Promise.resolve({
         states: [],
         last_update: new Date().toISOString(),
@@ -96,7 +96,7 @@ export class AlarmService {
    * Creates SSE subscription to Alarm API events
    * */
   subscribeOnNotifications(reason: string) {
-    if (Boolean(environmentConfig.DISABLE_ALARM_API) === true) {
+    if (environmentConfig.DISABLE_ALARM_API) {
       return;
     }
 
