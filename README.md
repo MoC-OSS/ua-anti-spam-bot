@@ -33,6 +33,9 @@ The framework comes with comprehensive documentation available at https://grammy
   - [9. Set Google Credits (confidential)](#9-set-google-credits-confidential)
   - [10. Set Alarm Credits (confidential)](#10-set-alarm-credits-confidential)
   - [11. Copy tensor files](#11-copy-tensor-files)
+- [For external users](#for-external-users)
+  - [1. Disable Google API](#1-disable-google-API)
+  - [2. Disable Alarm API](#2-disable-alarm-API)
 - [Running your bot](#running-your-bot)
   - [Enable bot in `Telegram`](#enable-bot-in-telegram)
   - [Docker](#docker)
@@ -159,6 +162,26 @@ ALARM_KEY=
 ### 11. Copy tensor files
 
 Extract and copy `ua-anti-spam-bot-ml-v3.zip` to `src/tensor/temp`.
+
+
+## For external users
+
+If you are an external user, you need to set the following parameters for the following fields in `.env`
+
+### 1. Disable Google API
+
+If you don't have `GOOGLE_CREDITS` and `GOOGLE_SPREADSHEET_ID`, you need to specify the value like this:
+
+```bash
+DISABLE_GOOGLE_API=true
+```
+
+### 2. Disable Alarm API
+
+If you don't have `ALARM_KEY`, you need to specify the value like this:
+
+```bash
+DISABLE_ALARM_API=true
 
 If you're outside the MOC organization, use the copy-swindlers.sh script to copy models from `./src/tensor/swindlers-temp` into the `./src/tensor/temp` destination:
 
