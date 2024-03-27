@@ -56,7 +56,12 @@ const saveNsfwMessage = async (context: GrammyContext) => {
     case ImageType.STICKER: {
       const setNameAddition = meta.set_name ? `from <code>${meta.set_name}</code> sticker-pack` : '';
 
-      const stickerMessage = await context.api.sendSticker(logsChat, meta.file_id);
+      const stickerMessage = await context.api.sendSticker(logsChat, meta.file_id, {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        message_thread_id: LOGS_CHAT_THREAD_IDS.PORN,
+      });
+
       return context.api.sendMessage(
         logsChat,
         `${nsfwLogsStartMessage} ${type} ${context.state.nsfwResult.reason} ${setNameAddition} (${(
@@ -94,7 +99,10 @@ const saveNsfwMessage = async (context: GrammyContext) => {
     case ImageType.VIDEO_NOTE: {
       const { videoNote } = imageData;
 
-      const videoNoteMessage = await context.api.sendVideoNote(logsChat, videoNote.file_id);
+      const videoNoteMessage = await context.api.sendVideoNote(logsChat, videoNote.file_id, {
+        message_thread_id: LOGS_CHAT_THREAD_IDS.PORN,
+      });
+
       return context.api.sendMessage(
         logsChat,
         `${nsfwLogsStartMessage} ${type} ${context.state.nsfwResult.reason} (${(deletePrediction.probability * 100).toFixed(
