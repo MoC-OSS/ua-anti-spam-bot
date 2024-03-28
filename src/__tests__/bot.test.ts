@@ -6,7 +6,7 @@ import { getBot } from '../bot';
 import { environmentConfig } from '../config';
 import { logsChat, secondLogsChat } from '../creator';
 import type { OutgoingRequests } from '../testing';
-import { MessagePrivateMockUpdate, MessageSuperGroupMockUpdate, prepareBotForTesting } from '../testing';
+import { MessageMockUpdate, MessagePrivateMockUpdate, prepareBotForTesting } from '../testing';
 import { mockChatSession, mockSession } from '../testing-main';
 import type { GrammyContext } from '../types';
 
@@ -105,7 +105,7 @@ describe('e2e bot testing', () => {
       it('should check is bot admin if isAdmin is empty', async () => {
         chatSession.isBotAdmin = undefined;
 
-        const update = new MessageSuperGroupMockUpdate('regular message').build();
+        const update = new MessageMockUpdate('regular message').build();
         await bot.handleUpdate(update);
 
         const getChatAdminsRequest = outgoingRequests.getLast<'getChatAdministrators'>();
@@ -124,7 +124,7 @@ describe('e2e bot testing', () => {
         });
 
         it('should check current user if its an admin to skip them', async () => {
-          const update = new MessageSuperGroupMockUpdate('regular message').build();
+          const update = new MessageMockUpdate('regular message').build();
           await bot.handleUpdate(update);
 
           const getChatMemberRequest = outgoingRequests.getFirst<'getChatMember'>();
@@ -140,7 +140,7 @@ describe('e2e bot testing', () => {
             delete chatSession.botRemoved;
           }
 
-          const update = new MessageSuperGroupMockUpdate('regular message').build();
+          const update = new MessageMockUpdate('regular message').build();
           await bot.handleUpdate(update);
 
           const [getChatRequest, getChatMemberRequest] = outgoingRequests.getTwoLast<'getChat', 'getChatMember'>();
@@ -151,7 +151,7 @@ describe('e2e bot testing', () => {
         });
 
         it('should not remove a super group message', async () => {
-          const update = new MessageSuperGroupMockUpdate('regular message').build();
+          const update = new MessageMockUpdate('regular message').build();
           await bot.handleUpdate(update);
 
           expect(outgoingRequests.requests).toHaveLength(1);
@@ -159,7 +159,7 @@ describe('e2e bot testing', () => {
 
         it('should remove a swindler message and notify for first swindler in several hours', async () => {
           chatSession.lastWarningDate = new Date(0);
-          const update = new MessageSuperGroupMockUpdate(realSwindlerMessage).build();
+          const update = new MessageMockUpdate(realSwindlerMessage).build();
           await bot.handleUpdate(update);
 
           const expectedMethods = outgoingRequests.buildMethods([
@@ -190,7 +190,7 @@ describe('e2e bot testing', () => {
 
         it('should remove a swindler message and dont notify after already notified', async () => {
           chatSession.lastWarningDate = new Date();
-          const update = new MessageSuperGroupMockUpdate(realSwindlerMessage).build();
+          const update = new MessageMockUpdate(realSwindlerMessage).build();
           await bot.handleUpdate(update);
 
           const expectedMethods = outgoingRequests.buildMethods([
@@ -212,13 +212,13 @@ describe('e2e bot testing', () => {
         });
 
         it('should delete swindler message if they are send in media group', async () => {
-          const updateCaption = new MessageSuperGroupMockUpdate('').buildOverwrite({
+          const updateCaption = new MessageMockUpdate('').buildOverwrite({
             message: { media_group_id: '1', photo: [], caption: realSwindlerMessage },
           });
-          const updatePhoto2 = new MessageSuperGroupMockUpdate('').buildOverwrite({
+          const updatePhoto2 = new MessageMockUpdate('').buildOverwrite({
             message: { media_group_id: '1', photo: [] },
           });
-          const updatePhoto3 = new MessageSuperGroupMockUpdate('').buildOverwrite({
+          const updatePhoto3 = new MessageMockUpdate('').buildOverwrite({
             message: { media_group_id: '1', photo: [] },
           });
 
@@ -246,16 +246,16 @@ describe('e2e bot testing', () => {
         });
 
         it('should delete swindler message if they are send in media group but dont delete another group', async () => {
-          const updateCaption = new MessageSuperGroupMockUpdate('').buildOverwrite({
+          const updateCaption = new MessageMockUpdate('').buildOverwrite({
             message: { media_group_id: '1', photo: [], caption: realSwindlerMessage },
           });
-          const updatePhoto2 = new MessageSuperGroupMockUpdate('').buildOverwrite({
+          const updatePhoto2 = new MessageMockUpdate('').buildOverwrite({
             message: { media_group_id: '1', photo: [] },
           });
-          const updateCaption2 = new MessageSuperGroupMockUpdate('').buildOverwrite({
+          const updateCaption2 = new MessageMockUpdate('').buildOverwrite({
             message: { media_group_id: '2', photo: [], caption: 'just a regular message' },
           });
-          const updatePhoto22 = new MessageSuperGroupMockUpdate('').buildOverwrite({
+          const updatePhoto22 = new MessageMockUpdate('').buildOverwrite({
             message: { media_group_id: '2', photo: [] },
           });
 

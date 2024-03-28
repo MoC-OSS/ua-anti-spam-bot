@@ -22,6 +22,18 @@ export abstract class GenericMockUpdate {
     title: 'GrammyMock',
   };
 
+  readonly genericChannelChat: Chat.ChannelChat = {
+    type: 'channel',
+    id: 202_212,
+    title: 'GrammyMockChannel',
+  };
+
+  readonly genericGroupChat: Chat.GroupChat = {
+    type: 'group',
+    id: 303_303,
+    title: 'GrammyMockGroup',
+  };
+
   readonly genericUserBot = this.getValidUser({
     id: 2022,
     is_bot: true,
@@ -88,10 +100,43 @@ export abstract class GenericMockUpdate {
     can_restrict_members: true,
   };
 
+  readonly genericMessagePartial = {
+    message_id: 12_345, // Example message_id generation
+    date: Math.floor(Date.now() / 1000), // Current date in Unix timestamp
+  };
+
+  setUserType(userType: 'owner' | 'admin' | 'user') {
+    let userUpdate = {};
+
+    if (userType === 'owner') {
+      userUpdate = { message: { from: this.genericOwner } };
+    } else if (userType === 'admin') {
+      userUpdate = { message: { from: this.genericAdmin } };
+    }
+    this.minimalUpdate = this.deepMerge(this.minimalUpdate, GenericMockUpdate.getValidUpdate(userUpdate));
+    return this; // Return this for chaining
+  }
+
+  setChatType(chatType: 'supergroup' | 'private' | 'group' | 'channel') {
+    const chatUpdates: Record<string, Chat> = {
+      private: this.genericPrivateChat,
+      group: this.genericGroupChat,
+      channel: this.genericChannelChat,
+    };
+
+    if (chatType in chatUpdates) {
+      const chatUpdate: Chat = chatUpdates[chatType];
+      const messageStruct = this.deepMerge({ message: this.genericMessagePartial }, { message: { chat: chatUpdate } });
+      this.minimalUpdate = this.deepMerge(this.minimalUpdate, GenericMockUpdate.getValidUpdate(messageStruct));
+    }
+
+    return this; // Return this for chaining
+  }
+
   /**
    * Minimal update for the update entity
    * */
-  abstract readonly minimalUpdate;
+  abstract minimalUpdate: Update;
 
   /**
    * @param update - update to type
