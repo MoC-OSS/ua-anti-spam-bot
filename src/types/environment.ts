@@ -25,6 +25,7 @@ export interface MiscellaneousEnvironmentConfig {
   DEBUG_MIDDLEWARE: boolean;
   DISABLE_LOGS_CHAT: boolean;
   ALARM_KEY: string;
+  DISABLE_ALARM_API: boolean;
 }
 
 export interface UserbotEnvironmentConfig {
@@ -44,6 +45,7 @@ export interface PostgresEnvironmentConfig {
 }
 
 export interface GoogleEnvironmentConfig {
+  DISABLE_GOOGLE_API: boolean;
   GOOGLE_CREDITS: string;
   GOOGLE_SPREADSHEET_ID: string;
 }

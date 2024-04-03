@@ -61,6 +61,9 @@ export class DynamicStorageService {
   }
 
   async init() {
+    if (environmentConfig.DISABLE_GOOGLE_API) {
+      return;
+    }
     await this.updateStorage();
     setInterval(() => {
       this.updateStorage().catch((error) => {
