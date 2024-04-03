@@ -13,7 +13,7 @@ export class NewMemberMockUpdate extends GenericMockUpdate {
       chat: this.genericSuperGroup as Chat,
       new_chat_members: [this.genericUser] as User[],
     },
-  });
+  } as const);
 
   build() {
     return this.minimalUpdate;

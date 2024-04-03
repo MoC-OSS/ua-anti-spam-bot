@@ -1,5 +1,3 @@
-import deepmerge from 'deepmerge';
-
 import type { PartialUpdate } from './generic-mock.update';
 import { GenericMockUpdate } from './generic-mock.update';
 
@@ -23,7 +21,7 @@ export class MessageMockUpdate extends GenericMockUpdate {
     return this.minimalUpdate;
   }
 
-  buildOverwrite<E extends PartialUpdate>(extra: E): object {
-    return deepmerge(this.minimalUpdate, extra);
+  buildOverwrite<E extends PartialUpdate>(extra: E) {
+    return this.deepMerge(this.minimalUpdate, extra);
   }
 }
