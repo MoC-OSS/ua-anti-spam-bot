@@ -62,7 +62,7 @@ export function generateChatSessionData(
     },
     chatPermissions: {
       can_send_messages: generateRandomBoolean(),
-      can_send_media_messages: generateRandomBoolean(),
+      can_send_photos: generateRandomBoolean(),
       can_send_polls: generateRandomBoolean(),
       can_send_other_messages: generateRandomBoolean(),
       can_add_web_page_previews: generateRandomBoolean(),

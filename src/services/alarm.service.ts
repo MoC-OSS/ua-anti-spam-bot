@@ -3,7 +3,7 @@ import axios from 'axios';
 import EventSource from 'eventsource';
 import ms from 'ms';
 import type TypedEmitter from 'typed-emitter';
-import type { AlarmNotification, AlarmStates } from 'types/alarm';
+import type { AlarmNotification, AlarmStates } from '../types/alarm';
 
 import { environmentConfig } from '../config';
 
@@ -84,11 +84,11 @@ export class AlarmService {
     }
 
     if (this.reconnectInterval) {
-      clearInterval(this.reconnectInterval);
+      // clearInterval(this.reconnectInterval);
     }
 
     if (this.testAlarmInterval) {
-      clearInterval(this.testAlarmInterval);
+      // clearInterval(this.testAlarmInterval);
     }
   }
 

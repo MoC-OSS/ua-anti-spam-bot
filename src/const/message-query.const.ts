@@ -20,7 +20,7 @@ export const getValidQueryType = <T extends FilterQuery[]>(value: T): T => value
  * */
 export const messageQuery = getValidQueryType([
   ':text',
-  ':forward_date',
+  ':forward_origin',
   ':poll',
   ':caption',
   // You need to add it explicitly because it won't work with omit values.
@@ -28,7 +28,7 @@ export const messageQuery = getValidQueryType([
   // It works with unit tests but doesn't work in real bot so we need to check it in real telegram.
   // DO NOT REMOVE!
   'edited_message:text',
-  'edited_message:forward_date',
+  'edited_message:forward_origin',
   'edited_message:poll',
   'edited_message:caption',
 ]);

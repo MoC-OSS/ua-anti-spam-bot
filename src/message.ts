@@ -595,7 +595,7 @@ ${getDeleteUserAtomMessage({ writeUsername, userId })}
 ${getWarnRussianMessage(message)}
 `;
 
-export const getUkrainianMessageExtra = (percent) => (percent === 200 ? '\nВ українській мові немає букв ъ, ы, э, та ё 🇺🇦' : '');
+export const getUkrainianMessageExtra = (percent: number) => (percent === 200 ? '\nВ українській мові немає букв ъ, ы, э, та ё 🇺🇦' : '');
 
 /**
  * Logs
