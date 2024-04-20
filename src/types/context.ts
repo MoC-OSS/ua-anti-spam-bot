@@ -17,7 +17,7 @@ export type GrammyMenuContext = GrammyContext & MenuFlavor;
 /**
  * Real object with hidden fields
  * */
-export type RealGrammyContext = GrammyContext & { tg: any; telegram: any; api: any };
+export type RealGrammyContext = GrammyContext & { tg: never; telegram: never; api: never };
 
 export type GrammyMiddleware<C extends GrammyContext = GrammyContext> = MiddlewareFn<C>;
 export type GrammyCommandMiddleware = GrammyMiddleware<CommandContext<GrammyContext>>;

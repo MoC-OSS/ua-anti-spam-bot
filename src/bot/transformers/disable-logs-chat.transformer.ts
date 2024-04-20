@@ -33,7 +33,7 @@ export const disableLogsChatTransformer: Transformer = (previous, method, payloa
   if (isSendMethod && isLogsChatRequest) {
     console.info(`Disabled log into logs chat. Method: ${method}. Payload:`, payload);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    return Promise.resolve({ ok: true, result: true as any });
+    return Promise.resolve({ ok: true, result: true as never });
   }
 
   return previous(method, payload, signal);

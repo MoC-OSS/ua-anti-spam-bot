@@ -1,6 +1,6 @@
 /* eslint-disable camelcase,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/ban-ts-comment,@typescript-eslint/no-unsafe-assignment */
 import { environmentConfig } from '../config';
-import type { CheckPassword } from '../types';
+import type { CheckPassword, MTProtoError } from '../types';
 
 import { api } from './api';
 
@@ -54,10 +54,10 @@ function signUp({ phone, phone_code_hash }) {
 }
 
 function getPassword() {
-  return api.call<any>('account.getPassword');
+  return api.call<Record<string, string>>('account.getPassword');
 }
 
-export default async () => {
+const auth = async () => {
   const user = await getUser();
 
   if (!user) {
@@ -82,8 +82,8 @@ export default async () => {
           phone_code_hash,
         });
       }
-    } catch (error: any) {
-      if (error.error_message !== 'SESSION_PASSWORD_NEEDED') {
+    } catch (error: unknown) {
+      if ((error as MTProtoError).error_message !== 'SESSION_PASSWORD_NEEDED') {
         console.error(JSON.stringify(error));
 
         return api;
@@ -113,3 +113,5 @@ export default async () => {
 
   return api;
 };
+
+export default auth;

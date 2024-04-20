@@ -47,7 +47,7 @@ export class TestTensorListener {
    */
   constructor(private tensorService: TensorService) {}
 
-  writeDataset(state: 'negatives' | 'positives' | string, word: string) {
+  writeDataset(state: 'negatives' | 'positives', word: string) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const writeInFileFunction = () => {
       const fileName = `./${state}.json`;
@@ -72,10 +72,6 @@ export class TestTensorListener {
         case 'positives': {
           return redisService.updatePositives(word);
         }
-
-        default: {
-          throw new Error(`Invalid state: ${state}`);
-        }
       }
     };
 
@@ -90,9 +86,6 @@ export class TestTensorListener {
         case 'positives': {
           return googleService.appendToSheet(sheetId, sheetPositiveName, word);
         }
-        default: {
-          throw new Error(`Invalid state: ${state}`);
-        }
       }
     };
 
@@ -102,10 +95,6 @@ export class TestTensorListener {
         // return writeInFileFunction();
         // return writeInRedisFunction();
         return writeInGoogleSheetFunction();
-      }
-
-      default: {
-        throw new Error(`Invalid state: ${state}`);
       }
     }
   }

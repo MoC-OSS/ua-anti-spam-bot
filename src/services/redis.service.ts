@@ -25,7 +25,7 @@ export class RedisService {
    * @param {string} newChatIds
    * */
   setTrainingChatWhitelist(newChatIds: string) {
-    return redisClient.setRawValue(this.redisSelectors.trainingChatWhitelist, newChatIds.replace(/ /g, '').split(','));
+    return redisClient.setRawValue(this.redisSelectors.trainingChatWhitelist, newChatIds.replaceAll(' ', '').split(','));
   }
 
   /**

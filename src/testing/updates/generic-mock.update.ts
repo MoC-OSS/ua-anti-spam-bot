@@ -119,10 +119,10 @@ export abstract class GenericMockUpdate {
    * }
    * ```
    * */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   abstract build(...parameters: any[]);
 
   /**
-   * @param extra - addition to add
    * @returns update with extra update information to override
    *
    * @example
@@ -131,13 +131,15 @@ export abstract class GenericMockUpdate {
    *   return deepmerge(this.update, extra) as MergeDeep<typeof this.update, E>;
    * }
    * ```
+   * @param parameters
    * */
   // abstract buildOverwrite<E extends PartialUpdate>(extra: E);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   abstract buildOverwrite(...parameters: any[]);
 
   deepMerge<A, B>(a: A, b: B): MergeDeep<A, B> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-explicit-any
     return deepmerge(a as any, b as any);
   }
 }

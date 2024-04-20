@@ -123,7 +123,7 @@ export class SwindlersUrlsService {
                   console.error(error);
                 }
 
-                return error.response?.headers.location || error.response?.config.url || url;
+                return (error.response?.headers['location'] as string) || error.response?.config.url || url;
               } catch (nestedError: unknown) {
                 console.error(nestedError);
                 return url;

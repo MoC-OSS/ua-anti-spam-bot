@@ -1,9 +1,11 @@
+import type { Chat } from '@grammyjs/types/manage';
+
 import type { AlarmNotification, ChatSessionData } from '../../types';
 import { getRandomItem } from '../../utils';
 
 import { generateRandomBoolean, generateRandomNumber, generateRandomString } from './helpers.mocks';
 
-export const testId = '1234567890';
+export const testId = 1_234_567_890;
 export const testState = 'Львівська область';
 export const generateTestState = (state = testState) => ({
   id: generateRandomNumber(3),
@@ -24,11 +26,13 @@ export const getAlarmMock = (alert = false, state = testState): AlarmNotificatio
   notification_id: generateRandomString(10),
 });
 
-export const chartMock = {
+export const chartMock: Chat.SupergroupGetChat = {
   id: testId,
+  type: 'supergroup',
+  title: 'SuperMockChat',
   permissions: {
     can_send_messages: true,
-    can_send_media_messages: true,
+    can_send_photos: true,
     can_send_polls: true,
     can_send_other_messages: true,
     can_add_web_page_previews: true,
@@ -73,7 +77,7 @@ export function generateChatSessionData(
   };
 }
 
-export function generateChat(id: string, data: ChatSessionData) {
+export function generateChat(id: number, data: ChatSessionData) {
   return { id, data };
 }
 
@@ -84,13 +88,13 @@ export function generateMockSessions(
   bothOff = 3,
 ) {
   const disableChatWhileAirRaidAlertOnArray = Array.from({ length: disableChatWhileAirRaidAlertOn }, () =>
-    generateChat(generateRandomString(10), generateChatSessionData(state, true, false)),
+    generateChat(generateRandomNumber(10), generateChatSessionData(state, true, false)),
   );
   const notificationMessageOnArray = Array.from({ length: notificationMessageOn }, () =>
-    generateChat(generateRandomString(10), generateChatSessionData(state, false, true)),
+    generateChat(generateRandomNumber(10), generateChatSessionData(state, false, true)),
   );
   const bothOffArray = Array.from({ length: bothOff }, () =>
-    generateChat(generateRandomString(10), generateChatSessionData(state, false, false)),
+    generateChat(generateRandomNumber(10), generateChatSessionData(state, false, false)),
   );
   return [...disableChatWhileAirRaidAlertOnArray, ...notificationMessageOnArray, ...bothOffArray];
 }
