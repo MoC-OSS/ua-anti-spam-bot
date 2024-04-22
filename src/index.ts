@@ -20,8 +20,6 @@ import { sleep } from './utils';
     tf.enableProdMode();
   }
 
-
-
   console.info('Waiting for the old instance to down...');
   await sleep(environmentConfig.ENV === 'local' ? 0 : ms('5s'));
   console.info('Starting a new instance...');
