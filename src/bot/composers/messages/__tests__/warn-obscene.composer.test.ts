@@ -2,7 +2,7 @@ import { hydrateReply } from '@grammyjs/parse-mode';
 import { Bot } from 'grammy';
 
 import type { OutgoingRequests } from '../../../../testing';
-import { MessageSuperGroupMockUpdate, prepareBotForTesting } from '../../../../testing';
+import { MessageMockUpdate, prepareBotForTesting } from '../../../../testing';
 import { mockChatSession } from '../../../../testing-main';
 import type { GrammyContext } from '../../../../types';
 import { parseText, stateMiddleware } from '../../../middleware';
@@ -48,7 +48,7 @@ describe('warnObsceneComposer', () => {
     });
 
     it('should warn if obscene is used', async () => {
-      const update = new MessageSuperGroupMockUpdate('він сказав дебіл').build();
+      const update = new MessageMockUpdate('він сказав дебіл').build();
       await bot.handleUpdate(update);
 
       const expectedMethods = outgoingRequests.buildMethods(['getChat', 'sendMessage', 'sendMessage']);
@@ -60,7 +60,7 @@ describe('warnObsceneComposer', () => {
 
     it('should warn if obscene is used and do still notify if disableDeleteMessage is true', async () => {
       chatSession.chatSettings.disableDeleteMessage = true;
-      const update = new MessageSuperGroupMockUpdate('він сказав дебіл').build();
+      const update = new MessageMockUpdate('він сказав дебіл').build();
       await bot.handleUpdate(update);
 
       const expectedMethods = outgoingRequests.buildMethods(['getChat', 'sendMessage', 'sendMessage']);
@@ -71,7 +71,7 @@ describe('warnObsceneComposer', () => {
     });
 
     it('should not warn if not obscene', async () => {
-      const update = new MessageSuperGroupMockUpdate(
+      const update = new MessageMockUpdate(
         'Інтерактивна мапа дозволяє швидко і зручно дізнатися погоду в містах України. На ній відображаються погодні умови в найбільших містах України з можливістю перегляду прогнозу погоди на тиждень. Щоб дізнатися докладний прогноз погоди в вашому місті досить натиснути на назву населеного пункту на мапі.',
       ).build();
       await bot.handleUpdate(update);
@@ -90,14 +90,14 @@ describe('warnObsceneComposer', () => {
     });
 
     it('should not warn if obscene is used', async () => {
-      const update = new MessageSuperGroupMockUpdate('він сказав дебіл').build();
+      const update = new MessageMockUpdate('він сказав дебіл').build();
       await bot.handleUpdate(update);
 
       expect(outgoingRequests.length).toEqual(0);
     });
 
     it('should not warn if not obscene is used', async () => {
-      const update = new MessageSuperGroupMockUpdate(
+      const update = new MessageMockUpdate(
         'Інтерактивна мапа дозволяє швидко і зручно дізнатися погоду в містах України. На ній відображаються погодні умови в найбільших містах України з можливістю перегляду прогнозу погоди на тиждень. Щоб дізнатися докладний прогноз погоди в вашому місті досить натиснути на назву населеного пункту на мапі.',
       ).build();
       await bot.handleUpdate(update);

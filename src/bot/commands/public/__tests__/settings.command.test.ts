@@ -4,7 +4,7 @@ import { Bot } from 'grammy';
 import { hasNoLinkedChats } from '../../../../message';
 import { mockRedisService } from '../../../../services/_mocks/index.mocks';
 import type { ApiResponses, OutgoingRequests } from '../../../../testing';
-import { MessagePrivateMockUpdate, MessageSuperGroupMockUpdate, prepareBotForTesting } from '../../../../testing';
+import { MessageMockUpdate, MessagePrivateMockUpdate, prepareBotForTesting } from '../../../../testing';
 import { mockChatSession } from '../../../../testing-main';
 import type { GrammyContext } from '../../../../types';
 import { stateMiddleware } from '../../../middleware';
@@ -14,7 +14,7 @@ import { SettingsCommand } from '../settings.command';
 let outgoingRequests: OutgoingRequests;
 const bot = new Bot<GrammyContext>('mock');
 const settingsMiddleware = new SettingsCommand(mockRedisService);
-const genericUpdate = new MessageSuperGroupMockUpdate('');
+const genericUpdate = new MessageMockUpdate('');
 
 const { chatSession, mockChatSessionMiddleware } = mockChatSession({});
 
@@ -32,7 +32,7 @@ const setUserSessionSpy = jest.spyOn(mockRedisService, 'setUserSession');
 const commandMessage = '/settings';
 
 function getSettingsCommandUpdate() {
-  return new MessageSuperGroupMockUpdate(commandMessage).buildOverwrite({
+  return new MessageMockUpdate(commandMessage).buildOverwrite({
     message: {
       entities: [
         {
