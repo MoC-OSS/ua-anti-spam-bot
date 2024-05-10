@@ -33,6 +33,12 @@ export class AlarmService {
   testAlarmInterval?: NodeJS.Timer;
 
   getStates(): Promise<AlarmStates> {
+    if (environmentConfig.DISABLE_ALARM_API) {
+      return Promise.resolve({
+        states: [],
+        last_update: new Date().toISOString(),
+      });
+    }
     return axios
       .get<AlarmStates>(apiUrl, apiOptions)
       .then((response) => response.data)
@@ -90,10 +96,12 @@ export class AlarmService {
    * Creates SSE subscription to Alarm API events
    * */
   subscribeOnNotifications(reason: string) {
+    if (environmentConfig.DISABLE_ALARM_API) {
+      return;
+    }
+
     this.disable(reason);
-
     let isConnected = false;
-
     this.source = new EventSource(`${apiUrl}/live`, apiOptions);
     this.source.addEventListener('error', (event: MessageEvent & Record<string, any>) => {
       console.info(`Subscribe to Alarm API fail:  ${event.message as string}`);

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
+import { autoThread } from '@grammyjs/auto-thread';
 import { Menu } from '@grammyjs/menu';
 import { hydrateReply } from '@grammyjs/parse-mode';
 import { sequentialize } from '@grammyjs/runner';
@@ -49,7 +50,7 @@ import {
   logCreatorState,
   stateMiddleware,
 } from './bot/middleware';
-import { autoThread, chainFilters, selfDestructedReply } from './bot/plugins';
+import { autoCommentReply, chainFilters, selfDestructedReply } from './bot/plugins';
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
 import { deleteMessageTransformer, disableLogsChatTransformer } from './bot/transformers';
 import { environmentConfig } from './config';
@@ -244,6 +245,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   bot.use(hydrateReply);
   bot.use(selfDestructedReply());
   bot.use(autoThread());
+  bot.use(autoCommentReply());
 
   bot.use(stateMiddleware);
 

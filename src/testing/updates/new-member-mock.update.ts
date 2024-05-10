@@ -1,4 +1,4 @@
-import type { User } from '@grammyjs/types/manage';
+import type { Chat, User } from '@grammyjs/types/manage';
 
 import type { PartialUpdate } from './generic-mock.update';
 import { GenericMockUpdate } from './generic-mock.update';
@@ -10,7 +10,7 @@ export class NewMemberMockUpdate extends GenericMockUpdate {
       message_id: 230,
       from: this.genericUser2,
       date: this.genericSentDate,
-      chat: this.genericSuperGroup,
+      chat: this.genericSuperGroup as Chat,
       new_chat_members: [this.genericUser] as User[],
     },
   } as const);

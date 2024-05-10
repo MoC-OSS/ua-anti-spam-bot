@@ -1,8 +1,8 @@
 import type { GrammyContext } from 'types';
 
+import { TELEGRAM_USER_ID } from '../../const';
 import { logSkipMiddleware } from '../../utils';
 
-const TELEGRAM_FORWARD_USER_ID = 777_000;
 const CHANNEL_BOT_ID = 136_817_688;
 
 /**
@@ -26,7 +26,7 @@ export function onlyNotAdminFilter(context: GrammyContext): boolean {
   /**
    * Handle forwarded messages from channel into channel's chat
    * */
-  if (context.from?.id === TELEGRAM_FORWARD_USER_ID) {
+  if (context.from?.id === TELEGRAM_USER_ID) {
     logSkipMiddleware(context, 'chat channel forward');
     return false;
   }
