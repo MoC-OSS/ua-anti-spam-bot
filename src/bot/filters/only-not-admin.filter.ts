@@ -3,8 +3,6 @@ import type { GrammyContext } from 'types';
 import { TELEGRAM_USER_ID } from '../../const';
 import { logSkipMiddleware } from '../../utils';
 
-const CHANNEL_BOT_ID = 136_817_688;
-
 /**
  * @description
  * Allow to execute next middlewares only if the user is not admin
@@ -79,16 +77,6 @@ export async function onlyNotAdminFilter(context: GrammyContext): Promise<boolea
   const chatMember = await context.getChatMember(fromId);
   if (['creator', 'administrator'].includes(chatMember.status)) {
     logSkipMiddleware(context, 'Admin');
-    return false;
-  }
-
-  /**
-   * For public channels Telegram could send the message from channel as Channel_Bot.
-   * It means an admin wrote the message, so we need to skip it.
-   * https://github.com/42wim/matterbridge/issues/1654
-   * */
-  if (fromId === CHANNEL_BOT_ID || context.from?.username === 'Channel_Bot') {
-    logSkipMiddleware(context, 'Channel_Bot');
     return false;
   }
 
