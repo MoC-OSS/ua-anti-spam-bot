@@ -57,6 +57,7 @@ export const getCreateLogsChatComposer = () => {
     const counterOffensiveTopic = await context.createForumTopic('Counter-Offensive', { icon_color: iconColors.illusion });
     const obsceneTopic = await context.createForumTopic('Obscene', { icon_color: iconColors.mayaBlue });
     const antiSemitismTopic = await context.createForumTopic('Anti-Semitism', { icon_color: iconColors.lightGreen });
+    const statisticsTopic = await context.createForumTopic('Statistics', { icon_color: iconColors.salomie });
 
     const topics = [
       pornTopic,
@@ -70,7 +71,23 @@ export const getCreateLogsChatComposer = () => {
       counterOffensiveTopic,
       obsceneTopic,
       antiSemitismTopic,
+      statisticsTopic,
     ];
+
+    const resultLogsThreadIds = {
+      PORN: pornTopic.message_thread_id,
+      SWINDLERS: swindlersTopic.message_thread_id,
+      ANTI_RUSSIAN: antiRussianTopic.message_thread_id,
+      STRATEGIC: strategicTopic.message_thread_id, // WARN! Use only for errors, not for messages
+      CARDS: cardsTopic.message_thread_id,
+      URLS: urlsTopic.message_thread_id,
+      LOCATIONS: locationTopic.message_thread_id,
+      MENTIONS: mentionsTopic.message_thread_id,
+      COUNTEROFFENSIVE: counterOffensiveTopic.message_thread_id,
+      OBSCENE: obsceneTopic.message_thread_id,
+      ANTISEMITISM: antiSemitismTopic.message_thread_id,
+      STATISTICS: statisticsTopic.message_thread_id,
+    };
 
     await Promise.all(
       topics.map((topic) =>
@@ -80,7 +97,13 @@ export const getCreateLogsChatComposer = () => {
       ),
     );
 
-    return context.replyWithHTML(`The group is ready and all topics created! Chat ID is <pre>${context.chat.id}</pre>`);
+    return context.replyWithHTML(
+      `The group is ready and all topics created! Chat ID is <pre>${context.chat.id}</pre> LOGS_CHAT_THREAD_IDS is <pre>${JSON.stringify(
+        resultLogsThreadIds,
+        null,
+        2,
+      )}</pre>`,
+    );
   });
 
   // Command to prepare second chat for logs
