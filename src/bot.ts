@@ -11,6 +11,7 @@ import moment from 'moment-timezone';
 import { CommandSetter } from './bot/commands';
 import {
   getBeforeAnyComposer,
+  getCreateLogsChatComposer,
   getCreatorCommandsComposer,
   getHealthCheckComposer,
   getHotlineSecurityComposer,
@@ -142,6 +143,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const { beforeAnyComposer } = getBeforeAnyComposer();
   const { healthCheckComposer } = getHealthCheckComposer();
   const { hotlineSecurityComposer } = getHotlineSecurityComposer();
+  const { createLogsChatComposer } = getCreateLogsChatComposer();
 
   // Commands
   const { publicCommandsComposer } = getPublicCommandsComposer({ startTime });
@@ -280,6 +282,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   // Commands
   notChannelComposer.use(healthCheckComposer);
   notChannelComposer.use(hotlineSecurityComposer);
+  notChannelComposer.use(createLogsChatComposer);
   notChannelComposer.use(creatorCommandsComposer);
   notChannelComposer.use(privateCommandsComposer);
   notChannelComposer.use(swindlersStatisticComposer);
