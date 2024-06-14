@@ -1,8 +1,11 @@
+import type { Message } from '@grammyjs/types';
 import type { Chat, ChatMemberAdministrator, ChatMemberOwner, User } from '@grammyjs/types/manage';
 import deepmerge from 'deepmerge';
 import type { Update } from 'grammy/out/types';
 import type { MergeDeep } from 'type-fest';
 import type { ChatMemberMember } from 'typegram';
+
+import { getTypedValue } from '../../utils';
 
 export type PartialUpdate<U extends Update = Update> = Partial<{
   [key in keyof U]: Partial<U[key]>;
@@ -99,6 +102,9 @@ export abstract class GenericMockUpdate {
     can_manage_video_chats: true,
     can_promote_members: true,
     can_restrict_members: true,
+    can_post_stories: true,
+    can_edit_stories: true,
+    can_delete_stories: true,
   };
 
   readonly genericUserMember: ChatMemberMember = {
@@ -106,10 +112,12 @@ export abstract class GenericMockUpdate {
     user: this.genericUser,
   };
 
-  readonly genericMessagePartial = {
+  readonly genericMessagePartial = getTypedValue<Update['message']>()({
     message_id: 12_345, // Example message_id generation
     date: Math.floor(Date.now() / 1000), // Current date in Unix timestamp
-  };
+    chat: this.genericGroupChat,
+    from: this.genericUser,
+  });
 
   // todo setUserType method, now telegram doesn't have interface for User type in message
   // setUserType(userType: ChatMember['status']) {
@@ -136,10 +144,10 @@ export abstract class GenericMockUpdate {
   //   return this; // Return this for chaining
   // }
   setChatType(chatType: Chat['type']) {
-    const chatUpdates: Partial<Record<Chat['type'], Chat>> = {
+    const chatUpdates: Partial<Record<Chat['type'], Exclude<Message['chat'], Chat.ChannelChat>>> = {
       private: this.genericPrivateChat,
       group: this.genericGroupChat,
-      channel: this.genericChannelChat,
+      // channel: this.genericChannelChat,
     };
     const chatUpdate = chatUpdates[chatType];
     if (chatUpdate) {
@@ -181,10 +189,10 @@ export abstract class GenericMockUpdate {
    * }
    * ```
    * */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   abstract build(...parameters: any[]);
 
   /**
-   * @param extra - addition to add
    * @returns update with extra update information to override
    *
    * @example
@@ -193,13 +201,15 @@ export abstract class GenericMockUpdate {
    *   return deepmerge(this.update, extra) as MergeDeep<typeof this.update, E>;
    * }
    * ```
+   * @param parameters
    * */
   // abstract buildOverwrite<E extends PartialUpdate>(extra: E);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   abstract buildOverwrite(...parameters: any[]);
 
   deepMerge<A, B>(a: A, b: B): MergeDeep<A, B> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-explicit-any
     return deepmerge(a as any, b as any);
   }
 }

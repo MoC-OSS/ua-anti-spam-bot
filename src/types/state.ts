@@ -115,7 +115,7 @@ interface OnlyWithTextMiddlewareState {
 }
 
 interface PerformanceMiddlewareState {
-  performanceStart?: DOMHighResTimeStamp;
+  performanceStart?: number;
 }
 
 /**

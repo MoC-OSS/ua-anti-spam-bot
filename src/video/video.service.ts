@@ -1,6 +1,6 @@
 import fsp from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import * as util from 'node:util';
+import { promisify } from 'node:util';
 import ffmpegPath from 'ffmpeg-static';
 import { path as ffprobePath } from 'ffprobe-static';
 import type { FfprobeData } from 'fluent-ffmpeg';
@@ -64,7 +64,7 @@ export class VideoService {
    * */
   getVideoProbe(videoFile: URL): Promise<FfprobeData> {
     const command = this.spawnCommand();
-    return util.promisify<FfprobeData>((callback) => command.input(fileURLToPath(videoFile)).ffprobe(callback))();
+    return promisify<FfprobeData>((callback) => command.input(fileURLToPath(videoFile)).ffprobe(callback))();
   }
 
   /**

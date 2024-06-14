@@ -49,7 +49,8 @@ import {
   logCreatorState,
   stateMiddleware,
 } from './bot/middleware';
-import { autoCommentReply, chainFilters, selfDestructedReply } from './bot/plugins';
+import { chainFilters, selfDestructedReply } from './bot/plugins';
+import { autoCommentReply } from './bot/plugins/auto-comment-reply.plugin';
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
 import { deleteMessageTransformer, disableLogsChatTransformer } from './bot/transformers';
 import { environmentConfig } from './config';

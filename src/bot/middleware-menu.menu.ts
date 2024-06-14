@@ -14,7 +14,7 @@ export class MiddlewareMenu<C extends GrammyMenuContext = GrammyMenuContext> ext
     return this;
   }
 
-  text(text: string | unknown, ...middleware: GrammyMiddleware[]) {
+  text(text: string | object, ...middleware: GrammyMiddleware[]) {
     const newMiddlewares = [...(this.menuMiddlewares || []), ...middleware];
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

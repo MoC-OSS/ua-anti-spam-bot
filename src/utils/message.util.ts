@@ -22,8 +22,8 @@ export class MessageUtil {
     if (searchFor.length <= 4) {
       directHit = strict
         ? message
-            .replace(/[^\da-z\u0400-\u04FF]/gi, ' ')
-            .replace(/\s\s+/g, ' ')
+            .replaceAll(/[^\da-z\u0400-\u04FF]/gi, ' ')
+            .replaceAll(/\s\s+/g, ' ')
             .split(' ')
             .find((word) => word.toLowerCase() === searchFor.toLowerCase()) || false
         : message.toLowerCase().includes(searchFor.toLowerCase());

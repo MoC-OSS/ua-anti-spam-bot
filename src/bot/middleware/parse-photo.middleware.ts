@@ -28,11 +28,11 @@ export async function parsePhoto(context: GrammyContext, next: NextFunction) {
     // Video and animated stickers
     const videoStickerMeta = sticker && sticker.is_video && !sticker.is_animated ? sticker : null;
     // Check only video thumb
-    const videoMeta = (video || videoStickerMeta)?.thumb;
+    const videoMeta = (video || videoStickerMeta)?.thumbnail;
     // GIFs
-    const animationMeta = animation && animation.thumb;
+    const animationMeta = animation && animation.thumbnail;
     // Round video messages
-    const videoNoteMeta = videoNote && videoNote.thumb;
+    const videoNoteMeta = videoNote && videoNote.thumbnail;
 
     const imageMeta = photoMeta || stickerMeta || videoStickerMeta || videoMeta || animationMeta || videoNoteMeta;
     let imageType: ImageType = ImageType.UNKNOWN;
@@ -52,7 +52,7 @@ export async function parsePhoto(context: GrammyContext, next: NextFunction) {
     }
 
     const photoFile = imageMeta
-      ? await context.api.getFile(videoStickerMeta?.thumb?.file_id || imageMeta.file_id).then((photoResponse) =>
+      ? await context.api.getFile(videoStickerMeta?.thumbnail?.file_id || imageMeta.file_id).then((photoResponse) =>
           photoResponse.file_path
             ? axios
                 .get<Buffer>(`https://api.telegram.org/file/bot${environmentConfig.BOT_TOKEN}/${photoResponse.file_path}`, {
@@ -67,7 +67,7 @@ export async function parsePhoto(context: GrammyContext, next: NextFunction) {
       meta: imageMeta,
       type: imageType,
       file: photoFile ? await sharp(photoFile).jpeg().toBuffer() : null,
-      thumb: videoStickerMeta?.thumb,
+      thumb: videoStickerMeta?.thumbnail,
       caption: context.msg?.caption,
       videoNote,
       video,

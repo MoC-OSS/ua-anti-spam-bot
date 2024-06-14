@@ -3,7 +3,7 @@ import type { MenuRange } from '@grammyjs/menu';
 import { getAirRaidAlarmSettingsMessage, nextPage, previousPage } from '../../../../message';
 import { alarmChatService, TEST_ALARM_STATE } from '../../../../services';
 import { generateTestState } from '../../../../services/_mocks';
-import type { GrammyMenuContext, State } from '../../../../types';
+import type { GrammyContext, GrammyMenuContext, State } from '../../../../types';
 import { handleError, isIdWhitelisted } from '../../../../utils';
 import { onlyAdmin } from '../../../middleware';
 
@@ -30,7 +30,7 @@ export const dynamicLocationMenu = (context_: GrammyMenuContext, range: MenuRang
     /**
      * @param {GrammyContext} context
      * */
-    return range.text(displayLocationName, onlyAdmin, (context) => {
+    return range.text(displayLocationName, onlyAdmin, (context: GrammyContext) => {
       context.chatSession.chatSettings.airRaidAlertSettings.state = locationName;
       alarmChatService.updateChat(context.chatSession, context.chat?.id);
       context.editMessageText(getAirRaidAlarmSettingsMessage(context_.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);

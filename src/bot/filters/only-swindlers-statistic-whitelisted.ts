@@ -1,5 +1,5 @@
 import type { GrammyContext } from '../../types';
-import { isIdWhitelistedForSwindlersStatistic } from '../../utils';
+import { isIdWhitelistedForSwindlersStatistic } from '../../utils/generic.util';
 
 /**
  * @description

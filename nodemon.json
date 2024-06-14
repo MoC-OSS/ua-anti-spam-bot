@@ -7,5 +7,6 @@
     "./negatives.json",
     "node_modules"
   ],
+  "exec": "tsx",
   "watch": ["src", ".env", "package.json", "tsconfig.json"]
 }

@@ -359,7 +359,7 @@ export class MessageHandler {
      * Remove extra spaces
      * */
     try {
-      message = message.replace(/\s\s+/g, ' ');
+      message = message.replaceAll(/\s\s+/g, ' ');
     } catch (error) {
       handleError(error, 'EXTRA_SPACE_REMOVER');
     }
