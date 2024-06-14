@@ -12,7 +12,7 @@
     "start:userbot:eternal": "forever -c ts-node ./src/userbot/index.ts --transpile-only",
     "start:userbot:prod": "ts-node ./src/userbot/index.ts --transpile-only",
     "start:server": "nodemon ./src/express.server.ts --max_old_space_size=2048",
-    "start:server:prod": "ts-node --transpile-only ./src/express.server.ts",
+    "start:server:prod": "tsx ./src/express.server.ts",
     "start:server:js:prod": "node ./dist/src/express.server.js",
     "start:server:cluster": "(npx pm2 delete all || exit 0) && npx pm2 start ./src/express.server.ts -i max && npx pm2 monit || echo '*** Install PM2 globally'",
     "check-swindler:positives": "ts-node ./dataset/check-swindlers.ts positives",
