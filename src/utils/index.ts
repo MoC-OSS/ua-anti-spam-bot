@@ -10,6 +10,7 @@ export * from './domain-allow-list';
 export * from './empty-functions.util';
 export * from './error-handler';
 export * from './generic.util';
+export * from './get-typed-value.util';
 export * from './optimize-write-context.util';
 export * from './remove-duplicates.util';
 export * from './remove-repeated-letters.util';

@@ -1,4 +1,5 @@
 export * from './before-any.composer';
+export * from './create-logs-chat.composer';
 export * from './creator-command.composer';
 export * from './health-check.composer';
 export * from './hotline-security.composer';
