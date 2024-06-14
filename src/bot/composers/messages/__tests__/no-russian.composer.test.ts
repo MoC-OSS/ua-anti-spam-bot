@@ -3,7 +3,7 @@ import { Bot } from 'grammy';
 
 import { mockDynamicStorageService } from '../../../../services/_mocks/index.mocks';
 import type { OutgoingRequests } from '../../../../testing';
-import { MessageSuperGroupMockUpdate, prepareBotForTesting } from '../../../../testing';
+import { MessageMockUpdate, prepareBotForTesting } from '../../../../testing';
 import { mockChatSession } from '../../../../testing-main';
 import type { GrammyContext } from '../../../../types';
 import { parseIsRussian, parseText, stateMiddleware } from '../../../middleware';
@@ -50,7 +50,7 @@ describe('noRussianComposer', () => {
     });
 
     it('should delete if russian is used', async () => {
-      const update = new MessageSuperGroupMockUpdate('съешь еще этих французских булок').build();
+      const update = new MessageMockUpdate('съешь еще этих французских булок').build();
       await bot.handleUpdate(update);
 
       const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest, sendMessageRequest] = outgoingRequests.getAll<
@@ -69,7 +69,7 @@ describe('noRussianComposer', () => {
 
     it('should delete if russian is used and do not notify if disableDeleteMessage is true', async () => {
       chatSession.chatSettings.disableDeleteMessage = true;
-      const update = new MessageSuperGroupMockUpdate('съешь еще этих французских булок').build();
+      const update = new MessageMockUpdate('съешь еще этих французских булок').build();
       await bot.handleUpdate(update);
 
       const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest] = outgoingRequests.getAll<
@@ -85,7 +85,7 @@ describe('noRussianComposer', () => {
     });
 
     it('should not delete if not russian', async () => {
-      const update = new MessageSuperGroupMockUpdate(
+      const update = new MessageMockUpdate(
         'Інтерактивна мапа дозволяє швидко і зручно дізнатися погоду в містах України. На ній відображаються погодні умови в найбільших містах України з можливістю перегляду прогнозу погоди на тиждень. Щоб дізнатися докладний прогноз погоди в вашому місті досить натиснути на назву населеного пункту на мапі.',
       ).build();
       await bot.handleUpdate(update);
@@ -104,14 +104,14 @@ describe('noRussianComposer', () => {
     });
 
     it('should not delete if russian is used', async () => {
-      const update = new MessageSuperGroupMockUpdate('съешь еще этих французских булок').build();
+      const update = new MessageMockUpdate('съешь еще этих французских булок').build();
       await bot.handleUpdate(update);
 
       expect(outgoingRequests.length).toEqual(0);
     });
 
     it('should not delete if not russian is used', async () => {
-      const update = new MessageSuperGroupMockUpdate(
+      const update = new MessageMockUpdate(
         'Інтерактивна мапа дозволяє швидко і зручно дізнатися погоду в містах України. На ній відображаються погодні умови в найбільших містах України з можливістю перегляду прогнозу погоди на тиждень. Щоб дізнатися докладний прогноз погоди в вашому місті досить натиснути на назву населеного пункту на мапі.',
       ).build();
       await bot.handleUpdate(update);
