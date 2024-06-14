@@ -86,6 +86,9 @@ export abstract class GenericMockUpdate {
     can_manage_video_chats: true,
     can_promote_members: true,
     can_restrict_members: true,
+    can_post_stories: true,
+    can_edit_stories: true,
+    can_delete_stories: true,
   };
 
   /**
