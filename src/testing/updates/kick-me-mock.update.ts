@@ -25,6 +25,9 @@ export class KickMeMockUpdate extends GenericMockUpdate {
         can_restrict_members: true,
         can_promote_members: false,
         can_manage_video_chats: true,
+        can_post_stories: true,
+        can_edit_stories: true,
+        can_delete_stories: true,
         is_anonymous: false,
       },
       new_chat_member: {
