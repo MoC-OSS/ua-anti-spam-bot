@@ -4,7 +4,7 @@ import { Bot } from 'grammy';
 import { CounteroffensiveService } from '../../../../services';
 import { mockDynamicStorageService } from '../../../../services/_mocks/index.mocks';
 import type { OutgoingRequests } from '../../../../testing';
-import { MessageSuperGroupMockUpdate, prepareBotForTesting } from '../../../../testing';
+import { MessageMockUpdate, prepareBotForTesting } from '../../../../testing';
 import { mockChatSession } from '../../../../testing-main';
 import type { GrammyContext } from '../../../../types';
 import { parseIsCounteroffensive, parseText, stateMiddleware } from '../../../middleware';
@@ -52,7 +52,7 @@ describe('noCounteroffensiveComposer', () => {
     });
 
     it('should delete if counteroffensive is used', async () => {
-      const update = new MessageSuperGroupMockUpdate('Сьогодні планується контрнаступ о 10:00').build();
+      const update = new MessageMockUpdate('Сьогодні планується контрнаступ о 10:00').build();
       await bot.handleUpdate(update);
 
       const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest, sendMessageRequest] = outgoingRequests.getAll<
@@ -70,7 +70,7 @@ describe('noCounteroffensiveComposer', () => {
     });
 
     it('should delete if counteroffensive regex is used', async () => {
-      const update = new MessageSuperGroupMockUpdate('Сьогодні планується контр-наступ о 10:00').build();
+      const update = new MessageMockUpdate('Сьогодні планується контр-наступ о 10:00').build();
       await bot.handleUpdate(update);
 
       const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest, sendMessageRequest] = outgoingRequests.getAll<
@@ -89,7 +89,7 @@ describe('noCounteroffensiveComposer', () => {
 
     it('should delete if counteroffensive is used and do not notify if disableDeleteMessage is true', async () => {
       chatSession.chatSettings.disableDeleteMessage = true;
-      const update = new MessageSuperGroupMockUpdate('Сьогодні планується контрнаступ о 10:00').build();
+      const update = new MessageMockUpdate('Сьогодні планується контрнаступ о 10:00').build();
       await bot.handleUpdate(update);
 
       const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest] = outgoingRequests.getAll<
@@ -105,7 +105,7 @@ describe('noCounteroffensiveComposer', () => {
     });
 
     it('should not delete if not counteroffensive', async () => {
-      const update = new MessageSuperGroupMockUpdate(
+      const update = new MessageMockUpdate(
         'Інтерактивна мапа дозволяє швидко і зручно дізнатися погоду в містах України. На ній відображаються погодні умови в найбільших містах України з можливістю перегляду прогнозу погоди на тиждень. Щоб дізнатися докладний прогноз погоди в вашому місті досить натиснути на назву населеного пункту на мапі.',
       ).build();
       await bot.handleUpdate(update);
@@ -124,14 +124,14 @@ describe('noCounteroffensiveComposer', () => {
     });
 
     it('should not delete if counteroffensive is used', async () => {
-      const update = new MessageSuperGroupMockUpdate('Сьогодні планується контрнаступ о 10:00').build();
+      const update = new MessageMockUpdate('Сьогодні планується контрнаступ о 10:00').build();
       await bot.handleUpdate(update);
 
       expect(outgoingRequests.length).toEqual(0);
     });
 
     it('should not delete if not russian is used', async () => {
-      const update = new MessageSuperGroupMockUpdate(
+      const update = new MessageMockUpdate(
         'Інтерактивна мапа дозволяє швидко і зручно дізнатися погоду в містах України. На ній відображаються погодні умови в найбільших містах України з можливістю перегляду прогнозу погоди на тиждень. Щоб дізнатися докладний прогноз погоди в вашому місті досить натиснути на назву населеного пункту на мапі.',
       ).build();
       await bot.handleUpdate(update);

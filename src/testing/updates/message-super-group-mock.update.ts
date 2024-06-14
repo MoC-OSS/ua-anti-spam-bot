@@ -9,6 +9,8 @@ export class MessageMockUpdate extends GenericMockUpdate {
       chat: this.genericSuperGroup,
       message_id: 1365,
       from: this.genericUser,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
       text: this.text,
     },
   });
