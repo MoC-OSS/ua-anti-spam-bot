@@ -70,7 +70,7 @@ export const apiRouter = (bot: Bot<GrammyContext>) => {
       const data: Required<ChatData> = {
         chat: {
           id: chatInfo.id.toString(),
-          name: title,
+          name: title || '$NO_TITLE',
           photo: avatar,
           users: chatMembers,
           airAlarm: isAirAlarmNow,

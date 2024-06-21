@@ -50,7 +50,7 @@ export class SwindlersGoogleService {
    *
    * @returns Promise<Record<string, any>[] | null>
    * */
-  getSheet<T extends boolean | true | false = true>(range: string, compact: T) {
+  getSheet<T extends true | false = true>(range: string, compact: T) {
     const isCompact = compact === undefined ? (true as T) : compact;
     return this.googleService.getSheet<T>(environmentConfig.GOOGLE_SPREADSHEET_ID, GOOGLE_SHEETS_NAMES.SWINDLERS, range, isCompact);
   }
@@ -137,7 +137,7 @@ export class SwindlersGoogleService {
    * */
   async appendTrainingPositives(singleCase: string) {
     const values = await this.getTrainingPositives(false);
-    const lastPosition = values[values.length - 1].index + 1;
+    const lastPosition = (values.at(-1)?.index || 0) + 1;
     return this.appendToSheet(this.appendRange(this.SHEET_COLUMNS.TRAINING_POSITIVES, lastPosition), singleCase);
   }
 

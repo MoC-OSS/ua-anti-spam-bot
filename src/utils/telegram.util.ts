@@ -1,4 +1,5 @@
-import type { Chat, ChatFromGetChat, User } from '@grammyjs/types/manage';
+import type { Chat, User } from '@grammyjs/types/manage';
+import type { ChatFullInfo } from 'grammy/types';
 import type { ChatMemberOwner } from 'typegram';
 
 import type { GrammyContext } from '../types';
@@ -18,7 +19,7 @@ export class TelegramUtil {
     return (chat && 'title' in chat && chat.title) || '$title';
   }
 
-  getInviteLink(chatInfo: ChatFromGetChat): string | undefined {
+  getInviteLink(chatInfo: ChatFullInfo): string | undefined {
     return ('invite_link' in chatInfo && chatInfo.invite_link) || undefined;
   }
 

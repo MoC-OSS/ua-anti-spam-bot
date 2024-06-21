@@ -99,7 +99,7 @@ export function joinUkrainianConjunctions(array: string[]): string {
     return array.join(', ');
   }
 
-  const lastItem = array[array.length - 1];
+  const lastItem = array.at(-1);
   const joinSlice = array.slice(0, -1);
 
   const resultSlice = joinSlice.join(', ');

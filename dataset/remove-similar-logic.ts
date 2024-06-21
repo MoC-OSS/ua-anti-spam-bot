@@ -12,7 +12,7 @@ export interface RemoveSimilarResult {
   isSame: boolean;
 }
 
-export function execute({ first, second, rate }: RemoveSimilarProperties, callback: (value: RemoveSimilarResult) => any) {
+export function execute({ first, second, rate }: RemoveSimilarProperties, callback: (value: RemoveSimilarResult) => void) {
   const result = stringSimilarity.compareTwoStrings(first, second);
   callback({ result, rate, isSame: result > rate });
 }

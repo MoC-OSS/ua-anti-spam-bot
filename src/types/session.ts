@@ -1,5 +1,5 @@
+import type { MessageEntity } from '@grammyjs/types/message';
 import type { Chat } from 'typegram/manage';
-import type { MessageEntity } from 'typegram/message';
 
 import type { State } from './alarm';
 import type { GrammyContext } from './context';

@@ -10,9 +10,9 @@ import { removeDuplicates } from '../utils';
 import type { GoogleService } from './google.service';
 import type { SwindlersGoogleService } from './swindlers-google.service';
 
-export type FetchEvents = {
+export interface FetchEvents {
   fetch: () => void;
-};
+}
 
 export type LocalDataset = typeof dataset &
   Partial<{
@@ -42,6 +42,8 @@ export class DynamicStorageService {
 
   counteroffensiveTriggers: (string | RegExp)[] = [];
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
   fetchEmitter: TypedEmitter<FetchEvents>;
 
   /**
@@ -57,6 +59,10 @@ export class DynamicStorageService {
     this.swindlerRegexSites = localDataset.swindlers_regex_sites || [];
     this.counteroffensiveTriggers = localDataset.counteroffensiveTriggers || [];
     this.notSwindlers = [];
+    // TODO replace this to EventTarget
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    // eslint-disable-next-line unicorn/prefer-event-target
     this.fetchEmitter = new EventEmitter() as TypedEmitter<FetchEvents>;
   }
 

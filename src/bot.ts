@@ -11,6 +11,7 @@ import moment from 'moment-timezone';
 import { CommandSetter } from './bot/commands';
 import {
   getBeforeAnyComposer,
+  getCreateLogsChatComposer,
   getCreatorCommandsComposer,
   getHealthCheckComposer,
   getHotlineSecurityComposer,
@@ -50,7 +51,8 @@ import {
   logCreatorState,
   stateMiddleware,
 } from './bot/middleware';
-import { autoCommentReply, chainFilters, selfDestructedReply } from './bot/plugins';
+import { chainFilters, selfDestructedReply } from './bot/plugins';
+import { autoCommentReply } from './bot/plugins/auto-comment-reply.plugin';
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
 import { deleteMessageTransformer, disableLogsChatTransformer } from './bot/transformers';
 import { environmentConfig } from './config';
@@ -142,6 +144,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const { beforeAnyComposer } = getBeforeAnyComposer();
   const { healthCheckComposer } = getHealthCheckComposer();
   const { hotlineSecurityComposer } = getHotlineSecurityComposer();
+  const { createLogsChatComposer } = getCreateLogsChatComposer();
 
   // Commands
   const { publicCommandsComposer } = getPublicCommandsComposer({ startTime });
@@ -280,6 +283,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   // Commands
   notChannelComposer.use(healthCheckComposer);
   notChannelComposer.use(hotlineSecurityComposer);
+  notChannelComposer.use(createLogsChatComposer);
   notChannelComposer.use(creatorCommandsComposer);
   notChannelComposer.use(privateCommandsComposer);
   notChannelComposer.use(swindlersStatisticComposer);

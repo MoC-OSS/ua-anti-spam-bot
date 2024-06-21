@@ -10,7 +10,7 @@ export class CardsService {
    */
   parseCards(message: string): string[] {
     return (message.match(this.cardRegex) || ([] as string[]))
-      .map((card) => card.replace(/\D/g, ''))
+      .map((card) => card.replaceAll(/\D/g, ''))
       .filter((card) => card && card.length === 16 && isCreditCard(card));
   }
 }

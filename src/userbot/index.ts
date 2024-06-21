@@ -102,8 +102,9 @@ auth()
     //
     // api.mtproto.updates.on('updateShortSentMessage', (updateInfo) => {
     //   console.log('updateShortSentMessage:', updateInfo);
-    // });
+    // });˚
     api.mtproto.updates.on('updates', (updateInfo) =>
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       updatesHandler.filterUpdate(updateInfo, async (message) => {
         // updatesHandler.handleTraining(message);
         await updatesHandler.handleSwindlers(message);

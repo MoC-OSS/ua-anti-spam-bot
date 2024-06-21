@@ -1,4 +1,4 @@
-/* eslint-disable camelcase */
+/* eslint-disable camelcase,@typescript-eslint/no-explicit-any */
 import { fileURLToPath } from 'node:url';
 import MTProto from '@mtproto/core';
 import type { JsonObject } from 'type-fest';

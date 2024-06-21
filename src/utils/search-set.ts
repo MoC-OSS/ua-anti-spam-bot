@@ -23,7 +23,7 @@ export class SearchSet extends Set {
      * Optimizes the input string for searching by converting to lowercase, removing punctuation,
      * and normalizing white spaces.
      */
-    const optimizedString = removeSpecialSymbols(string.toLowerCase()).replace(/\s\s+/g, ' ').trim();
+    const optimizedString = removeSpecialSymbols(string.toLowerCase()).replaceAll(/\s\s+/g, ' ').trim();
     const trimmedString = removeRepeatedLettersUtil(optimizedString);
 
     const words = optimizedString.split(' ');
