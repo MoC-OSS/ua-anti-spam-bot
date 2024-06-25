@@ -1,7 +1,7 @@
 import { Bot } from 'grammy';
 
 import type { OutgoingRequests } from '../../../testing';
-import { MessageSuperGroupMockUpdate, prepareBotForTesting } from '../../../testing';
+import { MessageMockUpdate, prepareBotForTesting } from '../../../testing';
 import type { GrammyContext } from '../../../types';
 import { stateMiddleware } from '../../middleware';
 import { getBeforeAnyComposer } from '../before-any.composer';
@@ -32,7 +32,7 @@ describe('beforeAnyComposer', () => {
   });
   describe('message', () => {
     it('should identify is user admin', async () => {
-      const update = new MessageSuperGroupMockUpdate('regular message').build();
+      const update = new MessageMockUpdate('regular message').build();
       await bot.handleUpdate(update);
       const expectedMethods = outgoingRequests.buildMethods(['getChatMember']);
       const actualMethods = outgoingRequests.getMethods();
