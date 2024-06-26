@@ -125,7 +125,7 @@ interface IsDeletedState {
   isDeleted?: boolean;
 }
 interface StateIsAdmin {
-  isUserAdmin: boolean;
+  isUserAdmin?: boolean;
 }
 
 export type State = OnlyWithTextMiddlewareState &
