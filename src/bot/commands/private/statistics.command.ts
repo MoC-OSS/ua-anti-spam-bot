@@ -61,6 +61,7 @@ export class StatisticsCommand {
           enableWarnRussian: 0,
           enableDeleteObscene: 0,
           enableWarnObscene: 0,
+          enableAdminCheck: 0,
         };
 
         chatSessions

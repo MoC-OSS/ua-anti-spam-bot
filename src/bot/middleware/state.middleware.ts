@@ -7,6 +7,5 @@ export const stateMiddleware: GrammyMiddleware = (context, next) => {
   if (!context.state) {
     context.state = {};
   }
-
   return next();
 };

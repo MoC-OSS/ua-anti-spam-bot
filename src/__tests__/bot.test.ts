@@ -104,14 +104,12 @@ describe('e2e bot testing', () => {
 
       it('should check is bot admin if isAdmin is empty', async () => {
         chatSession.isBotAdmin = undefined;
-
         const update = new MessageMockUpdate('regular message').build();
         await bot.handleUpdate(update);
-
-        const getChatAdminsRequest = outgoingRequests.getLast<'getChatAdministrators'>();
-
+        const [getChatAdminsRequest, getChatMemberRequest] = outgoingRequests.getTwoLast<'getChatAdministrators', 'getChatMember'>();
         expect(getChatAdminsRequest?.method).toEqual('getChatAdministrators');
-        expect(outgoingRequests.length).toEqual(1);
+        expect(getChatMemberRequest?.method).toEqual('getChatMember');
+        expect(outgoingRequests.length).toEqual(2);
       });
 
       describe('bot is admin', () => {
@@ -233,10 +231,10 @@ describe('e2e bot testing', () => {
             'sendMessage',
             'sendMessage',
             'deleteMessage',
-            'deleteMessage',
             'getChatMember',
             'deleteMessage',
             'getChatMember',
+            'deleteMessage',
           ]);
 
           const actualMethods = outgoingRequests.getMethods();

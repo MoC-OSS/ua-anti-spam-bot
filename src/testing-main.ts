@@ -35,3 +35,18 @@ export const mockChatSession = mockContextField<GrammyContext, 'chatSession', Mo
       mockChatSessionMiddleware: middleware,
     } as const),
 );
+
+/**
+ * Mock State
+ * */
+export interface MockStateResult<
+  R extends MockContextFieldReturnType<GrammyContext, 'state'> = MockContextFieldReturnType<GrammyContext, 'state'>,
+> {
+  state: R['mocked'];
+  mockStateMiddleware: R['middleware'];
+}
+
+export const mockState = mockContextField<GrammyContext, 'state', MockStateResult>('state', ({ mocked, middleware }) => ({
+  state: mocked,
+  mockStateMiddleware: middleware,
+}));

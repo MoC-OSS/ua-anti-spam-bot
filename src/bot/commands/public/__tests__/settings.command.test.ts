@@ -7,6 +7,7 @@ import type { ApiResponses, OutgoingRequests } from '../../../../testing';
 import { MessageMockUpdate, MessagePrivateMockUpdate, prepareBotForTesting } from '../../../../testing';
 import { mockChatSession } from '../../../../testing-main';
 import type { GrammyContext } from '../../../../types';
+import { getBeforeAnyComposer } from '../../../composers';
 import { stateMiddleware } from '../../../middleware';
 import { selfDestructedReply } from '../../../plugins';
 import { SettingsCommand } from '../settings.command';
@@ -61,10 +62,12 @@ function getPrivateSettingsCommandUpdate() {
 
 describe('SettingsCommand', () => {
   beforeAll(async () => {
+    const { beforeAnyComposer } = getBeforeAnyComposer();
     bot.use(hydrateReply);
     bot.use(selfDestructedReply());
 
     bot.use(stateMiddleware);
+    bot.use(beforeAnyComposer);
     bot.use(mockChatSessionMiddleware);
 
     bot.command('settings', settingsMiddleware.middleware());

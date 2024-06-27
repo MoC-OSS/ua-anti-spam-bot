@@ -12,7 +12,7 @@ const CHANNEL_BOT_ID = 136_817_688;
  * Reversed copy from
  * @see https://github.com/backmeupplz/grammy-middlewares/blob/main/src/middlewares/onlyAdmin.ts
  * */
-export async function onlyNotAdminFilter(context: GrammyContext): Promise<boolean> {
+export function onlyNotAdminFilter(context: GrammyContext): boolean {
   // TODO use for ctx prod debug
   // console.info('enter onlyNotAdmin ******', ctx.chat?.title, '******', ctx.state.text);
 
@@ -76,8 +76,7 @@ export async function onlyNotAdminFilter(context: GrammyContext): Promise<boolea
   /**
    * Check if the is admin. If so, skip.
    * */
-  const chatMember = await context.getChatMember(fromId);
-  if (['creator', 'administrator'].includes(chatMember.status)) {
+  if (context.state.isUserAdmin) {
     logSkipMiddleware(context, 'Admin');
     return false;
   }

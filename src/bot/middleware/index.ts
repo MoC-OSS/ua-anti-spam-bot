@@ -1,3 +1,4 @@
+export * from './admin-check-notify.middleware';
 export * from './bot-active.middleware';
 export * from './bot-redis-active.middleware';
 export * from './debug.middleware';
