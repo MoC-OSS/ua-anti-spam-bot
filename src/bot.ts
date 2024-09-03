@@ -24,6 +24,7 @@ import {
   getTensorTrainingComposer,
 } from './bot/composers';
 import {
+  getDenylistComposer,
   getNoCardsComposer,
   getNoCounterOffensiveComposer,
   getNoForwardsComposer,
@@ -201,7 +202,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const { noObsceneComposer } = getNoObsceneComposer();
   const { warnObsceneComposer } = getWarnObsceneComposer();
   const { noAntisemitismComposer } = getNoAntisemitismComposer();
-
+  const { denylistComposer } = getDenylistComposer();
   const { messagesComposer } = getMessagesComposer({
     counteroffensiveService,
     noCardsComposer,
@@ -301,6 +302,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
 
   // Main message composer
   notChannelComposer.use(messagesComposer);
+  notChannelComposer.use(denylistComposer);
   notChannelComposer.use(photosComposer);
 
   // Log state for creator only chat

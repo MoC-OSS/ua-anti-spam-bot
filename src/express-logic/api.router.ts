@@ -20,9 +20,7 @@ export const apiRouter = (bot: Bot<GrammyContext>) => {
       const userId = getUserIdFromAuthorizationHeader(request.headers.authorization);
       const linkedChats = await getLinkedChats(userId);
       if (linkedChats.length === 0) response.status(200).json({ chats: [] });
-
       const chats = await updateChatsList(linkedChats, bot, userId);
-
       response.status(200).json({ chats });
     }),
   );
@@ -49,13 +47,13 @@ export const apiRouter = (bot: Bot<GrammyContext>) => {
         enableWarnRussian: false,
         enableDeleteObscene: false,
         enableWarnObscene: false,
+        denylist: [],
         airRaidAlertSettings: {
           pageNumber: 0,
           state: '',
           notificationMessage: false,
         },
       };
-
       const airRaidAlarmStates = await alarmService.getStates();
       const chatInfo = await bot.api.getChat(id);
       const chatMembers = await bot.api.getChatMemberCount(id);
@@ -64,7 +62,6 @@ export const apiRouter = (bot: Bot<GrammyContext>) => {
       const title = 'title' in chatInfo ? chatInfo.title : '';
       const state = chatSession?.chatSettings?.airRaidAlertSettings?.state ?? '';
       const isAirAlarmNow = alarmChatService.isAlarmNow(state) || false;
-
       const data: Required<ChatData> = {
         chat: {
           id: chatInfo.id.toString(),
