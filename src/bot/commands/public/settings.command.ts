@@ -13,7 +13,7 @@ export class SettingsCommand {
       const isChatPrivate = context.chat?.type === 'private';
       const userId = context.from?.id.toString() ?? '';
       const chatId = context.chat?.id.toString() ?? '';
-      const isNotAdmin = await onlyNotAdminFilter(context);
+      const isNotAdmin = onlyNotAdminFilter(context);
       const isBotAdmin = onlyWhenBotAdminFilter(context);
 
       await context
