@@ -1,3 +1,4 @@
+export * from './denylist.composer';
 export * from './no-cards.composer';
 export * from './no-counteroffensive.composer';
 export * from './no-forward.composer';

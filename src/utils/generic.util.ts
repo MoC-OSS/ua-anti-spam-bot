@@ -132,6 +132,13 @@ export function getEnabledFeaturesString(chatSettings: ChatSettings): string {
         features.push(featureName);
       }
     }
+    if (Array.isArray(value) && value.length > 0) {
+      const featureName = featureNameMap.get(setting);
+
+      if (featureName) {
+        features.push(featureName);
+      }
+    }
   });
 
   return joinUkrainianConjunctions(features);

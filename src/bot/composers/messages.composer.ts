@@ -47,7 +47,6 @@ export interface MessagesComposerProperties {
  */
 export const getMessagesRegisterComposer = () => {
   const messagesComposer = new Composer<GrammyContext>();
-
   /**
    * Only these messages will be processed in this composer
    * */
