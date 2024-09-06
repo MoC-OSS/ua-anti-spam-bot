@@ -47,6 +47,7 @@ export const apiRouter = (bot: Bot<GrammyContext>) => {
         enableDeleteRussian: false,
         enableWarnRussian: false,
         enableDeleteObscene: false,
+        enableDeleteDenylist: false,
         enableWarnObscene: false,
         denylist: [],
         enableAdminCheck: false,

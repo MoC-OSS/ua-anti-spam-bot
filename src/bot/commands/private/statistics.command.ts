@@ -60,6 +60,7 @@ export class StatisticsCommand {
           enableDeleteRussian: 0,
           enableWarnRussian: 0,
           enableDeleteObscene: 0,
+          enableDeleteDenylist: 0,
           enableWarnObscene: 0,
           enableAdminCheck: 0,
         };

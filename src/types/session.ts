@@ -60,6 +60,7 @@ export interface OptionalChatSettings {
   enableDeleteObscene?: boolean;
   enableWarnObscene?: boolean;
   enableAdminCheck?: boolean;
+  enableDeleteDenylist?: boolean;
 }
 
 export type BooleanChatSettings = DefaultChatSettings & OptionalChatSettings;

@@ -219,6 +219,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     noObsceneComposer,
     warnObsceneComposer,
     noAntisemitismComposer,
+    denylistComposer,
   });
 
   // Photo composers

@@ -55,6 +55,17 @@ describe('denylistComposer', () => {
       expect(expectedMethods).toEqual(actualMethods);
     });
 
+    it('should delete if denylist is used and denyword part of larger message', async () => {
+      const update = new MessageMockUpdate(`Larger message${testWord}wrapped word is part of another string`).build();
+      await bot.handleUpdate(update);
+
+      const expectedMethods = outgoingRequests.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']);
+
+      const actualMethods = outgoingRequests.getMethods();
+
+      expect(expectedMethods).toEqual(actualMethods);
+    });
+
     it('should delete if denylist is used and do not notify if disableDeleteMessage is true', async () => {
       chatSession.chatSettings.disableDeleteMessage = true;
       const update = new MessageMockUpdate(testWord).build();

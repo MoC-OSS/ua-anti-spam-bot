@@ -38,13 +38,12 @@ export const getDenylistComposer = () => {
   denylistComposer.use(async (context, next) => {
     const { text } = context.state;
     const { chatSettings } = context.chatSession;
-    const { denylist } = chatSettings;
-
-    if (Array.isArray(denylist) && denylist.length > 0 && text) {
+    const { denylist, enableDeleteDenylist } = chatSettings;
+    if (Array.isArray(denylist) && denylist.length > 0 && text && enableDeleteDenylist) {
       const denyWord = denylist.find((word) => text.toLowerCase().includes(word.toLowerCase()));
       if (denyWord) {
         await context.deleteMessage();
-        await logDenylistMessage(context, text);
+        await logDenylistMessage(context, denyWord);
 
         if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
           const { writeUsername, userId } = getUserData(context);
