@@ -5,10 +5,9 @@ import type { OutgoingRequests } from '../../../../testing';
 import { MessagePrivateMockUpdate, prepareBotForTesting } from '../../../../testing';
 import { mockChatSession } from '../../../../testing-main';
 import type { GrammyContext } from '../../../../types';
-import { logContextMiddleware, parseLocations, parseText, stateMiddleware } from '../../../middleware';
+import { logContextMiddleware, parseText, stateMiddleware } from '../../../middleware';
 import { selfDestructedReply } from '../../../plugins';
-import { getNoLocationsComposer } from '../no-locations.composer';
-import {getNoChannelMessagesComposer} from "../no-channel-messages.composer";
+import { getNoChannelMessagesComposer } from '../no-channel-messages.composer';
 
 let outgoingRequests: OutgoingRequests;
 const { noChannelMessagesComposer } = getNoChannelMessagesComposer();
@@ -28,7 +27,6 @@ describe('noChannelMessagesComposer', () => {
 
     bot.use(stateMiddleware);
     bot.use(parseText);
-    // bot.use(parseLocations);
     bot.use(logContextMiddleware);
     bot.use(mockChatSessionMiddleware);
 
@@ -52,9 +50,9 @@ describe('noChannelMessagesComposer', () => {
 
     it('should delete message from a channel', async () => {
       const update = new MessagePrivateMockUpdate({
-        from: { id: 136817688, username: 'Channel_Bot' },
-        sender_chat: { id: 12345 },
-        reply_to_message: { sender_chat: { id: 54321 } },
+        from: { id: 136_817_688, username: 'Channel_Bot' },
+        sender_chat: { id: 12_345 },
+        reply_to_message: { sender_chat: { id: 54_321 } },
       }).build();
       await bot.handleUpdate(update);
 
@@ -63,7 +61,7 @@ describe('noChannelMessagesComposer', () => {
         'getChat',
         'sendMessage',
         'sendMessage'
-        >();
+      >();
 
       expect(outgoingRequests.length).toEqual(4);
       expect(deleteMessageRequest?.method).toEqual('deleteMessage');
@@ -74,17 +72,13 @@ describe('noChannelMessagesComposer', () => {
     it('should not delete message if disableDeleteMessage is true', async () => {
       chatSession.chatSettings.disableDeleteMessage = true;
       const update = new MessagePrivateMockUpdate({
-        from: { id: 136817688, username: 'Channel_Bot' },
-        sender_chat: { id: 12345 },
-        reply_to_message: { sender_chat: { id: 54321 } },
+        from: { id: 136_817_688, username: 'Channel_Bot' },
+        sender_chat: { id: 12_345 },
+        reply_to_message: { sender_chat: { id: 54_321 } },
       }).build();
       await bot.handleUpdate(update);
 
-      const [deleteMessageRequest, getChatRequest] = outgoingRequests.getAll<
-        'deleteMessage',
-        'getChat',
-        'sendMessage'
-        >();
+      const [deleteMessageRequest, getChatRequest] = outgoingRequests.getAll<'deleteMessage', 'getChat', 'sendMessage'>();
 
       expect(outgoingRequests.length).toEqual(3);
       expect(deleteMessageRequest?.method).toEqual('deleteMessage');
@@ -93,8 +87,8 @@ describe('noChannelMessagesComposer', () => {
 
     it('should not delete message if sent by GroupAnonymousBot', async () => {
       const update = new MessagePrivateMockUpdate({
-        from: { id: 136817688, username: 'GroupAnonymousBot' },
-        sender_chat: { id: 12345 },
+        from: { id: 136_817_688, username: 'GroupAnonymousBot' },
+        sender_chat: { id: 12_345 },
       }).build();
       await bot.handleUpdate(update);
 
@@ -103,7 +97,7 @@ describe('noChannelMessagesComposer', () => {
 
     it('should not delete message from non-channel users', async () => {
       const update = new MessagePrivateMockUpdate({
-        from: { id: 123456789, username: 'RegularUser' },
+        from: { id: 123_456_789, username: 'RegularUser' },
       }).build();
       await bot.handleUpdate(update);
 
@@ -122,8 +116,8 @@ describe('noChannelMessagesComposer', () => {
 
     it('should not delete message from a channel when feature is disabled', async () => {
       const update = new MessagePrivateMockUpdate({
-        from: { id: 136817688, username: 'Channel_Bot' },
-        sender_chat: { id: 12345 },
+        from: { id: 136_817_688, username: 'Channel_Bot' },
+        sender_chat: { id: 12_345 },
       }).build();
       await bot.handleUpdate(update);
 
