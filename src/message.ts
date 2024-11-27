@@ -617,6 +617,7 @@ export const counteroffensiveLogsStartMessage = 'Deleted counteroffensive messag
 export const obsceneDeleteLogsStartMessage = 'Delete obscene message';
 export const obsceneWarnLogsStartMessage = 'Warn obscene message';
 export const antisemitismDeleteLogsStartMessage = 'Delete antisemitism message';
+export const channelMessageLogsStartMessage = 'Deleted message from channel';
 
 export const logsStartMessages = new Set([
   swindlerLogsStartMessage,
@@ -632,4 +633,5 @@ export const logsStartMessages = new Set([
   obsceneDeleteLogsStartMessage,
   obsceneWarnLogsStartMessage,
   antisemitismDeleteLogsStartMessage,
+  channelMessageLogsStartMessage,
 ]);
