@@ -78,6 +78,13 @@ export const getPrivateCommandsComposer = ({ bot, commandSetter, dynamicStorageS
     process.exit(0);
   });
 
+  composer.command('thread', async (context) => {
+    const message = await context.replyWithHTML(
+      `Message Thread Id:\n<code>${context.msg?.message_thread_id?.toString()}</code>` || 'No thread id',
+    );
+    await context.pinChatMessage(message.message_id);
+  });
+
   composer.use(videoNoteConverterComposer);
 
   /* Menu Register */
