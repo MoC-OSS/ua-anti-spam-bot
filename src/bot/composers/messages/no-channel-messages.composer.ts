@@ -15,8 +15,8 @@ export const getNoChannelMessagesComposer = () => {
   noChannelMessagesComposer.use(async (context, next) => {
     const fromId = context.from?.id;
     const isFeatureEnabled = context.chatSession.chatSettings.enableDeleteChannelMessages;
-    const senderChatId = context.message?.sender_chat?.id;
-    const parentChannelId = context.message?.reply_to_message?.sender_chat?.id;
+    const senderChatId = context.senderChat?.id;
+    const parentChannelId = context.msg?.reply_to_message?.sender_chat?.id;
 
     /**
      * For public channels Telegram could send the message from channel as Channel_Bot.
@@ -28,7 +28,7 @@ export const getNoChannelMessagesComposer = () => {
 
     if (isFeatureEnabled && isChannel) {
       if (senderChatId === parentChannelId) {
-        return next;
+        return next();
       }
 
       await context.deleteMessage();
