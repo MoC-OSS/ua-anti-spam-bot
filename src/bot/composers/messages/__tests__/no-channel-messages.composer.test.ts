@@ -12,6 +12,7 @@ import { getNoChannelMessagesComposer } from '../no-channel-messages.composer';
 let outgoingRequests: OutgoingRequests;
 const { noChannelMessagesComposer } = getNoChannelMessagesComposer();
 const bot = new Bot<GrammyContext>('mock');
+const superGroupMockUpdate = new MessageSuperGroupMockUpdate('test');
 
 const { chatSession, mockChatSessionMiddleware } = mockChatSession({
   chatSettings: {
@@ -49,8 +50,6 @@ describe('noChannelMessagesComposer', () => {
     });
 
     it('should delete message from a channel', async () => {
-      const superGroupMockUpdate = new MessageSuperGroupMockUpdate('test');
-
       const update = new MessageSuperGroupMockUpdate('Test').buildOverwrite({
         message: {
           from: { id: 136_817_688, username: 'Channel_Bot', is_bot: false, first_name: '' },
@@ -67,9 +66,15 @@ describe('noChannelMessagesComposer', () => {
 
       await bot.handleUpdate(update);
 
-      const [deleteMessageRequest, sendMessageRequest] = outgoingRequests.getAll<'deleteMessage', 'sendMessage', 'sendMessage'>();
+      const [deleteMessageRequest, getChatRequest, sendMessageRequest] = outgoingRequests.getAll<
+        'deleteMessage',
+        'getChat',
+        'sendMessage',
+        'sendMessage'
+      >();
 
-      expect(outgoingRequests).toHaveLength(3);
+      expect(outgoingRequests).toHaveLength(4);
+      expect(getChatRequest?.method).toEqual('getChat');
       expect(deleteMessageRequest?.method).toEqual('deleteMessage');
       expect(sendMessageRequest?.method).toEqual('sendMessage');
     });
@@ -78,14 +83,20 @@ describe('noChannelMessagesComposer', () => {
       const update = new MessageSuperGroupMockUpdate('Test').buildOverwrite({
         message: {
           from: { id: 136_817_688, username: 'Channel_Bot', is_bot: false, first_name: '' },
+          sender_chat: { id: 54_321, type: 'channel', title: 'Main Channel' },
+          reply_to_message: {
+            sender_chat: { id: 54_321, type: 'channel', title: 'Main Channel' },
+            message_id: 123,
+            date: Date.now(),
+            chat: superGroupMockUpdate.genericSuperGroup,
+            reply_to_message: undefined,
+          },
         },
-        sender_chat: { id: 12_345 },
-        reply_to_message: { sender_chat: { id: 12_345 } },
       });
 
       await bot.handleUpdate(update);
 
-      expect(outgoingRequests.length).toEqual(0);
+      expect(outgoingRequests).toHaveLength(0);
     });
 
     it('should delete message but not notify if disableDeleteMessage is true', async () => {
@@ -93,16 +104,22 @@ describe('noChannelMessagesComposer', () => {
       const update = new MessageSuperGroupMockUpdate('Test').buildOverwrite({
         message: {
           from: { id: 136_817_688, username: 'Channel_Bot', is_bot: false, first_name: '' },
+          sender_chat: { id: 12_345, type: 'channel', title: 'Another Channel' },
+          reply_to_message: {
+            sender_chat: { id: 54_321, type: 'channel', title: 'Main Channel' },
+            message_id: 123,
+            date: Date.now(),
+            chat: superGroupMockUpdate.genericSuperGroup,
+            reply_to_message: undefined,
+          },
         },
-        sender_chat: { id: 12_345 },
-        reply_to_message: { sender_chat: { id: 54_321 } },
       });
 
       await bot.handleUpdate(update);
 
       const [deleteMessageRequest, getChatRequest] = outgoingRequests.getAll<'deleteMessage', 'getChat', 'sendMessage'>();
 
-      expect(outgoingRequests.length).toEqual(3);
+      expect(outgoingRequests).toHaveLength(3);
       expect(deleteMessageRequest?.method).toEqual('deleteMessage');
       expect(getChatRequest?.method).toEqual('getChat');
     });
@@ -116,7 +133,7 @@ describe('noChannelMessagesComposer', () => {
       });
       await bot.handleUpdate(update);
 
-      expect(outgoingRequests.length).toEqual(0);
+      expect(outgoingRequests).toHaveLength(0);
     });
 
     it('should not delete message from non-channel users', async () => {
@@ -127,7 +144,7 @@ describe('noChannelMessagesComposer', () => {
       });
       await bot.handleUpdate(update);
 
-      expect(outgoingRequests.length).toEqual(0);
+      expect(outgoingRequests).toHaveLength(0);
     });
   });
 
@@ -141,13 +158,42 @@ describe('noChannelMessagesComposer', () => {
     });
 
     it('should not delete message from a channel when feature is disabled', async () => {
-      const update = new MessagePrivateMockUpdate({
-        from: { id: 136_817_688, username: 'Channel_Bot' },
-        sender_chat: { id: 12_345 },
-      }).build();
+      const update = new MessagePrivateMockUpdate('Test').buildOverwrite({
+        message: {
+          from: { id: 136_817_688, username: 'Channel_Bot', is_bot: false, first_name: '' },
+          sender_chat: { id: 12_345, type: 'channel', title: 'Another Channel' },
+          reply_to_message: {
+            sender_chat: { id: 54_321, type: 'channel', title: 'Main Channel' },
+            message_id: 123,
+            date: Date.now(),
+            chat: superGroupMockUpdate.genericSuperGroup,
+            reply_to_message: undefined,
+          },
+        },
+      });
       await bot.handleUpdate(update);
 
-      expect(outgoingRequests.length).toEqual(0);
+      expect(outgoingRequests).toHaveLength(0);
+    });
+
+    it('should not delete message from the same channel', async () => {
+      const update = new MessageSuperGroupMockUpdate('Test').buildOverwrite({
+        message: {
+          from: { id: 136_817_688, username: 'Channel_Bot', is_bot: false, first_name: '' },
+          sender_chat: { id: 54_321, type: 'channel', title: 'Main Channel' },
+          reply_to_message: {
+            sender_chat: { id: 54_321, type: 'channel', title: 'Main Channel' },
+            message_id: 123,
+            date: Date.now(),
+            chat: superGroupMockUpdate.genericSuperGroup,
+            reply_to_message: undefined,
+          },
+        },
+      });
+
+      await bot.handleUpdate(update);
+
+      expect(outgoingRequests).toHaveLength(0);
     });
   });
 });
