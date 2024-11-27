@@ -11,6 +11,7 @@ import moment from 'moment-timezone';
 import { CommandSetter } from './bot/commands';
 import {
   getBeforeAnyComposer,
+  getCreateLogsChatComposer,
   getCreatorCommandsComposer,
   getHealthCheckComposer,
   getHotlineSecurityComposer,
@@ -44,6 +45,7 @@ import { isNotChannel, onlyCreatorChatFilter } from './bot/filters';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
 import { MessageHandler } from './bot/message.handler';
 import {
+  adminCheckNotify,
   deleteSpamMediaGroupMiddleware,
   DeleteSwindlersMiddleware,
   GlobalMiddleware,
@@ -143,6 +145,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const { beforeAnyComposer } = getBeforeAnyComposer();
   const { healthCheckComposer } = getHealthCheckComposer();
   const { hotlineSecurityComposer } = getHotlineSecurityComposer();
+  const { createLogsChatComposer } = getCreateLogsChatComposer();
 
   // Commands
   const { publicCommandsComposer } = getPublicCommandsComposer({ startTime });
@@ -283,6 +286,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   // Commands
   notChannelComposer.use(healthCheckComposer);
   notChannelComposer.use(hotlineSecurityComposer);
+  notChannelComposer.use(createLogsChatComposer);
   notChannelComposer.use(creatorCommandsComposer);
   notChannelComposer.use(privateCommandsComposer);
   notChannelComposer.use(swindlersStatisticComposer);
@@ -302,7 +306,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   // Main message composer
   notChannelComposer.use(messagesComposer);
   notChannelComposer.use(photosComposer);
-
+  notChannelComposer.use(adminCheckNotify);
   // Log state for creator only chat
   notChannelComposer
     .filter((context) => chainFilters(onlyCreatorChatFilter, !!context.state.isDeleted || !!context.state.photo)(context))

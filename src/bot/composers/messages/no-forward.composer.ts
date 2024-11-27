@@ -12,7 +12,7 @@ export const getNoForwardsComposer = () => {
 
   noForwardsComposer.use(async (context, next) => {
     const isFeatureEnabled = context.chatSession.chatSettings.enableDeleteForwards;
-    const isForwarded = !!context.msg?.forward_from;
+    const isForwarded = !!context.msg?.forward_origin;
 
     if (isFeatureEnabled && isForwarded) {
       await context.deleteMessage();

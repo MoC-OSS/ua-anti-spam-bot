@@ -19,6 +19,8 @@ export class MessagePrivateMockUpdate extends GenericMockUpdate {
 
   readonly paramsUpdate = GenericMockUpdate.getValidUpdate({
     message: {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
       text: this.text,
     },
   });

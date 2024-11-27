@@ -2,7 +2,7 @@ import { hydrateReply } from '@grammyjs/parse-mode';
 import { Bot } from 'grammy';
 
 import type { OutgoingRequests } from '../../../../testing';
-import { MessagePrivateMockUpdate, MessageSuperGroupMockUpdate, prepareBotForTesting } from '../../../../testing';
+import { MessageMockUpdate, MessagePrivateMockUpdate, prepareBotForTesting } from '../../../../testing';
 import { mockChatSession } from '../../../../testing-main';
 import type { GrammyContext } from '../../../../types';
 import { logContextMiddleware, parseText, stateMiddleware } from '../../../middleware';
@@ -12,7 +12,7 @@ import { getNoChannelMessagesComposer } from '../no-channel-messages.composer';
 let outgoingRequests: OutgoingRequests;
 const { noChannelMessagesComposer } = getNoChannelMessagesComposer();
 const bot = new Bot<GrammyContext>('mock');
-const superGroupMockUpdate = new MessageSuperGroupMockUpdate('test');
+const superGroupMockUpdate = new MessageMockUpdate('test');
 
 const { chatSession, mockChatSessionMiddleware } = mockChatSession({
   chatSettings: {
@@ -50,7 +50,7 @@ describe('noChannelMessagesComposer', () => {
     });
 
     it('should delete message from a channel', async () => {
-      const update = new MessageSuperGroupMockUpdate('Test').buildOverwrite({
+      const update = new MessageMockUpdate('Test').buildOverwrite({
         message: {
           from: { id: 136_817_688, username: 'Channel_Bot', is_bot: false, first_name: '' },
           sender_chat: { id: 12_345, type: 'channel', title: 'Another Channel' },
@@ -80,7 +80,7 @@ describe('noChannelMessagesComposer', () => {
     });
 
     it('should not delete message from the same channel', async () => {
-      const update = new MessageSuperGroupMockUpdate('Test').buildOverwrite({
+      const update = new MessageMockUpdate('Test').buildOverwrite({
         message: {
           from: { id: 136_817_688, username: 'Channel_Bot', is_bot: false, first_name: '' },
           sender_chat: { id: 54_321, type: 'channel', title: 'Main Channel' },
@@ -101,7 +101,7 @@ describe('noChannelMessagesComposer', () => {
 
     it('should delete message but not notify if disableDeleteMessage is true', async () => {
       chatSession.chatSettings.disableDeleteMessage = true;
-      const update = new MessageSuperGroupMockUpdate('Test').buildOverwrite({
+      const update = new MessageMockUpdate('Test').buildOverwrite({
         message: {
           from: { id: 136_817_688, username: 'Channel_Bot', is_bot: false, first_name: '' },
           sender_chat: { id: 12_345, type: 'channel', title: 'Another Channel' },
@@ -125,7 +125,7 @@ describe('noChannelMessagesComposer', () => {
     });
 
     it('should not delete message if sent by GroupAnonymousBot', async () => {
-      const update = new MessageSuperGroupMockUpdate('Test').buildOverwrite({
+      const update = new MessageMockUpdate('Test').buildOverwrite({
         message: {
           from: { id: 136_817_688, username: 'GroupAnonymousBot', is_bot: false, first_name: '' },
         },
@@ -137,7 +137,7 @@ describe('noChannelMessagesComposer', () => {
     });
 
     it('should not delete message from non-channel users', async () => {
-      const update = new MessageSuperGroupMockUpdate('Test').buildOverwrite({
+      const update = new MessageMockUpdate('Test').buildOverwrite({
         message: {
           from: { id: 123_456_789, username: 'RegularUser', is_bot: false, first_name: '' },
         },
@@ -177,7 +177,7 @@ describe('noChannelMessagesComposer', () => {
     });
 
     it('should not delete message from the same channel', async () => {
-      const update = new MessageSuperGroupMockUpdate('Test').buildOverwrite({
+      const update = new MessageMockUpdate('Test').buildOverwrite({
         message: {
           from: { id: 136_817_688, username: 'Channel_Bot', is_bot: false, first_name: '' },
           sender_chat: { id: 54_321, type: 'channel', title: 'Main Channel' },

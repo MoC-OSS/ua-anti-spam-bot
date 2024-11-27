@@ -1,4 +1,4 @@
-import type { Chat } from '@grammyjs/types/manage';
+import type { ChatFullInfo } from 'grammy/types';
 
 import type { AlarmNotification, ChatSessionData } from '../../types';
 import { getRandomItem } from '../../utils';
@@ -26,7 +26,7 @@ export const getAlarmMock = (alert = false, state = testState): AlarmNotificatio
   notification_id: generateRandomString(10),
 });
 
-export const chartMock: Chat.SupergroupGetChat = {
+export const chartMock: ChatFullInfo = {
   id: testId,
   type: 'supergroup',
   title: 'SuperMockChat',
@@ -40,6 +40,8 @@ export const chartMock: Chat.SupergroupGetChat = {
     can_invite_users: true,
     can_pin_messages: true,
   },
+  accent_color_id: 0,
+  max_reaction_count: 1,
 };
 
 export function generateChatSessionData(
@@ -78,7 +80,7 @@ export function generateChatSessionData(
 }
 
 export function generateChat(id: number, data: ChatSessionData) {
-  return { id, data };
+  return { id: id.toString(), data };
 }
 
 export function generateMockSessions(

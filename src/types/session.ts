@@ -1,5 +1,5 @@
+import type { MessageEntity } from '@grammyjs/types/message';
 import type { Chat } from 'typegram/manage';
-import type { MessageEntity } from 'typegram/message';
 
 import type { State } from './alarm';
 import type { GrammyContext } from './context';
@@ -59,6 +59,7 @@ export interface OptionalChatSettings {
   enableWarnRussian?: boolean;
   enableDeleteObscene?: boolean;
   enableWarnObscene?: boolean;
+  enableAdminCheck?: boolean;
   enableDeleteChannelMessages?: boolean;
 }
 
@@ -80,6 +81,7 @@ export interface ChatSessionData {
   lastWarningDate?: Date;
   chatSettings: ChatSettings;
   chatPermissions?: Chat.MultiUserGetChat['permissions'];
+  isCheckAdminNotified?: boolean;
 }
 
 export interface LinkedChat {

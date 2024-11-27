@@ -1,4 +1,4 @@
-FROM public.ecr.aws/f2g8j8i0/node:16
+FROM public.ecr.aws/docker/library/node:20
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -18,4 +18,4 @@ RUN npm i --only=production
 # Bundle app source
 COPY . .
 
-CMD [ "npm", "run", "start:bot:js:prod" ]
+CMD [ "npm", "run", "start:bot:prod" ]
