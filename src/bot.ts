@@ -26,6 +26,7 @@ import {
 import {
   getDenylistComposer,
   getNoCardsComposer,
+  getNoChannelMessagesComposer,
   getNoCounterOffensiveComposer,
   getNoForwardsComposer,
   getNoLocationsComposer,
@@ -203,6 +204,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const { noObsceneComposer } = getNoObsceneComposer();
   const { warnObsceneComposer } = getWarnObsceneComposer();
   const { noAntisemitismComposer } = getNoAntisemitismComposer();
+  const { noChannelMessagesComposer } = getNoChannelMessagesComposer();
   const { denylistComposer } = getDenylistComposer();
   const { messagesComposer } = getMessagesComposer({
     counteroffensiveService,
@@ -219,6 +221,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     noObsceneComposer,
     warnObsceneComposer,
     noAntisemitismComposer,
+    noChannelMessagesComposer,
     denylistComposer,
   });
 
