@@ -51,6 +51,7 @@ export const apiRouter = (bot: Bot<GrammyContext>) => {
         enableDeleteObscene: false,
         enableWarnObscene: false,
         enableAdminCheck: false,
+        enableDeleteChannelMessages: false,
         airRaidAlertSettings: {
           pageNumber: 0,
           state: '',

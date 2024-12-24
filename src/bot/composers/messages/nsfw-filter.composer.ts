@@ -9,7 +9,7 @@ import { getDeleteNsfwMessage, nsfwLogsStartMessage } from '../../../message';
 import type { NsfwTensorService } from '../../../tensor';
 import type { GrammyContext, NsfwTensorPositiveResult, NsfwTensorResult } from '../../../types';
 import { ImageType } from '../../../types';
-import type { StateImageAnimation, StateImageVideo } from '../../../types/state';
+import type { NsfwPhotoResult, StateImageAnimation, StateImageVideo } from '../../../types/state';
 import { getUserData, handleError, telegramUtil } from '../../../utils';
 
 const host = `http://${environmentConfig.HOST}:${environmentConfig.PORT}`;
@@ -25,7 +25,7 @@ const saveNsfwMessage = async (context: GrammyContext) => {
   const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
   const imageData = context.state.photo;
 
-  const { deletePrediction } = context.state.nsfwResult.tensor as NsfwTensorPositiveResult;
+  const { deletePrediction } = (context.state.nsfwResult as NsfwPhotoResult).tensor as NsfwTensorPositiveResult;
 
   if (!imageData) {
     return;
