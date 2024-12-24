@@ -4,7 +4,7 @@ import type { Animation, MessageEntity, PhotoSize, Sticker, Video, VideoNote } f
 import type { ImageType } from './image';
 import type { LanguageDetectionResult } from './language-detection';
 import type { NsfwTensorResult } from './nsfw';
-import type { SwindlerTensorResult } from './swindlers';
+import type { SwindlersBotsResult, SwindlerTensorResult } from './swindlers';
 
 export interface StateFlavor<S> {
   /**
@@ -138,9 +138,14 @@ export type State = OnlyWithTextMiddlewareState &
       rate: number;
       reason: string;
     };
-    nsfwResult?: {
-      tensor: NsfwTensorResult;
-      reason: 'preview' | 'frame';
-    };
+    nsfwResult?:
+      | {
+          tensor: NsfwTensorResult;
+          reason: 'preview' | 'frame';
+        }
+      | {
+          result: SwindlersBotsResult;
+          reason: 'message';
+        };
     dataset?: SwindlerTensorResult;
   };
