@@ -91,8 +91,8 @@ export class DynamicStorageService {
       this.swindlersGoogleService.getNotSwindlers(),
       this.swindlersGoogleService.getCards(),
       this.swindlersGoogleService.getSiteRegex(),
-      this.googleService.getSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, 'Ukrainian_phrases', 'A4:A', true),
-      this.googleService.getSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, 'Counter_offensive', 'A4:A', true),
+      this.googleService.getSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, GOOGLE_SHEETS_NAMES.UKRAINIAN_PHRASES, 'A4:A', true),
+      this.googleService.getSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, GOOGLE_SHEETS_NAMES.COUNTER_OFFENSIVE, 'A4:A', true),
       this.googleService.getSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, GOOGLE_SHEETS_NAMES.NSFW, 'B3:B', true),
     ]);
 
