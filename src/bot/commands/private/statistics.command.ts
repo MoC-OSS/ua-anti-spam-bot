@@ -62,6 +62,7 @@ export class StatisticsCommand {
           enableDeleteObscene: 0,
           enableWarnObscene: 0,
           enableAdminCheck: 0,
+          enableDeleteChannelMessages: 0,
         };
 
         chatSessions

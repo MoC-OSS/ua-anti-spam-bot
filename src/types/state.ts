@@ -118,6 +118,16 @@ interface PerformanceMiddlewareState {
   performanceStart?: number;
 }
 
+export interface NsfwPhotoResult {
+  tensor: NsfwTensorResult;
+  reason: 'preview' | 'frame';
+}
+
+export interface NsfwMessageResult {
+  result: SwindlersBotsResult;
+  reason: 'message';
+}
+
 /**
  * It's used to skip text handlers when message already marked as deleted
  * */
@@ -138,14 +148,6 @@ export type State = OnlyWithTextMiddlewareState &
       rate: number;
       reason: string;
     };
-    nsfwResult?:
-      | {
-          tensor: NsfwTensorResult;
-          reason: 'preview' | 'frame';
-        }
-      | {
-          result: SwindlersBotsResult;
-          reason: 'message';
-        };
+    nsfwResult?: NsfwPhotoResult | NsfwMessageResult;
     dataset?: SwindlerTensorResult;
   };

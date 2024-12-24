@@ -1,4 +1,5 @@
 import type { GrammyContext, RealGrammyContext } from '../types';
+import type { NsfwPhotoResult } from '../types/state';
 
 import { deepCopy } from './deep-copy.util';
 
@@ -21,8 +22,8 @@ export function optimizeWriteContextUtil(context: GrammyContext): RealGrammyCont
     writeContext.state.photo.fileFrames = [];
   }
 
-  if (writeContext.state.nsfwResult && (writeContext.state.nsfwResult.tensor?.predictions?.length || 0 > 1)) {
-    writeContext.state.nsfwResult.tensor.predictions = [];
+  if (writeContext.state.nsfwResult && ((writeContext.state.nsfwResult as NsfwPhotoResult).tensor?.predictions?.length || 0 > 1)) {
+    (writeContext.state.nsfwResult as NsfwPhotoResult).tensor.predictions = [];
   }
 
   return writeContext;
