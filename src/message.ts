@@ -226,7 +226,7 @@ export const getDeleteNsfwMessage = ({ writeUsername, userId }: DeleteMessageAto
   `
 ${getDeleteUserAtomMessage({ writeUsername, userId })}
 
-🔞 Зображення з <b>відвертим характером</b> та <b>дорослим контентом (18+)</b> заборонені.
+🔞 Зображення або текст з <b>відвертим характером</b> та <b>дорослим контентом (18+)</b> заборонені.
 `.trim();
 
 export const getDeleteCounteroffensiveMessage = ({ writeUsername, userId }: DeleteMessageAtomProperties) => `

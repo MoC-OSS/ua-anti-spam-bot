@@ -34,13 +34,13 @@ export const getNsfwMessageFilterComposer = ({ nsfwDetectService }: NsfwMessageF
       )}`,
       {
         parse_mode: 'HTML',
-        message_thread_id: LOGS_CHAT_THREAD_IDS.PORN,
+        message_thread_id: LOGS_CHAT_THREAD_IDS.CHANNEL_MESSAGES, // TODO change to PORN
       },
     );
   }
 
   nsfwMessageFilterComposer.use(async (context, next) => {
-    const isFeatureEnabled = context.chatSession.chatSettings.disableNsfwFilter === false;
+    const isFeatureEnabled = !context.chatSession.chatSettings.disableNsfwFilter;
     const nsfwResult = nsfwDetectService.processMessage(context.state.text || '');
 
     if (nsfwResult) {

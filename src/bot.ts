@@ -40,6 +40,7 @@ import {
 } from './bot/composers/messages';
 import { getNoAntisemitismComposer } from './bot/composers/messages/no-antisemitism.composer';
 import { getNoObsceneComposer } from './bot/composers/messages/no-obscene.composer';
+import { getNsfwMessageFilterComposer } from './bot/composers/messages/nsfw-message-filter.composer';
 import { getSwindlersStatisticCommandsComposer } from './bot/composers/swindlers-statististics.composer';
 import { isNotChannel, onlyCreatorChatFilter } from './bot/filters';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
@@ -56,6 +57,7 @@ import { chainFilters, selfDestructedReply } from './bot/plugins';
 import { autoCommentReply } from './bot/plugins/auto-comment-reply.plugin';
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
 import { deleteMessageTransformer, disableLogsChatTransformer } from './bot/transformers';
+import { NsfwDetectService } from './services/nsfw-detect.service';
 import { environmentConfig } from './config';
 import { logsChat, swindlerBotsChatId, swindlerHelpChatId, swindlerMessageChatId } from './creator';
 import { redisClient } from './db';
@@ -131,6 +133,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const redisChatSession = new RedisChatSession();
 
   const counteroffensiveService = new CounteroffensiveService(dynamicStorageService);
+  const nsfwDetectService = new NsfwDetectService(dynamicStorageService, 0.6);
 
   const globalMiddleware = new GlobalMiddleware();
 
@@ -204,6 +207,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const { warnObsceneComposer } = getWarnObsceneComposer();
   const { noAntisemitismComposer } = getNoAntisemitismComposer();
   const { noChannelMessagesComposer } = getNoChannelMessagesComposer();
+  const { nsfwMessageFilterComposer } = getNsfwMessageFilterComposer({ nsfwDetectService });
 
   const { messagesComposer } = getMessagesComposer({
     counteroffensiveService,
@@ -221,6 +225,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     warnObsceneComposer,
     noAntisemitismComposer,
     noChannelMessagesComposer,
+    nsfwMessageFilterComposer,
   });
 
   // Photo composers
