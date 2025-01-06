@@ -1,5 +1,4 @@
 import { EventEmitter } from 'node:events';
-import axios from 'axios';
 import EventSource from 'eventsource';
 import ms from 'ms';
 import type TypedEmitter from 'typed-emitter';
@@ -23,6 +22,10 @@ export interface UpdatesEvents {
   update: (body: AlarmNotification) => void;
 }
 
+/**
+ * @description Service for handling Alarm API
+ * @deprecated
+ * */
 export class AlarmService {
   // TODO replace with event target
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -37,25 +40,24 @@ export class AlarmService {
   testAlarmInterval?: NodeJS.Timer;
 
   getStates(): Promise<AlarmStates> {
-    if (environmentConfig.DISABLE_ALARM_API) {
-      return Promise.resolve({
-        states: [],
-        last_update: new Date().toISOString(),
-      });
-    }
-    return (
-      axios
-        .get<AlarmStates>(apiUrl, apiOptions)
-        .then((response) => response.data)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .catch((error: Record<any, any>) => {
-          console.info(`Alarm API is not responding:  ${JSON.stringify(error)}`);
-          return {
-            states: [],
-            last_update: new Date().toISOString(),
-          };
-        })
-    );
+    // TODO replace this API with the new one
+    return Promise.resolve({
+      states: [],
+      last_update: new Date().toISOString(),
+    });
+    // return (
+    //   axios
+    //     .get<AlarmStates>(apiUrl, apiOptions)
+    //     .then((response) => response.data)
+    //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    //     .catch((error: Record<any, any>) => {
+    //       console.info(`Alarm API is not responding:  ${JSON.stringify(error)}`);
+    //       return {
+    //         states: [],
+    //         last_update: new Date().toISOString(),
+    //       };
+    //     })
+    // );
   }
 
   /**
@@ -70,15 +72,17 @@ export class AlarmService {
   /**
    * Starts the connection
    * */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   enable(reason: string) {
-    this.subscribeOnNotifications(reason);
-    this.initTestAlarms();
-
-    if (environmentConfig.ENV === 'production') {
-      this.reconnectInterval = setInterval(() => {
-        this.subscribeOnNotifications('reconnect');
-      }, ms('1d'));
-    }
+    // TODO replace this API with the new one
+    // this.subscribeOnNotifications(reason);
+    // this.initTestAlarms();
+    //
+    // if (environmentConfig.ENV === 'production') {
+    //   this.reconnectInterval = setInterval(() => {
+    //     this.subscribeOnNotifications('reconnect');
+    //   }, ms('1d'));
+    // }
   }
 
   /**

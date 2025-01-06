@@ -34,7 +34,7 @@ export const getNsfwMessageFilterComposer = ({ nsfwDetectService }: NsfwMessageF
       )}`,
       {
         parse_mode: 'HTML',
-        message_thread_id: LOGS_CHAT_THREAD_IDS.CHANNEL_MESSAGES, // TODO change to PORN
+        message_thread_id: LOGS_CHAT_THREAD_IDS.PORN_MESSAGES,
       },
     );
   }
