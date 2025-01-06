@@ -4,7 +4,7 @@ import FuzzySet from 'fuzzyset';
 
 import { environmentConfig } from '../config';
 import type { SwindlersBaseResult, SwindlersUrlsResult } from '../types';
-import { DomainAllowList } from '../utils';
+import { DomainAllowList } from '../utils/domain-allow-list';
 
 import { EXCEPTION_DOMAINS, SHORTS } from './constants';
 import type { DynamicStorageService } from './dynamic-storage.service';
@@ -123,7 +123,7 @@ export class SwindlersUrlsService {
                   console.error(error);
                 }
 
-                return error.response?.headers.location || error.response?.config.url || url;
+                return (error.response?.headers['location'] as string) || error.response?.config.url || url;
               } catch (nestedError: unknown) {
                 console.error(nestedError);
                 return url;

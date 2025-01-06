@@ -19,9 +19,8 @@ export const getJoinLeaveComposer = () => {
     // Queries to filter
     .on([':new_chat_members', ':left_chat_member'])
     // Filter if the bot is not left chat member
-    .filter((context) => {
+    .filter((context: GrammyContext) => {
       const leftStatuses = new Set<ChatMember['status']>(['left', 'kicked']);
-
       return !(context.myChatMember && leftStatuses.has(context.myChatMember?.new_chat_member.status || 'left'));
     })
     // Delete message

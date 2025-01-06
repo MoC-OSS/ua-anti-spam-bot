@@ -76,7 +76,7 @@ export class OutgoingRequests<M extends RealApiMethodKeys = RealApiMethodKeys> {
       return null;
     }
 
-    return this.requests[this.requests.length - 1] as Request<A>;
+    return this.requests.at(-1) as Request<A>;
   }
 
   /**

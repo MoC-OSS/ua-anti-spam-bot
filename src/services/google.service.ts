@@ -4,7 +4,8 @@ import { google } from 'googleapis';
 
 import { environmentConfig } from '../config';
 import type { GoogleFullCellData, GoogleShortCellData } from '../types';
-import { coerceArray, handleError } from '../utils';
+import { handleError } from '../utils/error-handler';
+import { coerceArray } from '../utils/generic.util';
 
 const sheets = google.sheets('v4');
 
@@ -42,7 +43,7 @@ export class GoogleService {
    *
    * @returns {Promise<Record<string, any>[] | null>}
    * */
-  async getSheet<T extends boolean | true | false = false>(
+  async getSheet<T extends true | false = false>(
     spreadsheetId: string,
     sheetName: string,
     range?: string,
@@ -57,8 +58,8 @@ export class GoogleService {
       });
 
       const shortRange = valueRange.data.range?.replace(sheetName, '').replace('!', '') || '';
-      const sheetKey = shortRange.split(':')[0].replace(/\d/g, '');
-      const sheetStartFrom = +shortRange.split(':')[0].replace(/\D/g, '');
+      const sheetKey = shortRange.split(':')[0].replaceAll(/\d/g, '');
+      const sheetStartFrom = +shortRange.split(':')[0].replaceAll(/\D/g, '');
 
       const values = valueRange.data.values as string[][] | null | undefined;
 
@@ -87,7 +88,7 @@ export class GoogleService {
       return preparedValues.filter((item) => (isCompact ? !!item : !!(item as GoogleFullCellData).value));
     } catch (error: unknown) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error
       handleError(error, `GOOGLE API ERROR: ${error?.message as string}`);
       return [];
     }

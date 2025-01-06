@@ -2,7 +2,7 @@ import axios from 'axios';
 import escapeHTML from 'escape-html';
 import type { Bot } from 'grammy';
 import { InputFile } from 'grammy';
-import type { GrammyContext, GrammyMiddleware, SwindlerResponseBody, SwindlersResult, SwindlerType } from 'types';
+import type { GrammyContext, GrammyMiddleware, LooseAutocomplete, SwindlerResponseBody, SwindlersResult, SwindlerType } from 'types';
 
 import { environmentConfig } from '../../config';
 import { LOGS_CHAT_THREAD_IDS, SECOND_LOGS_CHAT_THREAD_IDS } from '../../const';
@@ -65,13 +65,13 @@ export class DeleteSwindlersMiddleware {
    * @param {SwindlerType | string} from
    * @param {string} [message]
    * */
-  async saveSwindlersMessage(context: GrammyContext, maxChance: number, from: SwindlerType | string, message?: string) {
+  async saveSwindlersMessage(context: GrammyContext, maxChance: number, from: LooseAutocomplete<SwindlerType>, message?: string) {
     const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
     const text = message || context.state?.text || '';
 
     await context.api.sendMessage(
       logsChat,
-      `${swindlerLogsStartMessage} (${(maxChance * 100).toFixed(2)}%) from <code>${from}</code> by user ${userMention}:\n\n${
+      `${swindlerLogsStartMessage} (${(maxChance * 100).toFixed(2)}%) from <code>${from as string}</code> by user ${userMention}:\n\n${
         chatMention || userMention
       }\n${escapeHTML(text)}`,
       {
@@ -82,7 +82,7 @@ export class DeleteSwindlersMiddleware {
 
     return context.api.sendMessage(
       secondLogsChat,
-      `${swindlerLogsStartMessage} (${(maxChance * 100).toFixed(2)}%) from <code>${from}</code> by user ${userMention}:\n\n${
+      `${swindlerLogsStartMessage} (${(maxChance * 100).toFixed(2)}%) from <code>${from as string}</code> by user ${userMention}:\n\n${
         chatMention || userMention
       }\n${escapeHTML(text)}`,
       {

@@ -30,6 +30,7 @@ export const apiRouter = (bot: Bot<GrammyContext>) => {
   botRoute.get(
     '/chats/:id',
     asyncHandler(async (request: Request, response: Response) => {
+      response.setHeader('Cache-Control', 'no-store');
       const { id } = request.params;
       const defaultSettings: Required<ChatSettings> = {
         disableChatWhileAirRaidAlert: false,
@@ -49,6 +50,8 @@ export const apiRouter = (bot: Bot<GrammyContext>) => {
         enableWarnRussian: false,
         enableDeleteObscene: false,
         enableWarnObscene: false,
+        enableAdminCheck: false,
+        enableDeleteChannelMessages: false,
         airRaidAlertSettings: {
           pageNumber: 0,
           state: '',
@@ -68,7 +71,7 @@ export const apiRouter = (bot: Bot<GrammyContext>) => {
       const data: Required<ChatData> = {
         chat: {
           id: chatInfo.id.toString(),
-          name: title,
+          name: title || '$NO_TITLE',
           photo: avatar,
           users: chatMembers,
           airAlarm: isAirAlarmNow,

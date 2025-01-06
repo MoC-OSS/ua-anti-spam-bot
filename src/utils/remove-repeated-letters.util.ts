@@ -5,5 +5,5 @@
  * @returns {string} A new string with repeated consecutive letters removed.
  */
 export function removeRepeatedLettersUtil(message: string): string {
-  return message.replace(/(.)\1+/g, '$1');
+  return message.replaceAll(/(.)\1+/g, '$1');
 }

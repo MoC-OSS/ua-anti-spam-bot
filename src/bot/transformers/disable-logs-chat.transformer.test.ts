@@ -2,7 +2,7 @@ import { Bot } from 'grammy';
 
 import { logsChat } from '../../creator';
 import type { OutgoingRequests } from '../../testing';
-import { MessageSuperGroupMockUpdate, prepareBotForTesting } from '../../testing';
+import { MessageMockUpdate, prepareBotForTesting } from '../../testing';
 import type { GrammyContext } from '../../types';
 
 import { disableLogsChatTransformer } from './disable-logs-chat.transformer';
@@ -33,7 +33,7 @@ describe('disableLogsChatTransformer', () => {
     });
 
     it('should not send request if it has been sent into logs chat', async () => {
-      const updateConstructor = new MessageSuperGroupMockUpdate('test');
+      const updateConstructor = new MessageMockUpdate('test');
       const update = updateConstructor.buildOverwrite({
         message: {
           chat: { ...updateConstructor.genericSuperGroup, id: logsChat },
@@ -52,7 +52,7 @@ describe('disableLogsChatTransformer', () => {
     });
 
     it('should not send request if it has been sent into logs chat', async () => {
-      const updateConstructor = new MessageSuperGroupMockUpdate('test');
+      const updateConstructor = new MessageMockUpdate('test');
       const update = updateConstructor.buildOverwrite({
         message: {
           chat: { ...updateConstructor.genericSuperGroup, id: logsChat },

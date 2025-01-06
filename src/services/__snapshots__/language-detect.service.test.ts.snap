@@ -40,11 +40,11 @@ exports[`LanguageDetectService isRussian should except ukrainian for all message
 [
   [
     {
-      "accuracy": 0.18803,
+      "accuracy": 0.18797999999999998,
       "lang": "ru",
     },
     {
-      "accuracy": 0.18225,
+      "accuracy": 0.18236,
       "lang": "uk",
     },
   ],
@@ -54,7 +54,7 @@ exports[`LanguageDetectService isRussian should except ukrainian for all message
       "lang": "ru",
     },
     {
-      "accuracy": 0.1099875,
+      "accuracy": 0.110275,
       "lang": "uk",
     },
   ],
@@ -88,7 +88,7 @@ exports[`LanguageDetectService isRussian should except ukrainian for all message
       "lang": "uk",
     },
     {
-      "accuracy": 0.1052625,
+      "accuracy": 0.1049,
       "lang": "ru",
     },
   ],

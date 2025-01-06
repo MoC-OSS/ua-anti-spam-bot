@@ -24,7 +24,7 @@ const getChatId = (sessionId: string) => sessionId.split(':')[0];
  * @param {Bot} bot
  * @param {Date} botStartDate
  * */
-export default async (bot: Bot<GrammyContext>, botStartDate: Date) => {
+const migration = async (bot: Bot<GrammyContext>, botStartDate: Date) => {
   const compareDate = `${botStartDate.getFullYear()}-${botStartDate.getMonth() + 1}-${botStartDate.getDate()}`;
 
   if (compareDate !== '2022-4-10') {
@@ -151,3 +151,5 @@ export default async (bot: Bot<GrammyContext>, botStartDate: Date) => {
 
   return true;
 };
+
+export default migration;

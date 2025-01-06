@@ -2,8 +2,8 @@ import { InputFile } from 'grammy';
 
 function processCsvValue(value: string) {
   return `"${value
-    .replace(/[^\da-z\u0400-\u04FF]/gi, ' ')
-    .replace(/\s\s+/g, ' ')
+    .replaceAll(/[^\da-z\u0400-\u04FF]/gi, ' ')
+    .replaceAll(/\s\s+/g, ' ')
     .trim()}"`;
 }
 

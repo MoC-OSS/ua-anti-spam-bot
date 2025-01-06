@@ -161,6 +161,7 @@ export const startMessageAtom = `
 - 💳 Блокування коментарів зі зборами грошей на банківські картки.
 - ↩️ Блокування пересланих повідомлень чи коментарів зі згадуваннями @.
 - 🔗 Блокування коментарів, якщо в них є будь-які посилання.
+- 💬 Блокування коментарів, якщо вони надіслані від імені телеграм каналу.
 - 📍 Не розголошуємо локації. Блокуємо коментарі з будь-якими локаціями.
 - ☢️ Попередження про використання російської мови як мови окупанта в коментарі користувача разом із мотивацією перейти на українську.
 - 🪆 Блокування коментарів, написаних російською мовою як мовою окупанта, разом із мотивацією переходити на українську мову.
@@ -225,7 +226,7 @@ export const getDeleteNsfwMessage = ({ writeUsername, userId }: DeleteMessageAto
   `
 ${getDeleteUserAtomMessage({ writeUsername, userId })}
 
-🔞 Зображення з <b>відвертим характером</b> та <b>дорослим контентом (18+)</b> заборонені.
+🔞 Зображення або текст з <b>відвертим характером</b> та <b>дорослим контентом (18+)</b> заборонені.
 `.trim();
 
 export const getDeleteCounteroffensiveMessage = ({ writeUsername, userId }: DeleteMessageAtomProperties) => `
@@ -363,6 +364,9 @@ export const getFeaturesStatisticsMessage = ({ features, chatsCount }: FeaturesS
     features.enableDeleteMentions / chatsCount,
   )}%)</b>
 ↩️ Бот видаляє повідомлення з пересиланнями: <b>${features.enableDeleteForwards} (${getPercentage(
+    features.enableDeleteForwards / chatsCount,
+  )}%)</b>
+💬 Бот видаляє повідомлення від інших телеграм каналів: <b>${features.enableDeleteChannelMessages} (${getPercentage(
     features.enableDeleteForwards / chatsCount,
   )}%)</b>
 🏃 Бот видаляє повідомлення з контрнаступом: <b>${features.enableDeleteCounteroffensive} (${getPercentage(
@@ -595,7 +599,7 @@ ${getDeleteUserAtomMessage({ writeUsername, userId })}
 ${getWarnRussianMessage(message)}
 `;
 
-export const getUkrainianMessageExtra = (percent) => (percent === 200 ? '\nВ українській мові немає букв ъ, ы, э, та ё 🇺🇦' : '');
+export const getUkrainianMessageExtra = (percent: number) => (percent === 200 ? '\nВ українській мові немає букв ъ, ы, э, та ё 🇺🇦' : '');
 
 /**
  * Logs
@@ -613,6 +617,7 @@ export const counteroffensiveLogsStartMessage = 'Deleted counteroffensive messag
 export const obsceneDeleteLogsStartMessage = 'Delete obscene message';
 export const obsceneWarnLogsStartMessage = 'Warn obscene message';
 export const antisemitismDeleteLogsStartMessage = 'Delete antisemitism message';
+export const channelMessageLogsStartMessage = 'Deleted message from channel';
 
 export const logsStartMessages = new Set([
   swindlerLogsStartMessage,
@@ -628,4 +633,5 @@ export const logsStartMessages = new Set([
   obsceneDeleteLogsStartMessage,
   obsceneWarnLogsStartMessage,
   antisemitismDeleteLogsStartMessage,
+  channelMessageLogsStartMessage,
 ]);

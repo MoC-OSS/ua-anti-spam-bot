@@ -9,18 +9,18 @@ export const mockNewBot = '@Diia_move_bot';
 export const mockNewUrl = 'https://olx.new-darpay.site/some/234234234';
 
 export const getSheet = jest.fn(
-  <T extends boolean | true | false = false>(
+  <T extends true | false = false>(
     spreadsheetId: string,
     sheetName: string,
     range?: string,
     compact?: T,
   ): Promise<T extends true ? GoogleShortCellData[] : GoogleFullCellData[]> => {
     if (compact) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return Promise.resolve([mockNewBot]) as any;
+      return Promise.resolve([mockNewBot] as T extends true ? GoogleShortCellData[] : never);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     return Promise.resolve([
       {
         value: mockNewBot,
@@ -28,7 +28,7 @@ export const getSheet = jest.fn(
         sheetKey: 'mock_key',
         fullPath: `mock_path`,
       },
-    ] as GoogleFullCellData[]) as any;
+    ] as T extends false ? GoogleFullCellData[] : never[]);
   },
 );
 
@@ -95,6 +95,9 @@ export const mockDataset = {
   swindlers_domains: ['olx-ua.darpays.site', 'olx-ua.europe-pays.site', 'olx-ua.glob-payments.site', 'olx-ua.lightpays.online'],
   swindlers_regex_sites: ['privat24.', 'orpay', 'da-pay', '-pay'],
   counteroffensiveTriggers: ['контрнаступ', /контр.{0,2}наступ/],
+  nsfwMessages: ['Радую голой фоточкой всех вступивших в группу', 'Покажу свои прелести'],
 } as LocalDataset;
 
-export const mockDynamicStorageService = new DynamicStorageService(mockSwindlersGoogleService, mockGoogleService, mockDataset);
+export const getMockDynamicStorageService = () => new DynamicStorageService(mockSwindlersGoogleService, mockGoogleService, mockDataset);
+
+export const mockDynamicStorageService = getMockDynamicStorageService();

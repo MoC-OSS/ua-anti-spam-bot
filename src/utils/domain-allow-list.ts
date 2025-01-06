@@ -70,9 +70,9 @@ export class DomainAllowList {
   createRegexFromPattern(pattern: string) {
     // Escape special characters in the pattern and replace '*' with '.*'
     const escapedPattern = pattern
-      .replace(/[$()*+.?[\\\]^{|}]/g, '\\$&')
-      .replace(/\*/g, '.*')
-      .replace(/\\.\*/g, '.*');
+      .replaceAll(/[$()*+.?[\\\]^{|}]/g, '\\$&')
+      .replaceAll('*', '.*')
+      .replaceAll(/\\.\*/g, '.*');
 
     // Create a regular expression with the pattern
     return new RegExp(`^${escapedPattern}$`, 'i');

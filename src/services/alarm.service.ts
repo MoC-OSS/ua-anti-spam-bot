@@ -1,11 +1,10 @@
 import { EventEmitter } from 'node:events';
-import axios from 'axios';
 import EventSource from 'eventsource';
 import ms from 'ms';
 import type TypedEmitter from 'typed-emitter';
-import type { AlarmNotification, AlarmStates } from 'types/alarm';
 
 import { environmentConfig } from '../config';
+import type { AlarmNotification, AlarmStates } from '../types/alarm';
 
 import { getAlarmMock } from './_mocks';
 
@@ -17,13 +16,21 @@ export const ALARM_CLOSE_KEY = 'close';
 export const ALARM_EVENT_KEY = 'update';
 export const TEST_ALARM_STATE = 'Московська область';
 
-export type UpdatesEvents = {
+export interface UpdatesEvents {
   connect: (reason: string) => void;
   close: (reason: string) => void;
   update: (body: AlarmNotification) => void;
-};
+}
 
+/**
+ * @description Service for handling Alarm API
+ * @deprecated
+ * */
 export class AlarmService {
+  // TODO replace with event target
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-expect-error
+  // eslint-disable-next-line unicorn/prefer-event-target
   updatesEmitter = new EventEmitter() as TypedEmitter<UpdatesEvents>;
 
   source?: EventSource;
@@ -33,16 +40,24 @@ export class AlarmService {
   testAlarmInterval?: NodeJS.Timer;
 
   getStates(): Promise<AlarmStates> {
-    return axios
-      .get<AlarmStates>(apiUrl, apiOptions)
-      .then((response) => response.data)
-      .catch((error: Record<any, any>) => {
-        console.info(`Alarm API is not responding:  ${JSON.stringify(error)}`);
-        return {
-          states: [],
-          last_update: new Date().toISOString(),
-        };
-      });
+    // TODO replace this API with the new one
+    return Promise.resolve({
+      states: [],
+      last_update: new Date().toISOString(),
+    });
+    // return (
+    //   axios
+    //     .get<AlarmStates>(apiUrl, apiOptions)
+    //     .then((response) => response.data)
+    //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    //     .catch((error: Record<any, any>) => {
+    //       console.info(`Alarm API is not responding:  ${JSON.stringify(error)}`);
+    //       return {
+    //         states: [],
+    //         last_update: new Date().toISOString(),
+    //       };
+    //     })
+    // );
   }
 
   /**
@@ -57,15 +72,17 @@ export class AlarmService {
   /**
    * Starts the connection
    * */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   enable(reason: string) {
-    this.subscribeOnNotifications(reason);
-    this.initTestAlarms();
-
-    if (environmentConfig.ENV === 'production') {
-      this.reconnectInterval = setInterval(() => {
-        this.subscribeOnNotifications('reconnect');
-      }, ms('1d'));
-    }
+    // TODO replace this API with the new one
+    // this.subscribeOnNotifications(reason);
+    // this.initTestAlarms();
+    //
+    // if (environmentConfig.ENV === 'production') {
+    //   this.reconnectInterval = setInterval(() => {
+    //     this.subscribeOnNotifications('reconnect');
+    //   }, ms('1d'));
+    // }
   }
 
   /**
@@ -78,11 +95,11 @@ export class AlarmService {
     }
 
     if (this.reconnectInterval) {
-      clearInterval(this.reconnectInterval);
+      // clearInterval(this.reconnectInterval);
     }
 
     if (this.testAlarmInterval) {
-      clearInterval(this.testAlarmInterval);
+      // clearInterval(this.testAlarmInterval);
     }
   }
 
@@ -90,11 +107,14 @@ export class AlarmService {
    * Creates SSE subscription to Alarm API events
    * */
   subscribeOnNotifications(reason: string) {
+    if (environmentConfig.DISABLE_ALARM_API) {
+      return;
+    }
+
     this.disable(reason);
-
     let isConnected = false;
-
     this.source = new EventSource(`${apiUrl}/live`, apiOptions);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.source.addEventListener('error', (event: MessageEvent & Record<string, any>) => {
       console.info(`Subscribe to Alarm API fail:  ${event.message as string}`);
     });

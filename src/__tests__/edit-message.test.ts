@@ -66,7 +66,7 @@ describe('edit message test', () => {
   it('should remove the message if it has been edited', async () => {
     const updateSendMessage = new MessagePrivateMockUpdate('not a card').build();
     const updateEditMessage = new MessagePrivateMockUpdate('').buildOverwrite({
-      edited_message: { ...updateSendMessage.message, text: '4111 1111 1111 1111' },
+      edited_message: { ...updateSendMessage.message, text: '4111 1111 1111 1111', edit_date: Date.now() },
     });
 
     await bot.handleUpdate(updateSendMessage);

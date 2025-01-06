@@ -2,7 +2,7 @@ import { hydrateReply } from '@grammyjs/parse-mode';
 import { Bot } from 'grammy';
 
 import type { OutgoingRequests } from '../../../../testing';
-import { MessageSuperGroupMockUpdate, prepareBotForTesting } from '../../../../testing';
+import { MessageMockUpdate, prepareBotForTesting } from '../../../../testing';
 import { mockChatSession } from '../../../../testing-main';
 import type { GrammyContext } from '../../../../types';
 import { parseText, stateMiddleware } from '../../../middleware';
@@ -48,7 +48,7 @@ describe('noAntisemitismComposer', () => {
     });
 
     it('should delete if antisemitism is used', async () => {
-      const update = new MessageSuperGroupMockUpdate('этих евреев нужно сжигать. по другому никак').build();
+      const update = new MessageMockUpdate('этих евреев нужно сжигать. по другому никак').build();
       await bot.handleUpdate(update);
 
       const expectedMethods = outgoingRequests.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']);
@@ -60,7 +60,7 @@ describe('noAntisemitismComposer', () => {
 
     it('should delete if antisemitism is used and do not notify if disableDeleteMessage is true', async () => {
       chatSession.chatSettings.disableDeleteMessage = true;
-      const update = new MessageSuperGroupMockUpdate('Нос жидовский, как у меня').build();
+      const update = new MessageMockUpdate('Нос жидовский, как у меня').build();
       await bot.handleUpdate(update);
 
       const expectedMethods = outgoingRequests.buildMethods(['deleteMessage', 'getChat', 'sendMessage']);
@@ -71,7 +71,7 @@ describe('noAntisemitismComposer', () => {
     });
 
     it('should not delete if not antisemitism', async () => {
-      const update = new MessageSuperGroupMockUpdate('Миру мир, а евреям деньги').build();
+      const update = new MessageMockUpdate('Миру мир, а евреям деньги').build();
       await bot.handleUpdate(update);
 
       expect(outgoingRequests.length).toEqual(0);
@@ -88,14 +88,14 @@ describe('noAntisemitismComposer', () => {
     });
 
     it('should not delete if antisemitism is used', async () => {
-      const update = new MessageSuperGroupMockUpdate('Нос жидовский, как у меня').build();
+      const update = new MessageMockUpdate('Нос жидовский, как у меня').build();
       await bot.handleUpdate(update);
 
       expect(outgoingRequests.length).toEqual(0);
     });
 
     it('should not delete if not antisemitism is used', async () => {
-      const update = new MessageSuperGroupMockUpdate('Миру мир, а евреям деньги').build();
+      const update = new MessageMockUpdate('Миру мир, а евреям деньги').build();
       await bot.handleUpdate(update);
 
       expect(outgoingRequests.length).toEqual(0);

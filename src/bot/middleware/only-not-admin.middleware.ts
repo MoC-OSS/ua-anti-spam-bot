@@ -11,11 +11,10 @@ import { onlyNotAdminFilter } from '../filters';
  * @see https://github.com/backmeupplz/grammy-middlewares/blob/main/src/middlewares/onlyAdmin.ts
  * */
 export async function onlyNotAdmin(context: GrammyContext, next: NextFunction) {
-  const isNotAdmin = await onlyNotAdminFilter(context);
-
-  if (isNotAdmin) {
+  const isNotAdmin = onlyNotAdminFilter(context);
+  const isAdminCheckEnabled = context.chatSession.chatSettings.enableAdminCheck;
+  if (isNotAdmin || isAdminCheckEnabled) {
     return next();
   }
-
   logSkipMiddleware(context, 'message is older than bot admin');
 }

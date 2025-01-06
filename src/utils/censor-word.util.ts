@@ -12,5 +12,5 @@ export function censorWord(word: string): string {
     return word.charAt(0) + '*'.repeat(word.length - 1);
   }
 
-  return word.charAt(0) + '*'.repeat(word.length - 2) + word.charAt(word.length - 1);
+  return word.charAt(0) + '*'.repeat(word.length - 2) + word.at(-1);
 }

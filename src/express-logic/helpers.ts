@@ -48,7 +48,7 @@ export const updateChatsList = async (linkedChats: LinkedChat[], bot: Bot<Grammy
 
       if (title !== chat.name) {
         const updatedChats = [...linkedChats];
-        const updatedChat = { ...updatedChats[index], name: title };
+        const updatedChat = { ...updatedChats[index], name: title || '$NO_TITLE' };
         updatedChats.splice(index, 1, updatedChat);
         const userSession = await redisService.getUserSession(userId);
         const chatsWitUpdates = { ...userSession, linkedChats: updatedChats } as Session;
@@ -57,7 +57,7 @@ export const updateChatsList = async (linkedChats: LinkedChat[], bot: Bot<Grammy
 
       const formattedChat: Required<Omit<ChatDetails, 'airAlarm'>> = {
         id: info.id.toString(),
-        name: title,
+        name: title || '$NO_TITLE',
         photo: avatar,
         users: members,
         isAdministrator: isAdmin,

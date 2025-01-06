@@ -1,7 +1,11 @@
+import type { Message } from '@grammyjs/types';
 import type { Chat, ChatMemberAdministrator, ChatMemberOwner, User } from '@grammyjs/types/manage';
 import deepmerge from 'deepmerge';
 import type { Update } from 'grammy/out/types';
 import type { MergeDeep } from 'type-fest';
+import type { ChatMemberMember } from 'typegram';
+
+import { getTypedValue } from '../../utils';
 
 export type PartialUpdate<U extends Update = Update> = Partial<{
   [key in keyof U]: Partial<U[key]>;
@@ -20,6 +24,18 @@ export abstract class GenericMockUpdate {
     type: 'supergroup',
     id: 202_212,
     title: 'GrammyMock',
+  };
+
+  readonly genericChannelChat: Chat.ChannelChat = {
+    type: 'channel',
+    id: 202_212,
+    title: 'GrammyMockChannel',
+  };
+
+  readonly genericGroupChat: Chat.GroupChat = {
+    type: 'group',
+    id: 303_303,
+    title: 'GrammyMockGroup',
   };
 
   readonly genericUserBot = this.getValidUser({
@@ -86,12 +102,66 @@ export abstract class GenericMockUpdate {
     can_manage_video_chats: true,
     can_promote_members: true,
     can_restrict_members: true,
+    can_post_stories: true,
+    can_edit_stories: true,
+    can_delete_stories: true,
   };
+
+  readonly genericUserMember: ChatMemberMember = {
+    status: 'member',
+    user: this.genericUser,
+  };
+
+  readonly genericMessagePartial = getTypedValue<Update['message']>()({
+    message_id: 12_345, // Example message_id generation
+    date: Math.floor(Date.now() / 1000), // Current date in Unix timestamp
+    chat: this.genericGroupChat,
+    from: this.genericUser,
+  });
+
+  // todo setUserType method, now telegram doesn't have interface for User type in message
+  // setUserType(userType: ChatMember['status']) {
+  //   const members: Partial<Record<ChatMember['status'], ChatMember>> = {
+  //     creator: this.genericOwner,
+  //     administrator: this.genericAdmin,
+  //     member: this.genericUserMember,
+  //   };
+  //   const currenMember = members[userType];
+  //   if (currenMember) {
+  //     // const userStruct = this.deepMerge({ message: this.genericMessagePartial }, { message: { from: { user: currenMember } } });
+  //     this.minimalUpdate = this.deepMerge(
+  //       this.minimalUpdate,
+  //       GenericMockUpdate.getValidUpdate({message:{fro}),
+  //     );
+  //   }
+  //   GenericMockUpdate.getValidUpdate({ message: { from: { user: currenMember } } }),
+  //   if (userType === 'owner') {
+  //     userUpdate = { message: { from: this.genericOwner } };
+  //   } else if (userType === 'admin') {
+  //     userUpdate = { message: { from: this.genericAdmin } };
+  //   }
+  //   this.minimalUpdate = this.deepMerge(this.minimalUpdate, GenericMockUpdate.getValidUpdate(userUpdate));
+  //   return this; // Return this for chaining
+  // }
+  setChatType(chatType: Chat['type']) {
+    const chatUpdates: Partial<Record<Chat['type'], Exclude<Message['chat'], Chat.ChannelChat>>> = {
+      private: this.genericPrivateChat,
+      group: this.genericGroupChat,
+      // channel: this.genericChannelChat,
+    };
+    const chatUpdate = chatUpdates[chatType];
+    if (chatUpdate) {
+      const messageStruct = this.deepMerge({ message: this.genericMessagePartial }, { message: { chat: chatUpdate } });
+      this.minimalUpdate = this.deepMerge(this.minimalUpdate, GenericMockUpdate.getValidUpdate(messageStruct));
+    }
+
+    return this; // Return this for chaining
+  }
 
   /**
    * Minimal update for the update entity
    * */
-  abstract readonly minimalUpdate;
+  abstract minimalUpdate: Partial<Update>;
 
   /**
    * @param update - update to type
@@ -119,10 +189,10 @@ export abstract class GenericMockUpdate {
    * }
    * ```
    * */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   abstract build(...parameters: any[]);
 
   /**
-   * @param extra - addition to add
    * @returns update with extra update information to override
    *
    * @example
@@ -131,13 +201,15 @@ export abstract class GenericMockUpdate {
    *   return deepmerge(this.update, extra) as MergeDeep<typeof this.update, E>;
    * }
    * ```
+   * @param parameters
    * */
   // abstract buildOverwrite<E extends PartialUpdate>(extra: E);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   abstract buildOverwrite(...parameters: any[]);
 
   deepMerge<A, B>(a: A, b: B): MergeDeep<A, B> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-explicit-any
     return deepmerge(a as any, b as any);
   }
 }

@@ -5,6 +5,7 @@ import type { API } from './api';
 export type Peer =
   | {
       _: 'inputPeerChannel';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       [key: string]: any;
     }
   | {
@@ -83,7 +84,7 @@ export class MtProtoClient {
    * @param {string} message
    * @param {Record<string, any>} peer
    * */
-  sendPeerMessage(message: string, peer: Record<string, any>) {
+  sendPeerMessage(message: string, peer: Record<string, string>) {
     return this.api.call('messages.sendMessage', {
       message,
       random_id: Math.ceil(Math.random() * 0xff_ff_ff) + Math.ceil(Math.random() * 0xff_ff_ff),

@@ -15,7 +15,7 @@ import type { ChatPeers } from './index';
 import type { MtProtoClient } from './mt-proto-client';
 import type { UserbotStorage } from './storage.handler';
 
-const sentMentionsFromStart: any[] = [];
+const sentMentionsFromStart: string[] = [];
 
 const SWINDLER_SETTINGS = {
   DELETE_CHANCE: 0.8,
@@ -60,7 +60,7 @@ export class UpdatesHandler {
    * @param {ProtoUpdate} updateInfo
    * @param {(string: string) => any} callback
    * */
-  filterUpdate(updateInfo: ProtoUpdate, callback: (string: string) => any) {
+  filterUpdate(updateInfo: ProtoUpdate, callback: (string: string) => void) {
     const allowedTypes = new Set(['updateEditChannelMessage', 'updateNewChannelMessage']);
 
     const newMessageUpdates = updateInfo.updates.filter((anUpdate) => allowedTypes.has(anUpdate._) && anUpdate.message?.message);
@@ -181,7 +181,7 @@ export class UpdatesHandler {
         clearMessageText = clearMessageText.replace(deleteWord, ' ');
       });
 
-      clearMessageText = clearMessageText.replace(/  +/g, ' ').split(' ').slice(0, 15).join(' ');
+      clearMessageText = clearMessageText.replaceAll(/  +/g, ' ').split(' ').slice(0, 15).join(' ');
 
       const { isSpam, spamRate } = await this.tensorService.predict(clearMessageText, 0.7);
       console.info(isSpam, spamRate, message);

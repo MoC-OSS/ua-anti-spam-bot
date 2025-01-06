@@ -16,7 +16,7 @@ The framework comes with comprehensive documentation available at https://grammy
 
 - [Before you start](#before-you-start)
   - [1. Files](#1-files)
-  - [2. Github Access](#2-github-access)
+  - [2. GitHub Access](#2-github-access)
 - [Installation](#installation)
   - [1. Cloning](#1-cloning)
   - [2. Installing `Node.js`](#2-installing-nodejs)
@@ -33,8 +33,12 @@ The framework comes with comprehensive documentation available at https://grammy
   - [9. Set Google Credits (confidential)](#9-set-google-credits-confidential)
   - [10. Set Alarm Credits (confidential)](#10-set-alarm-credits-confidential)
   - [11. Copy tensor files](#11-copy-tensor-files)
+- [For external users](#for-external-users)
+  - [1. Disable Google API](#1-disable-google-API)
+  - [2. Disable Alarm API](#2-disable-alarm-API)
 - [Running your bot](#running-your-bot)
   - [Enable bot in `Telegram`](#enable-bot-in-telegram)
+  - [Docker](#docker)
 - [Code Style](#code-style)
   - [Branch names](#branch-names)
   - [Commit names](#commit-names)
@@ -159,6 +163,32 @@ ALARM_KEY=
 
 Extract and copy `ua-anti-spam-bot-ml-v3.zip` to `src/tensor/temp`.
 
+
+## For external users
+
+If you are an external user, you need to set the following parameters for the following fields in `.env`
+
+### 1. Disable Google API
+
+If you don't have `GOOGLE_CREDITS` and `GOOGLE_SPREADSHEET_ID`, you need to specify the value like this:
+
+```bash
+DISABLE_GOOGLE_API=true
+```
+
+### 2. Disable Alarm API
+
+If you don't have `ALARM_KEY`, you need to specify the value like this:
+
+```bash
+DISABLE_ALARM_API=true
+
+If you're outside the MOC organization, use the copy-swindlers.sh script to copy models from `./src/tensor/swindlers-temp` into the `./src/tensor/temp` destination:
+
+```bash
+./copy-swindlers.sh
+```
+
 ## Running your bot
 
 To start your bot, simply run the following command:
@@ -172,6 +202,14 @@ npm run start:bot
 After it, navigate to your bot and call `/start` command. If you receive the answer, your bot is working.
 
 Then, try to call `/enable` command. If you receive the answer, your bot is set correctly and ready to be used.
+
+### Docker
+If you want to run the bot via Docker, make sure that you have [Docker](https://docs.docker.com/engine/install) and [Docker Compose](https://docs.docker.com/compose/install) installed.
+Then, run the following command to start the bot in Docker:
+
+```bash
+docker-compose up --build
+```
 
 ## Code Style
 

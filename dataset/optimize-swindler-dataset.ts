@@ -11,7 +11,7 @@ const urlRegexp =
 
 const processPromise = (response: string[]) =>
   response.map((item) => ({
-    value: item.replace(urlRegexp, ' ').replace(mentionRegexp, ' '),
+    value: item.replaceAll(urlRegexp, ' ').replaceAll(mentionRegexp, ' '),
     label: item,
   }));
 
@@ -57,12 +57,12 @@ const processPromise = (response: string[]) =>
   const newTrainData = uniqueTrainSwindlers
     .filter((item) => item[0].unique)
     .map((item) => item[0].first.label)
-    .filter((item) => item.replace(urlRegexp, '').replace(mentionRegexp, '').trim());
+    .filter((item) => item.replaceAll(urlRegexp, '').replaceAll(mentionRegexp, '').trim());
 
   const newTestData = removeDuplicates([
     ...testData.map((item) => item.label),
     ...uniqueTrainSwindlers.filter((item) => !item[0].unique).map((item) => item[0].first.label),
-  ]).filter((item) => item.replace(urlRegexp, '').replace(mentionRegexp, '').trim());
+  ]).filter((item) => item.replaceAll(urlRegexp, '').replaceAll(mentionRegexp, '').trim());
 
   await methods.clearTrainData();
   await methods.updateTrainData(newTrainData);

@@ -3,6 +3,7 @@ export * from './context';
 export * from './dataset';
 export * from './environment';
 export * from './express';
+export * from './generic';
 export * from './google';
 export * from './image';
 export * from './language-detection';

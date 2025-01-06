@@ -6,7 +6,7 @@ const translitRus = CyrillicToTranslit({ preset: 'ru' });
 const translitUa = CyrillicToTranslit({ preset: 'uk' });
 
 export function translitReplace(text: string): string {
-  return text.replace(/ї/g, 'i').replace(/є/g, 'e').replace(/ґ/g, 'g');
+  return text.replaceAll('ї', 'i').replaceAll('є', 'e').replaceAll('ґ', 'g');
 }
 
 export function processMessage(dataset: string[]): string[] {

@@ -4,7 +4,7 @@ import type { Animation, MessageEntity, PhotoSize, Sticker, Video, VideoNote } f
 import type { ImageType } from './image';
 import type { LanguageDetectionResult } from './language-detection';
 import type { NsfwTensorResult } from './nsfw';
-import type { SwindlerTensorResult } from './swindlers';
+import type { SwindlersBotsResult, SwindlerTensorResult } from './swindlers';
 
 export interface StateFlavor<S> {
   /**
@@ -115,7 +115,17 @@ interface OnlyWithTextMiddlewareState {
 }
 
 interface PerformanceMiddlewareState {
-  performanceStart?: DOMHighResTimeStamp;
+  performanceStart?: number;
+}
+
+export interface NsfwPhotoResult {
+  tensor: NsfwTensorResult;
+  reason: 'preview' | 'frame';
+}
+
+export interface NsfwMessageResult {
+  result: SwindlersBotsResult;
+  reason: 'message';
 }
 
 /**
@@ -124,19 +134,20 @@ interface PerformanceMiddlewareState {
 interface IsDeletedState {
   isDeleted?: boolean;
 }
+interface StateIsAdmin {
+  isUserAdmin?: boolean;
+}
 
 export type State = OnlyWithTextMiddlewareState &
   IsDeletedState &
-  PerformanceMiddlewareState & {
+  PerformanceMiddlewareState &
+  StateIsAdmin & {
     // TODO move into separate file src/types/swindlers.ts and add enum for reason
     swindlersResult?: {
       isSpam: boolean;
       rate: number;
       reason: string;
     };
-    nsfwResult?: {
-      tensor: NsfwTensorResult;
-      reason: 'preview' | 'frame';
-    };
+    nsfwResult?: NsfwPhotoResult | NsfwMessageResult;
     dataset?: SwindlerTensorResult;
   };

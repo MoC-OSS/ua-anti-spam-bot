@@ -99,7 +99,7 @@ export function joinUkrainianConjunctions(array: string[]): string {
     return array.join(', ');
   }
 
-  const lastItem = array[array.length - 1];
+  const lastItem = array.at(-1);
   const joinSlice = array.slice(0, -1);
 
   const resultSlice = joinSlice.join(', ');
@@ -119,6 +119,7 @@ export function getEnabledFeaturesString(chatSettings: ChatSettings): string {
   featureNameMap.set('enableDeleteLocations', '📍 локаціями');
   featureNameMap.set('enableDeleteForwards', '↩️ пересиланнями');
   featureNameMap.set('enableDeleteCards', '💳 картками');
+  featureNameMap.set('enableDeleteChannelMessages', '💬 від каналів');
 
   const settingsKeys = Object.keys(chatSettings) as (keyof ChatSettings)[];
 
