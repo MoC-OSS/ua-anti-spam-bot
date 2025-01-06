@@ -4,7 +4,8 @@ import { google } from 'googleapis';
 
 import { environmentConfig } from '../config';
 import type { GoogleFullCellData, GoogleShortCellData } from '../types';
-import { coerceArray, handleError } from '../utils';
+import { handleError } from '../utils/error-handler';
+import { coerceArray } from '../utils/generic.util';
 
 const sheets = google.sheets('v4');
 
@@ -86,8 +87,6 @@ export class GoogleService {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return preparedValues.filter((item) => (isCompact ? !!item : !!(item as GoogleFullCellData).value));
     } catch (error: unknown) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       handleError(error, `GOOGLE API ERROR: ${error?.message as string}`);
       return [];
     }
