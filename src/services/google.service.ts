@@ -87,6 +87,8 @@ export class GoogleService {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return preparedValues.filter((item) => (isCompact ? !!item : !!(item as GoogleFullCellData).value));
     } catch (error: unknown) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-expect-error
       handleError(error, `GOOGLE API ERROR: ${error?.message as string}`);
       return [];
     }
