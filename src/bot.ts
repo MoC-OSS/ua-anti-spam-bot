@@ -31,6 +31,7 @@ import {
   getNoForwardsComposer,
   getNoLocationsComposer,
   getNoMentionsComposer,
+  getNoObsceneComposer,
   getNoRussianComposer,
   getNoUrlsComposer,
   getNsfwFilterComposer,
@@ -40,7 +41,7 @@ import {
   getWarnRussianComposer,
 } from './bot/composers/messages';
 import { getNoAntisemitismComposer } from './bot/composers/messages/no-antisemitism.composer';
-import { getNoObsceneComposer } from './bot/composers/messages/no-obscene.composer';
+import { getNsfwMessageFilterComposer } from './bot/composers/messages/nsfw-message-filter.composer';
 import { getSwindlersStatisticCommandsComposer } from './bot/composers/swindlers-statististics.composer';
 import { isNotChannel, onlyCreatorChatFilter } from './bot/filters';
 import { OnTextListener, TestTensorListener } from './bot/listeners';
@@ -57,8 +58,9 @@ import { chainFilters, selfDestructedReply } from './bot/plugins';
 import { autoCommentReply } from './bot/plugins/auto-comment-reply.plugin';
 import { RedisChatSession, RedisSession } from './bot/sessionProviders';
 import { deleteMessageTransformer, disableLogsChatTransformer } from './bot/transformers';
+import { NsfwDetectService } from './services/nsfw-detect.service';
 import { environmentConfig } from './config';
-import { logsChat, swindlerBotsChatId, swindlerHelpChatId, swindlerMessageChatId } from './creator';
+import { swindlerBotsChatId, swindlerHelpChatId, swindlerMessageChatId } from './creator';
 import { redisClient } from './db';
 import {
   alarmChatService,
@@ -71,7 +73,7 @@ import {
 } from './services';
 import { initNsfwTensor, initTensor } from './tensor';
 import type { GrammyContext, GrammyMenuContext } from './types';
-import { emptyFunction, globalErrorHandler, videoUtil, wrapperErrorHandler } from './utils';
+import { globalErrorHandler, videoUtil, wrapperErrorHandler } from './utils';
 
 moment.tz.setDefault('Europe/Kiev');
 moment.locale('uk');
@@ -111,8 +113,8 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
 
   if (airRaidAlarmStates.states.length === 0) {
     // TODO add advance logic for this
-    console.error('No states are available. Air raid feature is not working...');
-    bot.api.sendMessage(logsChat, 'No states are available. Air raid feature is not working...').catch(emptyFunction);
+    // console.error('No states are available. Air raid feature is not working...');
+    // bot.api.sendMessage(logsChat, 'No states are available. Air raid feature is not working...').catch(emptyFunction);
   }
 
   const commandSetter = new CommandSetter(bot, startTime, !(await redisService.getIsBotDeactivated()));
@@ -132,6 +134,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const redisChatSession = new RedisChatSession();
 
   const counteroffensiveService = new CounteroffensiveService(dynamicStorageService);
+  const nsfwDetectService = new NsfwDetectService(dynamicStorageService, 0.6);
 
   const globalMiddleware = new GlobalMiddleware();
 
@@ -205,6 +208,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const { warnObsceneComposer } = getWarnObsceneComposer();
   const { noAntisemitismComposer } = getNoAntisemitismComposer();
   const { noChannelMessagesComposer } = getNoChannelMessagesComposer();
+  const { nsfwMessageFilterComposer } = getNsfwMessageFilterComposer({ nsfwDetectService });
   const { denylistComposer } = getDenylistComposer();
   const { messagesComposer } = getMessagesComposer({
     counteroffensiveService,
@@ -222,6 +226,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     warnObsceneComposer,
     noAntisemitismComposer,
     noChannelMessagesComposer,
+    nsfwMessageFilterComposer,
     denylistComposer,
   });
 

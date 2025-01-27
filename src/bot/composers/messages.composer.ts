@@ -40,6 +40,7 @@ export interface MessagesComposerProperties {
   warnObsceneComposer: Composer<GrammyContext>;
   noAntisemitismComposer: Composer<GrammyContext>;
   noChannelMessagesComposer: Composer<GrammyContext>;
+  nsfwMessageFilterComposer: Composer<GrammyContext>;
   denylistComposer: Composer<GrammyContext>;
 }
 
@@ -116,6 +117,7 @@ export const getMessagesComposer = ({
   warnObsceneComposer,
   noAntisemitismComposer,
   noChannelMessagesComposer,
+  nsfwMessageFilterComposer,
   denylistComposer,
 }: MessagesComposerProperties) => {
   const { messagesComposer, readyMessagesComposer, registerDefaultSettingModule, registerOptionalSettingModule } =
@@ -126,6 +128,7 @@ export const getMessagesComposer = ({
    * The order should be right
    * */
   registerDefaultSettingModule('disableDeleteAntisemitism', noAntisemitismComposer);
+  registerDefaultSettingModule('disableNsfwFilter', nsfwMessageFilterComposer);
   registerDefaultSettingModule('disableSwindlerMessage', swindlersComposer);
   registerOptionalSettingModule(
     'enableDeleteCounteroffensive',

@@ -4,7 +4,7 @@ import type { Animation, MessageEntity, PhotoSize, Sticker, Video, VideoNote } f
 import type { ImageType } from './image';
 import type { LanguageDetectionResult } from './language-detection';
 import type { NsfwTensorResult } from './nsfw';
-import type { SwindlerTensorResult } from './swindlers';
+import type { SwindlersBotsResult, SwindlerTensorResult } from './swindlers';
 
 export interface StateFlavor<S> {
   /**
@@ -118,6 +118,16 @@ interface PerformanceMiddlewareState {
   performanceStart?: number;
 }
 
+export interface NsfwPhotoResult {
+  tensor: NsfwTensorResult;
+  reason: 'preview' | 'frame';
+}
+
+export interface NsfwMessageResult {
+  result: SwindlersBotsResult;
+  reason: 'message';
+}
+
 /**
  * It's used to skip text handlers when message already marked as deleted
  * */
@@ -138,9 +148,6 @@ export type State = OnlyWithTextMiddlewareState &
       rate: number;
       reason: string;
     };
-    nsfwResult?: {
-      tensor: NsfwTensorResult;
-      reason: 'preview' | 'frame';
-    };
+    nsfwResult?: NsfwPhotoResult | NsfwMessageResult;
     dataset?: SwindlerTensorResult;
   };
