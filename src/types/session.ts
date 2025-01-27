@@ -61,12 +61,14 @@ export interface OptionalChatSettings {
   enableWarnObscene?: boolean;
   enableAdminCheck?: boolean;
   enableDeleteChannelMessages?: boolean;
+  enableDeleteDenylist?: boolean;
 }
 
 export type BooleanChatSettings = DefaultChatSettings & OptionalChatSettings;
 
 export interface ChatSettings extends BooleanChatSettings {
   airRaidAlertSettings: AirRaidAlertSettings;
+  denylist?: string[];
 }
 
 export interface ChatSessionData {
