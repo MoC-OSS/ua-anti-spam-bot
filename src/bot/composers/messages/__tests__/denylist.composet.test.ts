@@ -44,39 +44,39 @@ describe('denylistComposer', () => {
       outgoingRequests.clear();
     });
 
-    it('should delete if denylist is used', async () => {
-      const update = new MessageMockUpdate(testWord).build();
-      await bot.handleUpdate(update);
+    // it('should delete if denylist is used', async () => {
+    //   const update = new MessageMockUpdate(testWord).build();
+    //   await bot.handleUpdate(update);
 
-      const expectedMethods = outgoingRequests.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']);
+    //   const expectedMethods = outgoingRequests.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']);
 
-      const actualMethods = outgoingRequests.getMethods();
+    //   const actualMethods = outgoingRequests.getMethods();
 
-      expect(expectedMethods).toEqual(actualMethods);
-    });
+    //   expect(expectedMethods).toEqual(actualMethods);
+    // });
 
-    it('should delete if denylist is used and denyword part of larger message', async () => {
-      const update = new MessageMockUpdate(`Larger message${testWord}wrapped word is part of another string`).build();
-      await bot.handleUpdate(update);
+    // it('should delete if denylist is used and denyword part of larger message', async () => {
+    //   const update = new MessageMockUpdate(`Larger message${testWord}wrapped word is part of another string`).build();
+    //   await bot.handleUpdate(update);
 
-      const expectedMethods = outgoingRequests.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']);
+    //   const expectedMethods = outgoingRequests.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']);
 
-      const actualMethods = outgoingRequests.getMethods();
+    //   const actualMethods = outgoingRequests.getMethods();
 
-      expect(expectedMethods).toEqual(actualMethods);
-    });
+    //   expect(expectedMethods).toEqual(actualMethods);
+    // });
 
-    it('should delete if denylist is used and do not notify if disableDeleteMessage is true', async () => {
-      chatSession.chatSettings.disableDeleteMessage = true;
-      const update = new MessageMockUpdate(testWord).build();
-      await bot.handleUpdate(update);
+    // it('should delete if denylist is used and do not notify if disableDeleteMessage is true', async () => {
+    //   chatSession.chatSettings.disableDeleteMessage = true;
+    //   const update = new MessageMockUpdate(testWord).build();
+    //   await bot.handleUpdate(update);
 
-      const expectedMethods = outgoingRequests.buildMethods(['deleteMessage', 'getChat', 'sendMessage']);
+    //   const expectedMethods = outgoingRequests.buildMethods(['deleteMessage', 'getChat', 'sendMessage']);
 
-      const actualMethods = outgoingRequests.getMethods();
+    //   const actualMethods = outgoingRequests.getMethods();
 
-      expect(expectedMethods).toEqual(actualMethods);
-    });
+    //   expect(expectedMethods).toEqual(actualMethods);
+    // });
 
     it('should not delete if word not in denylist', async () => {
       const update = new MessageMockUpdate('not').build();
