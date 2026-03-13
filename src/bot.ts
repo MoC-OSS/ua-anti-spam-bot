@@ -315,7 +315,6 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
 
   // Main message composer
   notChannelComposer.use(messagesComposer);
-  notChannelComposer.use(denylistComposer);
   notChannelComposer.use(photosComposer);
   notChannelComposer.use(adminCheckNotify);
   // Log state for creator only chat

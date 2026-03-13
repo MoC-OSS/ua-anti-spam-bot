@@ -18,13 +18,14 @@ export const getDenylistComposer = () => {
    * @param {GrammyContext} context
    * @param {string} [message]
    * */
-  async function logDenylistMessage(context: GrammyContext, message?: string) {
+  async function logDenylistMessage(context: GrammyContext, denyWord: string) {
     const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
-    const text = message || context.state?.text || '';
-    const { denylist } = context.chatSession.chatSettings;
+    const fullText = context.state?.text || '';
     return context.api.sendMessage(
       logsChat,
-      `${urlLogsStartMessage} (${denylist?.join(', ')}) by user ${userMention}:\n\n${chatMention || userMention}\n${escapeHTML(text)}`,
+      `${urlLogsStartMessage} (word: "${escapeHTML(denyWord)}") by user ${userMention}:\n\n${chatMention || userMention}\n${escapeHTML(
+        fullText,
+      )}`,
       {
         parse_mode: 'HTML',
         message_thread_id: LOGS_CHAT_THREAD_IDS.DENYLIST,

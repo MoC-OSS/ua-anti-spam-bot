@@ -120,6 +120,7 @@ export function getEnabledFeaturesString(chatSettings: ChatSettings): string {
   featureNameMap.set('enableDeleteForwards', '↩️ пересиланнями');
   featureNameMap.set('enableDeleteCards', '💳 картками');
   featureNameMap.set('enableDeleteChannelMessages', '💬 від каналів');
+  featureNameMap.set('enableDeleteDenylist', '🚫 забороненими словами');
 
   const settingsKeys = Object.keys(chatSettings) as (keyof ChatSettings)[];
 
