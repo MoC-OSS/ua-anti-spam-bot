@@ -3,6 +3,7 @@
 const jestConfig = {
   preset: 'ts-jest',
   testEnvironment: 'node',
+  setupFiles: ['./src/jest-setup.ts'],
   transform: {
     '^.+\\.(t|j)sx?$': ['@swc/jest'],
   },

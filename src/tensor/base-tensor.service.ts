@@ -55,6 +55,16 @@ export class BaseTensorService {
   }
 
   predict(word: string, rate: number | null): Promise<SwindlerTensorResult> {
+    if (!this.model) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any
+      return Promise.resolve({
+        spamRate: 0,
+        deleteRank: rate || this.SPAM_THRESHOLD,
+        isSpam: false,
+        fileStat: null,
+      } as unknown as SwindlerTensorResult);
+    }
+
     const tensorRank = this.tokenize(word);
     const tensorPredict = this.model?.predict(tensorRank.tensor);
     const fullModelPath = new URL(this.modelPath, import.meta.url);

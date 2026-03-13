@@ -28,7 +28,7 @@ const { chatSession, mockChatSessionMiddleware } = mockChatSession({
 
 describe('e2e bot testing', () => {
   beforeAll(async () => {
-    const initialBot = new Bot<GrammyContext>(environmentConfig?.BOT_TOKEN);
+    const initialBot = new Bot<GrammyContext>(environmentConfig?.BOT_TOKEN || 'test');
 
     // Add mock session data
     initialBot.use(mockSessionMiddleware);

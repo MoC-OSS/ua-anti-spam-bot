@@ -118,7 +118,10 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   }
 
   const commandSetter = new CommandSetter(bot, startTime, !(await redisService.getIsBotDeactivated()));
-  await commandSetter.updateCommands();
+
+  if (!environmentConfig.UNIT_TESTING) {
+    await commandSetter.updateCommands();
+  }
 
   const trainingThrottler = apiThrottler({
     // group: {

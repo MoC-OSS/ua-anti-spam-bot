@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "engines": {
-    "node": "20.x"
+    "node": ">=20.x"
   },
   "scripts": {
     "start:bot": "nodemon -L src/index.ts --max_old_space_size=2048",
@@ -133,7 +133,6 @@
     "typed-emitter": "^2.1.0",
     "typescript": "^5.4.5",
     "unzipper": "^0.10.14",
-    "worker-farm": "^1.7.0",
-    "zlib": "^1.0.5"
+    "worker-farm": "^1.7.0"
   }
 }
