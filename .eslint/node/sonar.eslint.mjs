@@ -14,7 +14,7 @@ export default [
     name: 'sonar-custom',
     rules: {
       'sonarjs/function-return-type': 'warn',
-      'sonarjs/no-commented-code': 'warn',
+      'sonarjs/no-commented-code': 'off',
       'sonarjs/no-selector-parameter': 'off',
       'sonarjs/redundant-type-aliases': 'off',
       'sonarjs/todo-tag': 'warn',
