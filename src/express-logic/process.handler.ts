@@ -1,4 +1,3 @@
-import lodashGet from 'lodash.get';
 import { removeLatinPartialLetters, removeNumber, removeSpecialSymbols } from 'ukrainian-ml-optimizer';
 
 import { messageUtility } from '@utils/util-instances';
@@ -15,7 +14,7 @@ class ProcessHandler {
    * @returns {string | null}
    * */
   processHandler(message: string, datasetPath: DatasetKeys, strict = false) {
-    const words = lodashGet(dataset, datasetPath.replace('_$', '')) as string[];
+    const words = dataset[datasetPath.replace('_$', '') as DatasetKeys] as string[];
 
     if (datasetPath === 'one_word') {
       return this.processOneWordMessage(message, words);

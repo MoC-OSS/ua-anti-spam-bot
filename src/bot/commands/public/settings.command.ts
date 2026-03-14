@@ -1,5 +1,3 @@
-import pIteration from 'p-iteration';
-
 import { onlyNotAdminFilter } from '@bot/filters/only-not-admin.filter';
 import { onlyWhenBotAdminFilter } from '@bot/filters/only-when-bot-admin.filter';
 
@@ -51,8 +49,9 @@ export class SettingsCommand {
         const chatTitle = context.chat?.title;
         const admins = await context.getChatAdministrators();
 
-        await pIteration.forEachSeries(admins, async (admin) => {
+        for (const admin of admins) {
           const adminUserId = admin.user.id.toString();
+          // eslint-disable-next-line no-await-in-loop
           const userSession = await this.redisService.getUserSession(adminUserId);
 
           const chats = userSession?.linkedChats || [];
@@ -61,9 +60,10 @@ export class SettingsCommand {
           if (isChatMissing && isBotAdmin) {
             const newData = { ...userSession, linkedChats: [...chats, { id: chatId, name: chatTitle }] } as Session;
 
+            // eslint-disable-next-line no-await-in-loop
             await this.redisService.setUserSession(adminUserId, newData);
           }
-        });
+        }
 
         return context.replyWithSelfDestructedHTML(linkToWebView);
       }

@@ -73,9 +73,9 @@ export const apiRouter = (bot: Bot<GrammyContext>) => {
       };
 
       const airRaidAlarmStates = await alarmService.getStates();
-      const chatInfo = await bot.api.getChat(id);
-      const chatMembers = await bot.api.getChatMemberCount(id);
-      const chatSession = await redisService.getChatSession(id);
+      const chatInfo = await bot.api.getChat(id as string);
+      const chatMembers = await bot.api.getChatMemberCount(id as string);
+      const chatSession = await redisService.getChatSession(id as string);
       const avatar = await getChatAvatar(bot, chatInfo.photo?.small_file_id ?? '');
       const title = 'title' in chatInfo ? chatInfo.title : '';
       const state = chatSession?.chatSettings?.airRaidAlertSettings?.state ?? '';

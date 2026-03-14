@@ -1,4 +1,4 @@
-import { auth } from 'google-auth-library';
+import { JWT } from 'google-auth-library';
 import type { JWTInput } from 'google-auth-library/build/src/auth/credentials';
 import { google } from 'googleapis';
 
@@ -22,12 +22,13 @@ export class GoogleService {
   googleAuth() {
     try {
       const keys = JSON.parse(environmentConfig.GOOGLE_CREDITS) as JWTInput;
-      const client = auth.fromJSON(keys);
 
-      // @ts-ignore
-      client.scopes = [GOOGLE_SHEET_SCOPE];
+      const client = new JWT({
+        email: keys.client_email,
+        key: keys.private_key,
+        scopes: [GOOGLE_SHEET_SCOPE],
+      });
 
-      // @ts-ignore
       google.options({ auth: client });
     } catch (error: unknown) {
       // @ts-ignore

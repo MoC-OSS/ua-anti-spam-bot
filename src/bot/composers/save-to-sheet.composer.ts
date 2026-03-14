@@ -1,6 +1,6 @@
 import { Menu } from '@grammyjs/menu';
 import { Composer } from 'grammy';
-import { isChatId } from 'grammy-guard';
+import { isChatHasId } from 'grammy-guard';
 
 import { onlyWithText } from '@bot/middleware/only-with-text.middleware';
 import { parseText } from '@bot/middleware/parse-text.middleware';
@@ -21,7 +21,7 @@ export interface SaveToSheetComposerProperties {
 export const getSaveToSheetComposer = ({ chatId, rootMenu, updateMethod }: SaveToSheetComposerProperties) => {
   const saveToSheetComposer = new Composer<GrammyContext>();
 
-  const composer = saveToSheetComposer.filter(isChatId(chatId));
+  const composer = saveToSheetComposer.filter(isChatHasId(chatId));
 
   const menu = new Menu<GrammyMenuContext>(`saveToSheetMenu_${chatId}`);
 

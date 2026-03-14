@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 
-import EventSource from 'eventsource';
+import { EventSource } from 'eventsource';
 import ms from 'ms';
 import type TypedEmitter from 'typed-emitter';
 
@@ -11,7 +11,6 @@ import { environmentConfig } from '../config';
 import { getAlarmMock } from './_mocks/alarm.mocks';
 
 const apiUrl = 'https://alerts.com.ua/api/states';
-const apiOptions = { headers: { 'X-API-Key': environmentConfig.ALARM_KEY } };
 
 export const ALARM_CONNECT_KEY = 'connect';
 
@@ -121,7 +120,16 @@ export class AlarmService {
     this.disable(reason);
     let isConnected = false;
 
-    this.source = new EventSource(`${apiUrl}/live`, apiOptions);
+    this.source = new EventSource(`${apiUrl}/live`, {
+      fetch: (url, init) =>
+        fetch(url, {
+          ...init,
+          headers: {
+            ...init.headers,
+            'X-API-Key': environmentConfig.ALARM_KEY,
+          },
+        }),
+    });
 
     this.source.addEventListener('error', (event: MessageEvent & Record<string, any>) => {
       console.info(`Subscribe to Alarm API fail:  ${event.message as string}`);
@@ -141,7 +149,7 @@ export class AlarmService {
       }
     });
 
-    this.source.addEventListener('update', (event: MessageEvent<string>) => {
+    this.source.addEventListener('update', (event: MessageEvent) => {
       /**
        * SSE endpoint response
        * @see https://alerts.com.ua/en

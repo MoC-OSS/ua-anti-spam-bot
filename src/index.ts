@@ -31,24 +31,28 @@ import { logsChat } from './creator';
 
   runBotExpressServer(bot);
 
-  const runner = run(bot, 500, {
-    allowed_updates: [
-      'chat_member',
-      'edited_message',
-      'channel_post',
-      'edited_channel_post',
-      'inline_query',
-      'chosen_inline_result',
-      'callback_query',
-      'shipping_query',
-      'pre_checkout_query',
-      'poll',
-      'poll_answer',
-      'my_chat_member',
-      'chat_member',
-      'chat_join_request',
-      'message',
-    ],
+  const runner = run(bot, {
+    runner: {
+      fetch: {
+        allowed_updates: [
+          'chat_member',
+          'edited_message',
+          'channel_post',
+          'edited_channel_post',
+          'inline_query',
+          'chosen_inline_result',
+          'callback_query',
+          'shipping_query',
+          'pre_checkout_query',
+          'poll',
+          'poll_answer',
+          'my_chat_member',
+          'chat_member',
+          'chat_join_request',
+          'message',
+        ],
+      },
+    },
   });
 
   /**

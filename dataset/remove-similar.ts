@@ -1,5 +1,5 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import queue from 'queue';
+import Queue from 'queue';
 import workerFarm from 'worker-farm';
 
 import type { RemoveSimilarResult } from './remove-similar-logic';
@@ -56,7 +56,7 @@ export const removeSimilar = async (array: RemoveSimilarArray[], compareRate = 0
   const filteredArray = prepareArray(array);
 
   return new Promise<RemoveSimilarFinalResult[][]>((resolve) => {
-    const jobQueue = queue({ results: [], timeout: 0, concurrency: 6000 });
+    const jobQueue = new Queue({ results: [], timeout: 0, concurrency: 6000 });
 
     filteredArray.forEach((first, firstIndex, self) => {
       jobQueue.push(async (): Promise<RemoveSimilarFinalResult> => {
@@ -94,7 +94,7 @@ export const removeSimilar = async (array: RemoveSimilarArray[], compareRate = 0
       });
 
       if (firstIndex === filteredArray.length - 1) {
-        jobQueue.start((error) => {
+        jobQueue.start().then(({ error }) => {
           if (error) {
             throw error;
           }
