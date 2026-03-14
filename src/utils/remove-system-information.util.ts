@@ -1,4 +1,4 @@
-import { logsStartMessages } from '../message';
+import { logsStartMessages } from '@message/';
 
 /**
  * Removes system information from a given message.

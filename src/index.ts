@@ -1,7 +1,9 @@
 import { run } from '@grammyjs/runner';
-import * as tf from '@tensorflow/tfjs-node';
 import { Bot } from 'grammy';
+
 import ms from 'ms';
+
+import * as tf from '@tensorflow/tfjs-node';
 
 import { getBot } from './bot';
 import { runBotExpressServer } from './bot-express.server';
@@ -87,9 +89,9 @@ import { sleep } from './utils';
 
   // Enable graceful stop
   const stopRunner = () => runner.isRunning() && runner.stop();
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+
   process.once('SIGINT', stopRunner);
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+
   process.once('SIGTERM', stopRunner);
 })().catch((error) => {
   console.error('FATAL: Bot crashed with error:', error);

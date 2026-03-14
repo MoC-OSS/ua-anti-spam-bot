@@ -1,7 +1,8 @@
-import * as tf from '@tensorflow/tfjs-node';
 import express from 'express';
 import type { RouteParameters } from 'express-serve-static-core';
 import multer from 'multer';
+
+import * as tf from '@tensorflow/tfjs-node';
 
 import { environmentConfig } from './config';
 import { processHandler } from './express-logic';
@@ -42,6 +43,7 @@ const uploadMiddleware = multer({ storage: uploadMemoryStorage });
 
   app.use(express.json());
   app.get('/healthcheck', (request, response) => response.json({ status: 'ok' }));
+
   app.post<'/process', RouteParameters<'/process'>, ProcessResponseBody, ProcessRequestBody>('/process', (request, response) => {
     const startTime = performance.now();
     const { message, datasetPath, strict } = request.body;
@@ -57,7 +59,6 @@ const uploadMiddleware = multer({ storage: uploadMemoryStorage });
     response.json({ result, time, expressStartTime });
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   app.post<'/tensor', RouteParameters<'/tensor'>, TensorResponseBody, TensorRequestBody>('/tensor', async (request, response) => {
     const startTime = performance.now();
     const { message, rate } = request.body;
@@ -76,7 +77,7 @@ const uploadMiddleware = multer({ storage: uploadMemoryStorage });
 
   app.post<'/swindlers', RouteParameters<'/swindlers'>, SwindlerResponseBody, SwindlerRequestBody>(
     '/swindlers',
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+
     async (request, response) => {
       const startTime = performance.now();
       const { message } = request.body;
@@ -97,7 +98,7 @@ const uploadMiddleware = multer({ storage: uploadMemoryStorage });
   app.post<'/parse-video', RouteParameters<'/parse-video'>, ParseVideoResponseBody, ParseVideoRequestBody>(
     '/parse-video',
     uploadMiddleware.single('video'),
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+
     async (request, response) => {
       const startTime = performance.now();
       const video = request.file;
@@ -124,9 +125,10 @@ const uploadMiddleware = multer({ storage: uploadMemoryStorage });
   app.post<'/image', RouteParameters<'/image'>>(
     '/image',
     uploadMiddleware.array('image', 10),
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+
     async (request, response) => {
       const startTime = performance.now();
+
       const images = ((request.files?.['image'] as Express.Multer.File[]) || request.files)
         .filter((field) => field.fieldname === 'image')
         .map((field) => field.buffer);

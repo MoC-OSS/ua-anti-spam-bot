@@ -1,6 +1,7 @@
-import type { AbortSignal } from 'abort-controller';
 import type { RawApi } from 'grammy';
 import type { Methods, Payload } from 'grammy/out/core/client';
+
+import type { AbortSignal } from 'abort-controller';
 
 /**
  * Request object, inherits from a grammy transformer
@@ -50,6 +51,7 @@ export class OutgoingRequests<M extends RealApiMethodKeys = RealApiMethodKeys> {
    * */
   push(request: Request<M>): this {
     this.requests.push(request);
+
     return this;
   }
 
@@ -58,6 +60,7 @@ export class OutgoingRequests<M extends RealApiMethodKeys = RealApiMethodKeys> {
    * */
   clear(): this {
     this.requests = [];
+
     return this;
   }
 

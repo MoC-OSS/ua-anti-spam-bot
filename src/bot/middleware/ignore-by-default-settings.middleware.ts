@@ -1,4 +1,4 @@
-import type { DefaultChatSettings, GrammyMiddleware } from '../../types';
+import type { DefaultChatSettings, GrammyMiddleware } from '@types/';
 
 export const ignoreByDefaultSettingsMiddleware =
   (key: keyof DefaultChatSettings): GrammyMiddleware =>

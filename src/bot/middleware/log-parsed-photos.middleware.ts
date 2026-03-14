@@ -1,9 +1,11 @@
 import { InputFile } from 'grammy';
 import { isPrivate } from 'grammy-guard';
 
+import { onlyCreatorFilter } from '@bot/filters';
+
+import type { GrammyMiddleware } from '@types/';
+
 import { environmentConfig } from '../../config';
-import type { GrammyMiddleware } from '../../types';
-import { onlyCreatorFilter } from '../filters';
 
 /**
  * Logs parsed photos

@@ -1,8 +1,10 @@
 import type { NextFunction } from 'grammy';
+
 import type { GrammyContext } from 'types';
 
-import { urlService } from '../../services';
-import { removeDuplicates } from '../../utils';
+import { urlService } from '@services/';
+
+import { removeDuplicates } from '@utils/';
 
 /**
  * @description
@@ -11,6 +13,7 @@ import { removeDuplicates } from '../../utils';
 export function parseUrls(context: GrammyContext, next: NextFunction) {
   if (context.state.text && !context.state.urls) {
     const parsedUrls = urlService.parseUrls(context.state.text, true);
+
     const entitiesUrls =
       context.state.entities
         ?.map((entity) => {

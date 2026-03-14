@@ -1,7 +1,8 @@
 import type { NextFunction } from 'grammy';
+
 import type { GrammyContext } from 'types';
 
-import { logSkipMiddleware } from '../../utils';
+import { logSkipMiddleware } from '@utils/';
 
 /**
  * Used for performance checking

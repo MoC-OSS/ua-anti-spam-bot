@@ -1,4 +1,4 @@
-import { censorWord } from '../../src/utils';
+import { censorWord } from '@utils/';
 
 describe('censorWord', () => {
   it('should censor a word', () => {

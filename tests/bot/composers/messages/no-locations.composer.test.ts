@@ -1,13 +1,15 @@
 import { hydrateReply } from '@grammyjs/parse-mode';
 import { Bot } from 'grammy';
 
-import { getNoLocationsComposer } from '../../../../src/bot/composers/messages/no-locations.composer';
-import { logContextMiddleware, parseLocations, parseText, stateMiddleware } from '../../../../src/bot/middleware';
-import { selfDestructedReply } from '../../../../src/bot/plugins';
-import type { OutgoingRequests } from '../../../../src/testing';
-import { MessagePrivateMockUpdate, prepareBotForTesting } from '../../../../src/testing';
-import { mockChatSession } from '../../../../src/testing-main';
-import type { GrammyContext } from '../../../../src/types';
+import { getNoLocationsComposer } from '@bot/composers/messages/no-locations.composer';
+import { logContextMiddleware, parseLocations, parseText, stateMiddleware } from '@bot/middleware';
+import { selfDestructedReply } from '@bot/plugins';
+
+import type { OutgoingRequests } from '@testing/';
+import { MessagePrivateMockUpdate, prepareBotForTesting } from '@testing/';
+import { mockChatSession } from '@testing/../testing-main';
+
+import type { GrammyContext } from '@types/';
 
 let outgoingRequests: OutgoingRequests;
 const { noLocationsComposer } = getNoLocationsComposer();
@@ -51,6 +53,7 @@ describe('noLocationsComposer', () => {
 
     it('should delete location in any case', async () => {
       const update = new MessagePrivateMockUpdate('Тут ТеРемкИ без сВітла').build();
+
       await bot.handleUpdate(update);
 
       const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest, sendMessageRequest] = outgoingRequests.getAll<
@@ -70,6 +73,7 @@ describe('noLocationsComposer', () => {
     it('should delete location message and do not notify if disableDeleteMessage is true', async () => {
       chatSession.chatSettings.disableDeleteMessage = true;
       const update = new MessagePrivateMockUpdate('Тут ТеРемкИ без сВітла').build();
+
       await bot.handleUpdate(update);
 
       const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest] = outgoingRequests.getAll<
@@ -88,6 +92,7 @@ describe('noLocationsComposer', () => {
       const update = new MessagePrivateMockUpdate(
         'Інтерактивна мапа дозволяє швидко і зручно дізнатися погоду в містах України. На ній відображаються погодні умови в найбільших містах України з можливістю перегляду прогнозу погоди на тиждень. Щоб дізнатися докладний прогноз погоди в вашому місті досить натиснути на назву населеного пункту на мапі.',
       ).build();
+
       await bot.handleUpdate(update);
 
       expect(outgoingRequests.length).toEqual(0);
@@ -105,6 +110,7 @@ describe('noLocationsComposer', () => {
 
     it('should delete location in any case', async () => {
       const update = new MessagePrivateMockUpdate('Тут ТеРемкИ без сВітла').build();
+
       await bot.handleUpdate(update);
 
       expect(outgoingRequests.length).toEqual(0);
@@ -114,6 +120,7 @@ describe('noLocationsComposer', () => {
       const update = new MessagePrivateMockUpdate(
         'Інтерактивна мапа дозволяє швидко і зручно дізнатися погоду в містах України. На ній відображаються погодні умови в найбільших містах України з можливістю перегляду прогнозу погоди на тиждень. Щоб дізнатися докладний прогноз погоди в вашому місті досить натиснути на назву населеного пункту на мапі.',
       ).build();
+
       await bot.handleUpdate(update);
 
       expect(outgoingRequests.length).toEqual(0);

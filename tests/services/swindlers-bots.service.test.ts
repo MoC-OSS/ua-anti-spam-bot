@@ -1,10 +1,11 @@
-import { mockDynamicStorageService, mockNewBot } from '../../src/services/_mocks/index.mocks';
-import { SwindlersBotsService } from '../../src/services/swindlers-bots.service';
+import { mockDynamicStorageService, mockNewBot } from '@services/_mocks/index.mocks';
+import { SwindlersBotsService } from '@services/swindlers-bots.service';
 
 /**
  * @type {SwindlersBotsService}
  * */
 let swindlersBotsService: SwindlersBotsService;
+
 describe('SwindlersBotsService', () => {
   beforeAll(() => {
     swindlersBotsService = new SwindlersBotsService(mockDynamicStorageService, 0.6);
@@ -12,6 +13,7 @@ describe('SwindlersBotsService', () => {
 
   it('should compare new bot', () => {
     const result = swindlersBotsService.isSpamBot(mockNewBot);
+
     console.info(result);
 
     expect(result.isSpam).toEqual(true);
@@ -40,7 +42,7 @@ describe('SwindlersBotsService', () => {
     });
 
     it('should not process regular message', () => {
-      const result = swindlersBotsService.processMessage(`test message without @test_bot swindler bot `);
+      const result = swindlersBotsService.processMessage('test message without @test_bot swindler bot ');
 
       expect(result).toBeFalsy();
     });

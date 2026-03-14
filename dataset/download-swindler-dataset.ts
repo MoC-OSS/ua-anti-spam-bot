@@ -1,5 +1,5 @@
 /* eslint-disable unicorn/no-process-exit */
-import { initSwindlersContainer, swindlersGoogleService } from '../src/services';
+import { initSwindlersContainer, swindlersGoogleService } from '@services/';
 
 import { autoSwindlers } from './auto-swindlers';
 import { getSwindlersTopUsed } from './get-swindlers-top-used';
@@ -21,6 +21,7 @@ cases
     const { swindlersUrlsService, swindlersCardsService } = await initSwindlersContainer();
 
     getSwindlersTopUsed([...positives, ...testPositives]);
+
     await autoSwindlers(
       swindlersUrlsService,
       swindlersCardsService,

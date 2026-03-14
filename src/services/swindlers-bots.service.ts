@@ -1,6 +1,6 @@
 import FuzzySet from 'fuzzyset';
 
-import type { SwindlersBotsResult } from '../types';
+import type { SwindlersBotsResult } from '@types/';
 
 import type { DynamicStorageService } from './dynamic-storage.service';
 import { mentionService } from './mention.service';
@@ -10,7 +10,10 @@ export class SwindlersBotsService {
 
   swindlersBotsFuzzySet!: FuzzySet;
 
-  constructor(private dynamicStorageService: DynamicStorageService, private rate = 0.9) {
+  constructor(
+    private dynamicStorageService: DynamicStorageService,
+    private rate = 0.9,
+  ) {
     this.initFuzzySet();
     this.exceptionMentions = this.dynamicStorageService.notSwindlers;
 
@@ -25,11 +28,13 @@ export class SwindlersBotsService {
    */
   processMessage(message: string): SwindlersBotsResult | null {
     const mentions = mentionService.parseMentions(message, this.exceptionMentions);
+
     if (mentions) {
-      let lastResult: null | SwindlersBotsResult = null;
+      let lastResult: SwindlersBotsResult | null = null;
 
       const foundSwindlerMention = mentions.some((value) => {
         lastResult = this.isSpamBot(value);
+
         return lastResult.isSpam;
       });
 
@@ -55,6 +60,7 @@ export class SwindlersBotsService {
    */
   isSpamBot(name: string, customRate?: number): SwindlersBotsResult {
     const [[rate, nearestName]] = this.swindlersBotsFuzzySet.get(name) || [[0]];
+
     return {
       isSpam: rate > (customRate || this.rate),
       rate,

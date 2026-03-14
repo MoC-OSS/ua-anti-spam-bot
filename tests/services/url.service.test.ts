@@ -1,10 +1,10 @@
-import { EXCEPTION_DOMAINS } from '../../src/services/constants';
-import { urlService } from '../../src/services/url.service';
+import { EXCEPTION_DOMAINS } from '@services/constants';
+import { urlService } from '@services/url.service';
 
 describe('UrlService', () => {
   describe('parseUrls', () => {
     it('should parse urls', () => {
-      const text = `test https://url.com/ test url.com`;
+      const text = 'test https://url.com/ test url.com';
       const result = urlService.parseUrls(text);
 
       console.info(text);
@@ -13,7 +13,7 @@ describe('UrlService', () => {
     });
 
     it('should parse urls without special symbols at the end', () => {
-      const text = `test https://url.com/, test url.com. http://24.site/?order=946, http://24privat.site/?order=94696970126<`;
+      const text = 'test https://url.com/, test url.com. http://24.site/?order=946, http://24privat.site/?order=94696970126<';
       const result = urlService.parseUrls(text);
 
       console.info(text);
@@ -22,7 +22,7 @@ describe('UrlService', () => {
     });
 
     it('should not parse invalid urls', () => {
-      const text = `100.000.000 | 1.Перейдіть | 30.06.2022.`;
+      const text = '100.000.000 | 1.Перейдіть | 30.06.2022.';
       const result = urlService.parseUrls(text);
 
       expect(result).toEqual([]);
@@ -78,7 +78,7 @@ describe('UrlService', () => {
 
   describe('processMessage', () => {
     it('should process messages', () => {
-      const text = `https://da-pay.me/ тест`;
+      const text = 'https://da-pay.me/ тест';
       const parsedUrl = urlService.parseUrls(text)[0];
 
       expect(parsedUrl).toEqual('https://da-pay.me');
@@ -92,6 +92,7 @@ describe('UrlService', () => {
     https://t.me/+5v9SixsjZ9ZmMjBs
 
     https://t.me/+5v9SixsjZ9ZmMjBs`;
+
       const parsedUrl = urlService.parseUrls(text)[0];
 
       expect(parsedUrl).toEqual(undefined);

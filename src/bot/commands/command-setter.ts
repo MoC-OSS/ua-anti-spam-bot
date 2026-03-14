@@ -1,8 +1,10 @@
 import type { Bot } from 'grammy';
+
 import type { BotCommand } from 'typegram';
 
-import type { GrammyContext } from '../../types';
-import { formatDateIntoAccusative } from '../../utils';
+import type { GrammyContext } from '@types/';
+
+import { formatDateIntoAccusative } from '@utils/';
 
 /**
  * Handles bot public available commands
@@ -16,7 +18,11 @@ export class CommandSetter {
    * @param {Date} startTime
    * @param {boolean} active
    * */
-  constructor(private bot: Bot<GrammyContext>, private startTime: Date, private active: boolean) {}
+  constructor(
+    private bot: Bot<GrammyContext>,
+    private startTime: Date,
+    private active: boolean,
+  ) {}
 
   /**
    * @description
@@ -26,6 +32,7 @@ export class CommandSetter {
    * */
   buildStatus() {
     const activeStatus = this.active ? '🟢 Онлайн' : '🔴 Офлайн';
+
     return `${activeStatus}, оновлений у ${formatDateIntoAccusative(this.startTime).replace(/GMT\+\d/, '')}`;
   }
 

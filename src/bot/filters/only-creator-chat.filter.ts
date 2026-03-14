@@ -1,5 +1,6 @@
+import type { GrammyFilter } from '@types/';
+
 import { creatorId } from '../../creator';
-import type { GrammyFilter } from '../../types';
 
 /**
  * @description

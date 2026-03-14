@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 
-import { removeDuplicates } from '../src/utils';
+import { removeDuplicates } from '@utils/';
 
 import { antisemitismDictionaryActionUrl, antisemitismDictionaryNounsUrl, antisemitismDictionaryThreadsUrl } from './dataset-antisemitism';
 import { obsceneDictionaryEnUrl, obsceneDictionaryRuUrl, obsceneDictionaryUaUrl } from './dataset-obscene';
@@ -25,6 +25,7 @@ const processDictionary = (text: string): string[] =>
 
 filesToOptimize.forEach((url) => {
   const file = fs.readFileSync(url).toString();
+
   fs.writeFileSync(url, `${processDictionary(file).join('\n')}\n`);
   console.info('Optimize file:', url.pathname);
 });

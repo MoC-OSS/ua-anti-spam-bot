@@ -1,4 +1,5 @@
 import type { NextFunction } from 'grammy';
+
 import type { GrammyContext, GrammyMiddleware } from 'types';
 
 /**
@@ -8,13 +9,13 @@ import type { GrammyContext, GrammyMiddleware } from 'types';
 export const nestedMiddleware =
   (...middlewares: GrammyMiddleware[]) =>
   async (context: GrammyContext, next: NextFunction) => {
-    // eslint-disable-next-line no-restricted-syntax
     for (const middleware of middlewares) {
       let isNextCalled = false;
 
       // eslint-disable-next-line unicorn/consistent-function-scoping
       const localNext = () => {
         isNextCalled = true;
+
         return Promise.resolve();
       };
 

@@ -1,6 +1,6 @@
 import { Menu } from '@grammyjs/menu';
 
-import type { GrammyMenuContext, GrammyMiddleware } from '../types';
+import type { GrammyMenuContext, GrammyMiddleware } from '@types/';
 
 /**
  * @description
@@ -11,13 +11,13 @@ export class MiddlewareMenu<C extends GrammyMenuContext = GrammyMenuContext> ext
 
   addGlobalMiddlewares(...middlewares: GrammyMiddleware[]) {
     this.menuMiddlewares = middlewares;
+
     return this;
   }
 
-  text(text: string | object, ...middleware: GrammyMiddleware[]) {
+  text(text: object | string, ...middleware: GrammyMiddleware[]) {
     const newMiddlewares = [...(this.menuMiddlewares || []), ...middleware];
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return this.add(typeof text === 'object' ? { ...text, middleware: newMiddlewares } : { text, middleware: newMiddlewares });
   }

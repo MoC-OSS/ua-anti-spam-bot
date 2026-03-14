@@ -9,8 +9,8 @@ const csvFileRows = ['commenttext,spam'];
 
 function processDatasetCase(item) {
   return item
-    .replace(/[^\da-z\u0400-\u04FF]/gi, ' ')
-    .replace(/\s\s+/g, ' ')
+    .replaceAll(/[^\da-z\u0400-\u04FF]/gi, ' ')
+    .replaceAll(/\s\s+/g, ' ')
     .trim();
 }
 

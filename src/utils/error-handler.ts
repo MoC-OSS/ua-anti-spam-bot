@@ -1,12 +1,13 @@
 import type { ErrorHandler, MiddlewareFn } from 'grammy';
 import { GrammyError, HttpError, InputFile } from 'grammy';
 
+import type { GrammyContext } from '@types/';
+
 import { environmentConfig } from '../config';
 import { logsChat } from '../creator';
-import type { GrammyContext } from '../types';
 
 import { emptyFunction } from './empty-functions.util';
-import { optimizeWriteContextUtil } from './optimize-write-context.util';
+import { optimizeWriteContextUtil as optimizeWriteContextUtility } from './optimize-write-context.util';
 
 /**
  * Handle single error with expected reason
@@ -20,6 +21,7 @@ export const handleError = (catchError: unknown, reason = '') => {
  * */
 export const globalErrorHandler: ErrorHandler<GrammyContext> = (botError) => {
   const { ctx, error } = botError;
+
   console.error(`Error while handling update ${ctx.update.update_id}:`);
 
   if (error instanceof GrammyError) {
@@ -30,7 +32,7 @@ export const globalErrorHandler: ErrorHandler<GrammyContext> = (botError) => {
     console.error('**** GLOBAL-HANDLED ERROR **** Unknown error:', error);
   }
 
-  const writeContext = optimizeWriteContextUtil(ctx);
+  const writeContext = optimizeWriteContextUtility(ctx);
 
   console.error('*** GLOBAL-HANDLED ERROR CTX ***', writeContext);
 
@@ -56,7 +58,7 @@ export const wrapperErrorHandler =
     } catch (error) {
       handleError(error);
 
-      const writeContext = optimizeWriteContextUtil(context);
+      const writeContext = optimizeWriteContextUtility(context);
 
       console.error('*** FUNCTION-HANDLED ERROR CTX ***', writeContext);
 

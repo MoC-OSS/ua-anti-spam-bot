@@ -1,8 +1,10 @@
 import { Composer } from 'grammy';
 
-import { redisService } from '../../services';
-import type { GrammyContext } from '../../types';
-import { HelpCommand, SettingsCommand, StartCommand } from '../commands';
+import { HelpCommand, SettingsCommand, StartCommand } from '@bot/commands';
+
+import { redisService } from '@services/';
+
+import type { GrammyContext } from '@types/';
 
 export interface PublicCommandsComposerProperties {
   startTime: Date;

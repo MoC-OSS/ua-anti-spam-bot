@@ -2,9 +2,11 @@ import type { AxiosError } from 'axios';
 import axios from 'axios';
 import FuzzySet from 'fuzzyset';
 
+import type { SwindlersBaseResult, SwindlersUrlsResult } from '@types/';
+
+import { DomainAllowList } from '@utils/domain-allow-list';
+
 import { environmentConfig } from '../config';
-import type { SwindlersBaseResult, SwindlersUrlsResult } from '../types';
-import { DomainAllowList } from '../utils/domain-allow-list';
 
 import { EXCEPTION_DOMAINS, SHORTS } from './constants';
 import type { DynamicStorageService } from './dynamic-storage.service';
@@ -19,7 +21,10 @@ export class SwindlersUrlsService {
 
   domainAllowList: DomainAllowList;
 
-  constructor(private dynamicStorageService: DynamicStorageService, private rate = 0.9) {
+  constructor(
+    private dynamicStorageService: DynamicStorageService,
+    private rate = 0.9,
+  ) {
     this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
     console.info('swindlersRegex', this.swindlersRegex);
 
@@ -35,8 +40,8 @@ export class SwindlersUrlsService {
   }
 
   buildSiteRegex(sites: string[]): RegExp {
-    // eslint-disable-next-line unicorn/better-regex
     const regex = /(?:https?:\/\/)?([[sites]])(?!ua).+/;
+
     return new RegExp(regex.source.replace('[[sites]]', sites.join('|')));
   }
 
@@ -53,12 +58,15 @@ export class SwindlersUrlsService {
    */
   async processMessage(message: string): Promise<SwindlersBaseResult | SwindlersUrlsResult | null> {
     const urls = urlService.parseUrls(message);
+
     if (urls.length > 0) {
       let lastResult: SwindlersBaseResult | SwindlersUrlsResult | null = null;
       const getUrls = urls.map((url) => this.isSpamUrl(url));
       const allUrls = await Promise.all(getUrls);
+
       const foundSwindlerUrl = allUrls.some((value) => {
         lastResult = value;
+
         return lastResult?.isSpam;
       });
 
@@ -126,6 +134,7 @@ export class SwindlersUrlsService {
                 return (error.response?.headers['location'] as string) || error.response?.config.url || url;
               } catch (nestedError: unknown) {
                 console.error(nestedError);
+
                 return url;
               }
             },
@@ -155,8 +164,10 @@ export class SwindlersUrlsService {
     }
 
     const isRegexpMatch = this.swindlersRegex.test(domain);
+
     if (isRegexpMatch) {
       const result = { isSpam: isRegexpMatch, rate: 200 } as SwindlersUrlsResult;
+
       if (environmentConfig.ENV !== 'production') {
         result.currentName = domain.match(this.swindlersRegex)?.[0] || '$error';
       }

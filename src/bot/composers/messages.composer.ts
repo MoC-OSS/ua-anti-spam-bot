@@ -1,9 +1,6 @@
 import { Composer } from 'grammy';
 
-import { messageQuery } from '../../const';
-import type { CounteroffensiveService } from '../../services';
-import type { DefaultChatSettings, GrammyContext, GrammyMiddleware, OptionalChatSettings } from '../../types';
-import { onlyActiveDefaultSettingFilter, onlyActiveOptionalSettingFilter, onlyNotDeletedFilter, onlyWithTextFilter } from '../filters';
+import { onlyActiveDefaultSettingFilter, onlyActiveOptionalSettingFilter, onlyNotDeletedFilter, onlyWithTextFilter } from '@bot/filters';
 import {
   botActiveMiddleware,
   botRedisActive,
@@ -22,7 +19,13 @@ import {
   performanceEndMiddleware,
   performanceStartMiddleware,
   saveSpamMediaGroupMiddleware,
-} from '../middleware';
+} from '@bot/middleware';
+
+import { messageQuery } from '@const/';
+
+import type { CounteroffensiveService } from '@services/';
+
+import type { DefaultChatSettings, GrammyContext, GrammyMiddleware, OptionalChatSettings } from '@types/';
 
 export interface MessagesComposerProperties {
   counteroffensiveService: CounteroffensiveService;
@@ -50,6 +53,7 @@ export interface MessagesComposerProperties {
  */
 export const getMessagesRegisterComposer = () => {
   const messagesComposer = new Composer<GrammyContext>();
+
   /**
    * Only these messages will be processed in this composer
    * */
@@ -130,11 +134,13 @@ export const getMessagesComposer = ({
   registerDefaultSettingModule('disableDeleteAntisemitism', noAntisemitismComposer);
   registerDefaultSettingModule('disableNsfwFilter', nsfwMessageFilterComposer);
   registerDefaultSettingModule('disableSwindlerMessage', swindlersComposer);
+
   registerOptionalSettingModule(
     'enableDeleteCounteroffensive',
     parseIsCounteroffensive(counteroffensiveService),
     noCounterOffensiveComposer,
   );
+
   registerOptionalSettingModule('enableDeleteUrls', parseUrls, noUrlsComposer);
   registerOptionalSettingModule('enableDeleteLocations', parseLocations, noLocationsComposer);
   registerOptionalSettingModule('enableDeleteMentions', parseMentions, noMentionsComposer);

@@ -1,7 +1,8 @@
 import type { GrammyContext } from 'types';
 
-import { TELEGRAM_USER_ID } from '../../const';
-import { logSkipMiddleware } from '../../utils';
+import { TELEGRAM_USER_ID } from '@const/';
+
+import { logSkipMiddleware } from '@utils/';
 
 /**
  * @description
@@ -26,6 +27,7 @@ export function onlyNotAdminFilter(context: GrammyContext): boolean {
    * */
   if (context.from?.id === TELEGRAM_USER_ID) {
     logSkipMiddleware(context, 'chat channel forward');
+
     return false;
   }
 
@@ -42,6 +44,7 @@ export function onlyNotAdminFilter(context: GrammyContext): boolean {
    * */
   if (context.chat?.type === 'channel') {
     logSkipMiddleware(context, 'channel chat type');
+
     return false;
   }
 
@@ -51,6 +54,7 @@ export function onlyNotAdminFilter(context: GrammyContext): boolean {
    * */
   if (context.update?.channel_post?.sender_chat?.type === 'channel') {
     logSkipMiddleware(context, 'channel');
+
     return false;
   }
 
@@ -59,6 +63,7 @@ export function onlyNotAdminFilter(context: GrammyContext): boolean {
    */
   if (context.from?.username === 'GroupAnonymousBot') {
     logSkipMiddleware(context, 'GroupAnonymousBot');
+
     return false;
   }
 
@@ -76,6 +81,7 @@ export function onlyNotAdminFilter(context: GrammyContext): boolean {
    * */
   if (context.state.isUserAdmin) {
     logSkipMiddleware(context, 'Admin');
+
     return false;
   }
 

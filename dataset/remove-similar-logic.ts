@@ -14,5 +14,6 @@ export interface RemoveSimilarResult {
 
 export function execute({ first, second, rate }: RemoveSimilarProperties, callback: (value: RemoveSimilarResult) => void) {
   const result = stringSimilarity.compareTwoStrings(first, second);
+
   callback({ result, rate, isSame: result > rate });
 }

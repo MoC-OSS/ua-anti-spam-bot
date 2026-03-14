@@ -1,13 +1,15 @@
 import type { Chat, ChatMember } from '@grammyjs/types/manage';
 import type { NextFunction } from 'grammy';
+
 import type { GrammyContext } from 'types';
 
-import { logSkipMiddleware } from '../../utils';
+import { logSkipMiddleware } from '@utils/';
 
 export const onlyAdmin = async (context: GrammyContext, next: NextFunction) => {
   // No chat = no service
   if (!context.chat) {
     logSkipMiddleware(context, 'User is not admin');
+
     return;
   }
 
@@ -26,6 +28,7 @@ export const onlyAdmin = async (context: GrammyContext, next: NextFunction) => {
   // Surely not an admin
   if (!context.from?.id) {
     logSkipMiddleware(context, 'User is not admin');
+
     return;
   }
 
@@ -40,6 +43,7 @@ export const onlyAdmin = async (context: GrammyContext, next: NextFunction) => {
   const userStatuses = new Set<ChatMember['status']>(['member']);
 
   const chatMember = await context.getChatMember(context.from.id);
+
   if (adminStatuses.has(chatMember.status)) {
     return next();
   }
@@ -47,6 +51,7 @@ export const onlyAdmin = async (context: GrammyContext, next: NextFunction) => {
   // Regular user
   if (userStatuses.has(chatMember.status)) {
     logSkipMiddleware(context, 'User is a regular member');
+
     return;
   }
 

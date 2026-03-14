@@ -1,11 +1,13 @@
 import { Bot } from 'grammy';
 
-import { getJoinLeaveComposer } from '../../../src/bot/composers/join-leave.composer';
-import { stateMiddleware } from '../../../src/bot/middleware';
-import type { OutgoingRequests } from '../../../src/testing';
-import { LeftMemberMockUpdate, NewMemberMockUpdate, prepareBotForTesting } from '../../../src/testing';
-import { mockChatSession } from '../../../src/testing-main';
-import type { GrammyContext } from '../../../src/types';
+import { getJoinLeaveComposer } from '@bot/composers/join-leave.composer';
+import { stateMiddleware } from '@bot/middleware';
+
+import type { OutgoingRequests } from '@testing/';
+import { LeftMemberMockUpdate, NewMemberMockUpdate, prepareBotForTesting } from '@testing/';
+import { mockChatSession } from '@testing/../testing-main';
+
+import type { GrammyContext } from '@types/';
 
 let outgoingRequests: OutgoingRequests;
 const { joinLeaveComposer } = getJoinLeaveComposer();
@@ -43,6 +45,7 @@ describe('joinLeaveComposer main', () => {
 
       it('should delete new user service message', async () => {
         const update = new NewMemberMockUpdate().build();
+
         await bot.handleUpdate(update);
 
         const apiCall = outgoingRequests.getLast<'deleteMessage'>();
@@ -53,6 +56,7 @@ describe('joinLeaveComposer main', () => {
 
       it('should delete left user service message', async () => {
         const update = new LeftMemberMockUpdate().build();
+
         await bot.handleUpdate(update);
 
         const apiCall = outgoingRequests.getLast<'deleteMessage'>();
@@ -63,6 +67,7 @@ describe('joinLeaveComposer main', () => {
 
       it('should not delete left bot service message', async () => {
         const updateConstructor = new LeftMemberMockUpdate();
+
         const update = updateConstructor.buildOverwrite({
           my_chat_member: {
             chat: updateConstructor.genericSuperGroup,
@@ -90,6 +95,7 @@ describe('joinLeaveComposer main', () => {
 
       it('should delete new bot service message', async () => {
         const updateConstructor = new NewMemberMockUpdate();
+
         const update = updateConstructor.buildOverwrite({
           my_chat_member: {
             chat: updateConstructor.genericSuperGroup,
@@ -130,6 +136,7 @@ describe('joinLeaveComposer main', () => {
 
       it('should not delete new user service message', async () => {
         const update = new NewMemberMockUpdate().build();
+
         await bot.handleUpdate(update);
 
         expect(outgoingRequests.length).toEqual(0);
@@ -137,6 +144,7 @@ describe('joinLeaveComposer main', () => {
 
       it('should not delete left user service message', async () => {
         const update = new LeftMemberMockUpdate().build();
+
         await bot.handleUpdate(update);
 
         expect(outgoingRequests.length).toEqual(0);
@@ -155,6 +163,7 @@ describe('joinLeaveComposer main', () => {
 
     it('should not delete new user service message', async () => {
       const update = new NewMemberMockUpdate().build();
+
       await bot.handleUpdate(update);
 
       expect(outgoingRequests.length).toEqual(0);
@@ -162,6 +171,7 @@ describe('joinLeaveComposer main', () => {
 
     it('should not delete left user service message', async () => {
       const update = new LeftMemberMockUpdate().build();
+
       await bot.handleUpdate(update);
 
       expect(outgoingRequests.length).toEqual(0);

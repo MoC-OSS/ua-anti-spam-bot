@@ -1,16 +1,23 @@
-import escapeHTML from 'escape-html';
 import type { Bot, NextFunction } from 'grammy';
 import { InputFile } from 'grammy';
 
+import escapeHTML from 'escape-html';
+
+import type { MessageHandler } from '@bot/message.handler';
+import { isFilteredByRules } from '@bot/spam.handlers';
+
+import { LOGS_CHAT_THREAD_IDS } from '@const/';
+
+import { cannotDeleteMessage, getCannotDeleteMessage, getDebugMessage, getDeleteMessage } from '@message/'; // spamDeleteMessage
+
+import { redisService } from '@services/';
+
+import type { GrammyContext, GrammyMiddleware } from '@types/';
+
+import { compareDatesWithOffset, getUserData, handleError, telegramUtil as telegramUtility } from '@utils/';
+
 import { environmentConfig } from '../../config';
-import { LOGS_CHAT_THREAD_IDS } from '../../const';
 import { logsChat, privateTrainingChat } from '../../creator';
-import { cannotDeleteMessage, getCannotDeleteMessage, getDebugMessage, getDeleteMessage } from '../../message'; // spamDeleteMessage
-import { redisService } from '../../services';
-import type { GrammyContext, GrammyMiddleware } from '../../types';
-import { compareDatesWithOffset, getUserData, handleError, telegramUtil } from '../../utils';
-import type { MessageHandler } from '../message.handler';
-import { isFilteredByRules } from '../spam.handlers';
 
 // const slavaWords = ['слава україні', 'слава украине', 'слава зсу'];
 
@@ -21,7 +28,11 @@ export class OnTextListener {
    * @param {MessageHandler} messageHandler
    */
 
-  constructor(private bot: Bot<GrammyContext>, private startTime: Date, private messageHandler: MessageHandler) {}
+  constructor(
+    private bot: Bot<GrammyContext>,
+    private startTime: Date,
+    private messageHandler: MessageHandler,
+  ) {}
 
   /**
    * Handles every received message
@@ -45,6 +56,7 @@ export class OnTextListener {
 
       if (!context.chat?.id) {
         console.error(Date.toString(), 'Cannot access the chat:', context.chat);
+
         return next();
       }
 
@@ -56,7 +68,7 @@ export class OnTextListener {
 
       if (rep.dataset) {
         // TODO define the same types
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
         // @ts-ignore
         context.state.dataset = rep.dataset;
         const { deleteRank, tensor } = rep.dataset;
@@ -109,7 +121,7 @@ export class OnTextListener {
                   return;
                 }
 
-                return telegramUtil
+                return telegramUtility
                   .getChatAdmins(context, context.chat.id)
                   .then(({ adminsString }) => {
                     context
@@ -119,7 +131,7 @@ export class OnTextListener {
                     this.bot.api
                       .sendMessage(
                         logsChat,
-                        `${cannotDeleteMessage}\n\n<code>${telegramUtil.getChatTitle(context.chat)}</code>\n${escapeHTML(
+                        `${cannotDeleteMessage}\n\n<code>${telegramUtility.getChatTitle(context.chat)}</code>\n${escapeHTML(
                           context.msg?.text || '',
                         )}`,
                         {

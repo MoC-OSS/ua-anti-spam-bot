@@ -1,8 +1,10 @@
 import type { ChatAdministratorRights, ChatMember } from '@grammyjs/types/manage';
 
-import { getBotJoinMessage } from '../../message';
-import type { GrammyQueryMiddleware } from '../../types';
-import { telegramUtil } from '../../utils';
+import { getBotJoinMessage } from '@message/';
+
+import type { GrammyQueryMiddleware } from '@types/';
+
+import { telegramUtil as telegramUtility } from '@utils/';
 
 export const botInviteQuery: GrammyQueryMiddleware<'my_chat_member'> = async (context, next) => {
   const newStatuses = new Set<ChatMember['status']>(['member', 'administrator']);
@@ -14,7 +16,8 @@ export const botInviteQuery: GrammyQueryMiddleware<'my_chat_member'> = async (co
   // Invite as a normal member or admin
   if (oldStatuses.has(context.myChatMember.old_chat_member.status) && newStatuses.has(context.myChatMember.new_chat_member.status)) {
     context.chatSession.botRemoved = false;
-    const { adminsString } = await telegramUtil.getChatAdmins(context, context.chat.id);
+    const { adminsString } = await telegramUtility.getChatAdmins(context, context.chat.id);
+
     await context.replyWithHTML(getBotJoinMessage({ adminsString, isAdmin, canDelete }));
   }
 

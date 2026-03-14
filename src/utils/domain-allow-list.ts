@@ -1,4 +1,4 @@
-import { urlService } from '../services';
+import { urlService } from '@services/';
 
 /**
  * Domain allow list for filtering URLs.
@@ -70,7 +70,7 @@ export class DomainAllowList {
   createRegexFromPattern(pattern: string) {
     // Escape special characters in the pattern and replace '*' with '.*'
     const escapedPattern = pattern
-      .replaceAll(/[$()*+.?[\\\]^{|}]/g, '\\$&')
+      .replaceAll(/[$()*+.?[\\\]^{|}]/g, String.raw`\$&`)
       .replaceAll('*', '.*')
       .replaceAll(/\\.\*/g, '.*');
 

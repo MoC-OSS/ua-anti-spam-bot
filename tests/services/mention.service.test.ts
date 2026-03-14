@@ -1,4 +1,4 @@
-import { mentionService } from '../../src/services/mention.service';
+import { mentionService } from '@services/mention.service';
 
 const expectedMentions = ['@test_mention', '@another_mention'];
 const expectedUrls = ['t.me/test_mention', 'https://t.me/another_mention', 'not-t.me/not-a-mention'];
@@ -38,14 +38,14 @@ describe('MentionService', () => {
     });
 
     it('should exclude special symbols', () => {
-      const text = `@UAdopamoga_bot,#$%^&*()-_= @UAdopamoga_bot,`;
+      const text = '@UAdopamoga_bot,#$%^&*()-_= @UAdopamoga_bot,';
       const result = mentionService.parseMentions(text);
 
       expect(result).toEqual(['@UAdopamoga_bot']);
     });
 
     it('should exclude special symbols from url', () => {
-      const text = `https://t.me/test, https://t.me/test. https://t.me/test!`;
+      const text = 'https://t.me/test, https://t.me/test. https://t.me/test!';
       const result = mentionService.parseMentions(text);
 
       expect(result).toEqual(['@test']);

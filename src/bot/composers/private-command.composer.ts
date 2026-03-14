@@ -1,14 +1,17 @@
 import type { Bot } from 'grammy';
 import { Composer } from 'grammy';
 
-import type { DynamicStorageService } from '../../services';
-import { ALARM_EVENT_KEY, alarmService } from '../../services';
-import { getAlarmMock } from '../../services/_mocks';
-import type { TensorService } from '../../tensor';
-import type { GrammyContext } from '../../types';
-import type { CommandSetter } from '../commands';
-import { SessionCommand, StatisticsCommand, SwindlersUpdateCommand } from '../commands';
-import { onlyWhitelistedFilter } from '../filters';
+import type { CommandSetter } from '@bot/commands';
+import { SessionCommand, StatisticsCommand, SwindlersUpdateCommand } from '@bot/commands';
+import { onlyWhitelistedFilter } from '@bot/filters';
+
+import type { DynamicStorageService } from '@services/';
+import { ALARM_EVENT_KEY, alarmService } from '@services/';
+import { getAlarmMock } from '@services/_mocks';
+
+import type { TensorService } from '@tensor/';
+
+import type { GrammyContext } from '@types/';
 
 import { getGetVideoNoteConverterComposer } from './video-note-converter.composer';
 
@@ -30,13 +33,14 @@ export const getPrivateCommandsComposer = ({ bot, commandSetter, dynamicStorageS
 
   const composer = privateCommandsComposer.filter((context) => onlyWhitelistedFilter(context));
 
-  const commandMap = new Map<string, string>();
-  commandMap.set('swindlers_update', 'Update swindlers database');
-  commandMap.set('session', 'Get bot session data');
-  commandMap.set('statistics', 'Get bot statistics');
-  commandMap.set('start_alarm', 'Start test alarm');
-  commandMap.set('end_alarm', 'End test alarm');
-  commandMap.set('restart_alarm', 'Restart alarm logic');
+  const commandMap = new Map<string, string>([
+    ['swindlers_update', 'Update swindlers database'],
+    ['session', 'Get bot session data'],
+    ['statistics', 'Get bot statistics'],
+    ['start_alarm', 'Start test alarm'],
+    ['end_alarm', 'End test alarm'],
+   ['restart_alarm', 'Restart alarm logic']]);
+
   commandMap.set('disable_alarm', 'Disable alarm logic at all');
   commandMap.set('restart', 'Kills the bot process and deletes it');
   commandMap.set('video_note', 'Send a video with /video_note caption to convert it into video note');
@@ -82,6 +86,7 @@ export const getPrivateCommandsComposer = ({ bot, commandSetter, dynamicStorageS
     const message = await context.replyWithHTML(
       `Message Thread Id:\n<code>${context.msg?.message_thread_id?.toString()}</code>` || 'No thread id',
     );
+
     await context.pinChatMessage(message.message_id);
   });
 

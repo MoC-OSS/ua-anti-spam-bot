@@ -23,6 +23,7 @@ export function getTopUsed(
       .filter((word) => word.length > 3 && !whitelist.includes(word))
       .forEach((word) => {
         const optimizedWord = optimizeText(word);
+
         words.set(optimizedWord, (words.get(optimizedWord) || 0) + 1);
       }),
   );

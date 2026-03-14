@@ -1,8 +1,10 @@
 import type { NextFunction } from 'grammy';
+
 import type { JsonObject } from 'type-fest';
 
-import { redisClient } from '../../db';
-import type { GrammyContext, RedisSessionOptions } from '../../types';
+import { redisClient } from '@db/';
+
+import type { GrammyContext, RedisSessionOptions } from '@types/';
 
 export class RedisMiddleware {
   constructor(private options: RedisSessionOptions) {}
@@ -22,8 +24,13 @@ export class RedisMiddleware {
   middleware(property = this.options.property) {
     return async (context: GrammyContext, next: NextFunction) => {
       const key = this.getSessionKey(context);
-      if (!key) return next();
+
+      if (!key) {
+        return next();
+      }
+
       let session = await this.getSession(key);
+
       Object.defineProperty(context, property, {
         get() {
           return session;
@@ -32,6 +39,7 @@ export class RedisMiddleware {
           session = { ...newValue };
         },
       });
+
       // Saving session object on the next middleware
       await next();
       await this.saveSession(key, session);

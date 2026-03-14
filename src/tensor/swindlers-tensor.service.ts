@@ -24,6 +24,7 @@ export const initSwindlersTensor = async () => {
   // }
 
   const tensorService = new SwindlersTensorService('./swindlers-temp/model.json', environmentConfig.TENSOR_RANK);
+
   await tensorService.loadModel();
 
   return tensorService;

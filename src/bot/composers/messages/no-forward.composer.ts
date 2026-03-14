@@ -1,8 +1,10 @@
 import { Composer } from 'grammy';
 
-import { getDeleteFeatureMessage } from '../../../message';
-import type { GrammyContext } from '../../../types';
-import { getEnabledFeaturesString, getUserData } from '../../../utils';
+import { getDeleteFeatureMessage } from '@message/';
+
+import type { GrammyContext } from '@types/';
+
+import { getEnabledFeaturesString, getUserData } from '@utils/';
 
 /**
  * @description Remove strategic information logic

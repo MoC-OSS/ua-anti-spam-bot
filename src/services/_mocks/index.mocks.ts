@@ -1,15 +1,17 @@
-import type { GoogleFullCellData, GoogleShortCellData } from '../../types';
-import type { LocalDataset } from '../dynamic-storage.service';
-import { DynamicStorageService } from '../dynamic-storage.service';
-import type { GoogleService } from '../google.service';
-import type { RedisService } from '../redis.service';
-import type { SwindlersGoogleService } from '../swindlers-google.service';
+import type { LocalDataset } from '@services/dynamic-storage.service';
+import { DynamicStorageService } from '@services/dynamic-storage.service';
+import type { GoogleService } from '@services/google.service';
+import type { RedisService } from '@services/redis.service';
+import type { SwindlersGoogleService } from '@services/swindlers-google.service';
+
+import type { GoogleFullCellData, GoogleShortCellData } from '@types/';
 
 export const mockNewBot = '@Diia_move_bot';
+
 export const mockNewUrl = 'https://olx.new-darpay.site/some/234234234';
 
 export const getSheet = vi.fn(
-  <T extends true | false = false>(
+  <T extends false | true = false>(
     spreadsheetId: string,
     sheetName: string,
     range?: string,
@@ -19,14 +21,13 @@ export const getSheet = vi.fn(
       return Promise.resolve([mockNewBot] as T extends true ? GoogleShortCellData[] : never);
     }
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     return Promise.resolve([
       {
         value: mockNewBot,
         index: 0,
         sheetKey: 'mock_key',
-        fullPath: `mock_path`,
+        fullPath: 'mock_path',
       },
     ] as T extends false ? GoogleFullCellData[] : never[]);
   },
@@ -38,12 +39,13 @@ getSheet.mockReturnValueOnce(
       value: 'test message from swindler',
       index: 0,
       sheetKey: 'mock_key',
-      fullPath: `mock_path`,
+      fullPath: 'mock_path',
     },
   ]),
 );
 
 const getCompactSheet = vi.fn(() => Promise.resolve([mockNewBot]));
+
 getCompactSheet.mockReturnValueOnce(Promise.resolve(['test message from swindler']));
 
 /**

@@ -1,11 +1,15 @@
 import type { MenuRange } from '@grammyjs/menu';
 
-import { getAirRaidAlarmSettingsMessage, nextPage, previousPage } from '../../../../message';
-import { alarmChatService, TEST_ALARM_STATE } from '../../../../services';
-import { generateTestState } from '../../../../services/_mocks';
-import type { GrammyContext, GrammyMenuContext, State } from '../../../../types';
-import { handleError, isIdWhitelisted } from '../../../../utils';
-import { onlyAdmin } from '../../../middleware';
+import { onlyAdmin } from '@bot/middleware';
+
+import { getAirRaidAlarmSettingsMessage, nextPage, previousPage } from '@message/';
+
+import { alarmChatService, TEST_ALARM_STATE } from '@services/';
+import { generateTestState } from '@services/_mocks';
+
+import type { GrammyContext, GrammyMenuContext, State } from '@types/';
+
+import { handleError, isIdWhitelisted } from '@utils/';
 
 /**
  * @param {GrammyContext} context_

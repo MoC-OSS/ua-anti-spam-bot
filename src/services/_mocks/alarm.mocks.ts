@@ -1,12 +1,15 @@
 import type { ChatFullInfo } from 'grammy/types';
 
-import type { AlarmNotification, ChatSessionData } from '../../types';
-import { getRandomItem } from '../../utils';
+import type { AlarmNotification, ChatSessionData } from '@types/';
+
+import { getRandomItem } from '@utils/';
 
 import { generateRandomBoolean, generateRandomNumber, generateRandomString } from './helpers.mocks';
 
 export const testId = 1_234_567_890;
+
 export const testState = 'Львівська область';
+
 export const generateTestState = (state = testState) => ({
   id: generateRandomNumber(3),
   name: state,
@@ -99,11 +102,14 @@ export function generateMockSessions(
   const disableChatWhileAirRaidAlertOnArray = Array.from({ length: disableChatWhileAirRaidAlertOn }, () =>
     generateChat(generateRandomNumber(10), generateChatSessionData(state, true, false)),
   );
+
   const notificationMessageOnArray = Array.from({ length: notificationMessageOn }, () =>
     generateChat(generateRandomNumber(10), generateChatSessionData(state, false, true)),
   );
+
   const bothOffArray = Array.from({ length: bothOff }, () =>
     generateChat(generateRandomNumber(10), generateChatSessionData(state, false, false)),
   );
+
   return [...disableChatWhileAirRaidAlertOnArray, ...notificationMessageOnArray, ...bothOffArray];
 }

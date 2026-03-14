@@ -1,5 +1,5 @@
-import { languageDetectUaMocks } from '../../src/services/_mocks/language-detect.mocks';
-import { languageDetectService } from '../../src/services/language-detect.service';
+import { languageDetectUaMocks } from '@services/_mocks/language-detect.mocks';
+import { languageDetectService } from '@services/language-detect.service';
 
 describe('LanguageDetectService', () => {
   describe('isRussian', () => {
@@ -16,6 +16,7 @@ describe('LanguageDetectService', () => {
         '\n' +
         'Вам необходимо подтвердить номер телефона для того, чтобы завершить идентификацию.\n' +
         'Для этого нажмите кнопку ниже.';
+
       const result = languageDetectService.isRussian(text);
 
       expect(result.result).toEqual(true);
@@ -67,6 +68,7 @@ describe('LanguageDetectService', () => {
     it('should not detect russian when mixed', () => {
       const text =
         'съешь еще этих французских булок. Інтернет були взірцем для наслідування для всіх, хто хоче говорити українською правильно.';
+
       const result = languageDetectService.detect(text);
 
       expect(result).toMatchSnapshot();

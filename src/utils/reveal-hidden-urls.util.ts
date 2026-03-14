@@ -1,4 +1,4 @@
-import type { GrammyContext } from '../types';
+import type { GrammyContext } from '@types/';
 
 function cutInHiddenUrls(string_: string | undefined, cutStart: number, cutEnd: number, url: string): string {
   return string_ ? string_.slice(0, Math.max(0, cutStart)) + url + string_.slice(cutEnd) : '';
@@ -18,11 +18,13 @@ export function revealHiddenUrls(context: GrammyContext): string {
   if (entities) {
     let additionalUrlsLength = 0;
     let deletedTextLength = 0;
+
     entities.forEach((entity) => {
       if (entity.type === 'text_link') {
         const { offset } = entity;
         const { length, url } = entity;
         const hiddenUrl = url;
+
         text =
           additionalUrlsLength <= 0
             ? cutInHiddenUrls(text, offset, offset + length, hiddenUrl)
@@ -32,6 +34,7 @@ export function revealHiddenUrls(context: GrammyContext): string {
                 offset + length + additionalUrlsLength - deletedTextLength,
                 hiddenUrl,
               );
+
         deletedTextLength += length;
         additionalUrlsLength += hiddenUrl.length;
       }

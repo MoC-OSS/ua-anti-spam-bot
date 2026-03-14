@@ -1,13 +1,16 @@
 import FuzzySet from 'fuzzyset';
 
-import type { SwindlersBotsResult } from '../types';
+import type { SwindlersBotsResult } from '@types/';
 
 import type { DynamicStorageService } from './dynamic-storage.service';
 
 export class NsfwDetectService {
   nsfwMessagesFuzzySet!: FuzzySet;
 
-  constructor(private dynamicStorageService: DynamicStorageService, private rate = 0.9) {
+  constructor(
+    private dynamicStorageService: DynamicStorageService,
+    private rate = 0.9,
+  ) {
     this.initFuzzySet();
 
     this.dynamicStorageService.fetchEmitter.on('fetch', () => {
@@ -20,6 +23,7 @@ export class NsfwDetectService {
    */
   processMessage(message?: string): SwindlersBotsResult | null {
     const result = this.isSpamMessage(message);
+
     if (result.isSpam) {
       return result;
     }
@@ -50,6 +54,7 @@ export class NsfwDetectService {
     }
 
     const [[rate, nearestName]] = this.nsfwMessagesFuzzySet.get(message) || [[0]];
+
     return {
       isSpam: rate > (customRate || this.rate),
       rate,

@@ -2,10 +2,13 @@ import { Menu } from '@grammyjs/menu';
 import { Composer } from 'grammy';
 import { isChatId } from 'grammy-guard';
 
-import { messageQuery } from '../../const';
-import type { swindlersGoogleService } from '../../services';
-import type { GrammyContext, GrammyMenuContext } from '../../types';
-import { onlyWithText, parseText, removeSystemInformationMiddleware } from '../middleware';
+import { onlyWithText, parseText, removeSystemInformationMiddleware } from '@bot/middleware';
+
+import { messageQuery } from '@const/';
+
+import type { swindlersGoogleService } from '@services/';
+
+import type { GrammyContext, GrammyMenuContext } from '@types/';
 
 export interface SaveToSheetComposerProperties {
   chatId: number;
@@ -23,6 +26,7 @@ export const getSaveToSheetComposer = ({ chatId, rootMenu, updateMethod }: SaveT
   menu
     .text('✅ Додати в базу', async (context) => {
       await context.deleteMessage();
+
       await updateMethod(context.msg?.text || `$no_value_${chatId}`).catch(() =>
         context.reply('Дуже погана помилка, терміново подивіться sheet!'),
       );
@@ -35,6 +39,7 @@ export const getSaveToSheetComposer = ({ chatId, rootMenu, updateMethod }: SaveT
     const text = context.state.clearText!;
 
     await context.deleteMessage();
+
     await context.reply(text, {
       reply_markup: menu,
     });

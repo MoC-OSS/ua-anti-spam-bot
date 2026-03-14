@@ -1,5 +1,5 @@
-import { mockDynamicStorageService } from '../../src/services/_mocks/index.mocks';
-import { SwindlersCardsService } from '../../src/services/swindlers-cards.service';
+import { mockDynamicStorageService } from '@services/_mocks/index.mocks';
+import { SwindlersCardsService } from '@services/swindlers-cards.service';
 
 let swindlersCardsService: SwindlersCardsService;
 

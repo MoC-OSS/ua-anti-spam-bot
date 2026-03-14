@@ -1,9 +1,12 @@
 import pIteration from 'p-iteration';
 
-import { featureNoAdminMessage, hasNoLinkedChats, isNotAdminMessage, linkToWebView } from '../../../message';
-import type { RedisService } from '../../../services';
-import type { GrammyMiddleware, Session } from '../../../types';
-import { onlyNotAdminFilter, onlyWhenBotAdminFilter } from '../../filters';
+import { onlyNotAdminFilter, onlyWhenBotAdminFilter } from '@bot/filters';
+
+import { featureNoAdminMessage, hasNoLinkedChats, isNotAdminMessage, linkToWebView } from '@message/';
+
+import type { RedisService } from '@services/';
+
+import type { GrammyMiddleware, Session } from '@types/';
 
 export class SettingsCommand {
   constructor(private redisService: RedisService) {}
@@ -28,6 +31,7 @@ export class SettingsCommand {
       if (isChatPrivate) {
         const userSession = await this.redisService.getUserSession(userId);
         const chats = userSession?.linkedChats || [];
+
         return chats.length > 0 ? context.reply(linkToWebView) : context.reply(hasNoLinkedChats);
       }
 
@@ -43,7 +47,6 @@ export class SettingsCommand {
         const chatTitle = context.chat?.title;
         const admins = await context.getChatAdministrators();
 
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
         await pIteration.forEachSeries(admins, async (admin) => {
           const adminUserId = admin.user.id.toString();
           const userSession = await this.redisService.getUserSession(adminUserId);
@@ -53,6 +56,7 @@ export class SettingsCommand {
 
           if (isChatMissing && isBotAdmin) {
             const newData = { ...userSession, linkedChats: [...chats, { id: chatId, name: chatTitle }] } as Session;
+
             await this.redisService.setUserSession(adminUserId, newData);
           }
         });

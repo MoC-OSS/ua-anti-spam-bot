@@ -10,7 +10,7 @@
 
 import type fs from 'node:fs';
 
-export type SwindlerType = 'site' | 'mention' | 'card' | 'tensor' | 'compare' | 'no match';
+export type SwindlerType = 'card' | 'compare' | 'mention' | 'no match' | 'site' | 'tensor';
 
 export interface SwindlersBaseResult {
   isSpam: boolean;
@@ -35,15 +35,17 @@ export interface SwindlerTensorResult {
   fileStat: fs.Stats;
 }
 
+export interface SwindlersResultSummaryFoundCompare {
+  foundSwindler: boolean;
+  spamRate: number;
+}
+
 export interface SwindlersResultSummary {
   foundSwindlerUrl?: SwindlersBaseResult | SwindlersUrlsResult | null;
   foundSwindlerMention?: SwindlersBotsResult | null;
   foundCard?: true | null;
   foundTensor?: SwindlerTensorResult;
-  foundCompare?: {
-    foundSwindler: boolean;
-    spamRate: number;
-  };
+  foundCompare?: SwindlersResultSummaryFoundCompare;
 }
 
 export interface SwindlersResult extends SwindlersBaseResult {

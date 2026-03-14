@@ -5,7 +5,7 @@ const positives = require('../positives.json');
 // eslint-disable-next-line import/no-unresolved
 const negatives = require('../negatives.json');
 
-const processDataset = (array) => array.map((item) => item.replace(/\n/g, ' ')).join('\n');
+const processDataset = (array) => array.map((item) => item.replaceAll('\n', ' ')).join('\n');
 
 fs.writeFileSync('../positives.csv', processDataset(positives));
 fs.writeFileSync('../negatives.csv', processDataset(negatives));

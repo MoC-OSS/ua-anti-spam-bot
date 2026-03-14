@@ -1,6 +1,6 @@
 import type { Api, Bot, Context } from 'grammy';
 
-import type { OutgoingRequests } from '../outgoing-requests';
+import type { OutgoingRequests } from '@testing/outgoing-requests';
 
 /**
  * Reusing existing tests

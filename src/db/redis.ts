@@ -1,9 +1,10 @@
 import * as redis from 'redis';
 import type { JsonObject, Primitive } from 'type-fest';
 
+import type { ChatSession, ChatSessionData, Session } from '@types/';
+import type { CustomJsonValue } from '@types/object';
+
 import { environmentConfig } from '../config';
-import type { ChatSession, ChatSessionData, Session } from '../types';
-import type { CustomJsonValue } from '../types/object';
 
 export const redisSelectors = {
   isBotDeactivated: 'isBotDeactivated',
@@ -22,9 +23,13 @@ export const redisSelectors = {
 export const client = redis.createClient({ url: environmentConfig.REDIS_URL });
 
 export async function getRawValue<T>(key: string | null | undefined): Promise<T | null> {
-  if (!key) return {} as T;
+  if (!key) {
+    return {} as T;
+  }
+
   try {
     const sourceSession = await client.get(key);
+
     return JSON.parse(sourceSession || '{}') as T;
   } catch {
     return null;
@@ -32,22 +37,29 @@ export async function getRawValue<T>(key: string | null | undefined): Promise<T 
 }
 
 export async function getValue<T>(key: string): Promise<T> {
-  if (!key) return {} as T;
+  if (!key) {
+    return {} as T;
+  }
+
   try {
     const sourceSession = await client.get(key);
+
     return (JSON.parse(sourceSession || '{}') || {}) as T;
   } catch (error) {
     console.error(error);
+
     return {} as T;
   }
 }
 
-export function setRawValue(key: string, value: Primitive | CustomJsonValue | Session | ChatSessionData) {
+export function setRawValue(key: string, value: ChatSessionData | CustomJsonValue | Primitive | Session) {
   return client.set(key, JSON.stringify(value));
 }
 
 export function setValue(key: string, value: JsonObject) {
-  if (!key || !value) return;
+  if (!key || !value) {
+    return;
+  }
 
   return client.set(key, JSON.stringify(value));
 }
@@ -62,6 +74,7 @@ export function removeKey(key: string) {
 
 export async function getAllUserKeys(): Promise<string[]> {
   const keys = await client.keys('*:*');
+
   if (keys.length === 0) {
     return [];
   }
@@ -89,12 +102,14 @@ export async function getAllUserRecords(): Promise<Session[]> {
 
 export async function getAllChatRecords(): Promise<ChatSession[]> {
   const keys = await client.keys('*');
+
   if (keys.length === 0) {
     return [];
   }
 
   const filteredKeys = keys.filter((key) => redisSelectors.chatSessions.test(key));
   const values = await client.mGet(filteredKeys);
+
   return values
     .map((value, index) => {
       try {
@@ -109,10 +124,11 @@ export async function getAllChatRecords(): Promise<ChatSession[]> {
     .filter(Boolean) as ChatSession[];
 }
 
-export async function getAllRecords(): Promise<(Session | ChatSession)[]> {
+export async function getAllRecords(): Promise<(ChatSession | Session)[]> {
   try {
     const keys = await client.keys('*');
     const sourceRecords = await Promise.all(keys.map((key) => client.get(key)));
+
     return sourceRecords
       .map((record, index) => {
         if (!record) {
@@ -131,6 +147,7 @@ export async function getAllRecords(): Promise<(Session | ChatSession)[]> {
       .filter(Boolean) as (Session & ChatSession)[];
   } catch (error) {
     console.error(error);
+
     return [];
   }
 }

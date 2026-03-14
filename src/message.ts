@@ -9,6 +9,7 @@ import { formatStateIntoAccusative, getRandomItem } from './utils';
 export * from './message/index';
 
 export const randomBanEmojis = ['👮🏻‍♀️', '🤦🏼‍♀️', '🙅🏻‍♀️'];
+
 export const randomLocationBanEmojis = ['🏡', '🏘️', '🌳'];
 
 function getCurrentTimeAndDate() {
@@ -29,13 +30,20 @@ export const getAdminReadyMessage = ({ botName }: GenericBotProperties) =>
 
 👩‍💻 Якщо бот не працює чи є питання і пропозиції, пишіть в <a href="${helpChat}">чат підтримки</a>.
 `.trim();
+
 export const adminReadyHasNoDeletePermissionMessage = '😢 Тепер я адміністратор. Але не маю права на видалення повідомлень.';
+
 export const startAdminReadyMessage = '✅ Я активований і виконую свою роботу.';
+
 export const memberReadyMessage = '😴 Тепер я деактивований. Відпочиваю... ';
+
 export const makeAdminMessage = `⛔️ Я не активований!
 <b>☝️Зроби мене адміністратором, щоб я міг видаляти повідомлення, а також все інше що я вмію, за твоїм бажанням.</b>`;
+
 export const hasDeletePermissionMessage = '✅ Я маю права на видалення повідомлень.';
+
 export const hasNoDeletePermissionMessage = '⛔ Я не маю права на видалення повідомлень.';
+
 export const featureNoAdminMessage = '⛔️ Я не активований!\n<b>☝️Зроби мене адміністратором, щоб я міг дати цей функціонал.</b>';
 
 /**
@@ -44,12 +52,14 @@ export const featureNoAdminMessage = '⛔️ Я не активований!\n<b
 export const chatIsMutedMessage = `
 🤫 Можливість відправляти повідомлення під час повітряної тривоги тимчасово заблокована!
 `;
+
 export const chatIsUnmutedMessage = `
 💬 Блокування повідомлень зняті. Приємного спілкування!
 `;
 
 export const isNight = () => {
   const hours = +moment().format('H');
+
   return hours >= 20 || hours <= 5;
 };
 
@@ -131,6 +141,7 @@ export const getAirRaidAlarmSettingsMessage = (settings: ChatSessionData['chatSe
 `.trim();
 
 export const nextPage = 'Наступна сторінка ⏩';
+
 export const previousPage = '⏪ Попередня сторінка';
 
 /**
@@ -605,18 +616,31 @@ export const getUkrainianMessageExtra = (percent: number) => (percent === 200 ? 
  * Logs
  * */
 export const swindlerLogsStartMessage = "Looks like swindler's message";
+
 export const russianDeleteLogsStartMessage = 'Deleted russian message';
+
 export const russianWarnLogsStartMessage = 'Warn russian message';
+
 export const nsfwLogsStartMessage = 'Looks like nsfw';
+
 export const cannotDeleteMessage = 'Cannot delete the following message from chat';
+
 export const urlLogsStartMessage = 'Deleted URLs message';
+
 export const locationLogsStartMessage = 'Deleted location message';
+
 export const mentionLogsStartMessage = 'Deleted mention message';
+
 export const cardLogsStartMessage = 'Deleted card message';
+
 export const counteroffensiveLogsStartMessage = 'Deleted counteroffensive message by';
+
 export const obsceneDeleteLogsStartMessage = 'Delete obscene message';
+
 export const obsceneWarnLogsStartMessage = 'Warn obscene message';
+
 export const antisemitismDeleteLogsStartMessage = 'Delete antisemitism message';
+
 export const channelMessageLogsStartMessage = 'Deleted message from channel';
 
 export const logsStartMessages = new Set([

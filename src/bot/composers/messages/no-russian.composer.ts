@@ -1,12 +1,18 @@
-import escapeHTML from 'escape-html';
 import { Composer } from 'grammy';
 
-import { LOGS_CHAT_THREAD_IDS } from '../../../const';
+import escapeHTML from 'escape-html';
+
+import { LOGS_CHAT_THREAD_IDS } from '@const/';
+
+import { getDeleteRussianMessage, getUkrainianMessageExtra, russianDeleteLogsStartMessage } from '@message/';
+
+import type { DynamicStorageService } from '@services/';
+
+import type { GrammyContext } from '@types/';
+
+import { getRandomItem, getUserData, telegramUtil as telegramUtility } from '@utils/';
+
 import { logsChat } from '../../../creator';
-import { getDeleteRussianMessage, getUkrainianMessageExtra, russianDeleteLogsStartMessage } from '../../../message';
-import type { DynamicStorageService } from '../../../services';
-import type { GrammyContext } from '../../../types';
-import { getRandomItem, getUserData, telegramUtil } from '../../../utils';
 
 export interface NoRussianComposerProperties {
   dynamicStorageService: DynamicStorageService;
@@ -24,7 +30,7 @@ export const getNoRussianComposer = ({ dynamicStorageService }: NoRussianCompose
    * @param {string} [message]
    * */
   async function saveRussianMessage(context: GrammyContext, maxChance: number, message?: string) {
-    const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
+    const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const text = message || context.state?.text || '';
 
     return context.api.sendMessage(
@@ -49,6 +55,7 @@ export const getNoRussianComposer = ({ dynamicStorageService }: NoRussianCompose
 
       if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
         const { writeUsername, userId } = getUserData(context);
+
         await context.replyWithSelfDestructedHTML(
           getDeleteRussianMessage({ writeUsername, userId, message: getRandomItem(dynamicStorageService.ukrainianLanguageResponses) }) +
             getUkrainianMessageExtra(russianFeature.percent),

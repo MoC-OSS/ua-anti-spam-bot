@@ -1,4 +1,4 @@
-import { removeDuplicates } from '../utils';
+import { removeDuplicates } from '@utils/';
 
 export class MentionService {
   readonly mentionRegexp = /\B@\w+/g;
@@ -16,6 +16,7 @@ export class MentionService {
    */
   parseMentions(message: string, exceptionMentions: string[] = []): string[] {
     const directMentions = message.match(this.mentionRegexp) || [];
+
     const linkMentions = (message.match(this.urlRegexp) || [])
       .filter((url) => url.split('/').includes('t.me'))
       .map((url) => url.split('/').splice(-1)[0])

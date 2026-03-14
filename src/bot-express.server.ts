@@ -1,6 +1,7 @@
+import type { Bot } from 'grammy';
+
 import cors from 'cors';
 import express from 'express';
-import type { Bot } from 'grammy';
 
 import { apiRouter } from './express-logic/api.router';
 import { environmentConfig } from './config';
@@ -8,6 +9,7 @@ import type { GrammyContext } from './types';
 
 export const runBotExpressServer = (bot: Bot<GrammyContext>) => {
   const app = express();
+
   app.use(express.json());
   app.use(cors({ origin: environmentConfig.FRONTEND_HOST }));
   app.use('/api', apiRouter(bot));

@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-return,@typescript-eslint/restrict-template-expressions */
 import fs from 'node:fs';
 
-import type { ProtoUpdate, User } from '../types';
+import type { ProtoUpdate, User } from '@types/';
 
 import type { API } from './api';
 

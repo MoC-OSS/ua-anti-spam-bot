@@ -1,4 +1,4 @@
-import type { GrammyFilter, OptionalChatSettings } from '../../types';
+import type { GrammyFilter, OptionalChatSettings } from '@types/';
 
 /**
  * @returns {true} when optional settings is enabled

@@ -1,7 +1,6 @@
 import { Composer } from 'grammy';
 
-import type { DefaultChatSettings, GrammyContext, GrammyMiddleware } from '../../types';
-import { onlyActiveDefaultSettingFilter, onlyNotDeletedFilter, onlyWithPhotoFilter } from '../filters';
+import { onlyActiveDefaultSettingFilter, onlyNotDeletedFilter, onlyWithPhotoFilter } from '@bot/filters';
 import {
   botActiveMiddleware,
   botRedisActive,
@@ -14,7 +13,9 @@ import {
   parseVideoFrames,
   performanceEndMiddleware,
   performanceStartMiddleware,
-} from '../middleware';
+} from '@bot/middleware';
+
+import type { DefaultChatSettings, GrammyContext, GrammyMiddleware } from '@types/';
 
 export interface PhotosComposerProperties {
   nsfwFilterComposer: Composer<GrammyContext>;

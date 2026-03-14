@@ -1,8 +1,9 @@
 import fs from 'node:fs';
 
-import type { SwindlersCardsService, SwindlersUrlsService } from '../src/services';
-import { cardsService, swindlersGoogleService, urlService } from '../src/services';
-import { removeDuplicates } from '../src/utils';
+import type { SwindlersCardsService, SwindlersUrlsService } from '@services/';
+import { cardsService, swindlersGoogleService, urlService } from '@services/';
+
+import { removeDuplicates } from '@utils/';
 
 const notSwindlers = new Set([
   '@alinaaaawwaa',
@@ -26,6 +27,7 @@ const startsWith = [
 ];
 
 const mentionRegexp = /\B@\w+/g;
+
 /**
  * @param {SwindlersUrlsService} swindlersUrlsService
  * @param {Record<string, any>[]} savedSwindlersUrls
@@ -33,12 +35,14 @@ const mentionRegexp = /\B@\w+/g;
  * */
 async function processUrls(swindlersUrlsService: SwindlersUrlsService, savedSwindlersUrls: string[], swindlers: string[]) {
   const notMatchedDomains: string[] = [];
+
   const swindlerUrlsCheckPromises = removeDuplicates([
     ...savedSwindlersUrls,
     ...swindlers.flatMap((message) => urlService.parseUrls(message)),
   ])
     .filter((url) => {
       const urlDomain = urlService.getUrlDomain(url);
+
       return !!urlDomain;
     })
     .map(
@@ -56,6 +60,7 @@ async function processUrls(swindlersUrlsService: SwindlersUrlsService, savedSwin
 
   const swindlerUrlsCheck = await Promise.all(swindlerUrlsCheckPromises);
   const swindlersUrls = swindlerUrlsCheck.map(({ url }) => url).sort();
+
   const notMatchedUrls = swindlerUrlsCheck
     .filter(({ url, urlDomain, isSwindlerResult }) => {
       const isNotMatch =
@@ -89,7 +94,7 @@ export const autoSwindlers = async (
   swindlersCards: string[],
   swindlersUsers: string[],
 ) => {
-  function findSwindlersByPattern(items: string[], pattern: string | RegExp) {
+  function findSwindlersByPattern(items: string[], pattern: RegExp | string) {
     return removeDuplicates([...items, ...swindlers.flatMap((message) => message.match(pattern) || [])]).filter(
       (item) => !notSwindlers.has(item),
     );

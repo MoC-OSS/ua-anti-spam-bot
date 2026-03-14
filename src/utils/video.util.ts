@@ -1,9 +1,10 @@
 import axios from 'axios';
 
+import type { GrammyBot, GrammyContext, ImageVideoTypes } from '@types/';
+import { ImageType } from '@types/';
+import type { StateImageAnimation, StateImageVideo, StateImageVideoNote, StateImageVideoSticker, StateVideoFormats } from '@types/state';
+
 import { environmentConfig } from '../config';
-import type { GrammyBot, GrammyContext, ImageVideoTypes } from '../types';
-import { ImageType } from '../types';
-import type { StateImageAnimation, StateImageVideo, StateImageVideoNote, StateImageVideoSticker, StateVideoFormats } from '../types/state';
 
 /**
  * Helps to manage video across the bot
@@ -103,6 +104,7 @@ export class VideoUtil {
    * */
   async downloadVideo(video: StateVideoFormats, fileName: string | undefined) {
     const videoName = `${video.file_unique_id}-${fileName?.toLowerCase() || 'unknown-type.mp4'}`;
+
     const videoFile = await this.api.getFile(video.file_id).then((photoResponse) =>
       photoResponse.file_path
         ? axios

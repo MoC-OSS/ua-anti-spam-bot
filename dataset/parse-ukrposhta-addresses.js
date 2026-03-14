@@ -19,83 +19,87 @@ const streetArray = addressArray
 const clearStreetArrayAll = streetArray
   .map((value) => {
     let string_ = value;
+
     // replace latin symbols to cyrillic
-    string_ = string_.replace(/A/g, 'А');
-    string_ = string_.replace(/B/g, 'В');
-    string_ = string_.replace(/E/g, 'Е');
-    string_ = string_.replace(/K/g, 'К');
-    string_ = string_.replace(/M/g, 'М');
-    string_ = string_.replace(/H/g, 'Н');
-    string_ = string_.replace(/O/g, 'О');
-    string_ = string_.replace(/P/g, 'Р');
-    string_ = string_.replace(/C/g, 'С');
-    string_ = string_.replace(/T/g, 'Т');
-    string_ = string_.replace(/X/g, 'Х');
-    string_ = string_.replace(/a/g, 'а');
-    string_ = string_.replace(/e/g, 'е');
-    string_ = string_.replace(/i/g, 'і');
-    string_ = string_.replace(/o/g, 'о');
-    string_ = string_.replace(/p/g, 'р');
-    string_ = string_.replace(/c/g, 'с');
-    string_ = string_.replace(/y/g, 'у');
-    string_ = string_.replace(/x/g, 'х');
+    string_ = string_.replaceAll('A', 'А');
+    string_ = string_.replaceAll('B', 'В');
+    string_ = string_.replaceAll('E', 'Е');
+    string_ = string_.replaceAll('K', 'К');
+    string_ = string_.replaceAll('M', 'М');
+    string_ = string_.replaceAll('H', 'Н');
+    string_ = string_.replaceAll('O', 'О');
+    string_ = string_.replaceAll('P', 'Р');
+    string_ = string_.replaceAll('C', 'С');
+    string_ = string_.replaceAll('T', 'Т');
+    string_ = string_.replaceAll('X', 'Х');
+    string_ = string_.replaceAll('a', 'а');
+    string_ = string_.replaceAll('e', 'е');
+    string_ = string_.replaceAll('i', 'і');
+    string_ = string_.replaceAll('o', 'о');
+    string_ = string_.replaceAll('p', 'р');
+    string_ = string_.replaceAll('c', 'с');
+    string_ = string_.replaceAll('y', 'у');
+    string_ = string_.replaceAll('x', 'х');
 
     // further text processing...
     string_ = string_.replace(/^.*?\s+(.+)$/i, '$1');
+
     string_ = string_.replace(
       /^(?:\d*\s*(?:км|ї|ст|кст|га|го)\s+|.*-\s*(?:ї|а|ої|го|чя|я|й|ий|ій|ии|и|річчя|річя|річча|річа|га|ша|ти)|\d*-|\d+)\s*(.+)$/i,
       '$1',
     );
+
     string_ = string_.replace(/\d+-га$|\d+-ша$/, '');
     string_ = string_.replace(/\s*\(.*?\)\s*/, '');
-    string_ = string_.replace(/^"\.*|\.*"$|\s+"\.*/g, ' ');
-    string_ = string_.replace(/\s+\d+-й|\s+\d+-ї|\s+\d+-a|\s+-\s*\d/gi, '');
-    string_ = string_.replace(/[\S\s]*відс[\S\s]*тн[\S\s]*/gi, '');
-    string_ = string_.replace(/[\S\s]*без\s+вулиц[\S\s]*/gi, '');
-    string_ = string_.replace(/[\S\s]*без\s+назв[\S\s]*/gi, '');
-    string_ = string_.replace(/б\/н/gi, '');
-    string_ = string_.replace(/ж\/д/gi, '');
+    string_ = string_.replaceAll(/^"\.*|\.*"$|\s+"\.*/g, ' ');
+    string_ = string_.replaceAll(/\s+\d+-й|\s+\d+-ї|\s+\d+-a|\s+-\s*\d/gi, '');
+    string_ = string_.replaceAll(/[\S\s]*відс[\S\s]*тн[\S\s]*/gi, '');
+    string_ = string_.replaceAll(/[\S\s]*без\s+вулиц[\S\s]*/gi, '');
+    string_ = string_.replaceAll(/[\S\s]*без\s+назв[\S\s]*/gi, '');
+    string_ = string_.replaceAll(/б\/н/gi, '');
+    string_ = string_.replaceAll(/ж\/д/gi, '');
 
-    string_ = string_.replace(/^річчя\s+|\s+річчя$|\s+річчя\s+|^річчя$/gi, '');
-    string_ = string_.replace(/^річя\s+|\s+річя$|\s+річя\s+|^річя$/gi, '');
-    string_ = string_.replace(/^річча\s+|\s+річча$|\s+річча|^річча$\s+/gi, '');
-    string_ = string_.replace(/^річа\s+|\s+річа$|\s+річа\s+|^річа$/gi, '');
-    string_ = string_.replace(/^жд\s+|\s+жд$|\s+жд\s+/gi, '');
-    string_ = string_.replace(/^км\s+|\s+км$|\s+км\s+/gi, '');
-    string_ = string_.replace(/^ррс\s+|\s+ррс$|\s+ррс\s+/gi, '');
-    string_ = string_.replace(/^пзз\s+|\s+пзз$|\s+пзз\s+/gi, '');
+    string_ = string_.replaceAll(/^річчя\s+|\s+річчя$|\s+річчя\s+|^річчя$/gi, '');
+    string_ = string_.replaceAll(/^річя\s+|\s+річя$|\s+річя\s+|^річя$/gi, '');
+    string_ = string_.replaceAll(/^річча\s+|\s+річча$|\s+річча|^річча$\s+/gi, '');
+    string_ = string_.replaceAll(/^річа\s+|\s+річа$|\s+річа\s+|^річа$/gi, '');
+    string_ = string_.replaceAll(/^жд\s+|\s+жд$|\s+жд\s+/gi, '');
+    string_ = string_.replaceAll(/^км\s+|\s+км$|\s+км\s+/gi, '');
+    string_ = string_.replaceAll(/^ррс\s+|\s+ррс$|\s+ррс\s+/gi, '');
+    string_ = string_.replaceAll(/^пзз\s+|\s+пзз$|\s+пзз\s+/gi, '');
 
-    string_ = string_.replace(/^ім\.|\s+ім\./gi, '');
-    string_ = string_.replace(/ім\.105-ти/gi, '');
-    string_ = string_.replace(/null/gi, '');
-    string_ = string_.replace(/вул\./gi, '');
-    string_ = string_.replace(/.\./gi, '');
-    string_ = string_.replace(/ііі/gi, '');
-    string_ = string_.replace(/іі/gi, '');
-    string_ = string_.replace(/v/gi, '');
-    string_ = string_.replace(/\d/gi, '');
-    string_ = string_.replace(/\s+і{1,3}\s+|^і{1,3}\s+|\s+і{1,3}$/gi, '');
-    string_ = string_.replace(/i+/gi, 'і');
-    string_ = string_.replace(/\.+/g, '');
-    string_ = string_.replace(/"/g, "'");
-    string_ = string_.replace(/''/g, '');
-    string_ = string_.replace(/'а'/gi, '');
-    string_ = string_.replace(/'б'/gi, '');
-    string_ = string_.replace(/^-\s*|-\s*$|\s+км\s*$/g, '');
-    string_ = string_.replace(/\s-\s/g, '-');
-    string_ = string_.replace(/\s-/g, '-');
-    string_ = string_.replace(/-\s/g, '-');
-    string_ = string_.replace(/,/g, '');
-    string_ = string_.replace(/^[\S\s]\s/g, '');
-    string_ = string_.replace(/\s+[\S\s]$/g, '');
+    string_ = string_.replaceAll(/^ім\.|\s+ім\./gi, '');
+    string_ = string_.replaceAll(/ім\.105-ти/gi, '');
+    string_ = string_.replaceAll(/null/gi, '');
+    string_ = string_.replaceAll(/вул\./gi, '');
+    string_ = string_.replaceAll(/.\./gi, '');
+    string_ = string_.replaceAll(/ііі/gi, '');
+    string_ = string_.replaceAll(/іі/gi, '');
+    string_ = string_.replaceAll(/v/gi, '');
+    string_ = string_.replaceAll(/\d/gi, '');
+    string_ = string_.replaceAll(/\s+і{1,3}\s+|^і{1,3}\s+|\s+і{1,3}$/gi, '');
+    string_ = string_.replaceAll(/i+/gi, 'і');
+    string_ = string_.replaceAll(/\.+/g, '');
+    string_ = string_.replaceAll('"', "'");
+    string_ = string_.replaceAll("''", '');
+    string_ = string_.replaceAll(/'а'/gi, '');
+    string_ = string_.replaceAll(/'б'/gi, '');
+    string_ = string_.replaceAll(/^-\s*|-\s*$|\s+км\s*$/g, '');
+    string_ = string_.replaceAll(/\s-\s/g, '-');
+    string_ = string_.replaceAll(/\s-/g, '-');
+    string_ = string_.replaceAll(/-\s/g, '-');
+    string_ = string_.replaceAll(',', '');
+    string_ = string_.replaceAll(/^[\S\s]\s/g, '');
+    string_ = string_.replaceAll(/\s+[\S\s]$/g, '');
 
-    string_ = string_.replace(/\s\s+/g, ' ');
+    string_ = string_.replaceAll(/\s\s+/g, ' ');
     string_ = string_.trim().toLowerCase();
 
     // leave words with more than 4 characters
     if (string_.length < 4) {
       string_ = '';
     }
+
     return string_;
   })
   .filter((element) => element !== '');
@@ -112,6 +116,7 @@ fs.writeFile(path.join(__dirname, './strings/houses.json'), jsonContent, 'utf8',
   if (error) {
     return console.error(error);
   }
+
   console.dir('The file was saved!');
 });
 

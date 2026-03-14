@@ -1,4 +1,4 @@
-import { formatStateIntoAccusative, joinUkrainianConjunctions } from '../../src/utils/index';
+import { formatStateIntoAccusative, joinUkrainianConjunctions } from '@utils/index';
 
 describe('formatStateIntoAccusative', () => {
   const states = [
@@ -56,6 +56,7 @@ describe('formatStateIntoAccusative', () => {
     'Чернігівській області',
     'м. Київ',
   ];
+
   it('should format states right', () => {
     const newStates = states.map((state) => formatStateIntoAccusative(state));
 

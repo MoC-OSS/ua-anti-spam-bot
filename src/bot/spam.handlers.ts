@@ -1,4 +1,4 @@
-import type { GrammyContext } from '../types';
+import type { GrammyContext } from '@types/';
 
 import type { MessageHandler } from './message.handler';
 

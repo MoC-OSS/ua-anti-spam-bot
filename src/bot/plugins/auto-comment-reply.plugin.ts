@@ -1,7 +1,7 @@
 import type { Context, Middleware, RawApi } from 'grammy';
 import type { Methods, Payload } from 'grammy/out/core/client';
 
-import { TELEGRAM_USER_ID } from '../../const';
+import { TELEGRAM_USER_ID } from '@const/';
 
 const METHODS = new Set<Methods<RawApi>>([
   'sendMessage',

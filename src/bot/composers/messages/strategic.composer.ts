@@ -1,7 +1,8 @@
 import { Composer } from 'grammy';
 
-import type { GrammyContext } from '../../../types';
-import type { OnTextListener } from '../../listeners';
+import type { OnTextListener } from '@bot/listeners';
+
+import type { GrammyContext } from '@types/';
 
 export interface StrategicComposerProperties {
   onTextListener: OnTextListener;

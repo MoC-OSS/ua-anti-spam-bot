@@ -1,6 +1,7 @@
 import fsp from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
+
 import ffmpegPath from 'ffmpeg-static';
 import { path as ffprobePath } from 'ffprobe-static';
 import type { FfprobeData } from 'fluent-ffmpeg';
@@ -21,6 +22,7 @@ export class VideoService {
     }
 
     const command = ffmpeg();
+
     command.setFfmpegPath(ffmpegPath);
     command.setFfprobePath(ffprobePath);
 
@@ -41,6 +43,7 @@ export class VideoService {
     if (!localDuration) {
       try {
         const fileStat: FfprobeData = await this.getVideoProbe(videoFile);
+
         if (!fileStat.format.duration || fileStat.format.duration < 0.1) {
           throw new Error('Video has no duration');
         }
@@ -64,6 +67,7 @@ export class VideoService {
    * */
   getVideoProbe(videoFile: URL): Promise<FfprobeData> {
     const command = this.spawnCommand();
+
     return promisify<FfprobeData>((callback) => command.input(fileURLToPath(videoFile)).ffprobe(callback))();
   }
 
@@ -75,7 +79,7 @@ export class VideoService {
 
   async convertToVideoNote(videoFile: Buffer, fileName: string): Promise<Buffer>;
 
-  async convertToVideoNote(videoFile: URL | Buffer, fileName: string): Promise<Buffer> {
+  async convertToVideoNote(videoFile: Buffer | URL, fileName: string): Promise<Buffer> {
     let videoPath: URL;
     let outputVideoName: string;
 

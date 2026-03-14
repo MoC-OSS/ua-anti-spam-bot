@@ -1,8 +1,9 @@
 import type { ChatMember } from '@grammyjs/types/manage';
 import { Composer } from 'grammy';
 
-import type { GrammyContext } from '../../types';
-import { onlyNotDeletedFilter, onlyWhenBotAdminFilter } from '../filters';
+import { onlyNotDeletedFilter, onlyWhenBotAdminFilter } from '@bot/filters';
+
+import type { GrammyContext } from '@types/';
 
 /**
  * @description Remove join and leave messages from chat
@@ -21,11 +22,13 @@ export const getJoinLeaveComposer = () => {
     // Filter if the bot is not left chat member
     .filter((context: GrammyContext) => {
       const leftStatuses = new Set<ChatMember['status']>(['left', 'kicked']);
+
       return !(context.myChatMember && leftStatuses.has(context.myChatMember?.new_chat_member.status || 'left'));
     })
     // Delete message
     .use(async (context, next) => {
       await context.deleteMessage();
+
       return next();
     });
 

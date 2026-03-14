@@ -1,5 +1,6 @@
+import { GOOGLE_SHEETS_NAMES } from '@const/';
+
 import { environmentConfig } from '../config';
-import { GOOGLE_SHEETS_NAMES } from '../const';
 
 import type { GoogleService } from './google.service';
 import { googleService as localGoogleService } from './google.service';
@@ -50,8 +51,9 @@ export class SwindlersGoogleService {
    *
    * @returns Promise<Record<string, any>[] | null>
    * */
-  getSheet<T extends true | false = true>(range: string, compact: T) {
+  getSheet<T extends false | true = true>(range: string, compact: T) {
     const isCompact = compact === undefined ? (true as T) : compact;
+
     return this.googleService.getSheet<T>(environmentConfig.GOOGLE_SPREADSHEET_ID, GOOGLE_SHEETS_NAMES.SWINDLERS, range, isCompact);
   }
 
@@ -90,7 +92,9 @@ export class SwindlersGoogleService {
    * */
   async smartAppendToSheet(range: string, value: string) {
     const values = await this.getSheet(range, true);
+
     await this.clearSheet(range);
+
     return this.googleService.updateSheet(
       environmentConfig.GOOGLE_SPREADSHEET_ID,
       GOOGLE_SHEETS_NAMES.SWINDLERS,
@@ -122,6 +126,7 @@ export class SwindlersGoogleService {
 
   getTrainingPositives<T extends boolean = true>(compact?: T) {
     const isCompact = compact === undefined ? (true as T) : compact;
+
     return this.getSheet<T>(this.RANGES.TRAINING_POSITIVES, isCompact);
   }
 
@@ -138,6 +143,7 @@ export class SwindlersGoogleService {
   async appendTrainingPositives(singleCase: string) {
     const values = await this.getTrainingPositives(false);
     const lastPosition = (values.at(-1)?.index || 0) + 1;
+
     return this.appendToSheet(this.appendRange(this.SHEET_COLUMNS.TRAINING_POSITIVES, lastPosition), singleCase);
   }
 
@@ -291,7 +297,7 @@ export class SwindlersGoogleService {
     return `${column}${this.SHEETS_START_FROM}:${column}`;
   }
 
-  private appendRange(column: string, position: string | number) {
+  private appendRange(column: string, position: number | string) {
     return `${column}${position}`;
   }
 }

@@ -1,12 +1,13 @@
 import axios from 'axios';
 
-import { mockDynamicStorageService, mockNewBot, mockNewUrl } from '../../src/services/_mocks/index.mocks';
-import { SwindlersBotsService } from '../../src/services/swindlers-bots.service';
-import { SwindlersCardsService } from '../../src/services/swindlers-cards.service';
-import { SwindlersDetectService } from '../../src/services/swindlers-detect.service';
-import { SwindlersUrlsService } from '../../src/services/swindlers-urls.service';
-import type { SwindlersTensorService } from '../../src/tensor';
-import { initSwindlersTensor } from '../../src/tensor';
+import { mockDynamicStorageService, mockNewBot, mockNewUrl } from '@services/_mocks/index.mocks';
+import { SwindlersBotsService } from '@services/swindlers-bots.service';
+import { SwindlersCardsService } from '@services/swindlers-cards.service';
+import { SwindlersDetectService } from '@services/swindlers-detect.service';
+import { SwindlersUrlsService } from '@services/swindlers-urls.service';
+
+import type { SwindlersTensorService } from '@tensor/';
+import { initSwindlersTensor } from '@tensor/';
 
 vi.mock('axios');
 
@@ -42,6 +43,7 @@ describe('SwindlersDetectService', () => {
       it('should match swindler urls as spam', async () => {
         const text = 'https://da-pay.me/ тест';
         const responseUrl = 'https://da-pay.me/';
+
         axiosMock.get.mockImplementationOnce(() => Promise.resolve({ request: { res: { responseUrl } } }));
         const result = await swindlersDetectService.isSwindlerMessage(text);
 
@@ -53,6 +55,7 @@ describe('SwindlersDetectService', () => {
       it('should match swindler unresolved short url as spam', async () => {
         const text = 'https://privat24.io/ тест';
         const responseUrl = 'https://privat24.io';
+
         // eslint-disable-next-line prefer-promise-reject-errors
         axiosMock.get.mockImplementationOnce(() => Promise.reject({ response: { headers: { location: responseUrl } } }));
         const result = await swindlersDetectService.isSwindlerMessage(text);
@@ -65,8 +68,10 @@ describe('SwindlersDetectService', () => {
 
       it('should match similar swindler urls as spam', async () => {
         const text = `${mockNewUrl} test`;
+
         axiosMock.get.mockImplementationOnce(() => Promise.resolve({ response: { headers: { location: mockNewUrl } } }));
         const result = await swindlersDetectService.isSwindlerMessage(text);
+
         expect(result.isSpam).toEqual(true);
         expect(result.rate).toBeGreaterThan(0.6);
         expect(result.reason).toEqual('site');

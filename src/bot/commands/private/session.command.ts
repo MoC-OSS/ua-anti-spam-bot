@@ -1,8 +1,10 @@
 import { InputFile } from 'grammy';
 
+import { redisClient } from '@db/';
+
+import type { GrammyMiddleware } from '@types/';
+
 import { creatorId } from '../../../creator';
-import { redisClient } from '../../../db';
-import type { GrammyMiddleware } from '../../../types';
 
 export class SessionCommand {
   /**
@@ -23,10 +25,12 @@ export class SessionCommand {
 
       if (chatId === creatorId) {
         const sessions = await redisClient.getAllChatRecords();
+
         const sessionDocument = new InputFile(
           Buffer.from(JSON.stringify({ sessions }, null, 2)),
           `telegraf-chat-session-${this.startTime.toISOString()}.json`,
         );
+
         await context.replyWithDocument(sessionDocument);
       }
     };

@@ -1,6 +1,8 @@
-import { adminReadyHasNoDeletePermissionMessage, getAdminReadyMessage, getStartChannelMessage } from '../../message';
-import type { GrammyQueryMiddleware } from '../../types';
-import { handleError } from '../../utils';
+import { adminReadyHasNoDeletePermissionMessage, getAdminReadyMessage, getStartChannelMessage } from '@message/';
+
+import type { GrammyQueryMiddleware } from '@types/';
+
+import { handleError } from '@utils/';
 
 /**
  * Promoted to admin
@@ -12,6 +14,7 @@ export const botPromoteQuery: GrammyQueryMiddleware<'my_chat_member'> = async (c
     } else {
       context.chatSession.botAdminDate = new Date();
       context.chatSession.isBotAdmin = true;
+
       context
         .replyWithHTML(
           context.myChatMember.new_chat_member.can_delete_messages

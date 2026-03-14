@@ -1,4 +1,4 @@
-import { cardsService } from '../../src/services/cards.service';
+import { cardsService } from '@services/cards.service';
 
 describe('CardsService', () => {
   describe('parseCards', () => {

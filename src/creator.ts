@@ -2,14 +2,21 @@ import { environmentConfig } from './config';
 
 // TODO remove this file later and from Git-history
 export const creatorId = environmentConfig.CREATOR_ID ?? 341_977_297;
+
 export const helpChat = 'https://t.me/+UOWRWv3JSB1mYTZi';
+
 export const logsChat = -1_002_169_799_987;
+
 export const secondLogsChat = -1_002_207_322_076;
+
 export const trainingChat = -1_001_527_463_076;
+
 export const privateTrainingChat = -788_538_459;
 
 export const swindlerMessageChatId = -1_001_769_124_427;
+
 export const swindlerBotsChatId = -672_793_621;
+
 export const swindlerHelpChatId = -1_001_750_209_242;
 
 export const swindlersRegex =

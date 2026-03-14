@@ -1,4 +1,4 @@
-import { MessagePrivateMockUpdate } from '../../../src/testing/updates/message-private-mock.update';
+import { MessagePrivateMockUpdate } from '@testing/updates/message-private-mock.update';
 
 describe('Testing Update Mocks', () => {
   describe('MessagePrivateMockUpdate', () => {
@@ -13,6 +13,7 @@ describe('Testing Update Mocks', () => {
 
     it('should create extended when buildOverwrite and work with typing', () => {
       const expectedText = 'test';
+
       const update = new MessagePrivateMockUpdate(expectedText).buildOverwrite({
         message: {
           chat: {

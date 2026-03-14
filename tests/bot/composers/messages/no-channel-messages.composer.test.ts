@@ -1,13 +1,15 @@
 import { hydrateReply } from '@grammyjs/parse-mode';
 import { Bot } from 'grammy';
 
-import { getNoChannelMessagesComposer } from '../../../../src/bot/composers/messages/no-channel-messages.composer';
-import { logContextMiddleware, parseText, stateMiddleware } from '../../../../src/bot/middleware';
-import { selfDestructedReply } from '../../../../src/bot/plugins';
-import type { OutgoingRequests } from '../../../../src/testing';
-import { MessageMockUpdate, MessagePrivateMockUpdate, prepareBotForTesting } from '../../../../src/testing';
-import { mockChatSession } from '../../../../src/testing-main';
-import type { GrammyContext } from '../../../../src/types';
+import { getNoChannelMessagesComposer } from '@bot/composers/messages/no-channel-messages.composer';
+import { logContextMiddleware, parseText, stateMiddleware } from '@bot/middleware';
+import { selfDestructedReply } from '@bot/plugins';
+
+import type { OutgoingRequests } from '@testing/';
+import { MessageMockUpdate, MessagePrivateMockUpdate, prepareBotForTesting } from '@testing/';
+import { mockChatSession } from '@testing/../testing-main';
+
+import type { GrammyContext } from '@types/';
 
 let outgoingRequests: OutgoingRequests;
 const { noChannelMessagesComposer } = getNoChannelMessagesComposer();
@@ -101,6 +103,7 @@ describe('noChannelMessagesComposer', () => {
 
     it('should delete message but not notify if disableDeleteMessage is true', async () => {
       chatSession.chatSettings.disableDeleteMessage = true;
+
       const update = new MessageMockUpdate('Test').buildOverwrite({
         message: {
           from: { id: 136_817_688, username: 'Channel_Bot', is_bot: false, first_name: '' },
@@ -131,6 +134,7 @@ describe('noChannelMessagesComposer', () => {
         },
         sender_chat: { id: 12_345 },
       });
+
       await bot.handleUpdate(update);
 
       expect(outgoingRequests).toHaveLength(0);
@@ -142,6 +146,7 @@ describe('noChannelMessagesComposer', () => {
           from: { id: 123_456_789, username: 'RegularUser', is_bot: false, first_name: '' },
         },
       });
+
       await bot.handleUpdate(update);
 
       expect(outgoingRequests).toHaveLength(0);
@@ -171,6 +176,7 @@ describe('noChannelMessagesComposer', () => {
           },
         },
       });
+
       await bot.handleUpdate(update);
 
       expect(outgoingRequests).toHaveLength(0);

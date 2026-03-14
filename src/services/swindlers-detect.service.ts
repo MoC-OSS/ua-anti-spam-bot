@@ -1,8 +1,9 @@
 import { compareTwoStrings } from 'string-similarity';
 import { optimizeText } from 'ukrainian-ml-optimizer';
 
-import type { SwindlersTensorService } from '../tensor';
-import type { SwindlersResult, SwindlersResultSummary } from '../types';
+import type { SwindlersTensorService } from '@tensor/';
+
+import type { SwindlersResult, SwindlersResultSummary } from '@types/';
 
 import type { DynamicStorageService } from './dynamic-storage.service';
 import type { SwindlersBotsService } from './swindlers-bots.service';
@@ -33,6 +34,7 @@ export class SwindlersDetectService {
   async isSwindlerMessage(message: string): Promise<SwindlersResult> {
     const results: SwindlersResultSummary = {};
     const foundSwindlerUrl = await this.swindlersUrlsService.processMessage(message);
+
     results.foundSwindlerUrl = foundSwindlerUrl;
 
     if (foundSwindlerUrl) {
@@ -45,6 +47,7 @@ export class SwindlersDetectService {
     }
 
     const foundSwindlerMention = this.swindlersBotsService.processMessage(message);
+
     results.foundSwindlerMention = foundSwindlerMention;
 
     if (foundSwindlerMention) {
@@ -59,6 +62,7 @@ export class SwindlersDetectService {
     }
 
     const foundCard = this.swindlersCardsService.processMessage(message);
+
     results.foundCard = foundCard;
 
     if (foundCard) {
@@ -71,6 +75,7 @@ export class SwindlersDetectService {
     }
 
     const foundTensor = await this.swindlersTensorService.predict(message, null);
+
     results.foundTensor = foundTensor;
 
     if (foundTensor.isSpam) {
@@ -94,6 +99,7 @@ export class SwindlersDetectService {
 
     let lastChance = 0;
     let maxChance = 0;
+
     const foundSwindler = this.dynamicStorageService.swindlerMessages.some((text) => {
       lastChance = compareTwoStrings(processedMessage, text);
 
@@ -103,6 +109,7 @@ export class SwindlersDetectService {
 
       return lastChance >= this.SWINDLER_SETTINGS.DELETE_CHANCE;
     });
+
     results.foundCompare = {
       foundSwindler,
       spamRate: maxChance,

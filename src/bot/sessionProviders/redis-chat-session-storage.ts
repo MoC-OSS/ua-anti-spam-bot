@@ -1,5 +1,6 @@
-import type { GrammyContext, RedisSessionOptions } from '../../types';
-import { RedisMiddleware } from '../middleware/redis.middleware';
+import { RedisMiddleware } from '@bot/middleware/redis.middleware';
+
+import type { GrammyContext, RedisSessionOptions } from '@types/';
 
 export class RedisChatSession extends RedisMiddleware {
   constructor() {
@@ -8,8 +9,12 @@ export class RedisChatSession extends RedisMiddleware {
       state: {},
       format: {},
       getSessionKey: (context: GrammyContext): string => {
-        if (!context.from) return ''; // should never happen
+        if (!context.from) {
+          return '';
+        } // should never happen
+
         let chatInstance: number | string;
+
         if (context.chat) {
           chatInstance = context.chat.id;
         } else if (context.callbackQuery) {
@@ -17,9 +22,11 @@ export class RedisChatSession extends RedisMiddleware {
         } else {
           chatInstance = context.from.id;
         }
+
         return `${chatInstance}`;
       },
     };
+
     super(_options);
   }
 }

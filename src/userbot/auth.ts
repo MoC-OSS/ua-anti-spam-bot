@@ -1,6 +1,7 @@
-/* eslint-disable camelcase,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/ban-ts-comment,@typescript-eslint/no-unsafe-assignment */
+/* eslint-disable camelcase */
+import type { CheckPassword, MTProtoError } from '@types/';
+
 import { environmentConfig } from '../config';
-import type { CheckPassword, MTProtoError } from '../types';
 
 import { api } from './api';
 
@@ -107,6 +108,7 @@ const auth = async () => {
       });
 
       const checkPasswordResult = await checkPassword({ srp_id, A, M1 });
+
       console.info(checkPasswordResult);
     }
   }

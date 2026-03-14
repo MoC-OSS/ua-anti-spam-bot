@@ -1,4 +1,4 @@
-import type { DefaultChatSettings, GrammyFilter } from '../../types';
+import type { DefaultChatSettings, GrammyFilter } from '@types/';
 
 /**
  * @returns {true} when default settings is enabled

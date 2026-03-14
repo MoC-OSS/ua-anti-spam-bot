@@ -8,7 +8,9 @@
   "compilerOptions": {
     "target": "ES2022",
     "outDir": "dist",
-    "lib": ["es2022"],
+    "lib": [
+      "es2022"
+    ],
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
@@ -24,12 +26,56 @@
     "paths": {
       "@mtproto/core": [
         "./src/lib-types/mtproto__core"
+      ],
+      "@assets/*": [
+        "./src/assets/*"
+      ],
+      "@bot/*": [
+        "./src/bot/*"
+      ],
+      "@const/*": [
+        "./src/const/*"
+      ],
+      "@db/*": [
+        "./src/db/*"
+      ],
+      "@definitions/*": [
+        "./src/definitions/*"
+      ],
+      "@express-logic/*": [
+        "./src/express-logic/*"
+      ],
+      "@message/*": [
+        "./src/message/*"
+      ],
+      "@packages/*": [
+        "./src/packages/*"
+      ],
+      "@services/*": [
+        "./src/services/*"
+      ],
+      "@tensor/*": [
+        "./src/tensor/*"
+      ],
+      "@testing/*": [
+        "./src/testing/*"
+      ],
+      "@types/*": [
+        "./src/types/*"
+      ],
+      "@userbot/*": [
+        "./src/userbot/*"
+      ],
+      "@utils/*": [
+        "./src/utils/*"
+      ],
+      "@video/*": [
+        "./src/video/*"
       ]
     },
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
-    "allowSyntheticDefaultImports": true,
-    "baseUrl": "src"
+    "allowSyntheticDefaultImports": true
   },
   "display": "Recommended",
   "include": [

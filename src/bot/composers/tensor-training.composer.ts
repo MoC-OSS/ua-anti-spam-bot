@@ -1,12 +1,15 @@
 import type { Transformer } from 'grammy';
 import { Composer } from 'grammy';
 
+import type { TestTensorListener } from '@bot/listeners';
+import { onlyWithText, parseText } from '@bot/middleware';
+
+import { messageQuery } from '@const/';
+
+import type { GrammyContext } from '@types/';
+
 import { environmentConfig } from '../../config';
-import { messageQuery } from '../../const';
 import { trainingChat } from '../../creator';
-import type { GrammyContext } from '../../types';
-import type { TestTensorListener } from '../listeners';
-import { onlyWithText, parseText } from '../middleware';
 
 export interface TensorTrainingComposerProperties {
   tensorListener: TestTensorListener;

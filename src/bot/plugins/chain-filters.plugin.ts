@@ -3,7 +3,8 @@ import type { Context } from 'grammy';
 export type AtLeastOneArgument<T> = [T, ...T[]];
 
 export type BooleanFilter<C extends Context> = (context: C) => boolean;
-export type ChainFilter<C extends Context> = boolean | BooleanFilter<C> | Record<string, boolean | BooleanFilter<C>>;
+
+export type ChainFilter<C extends Context> = BooleanFilter<C> | Record<string, BooleanFilter<C> | boolean> | boolean;
 
 /**
  * It helps to chain filters to simplify Grammy Composer's `filter` method logic.
@@ -21,7 +22,6 @@ export type ChainFilter<C extends Context> = boolean | BooleanFilter<C> | Record
  * */
 export function chainFilters<C extends Context>(...filters: AtLeastOneArgument<ChainFilter<C>>) {
   return (context: C): boolean => {
-    // eslint-disable-next-line no-restricted-syntax
     for (const filter of filters) {
       switch (typeof filter) {
         /**

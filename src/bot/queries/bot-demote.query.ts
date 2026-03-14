@@ -1,6 +1,8 @@
-import { memberReadyMessage } from '../../message';
-import type { GrammyQueryMiddleware } from '../../types';
-import { handleError } from '../../utils';
+import { memberReadyMessage } from '@message/';
+
+import type { GrammyQueryMiddleware } from '@types/';
+
+import { handleError } from '@utils/';
 
 /**
  * Demoted to regular user

@@ -1,10 +1,11 @@
-import { mockDataset, mockGoogleService, mockSwindlersGoogleService } from '../../src/services/_mocks/index.mocks';
-import { DynamicStorageService } from '../../src/services/dynamic-storage.service';
+import { mockDataset, mockGoogleService, mockSwindlersGoogleService } from '@services/_mocks/index.mocks';
+import { DynamicStorageService } from '@services/dynamic-storage.service';
 
 /**
  * @type {DynamicStorageService}
  * */
 let dynamicStorageService: DynamicStorageService;
+
 describe('DynamicStorageService', () => {
   beforeAll(() => {
     dynamicStorageService = new DynamicStorageService(mockSwindlersGoogleService, mockGoogleService, mockDataset);

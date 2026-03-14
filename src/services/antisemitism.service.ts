@@ -1,5 +1,6 @@
+import { SearchSet } from '@utils/search-set';
+
 import { dataset } from '../../dataset/dataset';
-import { SearchSet } from '../utils/search-set';
 
 import { ObsceneService } from './obscene.service';
 

@@ -8,4 +8,4 @@ export enum ImageType {
   UNKNOWN = 'unknown',
 }
 
-export type ImageVideoTypes = ImageType.VIDEO | ImageType.VIDEO_STICKER | ImageType.ANIMATION | ImageType.VIDEO_NOTE;
+export type ImageVideoTypes = ImageType.ANIMATION | ImageType.VIDEO | ImageType.VIDEO_NOTE | ImageType.VIDEO_STICKER;

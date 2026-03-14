@@ -1,15 +1,18 @@
 import { hydrateReply } from '@grammyjs/parse-mode';
 import { Bot } from 'grammy';
 
-import { getNsfwMessageFilterComposer } from '../../../../src/bot/composers/messages/nsfw-message-filter.composer';
-import { parseText, stateMiddleware } from '../../../../src/bot/middleware';
-import { selfDestructedReply } from '../../../../src/bot/plugins';
-import { mockDynamicStorageService } from '../../../../src/services/_mocks/index.mocks';
-import { NsfwDetectService } from '../../../../src/services/nsfw-detect.service';
-import type { OutgoingRequests } from '../../../../src/testing';
-import { MessageMockUpdate, prepareBotForTesting } from '../../../../src/testing';
-import { mockChatSession } from '../../../../src/testing-main';
-import type { GrammyContext } from '../../../../src/types';
+import { getNsfwMessageFilterComposer } from '@bot/composers/messages/nsfw-message-filter.composer';
+import { parseText, stateMiddleware } from '@bot/middleware';
+import { selfDestructedReply } from '@bot/plugins';
+
+import { mockDynamicStorageService } from '@services/_mocks/index.mocks';
+import { NsfwDetectService } from '@services/nsfw-detect.service';
+
+import type { OutgoingRequests } from '@testing/';
+import { MessageMockUpdate, prepareBotForTesting } from '@testing/';
+import { mockChatSession } from '@testing/../testing-main';
+
+import type { GrammyContext } from '@types/';
 
 let outgoingRequests: OutgoingRequests;
 const nsfwDetectService = new NsfwDetectService(mockDynamicStorageService, 0.6);
@@ -52,6 +55,7 @@ describe('nsfwMessageFilterComposer', () => {
 
     it('should delete if nsfw message is used', async () => {
       const update = new MessageMockUpdate('Радую голой фоточкой всіх нових в каналі').build();
+
       await bot.handleUpdate(update);
 
       const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest, sendMessageRequest] = outgoingRequests.getAll<
@@ -71,6 +75,7 @@ describe('nsfwMessageFilterComposer', () => {
     it('should delete if nsfw message is used and do not notify if disableDeleteMessage is true', async () => {
       chatSession.chatSettings.disableDeleteMessage = true;
       const update = new MessageMockUpdate('Радую голой фоточкой всіх нових в каналі').build();
+
       await bot.handleUpdate(update);
 
       const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest] = outgoingRequests.getAll<
@@ -86,7 +91,8 @@ describe('nsfwMessageFilterComposer', () => {
     });
 
     it('should not delete if not nsfw message', async () => {
-      const update = new MessageMockUpdate(`Я додам нові фотографії зими з новорічної події`).build();
+      const update = new MessageMockUpdate('Я додам нові фотографії зими з новорічної події').build();
+
       await bot.handleUpdate(update);
 
       expect(outgoingRequests.length).toEqual(0);
@@ -104,13 +110,15 @@ describe('nsfwMessageFilterComposer', () => {
 
     it('should not delete if nsfw message is used', async () => {
       const update = new MessageMockUpdate('Радую голой фоточкой всіх нових в каналі').build();
+
       await bot.handleUpdate(update);
 
       expect(outgoingRequests.length).toEqual(0);
     });
 
     it('should not delete if not nsfw message is used', async () => {
-      const update = new MessageMockUpdate(`Я додам нові фотографії зими з новорічної події`).build();
+      const update = new MessageMockUpdate('Я додам нові фотографії зими з новорічної події').build();
+
       await bot.handleUpdate(update);
 
       expect(outgoingRequests.length).toEqual(0);

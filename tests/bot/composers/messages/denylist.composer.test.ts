@@ -1,13 +1,15 @@
 import { hydrateReply } from '@grammyjs/parse-mode';
 import { Bot } from 'grammy';
 
-import { getDenylistComposer } from '../../../../src/bot/composers/messages/denylist.composer';
-import { parseText, stateMiddleware } from '../../../../src/bot/middleware';
-import { selfDestructedReply } from '../../../../src/bot/plugins';
-import type { OutgoingRequests } from '../../../../src/testing';
-import { MessageMockUpdate, prepareBotForTesting } from '../../../../src/testing';
-import { mockChatSession } from '../../../../src/testing-main';
-import type { GrammyContext } from '../../../../src/types';
+import { getDenylistComposer } from '@bot/composers/messages/denylist.composer';
+import { parseText, stateMiddleware } from '@bot/middleware';
+import { selfDestructedReply } from '@bot/plugins';
+
+import type { OutgoingRequests } from '@testing/';
+import { MessageMockUpdate, prepareBotForTesting } from '@testing/';
+import { mockChatSession } from '@testing/../testing-main';
+
+import type { GrammyContext } from '@types/';
 
 let outgoingRequests: OutgoingRequests;
 const { denylistComposer } = getDenylistComposer();
@@ -20,7 +22,9 @@ const { chatSession, mockChatSessionMiddleware } = mockChatSession({
     disableDeleteMessage: false,
   },
 });
+
 const testWord = 'testWord';
+
 describe('denylistComposer', () => {
   beforeAll(async () => {
     bot.use(hydrateReply);
@@ -29,6 +33,7 @@ describe('denylistComposer', () => {
     bot.use(parseText);
     bot.use(mockChatSessionMiddleware);
     bot.use(denylistComposer);
+
     outgoingRequests = await prepareBotForTesting<GrammyContext>(bot, {
       getChat: {
         invite_link: '',
@@ -49,6 +54,7 @@ describe('denylistComposer', () => {
 
     it('should delete if denylist word is used', async () => {
       const update = new MessageMockUpdate(testWord).build();
+
       await bot.handleUpdate(update);
 
       const expectedMethods = outgoingRequests.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']);
@@ -59,6 +65,7 @@ describe('denylistComposer', () => {
 
     it('should delete if denylist word is part of a larger message', async () => {
       const update = new MessageMockUpdate(`Larger message ${testWord} wrapped word is part of another string`).build();
+
       await bot.handleUpdate(update);
 
       const expectedMethods = outgoingRequests.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']);
@@ -69,6 +76,7 @@ describe('denylistComposer', () => {
 
     it('should delete case-insensitively', async () => {
       const update = new MessageMockUpdate(testWord.toUpperCase()).build();
+
       await bot.handleUpdate(update);
 
       const expectedMethods = outgoingRequests.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']);
@@ -80,6 +88,7 @@ describe('denylistComposer', () => {
     it('should delete and skip user notification when disableDeleteMessage is true', async () => {
       chatSession.chatSettings.disableDeleteMessage = true;
       const update = new MessageMockUpdate(testWord).build();
+
       await bot.handleUpdate(update);
 
       const expectedMethods = outgoingRequests.buildMethods(['deleteMessage', 'getChat', 'sendMessage']);
@@ -91,6 +100,7 @@ describe('denylistComposer', () => {
 
     it('should not delete if word is not in denylist', async () => {
       const update = new MessageMockUpdate('not a banned word').build();
+
       await bot.handleUpdate(update);
 
       expect(outgoingRequests.length).toEqual(0);
@@ -109,6 +119,7 @@ describe('denylistComposer', () => {
 
     it('should not delete if enableDeleteDenylist is false even when denylist has words', async () => {
       const update = new MessageMockUpdate(testWord).build();
+
       await bot.handleUpdate(update);
       expect(outgoingRequests.length).toEqual(0);
     });
@@ -117,6 +128,7 @@ describe('denylistComposer', () => {
       chatSession.chatSettings.enableDeleteDenylist = true;
       chatSession.chatSettings.denylist = [];
       const update = new MessageMockUpdate(testWord).build();
+
       await bot.handleUpdate(update);
       expect(outgoingRequests.length).toEqual(0);
     });

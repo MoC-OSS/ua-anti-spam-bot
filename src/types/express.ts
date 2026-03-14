@@ -57,7 +57,7 @@ export interface ParseVideoErrorResponseBody {
   error: string;
 }
 
-export type ParseVideoResponseBody = ParseVideoSuccessResponseBody | ParseVideoErrorResponseBody;
+export type ParseVideoResponseBody = ParseVideoErrorResponseBody | ParseVideoSuccessResponseBody;
 
 export interface ParseVideoRequestBody {
   duration?: string;

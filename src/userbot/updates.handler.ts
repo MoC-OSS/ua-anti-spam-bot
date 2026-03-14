@@ -1,15 +1,19 @@
-/* eslint-disable no-restricted-syntax,no-await-in-loop,no-unreachable,unicorn/prefer-module */
 import fs from 'node:fs';
+
 import { forEachSeries } from 'p-iteration';
 import type { SetNonNullable } from 'type-fest';
 import { mentionRegexp, urlRegexp } from 'ukrainian-ml-optimizer';
 
+import type { DynamicStorageService, SwindlersBotsService, SwindlersDetectService } from '@services/';
+import { mentionService, redisService, swindlersGoogleService } from '@services/';
+
+import type { SwindlersTensorService, TensorService } from '@tensor/';
+
+import type { ProtoUpdate, SwindlerType } from '@types/';
+
+import { removeSystemInformationUtil as removeSystemInformationUtility } from '@utils/';
+
 import type { loadUserbotDatasetExtras } from '../../dataset/dataset';
-import type { DynamicStorageService, SwindlersBotsService, SwindlersDetectService } from '../services';
-import { mentionService, redisService, swindlersGoogleService } from '../services';
-import type { SwindlersTensorService, TensorService } from '../tensor';
-import type { ProtoUpdate, SwindlerType } from '../types';
-import { removeSystemInformationUtil } from '../utils';
 
 import type { ChatPeers } from './index';
 import type { MtProtoClient } from './mt-proto-client';
@@ -64,12 +68,14 @@ export class UpdatesHandler {
     const allowedTypes = new Set(['updateEditChannelMessage', 'updateNewChannelMessage']);
 
     const newMessageUpdates = updateInfo.updates.filter((anUpdate) => allowedTypes.has(anUpdate._) && anUpdate.message?.message);
+
     if (!newMessageUpdates || newMessageUpdates.length === 0) {
       return;
     }
 
     for (const update of newMessageUpdates) {
       const { message } = update.message;
+
       callback(message);
     }
   }
@@ -78,7 +84,7 @@ export class UpdatesHandler {
    * @param {string} message
    * */
   async handleSwindlers(message: string) {
-    const finalMessage = removeSystemInformationUtil(message);
+    const finalMessage = removeSystemInformationUtility(message);
     const matchArray = new Set<SwindlerType>(['tensor', 'site', 'mention']);
 
     if (!mentionRegexp.test(finalMessage) && !urlRegexp.test(finalMessage)) {
@@ -98,6 +104,7 @@ export class UpdatesHandler {
       if (isGoodMatch && isRateGood) {
         const allMentions = mentionService.parseMentions(message);
         const trainingBots = await redisService.getTrainingBots();
+
         const newMentions = (allMentions || []).filter(
           (item) => ![...this.dynamicStorageService.swindlerBots, ...trainingBots].includes(item),
         );
@@ -135,6 +142,7 @@ export class UpdatesHandler {
 
     if (spamResult.isSpam) {
       await processFoundSwindler(spamResult.rate, spamResult.reason);
+
       return { spam: true, reason: spamResult.reason, rate: spamResult.rate };
     }
 
@@ -145,9 +153,11 @@ export class UpdatesHandler {
 
     if (isHelp) {
       const isUnique = await this.userbotStorage.handleHelpMessage(finalMessage);
+
       if (isUnique) {
         await this.mtProtoClient.sendPeerMessage(message, this.chatPeers.helpChat);
         console.info(null, spamResult.results?.foundTensor?.spamRate, message);
+
         return { spam: false, reason: 'help message' };
       }
     }
@@ -161,13 +171,14 @@ export class UpdatesHandler {
   async handleTraining(message: string) {
     let clearMessageText = message;
     const deleteFromMessagePath = './from-entities.json';
+
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, import/no-unresolved
       const { default: deleteFromMessage } = await import(deleteFromMessagePath);
 
       if (!deleteFromMessage || !Array.isArray(deleteFromMessage)) {
         return;
       }
+
       const mentions = clearMessageText.match(mentionRegexp);
       const urls = clearMessageText.match(urlRegexp);
 
@@ -177,20 +188,19 @@ export class UpdatesHandler {
       clearMessageText = clearMessageText.replace(urlRegexp, ' ');
 
       deleteFromMessage.forEach((deleteWord) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         clearMessageText = clearMessageText.replace(deleteWord, ' ');
       });
 
       clearMessageText = clearMessageText.replaceAll(/  +/g, ' ').split(' ').slice(0, 15).join(' ');
 
       const { isSpam, spamRate } = await this.tensorService.predict(clearMessageText, 0.7);
+
       console.info(isSpam, spamRate, message);
 
       if (isSpam && spamRate < 0.9) {
         const isNew = await this.userbotStorage.handleMessage(clearMessageText);
 
         if (telegramLinks.length > 0) {
-          // eslint-disable-next-line @typescript-eslint/no-misused-promises
           await forEachSeries(telegramLinks, async (mention) => {
             if (!deleteFromMessage.includes(mention) && !sentMentionsFromStart.includes(mention)) {
               sentMentionsFromStart.push(mention);

@@ -1,8 +1,9 @@
 import type { MessageEntity } from '@grammyjs/types/message';
 import { Context } from 'grammy';
 
-import type { GrammyContext } from '../../src/types';
-import { revealHiddenUrls } from '../../src/utils/reveal-hidden-urls.util';
+import type { GrammyContext } from '@types/';
+
+import { revealHiddenUrls } from '@utils/reveal-hidden-urls.util';
 
 /**
  * @returns GrammyContext
@@ -29,7 +30,6 @@ const createContext = (text: string, entities: MessageEntity[]) => {
       },
     },
     {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       raw: {},
       state: { text },
@@ -74,6 +74,7 @@ describe('revealHiddenUrls', () => {
 
   it('should parse multiple urls in the message', () => {
     const text = 'url1 text url2 text123 234 !@#$%^&*()_+-= url3';
+
     const entities: MessageEntity[] = [
       { offset: 0, length: 4, type: 'text_link', url: 'http://example1.com/' },
       { offset: 10, length: 4, type: 'text_link', url: 'http://example2.com/' },
@@ -88,6 +89,7 @@ describe('revealHiddenUrls', () => {
 
   it('should not to be affected by bold', () => {
     const text = 'test some text url1 text bold url2';
+
     const entities: MessageEntity[] = [
       { offset: 0, length: 4, type: 'bold' },
       { offset: 15, length: 4, type: 'text_link', url: 'http://example1.com/' },

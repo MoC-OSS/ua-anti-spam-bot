@@ -1,9 +1,11 @@
-import * as tf from '@tensorflow/tfjs-node';
 import type { NSFWJS, predictionType } from 'nsfwjs';
 import * as nsfw from 'nsfwjs';
 
+import * as tf from '@tensorflow/tfjs-node';
+
+import type { NsfwTensorNegativeResult, NsfwTensorPositiveResult, NsfwTensorResult } from '@types/';
+
 import { environmentConfig } from '../config';
-import type { NsfwTensorNegativeResult, NsfwTensorPositiveResult, NsfwTensorResult } from '../types';
 
 export class NsfwTensorService {
   model!: NSFWJS;
@@ -22,9 +24,10 @@ export class NsfwTensorService {
 
   async classify(image: Buffer): Promise<predictionType[]> {
     const tensor3d = tf.node.decodeImage(image, 3);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
     // @ts-ignore
     const predictions = await this.model.classify(tensor3d);
+
     tensor3d.dispose(); // Tensor memory must be managed explicitly (it is not sufficient to let a tf.Tensor go out of scope for its memory to be released).
 
     return predictions;
@@ -75,6 +78,7 @@ export class NsfwTensorService {
 
     framesPredictions.some((predictions) => {
       const predictionResult = this.findHighestPrediction([highestPrediction, ...predictions].filter(Boolean));
+
       deletePrediction = predictionResult.deletePrediction;
       highestPrediction = predictionResult.highestPrediction;
 

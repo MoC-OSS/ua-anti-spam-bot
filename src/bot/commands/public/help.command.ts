@@ -1,6 +1,8 @@
-import { getHelpMessage } from '../../../message';
-import type { GrammyMiddleware } from '../../../types';
-import { formatDate, getUserData, handleError } from '../../../utils';
+import { getHelpMessage } from '@message/';
+
+import type { GrammyMiddleware } from '@types/';
+
+import { formatDate, getUserData, handleError } from '@utils/';
 
 export class HelpCommand {
   /**

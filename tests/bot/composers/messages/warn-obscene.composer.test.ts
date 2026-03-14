@@ -1,13 +1,15 @@
 import { hydrateReply } from '@grammyjs/parse-mode';
 import { Bot } from 'grammy';
 
-import { getWarnObsceneComposer } from '../../../../src/bot/composers/messages/warn-obscene.composer';
-import { parseText, stateMiddleware } from '../../../../src/bot/middleware';
-import { selfDestructedReply } from '../../../../src/bot/plugins';
-import type { OutgoingRequests } from '../../../../src/testing';
-import { MessageMockUpdate, prepareBotForTesting } from '../../../../src/testing';
-import { mockChatSession } from '../../../../src/testing-main';
-import type { GrammyContext } from '../../../../src/types';
+import { getWarnObsceneComposer } from '@bot/composers/messages/warn-obscene.composer';
+import { parseText, stateMiddleware } from '@bot/middleware';
+import { selfDestructedReply } from '@bot/plugins';
+
+import type { OutgoingRequests } from '@testing/';
+import { MessageMockUpdate, prepareBotForTesting } from '@testing/';
+import { mockChatSession } from '@testing/../testing-main';
+
+import type { GrammyContext } from '@types/';
 
 let outgoingRequests: OutgoingRequests;
 const { warnObsceneComposer: warnObsceneComposerTest } = getWarnObsceneComposer();
@@ -49,6 +51,7 @@ describe('warnObsceneComposer', () => {
 
     it('should warn if obscene is used', async () => {
       const update = new MessageMockUpdate('він сказав дебіл').build();
+
       await bot.handleUpdate(update);
 
       const expectedMethods = outgoingRequests.buildMethods(['getChat', 'sendMessage', 'sendMessage']);
@@ -61,6 +64,7 @@ describe('warnObsceneComposer', () => {
     it('should warn if obscene is used and do still notify if disableDeleteMessage is true', async () => {
       chatSession.chatSettings.disableDeleteMessage = true;
       const update = new MessageMockUpdate('він сказав дебіл').build();
+
       await bot.handleUpdate(update);
 
       const expectedMethods = outgoingRequests.buildMethods(['getChat', 'sendMessage', 'sendMessage']);
@@ -74,6 +78,7 @@ describe('warnObsceneComposer', () => {
       const update = new MessageMockUpdate(
         'Інтерактивна мапа дозволяє швидко і зручно дізнатися погоду в містах України. На ній відображаються погодні умови в найбільших містах України з можливістю перегляду прогнозу погоди на тиждень. Щоб дізнатися докладний прогноз погоди в вашому місті досить натиснути на назву населеного пункту на мапі.',
       ).build();
+
       await bot.handleUpdate(update);
 
       expect(outgoingRequests.length).toEqual(0);
@@ -91,6 +96,7 @@ describe('warnObsceneComposer', () => {
 
     it('should not warn if obscene is used', async () => {
       const update = new MessageMockUpdate('він сказав дебіл').build();
+
       await bot.handleUpdate(update);
 
       expect(outgoingRequests.length).toEqual(0);
@@ -100,6 +106,7 @@ describe('warnObsceneComposer', () => {
       const update = new MessageMockUpdate(
         'Інтерактивна мапа дозволяє швидко і зручно дізнатися погоду в містах України. На ній відображаються погодні умови в найбільших містах України з можливістю перегляду прогнозу погоди на тиждень. Щоб дізнатися докладний прогноз погоди в вашому місті досить натиснути на назву населеного пункту на мапі.',
       ).build();
+
       await bot.handleUpdate(update);
 
       expect(outgoingRequests.length).toEqual(0);

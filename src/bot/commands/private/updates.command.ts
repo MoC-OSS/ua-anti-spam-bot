@@ -1,10 +1,14 @@
 import { Menu } from '@grammyjs/menu';
+
 import Bottleneck from 'bottleneck';
 
-import { cancelMessageSending, confirmationMessage, getSuccessfulMessage, getUpdateMessage, getUpdatesMessage } from '../../../message';
-import { redisService } from '../../../services';
-import type { ChatSession, GrammyContext, GrammyMenuContext } from '../../../types';
-import { handleError } from '../../../utils';
+import { cancelMessageSending, confirmationMessage, getSuccessfulMessage, getUpdateMessage, getUpdatesMessage } from '@message/';
+
+import { redisService } from '@services/';
+
+import type { ChatSession, GrammyContext, GrammyMenuContext } from '@types/';
+
+import { handleError } from '@utils/';
 
 export class UpdatesCommand {
   private menu: Menu<GrammyMenuContext> | undefined;
@@ -12,11 +16,13 @@ export class UpdatesCommand {
   public async middleware(context: GrammyContext) {
     const userInput = context.msg?.text;
     const textEntities = context.msg?.entities;
+
     context.session.updatesText = userInput;
     context.session.textEntities = textEntities ?? undefined;
     context.session.step = 'messageSending';
     await context.replyWithChatAction('typing');
     const rawSessions = await redisService.getChatSessions();
+
     const sessions = rawSessions.filter(
       (session) => (session.data.chatType === 'private' || session.data.chatType === 'supergroup') && !session.data.botRemoved,
     );
@@ -59,6 +65,7 @@ export class UpdatesCommand {
     return async (context: GrammyContext) => {
       context.session.step = 'idle';
       const payload = context.match;
+
       if (payload === 'approve') {
         const sessions = await redisService.getChatSessions();
         const superGroupSessions = sessions.filter((session) => session.data.chatType === 'supergroup' && !session.data.botRemoved);

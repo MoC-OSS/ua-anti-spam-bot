@@ -1,7 +1,8 @@
 import { Composer } from 'grammy';
 
-import type { GrammyContext } from '../../../types';
-import type { DeleteSwindlersMiddleware } from '../../middleware';
+import type { DeleteSwindlersMiddleware } from '@bot/middleware';
+
+import type { GrammyContext } from '@types/';
 
 export interface SwindlersComposerProperties {
   deleteSwindlersMiddleware: DeleteSwindlersMiddleware;

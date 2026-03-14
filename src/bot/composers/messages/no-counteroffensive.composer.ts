@@ -1,11 +1,16 @@
-import escapeHTML from 'escape-html';
 import { Composer } from 'grammy';
 
-import { LOGS_CHAT_THREAD_IDS } from '../../../const';
+import escapeHTML from 'escape-html';
+
+import { LOGS_CHAT_THREAD_IDS } from '@const/';
+
+import { counteroffensiveLogsStartMessage, getDeleteCounteroffensiveMessage } from '@message/';
+
+import type { GrammyContext } from '@types/';
+
+import { getUserData, telegramUtil as telegramUtility } from '@utils/';
+
 import { logsChat } from '../../../creator';
-import { counteroffensiveLogsStartMessage, getDeleteCounteroffensiveMessage } from '../../../message';
-import type { GrammyContext } from '../../../types';
-import { getUserData, telegramUtil } from '../../../utils';
 
 /**
  * @description Remove messages which includes counteroffensive information
@@ -19,8 +24,8 @@ export const getNoCounterOffensiveComposer = () => {
    * @param {number} maxChance
    * @param {string} [message]
    * */
-  async function saveCounteroffensiveMessage(context: GrammyContext, reason: string | RegExp, maxChance: number, message?: string) {
-    const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
+  async function saveCounteroffensiveMessage(context: GrammyContext, reason: RegExp | string, maxChance: number, message?: string) {
+    const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const text = message || context.state?.text || '';
 
     return context.api.sendMessage(
@@ -41,6 +46,7 @@ export const getNoCounterOffensiveComposer = () => {
 
     if (isFeatureEnabled && isCounterOffensive?.result) {
       const { reason, percent } = isCounterOffensive;
+
       await context.deleteMessage();
       await saveCounteroffensiveMessage(context, reason, percent, text);
 

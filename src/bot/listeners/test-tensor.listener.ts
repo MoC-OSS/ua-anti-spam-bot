@@ -1,15 +1,22 @@
 import * as fs from 'node:fs';
+
 import { Menu } from '@grammyjs/menu';
 import type { Transformer } from 'grammy';
 
+import { GOOGLE_SHEETS_NAMES } from '@const/';
+
+import { getTensorTestResult } from '@message/';
+
+import { googleService, redisService } from '@services/';
+
+import type { TensorService } from '@tensor/';
+
+import type { GrammyContext, GrammyMenuContext, GrammyMiddleware } from '@types/';
+
+import { emptyFunction, emptyPromiseFunction, wrapperErrorHandler } from '@utils/';
+
 import { environmentConfig } from '../../config';
-import { GOOGLE_SHEETS_NAMES } from '../../const';
 import { creatorId, trainingChat } from '../../creator';
-import { getTensorTestResult } from '../../message';
-import { googleService, redisService } from '../../services';
-import type { TensorService } from '../../tensor';
-import type { GrammyContext, GrammyMenuContext, GrammyMiddleware } from '../../types';
-import { emptyFunction, emptyPromiseFunction, wrapperErrorHandler } from '../../utils';
 
 const defaultTime = 30;
 const removeTime = 30;
@@ -27,10 +34,12 @@ export interface TestTensorStorage {
  * */
 const getAnyUsername = (context: GrammyContext) => {
   const username = context.callbackQuery?.from?.username;
+
   const fullName = context.callbackQuery?.from?.last_name
     ? `${context.callbackQuery.from?.first_name} ${context.callbackQuery.from?.last_name}`
     : context.callbackQuery?.from?.first_name;
-  return username ? `@${username}` : fullName ?? '';
+
+  return username ? `@${username}` : (fullName ?? '');
 };
 
 export class TestTensorListener {
@@ -79,10 +88,12 @@ export class TestTensorListener {
       const sheetId = environmentConfig.GOOGLE_SPREADSHEET_ID;
       const sheetPositiveName = GOOGLE_SHEETS_NAMES.STRATEGIC_POSITIVE;
       const sheetNegativeName = GOOGLE_SHEETS_NAMES.STRATEGIC_NEGATIVE;
+
       switch (state) {
         case 'negatives': {
           return googleService.appendToSheet(sheetId, sheetNegativeName, word);
         }
+
         case 'positives': {
           return googleService.appendToSheet(sheetId, sheetPositiveName, word);
         }
@@ -118,6 +129,7 @@ export class TestTensorListener {
 
       if (!storage) {
         context.editMessageText(context.msg?.text || '', { reply_markup: undefined }).catch(emptyFunction);
+
         return;
       }
 
@@ -131,10 +143,12 @@ export class TestTensorListener {
         (negativesCount === skipsCount && negativesCount !== 0)
       ) {
         context.editMessageText(`${storage.originalMessage}\n\nЧекаю на більше оцінок...`).catch(emptyFunction);
+
         return;
       }
 
       let status: boolean | null = null;
+
       if (positivesCount > negativesCount && positivesCount > skipsCount) {
         status = true;
       } else if (negativesCount > positivesCount && negativesCount > skipsCount) {
@@ -142,6 +156,7 @@ export class TestTensorListener {
       }
 
       let winUsers: string[] | undefined;
+
       if (status === true) {
         winUsers = storage.positives;
       } else if (status === false) {
@@ -165,6 +180,7 @@ export class TestTensorListener {
       }
 
       let text = '⏭ пропуск';
+
       if (status === true) {
         text = '✅ спам';
       } else if (status === false) {
@@ -204,6 +220,7 @@ export class TestTensorListener {
 
     const processButtonMiddleware = wrapperErrorHandler((context) => {
       const storage = this.storage[this.getStorageKey(context)];
+
       context
         .editMessageText(`${storage.originalMessage}\n\nЧекаю ${storage.time} сек...\n${new Date().toISOString()}`, {
           parse_mode: 'HTML',
@@ -214,17 +231,20 @@ export class TestTensorListener {
       clearInterval(this.messageNodeIntervals[this.getStorageKey(context)]);
       storage.time = defaultTime;
 
-      this.messageNodeIntervals[this.getStorageKey(context)] = setInterval(() => {
-        storage.time -= 5;
+      this.messageNodeIntervals[this.getStorageKey(context)] = setInterval(
+        () => {
+          storage.time -= 5;
 
-        if (storage.time !== 0) {
-          context
-            .editMessageText(`${storage.originalMessage}\n\nЧекаю ${storage.time} сек...\n${new Date().toISOString()}`, {
-              parse_mode: 'HTML',
-            })
-            .catch(emptyFunction);
-        }
-      }, defaultTime * 1000 + 2000);
+          if (storage.time !== 0) {
+            context
+              .editMessageText(`${storage.originalMessage}\n\nЧекаю ${storage.time} сек...\n${new Date().toISOString()}`, {
+                parse_mode: 'HTML',
+              })
+              .catch(emptyFunction);
+          }
+        },
+        defaultTime * 1000 + 2000,
+      );
 
       this.messageNodeTimeouts[this.getStorageKey(context)] = setTimeout(() => {
         finalMiddleware(context).catch(emptyFunction);
@@ -241,8 +261,10 @@ export class TestTensorListener {
 
             const storage = this.storage[this.getStorageKey(context)];
             const username = getAnyUsername(context);
+
             storage.negatives = storage.negatives?.filter((item) => item !== username);
             storage.skips = storage.skips?.filter((item) => item !== username);
+
             if (!storage.positives?.includes(username)) {
               storage.positives?.push(username);
             }
@@ -258,8 +280,10 @@ export class TestTensorListener {
 
             const storage = this.storage[this.getStorageKey(context)];
             const username = getAnyUsername(context);
+
             storage.positives = storage.positives?.filter((item) => item !== username);
             storage.skips = storage.skips?.filter((item) => item !== username);
+
             if (!storage.negatives?.includes(username)) {
               storage.negatives?.push(username);
             }
@@ -276,8 +300,10 @@ export class TestTensorListener {
 
             const storage = this.storage[this.getStorageKey(context)];
             const username = getAnyUsername(context);
+
             storage.positives = storage.positives?.filter((item) => item !== username);
             storage.negatives = storage.negatives?.filter((item) => item !== username);
+
             if (!storage.skips?.includes(username)) {
               storage.skips?.push(username);
             }
@@ -314,6 +340,7 @@ export class TestTensorListener {
    * */
   getStorageKey(context: GrammyContext) {
     let chatInstance: number | string | undefined;
+
     if (context.chat) {
       chatInstance = context.chat.id;
     } else if (context.callbackQuery) {
@@ -353,11 +380,13 @@ export class TestTensorListener {
       if (context.from?.id !== creatorId) {
         if (context.chat?.type !== 'supergroup') {
           await context.reply('В особистих не працюю 😝');
+
           return;
         }
 
         if (context.chat.id !== trainingChat) {
           await context.reply('Я працюю тільки в одному супер чаті 😝');
+
           return;
         }
       }
@@ -366,6 +395,7 @@ export class TestTensorListener {
 
       if (!message && context.chat?.id && context.msg?.message_id) {
         await context.api.deleteMessage(context.chat?.id, context.msg?.message_id).catch();
+
         return;
       }
 
@@ -385,6 +415,7 @@ export class TestTensorListener {
           .catch(emptyFunction);
       } catch (error) {
         console.error(error);
+
         if (error instanceof Error) {
           context
             .reply(`Cannot parse this message.\nError:\n${error.message}`, { reply_to_message_id: context.msg?.message_id })

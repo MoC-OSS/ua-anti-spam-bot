@@ -1,4 +1,5 @@
 import type { Api, Bot, Context, RawApi } from 'grammy';
+
 import type { AsyncReturnType } from 'type-fest';
 
 import { OutgoingRequests } from './outgoing-requests';
@@ -39,7 +40,6 @@ export const prepareBotForTesting = async <C extends Context, A extends Api = Ap
       return Promise.resolve({ ok: true, result: apiResponses[method] });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-explicit-any
     return Promise.resolve({ ok: true, result: true as any });
   });
 

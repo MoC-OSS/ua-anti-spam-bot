@@ -1,10 +1,12 @@
 import { Bot } from 'grammy';
 
-import { getBeforeAnyComposer } from '../../../src/bot/composers/before-any.composer';
-import { stateMiddleware } from '../../../src/bot/middleware';
-import type { OutgoingRequests } from '../../../src/testing';
-import { MessageMockUpdate, prepareBotForTesting } from '../../../src/testing';
-import type { GrammyContext } from '../../../src/types';
+import { getBeforeAnyComposer } from '@bot/composers/before-any.composer';
+import { stateMiddleware } from '@bot/middleware';
+
+import type { OutgoingRequests } from '@testing/';
+import { MessageMockUpdate, prepareBotForTesting } from '@testing/';
+
+import type { GrammyContext } from '@types/';
 
 let outgoingRequests: OutgoingRequests;
 
@@ -30,12 +32,15 @@ describe('beforeAnyComposer', () => {
       });
     });
   });
+
   describe('message', () => {
     it('should identify is user admin', async () => {
       const update = new MessageMockUpdate('regular message').build();
+
       await bot.handleUpdate(update);
       const expectedMethods = outgoingRequests.buildMethods(['getChatMember']);
       const actualMethods = outgoingRequests.getMethods();
+
       expect(actualMethods).toEqual(expectedMethods);
       expect(outgoingRequests.length).toEqual(1);
     });

@@ -1,13 +1,17 @@
 import { Bot } from 'grammy';
 
-import { realSwindlerMessage } from '../src/__mocks__/bot.mocks';
-import { getBot } from '../src/bot';
+import { getBot } from '@bot/';
+
+import type { OutgoingRequests } from '@testing/';
+import { MessageMockUpdate, MessagePrivateMockUpdate, prepareBotForTesting } from '@testing/';
+import { mockChatSession, mockSession } from '@testing/../testing-main';
+
+import type { GrammyContext } from '@types/';
+
 import { environmentConfig } from '../src/config';
 import { logsChat, secondLogsChat } from '../src/creator';
-import type { OutgoingRequests } from '../src/testing';
-import { MessageMockUpdate, MessagePrivateMockUpdate, prepareBotForTesting } from '../src/testing';
-import { mockChatSession, mockSession } from '../src/testing-main';
-import type { GrammyContext } from '../src/types';
+
+import { realSwindlerMessage } from './__mocks__/bot.mocks';
 
 /**
  * Enable unit testing
@@ -20,6 +24,7 @@ let outgoingRequests: OutgoingRequests;
 let bot: Bot<GrammyContext>;
 
 const { mockSessionMiddleware } = mockSession({});
+
 const { chatSession, mockChatSessionMiddleware } = mockChatSession({
   isBotAdmin: true,
   botRemoved: false,
@@ -34,6 +39,7 @@ describe('e2e bot testing', () => {
     initialBot.use(mockChatSessionMiddleware);
 
     bot = await getBot(initialBot);
+
     outgoingRequests = await prepareBotForTesting<GrammyContext>(bot, {
       getChat: {},
     });
@@ -47,6 +53,7 @@ describe('e2e bot testing', () => {
 
       it('should not remove a regular message and have 0 api calls', async () => {
         const update = new MessagePrivateMockUpdate('regular message').build();
+
         await bot.handleUpdate(update);
 
         expect(outgoingRequests.requests).toHaveLength(0);
@@ -54,9 +61,11 @@ describe('e2e bot testing', () => {
 
       it('should remove a swindler message and notify for first swindler in several hours', async () => {
         const update = new MessagePrivateMockUpdate(realSwindlerMessage).build();
+
         await bot.handleUpdate(update);
 
         const expectedMethods = outgoingRequests.buildMethods(['getChat', 'sendMessage', 'sendMessage', 'sendMessage', 'deleteMessage']);
+
         const [, sendLogsMessageRequest, sendSecondLogsMessageRequest] = outgoingRequests.getAll<
           'getChat',
           'sendMessage',
@@ -75,9 +84,11 @@ describe('e2e bot testing', () => {
 
       it('should remove a swindler message and dont notify after already notified', async () => {
         const update = new MessagePrivateMockUpdate(realSwindlerMessage).build();
+
         await bot.handleUpdate(update);
 
         const expectedMethods = outgoingRequests.buildMethods(['getChat', 'sendMessage', 'sendMessage', 'deleteMessage']);
+
         const [, sendLogsMessageRequest, sendSecondLogsMessageRequest] = outgoingRequests.getAll<
           'getChat',
           'sendMessage',
@@ -104,8 +115,10 @@ describe('e2e bot testing', () => {
       it('should check is bot admin if isAdmin is empty', async () => {
         chatSession.isBotAdmin = undefined;
         const update = new MessageMockUpdate('regular message').build();
+
         await bot.handleUpdate(update);
         const [getChatAdminsRequest, getChatMemberRequest] = outgoingRequests.getTwoLast<'getChatAdministrators', 'getChatMember'>();
+
         expect(getChatAdminsRequest?.method).toEqual('getChatAdministrators');
         expect(getChatMemberRequest?.method).toEqual('getChatMember');
         expect(outgoingRequests.length).toEqual(2);
@@ -122,6 +135,7 @@ describe('e2e bot testing', () => {
 
         it('should check current user if its an admin to skip them', async () => {
           const update = new MessageMockUpdate('regular message').build();
+
           await bot.handleUpdate(update);
 
           const getChatMemberRequest = outgoingRequests.getFirst<'getChatMember'>();
@@ -132,12 +146,12 @@ describe('e2e bot testing', () => {
 
         it('should request chat info if no is removed info', async () => {
           if (chatSession.botRemoved !== undefined) {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             delete chatSession.botRemoved;
           }
 
           const update = new MessageMockUpdate('regular message').build();
+
           await bot.handleUpdate(update);
 
           const [getChatRequest, getChatMemberRequest] = outgoingRequests.getTwoLast<'getChat', 'getChatMember'>();
@@ -149,6 +163,7 @@ describe('e2e bot testing', () => {
 
         it('should not remove a super group message', async () => {
           const update = new MessageMockUpdate('regular message').build();
+
           await bot.handleUpdate(update);
 
           expect(outgoingRequests.requests).toHaveLength(1);
@@ -157,6 +172,7 @@ describe('e2e bot testing', () => {
         it('should remove a swindler message and notify for first swindler in several hours', async () => {
           chatSession.lastWarningDate = new Date(0);
           const update = new MessageMockUpdate(realSwindlerMessage).build();
+
           await bot.handleUpdate(update);
 
           const expectedMethods = outgoingRequests.buildMethods([
@@ -167,6 +183,7 @@ describe('e2e bot testing', () => {
             'sendMessage',
             'deleteMessage',
           ]);
+
           const requests = outgoingRequests.getAll<
             'getChatMember',
             'getChat',
@@ -175,6 +192,7 @@ describe('e2e bot testing', () => {
             'sendMessage',
             'deleteMessage'
           >();
+
           const sendLogsMessageRequest = requests[2];
           const sendSecondLogsMessageRequest = requests[3];
 
@@ -188,6 +206,7 @@ describe('e2e bot testing', () => {
         it('should remove a swindler message and dont notify after already notified', async () => {
           chatSession.lastWarningDate = new Date();
           const update = new MessageMockUpdate(realSwindlerMessage).build();
+
           await bot.handleUpdate(update);
 
           const expectedMethods = outgoingRequests.buildMethods([
@@ -197,6 +216,7 @@ describe('e2e bot testing', () => {
             'sendMessage',
             'deleteMessage',
           ]);
+
           const requests = outgoingRequests.getAll<'getChatMember', 'getChat', 'sendMessage', 'sendMessage', 'deleteMessage'>();
           const sendLogsMessageRequest = requests[2];
           const sendSecondLogsMessageRequest = requests[3];
@@ -212,9 +232,11 @@ describe('e2e bot testing', () => {
           const updateCaption = new MessageMockUpdate('').buildOverwrite({
             message: { media_group_id: '1', photo: [], caption: realSwindlerMessage },
           });
+
           const updatePhoto2 = new MessageMockUpdate('').buildOverwrite({
             message: { media_group_id: '1', photo: [] },
           });
+
           const updatePhoto3 = new MessageMockUpdate('').buildOverwrite({
             message: { media_group_id: '1', photo: [] },
           });
@@ -246,12 +268,15 @@ describe('e2e bot testing', () => {
           const updateCaption = new MessageMockUpdate('').buildOverwrite({
             message: { media_group_id: '1', photo: [], caption: realSwindlerMessage },
           });
+
           const updatePhoto2 = new MessageMockUpdate('').buildOverwrite({
             message: { media_group_id: '1', photo: [] },
           });
+
           const updateCaption2 = new MessageMockUpdate('').buildOverwrite({
             message: { media_group_id: '2', photo: [], caption: 'just a regular message' },
           });
+
           const updatePhoto22 = new MessageMockUpdate('').buildOverwrite({
             message: { media_group_id: '2', photo: [] },
           });

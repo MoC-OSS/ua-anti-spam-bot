@@ -1,10 +1,13 @@
 import { Bot } from 'grammy';
 
-import { selfDestructedReply } from '../../../src/bot/plugins/self-destructed.plugin';
-import type { OutgoingRequests } from '../../../src/testing';
-import { MessagePrivateMockUpdate, prepareBotForTesting } from '../../../src/testing';
-import type { GrammyContext } from '../../../src/types';
-import { sleep } from '../../../src/utils';
+import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
+
+import type { OutgoingRequests } from '@testing/';
+import { MessagePrivateMockUpdate, prepareBotForTesting } from '@testing/';
+
+import type { GrammyContext } from '@types/';
+
+import { sleep } from '@utils/';
 
 let outgoingRequests: OutgoingRequests;
 let bot: Bot<GrammyContext>;
@@ -34,6 +37,7 @@ describe('selfDestructedReply', () => {
 
     it('should delete message after specified time', async () => {
       const update = new MessagePrivateMockUpdate('test').build();
+
       await bot.handleUpdate(update);
 
       // We wait for event loop to resolve the previous request
@@ -48,6 +52,7 @@ describe('selfDestructedReply', () => {
 
     it('should not delete immediately', async () => {
       const update = new MessagePrivateMockUpdate('test').build();
+
       await bot.handleUpdate(update);
 
       // We don't wait so there are only 1 request should be
@@ -79,6 +84,7 @@ describe('selfDestructedReply', () => {
 
     it('should call custom callback if passed and dont call extra requests', async () => {
       const update = new MessagePrivateMockUpdate('test').build();
+
       await bot.handleUpdate(update);
       await sleep(0);
 

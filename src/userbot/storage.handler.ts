@@ -1,9 +1,10 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import stringSimilarity from 'string-similarity';
 
+import { GOOGLE_SHEETS_NAMES } from '@const/';
+
+import { googleService, redisService, swindlersGoogleService } from '@services/';
+
 import { environmentConfig } from '../config';
-import { GOOGLE_SHEETS_NAMES } from '../const';
-import { googleService, redisService, swindlersGoogleService } from '../services';
 
 const limits = {
   STORAGE: 999_999_999,
@@ -44,6 +45,7 @@ export class UserbotStorage {
 
       this.lastMessages.push(text);
       await redisService.setTrainingTempMessages(this.lastMessages);
+
       return true;
     }
 
@@ -60,6 +62,7 @@ export class UserbotStorage {
 
       this.helpMessages.push(text);
       await redisService.redisClient.setRawValue('training:help', this.helpMessages);
+
       return true;
     }
 
@@ -86,6 +89,7 @@ export class UserbotStorage {
 
     let lastChance = 0;
     let maxChance = 0;
+
     const isDifferent = !dataset.some((lastMessage) => {
       lastChance = stringSimilarity.compareTwoStrings(text, lastMessage);
 

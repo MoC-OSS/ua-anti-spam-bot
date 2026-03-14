@@ -1,4 +1,4 @@
-import { removeDuplicates } from '../utils';
+import { removeDuplicates } from '@utils/';
 
 import { EXCEPTION_DOMAINS, NON_WORD_REGEX, URL_REGEXP, VALID_URL_REGEXP } from './constants';
 
@@ -23,6 +23,7 @@ export class UrlService {
           try {
             const urlInstance = new URL(url);
             const isNotExcluded = strict ? true : !EXCEPTION_DOMAINS.includes(urlInstance.host);
+
             return urlInstance && isNotExcluded && VALID_URL_REGEXP.test(url);
           } catch {
             return false;
@@ -38,9 +39,11 @@ export class UrlService {
   getUrlDomain(url: string): string {
     try {
       const validUrl = url.slice(0, 4) === 'http' ? url : `https://${url}`;
+
       return `${new URL(validUrl).host}/`;
     } catch (error) {
       console.error('Cannot get URL domain:', url, error);
+
       return url;
     }
   }

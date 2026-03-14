@@ -1,11 +1,12 @@
 import type { Message } from '@grammyjs/types';
 import type { Chat, ChatMemberAdministrator, ChatMemberOwner, User } from '@grammyjs/types/manage';
-import deepmerge from 'deepmerge';
 import type { Update } from 'grammy/out/types';
+
+import deepmerge from 'deepmerge';
 import type { MergeDeep } from 'type-fest';
 import type { ChatMemberMember } from 'typegram';
 
-import { getTypedValue } from '../../utils';
+import { getTypedValue } from '@utils/';
 
 export type PartialUpdate<U extends Update = Update> = Partial<{
   [key in keyof U]: Partial<U[key]>;
@@ -149,9 +150,12 @@ export abstract class GenericMockUpdate {
       group: this.genericGroupChat,
       // channel: this.genericChannelChat,
     };
+
     const chatUpdate = chatUpdates[chatType];
+
     if (chatUpdate) {
       const messageStruct = this.deepMerge({ message: this.genericMessagePartial }, { message: { chat: chatUpdate } });
+
       this.minimalUpdate = this.deepMerge(this.minimalUpdate, GenericMockUpdate.getValidUpdate(messageStruct));
     }
 
@@ -189,7 +193,7 @@ export abstract class GenericMockUpdate {
    * }
    * ```
    * */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   abstract build(...parameters: any[]);
 
   /**
@@ -205,11 +209,9 @@ export abstract class GenericMockUpdate {
    * */
   // abstract buildOverwrite<E extends PartialUpdate>(extra: E);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   abstract buildOverwrite(...parameters: any[]);
 
   deepMerge<A, B>(a: A, b: B): MergeDeep<A, B> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-explicit-any
     return deepmerge(a as any, b as any);
   }
 }

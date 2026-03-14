@@ -1,7 +1,8 @@
 import type { NextFunction } from 'grammy';
 
-import { spamMediaGroupsStorage } from '../../services';
-import type { GrammyContext } from '../../types';
+import { spamMediaGroupsStorage } from '@services/';
+
+import type { GrammyContext } from '@types/';
 
 /**
  * saveSpamMediaGroup middleware.

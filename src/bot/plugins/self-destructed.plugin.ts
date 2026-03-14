@@ -1,5 +1,6 @@
 import type { Message } from '@grammyjs/types';
 import type { Context, NextFunction } from 'grammy';
+
 import type { ParseMode } from 'typegram';
 
 export type SelfDestructedFlavor<C extends Context> = C & {
@@ -15,7 +16,7 @@ export type SelfDestructedFlavor<C extends Context> = C & {
  * Default callback.
  * Just removes the sent message.
  * */
-const defaultDeleteCallback = async <C extends Context>(context: C, replyResult: Message.TextMessage | Message.PhotoMessage) => {
+const defaultDeleteCallback = async <C extends Context>(context: C, replyResult: Message.PhotoMessage | Message.TextMessage) => {
   await context.api.deleteMessage(replyResult.chat.id, replyResult.message_id);
 };
 

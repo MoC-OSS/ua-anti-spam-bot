@@ -1,15 +1,18 @@
 import { hydrateReply } from '@grammyjs/parse-mode';
 import { Bot } from 'grammy';
 
-import { getNoCounterOffensiveComposer } from '../../../../src/bot/composers/messages/no-counteroffensive.composer';
-import { parseIsCounteroffensive, parseText, stateMiddleware } from '../../../../src/bot/middleware';
-import { selfDestructedReply } from '../../../../src/bot/plugins';
-import { CounteroffensiveService } from '../../../../src/services';
-import { mockDynamicStorageService } from '../../../../src/services/_mocks/index.mocks';
-import type { OutgoingRequests } from '../../../../src/testing';
-import { MessageMockUpdate, prepareBotForTesting } from '../../../../src/testing';
-import { mockChatSession } from '../../../../src/testing-main';
-import type { GrammyContext } from '../../../../src/types';
+import { getNoCounterOffensiveComposer } from '@bot/composers/messages/no-counteroffensive.composer';
+import { parseIsCounteroffensive, parseText, stateMiddleware } from '@bot/middleware';
+import { selfDestructedReply } from '@bot/plugins';
+
+import { CounteroffensiveService } from '@services/';
+import { mockDynamicStorageService } from '@services/_mocks/index.mocks';
+
+import type { OutgoingRequests } from '@testing/';
+import { MessageMockUpdate, prepareBotForTesting } from '@testing/';
+import { mockChatSession } from '@testing/../testing-main';
+
+import type { GrammyContext } from '@types/';
 
 let outgoingRequests: OutgoingRequests;
 const { noCounterOffensiveComposer } = getNoCounterOffensiveComposer();
@@ -53,6 +56,7 @@ describe('noCounteroffensiveComposer', () => {
 
     it('should delete if counteroffensive is used', async () => {
       const update = new MessageMockUpdate('Сьогодні планується контрнаступ о 10:00').build();
+
       await bot.handleUpdate(update);
 
       const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest, sendMessageRequest] = outgoingRequests.getAll<
@@ -71,6 +75,7 @@ describe('noCounteroffensiveComposer', () => {
 
     it('should delete if counteroffensive regex is used', async () => {
       const update = new MessageMockUpdate('Сьогодні планується контр-наступ о 10:00').build();
+
       await bot.handleUpdate(update);
 
       const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest, sendMessageRequest] = outgoingRequests.getAll<
@@ -90,6 +95,7 @@ describe('noCounteroffensiveComposer', () => {
     it('should delete if counteroffensive is used and do not notify if disableDeleteMessage is true', async () => {
       chatSession.chatSettings.disableDeleteMessage = true;
       const update = new MessageMockUpdate('Сьогодні планується контрнаступ о 10:00').build();
+
       await bot.handleUpdate(update);
 
       const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest] = outgoingRequests.getAll<
@@ -108,6 +114,7 @@ describe('noCounteroffensiveComposer', () => {
       const update = new MessageMockUpdate(
         'Інтерактивна мапа дозволяє швидко і зручно дізнатися погоду в містах України. На ній відображаються погодні умови в найбільших містах України з можливістю перегляду прогнозу погоди на тиждень. Щоб дізнатися докладний прогноз погоди в вашому місті досить натиснути на назву населеного пункту на мапі.',
       ).build();
+
       await bot.handleUpdate(update);
 
       expect(outgoingRequests.length).toEqual(0);
@@ -125,6 +132,7 @@ describe('noCounteroffensiveComposer', () => {
 
     it('should not delete if counteroffensive is used', async () => {
       const update = new MessageMockUpdate('Сьогодні планується контрнаступ о 10:00').build();
+
       await bot.handleUpdate(update);
 
       expect(outgoingRequests.length).toEqual(0);
@@ -134,6 +142,7 @@ describe('noCounteroffensiveComposer', () => {
       const update = new MessageMockUpdate(
         'Інтерактивна мапа дозволяє швидко і зручно дізнатися погоду в містах України. На ній відображаються погодні умови в найбільших містах України з можливістю перегляду прогнозу погоди на тиждень. Щоб дізнатися докладний прогноз погоди в вашому місті досить натиснути на назву населеного пункту на мапі.',
       ).build();
+
       await bot.handleUpdate(update);
 
       expect(outgoingRequests.length).toEqual(0);

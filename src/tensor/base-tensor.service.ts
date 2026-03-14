@@ -1,11 +1,14 @@
 import fs from 'node:fs';
+
+import { optimizeText } from 'ukrainian-ml-optimizer';
+
 import type { LayersModel } from '@tensorflow/tfjs';
 import type { ModelArtifacts } from '@tensorflow/tfjs-core/dist/io/types';
 import * as tf from '@tensorflow/tfjs-node';
-import { optimizeText } from 'ukrainian-ml-optimizer';
+
+import type { SwindlerTensorResult } from '@types/';
 
 import { environmentConfig } from '../config';
-import type { SwindlerTensorResult } from '../types';
 
 /**
  * Class that shares logic for tensor services
@@ -25,7 +28,10 @@ export class BaseTensorService {
 
   modelLength = 0;
 
-  constructor(protected modelPath: string, protected SPAM_THRESHOLD: number) {}
+  constructor(
+    protected modelPath: string,
+    protected SPAM_THRESHOLD: number,
+  ) {}
 
   loadModelMetadata(modelPath: string, vocabPath: string) {
     try {
@@ -36,13 +42,12 @@ export class BaseTensorService {
       console.error(error);
     }
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
     this.modelLength = this.MODEL?.modelTopology?.model_config?.config.layers[1].config.input_length as number;
   }
 
-  setSpamThreshold(newThreshold: number | null | string) {
+  setSpamThreshold(newThreshold: number | string | null) {
     if (newThreshold && +newThreshold) {
       this.SPAM_THRESHOLD = +newThreshold;
     }
@@ -56,7 +61,6 @@ export class BaseTensorService {
 
   predict(word: string, rate: number | null): Promise<SwindlerTensorResult> {
     if (!this.model) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any
       return Promise.resolve({
         spamRate: 0,
         deleteRank: rate || this.SPAM_THRESHOLD,
@@ -84,9 +88,8 @@ export class BaseTensorService {
       }
     }
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call
+
     return tensorPredict?.data().then(
       (numericData: [number, number]) =>
         ({
@@ -94,7 +97,7 @@ export class BaseTensorService {
           deleteRank,
           isSpam: numericData[1] > deleteRank,
           fileStat,
-        } as SwindlerTensorResult),
+        }) as SwindlerTensorResult,
     ) as Promise<SwindlerTensorResult>;
   }
 
@@ -116,6 +119,7 @@ export class BaseTensorService {
     // you add the UNKNOWN token.
     wordArray.forEach((word) => {
       const encoding = this.DICTIONARY.indexOf(word);
+
       returnArray.push(encoding === -1 ? this.DICTIONARY_EXTRAS.UNKNOWN : encoding);
       index += 1;
     });

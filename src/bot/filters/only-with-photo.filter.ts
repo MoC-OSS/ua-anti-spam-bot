@@ -1,4 +1,4 @@
-import type { GrammyFilter } from '../../types';
+import type { GrammyFilter } from '@types/';
 
 /**
  * Checks that state has photo

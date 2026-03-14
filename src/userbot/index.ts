@@ -1,11 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import ms from 'ms';
 import type { SetNonNullable } from 'type-fest';
 
+import { redisClient } from '@db/';
+
+import { initSwindlersContainer } from '@services/';
+
+import { initTensor } from '@tensor/';
+
 import { loadUserbotDatasetExtras } from '../../dataset/dataset';
-import { redisClient } from '../db';
-import { initSwindlersContainer } from '../services';
-import { initTensor } from '../tensor';
 
 import auth from './auth';
 // const { findChannelAdmins } = require('./find-channel-admins');
@@ -24,6 +26,7 @@ export interface ChatPeers {
 }
 
 console.info('Start listener application');
+
 auth()
   .then(async (api) => {
     const datasetExtras = await loadUserbotDatasetExtras();
@@ -34,16 +37,19 @@ auth()
     const { dynamicStorageService, swindlersDetectService, swindlersBotsService, swindlersTensorService } = await initSwindlersContainer();
 
     const userbotStorage = new UserbotStorage();
+
     await userbotStorage.init();
     console.info('Application is listening new messages.');
 
     const tensorService = await initTensor();
+
     console.info('Tensor is ready.');
 
     // findChannelAdmins(api);
     // return;
 
     const allChats = await mtProtoClient.messagesGetAllChats();
+
     const chatPeers: ChatPeers = {
       trainingChat: mtProtoClient.resolvePeer(allChats.chats, 'UA Anti Spam Bot - Test'),
       helpChat: mtProtoClient.resolvePeer(allChats.chats, 'UA Anti Spam Bot - Help'),
@@ -73,12 +79,13 @@ auth()
     // console.log(testSwindlerResult);
 
     console.info('Userbot is ready and started.');
+
     //
     // api.mtproto.updates.on('updatesTooLong', (updateInfo) => {
     //   console.log('updatesTooLong:', updateInfo);
     // });
     //
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+
     api.mtproto.updates.on('updateShortMessage', (updateInfo) => {
       console.info('updateShortChatMessage:', updateInfo);
     });
@@ -95,7 +102,7 @@ auth()
     //   console.log('updatesCombined:', updateInfo);
     // });
     //
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+
     // api.mtproto.updates.on('updates', (updateInfo) => {
     //   console.info('updates:', updateInfo.updates);
     // });
@@ -104,14 +111,12 @@ auth()
     //   console.log('updateShortSentMessage:', updateInfo);
     // });˚
     api.mtproto.updates.on('updates', (updateInfo) =>
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       updatesHandler.filterUpdate(updateInfo, async (message) => {
         // updatesHandler.handleTraining(message);
         await updatesHandler.handleSwindlers(message);
       }),
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     setInterval(async () => {
       try {
         await api.call('updates.getState');

@@ -1,8 +1,10 @@
 import type { NextFunction } from 'grammy';
+
 import type { GrammyContext } from 'types';
 
-import { getDeclinedMassSendingMessage } from '../../message';
-import { isIdWhitelisted } from '../../utils';
+import { getDeclinedMassSendingMessage } from '@message/';
+
+import { isIdWhitelisted } from '@utils/';
 
 /**
  * @description

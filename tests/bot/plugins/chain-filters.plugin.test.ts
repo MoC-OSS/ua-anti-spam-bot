@@ -1,6 +1,6 @@
 import type { Context } from 'grammy';
 
-import { chainFilters } from '../../../src/bot/plugins/chain-filters.plugin';
+import { chainFilters } from '@bot/plugins/chain-filters.plugin';
 
 const mockContext = {} as Partial<Context> as Context;
 

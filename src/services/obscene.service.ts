@@ -1,6 +1,7 @@
+import type { SearchSetTokens } from '@utils/search-set';
+import { SearchSet } from '@utils/search-set';
+
 import { dataset } from '../../dataset/dataset';
-import type { SearchSetTokens } from '../utils/search-set';
-import { SearchSet } from '../utils/search-set';
 
 export class ObsceneService {
   private readonly warshipAllowList = new SearchSet(['корабль', 'корабель', 'кораблю']);
@@ -16,7 +17,7 @@ export class ObsceneService {
     'російський',
   ]);
 
-  checkObscene(message: string | SearchSetTokens) {
+  checkObscene(message: SearchSetTokens | string) {
     if (this.warshipAllowList.search(message) && this.militaryAllowList.search(message)) {
       return null;
     }

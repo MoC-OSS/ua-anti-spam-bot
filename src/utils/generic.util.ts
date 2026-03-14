@@ -1,16 +1,17 @@
 import fs from 'node:fs';
 
-import { environmentConfig } from '../config';
-import type { ChatSettings, GrammyContext } from '../types';
+import type { ChatSettings, GrammyContext } from '@types/';
 
-import { optimizeWriteContextUtil } from './optimize-write-context.util';
+import { environmentConfig } from '../config';
+
+import { optimizeWriteContextUtil as optimizeWriteContextUtility } from './optimize-write-context.util';
 
 /**
  * @param {GrammyContext} context
  * */
 export function logContext(context: GrammyContext) {
   if (environmentConfig.DEBUG) {
-    const writeContext = optimizeWriteContextUtil(context);
+    const writeContext = optimizeWriteContextUtility(context);
 
     console.info(JSON.stringify(writeContext, null, 2));
 
@@ -71,7 +72,7 @@ export function formatStateIntoAccusative(state: string) {
 export function getUserData(context: GrammyContext) {
   const username = context.from?.username;
   const fullName = context.from?.last_name ? `${context.from?.first_name} ${context.from?.last_name}` : context.from?.first_name;
-  const writeUsername = username ? `@${username}` : fullName ?? '';
+  const writeUsername = username ? `@${username}` : (fullName ?? '');
   const userId = context.from?.id;
 
   return {
@@ -109,17 +110,18 @@ export function joinUkrainianConjunctions(array: string[]): string {
 
 export function getEnabledFeaturesString(chatSettings: ChatSettings): string {
   const features: string[] = [];
-  const featureNameMap = new Map<keyof ChatSettings, string>();
+
+  const featureNameMap = new Map<keyof ChatSettings, string>([
+    ['enableDeleteUrls', '🔗 посиланнями'],
+    ['enableDeleteMentions', '⚓ згадками'],
+    ['enableDeleteLocations', '📍 локаціями'],
+    ['enableDeleteForwards', '↩️ пересиланнями'],
+    ['enableDeleteCards', '💳 картками'],
+   ['enableDeleteChannelMessages', '💬 від каналів']]);
 
   /**
    * Повідомлень з...
    * */
-  featureNameMap.set('enableDeleteUrls', '🔗 посиланнями');
-  featureNameMap.set('enableDeleteMentions', '⚓ згадками');
-  featureNameMap.set('enableDeleteLocations', '📍 локаціями');
-  featureNameMap.set('enableDeleteForwards', '↩️ пересиланнями');
-  featureNameMap.set('enableDeleteCards', '💳 картками');
-  featureNameMap.set('enableDeleteChannelMessages', '💬 від каналів');
   featureNameMap.set('enableDeleteDenylist', '🚫 забороненими словами');
 
   const settingsKeys = Object.keys(chatSettings) as (keyof ChatSettings)[];
@@ -134,6 +136,7 @@ export function getEnabledFeaturesString(chatSettings: ChatSettings): string {
         features.push(featureName);
       }
     }
+
     if (Array.isArray(value) && value.length > 0) {
       const featureName = featureNameMap.get(setting);
 
@@ -161,12 +164,11 @@ export function getRandomItem<T>(array: T[]): T {
  * @param {string} reason
  * @param {any} [extra]
  * */
-// eslint-disable-next-line  @typescript-eslint/no-explicit-any
+
 export function logSkipMiddleware(context: GrammyContext, reason: string, extra?: any) {
   if (environmentConfig.DEBUG || environmentConfig.DEBUG_MIDDLEWARE) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+
     console.info(`Skip due to ${reason} in chat ${context.chat?.title || '$empty_title'}`, extra);
   }
 }
@@ -192,6 +194,7 @@ export function isIdWhitelisted(id: number | undefined) {
   }
 
   const whitelist = (environmentConfig.USERS_WHITELIST || '').split(', ');
+
   return whitelist.includes(id.toString());
 }
 
@@ -206,5 +209,6 @@ export function isIdWhitelistedForSwindlersStatistic(id: number | undefined) {
   }
 
   const whitelist = (environmentConfig.USERS_FOR_SWINDLERS_STATISTIC_WHITELIST || '').split(', ');
+
   return whitelist.includes(id.toString());
 }

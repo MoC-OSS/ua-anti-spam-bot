@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-misused-promises */
 import { autoThread } from '@grammyjs/auto-thread';
 import { Menu } from '@grammyjs/menu';
 import { hydrateReply } from '@grammyjs/parse-mode';
@@ -6,6 +5,7 @@ import { sequentialize } from '@grammyjs/runner';
 import { apiThrottler } from '@grammyjs/transformer-throttler';
 import type { Bot } from 'grammy';
 import { Composer } from 'grammy';
+
 import moment from 'moment-timezone';
 
 import { CommandSetter } from './bot/commands';
@@ -73,7 +73,7 @@ import {
 } from './services';
 import { initNsfwTensor, initTensor } from './tensor';
 import type { GrammyContext, GrammyMenuContext } from './types';
-import { globalErrorHandler, videoUtil, wrapperErrorHandler } from './utils';
+import { globalErrorHandler, videoUtil as videoUtility, wrapperErrorHandler } from './utils';
 
 moment.tz.setDefault('Europe/Kiev');
 moment.locale('uk');
@@ -97,6 +97,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
 
   const s3Service = new S3Service();
   const tensorService = await initTensor(s3Service);
+
   tensorService.setSpamThreshold(await redisService.getBotTensorPercent());
 
   const nsfwTensorService = await initNsfwTensor();
@@ -156,6 +157,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
 
   // Commands
   const { publicCommandsComposer } = getPublicCommandsComposer({ startTime });
+
   const { privateCommandsComposer } = getPrivateCommandsComposer({
     bot,
     commandSetter,
@@ -163,6 +165,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     startTime,
     tensorService,
   });
+
   const { swindlersStatisticComposer } = getSwindlersStatisticCommandsComposer();
   const { creatorCommandsComposer } = getCreatorCommandsComposer({ commandSetter, rootMenu, tensorService });
 
@@ -213,6 +216,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const { noChannelMessagesComposer } = getNoChannelMessagesComposer();
   const { nsfwMessageFilterComposer } = getNsfwMessageFilterComposer({ nsfwDetectService });
   const { denylistComposer } = getDenylistComposer();
+
   const { messagesComposer } = getMessagesComposer({
     counteroffensiveService,
     noCardsComposer,
@@ -248,12 +252,15 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
       const chat = context.chat?.id.toString();
       const user = context.from?.id.toString();
       const array: string[] = [];
+
       if (chat !== undefined) {
         array.push(chat);
       }
+
       if (user !== undefined) {
         array.push(user);
       }
+
       return array;
     }),
   );
@@ -273,12 +280,14 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   // Set message as deleted when deleteMessage method has been called
   bot.use((context, next) => {
     context.api.config.use(deleteMessageTransformer(context));
+
     return next();
   });
 
   if (environmentConfig.DISABLE_LOGS_CHAT) {
     bot.use((context, next) => {
       context.api.config.use(disableLogsChatTransformer);
+
       return next();
     });
   }
@@ -317,6 +326,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   notChannelComposer.use(messagesComposer);
   notChannelComposer.use(photosComposer);
   notChannelComposer.use(adminCheckNotify);
+
   // Log state for creator only chat
   notChannelComposer
     .filter((context) => chainFilters(onlyCreatorChatFilter, !!context.state.isDeleted || !!context.state.photo)(context))
@@ -326,7 +336,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
 
   bot.catch(globalErrorHandler);
 
-  videoUtil.init(bot.api);
+  videoUtility.init(bot.api);
 
   return bot;
 };

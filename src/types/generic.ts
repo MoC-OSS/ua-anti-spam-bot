@@ -1,1 +1,1 @@
-export type LooseAutocomplete<T extends string> = T | Omit<string, T>;
+export type LooseAutocomplete<T extends string> = Omit<string, T> | T;

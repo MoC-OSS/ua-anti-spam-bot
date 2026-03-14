@@ -1,21 +1,21 @@
-import type { Chat, ProtoUpdate } from '../types';
+import type { Chat, ProtoUpdate } from '@types/';
 
 import type { API } from './api';
 
 export type Peer =
   | {
       _: 'inputPeerChannel';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       [key: string]: any;
-    }
-  | {
-      _: `inputPeerChat`;
-      chat_id: string;
     }
   | {
       _: 'inputPeerChannel';
       channel_id: string;
       access_hash: string;
+    }
+  | {
+      _: 'inputPeerChat';
+      chat_id: string;
     };
 
 export class MtProtoClient {
@@ -39,7 +39,7 @@ export class MtProtoClient {
     switch (peer._) {
       case 'chat': {
         return {
-          _: `inputPeerChat`,
+          _: 'inputPeerChat',
           chat_id: peer.id,
         };
       }

@@ -1,12 +1,18 @@
-import escapeHTML from 'escape-html';
 import { Composer } from 'grammy';
 
-import { LOGS_CHAT_THREAD_IDS } from '../../../const';
+import escapeHTML from 'escape-html';
+
+import { LOGS_CHAT_THREAD_IDS } from '@const/';
+
+import { getDeleteNsfwMessage, nsfwLogsStartMessage } from '@message/';
+
+import type { NsfwDetectService } from '@services/nsfw-detect.service';
+
+import type { GrammyContext } from '@types/';
+
+import { getUserData, telegramUtil as telegramUtility } from '@utils/';
+
 import { logsChat } from '../../../creator';
-import { getDeleteNsfwMessage, nsfwLogsStartMessage } from '../../../message';
-import type { NsfwDetectService } from '../../../services/nsfw-detect.service';
-import type { GrammyContext } from '../../../types';
-import { getUserData, telegramUtil } from '../../../utils';
 
 export interface NsfwMessageFilterComposerProperties {
   nsfwDetectService: NsfwDetectService;
@@ -24,7 +30,7 @@ export const getNsfwMessageFilterComposer = ({ nsfwDetectService }: NsfwMessageF
    * @param {string} [message]
    * */
   async function saveNsfwMessage(context: GrammyContext, maxChance: number, message?: string) {
-    const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
+    const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const text = message || context.state?.text || '';
 
     return context.api.sendMessage(
@@ -56,6 +62,7 @@ export const getNsfwMessageFilterComposer = ({ nsfwDetectService }: NsfwMessageF
 
       if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
         const { writeUsername, userId } = getUserData(context);
+
         await context.replyWithSelfDestructedHTML(getDeleteNsfwMessage({ writeUsername, userId }));
       }
     }

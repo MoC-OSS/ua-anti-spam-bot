@@ -1,13 +1,19 @@
-import escapeHTML from 'escape-html';
 import { Composer } from 'grammy';
 
-import { LOGS_CHAT_THREAD_IDS } from '../../../const';
+import escapeHTML from 'escape-html';
+
+import { LOGS_CHAT_THREAD_IDS } from '@const/';
+
+import { getWarnObsceneMessage, obsceneWarnLogsStartMessage } from '@message/';
+
+import { obsceneService } from '@services/';
+
+import type { GrammyContext } from '@types/';
+
+import type { SearchSetResult } from '@utils/';
+import { telegramUtil as telegramUtility } from '@utils/';
+
 import { logsChat } from '../../../creator';
-import { getWarnObsceneMessage, obsceneWarnLogsStartMessage } from '../../../message';
-import { obsceneService } from '../../../services';
-import type { GrammyContext } from '../../../types';
-import type { SearchSetResult } from '../../../utils';
-import { telegramUtil } from '../../../utils';
 
 /**
  * @description Remove strategic information logic
@@ -20,7 +26,7 @@ export const getWarnObsceneComposer = () => {
    * @param {SearchSetResult} searchResult
    * */
   async function saveObsceneMessage(context: GrammyContext, searchResult: SearchSetResult) {
-    const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
+    const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const text = context.state?.text || '';
 
     return context.api.sendMessage(

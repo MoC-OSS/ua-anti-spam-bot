@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const express = require('express');
-// eslint-disable-next-line import/no-extraneous-dependencies
+
 const cors = require('cors');
 const { env } = require('typed-dotenv').config();
 

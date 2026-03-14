@@ -1,6 +1,8 @@
-import { swindlersUpdateEndMessage, swindlersUpdateStartMessage } from '../../../message';
-import type { DynamicStorageService } from '../../../services';
-import type { GrammyContext } from '../../../types';
+import { swindlersUpdateEndMessage, swindlersUpdateStartMessage } from '@message/';
+
+import type { DynamicStorageService } from '@services/';
+
+import type { GrammyContext } from '@types/';
 
 export class SwindlersUpdateCommand {
   /**
@@ -20,7 +22,7 @@ export class SwindlersUpdateCommand {
       await context.reply(swindlersUpdateStartMessage).then(async (message) => {
         // eslint-disable-next-line camelcase
         const { message_id } = message;
-        // eslint-disable-next-line camelcase,@typescript-eslint/ban-ts-comment
+
         // @ts-ignore
         // eslint-disable-next-line camelcase
         await this.dynamicStorageService.updateStorage().then(() => context.editMessageText(swindlersUpdateEndMessage, { message_id }));

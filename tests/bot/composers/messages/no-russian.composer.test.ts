@@ -1,14 +1,17 @@
 import { hydrateReply } from '@grammyjs/parse-mode';
 import { Bot } from 'grammy';
 
-import { getNoRussianComposer } from '../../../../src/bot/composers/messages/no-russian.composer';
-import { parseIsRussian, parseText, stateMiddleware } from '../../../../src/bot/middleware';
-import { selfDestructedReply } from '../../../../src/bot/plugins';
-import { mockDynamicStorageService } from '../../../../src/services/_mocks/index.mocks';
-import type { OutgoingRequests } from '../../../../src/testing';
-import { MessageMockUpdate, prepareBotForTesting } from '../../../../src/testing';
-import { mockChatSession } from '../../../../src/testing-main';
-import type { GrammyContext } from '../../../../src/types';
+import { getNoRussianComposer } from '@bot/composers/messages/no-russian.composer';
+import { parseIsRussian, parseText, stateMiddleware } from '@bot/middleware';
+import { selfDestructedReply } from '@bot/plugins';
+
+import { mockDynamicStorageService } from '@services/_mocks/index.mocks';
+
+import type { OutgoingRequests } from '@testing/';
+import { MessageMockUpdate, prepareBotForTesting } from '@testing/';
+import { mockChatSession } from '@testing/../testing-main';
+
+import type { GrammyContext } from '@types/';
 
 let outgoingRequests: OutgoingRequests;
 const { noRussianComposer } = getNoRussianComposer({ dynamicStorageService: mockDynamicStorageService });
@@ -51,6 +54,7 @@ describe('noRussianComposer', () => {
 
     it('should delete if russian is used', async () => {
       const update = new MessageMockUpdate('съешь еще этих французских булок').build();
+
       await bot.handleUpdate(update);
 
       const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest, sendMessageRequest] = outgoingRequests.getAll<
@@ -70,6 +74,7 @@ describe('noRussianComposer', () => {
     it('should delete if russian is used and do not notify if disableDeleteMessage is true', async () => {
       chatSession.chatSettings.disableDeleteMessage = true;
       const update = new MessageMockUpdate('съешь еще этих французских булок').build();
+
       await bot.handleUpdate(update);
 
       const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest] = outgoingRequests.getAll<
@@ -88,6 +93,7 @@ describe('noRussianComposer', () => {
       const update = new MessageMockUpdate(
         'Інтерактивна мапа дозволяє швидко і зручно дізнатися погоду в містах України. На ній відображаються погодні умови в найбільших містах України з можливістю перегляду прогнозу погоди на тиждень. Щоб дізнатися докладний прогноз погоди в вашому місті досить натиснути на назву населеного пункту на мапі.',
       ).build();
+
       await bot.handleUpdate(update);
 
       expect(outgoingRequests.length).toEqual(0);
@@ -105,6 +111,7 @@ describe('noRussianComposer', () => {
 
     it('should not delete if russian is used', async () => {
       const update = new MessageMockUpdate('съешь еще этих французских булок').build();
+
       await bot.handleUpdate(update);
 
       expect(outgoingRequests.length).toEqual(0);
@@ -114,6 +121,7 @@ describe('noRussianComposer', () => {
       const update = new MessageMockUpdate(
         'Інтерактивна мапа дозволяє швидко і зручно дізнатися погоду в містах України. На ній відображаються погодні умови в найбільших містах України з можливістю перегляду прогнозу погоди на тиждень. Щоб дізнатися докладний прогноз погоди в вашому місті досить натиснути на назву населеного пункту на мапі.',
       ).build();
+
       await bot.handleUpdate(update);
 
       expect(outgoingRequests.length).toEqual(0);

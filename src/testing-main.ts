@@ -33,7 +33,7 @@ export const mockChatSession = mockContextField<GrammyContext, 'chatSession', Mo
     ({
       chatSession: mocked,
       mockChatSessionMiddleware: middleware,
-    } as const),
+    }) as const,
 );
 
 /**

@@ -1,8 +1,10 @@
 import type { NextFunction } from 'grammy';
+
 import type { GrammyContext } from 'types';
 
-import { logSkipMiddleware } from '../../utils';
-import { onlyWhenBotAdminFilter } from '../filters';
+import { onlyWhenBotAdminFilter } from '@bot/filters';
+
+import { logSkipMiddleware } from '@utils/';
 
 /**
  * @description

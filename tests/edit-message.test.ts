@@ -1,13 +1,15 @@
 import { Bot } from 'grammy';
 
-import { getMessagesRegisterComposer } from '../src/bot/composers';
-import { getNoCardsComposer } from '../src/bot/composers/messages';
-import { parseCards, stateMiddleware } from '../src/bot/middleware';
-import { selfDestructedReply } from '../src/bot/plugins';
-import type { OutgoingRequests } from '../src/testing';
-import { MessagePrivateMockUpdate, prepareBotForTesting } from '../src/testing';
-import { mockChatSession } from '../src/testing-main';
-import type { GrammyContext } from '../src/types';
+import { getMessagesRegisterComposer } from '@bot/composers';
+import { getNoCardsComposer } from '@bot/composers/messages';
+import { parseCards, stateMiddleware } from '@bot/middleware';
+import { selfDestructedReply } from '@bot/plugins';
+
+import type { OutgoingRequests } from '@testing/';
+import { MessagePrivateMockUpdate, prepareBotForTesting } from '@testing/';
+import { mockChatSession } from '@testing/../testing-main';
+
+import type { GrammyContext } from '@types/';
 
 let outgoingRequests: OutgoingRequests;
 const bot = new Bot<GrammyContext>('mock');
@@ -43,6 +45,7 @@ describe('edit message test', () => {
 
   it('should remove a card message', async () => {
     const update = new MessagePrivateMockUpdate('4111 1111 1111 1111').build();
+
     await bot.handleUpdate(update);
 
     const expectedMethods = outgoingRequests.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']);
@@ -54,6 +57,7 @@ describe('edit message test', () => {
 
   it('should not remove a card message', async () => {
     const update = new MessagePrivateMockUpdate('not a card').build();
+
     await bot.handleUpdate(update);
 
     const expectedMethods = outgoingRequests.buildMethods([]);
@@ -65,6 +69,7 @@ describe('edit message test', () => {
 
   it('should remove the message if it has been edited', async () => {
     const updateSendMessage = new MessagePrivateMockUpdate('not a card').build();
+
     const updateEditMessage = new MessagePrivateMockUpdate('').buildOverwrite({
       edited_message: { ...updateSendMessage.message, text: '4111 1111 1111 1111', edit_date: Date.now() },
     });

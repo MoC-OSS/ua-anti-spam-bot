@@ -1,5 +1,5 @@
-import { mockDynamicStorageService } from '../../src/services/_mocks/index.mocks';
-import { CounteroffensiveService } from '../../src/services/counteroffensive.service';
+import { mockDynamicStorageService } from '@services/_mocks/index.mocks';
+import { CounteroffensiveService } from '@services/counteroffensive.service';
 
 const testCases = [
   'контр наступальний',

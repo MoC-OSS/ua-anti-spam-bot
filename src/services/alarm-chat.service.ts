@@ -2,9 +2,11 @@ import Bottleneck from 'bottleneck';
 import pIteration from 'p-iteration';
 import type { Chat } from 'typegram/manage';
 
-import { alarmEndNotificationMessage, chatIsMutedMessage, chatIsUnmutedMessage, getAlarmStartNotificationMessage } from '../message';
-import type { ChatSession, ChatSessionData, GrammyBot } from '../types';
-import { handleError } from '../utils';
+import { alarmEndNotificationMessage, chatIsMutedMessage, chatIsUnmutedMessage, getAlarmStartNotificationMessage } from '@message/';
+
+import type { ChatSession, ChatSessionData, GrammyBot } from '@types/';
+
+import { handleError } from '@utils/';
 
 import { ALARM_EVENT_KEY, alarmService } from './alarm.service';
 import { redisService } from './redis.service';
@@ -21,11 +23,13 @@ export class AlarmChatService {
   async init(api: GrammyBot['api']) {
     this.api = api;
     this.chats = await this.getChatsWithAlarmModeOn();
-    this.alarms = new Set([]);
+    this.alarms = new Set();
+
     this.limiter = new Bottleneck({
       maxConcurrent: 1,
       minTime: 2000,
     });
+
     await this.getChatsWithAlarm();
     this.subscribeToAlarms();
   }
@@ -44,10 +48,12 @@ export class AlarmChatService {
    * */
   updateChat(chatSession: ChatSessionData, id: number | string | undefined) {
     if (!id) {
-      throw new Error(`This is an invalid chat id`);
+      throw new Error('This is an invalid chat id');
     }
+
     const chatId = id.toString();
     const index = this.chats ? this.chats.findIndex((chat) => chat.id === chatId) : -1;
+
     if (index !== -1) {
       if (!chatSession.chatSettings.disableChatWhileAirRaidAlert && !chatSession.chatSettings.airRaidAlertSettings.notificationMessage) {
         this.chats?.splice(index, 1);
@@ -64,6 +70,7 @@ export class AlarmChatService {
 
   async getChatsWithAlarmModeOn() {
     const sessions = await redisService.getChatSessions();
+
     return sessions.filter(
       (s) => s.data.chatSettings?.airRaidAlertSettings?.notificationMessage || s.data.chatSettings?.disableChatWhileAirRaidAlert,
     );
@@ -71,6 +78,7 @@ export class AlarmChatService {
 
   async getChatsWithAlarm() {
     const airRaidAlarmStates = await alarmService.getStates();
+
     airRaidAlarmStates.states.forEach((state) => {
       if (state.alert) {
         this.alarms?.add(state.name);
@@ -92,7 +100,7 @@ export class AlarmChatService {
 
       if (this.chats) {
         pIteration
-          // eslint-disable-next-line @typescript-eslint/no-misused-promises,unicorn/no-array-method-this-argument,unicorn/no-array-callback-reference
+          // eslint-disable-next-line unicorn/no-array-method-this-argument,unicorn/no-array-callback-reference
           .forEach(this.chats, async (chat) => {
             if (chat.data.chatSettings.airRaidAlertSettings.state === event.state.name) {
               await this.limiter.schedule(() => this.processChatAlarm(chat, event.state.alert, isRepeatedAlarm).catch(handleError));
@@ -119,6 +127,7 @@ export class AlarmChatService {
       startAlarmMessage += getAlarmStartNotificationMessage(chat.data.chatSettings, isRepeatedAlarm);
       endAlarmMessage += alarmEndNotificationMessage(chat.data.chatSettings);
     }
+
     if (chat.data.chatSettings.disableChatWhileAirRaidAlert) {
       startAlarmMessage += chatIsMutedMessage;
       endAlarmMessage += chatIsUnmutedMessage;
@@ -126,8 +135,8 @@ export class AlarmChatService {
 
     if (isAlarm) {
       if (chat.data.chatSettings.disableChatWhileAirRaidAlert && !isRepeatedAlarm) {
-        const newSession = { ...chat.data };
-        newSession.chatPermissions = { ...(chatInfo as Chat.MultiUserGetChat).permissions };
+        const newSession = { ...chat.data, chatPermissions: { ...(chatInfo as Chat.MultiUserGetChat).permissions } };
+
         await redisService.updateChatSession(chat.id, newSession);
         const newPermissions = {};
 

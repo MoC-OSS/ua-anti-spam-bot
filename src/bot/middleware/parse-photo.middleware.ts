@@ -1,12 +1,15 @@
 import type * as Buffer from 'node:buffer';
-import axios from 'axios';
+
 import type { NextFunction } from 'grammy';
+
+import axios from 'axios';
 import sharp from 'sharp';
 
+import type { GrammyContext } from '@types/';
+import { ImageType } from '@types/';
+import type { StateImage } from '@types/state';
+
 import { environmentConfig } from '../../config';
-import type { GrammyContext } from '../../types';
-import { ImageType } from '../../types';
-import type { StateImage } from '../../types/state';
 
 /**
  * @description

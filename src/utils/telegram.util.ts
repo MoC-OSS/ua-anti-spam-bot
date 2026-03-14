@@ -1,10 +1,11 @@
 import type { Chat, User } from '@grammyjs/types/manage';
 import type { ChatFullInfo } from 'grammy/types';
+
 import type { ChatMemberOwner } from 'typegram';
 
-import type { GrammyContext } from '../types';
+import type { GrammyContext } from '@types/';
 
-import { getUserData, telegramUtil } from './index';
+import { getUserData, telegramUtil as telegramUtility } from './index';
 
 export class TelegramUtil {
   /**
@@ -50,6 +51,7 @@ export class TelegramUtil {
     if (user.username) {
       return `@${user.username}`;
     }
+
     return `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}`;
   }
 
@@ -60,8 +62,8 @@ export class TelegramUtil {
     const { writeUsername, userId } = getUserData(context);
     const chatInfo = await context.getChat();
 
-    const chatTitle = telegramUtil.getChatTitle(context.chat);
-    const inviteLink = telegramUtil.getInviteLink(chatInfo);
+    const chatTitle = telegramUtility.getChatTitle(context.chat);
+    const inviteLink = telegramUtility.getInviteLink(chatInfo);
 
     const chatMention = chatTitle && (inviteLink ? `<a href="${inviteLink}">${chatTitle}</a>` : `<code>${chatTitle}</code>`);
 

@@ -1,9 +1,10 @@
 import lodashGet from 'lodash.get';
 import { removeLatinPartialLetters, removeNumber, removeSpecialSymbols } from 'ukrainian-ml-optimizer';
 
+import { messageUtil as messageUtility } from '@utils/';
+
 import type { DatasetKeys } from '../../dataset/dataset';
 import { dataset } from '../../dataset/dataset';
-import { messageUtil } from '../utils';
 
 class ProcessHandler {
   /**
@@ -14,20 +15,19 @@ class ProcessHandler {
    * @returns {string | null}
    * */
   processHandler(message: string, datasetPath: DatasetKeys, strict = false) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     const words = lodashGet(dataset, datasetPath.replace('_$', '')) as string[];
 
     if (datasetPath === 'one_word') {
       return this.processOneWordMessage(message, words);
     }
 
-    const directHit = words.find((word) => messageUtil.findInText(message, word, strict));
+    const directHit = words.find((word) => messageUtility.findInText(message, word, strict));
 
     if (directHit) {
       return directHit;
     }
 
-    return messageUtil.fuseInText(message, words);
+    return messageUtility.fuseInText(message, words);
   }
 
   /**

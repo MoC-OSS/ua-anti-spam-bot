@@ -1,11 +1,16 @@
-import escapeHTML from 'escape-html';
 import { Composer } from 'grammy';
 
-import { LOGS_CHAT_THREAD_IDS } from '../../../const';
+import escapeHTML from 'escape-html';
+
+import { LOGS_CHAT_THREAD_IDS } from '@const/';
+
+import { channelMessageLogsStartMessage, getDeleteFeatureMessage } from '@message/';
+
+import type { GrammyContext } from '@types/';
+
+import { getEnabledFeaturesString, getUserData, telegramUtil as telegramUtility } from '@utils/';
+
 import { logsChat } from '../../../creator';
-import { channelMessageLogsStartMessage, getDeleteFeatureMessage } from '../../../message';
-import type { GrammyContext } from '../../../types';
-import { getEnabledFeaturesString, getUserData, telegramUtil } from '../../../utils';
 
 const CHANNEL_BOT_ID = 136_817_688;
 
@@ -22,7 +27,7 @@ export const getNoChannelMessagesComposer = () => {
    * @param {string} [message]
    * */
   async function saveChannelMessage(context: GrammyContext, parentChannelId?: number, senderChatId?: number, message?: string) {
-    const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
+    const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const text = message || context.state?.text || '';
 
     return context.api.sendMessage(
@@ -62,6 +67,7 @@ export const getNoChannelMessagesComposer = () => {
 
       const { writeUsername, userId } = getUserData(context);
       const featuresString = getEnabledFeaturesString(context.chatSession.chatSettings);
+
       await saveChannelMessage(context, parentChannelId, senderChatId, text);
 
       if (context.chatSession.chatSettings.disableDeleteMessage !== true) {

@@ -1,5 +1,6 @@
+import type { S3Service } from '@services/';
+
 import { environmentConfig } from '../config';
-import type { S3Service } from '../services';
 
 import { BaseTensorService } from './base-tensor.service';
 

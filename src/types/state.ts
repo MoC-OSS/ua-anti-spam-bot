@@ -72,14 +72,14 @@ export interface StateImageAnimation extends StateImageParsedFrames {
 }
 
 export type StateImage =
+  | StateImageAnimation
   | StateImagePhoto
   | StateImageSticker
-  | StateImageVideoSticker
   | StateImageVideo
   | StateImageVideoNote
-  | StateImageAnimation;
+  | StateImageVideoSticker;
 
-export type StateVideoFormats = Video | Sticker | Animation | VideoNote;
+export type StateVideoFormats = Animation | Sticker | Video | VideoNote;
 
 export type StateEntity =
   | (Exclude<MessageEntity, MessageEntity.TextMentionMessageEntity> & { value: string })
@@ -88,7 +88,7 @@ export type StateEntity =
 export interface CounterOffensivePositiveResult {
   result: true;
   percent: number;
-  reason: string | RegExp;
+  reason: RegExp | string;
 }
 
 export interface CounterOffensiveNegativeResult {
@@ -96,7 +96,7 @@ export interface CounterOffensiveNegativeResult {
   percent: 0;
 }
 
-export type CounterOffensiveResult = CounterOffensivePositiveResult | CounterOffensiveNegativeResult;
+export type CounterOffensiveResult = CounterOffensiveNegativeResult | CounterOffensivePositiveResult;
 
 /**
  * It requires only-with-text.middleware.js
@@ -120,7 +120,7 @@ interface PerformanceMiddlewareState {
 
 export interface NsfwPhotoResult {
   tensor: NsfwTensorResult;
-  reason: 'preview' | 'frame';
+  reason: 'frame' | 'preview';
 }
 
 export interface NsfwMessageResult {
@@ -148,6 +148,6 @@ export type State = OnlyWithTextMiddlewareState &
       rate: number;
       reason: string;
     };
-    nsfwResult?: NsfwPhotoResult | NsfwMessageResult;
+    nsfwResult?: NsfwMessageResult | NsfwPhotoResult;
     dataset?: SwindlerTensorResult;
   };

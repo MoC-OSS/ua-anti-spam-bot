@@ -1,5 +1,6 @@
+import { GOOGLE_SHEETS_NAMES } from '@const/';
+
 import { environmentConfig } from '../config';
-import { GOOGLE_SHEETS_NAMES } from '../const';
 
 import type { GoogleService } from './google.service';
 import { googleService as localGoogleService } from './google.service';
@@ -15,7 +16,7 @@ export class StatisticsGoogleService {
    *
    * @returns Promise<any>
    * */
-  async appendToSheet(cases: (string | number)[]) {
+  async appendToSheet(cases: (number | string)[]) {
     return this.googleService.appendToSheet(
       environmentConfig.GOOGLE_SPREADSHEET_ID,
       GOOGLE_SHEETS_NAMES.STATISTICS,

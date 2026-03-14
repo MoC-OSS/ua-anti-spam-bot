@@ -1,8 +1,9 @@
 import { Composer } from 'grammy';
 
-import type { GrammyContext } from '../../types';
-import { onlyCreatorFilter } from '../filters';
-import { ignoreOld } from '../middleware';
+import { onlyCreatorFilter } from '@bot/filters';
+import { ignoreOld } from '@bot/middleware';
+
+import type { GrammyContext } from '@types/';
 
 /**
  * @description Health-check helper composer
@@ -16,6 +17,7 @@ export const getHealthCheckComposer = () => {
     await context.reply('Breaking the bot for 1,5 min...\nIt should restart if health-check works.');
 
     const end = Date.now() + 90_000;
+
     while (Date.now() < end) {
       // do something here ...
     }

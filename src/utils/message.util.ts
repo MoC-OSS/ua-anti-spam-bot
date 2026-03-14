@@ -17,7 +17,7 @@ export class MessageUtil {
     /**
      * Direct hit
      * */
-    let directHit: string | boolean = false;
+    let directHit: boolean | string = false;
 
     if (searchFor.length <= 4) {
       directHit = strict

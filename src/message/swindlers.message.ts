@@ -2,7 +2,9 @@
  * Generic - Swindlers
  * */
 export const swindlersUpdateStartMessage = 'Починаю оновлення списку шахраїв...';
+
 export const swindlersUpdateEndMessage = 'Оновлення спіску шахраїв завершено.';
+
 export const swindlersWarningMessage = `<b>❗УВАГА! UA Anti Spam Bot 🇺🇦 помітив повідомлення від шахраїв в цьому чаті!</b>
 
 Будьте обережні та дотримуйтесь правил інформаційної безпеки:

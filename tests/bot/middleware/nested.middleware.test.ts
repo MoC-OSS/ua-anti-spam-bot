@@ -1,7 +1,8 @@
 import type { NextFunction } from 'grammy';
 
-import { nestedMiddleware } from '../../../src/bot/middleware/nested.middleware';
-import type { GrammyContext } from '../../../src/types';
+import { nestedMiddleware } from '@bot/middleware/nested.middleware';
+
+import type { GrammyContext } from '@types/';
 
 const mockContext = {} as Partial<GrammyContext> as GrammyContext;
 

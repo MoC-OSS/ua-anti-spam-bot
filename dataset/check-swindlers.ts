@@ -1,9 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { initSwindlersContainer, swindlersGoogleService } from '../src/services';
-import type { SwindlersResult } from '../src/types';
-import { DatasetType } from '../src/types';
+import { initSwindlersContainer, swindlersGoogleService } from '@services/';
+
+import type { SwindlersResult } from '@types/';
+import { DatasetType } from '@types/';
 
 const type = process.argv[2] as DatasetType;
 

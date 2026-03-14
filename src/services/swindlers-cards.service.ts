@@ -24,6 +24,7 @@ export class SwindlersCardsService {
    */
   processMessage(message: string): true | null {
     const cards = cardsService.parseCards(message);
+
     if (cards.some((card) => this.cards.includes(card))) {
       return true;
     }

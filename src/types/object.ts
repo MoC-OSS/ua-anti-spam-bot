@@ -3,7 +3,7 @@
 
  @category JSON
  */
-// eslint-disable-next-line no-use-before-define
+
 export type CustomJsonArray = CustomJsonValue[];
 
 /**
@@ -11,7 +11,7 @@ export type CustomJsonArray = CustomJsonValue[];
 
  @category JSON
  */
-export type CustomJsonPrimitive = string | number | boolean | null | undefined;
+export type CustomJsonPrimitive = boolean | number | string | null | undefined;
 
 /**
  Matches any valid JSON value.
@@ -20,7 +20,7 @@ export type CustomJsonPrimitive = string | number | boolean | null | undefined;
 
  @category JSON
  */
-// eslint-disable-next-line no-use-before-define
-export type CustomJsonValue = CustomJsonPrimitive | CustomJsonObject | CustomJsonArray;
+
+export type CustomJsonValue = CustomJsonArray | CustomJsonObject | CustomJsonPrimitive;
 
 export type CustomJsonObject = { [Key in string]: CustomJsonValue } & { [Key in string]?: CustomJsonValue | undefined };

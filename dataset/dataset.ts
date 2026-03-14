@@ -21,7 +21,6 @@ export async function loadOptionalFile<T>(path: string, defaultValue: T): Promis
 
   await import(path)
     .then((file) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       resolvedFile = file.default as T;
     })
     .catch(() => {

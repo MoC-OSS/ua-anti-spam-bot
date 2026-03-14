@@ -1,4 +1,4 @@
-import { antisemitismService } from '../../src/services/antisemitism.service';
+import { antisemitismService } from '@services/antisemitism.service';
 
 describe('AntisemitismService', () => {
   it('should remove message with threads', () => {

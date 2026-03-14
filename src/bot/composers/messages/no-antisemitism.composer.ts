@@ -1,13 +1,19 @@
-import escapeHTML from 'escape-html';
 import { Composer } from 'grammy';
 
-import { LOGS_CHAT_THREAD_IDS } from '../../../const';
+import escapeHTML from 'escape-html';
+
+import { LOGS_CHAT_THREAD_IDS } from '@const/';
+
+import { antisemitismDeleteLogsStartMessage, getDeleteAntisemitismMessage } from '@message/';
+
+import { antisemitismService } from '@services/antisemitism.service';
+
+import type { GrammyContext } from '@types/';
+
+import type { SearchSetResult } from '@utils/';
+import { censorWord, getUserData, telegramUtil as telegramUtility } from '@utils/';
+
 import { logsChat } from '../../../creator';
-import { antisemitismDeleteLogsStartMessage, getDeleteAntisemitismMessage } from '../../../message';
-import { antisemitismService } from '../../../services/antisemitism.service';
-import type { GrammyContext } from '../../../types';
-import type { SearchSetResult } from '../../../utils';
-import { censorWord, getUserData, telegramUtil } from '../../../utils';
 
 /**
  * @description Delete antisemitism language messages
@@ -20,7 +26,7 @@ export const getNoAntisemitismComposer = () => {
    * @param {SearchSetResult} searchResult
    * */
   async function saveAntisemitismMessage(context: GrammyContext, searchResult: SearchSetResult) {
-    const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
+    const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const text = context.state?.text || '';
 
     return context.api.sendMessage(

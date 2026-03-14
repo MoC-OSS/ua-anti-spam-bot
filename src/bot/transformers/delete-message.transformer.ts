@@ -1,6 +1,6 @@
 import type { Transformer } from 'grammy';
 
-import type { GrammyContext } from '../../types';
+import type { GrammyContext } from '@types/';
 
 export const deleteMessageTransformer =
   (context: GrammyContext): Transformer =>

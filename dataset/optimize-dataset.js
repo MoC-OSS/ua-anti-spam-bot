@@ -1,8 +1,6 @@
-/* eslint-disable global-require */
 const fs = require('node:fs');
 const path = require('node:path');
 
-// eslint-disable-next-line import/no-extraneous-dependencies
 const stringSimilarity = require('string-similarity');
 
 const { googleService } = require('../src/services');
@@ -37,7 +35,6 @@ function processCases(positives, negatives) {
   }
 }
 
-// eslint-disable-next-line no-unused-vars
 function processFromGoogle() {
   const cases = Promise.all([
     googleService.getSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, GOOGLE_SHEETS_NAMES.STRATEGIC_POSITIVE),
@@ -52,7 +49,6 @@ function processFromGoogle() {
   });
 }
 
-// eslint-disable-next-line no-unused-vars
 // function processFromLocal() {
 //   const positivesLocal = require('../positives.json');
 //   const negativesLocal = require('../negatives.json');

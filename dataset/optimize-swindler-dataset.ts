@@ -1,11 +1,13 @@
-import { swindlersGoogleService } from '../src/services';
-import { removeDuplicates } from '../src/utils';
+import { swindlersGoogleService } from '@services/';
+
+import { removeDuplicates } from '@utils/';
 
 import { removeSimilar } from './remove-similar';
 
 const type = process.argv[2];
 
 const mentionRegexp = /\B@\w+/g;
+
 const urlRegexp =
   /(https?:\/\/(?:www\.|(?!www))?[\dA-Za-z][\dA-Za-z-]+[\dA-Za-z]\.\S{2,}|www\.[\dA-Za-z][\dA-Za-z-]+[\dA-Za-z]\.\S{2,}|(https?:\/\/(?:www\.|(?!www)))?[\dA-Za-z-]+\.\S{2,}|www\.?[\dA-Za-z]+\.\S{2,})/g;
 
@@ -54,6 +56,7 @@ const processPromise = (response: string[]) =>
   );
 
   const uniqueTrainSwindlers = await removeSimilar(removeDuplicates(trainData), 0.9);
+
   const newTrainData = uniqueTrainSwindlers
     .filter((item) => item[0].unique)
     .map((item) => item[0].first.label)

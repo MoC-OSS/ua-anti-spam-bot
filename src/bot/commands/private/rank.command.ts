@@ -1,6 +1,8 @@
-import { redisService } from '../../../services';
-import type { TensorService } from '../../../tensor';
-import type { GrammyCommandMiddleware } from '../../../types';
+import { redisService } from '@services/';
+
+import type { TensorService } from '@tensor/';
+
+import type { GrammyCommandMiddleware } from '@types/';
 
 export class RankCommand {
   constructor(private tensorService: TensorService) {}
@@ -14,6 +16,7 @@ export class RankCommand {
 
       if (!context.match) {
         const percent = await redisService.getBotTensorPercent();
+
         return context.reply(`Current rank is: ${percent || 9999}`);
       }
 
@@ -23,6 +26,7 @@ export class RankCommand {
 
       this.tensorService.setSpamThreshold(newPercent);
       await redisService.setBotTensorPercent(newPercent);
+
       return context.reply(`Set new tensor rank: ${newPercent}`);
     };
   }
@@ -36,6 +40,7 @@ export class RankCommand {
 
       if (!context.match) {
         const percent = await redisService.getTrainingStartRank();
+
         return context.reply(`Current training start rank is: ${percent || 9998}`);
       }
 
@@ -44,6 +49,7 @@ export class RankCommand {
       }
 
       await redisService.setTrainingStartRank(newPercent);
+
       return context.reply(`Set new training start rank rank: ${newPercent}`);
     };
   }
@@ -57,10 +63,12 @@ export class RankCommand {
 
       if (!context.match) {
         const whitelist = await redisService.getTrainingChatWhitelist();
+
         return context.reply(`Current training chat whitelist is:\n\n${whitelist.join(',')}`);
       }
 
       await redisService.setTrainingChatWhitelist(newChats);
+
       return context.reply(`Set training chat whitelist is:\n\n${newChats}`);
     };
   }
@@ -74,10 +82,12 @@ export class RankCommand {
 
       if (!context.match) {
         const whitelist = await redisService.getTrainingChatWhitelist();
+
         return context.reply(`Current training chat whitelist is:\n\n${whitelist.join(',')}`);
       }
 
       await redisService.updateTrainingChatWhitelist(newChats);
+
       return context.reply(`Set training chat whitelist is:\n\n${newChats}`);
     };
   }

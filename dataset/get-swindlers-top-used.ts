@@ -8,6 +8,7 @@ import { getTopUsed } from './get-top-used';
 export const getSwindlersTopUsed = (dataset: string[]) => {
   const whitelist = ['україн'];
   const sorted = getTopUsed(dataset, whitelist, ' ');
+
   const sortedTwo = getTopUsed(dataset, whitelist, ' ', (item2, index, self) => {
     if (index === dataset.length - 1) {
       return item2;
@@ -17,13 +18,16 @@ export const getSwindlersTopUsed = (dataset: string[]) => {
   });
 
   const result = {};
+
   sorted.slice(0, 9).forEach((item) => {
     const [word, count] = item;
+
     result[word] = count;
   });
 
   sortedTwo.slice(0, 20).forEach((item) => {
     const [word, count] = item;
+
     result[word] = count;
   });
 

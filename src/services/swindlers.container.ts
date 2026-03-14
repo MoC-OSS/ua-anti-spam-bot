@@ -1,5 +1,6 @@
+import { initSwindlersTensor } from '@tensor/';
+
 import { dataset } from '../../dataset/dataset';
-import { initSwindlersTensor } from '../tensor';
 
 import { DynamicStorageService } from './dynamic-storage.service';
 import { googleService } from './google.service';
@@ -11,6 +12,7 @@ import { SwindlersUrlsService } from './swindlers-urls.service';
 
 export const initSwindlersContainer = async () => {
   const swindlersTensorService = await initSwindlersTensor();
+
   swindlersTensorService.setSpamThreshold(0.87);
 
   // Test that swindlersTensorService works
@@ -18,6 +20,7 @@ export const initSwindlersContainer = async () => {
   await swindlersTensorService.predict('test', null);
 
   const dynamicStorageService = new DynamicStorageService(swindlersGoogleService, googleService, dataset);
+
   await dynamicStorageService.init();
 
   const swindlersBotsService = new SwindlersBotsService(dynamicStorageService, 0.6);

@@ -1,8 +1,10 @@
 import type { NextFunction } from 'grammy';
+
 import type { GrammyContext } from 'types';
 
-import { getDeclinedMassSendingMessage } from '../../message';
-import { onlyCreatorFilter } from '../filters';
+import { onlyCreatorFilter } from '@bot/filters';
+
+import { getDeclinedMassSendingMessage } from '@message/';
 
 /**
  * @description

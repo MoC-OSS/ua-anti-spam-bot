@@ -1,6 +1,12 @@
-import { redisClient } from '../db';
-import type { ChatSession, ChatSessionData, ChatSettings, Session } from '../types';
-import { removeDuplicates } from '../utils';
+import { redisClient } from '@db/';
+
+import type { ChatSession, ChatSessionData, ChatSettings, Session } from '@types/';
+
+import { removeDuplicates } from '@utils/';
+
+export interface RedisServiceSetSwindlersStatisticStatistic {
+  [key: string]: string[];
+}
 
 export class RedisService {
   redisClient = redisClient;
@@ -33,6 +39,7 @@ export class RedisService {
    * */
   async updateTrainingChatWhitelist(newChatId: string) {
     const currentChats = await this.getTrainingChatWhitelist();
+
     currentChats.push(newChatId);
 
     return this.setTrainingChatWhitelist(currentChats.join(','));
@@ -118,6 +125,7 @@ export class RedisService {
    */
   async updateNegatives(word: string) {
     const words = await this.getNegatives();
+
     words.push(word);
 
     return redisClient.setRawValue(this.redisSelectors.negatives, words);
@@ -128,6 +136,7 @@ export class RedisService {
    */
   async updatePositives(word: string) {
     const words = await this.getPositives();
+
     words.push(word);
 
     return redisClient.setRawValue(this.redisSelectors.positives, words);
@@ -145,7 +154,7 @@ export class RedisService {
    * @param {string | number} chatId
    * @param {Partial<ChatSessionData>} newSession
    * */
-  async updateChatSession(chatId: string | number, newSession: Partial<ChatSessionData>) {
+  async updateChatSession(chatId: number | string, newSession: Partial<ChatSessionData>) {
     const stringChatId = chatId.toString();
 
     if (!this.redisSelectors.chatSessions.test(stringChatId)) {
@@ -153,22 +162,24 @@ export class RedisService {
     }
 
     const currentSession = await redisClient.getRawValue<ChatSessionData>(stringChatId);
+
     const writeSession = {
       ...currentSession,
       ...newSession,
     } as ChatSessionData;
 
-    // eslint-disable-next-line  @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
     return redisClient.setRawValue(stringChatId, writeSession as any);
   }
 
-  async updateChatSettings(chatId: string | number, newSettings: ChatSettings) {
+  async updateChatSettings(chatId: number | string, newSettings: ChatSettings) {
     const stringChatId = chatId.toString();
 
     if (!this.redisSelectors.chatSessions.test(stringChatId)) {
       throw new Error(`This is an invalid chat id: ${stringChatId}`);
     }
+
     const currentSession = await redisClient.getRawValue<ChatSessionData>(stringChatId);
+
     const updatedSession = {
       ...currentSession,
       chatSettings: newSettings,
@@ -183,11 +194,13 @@ export class RedisService {
 
   async getUserSession(userId: string) {
     const key = `${userId}:${userId}`;
+
     return redisClient.getRawValue<Session>(key);
   }
 
   async setUserSession(userId: string, session: Session) {
     const key = `${userId}:${userId}`;
+
     return redisClient.setRawValue(key, session);
   }
 
@@ -199,12 +212,13 @@ export class RedisService {
    * @param {string} chatId
    * @returns {Promise<ChatSessionData>}
    * */
-  async getChatSession(chatId: string | number) {
+  async getChatSession(chatId: number | string) {
     const stringChatId = chatId.toString();
 
     if (!this.redisSelectors.chatSessions.test(stringChatId)) {
       throw new Error(`This is an invalid chat id: ${stringChatId}`);
     }
+
     return redisClient.getRawValue<ChatSessionData>(stringChatId);
   }
 
@@ -225,7 +239,7 @@ export class RedisService {
   /**
    * @param {{ [key: string]: string[] }} statistic
    * */
-  setSwindlersStatistic(statistic: { [key: string]: string[] }) {
+  setSwindlersStatistic(statistic: RedisServiceSetSwindlersStatisticStatistic) {
     return redisClient.setRawValue(this.redisSelectors.swindlersStatistic, statistic);
   }
 

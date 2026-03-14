@@ -1,4 +1,5 @@
 import type { Context, MiddlewareFn } from 'grammy';
+
 import type { PartialDeep } from 'type-fest';
 
 export interface MockContextFieldReturnType<C extends Context, F extends keyof C> {
@@ -31,6 +32,7 @@ export const mockContextField =
       mocked: mocked as C[F],
       middleware: (context, next) => {
         context[fieldName] = mocked as C[F];
+
         return next();
       },
     });

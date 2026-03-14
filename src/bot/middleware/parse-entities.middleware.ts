@@ -1,5 +1,5 @@
-import type { GrammyMiddleware } from '../../types';
-import type { StateEntity } from '../../types/state';
+import type { GrammyMiddleware } from '@types/';
+import type { StateEntity } from '@types/state';
 
 /**
  * It parses the value of entities and save it into the state

@@ -1,6 +1,7 @@
-import type { DeleteMessageAtomProperties } from '../message';
-import { getDeleteUserAtomMessage } from '../message';
-import { getRandomItem } from '../utils';
+import { getRandomItem } from '@utils/';
+
+import type { DeleteMessageAtomProperties } from '.';
+import { getDeleteUserAtomMessage } from '.';
 
 export const warnObsceneMessages = [
   '🧾 Будь ласка, утримайтеся від використання нецензурної лексики. Ми сподіваємося на вашу уважність до вибору слів.',

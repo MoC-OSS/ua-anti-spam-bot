@@ -1,11 +1,16 @@
-import escapeHTML from 'escape-html';
 import { Composer } from 'grammy';
 
-import { LOGS_CHAT_THREAD_IDS } from '../../../const';
+import escapeHTML from 'escape-html';
+
+import { LOGS_CHAT_THREAD_IDS } from '@const/';
+
+import { getDeleteFeatureMessage, mentionLogsStartMessage } from '@message/';
+
+import type { GrammyContext } from '@types/';
+
+import { getEnabledFeaturesString, getUserData, telegramUtil as telegramUtility } from '@utils/';
+
 import { logsChat } from '../../../creator';
-import { getDeleteFeatureMessage, mentionLogsStartMessage } from '../../../message';
-import type { GrammyContext } from '../../../types';
-import { getEnabledFeaturesString, getUserData, telegramUtil } from '../../../utils';
 
 /**
  * @description Remove strategic information logic
@@ -19,7 +24,7 @@ export const getNoMentionsComposer = () => {
    * @param {string} [message]
    * */
   async function saveMentionsMessage(context: GrammyContext, mentions: string[], message?: string) {
-    const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
+    const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const text = message || context.state?.text || '';
 
     return context.api.sendMessage(
@@ -42,6 +47,7 @@ export const getNoMentionsComposer = () => {
 
       const { writeUsername, userId } = getUserData(context);
       const featuresString = getEnabledFeaturesString(context.chatSession.chatSettings);
+
       await saveMentionsMessage(context, mentions, text);
 
       if (context.chatSession.chatSettings.disableDeleteMessage !== true) {

@@ -1,4 +1,4 @@
-import { obsceneService } from '../../src/services/obscene.service';
+import { obsceneService } from '@services/obscene.service';
 
 describe('ObsceneService', () => {
   it('should detect obscene messages', () => {

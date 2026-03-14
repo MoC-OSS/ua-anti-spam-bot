@@ -1,5 +1,6 @@
-import { languageDetectService } from '../../services';
-import type { GrammyMiddleware } from '../../types';
+import { languageDetectService } from '@services/';
+
+import type { GrammyMiddleware } from '@types/';
 
 export const parseIsRussian: GrammyMiddleware = async (context, next) => {
   if (context.state.isRussian === undefined) {

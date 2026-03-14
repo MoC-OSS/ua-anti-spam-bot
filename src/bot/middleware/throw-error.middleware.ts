@@ -1,4 +1,4 @@
-import type { GrammyMiddleware } from '../../types';
+import type { GrammyMiddleware } from '@types/';
 
 /**
  * @deprecated

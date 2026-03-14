@@ -1,14 +1,23 @@
 import axios from 'axios';
 
+import { processHandler } from '@express-logic/';
+
+import { redisService } from '@services/';
+
+import type { TensorService } from '@tensor/';
+
+import type { GrammyContext, SwindlerTensorResult } from '@types/';
+
+import { handleError } from '@utils/';
+
 import type { DatasetKeys } from '../../dataset/dataset';
 import { environmentConfig } from '../config';
-import { processHandler } from '../express-logic';
-import { redisService } from '../services';
-import type { TensorService } from '../tensor';
-import type { GrammyContext, SwindlerTensorResult } from '../types';
-import { handleError } from '../utils';
 
 const host = `http://${environmentConfig.HOST}:${environmentConfig.PORT}`;
+
+export interface MessageHandlerProcessTensorMessageReturn {
+  result: SwindlerTensorResult;
+}
 
 export class MessageHandler {
   /**
@@ -243,7 +252,7 @@ export class MessageHandler {
     return finalHighRisk;
   }
 
-  async processTensorMessage(message: string, rate: number | null): Promise<{ result: SwindlerTensorResult }> {
+  async processTensorMessage(message: string, rate: number | null): Promise<MessageHandlerProcessTensorMessageReturn> {
     try {
       if (environmentConfig.USE_SERVER) {
         return await axios
@@ -256,6 +265,7 @@ export class MessageHandler {
       };
     } catch (error) {
       handleError(error, 'API_DOWN');
+
       return {
         result: await this.tensorService.predict(message, rate),
       };
@@ -296,6 +306,7 @@ export class MessageHandler {
           };
     } catch (error) {
       handleError(error, 'API_DOWN');
+
       processResult = {
         result: processHandler.processHandler(message, datasetPath, strict),
       };
@@ -335,6 +346,7 @@ export class MessageHandler {
           .forEach((entity) => {
             // eslint-disable-next-line unicorn/prefer-string-slice
             const mention = result.substr(entity.offset, entity.length);
+
             result = result.replace(mention, Array.from({ length: mention.length }, () => ' ').join(''));
           });
 
@@ -366,6 +378,7 @@ export class MessageHandler {
 
     if (!message) {
       console.error('Cannot parse the message!', message);
+
       return '';
     }
 

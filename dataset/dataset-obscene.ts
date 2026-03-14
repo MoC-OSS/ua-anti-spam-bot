@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 
-import { removeRepeatedLettersUtil } from '../src/utils/remove-repeated-letters.util';
-import { SearchSet } from '../src/utils/search-set';
+import { removeRepeatedLettersUtil as removeRepeatedLettersUtility } from '@utils/remove-repeated-letters.util';
+import { SearchSet } from '@utils/search-set';
 
 import { processMessage, processTxtMessage } from './dataset-helpers';
 
@@ -14,7 +14,9 @@ const obsceneDictionaryTranslitWhitelist = new Set(['such', 'user', 'ept', 'derm
  * Urls
  * */
 export const obsceneDictionaryUaUrl = new URL('strings/obscene_dictionary_ua.txt', import.meta.url);
+
 export const obsceneDictionaryRuUrl = new URL('strings/obscene_dictionary_ru.txt', import.meta.url);
+
 export const obsceneDictionaryEnUrl = new URL('strings/obscene_dictionary_en.txt', import.meta.url);
 
 const obsceneDictionaryWhitelistUaUrl = new URL('strings/obscene_dictionary_ua_whitelist.txt', import.meta.url);
@@ -36,7 +38,7 @@ function processObsceneDictionary(whitelist: Set<string>, datasetUrl: URL) {
     ...whitelist,
     ...processTxtMessage(fs.readFileSync(datasetUrl).toString())
       .filter((item) => !whitelist.has(item))
-      .map((item) => removeRepeatedLettersUtil(item)),
+      .map((item) => removeRepeatedLettersUtility(item)),
   ]).filter((word) => !obsceneDictionaryTranslitWhitelist.has(word));
 }
 

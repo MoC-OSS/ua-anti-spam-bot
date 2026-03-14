@@ -1,10 +1,14 @@
-import Bottleneck from 'bottleneck';
 import { Composer } from 'grammy';
 
-import { getSuccessfulMessage, getUpdateMessage } from '../../message';
-import { redisService } from '../../services';
-import type { ChatSession, GrammyContext } from '../../types';
-import { handleError } from '../../utils';
+import Bottleneck from 'bottleneck';
+
+import { getSuccessfulMessage, getUpdateMessage } from '@message/';
+
+import { redisService } from '@services/';
+
+import type { ChatSession, GrammyContext } from '@types/';
+
+import { handleError } from '@utils/';
 
 const supportChatId = -1_001_788_350_185;
 const pollId = 4080;
@@ -64,6 +68,7 @@ export const featurePollComposer = new Composer<GrammyContext>();
 
 featurePollComposer.command('feature_poll', async (context) => {
   const allSessions = await redisService.getChatSessions();
+
   const superGroupsSessions = allSessions
     .filter((session) => session.data.chatType === 'supergroup' && !session.data.botRemoved && session.data.chatMembersCount)
     .filter((session) => +session.id !== supportChatId);

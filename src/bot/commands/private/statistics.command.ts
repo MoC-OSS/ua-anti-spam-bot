@@ -1,11 +1,15 @@
 import { InputFile } from 'grammy';
+
 import moment from 'moment-timezone';
 
-import { getChatStatisticsMessage, getFeaturesStatisticsMessage } from '../../../message';
-import { redisService } from '../../../services';
-import { statisticsGoogleService } from '../../../services/statistics-google.service';
-import type { FeaturesSessionsData, GrammyMiddleware } from '../../../types';
-import { handleError, optimizeWriteContextUtil } from '../../../utils';
+import { getChatStatisticsMessage, getFeaturesStatisticsMessage } from '@message/';
+
+import { redisService } from '@services/';
+import { statisticsGoogleService } from '@services/statistics-google.service';
+
+import type { FeaturesSessionsData, GrammyMiddleware } from '@types/';
+
+import { handleError, optimizeWriteContextUtil as optimizeWriteContextUtility } from '@utils/';
 
 export class StatisticsCommand {
   /**
@@ -32,6 +36,7 @@ export class StatisticsCommand {
         const groupCount = groupSessions.length;
         const privateCount = privateSessions.length;
         const channelCount = channelSessions.length;
+
         const totalUserCounts = chatSessions
           .filter((session) => !session.data.botRemoved)
           .reduce((accumulator, session) => accumulator + (session.data.chatMembersCount || 1), 0);
@@ -88,12 +93,14 @@ export class StatisticsCommand {
             totalUserCounts,
           }),
         );
+
         await context.replyWithHTML(
           getFeaturesStatisticsMessage({
             features,
             chatsCount: adminsChatsCount,
           }),
         );
+
         await statisticsGoogleService.appendToSheet([
           currentDate,
           totalSessionCount,
@@ -108,22 +115,27 @@ export class StatisticsCommand {
           ...Object.values(features),
         ]);
       } catch (error) {
-        const writeContext = optimizeWriteContextUtil(context);
+        const writeContext = optimizeWriteContextUtility(context);
         const chatSessions = await redisService.getChatSessions();
 
         handleError(error);
+
         await context
           .reply(`<b>Bot statistics failed with message:</b>\n${(error as Error).message}`)
           .catch(() => context.reply('cannot send error message.'));
+
         await context
           .reply(`<b>Stack:</b>\n<code>${(error as Error).stack || ''}</code>`)
           .catch(() => context.reply('cannot send error trace'));
+
         await context
           .replyWithDocument(new InputFile(Buffer.from(JSON.stringify(writeContext, null, 2)), `ctx-${new Date().toISOString()}.json`))
           .catch(() => context.reply('cannot send context'));
+
         await context
           .replyWithDocument(new InputFile(Buffer.from(JSON.stringify(error, null, 2)), `error-${new Date().toISOString()}.json`))
           .catch(() => context.reply('cannot send error file'));
+
         await context
           .replyWithDocument(
             new InputFile(Buffer.from(JSON.stringify(chatSessions, null, 2)), `chatSessions-${new Date().toISOString()}.json`),

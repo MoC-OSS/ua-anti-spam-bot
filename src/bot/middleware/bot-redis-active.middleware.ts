@@ -1,6 +1,8 @@
+import { redisService } from '@services/';
+
+import type { GrammyMiddleware } from '@types/';
+
 import { creatorId } from '../../creator';
-import { redisService } from '../../services';
-import type { GrammyMiddleware } from '../../types';
 
 export const botRedisActive: GrammyMiddleware = async (context, next) => {
   const isDeactivated = await redisService.getIsBotDeactivated();

@@ -16,6 +16,7 @@ datasetPaths.forEach((datasetPath) => {
   files.forEach((filePath) => {
     // eslint-disable-next-line global-require,import/no-dynamic-require
     const datasetFile = removeDuplicates(require(filePath));
+
     fs.writeFileSync(filePath, `${JSON.stringify(datasetFile, null, 2)}\n`);
   });
 });

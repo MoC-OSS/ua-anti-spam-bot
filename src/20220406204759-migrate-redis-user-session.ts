@@ -1,6 +1,7 @@
-/* eslint-disable no-param-reassign,unicorn/prefer-module */
+/* eslint-disable no-param-reassign */
 import type { Bot } from 'grammy';
 import { GrammyError } from 'grammy';
+
 import { forEach } from 'p-iteration';
 /**
  * @deprecated
@@ -29,6 +30,7 @@ const migration = async (bot: Bot<GrammyContext>, botStartDate: Date) => {
 
   if (compareDate !== '2022-4-10') {
     console.info('Skip migration:', __filename);
+
     return;
   }
 
@@ -42,6 +44,7 @@ const migration = async (bot: Bot<GrammyContext>, botStartDate: Date) => {
    * @type {Session[]}
    * */
   const userRecords = await redisService.getUserSessions();
+
   const uniqueUserRecords = userRecords.filter(
     (session, index, self) => index === self.findIndex((t) => getChatId(t.id) === getChatId(session.id)),
   );
@@ -57,10 +60,8 @@ const migration = async (bot: Bot<GrammyContext>, botStartDate: Date) => {
     )
     .catch(handleError);
 
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   await forEach(nonUniqueUserRecords, (record) => redisClient.removeKey(record.id));
 
-  // eslint-disable-next-line no-restricted-syntax
   uniqueUserRecords.forEach((record) => {
     const chatId = getChatId(record.id);
 
@@ -76,10 +77,10 @@ const migration = async (bot: Bot<GrammyContext>, botStartDate: Date) => {
       delete object.isCurrentUserAdmin;
     };
 
-    // eslint-disable-next-line no-await-in-loop
     queue.enqueue(async () => {
       try {
         const chat = await bot.api.getChat(chatId);
+
         chatSessionRecord.chatType = chat.type;
         chatSessionRecord.botRemoved = false;
 
@@ -89,6 +90,7 @@ const migration = async (bot: Bot<GrammyContext>, botStartDate: Date) => {
 
           const admins = await bot.api.getChatAdministrators(chatId);
           const isBotAdmin = (admins || []).some((admin) => admin.user.id === bot.botInfo.id);
+
           chatSessionRecord.isBotAdmin = isBotAdmin;
 
           if (isBotAdmin) {
@@ -115,17 +117,16 @@ const migration = async (bot: Bot<GrammyContext>, botStartDate: Date) => {
               chatSessionRecord = {
                 ...chatSessionRecord,
                 ...record.data,
+                botRemoved: true,
+                isBotAdmin: false,
               };
 
-              chatSessionRecord.botRemoved = true;
-              chatSessionRecord.isBotAdmin = false;
               delete chatSessionRecord.botAdminDate;
 
               await redisService.updateChatSession(chatId, chatSessionRecord).then(() => redisClient.removeKey(record.id));
               break;
             }
 
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             case /Too Many Requests: retry after/.test(error.description): {
               throw error;

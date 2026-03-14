@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-import { mockDynamicStorageService, mockNewUrl } from '../../src/services/_mocks/index.mocks';
-import { SwindlersUrlsService } from '../../src/services/swindlers-urls.service';
-import { urlService } from '../../src/services/url.service';
+import { mockDynamicStorageService, mockNewUrl } from '@services/_mocks/index.mocks';
+import { SwindlersUrlsService } from '@services/swindlers-urls.service';
+import { urlService } from '@services/url.service';
 
 vi.mock('axios');
 
@@ -12,6 +12,7 @@ const axiosMock = { get: vi.mocked(axios.get) };
  * @type {SwindlersUrlsService}
  * */
 let swindlersUrlsService: SwindlersUrlsService;
+
 describe('SwindlersUrlsService', () => {
   beforeAll(() => {
     swindlersUrlsService = new SwindlersUrlsService(mockDynamicStorageService, 0.6);
@@ -22,13 +23,14 @@ describe('SwindlersUrlsService', () => {
       const sites = ['test.com', 'example.com'];
       const result = swindlersUrlsService.buildSiteRegex(sites);
 
-      expect(result.source).toEqual('(?:https?:\\/\\/)?(test.com|example.com)(?!ua).+');
+      expect(result.source).toEqual(String.raw`(?:https?:\/\/)?(test.com|example.com)(?!ua).+`);
     });
   });
 
   describe('isSpamUrl', () => {
     it('should match swindlers url', async () => {
       const text = 'https://www.orpay.me';
+
       axiosMock.get.mockImplementationOnce(() => Promise.resolve({ request: { res: { responseUrl: text } } }));
       const result = await swindlersUrlsService.isSpamUrl(text);
 
@@ -37,6 +39,7 @@ describe('SwindlersUrlsService', () => {
 
     it('should not match privat url', async () => {
       const text = 'https://next.privat24.ua/';
+
       axiosMock.get.mockImplementationOnce(() => Promise.resolve({ request: { res: { responseUrl: text } } }));
       const result = await swindlersUrlsService.isSpamUrl(text);
 
@@ -97,11 +100,13 @@ describe('SwindlersUrlsService', () => {
 
   describe('processMessage', () => {
     it('should process messages', async () => {
-      const text = `https://da-pay.me/ тест`;
+      const text = 'https://da-pay.me/ тест';
+
       axiosMock.get.mockImplementationOnce(() => Promise.resolve({ request: { res: { responseUrl: 'https://da-pay.me/' } } }));
       const result = await swindlersUrlsService.processMessage(text);
 
       const parsedUrl = urlService.parseUrls(text)[0];
+
       axiosMock.get.mockImplementationOnce(() => Promise.resolve({ request: { res: { responseUrl: parsedUrl } } }));
       const isUrlSpam = await swindlersUrlsService.isSpamUrl(parsedUrl);
 
@@ -119,10 +124,12 @@ describe('SwindlersUrlsService', () => {
     https://t.me/+5v9SixsjZ9ZmMjBs
 
     https://t.me/+5v9SixsjZ9ZmMjBs`;
+
       axiosMock.get.mockImplementation(() => Promise.resolve({ request: { res: { responseUrl: 'https://t.me/+5v9SixsjZ9ZmMjBs' } } }));
       const result = await swindlersUrlsService.processMessage(text);
 
       const parsedUrl = urlService.parseUrls(text)[0];
+
       axiosMock.get.mockImplementationOnce(() => Promise.resolve({ request: { res: { responseUrl: parsedUrl } } }));
       const isUrlSpam = await swindlersUrlsService.isSpamUrl(parsedUrl);
 

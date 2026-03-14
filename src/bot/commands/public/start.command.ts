@@ -1,6 +1,8 @@
-import { getGroupStartMessage, getStartMessage, makeAdminMessage } from '../../../message';
-import type { GrammyMiddleware } from '../../../types';
-import { getUserData, handleError, telegramUtil } from '../../../utils';
+import { getGroupStartMessage, getStartMessage, makeAdminMessage } from '@message/';
+
+import type { GrammyMiddleware } from '@types/';
+
+import { getUserData, handleError, telegramUtil as telegramUtility } from '@utils/';
 
 export class StartCommand {
   /**
@@ -18,6 +20,7 @@ export class StartCommand {
       }
 
       const isAdmin = context.chatSession.isBotAdmin;
+
       const canDelete = await context
         .deleteMessage()
         .then(() => true)
@@ -35,7 +38,7 @@ export class StartCommand {
         throw new Error('StartMiddleware error: chat.id is undefined');
       }
 
-      return telegramUtil
+      return telegramUtility
         .getChatAdmins(context, context.chat?.id)
         .then(({ adminsString }) => {
           context

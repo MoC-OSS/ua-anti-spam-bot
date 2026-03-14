@@ -1,12 +1,15 @@
 import { EventEmitter } from 'node:events';
+
 import ms from 'ms';
 import type TypedEmitter from 'typed-emitter';
 import { optimizeText } from 'ukrainian-ml-optimizer';
 
+import { GOOGLE_SHEETS_NAMES } from '@const/';
+
+import { removeDuplicates } from '@utils/';
+
 import type { dataset } from '../../dataset/dataset';
 import { environmentConfig } from '../config';
-import { GOOGLE_SHEETS_NAMES } from '../const';
-import { removeDuplicates } from '../utils';
 
 import type { GoogleService } from './google.service';
 import type { SwindlersGoogleService } from './swindlers-google.service';
@@ -21,7 +24,7 @@ export type LocalDataset = typeof dataset &
     swindlers_domains: string[];
     swindlers_cards: string[];
     swindlers_regex_sites: string[];
-    counteroffensiveTriggers: (string | RegExp)[];
+    counteroffensiveTriggers: (RegExp | string)[];
     nsfwMessages: string[];
   }>;
 
@@ -42,11 +45,10 @@ export class DynamicStorageService {
 
   ukrainianLanguageResponses: string[] = [];
 
-  counteroffensiveTriggers: (string | RegExp)[] = [];
+  counteroffensiveTriggers: (RegExp | string)[] = [];
 
   nsfwMessages: string[] = [];
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
   fetchEmitter: TypedEmitter<FetchEvents>;
 
@@ -55,7 +57,11 @@ export class DynamicStorageService {
    * @param {GoogleService} googleService
    * @param {any} localDataset
    * */
-  constructor(private swindlersGoogleService: SwindlersGoogleService, private googleService: GoogleService, localDataset: LocalDataset) {
+  constructor(
+    private swindlersGoogleService: SwindlersGoogleService,
+    private googleService: GoogleService,
+    localDataset: LocalDataset,
+  ) {
     this.swindlerMessages = [];
     this.swindlerBots = localDataset.swindlers_bots || [];
     this.swindlerDomains = localDataset.swindlers_domains || [];
@@ -65,7 +71,7 @@ export class DynamicStorageService {
     this.nsfwMessages = localDataset.nsfwMessages || [];
     this.notSwindlers = [];
     // TODO replace this to EventTarget
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
     // @ts-expect-error
     // eslint-disable-next-line unicorn/prefer-event-target
     this.fetchEmitter = new EventEmitter() as TypedEmitter<FetchEvents>;
@@ -75,7 +81,9 @@ export class DynamicStorageService {
     if (environmentConfig.DISABLE_GOOGLE_API) {
       return;
     }
+
     await this.updateStorage();
+
     setInterval(() => {
       this.updateStorage().catch((error) => {
         console.error('Cannot update swindlers on interval. Reason:', error);
@@ -111,6 +119,7 @@ export class DynamicStorageService {
         this.swindlerMessages = removeDuplicates(swindlerPositives)
           .map((element) => optimizeText(element))
           .filter(Boolean);
+
         this.notSwindlers = removeDuplicates(notSwindlers);
         this.swindlerBots = removeDuplicates(swindlerBots).filter((item) => !this.notSwindlers.includes(item));
         this.swindlerDomains = removeDuplicates(swindlerDomains).filter((item) => !this.notSwindlers.includes(item));
@@ -125,7 +134,7 @@ export class DynamicStorageService {
     );
   }
 
-  private parseRegexItems(strings: string[]): (string | RegExp)[] {
+  private parseRegexItems(strings: string[]): (RegExp | string)[] {
     return strings.map((string) => {
       if (string.startsWith(this.REGEX_KEYWORD)) {
         return new RegExp(string.slice(this.REGEX_KEYWORD.length));

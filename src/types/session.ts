@@ -1,4 +1,5 @@
 import type { MessageEntity } from '@grammyjs/types/message';
+
 import type { Chat } from 'typegram/manage';
 
 import type { State } from './alarm';
@@ -90,6 +91,7 @@ export interface LinkedChat {
   id: string;
   name: string;
 }
+
 export interface Session {
   id: string;
   data: SessionData;
@@ -106,13 +108,14 @@ export interface SessionObject {
 }
 
 export interface RedisSessionOptions {
-  property: 'session' | 'chatSession';
+  property: 'chatSession' | 'session';
   state: Record<string, unknown>;
   format: Record<string, unknown>;
   getSessionKey: (context: GrammyContext) => string;
 }
 
 export type FeaturesSessionsDataKeys = keyof (BooleanChatSettings & Pick<AirRaidAlertSettings, 'notificationMessage'>);
+
 export type FeaturesSessionsData = Record<FeaturesSessionsDataKeys, number>;
 
 export interface ChatDetails {

@@ -1,9 +1,11 @@
 import type { ChatMember } from '@grammyjs/types/manage';
 import type { NextFunction } from 'grammy';
 
+import type { AirRaidAlertSettings, ChatSettings, GrammyContext, GrammyMiddleware } from '@types/';
+
+import { emptyFunction, handleError, telegramUtil as telegramUtility } from '@utils/';
+
 import { environmentConfig } from '../../config';
-import type { AirRaidAlertSettings, ChatSettings, GrammyContext, GrammyMiddleware } from '../../types';
-import { emptyFunction, handleError, telegramUtil } from '../../utils';
 
 export class GlobalMiddleware {
   /**
@@ -35,7 +37,7 @@ export class GlobalMiddleware {
     const leftStatuses = new Set<ChatMember['status']>(['left', 'kicked']);
 
     context.chatSession.chatType = context.chat?.type;
-    context.chatSession.chatTitle = telegramUtil.getChatTitle(context.chat);
+    context.chatSession.chatTitle = telegramUtility.getChatTitle(context.chat);
 
     const defaultAirRaidAlertSettings: AirRaidAlertSettings = {
       pageNumber: 1,
@@ -78,6 +80,7 @@ export class GlobalMiddleware {
     if (context.chat?.type === 'private') {
       context.chatSession.botRemoved = false;
       context.chatSession.isBotAdmin = true;
+
       return;
     }
 
@@ -103,6 +106,7 @@ export class GlobalMiddleware {
         .getChatAdministrators()
         .then((admins) => {
           const isBotAdmin = (admins || []).some((member) => member.user?.id === context.me.id);
+
           context.chatSession.isBotAdmin = isBotAdmin;
           context.chatSession.botAdminDate = isBotAdmin ? new Date() : null;
         })

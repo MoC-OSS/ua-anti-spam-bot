@@ -1,5 +1,6 @@
-import type { GrammyContext } from '../../types';
-import { isIdWhitelisted } from '../../utils';
+import type { GrammyContext } from '@types/';
+
+import { isIdWhitelisted } from '@utils/';
 
 /**
  * @description

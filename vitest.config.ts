@@ -1,3 +1,4 @@
+import tsconfigPaths from 'vite-tsconfig-paths';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
@@ -7,4 +8,5 @@ export default defineConfig({
     setupFiles: ['./src/vitest-setup.ts'],
     include: ['tests/**/*.test.ts'],
   },
+  plugins: [tsconfigPaths()],
 });

@@ -1,8 +1,10 @@
 import type { NextFunction } from 'grammy';
+
 import type { GrammyContext } from 'types';
 
-import { mentionService } from '../../services';
-import { removeDuplicates } from '../../utils';
+import { mentionService } from '@services/';
+
+import { removeDuplicates } from '@utils/';
 
 /**
  * @description
@@ -11,6 +13,7 @@ import { removeDuplicates } from '../../utils';
 export function parseMentions(context: GrammyContext, next: NextFunction) {
   if (context.state.text && !context.state.mentions) {
     const mentions = mentionService.parseMentions(context.state.text);
+
     const entitiesMentions =
       context.state.entities
         ?.map((entity) => {
@@ -24,7 +27,7 @@ export function parseMentions(context: GrammyContext, next: NextFunction) {
 
           return null;
         })
-        .filter((entity: string | undefined | null): entity is string => !!entity) || [];
+        .filter((entity: string | null | undefined): entity is string => !!entity) || [];
 
     context.state.mentions = removeDuplicates([...mentions, ...entitiesMentions]);
   }

@@ -1,15 +1,20 @@
-import axios from 'axios';
-import escapeHTML from 'escape-html';
 import type { Bot } from 'grammy';
 import { InputFile } from 'grammy';
+
+import axios from 'axios';
+import escapeHTML from 'escape-html';
 import type { GrammyContext, GrammyMiddleware, LooseAutocomplete, SwindlerResponseBody, SwindlersResult, SwindlerType } from 'types';
 
+import { LOGS_CHAT_THREAD_IDS, SECOND_LOGS_CHAT_THREAD_IDS } from '@const/';
+
+import { cannotDeleteMessage, getCannotDeleteMessage, swindlerLogsStartMessage, swindlersWarningMessage } from '@message/';
+
+import type { SwindlersDetectService } from '@services/';
+
+import { compareDatesWithOffset, handleError, revealHiddenUrls, telegramUtil as telegramUtility } from '@utils/';
+
 import { environmentConfig } from '../../config';
-import { LOGS_CHAT_THREAD_IDS, SECOND_LOGS_CHAT_THREAD_IDS } from '../../const';
 import { logsChat, secondLogsChat } from '../../creator';
-import { cannotDeleteMessage, getCannotDeleteMessage, swindlerLogsStartMessage, swindlersWarningMessage } from '../../message';
-import type { SwindlersDetectService } from '../../services';
-import { compareDatesWithOffset, handleError, revealHiddenUrls, telegramUtil } from '../../utils';
 
 const host = `http://${environmentConfig.HOST}:${environmentConfig.PORT}`;
 
@@ -18,7 +23,10 @@ const SWINDLER_SETTINGS = {
 };
 
 export class DeleteSwindlersMiddleware {
-  constructor(private bot: Bot<GrammyContext>, private swindlersDetectService: SwindlersDetectService) {}
+  constructor(
+    private bot: Bot<GrammyContext>,
+    private swindlersDetectService: SwindlersDetectService,
+  ) {}
 
   middleware(): GrammyMiddleware {
     /**
@@ -35,6 +43,7 @@ export class DeleteSwindlersMiddleware {
         await this.saveSwindlersMessage(context, result.rate, result.displayReason || result.reason, message);
         await this.processWarningMessage(context);
         await this.removeMessage(context);
+
         return next();
       }
 
@@ -55,6 +64,7 @@ export class DeleteSwindlersMiddleware {
       return this.swindlersDetectService.isSwindlerMessage(message);
     } catch (error) {
       handleError(error, 'API_DOWN');
+
       return this.swindlersDetectService.isSwindlerMessage(message);
     }
   }
@@ -66,7 +76,7 @@ export class DeleteSwindlersMiddleware {
    * @param {string} [message]
    * */
   async saveSwindlersMessage(context: GrammyContext, maxChance: number, from: LooseAutocomplete<SwindlerType>, message?: string) {
-    const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
+    const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const text = message || context.state?.text || '';
 
     await context.api.sendMessage(
@@ -100,8 +110,10 @@ export class DeleteSwindlersMiddleware {
       !context.chatSession.lastWarningDate ||
       (context.chatSession.lastWarningDate &&
         Date.now() > new Date(context.chatSession.lastWarningDate).getTime() + SWINDLER_SETTINGS.WARNING_DELAY);
+
     if (shouldSend) {
       context.chatSession.lastWarningDate = new Date();
+
       return context.reply(swindlersWarningMessage, {
         parse_mode: 'HTML',
       });
@@ -126,7 +138,7 @@ export class DeleteSwindlersMiddleware {
           return;
         }
 
-        return telegramUtil
+        return telegramUtility
           .getChatAdmins(context, context.chat.id)
           .then(({ adminsString }) => {
             context
@@ -136,7 +148,7 @@ export class DeleteSwindlersMiddleware {
             context.api
               .sendMessage(
                 logsChat,
-                `${cannotDeleteMessage}\n\n<code>${telegramUtil.getChatTitle(context.chat)}</code>\n${escapeHTML(context.msg?.text || '')}`,
+                `${cannotDeleteMessage}\n\n<code>${telegramUtility.getChatTitle(context.chat)}</code>\n${escapeHTML(context.msg?.text || '')}`,
                 {
                   parse_mode: 'HTML',
                   message_thread_id: LOGS_CHAT_THREAD_IDS.SWINDLERS,

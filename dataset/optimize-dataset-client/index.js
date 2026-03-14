@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 const optimizeListElement = document.querySelector('[data-optimize-list]');
 const optimizeItemTemplateElement = document.querySelector('[data-optimize-item-template]');
 const caseTemplateElement = document.querySelector('[data-case-template]');
@@ -24,6 +23,7 @@ function handleDelete(path, type, element, index, negativeIndex) {
 
 axios.get('http://localhost:3050/optimize').then((response) => {
   const optimizeCases = response.data;
+
   console.info(optimizeCases);
 
   optimizeCases.forEach((optimize, index) => {

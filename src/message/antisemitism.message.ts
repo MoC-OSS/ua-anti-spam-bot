@@ -1,6 +1,7 @@
-import type { DeleteObsceneMessageProperties } from '../message';
-import { getDeleteUserAtomMessage } from '../message';
-import { getRandomItem } from '../utils';
+import { getRandomItem } from '@utils/';
+
+import type { DeleteObsceneMessageProperties } from '.';
+import { getDeleteUserAtomMessage } from '.';
 
 export const deleteAntisemitismMessages = [
   '🕊️ Нажаль, ваше повідомлення може містити образливий вміст, що порушує наші принципи толерантності. Будь ласка, утримуйтесь від антисемітських висловів. 🌈',

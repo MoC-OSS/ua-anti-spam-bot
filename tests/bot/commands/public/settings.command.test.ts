@@ -1,16 +1,20 @@
 import { hydrateReply } from '@grammyjs/parse-mode';
 import { Bot } from 'grammy';
 
-import { SettingsCommand } from '../../../../src/bot/commands/public/settings.command';
-import { getBeforeAnyComposer } from '../../../../src/bot/composers';
-import { stateMiddleware } from '../../../../src/bot/middleware';
-import { selfDestructedReply } from '../../../../src/bot/plugins';
-import { hasNoLinkedChats } from '../../../../src/message';
-import { mockRedisService } from '../../../../src/services/_mocks/index.mocks';
-import type { ApiResponses, OutgoingRequests } from '../../../../src/testing';
-import { MessageMockUpdate, MessagePrivateMockUpdate, prepareBotForTesting } from '../../../../src/testing';
-import { mockChatSession } from '../../../../src/testing-main';
-import type { GrammyContext } from '../../../../src/types';
+import { SettingsCommand } from '@bot/commands/public/settings.command';
+import { getBeforeAnyComposer } from '@bot/composers';
+import { stateMiddleware } from '@bot/middleware';
+import { selfDestructedReply } from '@bot/plugins';
+
+import { hasNoLinkedChats } from '@message/';
+
+import { mockRedisService } from '@services/_mocks/index.mocks';
+
+import type { ApiResponses, OutgoingRequests } from '@testing/';
+import { MessageMockUpdate, MessagePrivateMockUpdate, prepareBotForTesting } from '@testing/';
+import { mockChatSession } from '@testing/../testing-main';
+
+import type { GrammyContext } from '@types/';
 
 let outgoingRequests: OutgoingRequests;
 const bot = new Bot<GrammyContext>('mock');
@@ -20,6 +24,7 @@ const genericUpdate = new MessageMockUpdate('');
 const { chatSession, mockChatSessionMiddleware } = mockChatSession({});
 
 const chatAdmins = [genericUpdate.genericOwner, genericUpdate.genericAdmin];
+
 const apiResponses: ApiResponses = {
   getChatMember: {
     status: 'creator',
@@ -63,6 +68,7 @@ function getPrivateSettingsCommandUpdate() {
 describe('SettingsCommand', () => {
   beforeAll(async () => {
     const { beforeAnyComposer } = getBeforeAnyComposer();
+
     bot.use(hydrateReply);
     bot.use(selfDestructedReply());
 
@@ -165,6 +171,7 @@ describe('SettingsCommand', () => {
 
       expect(expectedMethods).toEqual(actualMethods);
       expect(setUserSessionSpy).toHaveBeenCalledTimes(chatAdmins.length);
+
       expect(setUserSessionSpy).toHaveBeenNthCalledWith(1, chatAdmins[0].user.id.toString(), {
         data: { isCurrentUserAdmin: false },
         id: chatAdmins[0].user.id.toString(),

@@ -1,21 +1,25 @@
 import path from 'node:path';
+
 import { apiThrottler } from '@grammyjs/transformer-throttler';
 import { Composer, InputFile } from 'grammy';
+
 import type { ApiMethods } from 'typegram';
 
-import type { GrammyContext } from '../../types';
-import { getTypedValue, handleError } from '../../utils';
-import { onlyCreatorFilter } from '../filters';
+import { onlyCreatorFilter } from '@bot/filters';
+
+import type { GrammyContext } from '@types/';
+
+import { getTypedValue, handleError } from '@utils/';
 
 type IconColor = Parameters<ApiMethods<void>['createForumTopic']>[0]['icon_color'];
 
 const iconColors = getTypedValue<Record<string, IconColor>>()({
-  bittersweet: 0xfb_6f_5f, // red
-  salomie: 0xff_d6_7e, // yellow
-  lightGreen: 0x8e_ee_98, // green
-  mayaBlue: 0x6f_b9_f0, // blue
-  wisteria: 0xcb_86_db, // violet
-  illusion: 0xff_93_b2, // purple
+  bittersweet: 0xFB_6F_5F, // red
+  salomie: 0xFF_D6_7E, // yellow
+  lightGreen: 0x8E_EE_98, // green
+  mayaBlue: 0x6F_B9_F0, // blue
+  wisteria: 0xCB_86_DB, // violet
+  illusion: 0xFF_93_B2, // purple
 });
 
 const groupPhotoPath = path.resolve('./src/assets/logs-chat-profile-photo.jpeg');
@@ -31,6 +35,7 @@ export const getCreateLogsChatComposer = () => {
 
   composer.use((context, next) => {
     context.api.config.use(apiThrottler());
+
     return next();
   });
 
@@ -47,6 +52,7 @@ export const getCreateLogsChatComposer = () => {
     const pornTopic = await context.createForumTopic('Porn', {
       icon_color: iconColors.bittersweet,
     });
+
     const swindlersTopic = await context.createForumTopic('Swindlers', { icon_color: iconColors.salomie });
     const antiRussianTopic = await context.createForumTopic('Anti-Russian', { icon_color: iconColors.illusion });
     const strategicTopic = await context.createForumTopic('Strategic', { icon_color: iconColors.mayaBlue });
