@@ -2,12 +2,12 @@
   "overrides": [
     {
       "env": {
-        "jest/globals": true
+        "vitest-globals/env": true
       },
       "files": ["src/**/*.test.ts", "src/**/*.spec.ts"],
-      "plugins": ["jest"],
-      "extends": ["plugin:jest/recommended"],
-      "rules": { "jest/prefer-expect-assertions": "off" }
+      "plugins": ["vitest", "vitest-globals"],
+      "extends": ["plugin:vitest/legacy-recommended"],
+      "rules": { "vitest/prefer-expect-assertions": "off" }
     }
   ]
 }

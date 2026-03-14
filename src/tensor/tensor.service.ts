@@ -25,7 +25,10 @@ export const initTensor = async (s3Service?: S3Service) => {
   }
 
   const tensorService = new TensorService('./temp/model.json', environmentConfig.TENSOR_RANK);
-  await tensorService.loadModel();
+
+  if (!environmentConfig.UNIT_TESTING) {
+    await tensorService.loadModel();
+  }
 
   return tensorService;
 };

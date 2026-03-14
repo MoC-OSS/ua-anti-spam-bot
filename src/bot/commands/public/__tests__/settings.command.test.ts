@@ -27,8 +27,8 @@ const apiResponses: ApiResponses = {
   getChatAdministrators: chatAdmins,
 };
 
-const getUserSessionSpy = jest.spyOn(mockRedisService, 'getUserSession');
-const setUserSessionSpy = jest.spyOn(mockRedisService, 'setUserSession');
+const getUserSessionSpy = vi.spyOn(mockRedisService, 'getUserSession');
+const setUserSessionSpy = vi.spyOn(mockRedisService, 'setUserSession');
 
 const commandMessage = '/settings';
 

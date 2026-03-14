@@ -6,12 +6,12 @@ import { chartMock, generateChatSessionData, generateMockSessions, testId } from
 import { alarmChatService } from './alarm-chat.service';
 
 const apiMock: Partial<GrammyBot['api']> = {
-  sendMessage: jest.fn(() => Promise.resolve({} as Partial<Message.TextMessage> as Message.TextMessage)),
-  getChat: jest.fn(() => Promise.resolve(chartMock)),
-  setChatPermissions: jest.fn(),
+  sendMessage: vi.fn(() => Promise.resolve({} as Partial<Message.TextMessage> as Message.TextMessage)),
+  getChat: vi.fn(() => Promise.resolve(chartMock)),
+  setChatPermissions: vi.fn(),
 };
 
-jest.mock('./redis.service', () => ({
+vi.mock('./redis.service', () => ({
   redisService: {
     getChatSessions: () => generateMockSessions(),
     updateChatSession: () => null,
@@ -20,7 +20,7 @@ jest.mock('./redis.service', () => ({
 
 describe('AlarmChatService', () => {
   beforeAll(async () => {
-    alarmChatService.processChatAlarm = jest.fn(alarmChatService.processChatAlarm);
+    alarmChatService.processChatAlarm = vi.fn(alarmChatService.processChatAlarm);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     await alarmChatService.init(apiMock as GrammyBot['api']);
   });
@@ -31,21 +31,6 @@ describe('AlarmChatService', () => {
       expect(sessions.length).toEqual(6);
     });
   });
-
-  // TODO FIX THIS test
-  // describe('subscribeToAlarms', () => {
-  //   it('should process alarm = true', async () => {
-  //     const session = generateChatSessionData(testState, true, true);
-  //     const chat = generateChat(testId, session);
-  //     alarmChatService.updateChat(session, testId);
-  //     alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(true));
-  //     // eslint-disable-next-line no-promise-executor-return
-  //     await sleep(3000);
-  //     expect(alarmChatService.processChatAlarm).toHaveBeenCalledTimes(1);
-  //     // TODO FIX THIS test
-  //     expect(alarmChatService.processChatAlarm).toHaveBeenCalledWith(chat, true, true);
-  //   });
-  // });
 
   describe('add and delete chats', () => {
     it('should add new chat to list', () => {

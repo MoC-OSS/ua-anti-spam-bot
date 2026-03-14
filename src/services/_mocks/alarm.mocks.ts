@@ -42,6 +42,13 @@ export const chartMock: ChatFullInfo = {
   },
   accent_color_id: 0,
   max_reaction_count: 1,
+  accepted_gift_types: {
+    unlimited_gifts: false,
+    limited_gifts: false,
+    unique_gifts: false,
+    premium_subscription: false,
+    gifts_from_channels: false,
+  },
 };
 
 export function generateChatSessionData(

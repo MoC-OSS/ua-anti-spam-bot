@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`LanguageDetectService detect should detect russian 1`] = `
+exports[`LanguageDetectService > detect > should detect russian 1`] = `
 [
   {
     "accuracy": 1,
@@ -9,7 +9,7 @@ exports[`LanguageDetectService detect should detect russian 1`] = `
 ]
 `;
 
-exports[`LanguageDetectService detect should detect surzhik as ukrainian 1`] = `
+exports[`LanguageDetectService > detect > should detect surzhik as ukrainian 1`] = `
 [
   {
     "accuracy": 1,
@@ -18,7 +18,7 @@ exports[`LanguageDetectService detect should detect surzhik as ukrainian 1`] = `
 ]
 `;
 
-exports[`LanguageDetectService detect should detect ukrainian 1`] = `
+exports[`LanguageDetectService > detect > should detect ukrainian 1`] = `
 [
   {
     "accuracy": 1,
@@ -27,7 +27,7 @@ exports[`LanguageDetectService detect should detect ukrainian 1`] = `
 ]
 `;
 
-exports[`LanguageDetectService detect should not detect russian when mixed 1`] = `
+exports[`LanguageDetectService > detect > should not detect russian when mixed 1`] = `
 [
   {
     "accuracy": 1,
@@ -36,7 +36,7 @@ exports[`LanguageDetectService detect should not detect russian when mixed 1`] =
 ]
 `;
 
-exports[`LanguageDetectService isRussian should except ukrainian for all messages 1`] = `
+exports[`LanguageDetectService > isRussian > should except ukrainian for all messages 1`] = `
 [
   [
     {

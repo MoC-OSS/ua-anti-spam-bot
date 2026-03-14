@@ -41,6 +41,7 @@ export interface MessagesComposerProperties {
   noAntisemitismComposer: Composer<GrammyContext>;
   noChannelMessagesComposer: Composer<GrammyContext>;
   nsfwMessageFilterComposer: Composer<GrammyContext>;
+  denylistComposer: Composer<GrammyContext>;
 }
 
 /**
@@ -49,7 +50,6 @@ export interface MessagesComposerProperties {
  */
 export const getMessagesRegisterComposer = () => {
   const messagesComposer = new Composer<GrammyContext>();
-
   /**
    * Only these messages will be processed in this composer
    * */
@@ -118,6 +118,7 @@ export const getMessagesComposer = ({
   noAntisemitismComposer,
   noChannelMessagesComposer,
   nsfwMessageFilterComposer,
+  denylistComposer,
 }: MessagesComposerProperties) => {
   const { messagesComposer, readyMessagesComposer, registerDefaultSettingModule, registerOptionalSettingModule } =
     getMessagesRegisterComposer();
@@ -144,6 +145,7 @@ export const getMessagesComposer = ({
   registerOptionalSettingModule('enableDeleteObscene', noObsceneComposer);
   registerOptionalSettingModule('enableWarnObscene', warnObsceneComposer);
   registerOptionalSettingModule('enableDeleteChannelMessages', noChannelMessagesComposer);
+  registerOptionalSettingModule('enableDeleteDenylist', denylistComposer);
   // TODO optimize this module
   registerDefaultSettingModule('disableStrategicInfo', strategicComposer);
 

@@ -2,6 +2,7 @@ import * as tf from '@tensorflow/tfjs-node';
 import type { NSFWJS, predictionType } from 'nsfwjs';
 import * as nsfw from 'nsfwjs';
 
+import { environmentConfig } from '../config';
 import type { NsfwTensorNegativeResult, NsfwTensorPositiveResult, NsfwTensorResult } from '../types';
 
 export class NsfwTensorService {
@@ -125,7 +126,10 @@ export class NsfwTensorService {
 
 export const initNsfwTensor = async () => {
   const tensorService = new NsfwTensorService(new URL('nsfw-temp/model.json', import.meta.url));
-  await tensorService.load();
+
+  if (!environmentConfig.UNIT_TESTING) {
+    await tensorService.load();
+  }
 
   return tensorService;
 };

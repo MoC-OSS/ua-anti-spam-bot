@@ -18,7 +18,7 @@ describe('SwindlersBotsService', () => {
   });
 
   it('should recreate fuzzyset on fetch', async () => {
-    const initFuzzySetSpy = jest.spyOn(swindlersBotsService, 'initFuzzySet');
+    const initFuzzySetSpy = vi.spyOn(swindlersBotsService, 'initFuzzySet');
     const oldFuzzyMatch = swindlersBotsService.swindlersBotsFuzzySet;
 
     expect(initFuzzySetSpy).not.toHaveBeenCalled();

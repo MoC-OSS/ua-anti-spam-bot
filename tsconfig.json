@@ -16,9 +16,7 @@
     "esModuleInterop": true,
     "strict": true,
     "skipLibCheck": true,
-    "types": [
-      "jest"
-    ],
+    "types": [],
     "typeRoots": [
       "node_modules/@types",
       "src/lib-types"
@@ -35,8 +33,12 @@
   },
   "display": "Recommended",
   "include": [
+    "vitest.config.ts",
     "src/**/*",
     "dataset/**/*"
+  ],
+  "files": [
+    "node_modules/vitest/globals.d.ts"
   ],
   "exclude": [
     "node_modules",

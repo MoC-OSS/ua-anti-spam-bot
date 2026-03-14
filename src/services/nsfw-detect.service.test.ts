@@ -21,7 +21,7 @@ describe('NsfwDetectService', () => {
   });
 
   it('should recreate fuzzyset on fetch', async () => {
-    const initFuzzySetSpy = jest.spyOn(nsfwDetectService, 'initFuzzySet');
+    const initFuzzySetSpy = vi.spyOn(nsfwDetectService, 'initFuzzySet');
     const oldFuzzyMatch = nsfwDetectService.nsfwMessagesFuzzySet;
 
     expect(initFuzzySetSpy).not.toHaveBeenCalled();

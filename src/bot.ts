@@ -24,6 +24,7 @@ import {
   getTensorTrainingComposer,
 } from './bot/composers';
 import {
+  getDenylistComposer,
   getNoCardsComposer,
   getNoChannelMessagesComposer,
   getNoCounterOffensiveComposer,
@@ -117,7 +118,10 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   }
 
   const commandSetter = new CommandSetter(bot, startTime, !(await redisService.getIsBotDeactivated()));
-  await commandSetter.updateCommands();
+
+  if (!environmentConfig.UNIT_TESTING) {
+    await commandSetter.updateCommands();
+  }
 
   const trainingThrottler = apiThrottler({
     // group: {
@@ -208,7 +212,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const { noAntisemitismComposer } = getNoAntisemitismComposer();
   const { noChannelMessagesComposer } = getNoChannelMessagesComposer();
   const { nsfwMessageFilterComposer } = getNsfwMessageFilterComposer({ nsfwDetectService });
-
+  const { denylistComposer } = getDenylistComposer();
   const { messagesComposer } = getMessagesComposer({
     counteroffensiveService,
     noCardsComposer,
@@ -226,6 +230,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     noAntisemitismComposer,
     noChannelMessagesComposer,
     nsfwMessageFilterComposer,
+    denylistComposer,
   });
 
   // Photo composers

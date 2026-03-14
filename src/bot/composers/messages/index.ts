@@ -1,3 +1,4 @@
+export * from './denylist.composer';
 export * from './no-cards.composer';
 export * from './no-channel-messages.composer';
 export * from './no-counteroffensive.composer';

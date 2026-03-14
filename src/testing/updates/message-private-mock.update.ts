@@ -17,25 +17,25 @@ export class MessagePrivateMockUpdate extends GenericMockUpdate {
     },
   } as const);
 
-  readonly paramsUpdate = GenericMockUpdate.getValidUpdate({
-    message: {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      text: this.text,
-    },
-  });
-
-  readonly update = deepmerge(this.minimalUpdate, this.paramsUpdate);
-
-  constructor(private text: string) {
+  constructor(private readonly text: string) {
     super();
   }
 
+  private buildUpdate() {
+    const parametersUpdate = GenericMockUpdate.getValidUpdate({
+      message: {
+        text: this.text,
+      },
+    });
+
+    return deepmerge(this.minimalUpdate, parametersUpdate);
+  }
+
   build() {
-    return this.update;
+    return this.buildUpdate();
   }
 
   buildOverwrite<E extends PartialUpdate>(extra: E) {
-    return this.deepMerge(this.update, extra);
+    return this.deepMerge(this.buildUpdate(), extra);
   }
 }

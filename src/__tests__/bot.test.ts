@@ -1,6 +1,5 @@
 import { Bot } from 'grammy';
 
-// eslint-disable-next-line jest/no-mocks-import
 import { realSwindlerMessage } from '../__mocks__/bot.mocks';
 import { getBot } from '../bot';
 import { environmentConfig } from '../config';
@@ -28,7 +27,7 @@ const { chatSession, mockChatSessionMiddleware } = mockChatSession({
 
 describe('e2e bot testing', () => {
   beforeAll(async () => {
-    const initialBot = new Bot<GrammyContext>(environmentConfig?.BOT_TOKEN);
+    const initialBot = new Bot<GrammyContext>(environmentConfig?.BOT_TOKEN || 'test');
 
     // Add mock session data
     initialBot.use(mockSessionMiddleware);

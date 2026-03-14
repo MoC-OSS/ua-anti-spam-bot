@@ -9,7 +9,7 @@ import { selfDestructedReply } from './self-destructed.plugin';
 
 let outgoingRequests: OutgoingRequests;
 let bot: Bot<GrammyContext>;
-const customPluginCallback = jest.fn(() => Promise.resolve());
+const customPluginCallback = vi.fn(() => Promise.resolve());
 
 describe('selfDestructedReply', () => {
   describe('default plugin', () => {
