@@ -50,6 +50,8 @@ export default [
             ['^node'],
             // Nest
             ['^@?nestjs'],
+            // Grammy
+            ['^@?grammy'],
             // React and related packages.
             ['^react', String.raw`^@?\w*react`, String.raw`^@?\w*jsx-runtime`],
             // All other npm packages.
