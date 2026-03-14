@@ -34,10 +34,10 @@ export const getCreatorCommandsComposer = ({ commandSetter, rootMenu, tensorServ
     ['enable', 'Global enable bot (only deleting strategic info)'],
     ['leave', 'Leave bot from the chat'],
     ['set_rank', 'Get/Set bot strategic rank number'],
-   ['set_training_start_rank', 'Get/Set bot strategic training chat rank number']]);
-
-  commandMap.set('set_training_chat_whitelist', 'Get/Set bot training chat ids');
-  commandMap.set('update_training_chat_whitelist', 'Get/Set bot add new training chat id');
+    ['set_training_start_rank', 'Get/Set bot strategic training chat rank number'],
+    ['set_training_chat_whitelist', 'Get/Set bot training chat ids'],
+    ['update_training_chat_whitelist', 'Get/Set bot add new training chat id'],
+  ]);
 
   const commandString = [...commandMap.entries()].map(([name, description]) => `/${name} - ${description}`).join('\n');
 

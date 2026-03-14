@@ -117,12 +117,13 @@ export function getEnabledFeaturesString(chatSettings: ChatSettings): string {
     ['enableDeleteLocations', '📍 локаціями'],
     ['enableDeleteForwards', '↩️ пересиланнями'],
     ['enableDeleteCards', '💳 картками'],
-   ['enableDeleteChannelMessages', '💬 від каналів']]);
+    ['enableDeleteChannelMessages', '💬 від каналів'],
+    ['enableDeleteDenylist', '🚫 забороненими словами'],
+  ]);
 
   /**
    * Повідомлень з...
    * */
-  featureNameMap.set('enableDeleteDenylist', '🚫 забороненими словами');
 
   const settingsKeys = Object.keys(chatSettings) as (keyof ChatSettings)[];
 

@@ -39,11 +39,11 @@ export const getPrivateCommandsComposer = ({ bot, commandSetter, dynamicStorageS
     ['statistics', 'Get bot statistics'],
     ['start_alarm', 'Start test alarm'],
     ['end_alarm', 'End test alarm'],
-   ['restart_alarm', 'Restart alarm logic']]);
-
-  commandMap.set('disable_alarm', 'Disable alarm logic at all');
-  commandMap.set('restart', 'Kills the bot process and deletes it');
-  commandMap.set('video_note', 'Send a video with /video_note caption to convert it into video note');
+    ['restart_alarm', 'Restart alarm logic'],
+    ['disable_alarm', 'Disable alarm logic at all'],
+    ['restart', 'Kills the bot process and deletes it'],
+    ['video_note', 'Send a video with /video_note caption to convert it into video note'],
+  ]);
 
   const commandString = [...commandMap.entries()].map(([name, description]) => `/${name} - ${description}`).join('\n');
 
