@@ -106,12 +106,13 @@ export const getCreateLogsChatComposer = () => {
       ),
     );
 
-    return context.replyWithHTML(
+    return context.reply(
       `The group is ready and all topics created! Chat ID is <pre>${context.chat.id}</pre> LOGS_CHAT_THREAD_IDS is <pre>${JSON.stringify(
         resultLogsThreadIds,
         null,
         2,
       )}</pre>`,
+      { parse_mode: 'HTML' },
     );
   });
 
@@ -136,7 +137,7 @@ export const getCreateLogsChatComposer = () => {
       ),
     );
 
-    return context.replyWithHTML(`The group is ready and all topics created! Chat ID is <pre>${context.chat.id}</pre>`);
+    return context.reply(`The group is ready and all topics created! Chat ID is <pre>${context.chat.id}</pre>`, { parse_mode: 'HTML' });
   });
 
   return { createLogsChatComposer };

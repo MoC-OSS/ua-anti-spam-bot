@@ -19,7 +19,7 @@ export class StartCommand {
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context) => {
       if (context.chat?.type === 'private') {
-        return context.replyWithHTML(getStartMessage());
+        return context.reply(getStartMessage(), { parse_mode: 'HTML' });
       }
 
       const isAdmin = context.chatSession.isBotAdmin;
@@ -50,7 +50,7 @@ export class StartCommand {
             )
             .catch(async (getAdminsError) => {
               handleError(getAdminsError);
-              await context.replyWithHTML(makeAdminMessage);
+              await context.reply(makeAdminMessage, { parse_mode: 'HTML' });
             });
         })
         .catch(handleError);

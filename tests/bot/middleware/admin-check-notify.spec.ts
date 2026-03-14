@@ -1,4 +1,3 @@
-import { hydrateReply } from '@grammyjs/parse-mode';
 import { Bot } from 'grammy';
 
 import { getBeforeAnyComposer } from '@bot/composers/before-any.composer';
@@ -54,7 +53,6 @@ describe('admin-check-notify', () => {
     bot.use(mockStateMiddleware);
     bot.use(beforeAnyComposer);
     bot.use(stateMiddleware);
-    bot.use(hydrateReply);
     bot.use(selfDestructedReply());
     bot.use(adminCheckNotify);
     bot.use(parseText);

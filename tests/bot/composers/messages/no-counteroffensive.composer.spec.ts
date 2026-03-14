@@ -1,4 +1,3 @@
-import { hydrateReply } from '@grammyjs/parse-mode';
 import { Bot } from 'grammy';
 
 import { getNoCounterOffensiveComposer } from '@bot/composers/messages/no-counteroffensive.composer';
@@ -31,7 +30,6 @@ const counteroffensiveService = new CounteroffensiveService(mockDynamicStorageSe
 
 describe('noCounteroffensiveComposer', () => {
   beforeAll(async () => {
-    bot.use(hydrateReply);
     bot.use(selfDestructedReply());
 
     bot.use(stateMiddleware);

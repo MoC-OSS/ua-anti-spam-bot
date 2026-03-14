@@ -18,7 +18,7 @@ export const botInviteQuery: GrammyQueryMiddleware<'my_chat_member'> = async (co
     context.chatSession.botRemoved = false;
     const { adminsString } = await telegramUtility.getChatAdmins(context, context.chat.id);
 
-    await context.replyWithHTML(getBotJoinMessage({ adminsString, isAdmin, canDelete }));
+    await context.reply(getBotJoinMessage({ adminsString, isAdmin, canDelete }), { parse_mode: 'HTML' });
   }
 
   return next();

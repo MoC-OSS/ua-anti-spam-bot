@@ -1,4 +1,3 @@
-import { hydrateReply } from '@grammyjs/parse-mode';
 import { Bot } from 'grammy';
 
 import { SettingsCommand } from '@bot/commands/public/settings.command';
@@ -72,7 +71,6 @@ describe('SettingsCommand', () => {
   beforeAll(async () => {
     const { beforeAnyComposer } = getBeforeAnyComposer();
 
-    bot.use(hydrateReply);
     bot.use(selfDestructedReply());
 
     bot.use(stateMiddleware);

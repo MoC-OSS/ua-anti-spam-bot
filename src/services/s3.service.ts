@@ -1,13 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import type { S3 } from 'aws-sdk';
-import AWS from 'aws-sdk';
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 import { environmentConfig } from '../config';
 
 export class S3Service {
-  s3: S3 = new AWS.S3({
+  s3 = new S3Client({
     region: environmentConfig.AWS_REGION,
   });
 
@@ -22,16 +21,18 @@ export class S3Service {
    * Download tensor flow model into the specific folder
    * */
   downloadTensorFlowModel(fsFolderPath: URL) {
-    const loadFilePromises = this.mlFiles.map((fileName) =>
-      this.s3
-        .getObject({ Bucket: this.config.bucket || '', Key: path.join(this.config.path, fileName) })
-        .promise()
-        .then((response) => {
-          console.info(new URL(fileName, fsFolderPath));
-          // eslint-disable-next-line security/detect-non-literal-fs-filename
-          fs.writeFileSync(new URL(fileName, fsFolderPath), response.Body?.toString() || '');
-        }),
-    );
+    const loadFilePromises = this.mlFiles.map(async (fileName) => {
+      const response = await this.s3.send(
+        new GetObjectCommand({ Bucket: this.config.bucket || '', Key: path.join(this.config.path, fileName) }),
+      );
+
+      console.info(new URL(fileName, fsFolderPath));
+
+      const body = (await response.Body?.transformToString()) || '';
+
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
+      fs.writeFileSync(new URL(fileName, fsFolderPath), body);
+    });
 
     return Promise.all(loadFilePromises);
   }

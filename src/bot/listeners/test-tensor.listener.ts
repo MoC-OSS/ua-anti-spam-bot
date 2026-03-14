@@ -440,7 +440,8 @@ export class TestTensorListener {
         this.initTensorSession(context, tensorTestMessage);
 
         context
-          .replyWithHTML(tensorTestMessage, {
+          .reply(tensorTestMessage, {
+            parse_mode: 'HTML',
             reply_to_message_id: context.msg?.message_id,
             reply_markup: this.menu,
           })

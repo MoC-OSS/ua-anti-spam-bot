@@ -12,8 +12,8 @@ export const deleteMessageMiddleware =
       return context
         .deleteMessage()
         .then(next)
-        .catch(() => (reason ? context.replyWithHTML(reason) : null));
+        .catch(() => (reason ? context.reply(reason, { parse_mode: 'HTML' }) : null));
     }
 
-    return context.replyWithHTML(reason);
+    return context.reply(reason, { parse_mode: 'HTML' });
   };

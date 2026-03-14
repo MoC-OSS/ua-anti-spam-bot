@@ -1,5 +1,4 @@
 import type { MenuFlavor } from '@grammyjs/menu';
-import type { ParseModeFlavor } from '@grammyjs/parse-mode';
 import type { Bot, CommandContext, Composer, Context, Filter, FilterQuery, MiddlewareFn, SessionFlavor } from 'grammy';
 
 import type { SelfDestructedFlavor } from '@bot/plugins/self-destructed.plugin';
@@ -7,7 +6,7 @@ import type { SelfDestructedFlavor } from '@bot/plugins/self-destructed.plugin';
 import type { ChatSessionData, ChatSessionFlavor, SessionData } from './session';
 import type { State, StateFlavor } from './state';
 
-export type GrammyContext = SelfDestructedFlavor<ParseModeFlavor<Context>> &
+export type GrammyContext = SelfDestructedFlavor<Context> &
   SessionFlavor<SessionData> &
   ChatSessionFlavor<ChatSessionData> &
   StateFlavor<State>;

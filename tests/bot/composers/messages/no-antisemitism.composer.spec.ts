@@ -1,4 +1,3 @@
-import { hydrateReply } from '@grammyjs/parse-mode';
 import { Bot } from 'grammy';
 
 import { getNoAntisemitismComposer } from '@bot/composers/messages/no-antisemitism.composer';
@@ -26,7 +25,6 @@ const { chatSession, mockChatSessionMiddleware } = mockChatSession({
 
 describe('noAntisemitismComposer', () => {
   beforeAll(async () => {
-    bot.use(hydrateReply);
     bot.use(selfDestructedReply());
 
     bot.use(stateMiddleware);

@@ -1,4 +1,3 @@
-import { hydrateReply } from '@grammyjs/parse-mode';
 import { Bot } from 'grammy';
 
 import { getNoObsceneComposer } from '@bot/composers/messages/no-obscene.composer';
@@ -26,7 +25,6 @@ const { chatSession, mockChatSessionMiddleware } = mockChatSession({
 
 describe('noObsceneComposer', () => {
   beforeAll(async () => {
-    bot.use(hydrateReply);
     bot.use(selfDestructedReply());
 
     bot.use(stateMiddleware);

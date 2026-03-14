@@ -1,4 +1,3 @@
-import { hydrateReply } from '@grammyjs/parse-mode';
 import { Bot } from 'grammy';
 
 import { getDenylistComposer } from '@bot/composers/messages/denylist.composer';
@@ -29,7 +28,6 @@ const testWord = 'testWord';
 
 describe('denylistComposer', () => {
   beforeAll(async () => {
-    bot.use(hydrateReply);
     bot.use(selfDestructedReply());
     bot.use(stateMiddleware);
     bot.use(parseText);

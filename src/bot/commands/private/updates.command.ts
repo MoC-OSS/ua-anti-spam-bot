@@ -48,7 +48,7 @@ export class UpdatesCommand {
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context: GrammyContext) => {
       context.session.step = 'confirmation';
-      await context.replyWithHTML(getUpdatesMessage());
+      await context.reply(getUpdatesMessage(), { parse_mode: 'HTML' });
     };
   }
 

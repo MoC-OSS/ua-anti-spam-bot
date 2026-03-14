@@ -1,4 +1,3 @@
-import { hydrateReply } from '@grammyjs/parse-mode';
 import { Bot } from 'grammy';
 
 import { getNoChannelMessagesComposer } from '@bot/composers/messages/no-channel-messages.composer';
@@ -29,7 +28,6 @@ const { chatSession, mockChatSessionMiddleware } = mockChatSession({
 
 describe('noChannelMessagesComposer', () => {
   beforeAll(async () => {
-    bot.use(hydrateReply);
     bot.use(selfDestructedReply());
 
     bot.use(stateMiddleware);

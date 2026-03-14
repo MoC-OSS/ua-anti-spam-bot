@@ -10,7 +10,7 @@ import { environmentConfig } from '../../config';
 export async function performanceEndMiddleware(context: GrammyContext, next: NextFunction) {
   if (environmentConfig.DEBUG) {
     return context
-      .replyWithHTML(
+      .reply(
         [
           `<b>Time</b>: ${performance.now() - (context.state?.performanceStart || 0)}`,
           '',
@@ -20,6 +20,7 @@ export async function performanceEndMiddleware(context: GrammyContext, next: Nex
           'End:',
           performance.now(),
         ].join('\n'),
+        { parse_mode: 'HTML' },
       )
 
       .then(() => next());

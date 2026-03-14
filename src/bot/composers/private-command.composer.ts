@@ -86,7 +86,7 @@ export const getPrivateCommandsComposer = ({ bot, commandSetter, dynamicStorageS
 
   composer.command('thread', async (context) => {
     const threadId = context.msg?.message_thread_id?.toString();
-    const message = await context.replyWithHTML(threadId ? `Message Thread Id:\n<code>${threadId}</code>` : 'No thread id');
+    const message = await context.reply(threadId ? `Message Thread Id:\n<code>${threadId}</code>` : 'No thread id', { parse_mode: 'HTML' });
 
     await context.pinChatMessage(message.message_id);
   });

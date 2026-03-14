@@ -1,4 +1,3 @@
-import { hydrateReply } from '@grammyjs/parse-mode';
 import { Bot } from 'grammy';
 
 import { getNoRussianComposer } from '@bot/composers/messages/no-russian.composer';
@@ -29,7 +28,6 @@ const { chatSession, mockChatSessionMiddleware } = mockChatSession({
 
 describe('noRussianComposer', () => {
   beforeAll(async () => {
-    bot.use(hydrateReply);
     bot.use(selfDestructedReply());
 
     bot.use(stateMiddleware);

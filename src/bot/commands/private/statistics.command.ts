@@ -86,7 +86,7 @@ export class StatisticsCommand {
             });
           });
 
-        await context.replyWithHTML(
+        await context.reply(
           getChatStatisticsMessage({
             adminsChatsCount,
             botRemovedCount,
@@ -98,13 +98,15 @@ export class StatisticsCommand {
             totalSessionCount,
             totalUserCounts,
           }),
+          { parse_mode: 'HTML' },
         );
 
-        await context.replyWithHTML(
+        await context.reply(
           getFeaturesStatisticsMessage({
             features,
             chatsCount: adminsChatsCount,
           }),
+          { parse_mode: 'HTML' },
         );
 
         await statisticsGoogleService.appendToSheet([

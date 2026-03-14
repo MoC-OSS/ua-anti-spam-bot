@@ -152,7 +152,7 @@ export class DeleteSwindlersMiddleware {
           .getChatAdmins(context, context.chat.id)
           .then(({ adminsString }) => {
             context
-              .replyWithHTML(getCannotDeleteMessage({ adminsString }), { reply_to_message_id: context.msg?.message_id })
+              .reply(getCannotDeleteMessage({ adminsString }), { parse_mode: 'HTML', reply_to_message_id: context.msg?.message_id })
               .catch(handleError);
 
             context.api

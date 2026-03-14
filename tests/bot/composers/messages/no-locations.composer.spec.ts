@@ -1,4 +1,3 @@
-import { hydrateReply } from '@grammyjs/parse-mode';
 import { Bot } from 'grammy';
 
 import { getNoLocationsComposer } from '@bot/composers/messages/no-locations.composer';
@@ -28,7 +27,6 @@ const { chatSession, mockChatSessionMiddleware } = mockChatSession({
 
 describe('noLocationsComposer', () => {
   beforeAll(async () => {
-    bot.use(hydrateReply);
     bot.use(selfDestructedReply());
 
     bot.use(stateMiddleware);

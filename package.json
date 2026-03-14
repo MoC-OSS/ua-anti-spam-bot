@@ -38,8 +38,8 @@
     "format": "npx prettier . --write"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1009.0",
     "@grammyjs/menu": "^1.3.1",
-    "@grammyjs/parse-mode": "^1.11.1",
     "@grammyjs/router": "^2.0.0",
     "@grammyjs/runner": "^2.0.3",
     "@grammyjs/transformer-throttler": "^1.2.1",
@@ -51,7 +51,6 @@
     "@tensorflow/tfjs": "^4.22.0",
     "@tensorflow/tfjs-node": "^4.22.0",
     "@types/fuzzyset": "^1.0.7",
-    "aws-sdk": "^2.1693.0",
     "axios": "^1.13.6",
     "bottleneck": "^2.19.5",
     "cors": "^2.8.6",
@@ -147,7 +146,6 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.0",
     "unplugin-swc": "^1.5.9",
-    "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.0",
     "worker-farm": "^1.7.0"
   },

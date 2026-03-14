@@ -1,4 +1,3 @@
-import { hydrateReply } from '@grammyjs/parse-mode';
 import { Bot } from 'grammy';
 
 import { getNsfwMessageFilterComposer } from '@bot/composers/messages/nsfw-message-filter.composer';
@@ -30,7 +29,6 @@ const { chatSession, mockChatSessionMiddleware } = mockChatSession({
 
 describe('nsfwMessageFilterComposer', () => {
   beforeAll(async () => {
-    bot.use(hydrateReply);
     bot.use(selfDestructedReply());
 
     bot.use(stateMiddleware);

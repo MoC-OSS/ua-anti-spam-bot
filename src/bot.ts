@@ -1,5 +1,4 @@
 import { Menu } from '@grammyjs/menu';
-import { hydrateReply } from '@grammyjs/parse-mode';
 import { sequentialize } from '@grammyjs/runner';
 import { apiThrottler } from '@grammyjs/transformer-throttler';
 import type { Bot } from 'grammy';
@@ -264,7 +263,6 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
     }),
   );
 
-  bot.use(hydrateReply);
   bot.use(selfDestructedReply());
   bot.use(autoCommentReply());
 
