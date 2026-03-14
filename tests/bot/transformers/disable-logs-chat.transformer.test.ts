@@ -1,0 +1,69 @@
+import { Bot } from 'grammy';
+
+import { disableLogsChatTransformer } from '../../../src/bot/transformers/disable-logs-chat.transformer';
+import { logsChat } from '../../../src/creator';
+import type { OutgoingRequests } from '../../../src/testing';
+import { MessageMockUpdate, prepareBotForTesting } from '../../../src/testing';
+import type { GrammyContext } from '../../../src/types';
+
+let outgoingRequests: OutgoingRequests;
+const bot = new Bot<GrammyContext>('mock');
+
+let isEnabled = true;
+
+describe('disableLogsChatTransformer', () => {
+  beforeAll(async () => {
+    bot.use((context, next) => {
+      if (isEnabled) {
+        context.api.config.use(disableLogsChatTransformer);
+      }
+
+      return next();
+    });
+
+    bot.on('message', (context) => context.api.sendMessage(logsChat, context.msg.text || 'test'));
+
+    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot);
+  }, 5000);
+
+  describe('enabled feature', () => {
+    beforeAll(() => {
+      isEnabled = true;
+    });
+
+    it('should not send request if it has been sent into logs chat', async () => {
+      const updateConstructor = new MessageMockUpdate('test');
+      const update = updateConstructor.buildOverwrite({
+        message: {
+          chat: { ...updateConstructor.genericSuperGroup, id: logsChat },
+        },
+      });
+
+      await bot.handleUpdate(update);
+
+      expect(outgoingRequests.length).toEqual(0);
+    });
+  });
+
+  describe('disabled feature', () => {
+    beforeAll(() => {
+      isEnabled = false;
+    });
+
+    it('should not send request if it has been sent into logs chat', async () => {
+      const updateConstructor = new MessageMockUpdate('test');
+      const update = updateConstructor.buildOverwrite({
+        message: {
+          chat: { ...updateConstructor.genericSuperGroup, id: logsChat },
+        },
+      });
+
+      await bot.handleUpdate(update);
+
+      const apiCall = outgoingRequests.getLast<'sendMessage'>();
+
+      expect(outgoingRequests.length).toEqual(1);
+      expect(apiCall?.method).toEqual('sendMessage');
+    });
+  });
+});
