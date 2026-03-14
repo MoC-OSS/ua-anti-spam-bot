@@ -44,7 +44,6 @@
     "@grammyjs/runner": "^2.0.3",
     "@grammyjs/transformer-throttler": "^1.2.1",
     "@grammyjs/types": "^3.25.0",
-    "@keyv/sqlite": "^4.0.8",
     "@mtproto/core": "6.3.0",
     "@swc/cli": "^0.8.0",
     "@swc/core": "^1.15.18",
