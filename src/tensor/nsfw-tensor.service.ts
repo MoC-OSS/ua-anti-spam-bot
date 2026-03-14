@@ -1,4 +1,4 @@
-import type { NSFWJS, predictionType } from 'nsfwjs';
+import type { NSFWJS, PredictionType } from 'nsfwjs';
 import * as nsfw from 'nsfwjs';
 
 import * as tf from '@tensorflow/tfjs-node';
@@ -10,19 +10,17 @@ import { environmentConfig } from '../config';
 export class NsfwTensorService {
   model!: NSFWJS;
 
-  readonly predictionChecks = new Map<predictionType['className'], number>([
+  readonly predictionChecks = new Map<PredictionType['className'], number>([
     ['Hentai', 0.85],
     ['Porn', 0.85],
     ['Sexy', 0.8],
   ]);
 
-  constructor(private modelPath: URL) {}
-
   async load() {
-    this.model = await nsfw.load(this.modelPath.toString());
+    this.model = await nsfw.load('InceptionV3');
   }
 
-  async classify(image: Buffer): Promise<predictionType[]> {
+  async classify(image: Buffer): Promise<PredictionType[]> {
     const tensor3d = tf.node.decodeImage(image, 3);
 
     // @ts-ignore
@@ -39,7 +37,7 @@ export class NsfwTensorService {
    *
    * @param imageArray
    */
-  classifyVideo(imageArray: Buffer[]): Promise<predictionType[][]> {
+  classifyVideo(imageArray: Buffer[]): Promise<PredictionType[][]> {
     return Promise.all(imageArray.map((image) => this.classify(image)));
   }
 
@@ -73,8 +71,8 @@ export class NsfwTensorService {
   async predictVideo(imageArray: Buffer[]): Promise<NsfwTensorResult> {
     const framesPredictions = await this.classifyVideo(imageArray);
 
-    let highestPrediction!: predictionType;
-    let deletePrediction: predictionType | undefined;
+    let highestPrediction!: PredictionType;
+    let deletePrediction: PredictionType | undefined;
 
     framesPredictions.some((predictions) => {
       const predictionResult = this.findHighestPrediction([highestPrediction, ...predictions].filter(Boolean));
@@ -104,8 +102,8 @@ export class NsfwTensorService {
   /**
    * @description finds highest and delete prediction
    * */
-  private findHighestPrediction(predictions: predictionType[]) {
-    let highestPrediction!: predictionType;
+  private findHighestPrediction(predictions: PredictionType[]) {
+    let highestPrediction!: PredictionType;
 
     const deletePrediction = predictions.find((currentPrediction) => {
       const spamThreshold = this.predictionChecks.get(currentPrediction.className);
@@ -129,7 +127,7 @@ export class NsfwTensorService {
 }
 
 export const initNsfwTensor = async () => {
-  const tensorService = new NsfwTensorService(new URL('nsfw-temp/model.json', import.meta.url));
+  const tensorService = new NsfwTensorService();
 
   if (!environmentConfig.UNIT_TESTING) {
     await tensorService.load();

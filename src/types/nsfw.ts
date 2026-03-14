@@ -1,15 +1,15 @@
-import type { predictionType } from 'nsfwjs';
+import type { PredictionType } from 'nsfwjs';
 
 export interface NsfwTensorNegativeResult {
   isSpam: false;
-  predictions: predictionType[] | predictionType[][];
-  highestPrediction: predictionType;
+  predictions: PredictionType[] | PredictionType[][];
+  highestPrediction: PredictionType;
 }
 
 export interface NsfwTensorPositiveResult {
   isSpam: true;
-  predictions: predictionType[] | predictionType[][];
-  deletePrediction: predictionType;
+  predictions: PredictionType[] | PredictionType[][];
+  deletePrediction: PredictionType;
   deleteRank: number;
 }
 
