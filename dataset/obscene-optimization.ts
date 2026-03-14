@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 
-import { removeDuplicates } from '@utils/';
+import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 import { antisemitismDictionaryActionUrl, antisemitismDictionaryNounsUrl, antisemitismDictionaryThreadsUrl } from './dataset-antisemitism';
 import { obsceneDictionaryEnUrl, obsceneDictionaryRuUrl, obsceneDictionaryUaUrl } from './dataset-obscene';
@@ -20,12 +20,14 @@ const processDictionary = (text: string): string[] =>
       .toLowerCase()
       .split('\n')
       .filter(Boolean)
-      .sort((a, b) => a.localeCompare(b)),
+      .toSorted((left, right) => left.localeCompare(right)),
   );
 
 filesToOptimize.forEach((url) => {
+  // eslint-disable-next-line security/detect-non-literal-fs-filename
   const file = fs.readFileSync(url).toString();
 
+  // eslint-disable-next-line security/detect-non-literal-fs-filename
   fs.writeFileSync(url, `${processDictionary(file).join('\n')}\n`);
   console.info('Optimize file:', url.pathname);
 });

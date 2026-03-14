@@ -1,8 +1,8 @@
 import type { NextFunction } from 'grammy';
 
-import type { GrammyContext } from 'types';
+import type { GrammyContext } from '@app-types/context';
 
-import { logSkipMiddleware } from '@utils/';
+import { logSkipMiddleware } from '@utils/generic.util';
 
 /**
  * @description
@@ -14,4 +14,7 @@ export function onlyWithText(context: GrammyContext, next: NextFunction) {
   }
 
   logSkipMiddleware(context, 'no text');
+
+  // eslint-disable-next-line unicorn/no-useless-undefined
+  return undefined;
 }

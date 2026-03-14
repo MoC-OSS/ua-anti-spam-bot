@@ -1,10 +1,11 @@
 import { RedisMiddleware } from '@bot/middleware/redis.middleware';
 
-import type { GrammyContext, RedisSessionOptions } from '@types/';
+import type { GrammyContext } from '@app-types/context';
+import type { RedisSessionOptions } from '@app-types/session';
 
 export class RedisChatSession extends RedisMiddleware {
   constructor() {
-    const _options: RedisSessionOptions = {
+    const redisOptions: RedisSessionOptions = {
       property: 'chatSession',
       state: {},
       format: {},
@@ -27,6 +28,6 @@ export class RedisChatSession extends RedisMiddleware {
       },
     };
 
-    super(_options);
+    super(redisOptions);
   }
 }

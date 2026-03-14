@@ -1,10 +1,10 @@
 import type { NextFunction } from 'grammy';
 
-import type { GrammyContext } from 'types';
+import { onlyNotAdminFilter } from '@bot/filters/only-not-admin.filter';
 
-import { onlyNotAdminFilter } from '@bot/filters';
+import type { GrammyContext } from '@app-types/context';
 
-import { logSkipMiddleware } from '@utils/';
+import { logSkipMiddleware } from '@utils/generic.util';
 
 /**
  * @description
@@ -22,4 +22,7 @@ export async function onlyNotAdmin(context: GrammyContext, next: NextFunction) {
   }
 
   logSkipMiddleware(context, 'message is older than bot admin');
+
+  // eslint-disable-next-line unicorn/no-useless-undefined
+  return undefined;
 }

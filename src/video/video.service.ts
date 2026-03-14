@@ -38,6 +38,7 @@ export class VideoService {
     let localDuration = duration;
     const videoFile = new URL(filename, this.saveFolderPath);
 
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     await fsp.writeFile(videoFile, video);
 
     if (!localDuration) {
@@ -95,6 +96,7 @@ export class VideoService {
        * */
       videoPath = new URL(`${fileName}.mp4`, this.saveFolderPath);
       outputVideoName = `${new Date().toString()}-video-note.mp4`;
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
       await fsp.writeFile(videoPath, videoFile);
     }
 
@@ -115,12 +117,15 @@ export class VideoService {
         .run();
     });
 
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     const outputVideoBuffer = await fsp.readFile(outputVideoPath);
 
     /**
      * Remove files from FS
      * */
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     await fsp.unlink(videoPath);
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     await fsp.unlink(outputVideoPath);
 
     return outputVideoBuffer;
@@ -170,12 +175,15 @@ export class VideoService {
     /**
      * Load files from FS
      * */
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     const screenshotBuffers = await Promise.all(fullFileNamePaths.map((fullPath) => fsp.readFile(fullPath)));
 
     /**
      * Remove files from FS
      * */
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     await Promise.all(fullFileNamePaths.map((fullPath) => fsp.unlink(fullPath)));
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     await fsp.unlink(videoFile);
 
     return screenshotBuffers;

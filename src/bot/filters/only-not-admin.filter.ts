@@ -1,8 +1,8 @@
-import type { GrammyContext } from 'types';
+import { TELEGRAM_USER_ID } from '@const/telegram.const';
 
-import { TELEGRAM_USER_ID } from '@const/';
+import type { GrammyContext } from '@app-types/context';
 
-import { logSkipMiddleware } from '@utils/';
+import { logSkipMiddleware } from '@utils/generic.util';
 
 /**
  * @description

@@ -2,7 +2,7 @@ import { auth } from 'google-auth-library';
 import type { JWTInput } from 'google-auth-library/build/src/auth/credentials';
 import { google } from 'googleapis';
 
-import type { GoogleFullCellData, GoogleShortCellData } from '@types/';
+import type { GoogleFullCellData, GoogleShortCellData } from '@app-types/google';
 
 import { handleError } from '@utils/error-handler';
 import { coerceArray } from '@utils/generic.util';
@@ -32,8 +32,6 @@ export class GoogleService {
     } catch (error: unknown) {
       // @ts-ignore
       handleError(error, `GOOGLE AUTH ERROR: ${error?.message as string}`);
-
-      return null;
     }
   }
 
@@ -101,6 +99,7 @@ export class GoogleService {
    * @returns {Promise<null>}
    * */
   removeSheetRange(spreadsheetId: string, range: string) {
+    // eslint-disable-next-line sonarjs/no-try-promise
     try {
       return sheets.spreadsheets.values.clear({
         spreadsheetId,
@@ -121,7 +120,7 @@ export class GoogleService {
    * @param {string} [range]
    * */
   async appendToSheet<T>(spreadsheetId: string, sheetName: string, value: T | T[], range?: string) {
-    const data = coerceArray(value);
+    const responseData = coerceArray(value);
 
     try {
       await sheets.spreadsheets.values.append({
@@ -129,14 +128,12 @@ export class GoogleService {
         range: `${sheetName}!${range || RANGE}`,
         valueInputOption: 'USER_ENTERED',
         requestBody: {
-          values: [data],
+          values: [responseData],
         },
       });
     } catch (error: unknown) {
       // @ts-ignore
       handleError(error, `GOOGLE API ERROR: ${error?.message as string}`);
-
-      return null;
     }
   }
 
@@ -159,8 +156,6 @@ export class GoogleService {
     } catch (error: unknown) {
       // @ts-ignore
       handleError(error, `GOOGLE API ERROR: ${error?.message as string}`);
-
-      return null;
     }
   }
 
@@ -178,8 +173,6 @@ export class GoogleService {
     } catch (error: unknown) {
       // @ts-ignore
       handleError(error, `GOOGLE API ERROR: ${error?.message as string}`);
-
-      return null;
     }
   }
 }

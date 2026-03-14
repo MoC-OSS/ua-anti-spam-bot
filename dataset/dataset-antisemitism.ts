@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 
-import { removeRepeatedLettersUtil as removeRepeatedLettersUtility } from '@utils/remove-repeated-letters.util';
+import { removeRepeatedLettersUtility } from '@utils/remove-repeated-letters.util';
 import { SearchSet } from '@utils/search-set';
 
 import { processMessage, processTxtMessage } from './dataset-helpers';
@@ -18,6 +18,7 @@ export const antisemitismDictionaryThreadsUrl = new URL('strings/antisemitism_th
  * Logic
  * */
 function processAntisemitismDictionary(datasetUrl: URL) {
+  // eslint-disable-next-line security/detect-non-literal-fs-filename
   return processMessage(processTxtMessage(fs.readFileSync(datasetUrl).toString()).map((item) => removeRepeatedLettersUtility(item)));
 }
 

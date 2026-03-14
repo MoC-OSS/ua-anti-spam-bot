@@ -1,4 +1,4 @@
-import { removeDuplicates } from '@utils/';
+import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 export class MentionService {
   readonly mentionRegexp = /\B@\w+/g;
@@ -6,6 +6,7 @@ export class MentionService {
   readonly nonWordRegex = /\W/;
 
   readonly urlRegexp =
+    // eslint-disable-next-line security/detect-unsafe-regex, sonarjs/slow-regex, sonarjs/regex-complexity, sonarjs/empty-string-repetition
     /(https?:\/\/(?:www\.|(?!www))?[\dA-Za-z][\dA-Za-z-]+[\dA-Za-z]\.\S{2,}|www\.[\dA-Za-z][\dA-Za-z-]+[\dA-Za-z]\.\S{2,}|(https?:\/\/(?:www\.|(?!www)))?[\dA-Za-z-]+\.\S{2,}|www\.?[\dA-Za-z]+\.\S{2,})/g;
 
   /**
@@ -15,8 +16,10 @@ export class MentionService {
    * @returns {string[]}
    */
   parseMentions(message: string, exceptionMentions: string[] = []): string[] {
+    // eslint-disable-next-line sonarjs/prefer-regexp-exec
     const directMentions = message.match(this.mentionRegexp) || [];
 
+    // eslint-disable-next-line sonarjs/prefer-regexp-exec
     const linkMentions = (message.match(this.urlRegexp) || [])
       .filter((url) => url.split('/').includes('t.me'))
       .map((url) => url.split('/').splice(-1)[0])

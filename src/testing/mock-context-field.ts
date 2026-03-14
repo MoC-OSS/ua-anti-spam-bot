@@ -2,21 +2,22 @@ import type { Context, MiddlewareFn } from 'grammy';
 
 import type { PartialDeep } from 'type-fest';
 
-export interface MockContextFieldReturnType<C extends Context, F extends keyof C> {
-  mocked: C[F];
-  middleware: MiddlewareFn<C>;
+export interface MockContextFieldReturnType<TContext extends Context, TField extends keyof TContext> {
+  mocked: TContext[TField];
+  middleware: MiddlewareFn<TContext>;
 }
 
+// eslint-disable-next-line no-secrets/no-secrets
 /**
  * Mock field with strict partial typing and dynamically changing it for testing
  *
  * @example
  * ```ts
  * export interface MockSessionResult<
- *   R extends MockContextFieldReturnType<GrammyContext, 'session'> = MockContextFieldReturnType<GrammyContext, 'session'>,
+ *   TResult extends MockContextFieldReturnType<GrammyContext, 'session'> = MockContextFieldReturnType<GrammyContext, 'session'>,
  * > {
- *   session: R['mocked'];
- *   mockSessionMiddleware: R['middleware'];
+ *   session: TResult['mocked'];
+ *   mockSessionMiddleware: TResult['middleware'];
  * }
  *
  * export const mockSession = mockContextField<GrammyContext, 'session', MockSessionResult>('session', ({ mocked, middleware }) => ({
@@ -26,12 +27,16 @@ export interface MockContextFieldReturnType<C extends Context, F extends keyof C
  * ```
  * */
 export const mockContextField =
-  <C extends Context, F extends keyof C, R>(fieldName: F, remap: (value: MockContextFieldReturnType<C, F>) => R) =>
-  (mocked: PartialDeep<C[F]>) =>
+  <TContext extends Context, TField extends keyof TContext, TResult>(
+    fieldName: TField,
+    remap: (value: MockContextFieldReturnType<TContext, TField>) => TResult,
+  ) =>
+  (mocked: PartialDeep<TContext[TField]>) =>
     remap({
-      mocked: mocked as C[F],
+      mocked: mocked as TContext[TField],
       middleware: (context, next) => {
-        context[fieldName] = mocked as C[F];
+        // eslint-disable-next-line security/detect-object-injection
+        context[fieldName] = mocked as TContext[TField];
 
         return next();
       },

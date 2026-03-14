@@ -10,7 +10,7 @@ export function getTopUsed(
   array: string[],
   whitelist: string[] = [],
   split = ' ',
-  additionalMap: (v: string, index: number, self: string[]) => string = (v) => v,
+  additionalMap: (v: string, index: number, self: string[]) => string = (value) => value,
 ) {
   const words: Map<string, number> = new Map();
 
@@ -28,5 +28,5 @@ export function getTopUsed(
       }),
   );
 
-  return [...words.entries()].sort((a, b) => b[1] - a[1]);
+  return [...words.entries()].toSorted((left, right) => right[1] - left[1]);
 }

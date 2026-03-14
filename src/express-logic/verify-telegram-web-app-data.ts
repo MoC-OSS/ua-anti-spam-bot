@@ -11,7 +11,7 @@ export const verifyTelegramWebAppData = (telegramInitData: string): boolean => {
   initData.forEach((value, key) => key !== 'hash' && dataToCheck.push(`${key}=${value}`));
 
   const secret = CryptoJS.HmacSHA256(environmentConfig.BOT_TOKEN, 'WebAppData');
-  const _hash = CryptoJS.HmacSHA256(dataToCheck.join('\n'), secret).toString(CryptoJS.enc.Hex);
+  const computedHash = CryptoJS.HmacSHA256(dataToCheck.join('\n'), secret).toString(CryptoJS.enc.Hex);
 
-  return _hash === hash;
+  return computedHash === hash;
 };

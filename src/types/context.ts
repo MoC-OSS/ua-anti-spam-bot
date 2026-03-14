@@ -2,7 +2,7 @@ import type { MenuFlavor } from '@grammyjs/menu';
 import type { ParseModeFlavor } from '@grammyjs/parse-mode';
 import type { Bot, CommandContext, Composer, Context, Filter, FilterQuery, MiddlewareFn, SessionFlavor } from 'grammy';
 
-import type { SelfDestructedFlavor } from '@bot/plugins';
+import type { SelfDestructedFlavor } from '@bot/plugins/self-destructed.plugin';
 
 import type { ChatSessionData, ChatSessionFlavor, SessionData } from './session';
 import type { State, StateFlavor } from './state';
@@ -19,11 +19,11 @@ export type GrammyMenuContext = GrammyContext & MenuFlavor;
  * */
 export type RealGrammyContext = GrammyContext & { tg: never; telegram: never; api: never };
 
-export type GrammyMiddleware<C extends GrammyContext = GrammyContext> = MiddlewareFn<C>;
+export type GrammyMiddleware<TContext extends GrammyContext = GrammyContext> = MiddlewareFn<TContext>;
 
 export type GrammyCommandMiddleware = GrammyMiddleware<CommandContext<GrammyContext>>;
 
-export type GrammyQueryMiddleware<Q extends FilterQuery> = GrammyMiddleware<Filter<GrammyContext, Q>>;
+export type GrammyQueryMiddleware<TQuery extends FilterQuery> = GrammyMiddleware<Filter<GrammyContext, TQuery>>;
 
 export type GrammyBot = Bot<GrammyContext>;
 

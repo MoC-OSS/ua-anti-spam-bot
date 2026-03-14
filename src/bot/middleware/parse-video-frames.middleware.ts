@@ -1,12 +1,14 @@
 import axios from 'axios';
 import FormData from 'form-data';
 
-import type { GrammyMiddleware, ParseVideoSuccessResponseBody } from '@types/';
-import type { StateImageParsedFrames } from '@types/state';
+import type { GrammyMiddleware } from '@app-types/context';
+import type { ParseVideoSuccessResponseBody } from '@app-types/express';
+import type { StateImageParsedFrames } from '@app-types/state';
 
-import { handleError, videoUtil as videoUtility } from '@utils/';
+import { handleError } from '@utils/error-handler';
+import { videoUtility } from '@utils/video.util';
 
-import { videoService } from '@video/';
+import { videoService } from '@video/video.service';
 
 import { environmentConfig } from '../../config';
 

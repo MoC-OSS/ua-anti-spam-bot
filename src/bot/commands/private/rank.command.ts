@@ -1,8 +1,8 @@
-import { redisService } from '@services/';
+import { redisService } from '@services/redis.service';
 
-import type { TensorService } from '@tensor/';
+import type { TensorService } from '@tensor/tensor.service';
 
-import type { GrammyCommandMiddleware } from '@types/';
+import type { GrammyCommandMiddleware } from '@app-types/context';
 
 export class RankCommand {
   constructor(private tensorService: TensorService) {}
@@ -11,6 +11,7 @@ export class RankCommand {
    * @command /set_rank
    * */
   setRankMiddleware(): GrammyCommandMiddleware {
+    // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context) => {
       const newPercent = +context.match;
 
@@ -35,6 +36,7 @@ export class RankCommand {
    * @command /set_training_start_rank
    * */
   setTrainingStartRank(): GrammyCommandMiddleware {
+    // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context) => {
       const newPercent = +context.match;
 
@@ -58,6 +60,7 @@ export class RankCommand {
    * @command /set_training_chat_whitelist
    * */
   setTrainingChatWhitelist(): GrammyCommandMiddleware {
+    // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context) => {
       const newChats = context.match;
 
@@ -77,6 +80,7 @@ export class RankCommand {
    * @command /update_training_chat_whitelist
    * */
   updateTrainingChatWhitelist(): GrammyCommandMiddleware {
+    // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context) => {
       const newChats = context.match;
 

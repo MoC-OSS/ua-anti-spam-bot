@@ -1,12 +1,12 @@
 import { Composer } from 'grammy';
 
-import { ignoreOld } from '@bot/middleware';
+import { ignoreOld } from '@bot/middleware/ignore-old.middleware';
 
-import { swindlersHelpMessage } from '@message/';
+import { swindlersHelpMessage } from '@message/swindlers.message';
 
-import type { GrammyContext } from '@types/';
+import type { GrammyContext } from '@app-types/context';
 
-import { handleError } from '@utils/';
+import { handleError } from '@utils/error-handler';
 
 /**
  * @description Health-check helper composer

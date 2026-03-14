@@ -1,17 +1,21 @@
 import pIteration from 'p-iteration';
 
-import { onlyNotAdminFilter, onlyWhenBotAdminFilter } from '@bot/filters';
+import { onlyNotAdminFilter } from '@bot/filters/only-not-admin.filter';
+import { onlyWhenBotAdminFilter } from '@bot/filters/only-when-bot-admin.filter';
 
-import { featureNoAdminMessage, hasNoLinkedChats, isNotAdminMessage, linkToWebView } from '@message/';
+import { featureNoAdminMessage } from '@message';
+import { hasNoLinkedChats, isNotAdminMessage, linkToWebView } from '@message/settings.message';
 
-import type { RedisService } from '@services/';
+import type { RedisService } from '@services/redis.service';
 
-import type { GrammyMiddleware, Session } from '@types/';
+import type { GrammyMiddleware } from '@app-types/context';
+import type { Session } from '@app-types/session';
 
 export class SettingsCommand {
   constructor(private redisService: RedisService) {}
 
   middleware(): GrammyMiddleware {
+    // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context) => {
       const isChatPrivate = context.chat?.type === 'private';
       const userId = context.from?.id.toString() ?? '';
@@ -63,6 +67,9 @@ export class SettingsCommand {
 
         return context.replyWithSelfDestructedHTML(linkToWebView);
       }
+
+      // eslint-disable-next-line unicorn/no-useless-undefined
+      return undefined;
     };
   }
 }

@@ -31,6 +31,7 @@ export interface SetOfArraysDiffReturn {
 export function setOfArraysDiff(smallSet: SetOfArraysDiffSmallSet, bigSet: SetOfArraysDiffBigSet): SetOfArraysDiffReturn {
   // eslint-disable-next-line unicorn/no-array-reduce
   return Object.entries(bigSet).reduce((accumulator, [key, value]) => {
+    // eslint-disable-next-line security/detect-object-injection
     accumulator[key] = arrayDiff(value, smallSet[key]);
 
     return accumulator;

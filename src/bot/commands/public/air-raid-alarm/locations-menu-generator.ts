@@ -1,25 +1,28 @@
 import type { MenuRange } from '@grammyjs/menu';
 
-import { onlyAdmin } from '@bot/middleware';
+import { onlyAdmin } from '@bot/middleware/only-admin.middleware';
 
-import { getAirRaidAlarmSettingsMessage, nextPage, previousPage } from '@message/';
+import { getAirRaidAlarmSettingsMessage, nextPage, previousPage } from '@message';
 
-import { alarmChatService, TEST_ALARM_STATE } from '@services/';
-import { generateTestState } from '@services/_mocks';
+import { generateTestState } from '@services/_mocks/alarm.mocks';
+import { TEST_ALARM_STATE } from '@services/alarm.service';
+import { alarmChatService } from '@services/alarm-chat.service';
 
-import type { GrammyContext, GrammyMenuContext, State } from '@types/';
+import type { State } from '@app-types/alarm';
+import type { GrammyContext, GrammyMenuContext } from '@app-types/context';
 
-import { handleError, isIdWhitelisted } from '@utils/';
+import { handleError } from '@utils/error-handler';
+import { isIdWhitelisted } from '@utils/generic.util';
 
 /**
- * @param {GrammyContext} context_
+ * @param {GrammyContext} _context
  * @param {MenuRange<GrammyContext>} range
  * @param alertStates
  * */
-export const dynamicLocationMenu = (context_: GrammyMenuContext, range: MenuRange<GrammyMenuContext>, alertStates: State[]) => {
-  const states = isIdWhitelisted(context_.from?.id) ? [...alertStates, generateTestState(TEST_ALARM_STATE)] : alertStates;
-  const pageIndex = context_.chatSession.chatSettings.airRaidAlertSettings.pageNumber;
-  const { state } = context_.chatSession.chatSettings.airRaidAlertSettings;
+export const dynamicLocationMenu = (_context: GrammyMenuContext, range: MenuRange<GrammyMenuContext>, alertStates: State[]) => {
+  const states = isIdWhitelisted(_context.from?.id) ? [...alertStates, generateTestState(TEST_ALARM_STATE)] : alertStates;
+  const pageIndex = _context.chatSession.chatSettings.airRaidAlertSettings.pageNumber;
+  const { state } = _context.chatSession.chatSettings.airRaidAlertSettings;
   const maxPageIndex = Math.ceil(states.length / 10);
   const lastPageButtonsNumber = states.length % 10;
   let currentButtonsLimit = pageIndex * 10;
@@ -37,7 +40,7 @@ export const dynamicLocationMenu = (context_: GrammyMenuContext, range: MenuRang
     return range.text(displayLocationName, onlyAdmin, (context: GrammyContext) => {
       context.chatSession.chatSettings.airRaidAlertSettings.state = locationName;
       alarmChatService.updateChat(context.chatSession, context.chat?.id);
-      context.editMessageText(getAirRaidAlarmSettingsMessage(context_.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
+      context.editMessageText(getAirRaidAlarmSettingsMessage(_context.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
     });
   }
 
@@ -60,6 +63,7 @@ export const dynamicLocationMenu = (context_: GrammyMenuContext, range: MenuRang
   }
 
   for (buttonIndex; buttonIndex < currentButtonsLimit; buttonIndex += 1) {
+    // eslint-disable-next-line security/detect-object-injection
     const locationName = states[buttonIndex].name;
 
     if (columnIndex % 2 === 0) {

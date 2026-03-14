@@ -2,15 +2,16 @@ import { Composer } from 'grammy';
 
 import escapeHTML from 'escape-html';
 
-import { LOGS_CHAT_THREAD_IDS } from '@const/';
+import { LOGS_CHAT_THREAD_IDS } from '@const/logs.const';
 
-import { getUkrainianMessageExtra, getWarnRussianMessage, russianWarnLogsStartMessage } from '@message/';
+import { getUkrainianMessageExtra, getWarnRussianMessage, russianWarnLogsStartMessage } from '@message';
 
-import type { DynamicStorageService } from '@services/';
+import type { DynamicStorageService } from '@services/dynamic-storage.service';
 
-import type { GrammyContext } from '@types/';
+import type { GrammyContext } from '@app-types/context';
 
-import { getRandomItem, telegramUtil as telegramUtility } from '@utils/';
+import { getRandomItem } from '@utils/generic.util';
+import { telegramUtility } from '@utils/util-instances';
 
 import { logsChat } from '../../../creator';
 

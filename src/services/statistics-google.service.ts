@@ -1,4 +1,4 @@
-import { GOOGLE_SHEETS_NAMES } from '@const/';
+import { GOOGLE_SHEETS_NAMES } from '@const/google-sheets.const';
 
 import { environmentConfig } from '../config';
 
@@ -6,7 +6,7 @@ import type { GoogleService } from './google.service';
 import { googleService as localGoogleService } from './google.service';
 
 export class StatisticsGoogleService {
-  SHEETS_START_FROM = 'A2:A';
+  sheetsStartFrom = 'A2:A';
 
   constructor(private googleService: GoogleService) {}
 
@@ -21,7 +21,7 @@ export class StatisticsGoogleService {
       environmentConfig.GOOGLE_SPREADSHEET_ID,
       GOOGLE_SHEETS_NAMES.STATISTICS,
       cases,
-      this.SHEETS_START_FROM,
+      this.sheetsStartFrom,
     );
   }
 }

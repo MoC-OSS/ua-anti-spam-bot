@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 
-import { removeRepeatedLettersUtil as removeRepeatedLettersUtility } from '@utils/remove-repeated-letters.util';
+import { removeRepeatedLettersUtility } from '@utils/remove-repeated-letters.util';
 import { SearchSet } from '@utils/search-set';
 
 import { processMessage, processTxtMessage } from './dataset-helpers';
@@ -26,8 +26,11 @@ const obsceneDictionaryWhitelistEnUrl = new URL('strings/obscene_dictionary_en_w
 /**
  * File allow lists
  * */
+// eslint-disable-next-line security/detect-non-literal-fs-filename
 const obsceneDictionaryWhitelistUa = new Set(processTxtMessage(fs.readFileSync(obsceneDictionaryWhitelistUaUrl).toString()));
+// eslint-disable-next-line security/detect-non-literal-fs-filename
 const obsceneDictionaryWhitelistRu = new Set(processTxtMessage(fs.readFileSync(obsceneDictionaryWhitelistRuUrl).toString()));
+// eslint-disable-next-line security/detect-non-literal-fs-filename
 const obsceneDictionaryWhitelistEn = new Set(processTxtMessage(fs.readFileSync(obsceneDictionaryWhitelistEnUrl).toString()));
 
 /**
@@ -36,6 +39,7 @@ const obsceneDictionaryWhitelistEn = new Set(processTxtMessage(fs.readFileSync(o
 function processObsceneDictionary(whitelist: Set<string>, datasetUrl: URL) {
   return processMessage([
     ...whitelist,
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     ...processTxtMessage(fs.readFileSync(datasetUrl).toString())
       .filter((item) => !whitelist.has(item))
       .map((item) => removeRepeatedLettersUtility(item)),

@@ -1,9 +1,9 @@
 import { Composer } from 'grammy';
 
-import { onlyCreatorFilter } from '@bot/filters';
-import { ignoreOld } from '@bot/middleware';
+import { onlyCreatorFilter } from '@bot/filters/only-creator.filter';
+import { ignoreOld } from '@bot/middleware/ignore-old.middleware';
 
-import type { GrammyContext } from '@types/';
+import type { GrammyContext } from '@app-types/context';
 
 /**
  * @description Health-check helper composer

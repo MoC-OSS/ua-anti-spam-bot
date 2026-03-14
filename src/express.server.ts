@@ -4,10 +4,11 @@ import multer from 'multer';
 
 import * as tf from '@tensorflow/tfjs-node';
 
-import { environmentConfig } from './config';
-import { processHandler } from './express-logic';
-import { initSwindlersContainer, S3Service } from './services';
-import { initNsfwTensor, initTensor } from './tensor';
+import { processHandler } from './express-logic/process.handler';
+import { S3Service } from './services/s3.service';
+import { initSwindlersContainer } from './services/swindlers.container';
+import { initNsfwTensor } from './tensor/nsfw-tensor.service';
+import { initTensor } from './tensor/tensor.service';
 import type {
   ParseVideoRequestBody,
   ParseVideoResponseBody,
@@ -17,10 +18,12 @@ import type {
   SwindlerResponseBody,
   TensorRequestBody,
   TensorResponseBody,
-} from './types';
-import { videoService } from './video';
+} from './types/express';
+import { videoService } from './video/video.service';
+import { environmentConfig } from './config';
 
 const uploadMemoryStorage = multer.memoryStorage();
+// eslint-disable-next-line sonarjs/content-length
 const uploadMiddleware = multer({ storage: uploadMemoryStorage });
 
 (async () => {
@@ -38,6 +41,7 @@ const uploadMiddleware = multer({ storage: uploadMemoryStorage });
   const nsfwTensorService = await initNsfwTensor();
   const { swindlersDetectService } = await initSwindlersContainer();
 
+  // eslint-disable-next-line sonarjs/x-powered-by
   const app = express();
   const expressStartTime = new Date().toString();
 

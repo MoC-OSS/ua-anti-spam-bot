@@ -12,15 +12,14 @@ const options = {
   minMatchCharLength: 6,
 };
 
-export class MessageUtil {
+export class MessageUtility {
+  // eslint-disable-next-line sonarjs/function-return-type
   findInText(message: string, searchFor: string, strict = false) {
     /**
      * Direct hit
      * */
-    let directHit: boolean | string = false;
-
     if (searchFor.length <= 4) {
-      directHit = strict
+      const directHit = strict
         ? message
             .replaceAll(/[^\da-z\u0400-\u04FF]/gi, ' ')
             .replaceAll(/\s\s+/g, ' ')

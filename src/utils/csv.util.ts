@@ -9,21 +9,22 @@ function processCsvValue(value: string) {
 
 function toCsvRows(headers: string[], columns: string[][]) {
   const output = [headers];
-  // eslint-disable-next-line unicorn/no-array-reduce
-  const numberRows = columns.map((col) => col.length).reduce((a, b) => Math.max(a, b));
+  // eslint-disable-next-line unicorn/no-array-reduce, sonarjs/reduce-initial-value
+  const numberRows = columns.map((column) => column.length).reduce((left, right) => Math.max(left, right));
 
   for (let row = 0; row < numberRows; row += 1) {
-    output.push(columns.map((c) => (c[row] ? processCsvValue(c[row]) : '')));
+    // eslint-disable-next-line security/detect-object-injection
+    output.push(columns.map((column) => (column[row] ? processCsvValue(column[row]) : '')));
   }
 
   return output;
 }
 
-function toCsvString(data: string[][]) {
+function toCsvString(csvData: string[][]) {
   let output = '';
 
   // eslint-disable-next-line no-return-assign
-  data.forEach((row) => (output += `${row.join(',')}\n`));
+  csvData.forEach((row) => (output += `${row.join(',')}\n`));
 
   return output;
 }

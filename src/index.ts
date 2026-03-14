@@ -5,13 +5,13 @@ import ms from 'ms';
 
 import * as tf from '@tensorflow/tfjs-node';
 
+import { alarmService } from './services/alarm.service';
+import type { GrammyContext } from './types/context';
+import { sleep } from './utils/generic.util';
 import { getBot } from './bot';
 import { runBotExpressServer } from './bot-express.server';
 import { environmentConfig } from './config';
 import { logsChat } from './creator';
-import { alarmService } from './services';
-import type { GrammyContext } from './types';
-import { sleep } from './utils';
 
 (async () => {
   /**

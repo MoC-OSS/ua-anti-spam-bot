@@ -2,9 +2,10 @@ import type { Bot } from 'grammy';
 
 import axios from 'axios';
 
-import { redisService } from '@services/';
+import { redisService } from '@services/redis.service';
 
-import type { ChatDetails, GrammyContext, LinkedChat, Session } from '@types/';
+import type { GrammyContext } from '@app-types/context';
+import type { ChatDetails, LinkedChat, Session } from '@app-types/session';
 
 import { environmentConfig } from '../config';
 
@@ -54,12 +55,13 @@ export const updateChatsList = async (linkedChats: LinkedChat[], bot: Bot<Grammy
       const chatMembers = await bot.api.getChatMemberCount(chat.id);
       const admins = await bot.api.getChatAdministrators(chat.id);
       const isAdmin = admins.some((admin) => admin.user.id.toString() === userId);
-      const [info, members] = await Promise.all([chatInfo, chatMembers]);
-      const avatar = await getChatAvatar(bot, info.photo?.small_file_id ?? '');
-      const title = 'title' in info ? info.title : '';
+      const [details, members] = await Promise.all([chatInfo, chatMembers]);
+      const avatar = await getChatAvatar(bot, details.photo?.small_file_id ?? '');
+      const title = 'title' in details ? details.title : '';
 
       if (title !== chat.name) {
         const updatedChats = [...linkedChats];
+        // eslint-disable-next-line security/detect-object-injection
         const updatedChat = { ...updatedChats[index], name: title || '$NO_TITLE' };
 
         updatedChats.splice(index, 1, updatedChat);
@@ -70,7 +72,7 @@ export const updateChatsList = async (linkedChats: LinkedChat[], bot: Bot<Grammy
       }
 
       const formattedChat: Required<Omit<ChatDetails, 'airAlarm'>> = {
-        id: info.id.toString(),
+        id: details.id.toString(),
         name: title || '$NO_TITLE',
         photo: avatar,
         users: members,
@@ -81,9 +83,9 @@ export const updateChatsList = async (linkedChats: LinkedChat[], bot: Bot<Grammy
     } catch (error) {
       if (error instanceof Error) {
         console.error(error);
-
-        return deletedChat(chat.id, chat.name);
       }
+
+      return deletedChat(chat.id, chat.name);
     }
   });
 

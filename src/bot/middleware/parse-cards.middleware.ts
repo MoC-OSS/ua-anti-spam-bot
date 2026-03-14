@@ -1,8 +1,8 @@
 import type { NextFunction } from 'grammy';
 
-import type { GrammyContext } from 'types';
+import { cardsService } from '@services/cards.service';
 
-import { cardsService } from '@services/';
+import type { GrammyContext } from '@app-types/context';
 
 /**
  * @description

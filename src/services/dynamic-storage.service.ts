@@ -4,9 +4,9 @@ import ms from 'ms';
 import type TypedEmitter from 'typed-emitter';
 import { optimizeText } from 'ukrainian-ml-optimizer';
 
-import { GOOGLE_SHEETS_NAMES } from '@const/';
+import { GOOGLE_SHEETS_NAMES } from '@const/google-sheets.const';
 
-import { removeDuplicates } from '@utils/';
+import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 import type { dataset } from '../../dataset/dataset';
 import { environmentConfig } from '../config';
@@ -137,6 +137,7 @@ export class DynamicStorageService {
   private parseRegexItems(strings: string[]): (RegExp | string)[] {
     return strings.map((string) => {
       if (string.startsWith(this.REGEX_KEYWORD)) {
+        // eslint-disable-next-line security/detect-non-literal-regexp
         return new RegExp(string.slice(this.REGEX_KEYWORD.length));
       }
 

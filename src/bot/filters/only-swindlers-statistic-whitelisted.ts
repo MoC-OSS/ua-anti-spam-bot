@@ -1,4 +1,4 @@
-import type { GrammyContext } from '@types/';
+import type { GrammyContext } from '@app-types/context';
 
 import { isIdWhitelistedForSwindlersStatistic } from '@utils/generic.util';
 

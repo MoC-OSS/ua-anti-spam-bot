@@ -2,13 +2,15 @@ import { Menu } from '@grammyjs/menu';
 import { Composer } from 'grammy';
 import { isChatId } from 'grammy-guard';
 
-import { onlyWithText, parseText, removeSystemInformationMiddleware } from '@bot/middleware';
+import { onlyWithText } from '@bot/middleware/only-with-text.middleware';
+import { parseText } from '@bot/middleware/parse-text.middleware';
+import { removeSystemInformationMiddleware } from '@bot/middleware/remove-system-information.middleware';
 
-import { messageQuery } from '@const/';
+import { messageQuery } from '@const/message-query.const';
 
-import type { swindlersGoogleService } from '@services/';
+import type { swindlersGoogleService } from '@services/swindlers-google.service';
 
-import type { GrammyContext, GrammyMenuContext } from '@types/';
+import type { GrammyContext, GrammyMenuContext } from '@app-types/context';
 
 export interface SaveToSheetComposerProperties {
   chatId: number;

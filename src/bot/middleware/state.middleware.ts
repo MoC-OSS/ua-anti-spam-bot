@@ -1,4 +1,4 @@
-import type { GrammyMiddleware } from '@types/';
+import type { GrammyMiddleware } from '@app-types/context';
 
 /**
  * Add state into context

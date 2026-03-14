@@ -2,11 +2,12 @@ import Bottleneck from 'bottleneck';
 import pIteration from 'p-iteration';
 import type { Chat } from 'typegram/manage';
 
-import { alarmEndNotificationMessage, chatIsMutedMessage, chatIsUnmutedMessage, getAlarmStartNotificationMessage } from '@message/';
+import { alarmEndNotificationMessage, chatIsMutedMessage, chatIsUnmutedMessage, getAlarmStartNotificationMessage } from '@message';
 
-import type { ChatSession, ChatSessionData, GrammyBot } from '@types/';
+import type { GrammyBot } from '@app-types/context';
+import type { ChatSession, ChatSessionData } from '@app-types/session';
 
-import { handleError } from '@utils/';
+import { handleError } from '@utils/error-handler';
 
 import { ALARM_EVENT_KEY, alarmService } from './alarm.service';
 import { redisService } from './redis.service';
@@ -58,12 +59,13 @@ export class AlarmChatService {
       if (!chatSession.chatSettings.disableChatWhileAirRaidAlert && !chatSession.chatSettings.airRaidAlertSettings.notificationMessage) {
         this.chats?.splice(index, 1);
       } else {
-        this.chats[index].data = chatSession;
+        // eslint-disable-next-line security/detect-object-injection
+        this.chats[index].payload = chatSession;
       }
     } else if (chatSession.chatSettings.disableChatWhileAirRaidAlert || chatSession.chatSettings.airRaidAlertSettings.notificationMessage) {
       this.chats?.push({
         id: chatId,
-        data: chatSession,
+        payload: chatSession,
       });
     }
   }
@@ -72,7 +74,9 @@ export class AlarmChatService {
     const sessions = await redisService.getChatSessions();
 
     return sessions.filter(
-      (s) => s.data.chatSettings?.airRaidAlertSettings?.notificationMessage || s.data.chatSettings?.disableChatWhileAirRaidAlert,
+      (session) =>
+        session.payload.chatSettings?.airRaidAlertSettings?.notificationMessage ||
+        session.payload.chatSettings?.disableChatWhileAirRaidAlert,
     );
   }
 
@@ -102,7 +106,7 @@ export class AlarmChatService {
         pIteration
           // eslint-disable-next-line unicorn/no-array-method-this-argument,unicorn/no-array-callback-reference
           .forEach(this.chats, async (chat) => {
-            if (chat.data.chatSettings.airRaidAlertSettings.state === event.state.name) {
+            if (chat.payload.chatSettings.airRaidAlertSettings.state === event.state.name) {
               await this.limiter.schedule(() => this.processChatAlarm(chat, event.state.alert, isRepeatedAlarm).catch(handleError));
             }
           })
@@ -123,35 +127,35 @@ export class AlarmChatService {
     let startAlarmMessage = '';
     let endAlarmMessage = '';
 
-    if (chat.data.chatSettings.airRaidAlertSettings.notificationMessage) {
-      startAlarmMessage += getAlarmStartNotificationMessage(chat.data.chatSettings, isRepeatedAlarm);
-      endAlarmMessage += alarmEndNotificationMessage(chat.data.chatSettings);
+    if (chat.payload.chatSettings.airRaidAlertSettings.notificationMessage) {
+      startAlarmMessage += getAlarmStartNotificationMessage(chat.payload.chatSettings, isRepeatedAlarm);
+      endAlarmMessage += alarmEndNotificationMessage(chat.payload.chatSettings);
     }
 
-    if (chat.data.chatSettings.disableChatWhileAirRaidAlert) {
+    if (chat.payload.chatSettings.disableChatWhileAirRaidAlert) {
       startAlarmMessage += chatIsMutedMessage;
       endAlarmMessage += chatIsUnmutedMessage;
     }
 
     if (isAlarm) {
-      if (chat.data.chatSettings.disableChatWhileAirRaidAlert && !isRepeatedAlarm) {
-        const newSession = { ...chat.data, chatPermissions: { ...(chatInfo as Chat.MultiUserGetChat).permissions } };
+      if (chat.payload.chatSettings.disableChatWhileAirRaidAlert && !isRepeatedAlarm) {
+        const newSession = { ...chat.payload, chatPermissions: { ...(chatInfo as Chat.MultiUserGetChat).permissions } };
 
         await redisService.updateChatSession(chat.id, newSession);
         const newPermissions = {};
 
-        if (chat.data.isBotAdmin) {
+        if (chat.payload.isBotAdmin) {
           await this.api?.setChatPermissions(chat.id, newPermissions);
         }
       }
 
       this.api?.sendMessage(chat.id, startAlarmMessage, { parse_mode: 'HTML' }).catch(handleError);
     } else {
-      if (chat.data.chatSettings.disableChatWhileAirRaidAlert) {
+      if (chat.payload.chatSettings.disableChatWhileAirRaidAlert) {
         const currentSession = await redisService.getChatSession(chat.id);
         const newPermissions = { ...currentSession?.chatPermissions };
 
-        if (chat.data.isBotAdmin) {
+        if (chat.payload.isBotAdmin) {
           await this.api?.setChatPermissions(chat.id, newPermissions);
         }
       }

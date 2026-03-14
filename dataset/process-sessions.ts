@@ -2,9 +2,9 @@ import fs from 'node:fs';
 
 import type { Chat } from 'typegram';
 
-import { redisService } from '@services/';
+import { redisService } from '@services/redis.service';
 
-import type { ChatSession, Session } from '@types/';
+import type { ChatSession, Session } from '@app-types/session';
 
 async function processSession() {
   try {
@@ -21,18 +21,18 @@ async function processSession() {
     ) as ChatSession[];
 
     const groupSessions = groupAndPrivateSessions.filter(
-      (session) => chatTypes.has(session.data.chatType || 'private') && !!session.data.chatMembersCount,
+      (session) => chatTypes.has(session.payload.chatType || 'private') && !!session.payload.chatMembersCount,
     );
 
-    const sortedGroupSessions = groupSessions.sort((a, b) => b.data.chatMembersCount - a.data.chatMembersCount);
+    const sortedGroupSessions = groupSessions.toSorted((left, right) => right.payload.chatMembersCount - left.payload.chatMembersCount);
 
     type HeaderFunction = (session: ChatSession) => number | string | undefined;
 
     const headersMap = new Map<string, HeaderFunction>([
-      ['Title', (session) => session.data.chatTitle],
-      ['Type', (session) => session.data.chatType],
-      ['Members', (session) => session.data.chatMembersCount],
-      ['Active', (session) => (session.data.botRemoved ? 'No' : 'Yes')],
+      ['Title', (session) => session.payload.chatTitle],
+      ['Type', (session) => session.payload.chatType],
+      ['Members', (session) => session.payload.chatMembersCount],
+      ['Active', (session) => (session.payload.botRemoved ? 'No' : 'Yes')],
     ]);
 
     const csvValues = sortedGroupSessions.map((session) =>
@@ -43,6 +43,7 @@ async function processSession() {
 
     const csv = [csvHeaders, ...csvValues].join('\n');
 
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     fs.writeFileSync(new URL('temp/processed-telegraf-session.tsv', import.meta.url), csv, { encoding: 'utf8' });
   } catch (error) {
     console.error('Failed to load sessions:', error);

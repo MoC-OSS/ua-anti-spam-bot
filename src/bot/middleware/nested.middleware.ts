@@ -1,6 +1,6 @@
 import type { NextFunction } from 'grammy';
 
-import type { GrammyContext, GrammyMiddleware } from 'types';
+import type { GrammyContext, GrammyMiddleware } from '@app-types/context';
 
 /**
  * @param {GrammyMiddleware} middlewares

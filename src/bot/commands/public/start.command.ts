@@ -1,8 +1,10 @@
-import { getGroupStartMessage, getStartMessage, makeAdminMessage } from '@message/';
+import { getGroupStartMessage, getStartMessage, makeAdminMessage } from '@message';
 
-import type { GrammyMiddleware } from '@types/';
+import type { GrammyMiddleware } from '@app-types/context';
 
-import { getUserData, handleError, telegramUtil as telegramUtility } from '@utils/';
+import { handleError } from '@utils/error-handler';
+import { getUserData } from '@utils/generic.util';
+import { telegramUtility } from '@utils/util-instances';
 
 export class StartCommand {
   /**
@@ -14,6 +16,7 @@ export class StartCommand {
     /**
      * @param {GrammyContext} context
      * */
+    // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context) => {
       if (context.chat?.type === 'private') {
         return context.replyWithHTML(getStartMessage());

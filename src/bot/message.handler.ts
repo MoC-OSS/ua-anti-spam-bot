@@ -1,14 +1,15 @@
 import axios from 'axios';
 
-import { processHandler } from '@express-logic/';
+import { processHandler } from '@express-logic/process.handler';
 
-import { redisService } from '@services/';
+import { redisService } from '@services/redis.service';
 
-import type { TensorService } from '@tensor/';
+import type { TensorService } from '@tensor/tensor.service';
 
-import type { GrammyContext, SwindlerTensorResult } from '@types/';
+import type { GrammyContext } from '@app-types/context';
+import type { SwindlerTensorResult } from '@app-types/swindlers';
 
-import { handleError } from '@utils/';
+import { handleError } from '@utils/error-handler';
 
 import type { DatasetKeys } from '../../dataset/dataset';
 import { environmentConfig } from '../config';
@@ -46,7 +47,7 @@ export class MessageHandler {
   /**
    * Strictly typing an object and return initial object as a const type
    * */
-  getDatasetPaths<P extends { [key in DatasetKeys]?: key }>(paths: P): P {
+  getDatasetPaths<TPayload extends { [key in DatasetKeys]?: key }>(paths: TPayload): TPayload {
     return paths;
   }
 
@@ -182,6 +183,7 @@ export class MessageHandler {
       };
     }
 
+    // eslint-disable-next-line sonarjs/deprecation
     const oldLogicResult = await this.getDeleteRule(message);
     const oldLogicRank = oldLogicResult.rule ? 0.3 : 0;
 
@@ -257,6 +259,7 @@ export class MessageHandler {
       if (environmentConfig.USE_SERVER) {
         return await axios
           .post(`${host}/tensor`, { message, rate })
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           .then((response: { data: { result: SwindlerTensorResult } }) => response.data);
       }
 
@@ -300,6 +303,7 @@ export class MessageHandler {
               datasetPath,
               strict,
             })
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             .then((response: { data: { result: string | null } }) => response.data)
         : {
             result: processHandler.processHandler(message, datasetPath, strict),
@@ -344,7 +348,7 @@ export class MessageHandler {
           ?.filter(Boolean)
           .filter((entity) => entity.type === 'text_mention')
           .forEach((entity) => {
-            // eslint-disable-next-line unicorn/prefer-string-slice
+            // eslint-disable-next-line unicorn/prefer-string-slice, sonarjs/deprecation
             const mention = result.substr(entity.offset, entity.length);
 
             result = result.replace(mention, Array.from({ length: mention.length }, () => ' ').join(''));

@@ -1,4 +1,4 @@
-import type { CounterOffensiveResult } from '@types/state';
+import type { CounterOffensiveResult } from '@app-types/state';
 
 import type { DynamicStorageService } from './dynamic-storage.service';
 

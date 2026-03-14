@@ -4,14 +4,20 @@ import { forEachSeries } from 'p-iteration';
 import type { SetNonNullable } from 'type-fest';
 import { mentionRegexp, urlRegexp } from 'ukrainian-ml-optimizer';
 
-import type { DynamicStorageService, SwindlersBotsService, SwindlersDetectService } from '@services/';
-import { mentionService, redisService, swindlersGoogleService } from '@services/';
+import type { DynamicStorageService } from '@services/dynamic-storage.service';
+import { mentionService } from '@services/mention.service';
+import { redisService } from '@services/redis.service';
+import type { SwindlersBotsService } from '@services/swindlers-bots.service';
+import type { SwindlersDetectService } from '@services/swindlers-detect.service';
+import { swindlersGoogleService } from '@services/swindlers-google.service';
 
-import type { SwindlersTensorService, TensorService } from '@tensor/';
+import type { SwindlersTensorService } from '@tensor/swindlers-tensor.service';
+import type { TensorService } from '@tensor/tensor.service';
 
-import type { ProtoUpdate, SwindlerType } from '@types/';
+import type { ProtoUpdate } from '@app-types/mtproto/mtproto.types';
+import type { SwindlerType } from '@app-types/swindlers';
 
-import { removeSystemInformationUtil as removeSystemInformationUtility } from '@utils/';
+import { removeSystemInformationUtility } from '@utils/remove-system-information.util';
 
 import type { loadUserbotDatasetExtras } from '../../dataset/dataset';
 
@@ -179,7 +185,9 @@ export class UpdatesHandler {
         return;
       }
 
+      // eslint-disable-next-line sonarjs/prefer-regexp-exec
       const mentions = clearMessageText.match(mentionRegexp);
+      // eslint-disable-next-line sonarjs/prefer-regexp-exec
       const urls = clearMessageText.match(urlRegexp);
 
       const telegramLinks = [...(mentions || []), ...(urls || [])];
@@ -191,6 +199,7 @@ export class UpdatesHandler {
         clearMessageText = clearMessageText.replace(deleteWord, ' ');
       });
 
+      // eslint-disable-next-line sonarjs/no-regex-spaces
       clearMessageText = clearMessageText.replaceAll(/  +/g, ' ').split(' ').slice(0, 15).join(' ');
 
       const { isSpam, spamRate } = await this.tensorService.predict(clearMessageText, 0.7);
@@ -206,6 +215,7 @@ export class UpdatesHandler {
               sentMentionsFromStart.push(mention);
               deleteFromMessage.push(mention);
 
+              // eslint-disable-next-line security/detect-non-literal-fs-filename
               fs.writeFileSync(new URL('from-entities.json', import.meta.url), JSON.stringify(deleteFromMessage, null, 2));
 
               await this.mtProtoClient.sendSelfMessage(mention);

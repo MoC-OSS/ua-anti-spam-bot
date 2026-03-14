@@ -3,15 +3,16 @@ import { Composer } from 'grammy';
 
 import { onlySwindlersStatisticWhitelistedFilter } from '@bot/filters/only-swindlers-statistic-whitelisted';
 
-import { noNewStatisticMessage } from '@message/';
+import { noNewStatisticMessage } from '@message';
 
-import { redisService, swindlersGoogleService } from '@services/';
+import { redisService } from '@services/redis.service';
+import { swindlersGoogleService } from '@services/swindlers-google.service';
 
-import type { GrammyContext } from '@types/';
+import type { GrammyContext } from '@app-types/context';
 
-import { removeDuplicates } from '@utils/';
 import { setOfArraysDiff } from '@utils/array-diff.util';
 import { csvConstructor } from '@utils/csv.util';
+import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 const FILE_NAME = 'statistic';
 
@@ -19,9 +20,9 @@ interface StatisticToCsvData {
   [key: string]: string[];
 }
 
-const statisticToCsv = (data: StatisticToCsvData): InputFile => {
-  const headers = Object.keys(data);
-  const columns = Object.values(data);
+const statisticToCsv = (payload: StatisticToCsvData): InputFile => {
+  const headers = Object.keys(payload);
+  const columns = Object.values(payload);
 
   return csvConstructor(headers, columns, FILE_NAME);
 };
@@ -40,8 +41,8 @@ const getStatisticFromSheet = async (): Promise<GetStatisticFromSheetReturn> => 
     swindlersGoogleService.getSiteRegex(),
   ]);
 
-  return statistic.then((data) => {
-    const [swindlerPositives, swindlerBots, swindlerDomains, notSwindlers, swindlerCards, swindlerRegexSites] = data.map((element) =>
+  return statistic.then((payload) => {
+    const [swindlerPositives, swindlerBots, swindlerDomains, notSwindlers, swindlerCards, swindlerRegexSites] = payload.map((element) =>
       removeDuplicates(element),
     );
 

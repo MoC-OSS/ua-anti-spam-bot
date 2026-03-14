@@ -6,7 +6,7 @@ import type { LayersModel } from '@tensorflow/tfjs';
 import type { ModelArtifacts } from '@tensorflow/tfjs-core/dist/io/types';
 import * as tf from '@tensorflow/tfjs-node';
 
-import type { SwindlerTensorResult } from '@types/';
+import type { SwindlerTensorResult } from '@app-types/swindlers';
 
 import { environmentConfig } from '../config';
 
@@ -16,11 +16,11 @@ import { environmentConfig } from '../config';
 export class BaseTensorService {
   model: LayersModel | null = null;
 
-  DICTIONARY: string[] = [];
+  dictionary: string[] = [];
 
-  MODEL: ModelArtifacts | undefined;
+  modelArtifacts: ModelArtifacts | undefined;
 
-  DICTIONARY_EXTRAS = {
+  dictionaryExtras = {
     START: 0,
     UNKNOWN: 1,
     PAD: 2,
@@ -30,13 +30,15 @@ export class BaseTensorService {
 
   constructor(
     protected modelPath: string,
-    protected SPAM_THRESHOLD: number,
+    protected spamThreshold: number,
   ) {}
 
   loadModelMetadata(modelPath: string, vocabPath: string) {
     try {
-      this.DICTIONARY = JSON.parse(fs.readFileSync(new URL(vocabPath, import.meta.url)).toString()) as string[];
-      this.MODEL = JSON.parse(fs.readFileSync(new URL(modelPath, import.meta.url)).toString()) as ModelArtifacts;
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
+      this.dictionary = JSON.parse(fs.readFileSync(new URL(vocabPath, import.meta.url)).toString()) as string[];
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
+      this.modelArtifacts = JSON.parse(fs.readFileSync(new URL(modelPath, import.meta.url)).toString()) as ModelArtifacts;
     } catch (error) {
       console.error('Cannot parse model! Reason:');
       console.error(error);
@@ -44,12 +46,12 @@ export class BaseTensorService {
 
     // @ts-ignore
 
-    this.modelLength = this.MODEL?.modelTopology?.model_config?.config.layers[1].config.input_length as number;
+    this.modelLength = this.modelArtifacts?.modelTopology?.model_config?.config.layers[1].config.input_length as number;
   }
 
   setSpamThreshold(newThreshold: number | string | null) {
     if (newThreshold && +newThreshold) {
-      this.SPAM_THRESHOLD = +newThreshold;
+      this.spamThreshold = +newThreshold;
     }
   }
 
@@ -63,7 +65,7 @@ export class BaseTensorService {
     if (!this.model) {
       return Promise.resolve({
         spamRate: 0,
-        deleteRank: rate || this.SPAM_THRESHOLD,
+        deleteRank: rate || this.spamThreshold,
         isSpam: false,
         fileStat: null,
       } as unknown as SwindlerTensorResult);
@@ -73,7 +75,7 @@ export class BaseTensorService {
     const tensorPredict = this.model?.predict(tensorRank.tensor);
     const fullModelPath = new URL(this.modelPath, import.meta.url);
 
-    const deleteRank = rate || this.SPAM_THRESHOLD;
+    const deleteRank = rate || this.spamThreshold;
 
     /**
      * @type {Stats | null}
@@ -82,6 +84,7 @@ export class BaseTensorService {
 
     if (environmentConfig.TEST_TENSOR) {
       try {
+        // eslint-disable-next-line security/detect-non-literal-fs-filename
         fileStat = fs.statSync(fullModelPath);
       } catch {
         fileStat = null;
@@ -103,7 +106,7 @@ export class BaseTensorService {
 
   tokenize(message: string) {
     // Always start with the START token.
-    const returnArray = [this.DICTIONARY_EXTRAS.START];
+    const returnArray = [this.dictionaryExtras.START];
 
     // Convert sentence to lower case which ML Model expects
     // Strip all characters that are not alphanumeric or spaces
@@ -118,16 +121,16 @@ export class BaseTensorService {
     // If word is found in dictionary, add that number else
     // you add the UNKNOWN token.
     wordArray.forEach((word) => {
-      const encoding = this.DICTIONARY.indexOf(word);
+      const encoding = this.dictionary.indexOf(word);
 
-      returnArray.push(encoding === -1 ? this.DICTIONARY_EXTRAS.UNKNOWN : encoding);
+      returnArray.push(encoding === -1 ? this.dictionaryExtras.UNKNOWN : encoding);
       index += 1;
     });
 
     // Finally if the number of words was < the minimum encoding length
     // minus 1 (due to the start token), fill the rest with PAD tokens.
     while (index < this.modelLength - 1) {
-      returnArray.push(this.DICTIONARY_EXTRAS.PAD);
+      returnArray.push(this.dictionaryExtras.PAD);
       index += 1;
     }
 

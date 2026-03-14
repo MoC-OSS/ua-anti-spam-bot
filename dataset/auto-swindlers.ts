@@ -1,9 +1,12 @@
 import fs from 'node:fs';
 
-import type { SwindlersCardsService, SwindlersUrlsService } from '@services/';
-import { cardsService, swindlersGoogleService, urlService } from '@services/';
+import { cardsService } from '@services/cards.service';
+import type { SwindlersCardsService } from '@services/swindlers-cards.service';
+import { swindlersGoogleService } from '@services/swindlers-google.service';
+import type { SwindlersUrlsService } from '@services/swindlers-urls.service';
+import { urlService } from '@services/url.service';
 
-import { removeDuplicates } from '@utils/';
+import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 const notSwindlers = new Set([
   '@alinaaaawwaa',
@@ -19,6 +22,7 @@ const startsWith = [
   't.me/',
   'https://hi.alfabank.ua/',
   'https://cutt.ly/',
+  // eslint-disable-next-line sonarjs/no-clear-text-protocols
   'http://surl.li',
   'https://bit.ly',
   'telegra.ph/',
@@ -59,7 +63,7 @@ async function processUrls(swindlersUrlsService: SwindlersUrlsService, savedSwin
     );
 
   const swindlerUrlsCheck = await Promise.all(swindlerUrlsCheckPromises);
-  const swindlersUrls = swindlerUrlsCheck.map(({ url }) => url).sort();
+  const swindlersUrls = swindlerUrlsCheck.map(({ url }) => url).toSorted((left, right) => left.localeCompare(right));
 
   const notMatchedUrls = swindlerUrlsCheck
     .filter(({ url, urlDomain, isSwindlerResult }) => {
@@ -73,7 +77,7 @@ async function processUrls(swindlersUrlsService: SwindlersUrlsService, savedSwin
       return isNotMatch;
     })
     .map(({ url }) => url)
-    .sort();
+    .toSorted((left, right) => left.localeCompare(right));
 
   return { notMatchedDomains, notMatchedUrls, swindlersUrls };
 }
@@ -95,6 +99,7 @@ export const autoSwindlers = async (
   swindlersUsers: string[],
 ) => {
   function findSwindlersByPattern(items: string[], pattern: RegExp | string) {
+    // eslint-disable-next-line sonarjs/prefer-regexp-exec
     return removeDuplicates([...items, ...swindlers.flatMap((message) => message.match(pattern) || [])]).filter(
       (item) => !notSwindlers.has(item),
     );
@@ -108,7 +113,7 @@ export const autoSwindlers = async (
   const { notMatchedDomains, notMatchedUrls, swindlersUrls } = await processUrls(swindlersUrlsService, savedSwindlersUrls, swindlers);
 
   const swindlersDomains = removeDuplicates([...savedSwindlerDomains, ...notMatchedDomains])
-    .sort()
+    .toSorted((left, right) => left.localeCompare(right))
     .filter((item) => item !== 't.me');
 
   const newSwindlersBots = findSwindlersByPattern(swindlersBots, mentionRegexp).filter((bot) => !swindlersUsers.includes(bot));
@@ -123,8 +128,11 @@ export const autoSwindlers = async (
   const notMatchedUrlsPath = new URL('../temp/notMatchedUrls.txt', import.meta.url);
   const notMatchedDomainsPath = new URL('../temp/notMatchedDomains.txt', import.meta.url);
 
+  // eslint-disable-next-line security/detect-non-literal-fs-filename
   fs.writeFileSync(regexpPath, `${swindlersUrlsService.swindlersRegex.toString()}g`);
+  // eslint-disable-next-line security/detect-non-literal-fs-filename
   fs.writeFileSync(notMatchedUrlsPath, notMatchedUrls.join('\n'));
+  // eslint-disable-next-line security/detect-non-literal-fs-filename
   fs.writeFileSync(notMatchedDomainsPath, notMatchedDomains.join('\n'));
 
   console.info('*** Regex update info ***');

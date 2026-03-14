@@ -6,7 +6,7 @@ import deepmerge from 'deepmerge';
 import type { MergeDeep } from 'type-fest';
 import type { ChatMemberMember } from 'typegram';
 
-import { getTypedValue } from '@utils/';
+import { getTypedValue } from '@utils/get-typed-value.util';
 
 export type PartialUpdate<U extends Update = Update> = Partial<{
   [key in keyof U]: Partial<U[key]>;
@@ -151,6 +151,7 @@ export abstract class GenericMockUpdate {
       // channel: this.genericChannelChat,
     };
 
+    // eslint-disable-next-line security/detect-object-injection
     const chatUpdate = chatUpdates[chatType];
 
     if (chatUpdate) {
@@ -211,7 +212,7 @@ export abstract class GenericMockUpdate {
 
   abstract buildOverwrite(...parameters: any[]);
 
-  deepMerge<A, B>(a: A, b: B): MergeDeep<A, B> {
-    return deepmerge(a as any, b as any);
+  deepMerge<TApi, TBot>(first: TApi, second: TBot): MergeDeep<TApi, TBot> {
+    return deepmerge(first as any, second as any);
   }
 }

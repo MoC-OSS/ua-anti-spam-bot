@@ -1,8 +1,8 @@
-import { swindlersUpdateEndMessage, swindlersUpdateStartMessage } from '@message/';
+import { swindlersUpdateEndMessage, swindlersUpdateStartMessage } from '@message/swindlers.message';
 
-import type { DynamicStorageService } from '@services/';
+import type { DynamicStorageService } from '@services/dynamic-storage.service';
 
-import type { GrammyContext } from '@types/';
+import type { GrammyContext } from '@app-types/context';
 
 export class SwindlersUpdateCommand {
   /**
@@ -18,6 +18,7 @@ export class SwindlersUpdateCommand {
     /**
      * @param {GrammyContext} context
      * */
+    // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context: GrammyContext) => {
       await context.reply(swindlersUpdateStartMessage).then(async (message) => {
         // eslint-disable-next-line camelcase

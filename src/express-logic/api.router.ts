@@ -4,12 +4,16 @@ import type { Request, Response } from 'express';
 import { Router } from 'express';
 import asyncHandler from 'express-async-handler';
 
-import { alarmChatService, alarmService, redisService } from '@services/';
+import { alarmService } from '@services/alarm.service';
+import { alarmChatService } from '@services/alarm-chat.service';
+import { redisService } from '@services/redis.service';
 
-import type { ChatData, ChatSettings, GrammyContext, Session } from '@types/';
+import type { GrammyContext } from '@app-types/context';
+import type { ChatData, ChatSettings, Session } from '@app-types/session';
 
+import { headersMiddleware } from './middleware/headers.middleware';
+import { validateMiddleware } from './middleware/web-view-auth.middleware';
 import { getChatAvatar, getLinkedChats, getUserIdFromAuthorizationHeader, updateChatsList } from './helpers';
-import { headersMiddleware, validateMiddleware } from './middleware';
 
 export const apiRouter = (bot: Bot<GrammyContext>) => {
   const botRoute = Router();
@@ -77,7 +81,7 @@ export const apiRouter = (bot: Bot<GrammyContext>) => {
       const state = chatSession?.chatSettings?.airRaidAlertSettings?.state ?? '';
       const isAirAlarmNow = alarmChatService.isAlarmNow(state) || false;
 
-      const data: Required<ChatData> = {
+      const responseData: Required<ChatData> = {
         chat: {
           id: chatInfo.id.toString(),
           name: title || '$NO_TITLE',
@@ -89,7 +93,7 @@ export const apiRouter = (bot: Bot<GrammyContext>) => {
         states: airRaidAlarmStates.states,
       };
 
-      response.status(200).json({ ...data });
+      response.status(200).json({ ...responseData });
     }),
   );
 

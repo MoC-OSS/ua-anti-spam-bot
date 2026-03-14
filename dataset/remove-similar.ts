@@ -56,10 +56,10 @@ export const removeSimilar = async (array: RemoveSimilarArray[], compareRate = 0
   const filteredArray = prepareArray(array);
 
   return new Promise<RemoveSimilarFinalResult[][]>((resolve) => {
-    const q = queue({ results: [], timeout: 0, concurrency: 6000 });
+    const jobQueue = queue({ results: [], timeout: 0, concurrency: 6000 });
 
     filteredArray.forEach((first, firstIndex, self) => {
-      q.push(async (): Promise<RemoveSimilarFinalResult> => {
+      jobQueue.push(async (): Promise<RemoveSimilarFinalResult> => {
         if (firstIndex % 100 === 0) {
           console.info(firstIndex, 'of', filteredArray.length, ((firstIndex / filteredArray.length) * 100).toFixed(2), '%');
         }
@@ -71,7 +71,7 @@ export const removeSimilar = async (array: RemoveSimilarArray[], compareRate = 0
             rate: compareRate,
           };
 
-          // eslint-disable-next-line no-await-in-loop
+          // eslint-disable-next-line no-await-in-loop, sonarjs/no-nested-functions
           const { isSame, result } = await new Promise<RemoveSimilarResult>((workerResolve) => {
             workers.execute(compareOptions, workerResolve);
           });
@@ -94,15 +94,15 @@ export const removeSimilar = async (array: RemoveSimilarArray[], compareRate = 0
       });
 
       if (firstIndex === filteredArray.length - 1) {
-        q.start((error) => {
+        jobQueue.start((error) => {
           if (error) {
             throw error;
           }
 
-          console.info('all done:', q.results);
+          console.info('all done:', jobQueue.results);
           workerFarm.end(workers);
 
-          resolve(q.results as RemoveSimilarFinalResult[][]);
+          resolve(jobQueue.results as RemoveSimilarFinalResult[][]);
         });
       }
     });

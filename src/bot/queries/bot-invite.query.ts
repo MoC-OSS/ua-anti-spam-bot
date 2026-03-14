@@ -1,10 +1,10 @@
 import type { ChatAdministratorRights, ChatMember } from '@grammyjs/types/manage';
 
-import { getBotJoinMessage } from '@message/';
+import { getBotJoinMessage } from '@message';
 
-import type { GrammyQueryMiddleware } from '@types/';
+import type { GrammyQueryMiddleware } from '@app-types/context';
 
-import { telegramUtil as telegramUtility } from '@utils/';
+import { telegramUtility } from '@utils/util-instances';
 
 export const botInviteQuery: GrammyQueryMiddleware<'my_chat_member'> = async (context, next) => {
   const newStatuses = new Set<ChatMember['status']>(['member', 'administrator']);

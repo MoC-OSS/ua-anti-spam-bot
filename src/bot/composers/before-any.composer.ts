@@ -1,8 +1,11 @@
 import { Composer } from 'grammy';
 
-import { botDemoteQuery, botInviteQuery, botKickQuery, botPromoteQuery } from '@bot/queries';
+import { botDemoteQuery } from '@bot/queries/bot-demote.query';
+import { botInviteQuery } from '@bot/queries/bot-invite.query';
+import { botKickQuery } from '@bot/queries/bot-kick.query';
+import { botPromoteQuery } from '@bot/queries/bot-promote.query';
 
-import type { GrammyContext } from '@types/';
+import type { GrammyContext } from '@app-types/context';
 
 /**
  * @description Message handling composer

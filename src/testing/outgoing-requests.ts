@@ -6,9 +6,9 @@ import type { AbortSignal } from 'abort-controller';
 /**
  * Request object, inherits from a grammy transformer
  * */
-export interface Request<M extends Methods<RawApi> = Methods<RawApi>> {
-  method: M;
-  payload: Payload<M, RawApi>;
+export interface Request<TMethod extends Methods<RawApi> = Methods<RawApi>> {
+  method: TMethod;
+  payload: Payload<TMethod, RawApi>;
   signal?: AbortSignal;
 }
 
@@ -18,7 +18,7 @@ export type RealApiMethodKeys = keyof RawApi;
  * Collects outgoing requests and gives API to process these requests.
  * Helps to save typing.
  * */
-export class OutgoingRequests<M extends RealApiMethodKeys = RealApiMethodKeys> {
+export class OutgoingRequests<TMethod extends RealApiMethodKeys = RealApiMethodKeys> {
   /**
    * Collected requests
    * @internal
@@ -35,21 +35,21 @@ export class OutgoingRequests<M extends RealApiMethodKeys = RealApiMethodKeys> {
   /**
    * Builds an array of methods with strong and loose autocomplete
    */
-  buildMethods<T extends M>(methods: T[]): T[] {
+  buildMethods<T extends TMethod>(methods: T[]): T[] {
     return methods;
   }
 
   /**
    * Get the outgoing request methods
    */
-  getMethods(): M[] {
-    return this.requests.map((request) => request.method as M);
+  getMethods(): TMethod[] {
+    return this.requests.map((request) => request.method as TMethod);
   }
 
   /**
    * Add request at the end
    * */
-  push(request: Request<M>): this {
+  push(request: Request<TMethod>): this {
     this.requests.push(request);
 
     return this;
@@ -67,51 +67,63 @@ export class OutgoingRequests<M extends RealApiMethodKeys = RealApiMethodKeys> {
   /**
    * @returns first request
    * */
-  getFirst<A extends M>(): Request<A> | null {
-    return (this.requests[0] as Request<A>) || null;
+  getFirst<TApi extends TMethod>(): Request<TApi> | null {
+    return (this.requests[0] as Request<TApi>) || null;
   }
 
   /**
    * @returns last request
    * */
-  getLast<A extends M>(): Request<A> | null {
+  getLast<TApi extends TMethod>(): Request<TApi> | null {
     if (this.requests.length === 0) {
       return null;
     }
 
-    return this.requests.at(-1) as Request<A>;
+    return this.requests.at(-1) as Request<TApi>;
   }
 
   /**
    * @returns two last request
    * */
-  getTwoLast<A extends M, B extends M>() {
-    return this.requests.slice(-2) as Partial<[Request<A>, Request<B>]>;
+  getTwoLast<TApi extends TMethod, TBot extends TMethod>() {
+    return this.requests.slice(-2) as Partial<[Request<TApi>, Request<TBot>]>;
   }
 
   /**
    * @returns two last request
    * */
-  getThreeLast<A extends M, B extends M, C extends M>() {
-    return this.requests.slice(-3) as Partial<[Request<A>, Request<B>, Request<C>]>;
+  getThreeLast<TApi extends TMethod, TBot extends TMethod, TContext extends TMethod>() {
+    return this.requests.slice(-3) as Partial<[Request<TApi>, Request<TBot>, Request<TContext>]>;
   }
 
   /**
    * Returns all typed requests
    * */
-  /* eslint-disable prettier/prettier */
-  getAll<A extends M>(): Partial<[Request<A>]>;
 
-  getAll<A extends M, B extends M>(): Partial<[Request<A>, Request<B>]>;
+  getAll<TApi extends TMethod>(): Partial<[Request<TApi>]>;
 
-  getAll<A extends M, B extends M, C extends M>(): Partial<[Request<A>, Request<B>, Request<C>]>;
+  getAll<TApi extends TMethod, TBot extends TMethod>(): Partial<[Request<TApi>, Request<TBot>]>;
 
-  getAll<A extends M, B extends M, C extends M, D extends M>(): Partial<[Request<A>, Request<B>, Request<C>, Request<D>]>;
+  getAll<TApi extends TMethod, TBot extends TMethod, TContext extends TMethod>(): Partial<
+    [Request<TApi>, Request<TBot>, Request<TContext>]
+  >;
 
-  getAll<A extends M, B extends M, C extends M, D extends M, E extends M>(): Partial<[Request<A>, Request<B>, Request<C>, Request<D>, Request<E>]>;
+  getAll<TApi extends TMethod, TBot extends TMethod, TContext extends TMethod, TData extends TMethod>(): Partial<
+    [Request<TApi>, Request<TBot>, Request<TContext>, Request<TData>]
+  >;
 
-  getAll<A extends M, B extends M, C extends M, D extends M, E extends M, F extends M>(): Partial<[Request<A>, Request<B>, Request<C>, Request<D>, Request<E>, Request<F>]>;
-  /* eslint-enable prettier/prettier */
+  getAll<TApi extends TMethod, TBot extends TMethod, TContext extends TMethod, TData extends TMethod, TExtra extends TMethod>(): Partial<
+    [Request<TApi>, Request<TBot>, Request<TContext>, Request<TData>, Request<TExtra>]
+  >;
+
+  getAll<
+    TApi extends TMethod,
+    TBot extends TMethod,
+    TContext extends TMethod,
+    TData extends TMethod,
+    TExtra extends TMethod,
+    TFilter extends TMethod,
+  >(): Partial<[Request<TApi>, Request<TBot>, Request<TContext>, Request<TData>, Request<TExtra>, Request<TFilter>]>;
 
   getAll() {
     return this.requests as Partial<Request[]>;

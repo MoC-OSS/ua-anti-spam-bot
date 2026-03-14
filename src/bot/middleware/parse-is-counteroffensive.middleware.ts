@@ -1,6 +1,6 @@
-import type { CounteroffensiveService } from '@services/';
+import type { CounteroffensiveService } from '@services/counteroffensive.service';
 
-import type { GrammyMiddleware } from '@types/';
+import type { GrammyMiddleware } from '@app-types/context';
 
 export const parseIsCounteroffensive =
   (counteroffensiveService: CounteroffensiveService): GrammyMiddleware =>

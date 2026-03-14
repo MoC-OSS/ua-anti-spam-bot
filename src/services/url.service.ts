@@ -1,6 +1,6 @@
-import { removeDuplicates } from '@utils/';
+import { removeDuplicates } from '@utils/remove-duplicates.util';
 
-import { EXCEPTION_DOMAINS, NON_WORD_REGEX, URL_REGEXP, VALID_URL_REGEXP } from './constants';
+import { EXCEPTION_DOMAINS, NON_WORD_REGEX, URL_REGEXP, VALID_URL_REGEXP } from './constants/swindlers-urls.constant';
 
 export class UrlService {
   /**
@@ -11,6 +11,7 @@ export class UrlService {
    */
   parseUrls(message: string, strict = false): string[] {
     return removeDuplicates(
+      // eslint-disable-next-line sonarjs/prefer-regexp-exec
       (message.match(URL_REGEXP) || ([] as string[]))
         .map((url) => {
           const clearUrl = url.trim();

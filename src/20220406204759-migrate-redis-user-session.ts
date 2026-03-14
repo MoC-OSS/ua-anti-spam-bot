@@ -13,11 +13,12 @@ import { forEach } from 'p-iteration';
  * */
 import Queue from 'queue-promise';
 
+import * as redisClient from './db/redis';
+import { redisService } from './services/redis.service';
+import type { GrammyContext } from './types/context';
+import type { ChatSessionData, SessionData } from './types/session';
+import { handleError } from './utils/error-handler';
 import { logsChat } from './creator';
-import { redisClient } from './db';
-import { redisService } from './services';
-import type { ChatSessionData, GrammyContext, SessionData } from './types';
-import { handleError } from './utils';
 
 const getChatId = (sessionId: string) => sessionId.split(':')[0];
 
@@ -46,7 +47,7 @@ const migration = async (bot: Bot<GrammyContext>, botStartDate: Date) => {
   const userRecords = await redisService.getUserSessions();
 
   const uniqueUserRecords = userRecords.filter(
-    (session, index, self) => index === self.findIndex((t) => getChatId(t.id) === getChatId(session.id)),
+    (session, index, self) => index === self.findIndex((item) => getChatId(item.id) === getChatId(session.id)),
   );
 
   const nonUniqueUserRecords = userRecords.filter((session) => uniqueUserRecords.some((record) => session.id !== record.id));
@@ -109,14 +110,15 @@ const migration = async (bot: Bot<GrammyContext>, botStartDate: Date) => {
           switch (error.description) {
             case 'Bad Request: chat not found':
             case 'Bad Request: group chat was upgraded to a supergroup chat': {
-              return redisClient.removeKey(record.id);
+              await redisClient.removeKey(record.id);
+              break;
             }
 
             case 'Forbidden: bot was kicked from the supergroup chat':
             case 'Forbidden: bot was kicked from the group chat': {
               chatSessionRecord = {
                 ...chatSessionRecord,
-                ...record.data,
+                ...record.payload,
                 botRemoved: true,
                 isBotAdmin: false,
               };
@@ -149,8 +151,6 @@ const migration = async (bot: Bot<GrammyContext>, botStartDate: Date) => {
     // eslint-disable-next-line no-await-in-loop
     await queue.dequeue();
   }
-
-  return true;
 };
 
 export default migration;

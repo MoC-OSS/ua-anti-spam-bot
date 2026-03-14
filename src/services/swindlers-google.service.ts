@@ -1,4 +1,4 @@
-import { GOOGLE_SHEETS_NAMES } from '@const/';
+import { GOOGLE_SHEETS_NAMES } from '@const/google-sheets.const';
 
 import { environmentConfig } from '../config';
 
@@ -6,9 +6,9 @@ import type { GoogleService } from './google.service';
 import { googleService as localGoogleService } from './google.service';
 
 export class SwindlersGoogleService {
-  SHEETS_START_FROM = 6;
+  sheetsStartFrom = 6;
 
-  private SHEET_COLUMNS = {
+  private sheetColumns = {
     TRAINING_NEGATIVES: 'A',
     TRAINING_POSITIVES: 'B',
     BOTS: 'C',
@@ -22,18 +22,18 @@ export class SwindlersGoogleService {
     SITE_REGEX: 'K',
   };
 
-  RANGES = {
-    TRAINING_NEGATIVES: this.buildRange(this.SHEET_COLUMNS.TRAINING_NEGATIVES),
-    TRAINING_POSITIVES: this.buildRange(this.SHEET_COLUMNS.TRAINING_POSITIVES),
-    BOTS: this.buildRange(this.SHEET_COLUMNS.BOTS),
-    DOMAINS: this.buildRange(this.SHEET_COLUMNS.DOMAINS),
-    TESTING_NEGATIVES: this.buildRange(this.SHEET_COLUMNS.TESTING_NEGATIVES),
-    TESTING_POSITIVES: this.buildRange(this.SHEET_COLUMNS.TESTING_POSITIVES),
-    SITES: this.buildRange(this.SHEET_COLUMNS.SITES),
-    USERS: this.buildRange(this.SHEET_COLUMNS.USERS),
-    CARDS: this.buildRange(this.SHEET_COLUMNS.CARDS),
-    NOT_SWINDLERS: this.buildRange(this.SHEET_COLUMNS.NOT_SWINDLERS),
-    SITE_REGEX: this.buildRange(this.SHEET_COLUMNS.SITE_REGEX),
+  ranges = {
+    TRAINING_NEGATIVES: this.buildRange(this.sheetColumns.TRAINING_NEGATIVES),
+    TRAINING_POSITIVES: this.buildRange(this.sheetColumns.TRAINING_POSITIVES),
+    BOTS: this.buildRange(this.sheetColumns.BOTS),
+    DOMAINS: this.buildRange(this.sheetColumns.DOMAINS),
+    TESTING_NEGATIVES: this.buildRange(this.sheetColumns.TESTING_NEGATIVES),
+    TESTING_POSITIVES: this.buildRange(this.sheetColumns.TESTING_POSITIVES),
+    SITES: this.buildRange(this.sheetColumns.SITES),
+    USERS: this.buildRange(this.sheetColumns.USERS),
+    CARDS: this.buildRange(this.sheetColumns.CARDS),
+    NOT_SWINDLERS: this.buildRange(this.sheetColumns.NOT_SWINDLERS),
+    SITE_REGEX: this.buildRange(this.sheetColumns.SITE_REGEX),
   };
 
   constructor(private googleService: GoogleService) {}
@@ -46,7 +46,7 @@ export class SwindlersGoogleService {
 
   /**
    * @private
-   * @param {string} range - range from {this.RANGES}
+   * @param {string} range - range from {this.ranges}
    * @param {boolean} [compact=true]
    *
    * @returns Promise<Record<string, any>[] | null>
@@ -59,7 +59,7 @@ export class SwindlersGoogleService {
 
   /**
    * @private
-   * @param {string} range - range from {this.RANGES}
+   * @param {string} range - range from {this.ranges}
    * */
   clearSheet(range: string) {
     return this.googleService.clearSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, GOOGLE_SHEETS_NAMES.SWINDLERS, range);
@@ -67,7 +67,7 @@ export class SwindlersGoogleService {
 
   /**
    * @private
-   * @param {string} range - range from {this.RANGES}
+   * @param {string} range - range from {this.ranges}
    * @param {string[]} values - values to set
    *
    * @returns Promise<any>
@@ -78,7 +78,7 @@ export class SwindlersGoogleService {
 
   /**
    * @private
-   * @param {string} range - range from {this.RANGES}
+   * @param {string} range - range from {this.ranges}
    * @param {string} value - value to append
    *
    * @returns Promise<any>
@@ -110,31 +110,31 @@ export class SwindlersGoogleService {
    * */
 
   getTrainingNegatives() {
-    return this.getSheet(this.RANGES.TRAINING_NEGATIVES, true);
+    return this.getSheet(this.ranges.TRAINING_NEGATIVES, true);
   }
 
   /**
    * @param {string[]} cases - cases to update
    * */
   updateTrainingNegatives(cases: string[]) {
-    return this.updateSheet(this.RANGES.TRAINING_NEGATIVES, cases);
+    return this.updateSheet(this.ranges.TRAINING_NEGATIVES, cases);
   }
 
   clearTrainingNegatives() {
-    return this.clearSheet(this.RANGES.TRAINING_NEGATIVES);
+    return this.clearSheet(this.ranges.TRAINING_NEGATIVES);
   }
 
   getTrainingPositives<T extends boolean = true>(compact?: T) {
     const isCompact = compact === undefined ? (true as T) : compact;
 
-    return this.getSheet<T>(this.RANGES.TRAINING_POSITIVES, isCompact);
+    return this.getSheet<T>(this.ranges.TRAINING_POSITIVES, isCompact);
   }
 
   /**
    * @param {string[]} cases - cases to update
    * */
   updateTrainingPositives(cases: string[]) {
-    return this.updateSheet(this.RANGES.TRAINING_POSITIVES, cases);
+    return this.updateSheet(this.ranges.TRAINING_POSITIVES, cases);
   }
 
   /**
@@ -144,11 +144,11 @@ export class SwindlersGoogleService {
     const values = await this.getTrainingPositives(false);
     const lastPosition = (values.at(-1)?.index || 0) + 1;
 
-    return this.appendToSheet(this.appendRange(this.SHEET_COLUMNS.TRAINING_POSITIVES, lastPosition), singleCase);
+    return this.appendToSheet(this.appendRange(this.sheetColumns.TRAINING_POSITIVES, lastPosition), singleCase);
   }
 
   clearTrainingPositives() {
-    return this.clearSheet(this.RANGES.TRAINING_POSITIVES);
+    return this.clearSheet(this.ranges.TRAINING_POSITIVES);
   }
 
   /**
@@ -158,22 +158,22 @@ export class SwindlersGoogleService {
    * */
 
   getBots() {
-    return this.getSheet(this.RANGES.BOTS, true);
+    return this.getSheet(this.ranges.BOTS, true);
   }
 
   appendBot(bot: string) {
-    return this.smartAppendToSheet(this.RANGES.BOTS, bot);
+    return this.smartAppendToSheet(this.ranges.BOTS, bot);
   }
 
   /**
    * @param {string[]} bots
    */
   updateBots(bots: string[]) {
-    return this.updateSheet(this.RANGES.BOTS, bots);
+    return this.updateSheet(this.ranges.BOTS, bots);
   }
 
   clearBots() {
-    return this.clearSheet(this.RANGES.BOTS);
+    return this.clearSheet(this.ranges.BOTS);
   }
 
   /**
@@ -183,14 +183,14 @@ export class SwindlersGoogleService {
    * */
 
   getDomains() {
-    return this.getSheet(this.RANGES.DOMAINS, true);
+    return this.getSheet(this.ranges.DOMAINS, true);
   }
 
   /**
    * @param {string[]} domains
    */
   updateDomains(domains: string[]) {
-    return this.updateSheet(this.RANGES.DOMAINS, domains);
+    return this.updateSheet(this.ranges.DOMAINS, domains);
   }
 
   /**
@@ -200,33 +200,33 @@ export class SwindlersGoogleService {
    * */
 
   getTestingNegatives() {
-    return this.getSheet(this.RANGES.TESTING_NEGATIVES, true);
+    return this.getSheet(this.ranges.TESTING_NEGATIVES, true);
   }
 
   /**
    * @param {string[]} cases - cases to update
    * */
   updateTestingNegatives(cases: string[]) {
-    return this.updateSheet(this.RANGES.TESTING_NEGATIVES, cases);
+    return this.updateSheet(this.ranges.TESTING_NEGATIVES, cases);
   }
 
   clearTestingNegatives() {
-    return this.clearSheet(this.RANGES.TESTING_NEGATIVES);
+    return this.clearSheet(this.ranges.TESTING_NEGATIVES);
   }
 
   getTestingPositives() {
-    return this.getSheet(this.RANGES.TESTING_POSITIVES, true);
+    return this.getSheet(this.ranges.TESTING_POSITIVES, true);
   }
 
   /**
    * @param {string[]} cases - cases to update
    * */
   updateTestingPositives(cases: string[]) {
-    return this.updateSheet(this.RANGES.TESTING_POSITIVES, cases);
+    return this.updateSheet(this.ranges.TESTING_POSITIVES, cases);
   }
 
   clearTestingPositives() {
-    return this.clearSheet(this.RANGES.TESTING_POSITIVES);
+    return this.clearSheet(this.ranges.TESTING_POSITIVES);
   }
 
   /**
@@ -236,14 +236,14 @@ export class SwindlersGoogleService {
    * */
 
   getSites() {
-    return this.getSheet(this.RANGES.SITES, true);
+    return this.getSheet(this.ranges.SITES, true);
   }
 
   /**
    * @param {string[]} sites
    */
   updateSites(sites: string[]) {
-    return this.updateSheet(this.RANGES.SITES, sites);
+    return this.updateSheet(this.ranges.SITES, sites);
   }
 
   /**
@@ -253,7 +253,7 @@ export class SwindlersGoogleService {
    * */
 
   getUsers() {
-    return this.getSheet(this.RANGES.USERS, true);
+    return this.getSheet(this.ranges.USERS, true);
   }
 
   /**
@@ -263,14 +263,14 @@ export class SwindlersGoogleService {
    * */
 
   getCards() {
-    return this.getSheet(this.RANGES.CARDS, true);
+    return this.getSheet(this.ranges.CARDS, true);
   }
 
   /**
    * @param {string[]} cards
    */
   updateCards(cards: string[]) {
-    return this.updateSheet(this.RANGES.CARDS, cards);
+    return this.updateSheet(this.ranges.CARDS, cards);
   }
 
   /**
@@ -280,7 +280,7 @@ export class SwindlersGoogleService {
    * */
 
   getNotSwindlers() {
-    return this.getSheet(this.RANGES.NOT_SWINDLERS, true);
+    return this.getSheet(this.ranges.NOT_SWINDLERS, true);
   }
 
   /**
@@ -290,11 +290,11 @@ export class SwindlersGoogleService {
    * */
 
   getSiteRegex() {
-    return this.getSheet(this.RANGES.SITE_REGEX, true);
+    return this.getSheet(this.ranges.SITE_REGEX, true);
   }
 
   private buildRange(column: string): string {
-    return `${column}${this.SHEETS_START_FROM}:${column}`;
+    return `${column}${this.sheetsStartFrom}:${column}`;
   }
 
   private appendRange(column: string, position: number | string) {

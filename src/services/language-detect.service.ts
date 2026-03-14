@@ -1,7 +1,7 @@
 import { detectAll } from 'tinyld/heavy';
 import { removeExtraSpaces, removeSpecialSymbols } from 'ukrainian-ml-optimizer';
 
-import type { LanguageDetectionResult } from '@types/';
+import type { LanguageDetectionResult } from '@app-types/language-detection';
 
 export class LanguageDetectService {
   readonly russianLetters = /[ъыэё]/i;

@@ -1,6 +1,6 @@
 import type { NextFunction } from 'grammy';
 
-import type { GrammyContext } from '@types/';
+import type { GrammyContext } from '@app-types/context';
 
 import { environmentConfig } from '../../config';
 

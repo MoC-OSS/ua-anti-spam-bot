@@ -1,12 +1,12 @@
-import type { S3Service } from '@services/';
+import type { S3Service } from '@services/s3.service';
 
 import { environmentConfig } from '../config';
 
 import { BaseTensorService } from './base-tensor.service';
 
 export class TensorService extends BaseTensorService {
-  constructor(modelPath: string, SPAM_THRESHOLD: number) {
-    super(modelPath, SPAM_THRESHOLD);
+  constructor(modelPath: string, spamThreshold: number) {
+    super(modelPath, spamThreshold);
     this.loadModelMetadata('./temp/model.json', './temp/vocab.json');
   }
 }

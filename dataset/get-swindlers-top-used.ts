@@ -22,17 +22,20 @@ export const getSwindlersTopUsed = (dataset: string[]) => {
   sorted.slice(0, 9).forEach((item) => {
     const [word, count] = item;
 
+    // eslint-disable-next-line security/detect-object-injection
     result[word] = count;
   });
 
   sortedTwo.slice(0, 20).forEach((item) => {
     const [word, count] = item;
 
+    // eslint-disable-next-line security/detect-object-injection
     result[word] = count;
   });
 
   console.info(sorted);
   console.info(sortedTwo);
 
+  // eslint-disable-next-line security/detect-non-literal-fs-filename
   fs.writeFileSync(new URL('strings/swindlers_top_used.json', import.meta.url), JSON.stringify(result, null, 2));
 };

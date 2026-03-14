@@ -20,4 +20,5 @@ export const swindlerBotsChatId = -672_793_621;
 export const swindlerHelpChatId = -1_001_750_209_242;
 
 export const swindlersRegex =
+  // eslint-disable-next-line security/detect-unsafe-regex, sonarjs/regex-complexity
   /(?:https?:\/\/)?(privat24.|privatpay|privatbank.my-payment|app-raiffeisen|mono-bank|login24|privat\.|privat24.ua-|privatbank.u-|privatbank.m|privatbank.a|e-pidtrimka|perekazprivat|privatbank.|privatapp|da-pay|goo.su|p24.|8-pay|pay-raiffeisen|myprlvat|orpay|privat24-.|monobank.|tpays|mopays|leaf-pays|j-pay|i-pay|olx-ua|op-pay|ok-pay|uabuy|private24|darpayments|o-pay|u.to|privatgetmoney|inlnk.ru|privat-|-pay|ik-safe|transfer-go|24pay.|-pau.me|-pai.me|u-pau.com|uasafe|ua-talon|menlo.pw|prlvatbank)(?!ua).+/;

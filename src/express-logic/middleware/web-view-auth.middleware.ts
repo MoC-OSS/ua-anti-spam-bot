@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 
-import { verifyTelegramWebAppData } from '..';
+import { verifyTelegramWebAppData } from '@express-logic/verify-telegram-web-app-data';
 
 export const validateMiddleware = (request: Request, response: Response, next: NextFunction) => {
   const isValid = verifyTelegramWebAppData(request.headers.authorization as string);
@@ -9,5 +9,5 @@ export const validateMiddleware = (request: Request, response: Response, next: N
     return response.status(403).json({ message: 'Unauthorized' });
   }
 
-  next();
+  return next();
 };

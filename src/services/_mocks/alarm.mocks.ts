@@ -1,8 +1,9 @@
 import type { ChatFullInfo } from 'grammy/types';
 
-import type { AlarmNotification, ChatSessionData } from '@types/';
+import type { AlarmNotification } from '@app-types/alarm';
+import type { ChatSessionData } from '@app-types/session';
 
-import { getRandomItem } from '@utils/';
+import { getRandomItem } from '@utils/generic.util';
 
 import { generateRandomBoolean, generateRandomNumber, generateRandomString } from './helpers.mocks';
 
@@ -89,8 +90,8 @@ export function generateChatSessionData(
   };
 }
 
-export function generateChat(id: number, data: ChatSessionData) {
-  return { id: id.toString(), data };
+export function generateChat(id: number, payload: ChatSessionData) {
+  return { id: id.toString(), payload };
 }
 
 export function generateMockSessions(

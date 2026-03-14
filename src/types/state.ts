@@ -6,7 +6,7 @@ import type { LanguageDetectionResult } from './language-detection';
 import type { NsfwTensorResult } from './nsfw';
 import type { SwindlersBotsResult, SwindlerTensorResult } from './swindlers';
 
-export interface StateFlavor<S> {
+export interface StateFlavor<TSession> {
   /**
    * Session data on the context object.
    *
@@ -20,8 +20,8 @@ export interface StateFlavor<S> {
    * `getSessionKey(ctx) === undefined` for the respective context object
    * `ctx`.
    */
-  get state(): S;
-  set state(session: S | null | undefined);
+  get state(): TSession;
+  set state(session: TSession | null | undefined);
 }
 
 export interface StateImagePhoto {

@@ -1,8 +1,8 @@
 import type { NextFunction } from 'grammy';
 
-import type { GrammyContext } from 'types';
+import type { GrammyContext } from '@app-types/context';
 
-import { logSkipMiddleware } from '@utils/';
+import { logSkipMiddleware } from '@utils/generic.util';
 
 /**
  * @description
@@ -18,7 +18,8 @@ export function onlyNotForwarded(context: GrammyContext, next: NextFunction) {
   if (context.update?.message?.forward_origin) {
     logSkipMiddleware(context, 'regular forward');
 
-    return;
+    // eslint-disable-next-line unicorn/no-useless-undefined
+    return undefined;
   }
 
   return next();

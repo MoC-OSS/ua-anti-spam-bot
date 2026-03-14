@@ -1,8 +1,10 @@
 import stringSimilarity from 'string-similarity';
 
-import { GOOGLE_SHEETS_NAMES } from '@const/';
+import { GOOGLE_SHEETS_NAMES } from '@const/google-sheets.const';
 
-import { googleService, redisService, swindlersGoogleService } from '@services/';
+import { googleService } from '@services/google.service';
+import { redisService } from '@services/redis.service';
+import { swindlersGoogleService } from '@services/swindlers-google.service';
 
 import { environmentConfig } from '../config';
 

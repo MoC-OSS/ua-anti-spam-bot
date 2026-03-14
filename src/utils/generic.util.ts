@@ -1,10 +1,11 @@
 import fs from 'node:fs';
 
-import type { ChatSettings, GrammyContext } from '@types/';
+import type { GrammyContext } from '@app-types/context';
+import type { ChatSettings } from '@app-types/session';
 
 import { environmentConfig } from '../config';
 
-import { optimizeWriteContextUtil as optimizeWriteContextUtility } from './optimize-write-context.util';
+import { optimizeWriteContextUtility } from './optimize-write-context.util';
 
 /**
  * @param {GrammyContext} context
@@ -25,12 +26,12 @@ export function sleep(time: number) {
   });
 }
 
-export function truncateString(string_: string, number_: number) {
-  if (string_.length > number_) {
-    return `${string_.slice(0, number_)}..`;
+export function truncateString(inputString: string, inputNumber: number) {
+  if (inputString.length > inputNumber) {
+    return `${inputString.slice(0, inputNumber)}..`;
   }
 
-  return string_;
+  return inputString;
 }
 
 /**
@@ -128,6 +129,7 @@ export function getEnabledFeaturesString(chatSettings: ChatSettings): string {
   const settingsKeys = Object.keys(chatSettings) as (keyof ChatSettings)[];
 
   settingsKeys.forEach((setting) => {
+    // eslint-disable-next-line security/detect-object-injection
     const value = chatSettings[setting];
 
     if (typeof value === 'boolean' && value) {
@@ -157,6 +159,7 @@ export function getEnabledFeaturesString(chatSettings: ChatSettings): string {
  * @returns {T} - random item from array
  * */
 export function getRandomItem<T>(array: T[]): T {
+  // eslint-disable-next-line sonarjs/pseudo-random
   return array[Math.floor(Math.random() * array.length)];
 }
 

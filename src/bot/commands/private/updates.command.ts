@@ -2,13 +2,14 @@ import { Menu } from '@grammyjs/menu';
 
 import Bottleneck from 'bottleneck';
 
-import { cancelMessageSending, confirmationMessage, getSuccessfulMessage, getUpdateMessage, getUpdatesMessage } from '@message/';
+import { cancelMessageSending, confirmationMessage, getSuccessfulMessage, getUpdateMessage, getUpdatesMessage } from '@message';
 
-import { redisService } from '@services/';
+import { redisService } from '@services/redis.service';
 
-import type { ChatSession, GrammyContext, GrammyMenuContext } from '@types/';
+import type { GrammyContext, GrammyMenuContext } from '@app-types/context';
+import type { ChatSession } from '@app-types/session';
 
-import { handleError } from '@utils/';
+import { handleError } from '@utils/error-handler';
 
 export class UpdatesCommand {
   private menu: Menu<GrammyMenuContext> | undefined;
@@ -24,7 +25,7 @@ export class UpdatesCommand {
     const rawSessions = await redisService.getChatSessions();
 
     const sessions = rawSessions.filter(
-      (session) => (session.data.chatType === 'private' || session.data.chatType === 'supergroup') && !session.data.botRemoved,
+      (session) => (session.payload.chatType === 'private' || session.payload.chatType === 'supergroup') && !session.payload.botRemoved,
     );
 
     await context.reply(`${confirmationMessage}\nВсього чатів: ${sessions.length}`);
@@ -44,6 +45,7 @@ export class UpdatesCommand {
     /**
      * @param {GrammyContext} context
      * */
+    // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context: GrammyContext) => {
       context.session.step = 'confirmation';
       await context.replyWithHTML(getUpdatesMessage());
@@ -62,14 +64,15 @@ export class UpdatesCommand {
     /**
      * @param {GrammyContext} context
      * */
+    // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context: GrammyContext) => {
       context.session.step = 'idle';
       const payload = context.match;
 
       if (payload === 'approve') {
         const sessions = await redisService.getChatSessions();
-        const superGroupSessions = sessions.filter((session) => session.data.chatType === 'supergroup' && !session.data.botRemoved);
-        const privateGroupSessions = sessions.filter((session) => session.data.chatType === 'private' && !session.data.botRemoved);
+        const superGroupSessions = sessions.filter((session) => session.payload.chatType === 'supergroup' && !session.payload.botRemoved);
+        const privateGroupSessions = sessions.filter((session) => session.payload.chatType === 'private' && !session.payload.botRemoved);
 
         await this.bulkSending(context, superGroupSessions, 'supergroup');
         await this.bulkSending(context, privateGroupSessions, 'private');
@@ -106,10 +109,12 @@ export class UpdatesCommand {
           .schedule(() =>
             context.api
               .sendMessage(chartSession.id, updatesMessage || '', { entities: updatesMessageEntities ?? undefined })
+              // eslint-disable-next-line sonarjs/no-nested-functions
               .then(() => {
                 successCount += 1;
               })
               .catch(handleError)
+              // eslint-disable-next-line sonarjs/no-nested-functions
               .finally(() => {
                 finishedCount += 1;
               }),

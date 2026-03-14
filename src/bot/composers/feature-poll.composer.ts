@@ -2,13 +2,14 @@ import { Composer } from 'grammy';
 
 import Bottleneck from 'bottleneck';
 
-import { getSuccessfulMessage, getUpdateMessage } from '@message/';
+import { getSuccessfulMessage, getUpdateMessage } from '@message';
 
-import { redisService } from '@services/';
+import { redisService } from '@services/redis.service';
 
-import type { ChatSession, GrammyContext } from '@types/';
+import type { GrammyContext } from '@app-types/context';
+import type { ChatSession } from '@app-types/session';
 
-import { handleError } from '@utils/';
+import { handleError } from '@utils/error-handler';
 
 const supportChatId = -1_001_788_350_185;
 const pollId = 4080;
@@ -38,10 +39,12 @@ async function bulkSending(context: GrammyContext, sessions: ChatSession[]) {
         .schedule(async () => {
           await context.api
             .sendMessage(chartSession.id, message, { parse_mode: 'HTML' })
+            // eslint-disable-next-line sonarjs/no-nested-functions
             .then(() => {
               successCount += 1;
             })
             .catch(handleError)
+            // eslint-disable-next-line sonarjs/no-nested-functions
             .finally(() => {
               finishedCount += 1;
             });
@@ -70,10 +73,12 @@ featurePollComposer.command('feature_poll', async (context) => {
   const allSessions = await redisService.getChatSessions();
 
   const superGroupsSessions = allSessions
-    .filter((session) => session.data.chatType === 'supergroup' && !session.data.botRemoved && session.data.chatMembersCount)
+    .filter((session) => session.payload.chatType === 'supergroup' && !session.payload.botRemoved && session.payload.chatMembersCount)
     .filter((session) => +session.id !== supportChatId);
 
-  const sortedSuperGroupsSessions = superGroupsSessions.sort((a, b) => b.data.chatMembersCount - a.data.chatMembersCount);
+  const sortedSuperGroupsSessions = superGroupsSessions.toSorted(
+    (left, right) => right.payload.chatMembersCount - left.payload.chatMembersCount,
+  );
 
   const sessions = sortedSuperGroupsSessions.slice(10, 60);
 

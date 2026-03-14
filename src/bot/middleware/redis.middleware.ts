@@ -2,9 +2,10 @@ import type { NextFunction } from 'grammy';
 
 import type { JsonObject } from 'type-fest';
 
-import { redisClient } from '@db/';
+import * as redisClient from '@db/redis';
 
-import type { GrammyContext, RedisSessionOptions } from '@types/';
+import type { GrammyContext } from '@app-types/context';
+import type { RedisSessionOptions } from '@app-types/session';
 
 export class RedisMiddleware {
   constructor(private options: RedisSessionOptions) {}
@@ -17,8 +18,8 @@ export class RedisMiddleware {
     return redisClient.getValue(key);
   }
 
-  saveSession(key: string, data: JsonObject) {
-    return redisClient.setValue(key, data);
+  saveSession(key: string, payload: JsonObject) {
+    return redisClient.setValue(key, payload);
   }
 
   middleware(property = this.options.property) {
@@ -43,6 +44,9 @@ export class RedisMiddleware {
       // Saving session object on the next middleware
       await next();
       await this.saveSession(key, session);
+
+      // eslint-disable-next-line unicorn/no-useless-undefined
+      return undefined;
     };
   }
 }

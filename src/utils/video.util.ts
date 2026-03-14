@@ -1,15 +1,22 @@
 import axios from 'axios';
 
-import type { GrammyBot, GrammyContext, ImageVideoTypes } from '@types/';
-import { ImageType } from '@types/';
-import type { StateImageAnimation, StateImageVideo, StateImageVideoNote, StateImageVideoSticker, StateVideoFormats } from '@types/state';
+import type { GrammyBot, GrammyContext } from '@app-types/context';
+import type { ImageVideoTypes } from '@app-types/image';
+import { ImageType } from '@app-types/image';
+import type {
+  StateImageAnimation,
+  StateImageVideo,
+  StateImageVideoNote,
+  StateImageVideoSticker,
+  StateVideoFormats,
+} from '@app-types/state';
 
 import { environmentConfig } from '../config';
 
 /**
  * Helps to manage video across the bot
  * */
-export class VideoUtil {
+export class VideoUtility {
   private api!: GrammyBot['api'];
 
   /**
@@ -122,4 +129,4 @@ export class VideoUtil {
   }
 }
 
-export const videoUtil = new VideoUtil();
+export const videoUtility = new VideoUtility();

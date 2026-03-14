@@ -1,12 +1,12 @@
-import type { GrammyContext, RealGrammyContext } from '@types/';
-import type { NsfwPhotoResult } from '@types/state';
+import type { GrammyContext, RealGrammyContext } from '@app-types/context';
+import type { NsfwPhotoResult } from '@app-types/state';
 
 import { deepCopy } from './deep-copy.util';
 
 /**
  * Optimize real grammy context for logging
  * */
-export function optimizeWriteContextUtil(context: GrammyContext): RealGrammyContext {
+export function optimizeWriteContextUtility(context: GrammyContext): RealGrammyContext {
   const writeContext = deepCopy(context) as RealGrammyContext;
 
   // noinspection JSConstantReassignment

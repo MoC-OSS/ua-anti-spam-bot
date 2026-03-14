@@ -2,9 +2,9 @@ import type { Bot } from 'grammy';
 
 import type { BotCommand } from 'typegram';
 
-import type { GrammyContext } from '@types/';
+import type { GrammyContext } from '@app-types/context';
 
-import { formatDateIntoAccusative } from '@utils/';
+import { formatDateIntoAccusative } from '@utils/generic.util';
 
 /**
  * Handles bot public available commands

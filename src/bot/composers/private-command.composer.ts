@@ -1,17 +1,19 @@
 import type { Bot } from 'grammy';
 import { Composer } from 'grammy';
 
-import type { CommandSetter } from '@bot/commands';
-import { SessionCommand, StatisticsCommand, SwindlersUpdateCommand } from '@bot/commands';
-import { onlyWhitelistedFilter } from '@bot/filters';
+import type { CommandSetter } from '@bot/commands/command-setter';
+import { SessionCommand } from '@bot/commands/private/session.command';
+import { StatisticsCommand } from '@bot/commands/private/statistics.command';
+import { SwindlersUpdateCommand } from '@bot/commands/private/swindlers-update.command';
+import { onlyWhitelistedFilter } from '@bot/filters/only-whitelisted.filter';
 
-import type { DynamicStorageService } from '@services/';
-import { ALARM_EVENT_KEY, alarmService } from '@services/';
-import { getAlarmMock } from '@services/_mocks';
+import { getAlarmMock } from '@services/_mocks/alarm.mocks';
+import { ALARM_EVENT_KEY, alarmService } from '@services/alarm.service';
+import type { DynamicStorageService } from '@services/dynamic-storage.service';
 
-import type { TensorService } from '@tensor/';
+import type { TensorService } from '@tensor/tensor.service';
 
-import type { GrammyContext } from '@types/';
+import type { GrammyContext } from '@app-types/context';
 
 import { getGetVideoNoteConverterComposer } from './video-note-converter.composer';
 
@@ -83,9 +85,8 @@ export const getPrivateCommandsComposer = ({ bot, commandSetter, dynamicStorageS
   });
 
   composer.command('thread', async (context) => {
-    const message = await context.replyWithHTML(
-      `Message Thread Id:\n<code>${context.msg?.message_thread_id?.toString()}</code>` || 'No thread id',
-    );
+    const threadId = context.msg?.message_thread_id?.toString();
+    const message = await context.replyWithHTML(threadId ? `Message Thread Id:\n<code>${threadId}</code>` : 'No thread id');
 
     await context.pinChatMessage(message.message_id);
   });

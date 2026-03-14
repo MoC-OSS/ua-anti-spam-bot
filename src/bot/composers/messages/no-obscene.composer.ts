@@ -2,16 +2,19 @@ import { Composer } from 'grammy';
 
 import escapeHTML from 'escape-html';
 
-import { LOGS_CHAT_THREAD_IDS } from '@const/';
+import { LOGS_CHAT_THREAD_IDS } from '@const/logs.const';
 
-import { getDeleteObsceneMessage, obsceneDeleteLogsStartMessage } from '@message/';
+import { obsceneDeleteLogsStartMessage } from '@message';
+import { getDeleteObsceneMessage } from '@message/obscene.message';
 
-import { obsceneService } from '@services/';
+import { obsceneService } from '@services/obscene.service';
 
-import type { GrammyContext } from '@types/';
+import type { GrammyContext } from '@app-types/context';
 
-import type { SearchSetResult } from '@utils/';
-import { censorWord, getUserData, telegramUtil as telegramUtility } from '@utils/';
+import { censorWord } from '@utils/censor-word.util';
+import { getUserData } from '@utils/generic.util';
+import type { SearchSetResult } from '@utils/search-set';
+import { telegramUtility } from '@utils/util-instances';
 
 import { logsChat } from '../../../creator';
 

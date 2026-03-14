@@ -4,7 +4,7 @@ import type { GoogleService } from '@services/google.service';
 import type { RedisService } from '@services/redis.service';
 import type { SwindlersGoogleService } from '@services/swindlers-google.service';
 
-import type { GoogleFullCellData, GoogleShortCellData } from '@types/';
+import type { GoogleFullCellData, GoogleShortCellData } from '@app-types/google';
 
 export const mockNewBot = '@Diia_move_bot';
 
@@ -71,7 +71,7 @@ export const mockRedisService = {
   getUserSession(id) {
     return Promise.resolve({
       id,
-      data: {
+      payload: {
         isCurrentUserAdmin: false,
       },
     });

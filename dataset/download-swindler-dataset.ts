@@ -1,5 +1,6 @@
 /* eslint-disable unicorn/no-process-exit */
-import { initSwindlersContainer, swindlersGoogleService } from '@services/';
+import { initSwindlersContainer } from '@services/swindlers.container';
+import { swindlersGoogleService } from '@services/swindlers-google.service';
 
 import { autoSwindlers } from './auto-swindlers';
 import { getSwindlersTopUsed } from './get-swindlers-top-used';

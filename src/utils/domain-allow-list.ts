@@ -1,4 +1,4 @@
-import { urlService } from '@services/';
+import { urlService } from '@services/url.service';
 
 /**
  * Domain allow list for filtering URLs.
@@ -15,7 +15,7 @@ export class DomainAllowList {
   updateDomains(allowDomains: string[]) {
     const baseUrls = allowDomains.filter((domain) => !domain.startsWith('@')).map((url) => this.processLink(url));
 
-    this.allowDomains = new Set(baseUrls.sort((a, b) => a.localeCompare(b)));
+    this.allowDomains = new Set(baseUrls.toSorted((left, right) => left.localeCompare(right)));
     this.allowDomainPatterns = baseUrls.filter((url) => url.includes('*')).map((patternUrl) => this.createRegexFromPattern(patternUrl));
   }
 
@@ -75,6 +75,7 @@ export class DomainAllowList {
       .replaceAll(/\\.\*/g, '.*');
 
     // Create a regular expression with the pattern
+    // eslint-disable-next-line security/detect-non-literal-regexp
     return new RegExp(`^${escapedPattern}$`, 'i');
   }
 }

@@ -1,6 +1,6 @@
 import type { NextFunction } from 'grammy';
 
-import type { GrammyContext } from '@types/';
+import type { GrammyContext } from '@app-types/context';
 
 import { environmentConfig } from '../../config';
 
@@ -9,7 +9,7 @@ import { environmentConfig } from '../../config';
  * */
 export async function performanceEndMiddleware(context: GrammyContext, next: NextFunction) {
   if (environmentConfig.DEBUG) {
-    await context
+    return context
       .replyWithHTML(
         [
           `<b>Time</b>: ${performance.now() - (context.state?.performanceStart || 0)}`,
@@ -23,7 +23,7 @@ export async function performanceEndMiddleware(context: GrammyContext, next: Nex
       )
 
       .then(() => next());
-  } else {
-    return next();
   }
+
+  return next();
 }

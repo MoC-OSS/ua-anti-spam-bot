@@ -2,13 +2,13 @@ import type { AxiosError } from 'axios';
 import axios from 'axios';
 import FuzzySet from 'fuzzyset';
 
-import type { SwindlersBaseResult, SwindlersUrlsResult } from '@types/';
+import type { SwindlersBaseResult, SwindlersUrlsResult } from '@app-types/swindlers';
 
 import { DomainAllowList } from '@utils/domain-allow-list';
 
 import { environmentConfig } from '../config';
 
-import { EXCEPTION_DOMAINS, SHORTS } from './constants';
+import { EXCEPTION_DOMAINS, SHORTS } from './constants/swindlers-urls.constant';
 import type { DynamicStorageService } from './dynamic-storage.service';
 import { urlService } from './url.service';
 
@@ -40,8 +40,10 @@ export class SwindlersUrlsService {
   }
 
   buildSiteRegex(sites: string[]): RegExp {
+    // eslint-disable-next-line security/detect-unsafe-regex, sonarjs/duplicates-in-character-class
     const regex = /(?:https?:\/\/)?([[sites]])(?!ua).+/;
 
+    // eslint-disable-next-line security/detect-non-literal-regexp
     return new RegExp(regex.source.replace('[[sites]]', sites.join('|')));
   }
 
@@ -64,13 +66,13 @@ export class SwindlersUrlsService {
       const getUrls = urls.map((url) => this.isSpamUrl(url));
       const allUrls = await Promise.all(getUrls);
 
-      const foundSwindlerUrl = allUrls.some((value) => {
+      const hasSwindlerUrl = allUrls.some((value) => {
         lastResult = value;
 
         return lastResult?.isSpam;
       });
 
-      if (foundSwindlerUrl) {
+      if (hasSwindlerUrl) {
         return lastResult;
       }
     }
@@ -156,7 +158,7 @@ export class SwindlersUrlsService {
 
     const domain = urlService.getUrlDomain(redirectUrl);
 
-    if (EXCEPTION_DOMAINS.some((u) => domain.startsWith(u))) {
+    if (EXCEPTION_DOMAINS.some((exceptionDomain) => domain.startsWith(exceptionDomain))) {
       return {
         rate: 0,
         isSpam: false,
@@ -169,7 +171,7 @@ export class SwindlersUrlsService {
       const result = { isSpam: isRegexpMatch, rate: 200 } as SwindlersUrlsResult;
 
       if (environmentConfig.ENV !== 'production') {
-        result.currentName = domain.match(this.swindlersRegex)?.[0] || '$error';
+        result.currentName = this.swindlersRegex.exec(domain)?.[0] || '$error';
       }
 
       return result;

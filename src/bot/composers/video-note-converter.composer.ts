@@ -1,13 +1,13 @@
 import { Router } from '@grammyjs/router';
 import { Composer, InputFile } from 'grammy';
 
-import { parsePhoto } from '@bot/middleware';
+import { parsePhoto } from '@bot/middleware/parse-photo.middleware';
 
-import type { GrammyContext } from '@types/';
+import type { GrammyContext } from '@app-types/context';
 
-import { videoUtil as videoUtility } from '@utils/';
+import { videoUtility } from '@utils/video.util';
 
-import { videoService } from '@video/';
+import { videoService } from '@video/video.service';
 
 /**
  * @description Message handling composer
@@ -53,6 +53,9 @@ export const getGetVideoNoteConverterComposer = () => {
 
     await context.replyWithChatAction('upload_video_note');
     await context.replyWithVideoNote(new InputFile(squareVideoFile));
+
+    // eslint-disable-next-line unicorn/no-useless-undefined
+    return undefined;
   });
 
   videoNoteConverterComposer.use(router);

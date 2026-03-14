@@ -1,6 +1,6 @@
 import ms from 'ms';
 
-import type { GrammyContext } from '@types/';
+import type { GrammyContext } from '@app-types/context';
 
 const GROUP_EXPIRATION_TIME = ms('60s');
 const GROUP_EXPIRATION_CHECK_INTERVAL = ms('10s');
@@ -14,6 +14,7 @@ interface SpamMediaGroupsStorageDataType {
 export class SpamMediaGroupsStorage {
   private storage: SpamMediaGroupsStorageDataType = {};
 
+  // eslint-disable-next-line sonarjs/deprecation
   private timer?: NodeJS.Timer;
 
   constructor() {
@@ -29,9 +30,11 @@ export class SpamMediaGroupsStorage {
       const now = Date.now();
 
       Object.keys(this.storage).forEach((key) => {
+        // eslint-disable-next-line security/detect-object-injection
         const duration = now - this.storage[key].createdAt;
 
         if (duration > GROUP_EXPIRATION_TIME) {
+          // eslint-disable-next-line security/detect-object-injection
           delete this.storage[key];
         }
       });
@@ -54,6 +57,7 @@ export class SpamMediaGroupsStorage {
     const key = this.extractKeyFromContext(context);
 
     if (key) {
+      // eslint-disable-next-line security/detect-object-injection
       this.storage[key] = { createdAt: Date.now() };
     }
   }

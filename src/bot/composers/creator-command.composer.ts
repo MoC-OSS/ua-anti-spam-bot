@@ -2,15 +2,16 @@ import type { Menu } from '@grammyjs/menu';
 import { Router } from '@grammyjs/router';
 import { Composer } from 'grammy';
 
-import type { CommandSetter } from '@bot/commands';
-import { RankCommand, UpdatesCommand } from '@bot/commands';
-import { onlyCreatorFilter } from '@bot/filters';
+import type { CommandSetter } from '@bot/commands/command-setter';
+import { RankCommand } from '@bot/commands/private/rank.command';
+import { UpdatesCommand } from '@bot/commands/private/updates.command';
+import { onlyCreatorFilter } from '@bot/filters/only-creator.filter';
 
-import { redisService } from '@services/';
+import { redisService } from '@services/redis.service';
 
-import type { TensorService } from '@tensor/';
+import type { TensorService } from '@tensor/tensor.service';
 
-import type { GrammyContext, GrammyMenuContext } from '@types/';
+import type { GrammyContext, GrammyMenuContext } from '@app-types/context';
 
 import { featurePollComposer } from './feature-poll.composer';
 

@@ -1,6 +1,6 @@
 import FuzzySet from 'fuzzyset';
 
-import type { SwindlersBotsResult } from '@types/';
+import type { SwindlersBotsResult } from '@app-types/swindlers';
 
 import type { DynamicStorageService } from './dynamic-storage.service';
 

@@ -5,9 +5,9 @@ import type { JsonObject } from 'type-fest';
 
 import MTProto from '@mtproto/core';
 
-import type { CheckPassword, MTProtoError, ProtoUpdate } from '@types/';
+import type { CheckPassword, MTProtoError, ProtoUpdate } from '@app-types/mtproto/mtproto.types';
 
-import { sleep } from '@utils/';
+import { sleep } from '@utils/generic.util';
 
 import { environmentConfig } from '../config';
 

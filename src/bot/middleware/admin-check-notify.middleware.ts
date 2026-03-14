@@ -1,12 +1,10 @@
 import type { NextFunction } from 'grammy';
 
-import type { GrammyContext } from 'types';
+import { checkAdminNotification } from '@message/admin.message';
 
-import { checkAdminNotification } from '@message/';
+import type { GrammyContext, GrammyMiddleware } from '@app-types/context';
 
-import type { GrammyMiddleware } from '@types/';
-
-import { logSkipMiddleware } from '@utils/';
+import { logSkipMiddleware } from '@utils/generic.util';
 
 /**
  * Used for notifying admins about checking their messages

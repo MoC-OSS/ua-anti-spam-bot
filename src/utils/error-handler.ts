@@ -1,13 +1,13 @@
 import type { ErrorHandler, MiddlewareFn } from 'grammy';
 import { GrammyError, HttpError, InputFile } from 'grammy';
 
-import type { GrammyContext } from '@types/';
+import type { GrammyContext } from '@app-types/context';
 
 import { environmentConfig } from '../config';
 import { logsChat } from '../creator';
 
 import { emptyFunction } from './empty-functions.util';
-import { optimizeWriteContextUtil as optimizeWriteContextUtility } from './optimize-write-context.util';
+import { optimizeWriteContextUtility } from './optimize-write-context.util';
 
 /**
  * Handle single error with expected reason
@@ -47,7 +47,7 @@ export const globalErrorHandler: ErrorHandler<GrammyContext> = (botError) => {
  * @param {function} callback - function to enter a stage
  */
 export const wrapperErrorHandler =
-  <C extends GrammyContext = GrammyContext>(callback: MiddlewareFn<C>): MiddlewareFn<C> =>
+  <TContext extends GrammyContext = GrammyContext>(callback: MiddlewareFn<TContext>): MiddlewareFn<TContext> =>
   async (context, next) => {
     try {
       if (!callback) {

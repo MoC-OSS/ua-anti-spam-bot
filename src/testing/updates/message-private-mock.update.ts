@@ -35,7 +35,7 @@ export class MessagePrivateMockUpdate extends GenericMockUpdate {
     return this.buildUpdate();
   }
 
-  buildOverwrite<E extends PartialUpdate>(extra: E) {
+  buildOverwrite<TExtra extends PartialUpdate>(extra: TExtra) {
     return this.deepMerge(this.buildUpdate(), extra);
   }
 }

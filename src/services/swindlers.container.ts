@@ -1,4 +1,4 @@
-import { initSwindlersTensor } from '@tensor/';
+import { initSwindlersTensor } from '@tensor/swindlers-tensor.service';
 
 import { dataset } from '../../dataset/dataset';
 

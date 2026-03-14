@@ -7,7 +7,9 @@ import type { Api, Bot, Context } from 'grammy';
  * Used for testing.
  * @internal
  * */
-export const logUpdates = <C extends Context, A extends Api = Api, B extends Bot<C, A> = Bot<C, A>>(bot: B) => {
+export const logUpdates = <TContext extends Context, TApi extends Api = Api, TBot extends Bot<TContext, TApi> = Bot<TContext, TApi>>(
+  bot: TBot,
+) => {
   const originUpdate = bot.handleUpdate.bind(bot);
 
   // eslint-disable-next-line no-param-reassign

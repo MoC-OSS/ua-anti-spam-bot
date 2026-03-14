@@ -1,11 +1,11 @@
 import ms from 'ms';
 import type { SetNonNullable } from 'type-fest';
 
-import { redisClient } from '@db/';
+import * as redisClient from '@db/redis';
 
-import { initSwindlersContainer } from '@services/';
+import { initSwindlersContainer } from '@services/swindlers.container';
 
-import { initTensor } from '@tensor/';
+import { initTensor } from '@tensor/tensor.service';
 
 import { loadUserbotDatasetExtras } from '../../dataset/dataset';
 
@@ -57,6 +57,7 @@ auth()
       botsChat: mtProtoClient.resolvePeer(allChats.chats, 'UA Anti Spam Bot - Bots'),
     };
 
+    // eslint-disable-next-line security/detect-object-injection
     const notFoundChatPeer = Object.keys(chatPeers).find((key) => chatPeers[key] === null);
 
     if (notFoundChatPeer) {

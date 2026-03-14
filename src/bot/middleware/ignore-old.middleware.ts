@@ -1,4 +1,4 @@
-import type { GrammyMiddleware } from '@types/';
+import type { GrammyMiddleware } from '@app-types/context';
 
 export const ignoreOld =
   (threshold = 5 * 60): GrammyMiddleware =>
@@ -12,7 +12,8 @@ export const ignoreOld =
         }:${date})`,
       );
 
-      return;
+      // eslint-disable-next-line unicorn/no-useless-undefined
+      return undefined;
     }
 
     return next();

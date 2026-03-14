@@ -2,13 +2,14 @@ import { Composer } from 'grammy';
 
 import escapeHTML from 'escape-html';
 
-import { LOGS_CHAT_THREAD_IDS } from '@const/';
+import { LOGS_CHAT_THREAD_IDS } from '@const/logs.const';
 
-import { counteroffensiveLogsStartMessage, getDeleteCounteroffensiveMessage } from '@message/';
+import { counteroffensiveLogsStartMessage, getDeleteCounteroffensiveMessage } from '@message';
 
-import type { GrammyContext } from '@types/';
+import type { GrammyContext } from '@app-types/context';
 
-import { getUserData, telegramUtil as telegramUtility } from '@utils/';
+import { getUserData } from '@utils/generic.util';
+import { telegramUtility } from '@utils/util-instances';
 
 import { logsChat } from '../../../creator';
 

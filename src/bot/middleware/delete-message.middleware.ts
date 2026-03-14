@@ -1,4 +1,4 @@
-import type { GrammyMiddleware } from '@types/';
+import type { GrammyMiddleware } from '@app-types/context';
 
 /**
  * Delete user entered message

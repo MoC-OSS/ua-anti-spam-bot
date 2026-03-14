@@ -3,15 +3,23 @@ import { InputFile } from 'grammy';
 
 import axios from 'axios';
 import escapeHTML from 'escape-html';
-import type { GrammyContext, GrammyMiddleware, LooseAutocomplete, SwindlerResponseBody, SwindlersResult, SwindlerType } from 'types';
 
-import { LOGS_CHAT_THREAD_IDS, SECOND_LOGS_CHAT_THREAD_IDS } from '@const/';
+import { LOGS_CHAT_THREAD_IDS, SECOND_LOGS_CHAT_THREAD_IDS } from '@const/logs.const';
 
-import { cannotDeleteMessage, getCannotDeleteMessage, swindlerLogsStartMessage, swindlersWarningMessage } from '@message/';
+import { cannotDeleteMessage, getCannotDeleteMessage, swindlerLogsStartMessage } from '@message';
+import { swindlersWarningMessage } from '@message/swindlers.message';
 
-import type { SwindlersDetectService } from '@services/';
+import type { SwindlersDetectService } from '@services/swindlers-detect.service';
 
-import { compareDatesWithOffset, handleError, revealHiddenUrls, telegramUtil as telegramUtility } from '@utils/';
+import type { GrammyContext, GrammyMiddleware } from '@app-types/context';
+import type { SwindlerResponseBody } from '@app-types/express';
+import type { LooseAutocomplete } from '@app-types/generic';
+import type { SwindlersResult, SwindlerType } from '@app-types/swindlers';
+
+import { handleError } from '@utils/error-handler';
+import { compareDatesWithOffset } from '@utils/generic.util';
+import { revealHiddenUrls } from '@utils/reveal-hidden-urls.util';
+import { telegramUtility } from '@utils/util-instances';
 
 import { environmentConfig } from '../../config';
 import { logsChat, secondLogsChat } from '../../creator';
@@ -32,6 +40,7 @@ export class DeleteSwindlersMiddleware {
     /**
      * Delete messages that looks like from swindlers
      * */
+    // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context, next) => {
       const message = revealHiddenUrls(context);
 
@@ -118,11 +127,11 @@ export class DeleteSwindlersMiddleware {
         parse_mode: 'HTML',
       });
     }
+
+    // eslint-disable-next-line unicorn/no-useless-undefined
+    return undefined;
   }
 
-  /**
-   * Delete messages that looks like from swindlers
-   * */
   async removeMessage(context: GrammyContext) {
     try {
       return await context.deleteMessage();
@@ -135,7 +144,8 @@ export class DeleteSwindlersMiddleware {
         context.chatSession.lastLimitedDeletionDate = new Date();
 
         if (!context.chat?.id) {
-          return;
+          // eslint-disable-next-line unicorn/no-useless-undefined
+          return undefined;
         }
 
         return telegramUtility
@@ -169,6 +179,9 @@ export class DeleteSwindlersMiddleware {
           })
           .catch(handleError);
       }
+
+      // eslint-disable-next-line unicorn/no-useless-undefined
+      return undefined;
     }
   }
 }

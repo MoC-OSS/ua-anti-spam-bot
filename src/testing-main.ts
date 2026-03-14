@@ -1,15 +1,15 @@
 import type { MockContextFieldReturnType } from './testing/mock-context-field';
 import { mockContextField } from './testing/mock-context-field';
-import type { GrammyContext } from './types';
+import type { GrammyContext } from './types/context';
 
 /**
  * Mock Session
  * */
 export interface MockSessionResult<
-  R extends MockContextFieldReturnType<GrammyContext, 'session'> = MockContextFieldReturnType<GrammyContext, 'session'>,
+  TResult extends MockContextFieldReturnType<GrammyContext, 'session'> = MockContextFieldReturnType<GrammyContext, 'session'>,
 > {
-  session: R['mocked'];
-  mockSessionMiddleware: R['middleware'];
+  session: TResult['mocked'];
+  mockSessionMiddleware: TResult['middleware'];
 }
 
 export const mockSession = mockContextField<GrammyContext, 'session', MockSessionResult>('session', ({ mocked, middleware }) => ({
@@ -21,10 +21,10 @@ export const mockSession = mockContextField<GrammyContext, 'session', MockSessio
  * Mock Chat Session
  * */
 export interface MockChatSessionResult<
-  R extends MockContextFieldReturnType<GrammyContext, 'chatSession'> = MockContextFieldReturnType<GrammyContext, 'chatSession'>,
+  TResult extends MockContextFieldReturnType<GrammyContext, 'chatSession'> = MockContextFieldReturnType<GrammyContext, 'chatSession'>,
 > {
-  chatSession: R['mocked'];
-  mockChatSessionMiddleware: R['middleware'];
+  chatSession: TResult['mocked'];
+  mockChatSessionMiddleware: TResult['middleware'];
 }
 
 export const mockChatSession = mockContextField<GrammyContext, 'chatSession', MockChatSessionResult>(
@@ -40,10 +40,10 @@ export const mockChatSession = mockContextField<GrammyContext, 'chatSession', Mo
  * Mock State
  * */
 export interface MockStateResult<
-  R extends MockContextFieldReturnType<GrammyContext, 'state'> = MockContextFieldReturnType<GrammyContext, 'state'>,
+  TResult extends MockContextFieldReturnType<GrammyContext, 'state'> = MockContextFieldReturnType<GrammyContext, 'state'>,
 > {
-  state: R['mocked'];
-  mockStateMiddleware: R['middleware'];
+  state: TResult['mocked'];
+  mockStateMiddleware: TResult['middleware'];
 }
 
 export const mockState = mockContextField<GrammyContext, 'state', MockStateResult>('state', ({ mocked, middleware }) => ({

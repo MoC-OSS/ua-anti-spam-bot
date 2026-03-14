@@ -6,15 +6,17 @@ import escapeHTML from 'escape-html';
 import type { MessageHandler } from '@bot/message.handler';
 import { isFilteredByRules } from '@bot/spam.handlers';
 
-import { LOGS_CHAT_THREAD_IDS } from '@const/';
+import { LOGS_CHAT_THREAD_IDS } from '@const/logs.const';
 
-import { cannotDeleteMessage, getCannotDeleteMessage, getDebugMessage, getDeleteMessage } from '@message/'; // spamDeleteMessage
+import { cannotDeleteMessage, getCannotDeleteMessage, getDebugMessage, getDeleteMessage } from '@message'; // spamDeleteMessage
 
-import { redisService } from '@services/';
+import { redisService } from '@services/redis.service';
 
-import type { GrammyContext, GrammyMiddleware } from '@types/';
+import type { GrammyContext, GrammyMiddleware } from '@app-types/context';
 
-import { compareDatesWithOffset, getUserData, handleError, telegramUtil as telegramUtility } from '@utils/';
+import { handleError } from '@utils/error-handler';
+import { compareDatesWithOffset, getUserData } from '@utils/generic.util';
+import { telegramUtility } from '@utils/util-instances';
 
 import { environmentConfig } from '../../config';
 import { logsChat, privateTrainingChat } from '../../creator';
@@ -42,6 +44,7 @@ export class OnTextListener {
      * @param {GrammyContext} context
      * @param {NextFunction} next
      * */
+    // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context: GrammyContext, next: NextFunction) => {
       // TODO use for ctx prod debug
       // console.info('enter onText ******', ctx.chat?.title, '******', ctx.state.text);
@@ -118,7 +121,8 @@ export class OnTextListener {
                 context.chatSession.lastLimitedDeletionDate = new Date();
 
                 if (!context.chat?.id) {
-                  return;
+                  // eslint-disable-next-line unicorn/no-useless-undefined
+                  return undefined;
                 }
 
                 return telegramUtility
@@ -139,6 +143,7 @@ export class OnTextListener {
                           message_thread_id: LOGS_CHAT_THREAD_IDS.STRATEGIC,
                         },
                       )
+                      // eslint-disable-next-line sonarjs/no-nested-functions
                       .then(() => {
                         context.api
                           .sendDocument(
@@ -154,6 +159,9 @@ export class OnTextListener {
                   })
                   .catch(handleError);
               }
+
+              // eslint-disable-next-line unicorn/no-useless-undefined
+              return undefined;
             });
         } catch (error) {
           console.error('Cannot delete the message. Reason:', error);

@@ -9,7 +9,7 @@
     "target": "ES2022",
     "outDir": "dist",
     "lib": [
-      "es2022"
+      "es2023"
     ],
     "module": "esnext",
     "moduleResolution": "node",
@@ -30,6 +30,9 @@
       "@assets/*": [
         "./src/assets/*"
       ],
+      "@bot": [
+        "./src/bot.ts"
+      ],
       "@bot/*": [
         "./src/bot/*"
       ],
@@ -44,6 +47,9 @@
       ],
       "@express-logic/*": [
         "./src/express-logic/*"
+      ],
+      "@message": [
+        "./src/message.ts"
       ],
       "@message/*": [
         "./src/message/*"
@@ -60,7 +66,7 @@
       "@testing/*": [
         "./src/testing/*"
       ],
-      "@types/*": [
+      "@app-types/*": [
         "./src/types/*"
       ],
       "@userbot/*": [
@@ -82,14 +88,14 @@
     "vitest.config.ts",
     "src/**/*",
     "tests/**/*",
-    "dataset/**/*"
+    "dataset/**/*",
+    "scripts/**/*"
   ],
   "files": [
     "node_modules/vitest/globals.d.ts"
   ],
   "exclude": [
     "node_modules",
-    "**/*.spec.ts",
     "src/lib-types/**"
   ]
 }

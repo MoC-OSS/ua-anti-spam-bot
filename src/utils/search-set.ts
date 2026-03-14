@@ -4,7 +4,7 @@
 import { removeSpecialSymbols } from 'ukrainian-ml-optimizer';
 
 import { removeDuplicates } from './remove-duplicates.util';
-import { removeRepeatedLettersUtil as removeRepeatedLettersUtility } from './remove-repeated-letters.util';
+import { removeRepeatedLettersUtility } from './remove-repeated-letters.util';
 
 export interface SearchSetResult {
   found: string;
@@ -56,6 +56,7 @@ export class SearchSet extends Set {
     if (foundWord) {
       return {
         found: foundWord,
+        // eslint-disable-next-line security/detect-object-injection
         origin: words[foundWordIndex] || foundWord,
         wordIndex: foundWordIndex,
       };

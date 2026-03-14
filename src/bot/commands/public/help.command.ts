@@ -1,8 +1,9 @@
-import { getHelpMessage } from '@message/';
+import { getHelpMessage } from '@message';
 
-import type { GrammyMiddleware } from '@types/';
+import type { GrammyMiddleware } from '@app-types/context';
 
-import { formatDate, getUserData, handleError } from '@utils/';
+import { handleError } from '@utils/error-handler';
+import { formatDate, getUserData } from '@utils/generic.util';
 
 export class HelpCommand {
   /**
@@ -18,6 +19,7 @@ export class HelpCommand {
     /**
      * @param {GrammyContext} context
      * */
+    // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context) => {
       const startLocaleTime = formatDate(this.startTime);
 

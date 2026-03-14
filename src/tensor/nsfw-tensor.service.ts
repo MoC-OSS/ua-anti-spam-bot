@@ -3,7 +3,7 @@ import * as nsfw from 'nsfwjs';
 
 import * as tf from '@tensorflow/tfjs-node';
 
-import type { NsfwTensorNegativeResult, NsfwTensorPositiveResult, NsfwTensorResult } from '@types/';
+import type { NsfwTensorNegativeResult, NsfwTensorPositiveResult, NsfwTensorResult } from '@app-types/nsfw';
 
 import { environmentConfig } from '../config';
 

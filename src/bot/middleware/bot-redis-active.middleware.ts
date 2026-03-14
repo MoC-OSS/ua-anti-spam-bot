@@ -1,6 +1,6 @@
-import { redisService } from '@services/';
+import { redisService } from '@services/redis.service';
 
-import type { GrammyMiddleware } from '@types/';
+import type { GrammyMiddleware } from '@app-types/context';
 
 import { creatorId } from '../../creator';
 
@@ -13,4 +13,7 @@ export const botRedisActive: GrammyMiddleware = async (context, next) => {
   }
 
   console.info('Skip due to redis:', context.chat?.id);
+
+  // eslint-disable-next-line unicorn/no-useless-undefined
+  return undefined;
 };

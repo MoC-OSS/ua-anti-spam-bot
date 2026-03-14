@@ -2,14 +2,16 @@ import { InputFile } from 'grammy';
 
 import moment from 'moment-timezone';
 
-import { getChatStatisticsMessage, getFeaturesStatisticsMessage } from '@message/';
+import { getChatStatisticsMessage, getFeaturesStatisticsMessage } from '@message';
 
-import { redisService } from '@services/';
+import { redisService } from '@services/redis.service';
 import { statisticsGoogleService } from '@services/statistics-google.service';
 
-import type { FeaturesSessionsData, GrammyMiddleware } from '@types/';
+import type { GrammyMiddleware } from '@app-types/context';
+import type { FeaturesSessionsData } from '@app-types/session';
 
-import { handleError, optimizeWriteContextUtil as optimizeWriteContextUtility } from '@utils/';
+import { handleError } from '@utils/error-handler';
+import { optimizeWriteContextUtility } from '@utils/optimize-write-context.util';
 
 export class StatisticsCommand {
   /**
@@ -20,16 +22,17 @@ export class StatisticsCommand {
     /**
      * @param {GrammyContext} context
      * */
+    // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context) => {
       try {
         await context.replyWithChatAction('typing');
         const chatSessions = await redisService.getChatSessions();
         const currentDate = moment().locale('en').format('LLL');
 
-        const superGroupsSessions = chatSessions.filter((session) => session.data.chatType === 'supergroup');
-        const groupSessions = chatSessions.filter((session) => session.data.chatType === 'group');
-        const privateSessions = chatSessions.filter((session) => session.data.chatType === 'private');
-        const channelSessions = chatSessions.filter((session) => session.data.chatType === 'channel');
+        const superGroupsSessions = chatSessions.filter((session) => session.payload.chatType === 'supergroup');
+        const groupSessions = chatSessions.filter((session) => session.payload.chatType === 'group');
+        const privateSessions = chatSessions.filter((session) => session.payload.chatType === 'private');
+        const channelSessions = chatSessions.filter((session) => session.payload.chatType === 'channel');
 
         const totalSessionCount = chatSessions.length;
         const superGroupsCount = superGroupsSessions.length;
@@ -38,12 +41,12 @@ export class StatisticsCommand {
         const channelCount = channelSessions.length;
 
         const totalUserCounts = chatSessions
-          .filter((session) => !session.data.botRemoved)
-          .reduce((accumulator, session) => accumulator + (session.data.chatMembersCount || 1), 0);
+          .filter((session) => !session.payload.botRemoved)
+          .reduce((accumulator, session) => accumulator + (session.payload.chatMembersCount || 1), 0);
 
-        const adminsChatsCount = [...superGroupsSessions, ...groupSessions].filter((session) => session.data.isBotAdmin).length;
-        const memberChatsCount = [...superGroupsSessions, ...groupSessions].filter((session) => !session.data.isBotAdmin).length;
-        const botRemovedCount = [...superGroupsSessions, ...groupSessions].filter((session) => session.data.botRemoved).length;
+        const adminsChatsCount = [...superGroupsSessions, ...groupSessions].filter((session) => session.payload.isBotAdmin).length;
+        const memberChatsCount = [...superGroupsSessions, ...groupSessions].filter((session) => !session.payload.isBotAdmin).length;
+        const botRemovedCount = [...superGroupsSessions, ...groupSessions].filter((session) => session.payload.botRemoved).length;
 
         // features
 
@@ -72,11 +75,14 @@ export class StatisticsCommand {
         };
 
         chatSessions
-          .filter((session) => session.data.chatSettings && session.data.chatSettings.airRaidAlertSettings)
+          .filter((session) => session.payload.chatSettings && session.payload.chatSettings.airRaidAlertSettings)
           .forEach((session) => {
             Object.keys(features).forEach((key) => {
+              // eslint-disable-next-line security/detect-object-injection
               features[key] +=
-                key === 'notificationMessage' ? +session.data.chatSettings.airRaidAlertSettings[key] : +!!session.data.chatSettings[key];
+                key === 'notificationMessage'
+                  ? +session.payload.chatSettings.airRaidAlertSettings[key]
+                  : +!!session.payload.chatSettings[key];
             });
           });
 

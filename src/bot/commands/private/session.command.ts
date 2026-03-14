@@ -1,8 +1,8 @@
 import { InputFile } from 'grammy';
 
-import { redisClient } from '@db/';
+import * as redisClient from '@db/redis';
 
-import type { GrammyMiddleware } from '@types/';
+import type { GrammyMiddleware } from '@app-types/context';
 
 import { creatorId } from '../../../creator';
 
@@ -20,9 +20,11 @@ export class SessionCommand {
     /**
      * @param {GrammyContext} context
      * */
+    // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context) => {
       const chatId = context?.update?.message?.chat?.id;
 
+      // eslint-disable-next-line sonarjs/different-types-comparison
       if (chatId === creatorId) {
         const sessions = await redisClient.getAllChatRecords();
 

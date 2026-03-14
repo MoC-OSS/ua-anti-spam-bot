@@ -1,8 +1,8 @@
 import type { NextFunction } from 'grammy';
 
-import type { GrammyContext } from 'types';
+import type { GrammyContext } from '@app-types/context';
 
-import { logSkipMiddleware } from '@utils/';
+import { logSkipMiddleware } from '@utils/generic.util';
 
 /**
  * Used for performance checking
@@ -20,4 +20,7 @@ export function botActiveMiddleware(context: GrammyContext, next: NextFunction) 
   }
 
   logSkipMiddleware(context, 'bot kicked or not admin', context.chatSession);
+
+  // eslint-disable-next-line unicorn/no-useless-undefined
+  return undefined;
 }

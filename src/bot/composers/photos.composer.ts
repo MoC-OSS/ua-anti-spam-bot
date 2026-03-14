@@ -1,21 +1,22 @@
 import { Composer } from 'grammy';
 
-import { onlyActiveDefaultSettingFilter, onlyNotDeletedFilter, onlyWithPhotoFilter } from '@bot/filters';
-import {
-  botActiveMiddleware,
-  botRedisActive,
-  ignoreOld,
-  logContextMiddleware,
-  logParsedPhotosMiddleware,
-  onlyNotAdmin,
-  onlyWhenBotAdmin,
-  parsePhoto,
-  parseVideoFrames,
-  performanceEndMiddleware,
-  performanceStartMiddleware,
-} from '@bot/middleware';
+import { onlyActiveDefaultSettingFilter } from '@bot/filters/only-active-default-setting.filter';
+import { onlyNotDeletedFilter } from '@bot/filters/only-not-deleted.filter';
+import { onlyWithPhotoFilter } from '@bot/filters/only-with-photo.filter';
+import { botActiveMiddleware } from '@bot/middleware/bot-active.middleware';
+import { botRedisActive } from '@bot/middleware/bot-redis-active.middleware';
+import { ignoreOld } from '@bot/middleware/ignore-old.middleware';
+import { logContextMiddleware } from '@bot/middleware/log-context.middleware';
+import { logParsedPhotosMiddleware } from '@bot/middleware/log-parsed-photos.middleware';
+import { onlyNotAdmin } from '@bot/middleware/only-not-admin.middleware';
+import { onlyWhenBotAdmin } from '@bot/middleware/only-when-bot-admin.middleware';
+import { parsePhoto } from '@bot/middleware/parse-photo.middleware';
+import { parseVideoFrames } from '@bot/middleware/parse-video-frames.middleware';
+import { performanceEndMiddleware } from '@bot/middleware/performance-end.middleware';
+import { performanceStartMiddleware } from '@bot/middleware/performance-start.middleware';
 
-import type { DefaultChatSettings, GrammyContext, GrammyMiddleware } from '@types/';
+import type { GrammyContext, GrammyMiddleware } from '@app-types/context';
+import type { DefaultChatSettings } from '@app-types/session';
 
 export interface PhotosComposerProperties {
   nsfwFilterComposer: Composer<GrammyContext>;

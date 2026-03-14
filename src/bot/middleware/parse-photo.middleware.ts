@@ -5,9 +5,9 @@ import type { NextFunction } from 'grammy';
 import axios from 'axios';
 import sharp from 'sharp';
 
-import type { GrammyContext } from '@types/';
-import { ImageType } from '@types/';
-import type { StateImage } from '@types/state';
+import type { GrammyContext } from '@app-types/context';
+import { ImageType } from '@app-types/image';
+import type { StateImage } from '@app-types/state';
 
 import { environmentConfig } from '../../config';
 
@@ -16,6 +16,7 @@ import { environmentConfig } from '../../config';
  * Add images into state.
  * Downloads the smallest one and appends into the state.
  * */
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export async function parsePhoto(context: GrammyContext, next: NextFunction) {
   if (!context.state.photo && context.state.photo !== null) {
     const photo = context.msg?.photo;

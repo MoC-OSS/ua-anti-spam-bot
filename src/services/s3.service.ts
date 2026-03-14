@@ -28,6 +28,7 @@ export class S3Service {
         .promise()
         .then((response) => {
           console.info(new URL(fileName, fsFolderPath));
+          // eslint-disable-next-line security/detect-non-literal-fs-filename
           fs.writeFileSync(new URL(fileName, fsFolderPath), response.Body?.toString() || '');
         }),
     );

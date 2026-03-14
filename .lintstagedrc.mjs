@@ -9,7 +9,7 @@ const getLintFlags = (absolutePaths) => {
    * https://serverfault.com/questions/9546/filename-length-limits-on-linux/9548#9548
    *
    * */
-  const filePathLengthLimit = relativePaths.find((path) => path.length > 250);
+  const filePathLengthLimit = relativePaths.find((filePath) => filePath.length > 250);
 
   /**
    *

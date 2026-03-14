@@ -1,12 +1,41 @@
 import moment from 'moment-timezone';
 
+import type { DeleteMessageAtomProperties } from './message/shared.message';
+import { getDeleteUserAtomMessage } from './message/shared.message';
 import type { CustomJsonObject } from './types/object';
+import type { ChatSessionData, FeaturesSessionsData } from './types/session';
+import { formatStateIntoAccusative, getRandomItem } from './utils/generic.util';
 import { environmentConfig } from './config';
 import { helpChat } from './creator';
-import type { ChatSessionData, FeaturesSessionsData } from './types';
-import { formatStateIntoAccusative, getRandomItem } from './utils';
 
-export * from './message/index';
+// eslint-disable-next-line no-barrel-files/no-barrel-files
+export { checkAdminNotification } from './message/admin.message';
+
+// eslint-disable-next-line no-barrel-files/no-barrel-files
+export { deleteAntisemitismMessages, getDeleteAntisemitismMessage } from './message/antisemitism.message';
+
+// eslint-disable-next-line no-barrel-files/no-barrel-files
+export { deleteObsceneMessages, getDeleteObsceneMessage, getWarnObsceneMessage, warnObsceneMessages } from './message/obscene.message';
+
+// eslint-disable-next-line no-barrel-files/no-barrel-files
+export type { DeleteObsceneMessageProperties } from './message/obscene.message';
+
+// eslint-disable-next-line no-barrel-files/no-barrel-files
+export { hasNoLinkedChats, isNotAdminMessage, linkToWebView } from './message/settings.message';
+
+// eslint-disable-next-line no-barrel-files/no-barrel-files
+export type { DeleteMessageAtomProperties } from './message/shared.message';
+
+// eslint-disable-next-line no-barrel-files/no-barrel-files
+export { getDeleteUserAtomMessage } from './message/shared.message';
+
+// eslint-disable-next-line no-barrel-files/no-barrel-files
+export {
+  swindlersHelpMessage,
+  swindlersUpdateEndMessage,
+  swindlersUpdateStartMessage,
+  swindlersWarningMessage,
+} from './message/swindlers.message';
 
 export const randomBanEmojis = ['👮🏻‍♀️', '🤦🏼‍♀️', '🙅🏻‍♀️'];
 
@@ -184,16 +213,6 @@ export const startMessageAtom = `
  *
  * */
 export const getDeclinedMassSendingMessage = 'Вибач, але у тебе немає прав для цієї команди.😞'.trim();
-
-export interface DeleteMessageAtomProperties {
-  writeUsername: string;
-  userId?: number;
-}
-
-export const getDeleteUserAtomMessage = ({ writeUsername, userId }: DeleteMessageAtomProperties) =>
-  `
-❗️ ${userId && writeUsername ? `<a href="tg://user?id=${userId}">${writeUsername}</a>, <b>повідомлення` : '<b>Повідомлення'} видалено</b>.
-`.trim();
 
 export interface DeleteMessageProperties extends DeleteMessageAtomProperties {
   wordMessage: string;

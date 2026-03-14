@@ -35,11 +35,11 @@ export async function loadOptionalFile<T>(path: string, defaultValue: T): Promis
  * Should be called before any project calls
  * */
 export async function loadUserbotDatasetExtras() {
-  const swindlers_top_used = await loadOptionalFile<Record<string, number>>('./strings/swindlers_top_used.json', {});
+  const swindlersTopUsed = await loadOptionalFile<Record<string, number>>('./strings/swindlers_top_used.json', {});
 
   console.info('Userbot dataset extras are loaded!');
 
-  return { swindlers_top_used };
+  return { swindlers_top_used: swindlersTopUsed };
 }
 
 /**

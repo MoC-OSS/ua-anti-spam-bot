@@ -1,7 +1,7 @@
-import type { GrammyContext } from '@types/';
+import type { GrammyContext } from '@app-types/context';
 
-function cutInHiddenUrls(string_: string | undefined, cutStart: number, cutEnd: number, url: string): string {
-  return string_ ? string_.slice(0, Math.max(0, cutStart)) + url + string_.slice(cutEnd) : '';
+function cutInHiddenUrls(inputString: string | undefined, cutStart: number, cutEnd: number, url: string): string {
+  return inputString ? inputString.slice(0, Math.max(0, cutStart)) + url + inputString.slice(cutEnd) : '';
 }
 
 /**

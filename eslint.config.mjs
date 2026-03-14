@@ -9,6 +9,10 @@ export default defineConfig([
     name: 'Source Files to scan',
     files: ['**/*.{js,mjs,cjs,ts}'],
   },
+  // Extra ignores (migrated from .eslintignore)
+  {
+    ignores: ['.eslint/**', '.husky/**', '.vscode/**', 'dist/**', 'e2e/**', 'temp/**', 'dataset/**/*.js'],
+  },
   // Node config
   ...nodeConfigs,
   // Vitest rules for testing

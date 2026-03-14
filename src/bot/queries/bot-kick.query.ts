@@ -1,6 +1,6 @@
 import type { ChatMember } from '@grammyjs/types/manage';
 
-import type { GrammyQueryMiddleware } from '@types/';
+import type { GrammyQueryMiddleware } from '@app-types/context';
 
 export const botKickQuery: GrammyQueryMiddleware<'my_chat_member'> = (context, next) => {
   const oldStatuses = new Set<ChatMember['status']>(['left', 'kicked']);

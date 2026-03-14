@@ -3,17 +3,19 @@ import * as fs from 'node:fs';
 import { Menu } from '@grammyjs/menu';
 import type { Transformer } from 'grammy';
 
-import { GOOGLE_SHEETS_NAMES } from '@const/';
+import { GOOGLE_SHEETS_NAMES } from '@const/google-sheets.const';
 
-import { getTensorTestResult } from '@message/';
+import { getTensorTestResult } from '@message';
 
-import { googleService, redisService } from '@services/';
+import { googleService } from '@services/google.service';
+import { redisService } from '@services/redis.service';
 
-import type { TensorService } from '@tensor/';
+import type { TensorService } from '@tensor/tensor.service';
 
-import type { GrammyContext, GrammyMenuContext, GrammyMiddleware } from '@types/';
+import type { GrammyContext, GrammyMenuContext, GrammyMiddleware } from '@app-types/context';
 
-import { emptyFunction, emptyPromiseFunction, wrapperErrorHandler } from '@utils/';
+import { emptyFunction, emptyPromiseFunction } from '@utils/empty-functions.util';
+import { wrapperErrorHandler } from '@utils/error-handler';
 
 import { environmentConfig } from '../../config';
 import { creatorId, trainingChat } from '../../creator';
@@ -57,21 +59,25 @@ export class TestTensorListener {
   constructor(private tensorService: TensorService) {}
 
   writeDataset(state: 'negatives' | 'positives', word: string) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, sonarjs/no-unused-vars, sonarjs/no-dead-store
     const writeInFileFunction = () => {
       const fileName = `./${state}.json`;
 
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
       if (!fs.existsSync(fileName)) {
+        // eslint-disable-next-line security/detect-non-literal-fs-filename
         fs.writeFileSync(fileName, '[]');
       }
 
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
       const file = JSON.parse(fs.readFileSync(fileName, 'utf8') || '[]') as string[];
       const newFile = [...new Set([...file, word])];
 
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
       fs.writeFileSync(fileName, `${JSON.stringify(newFile, null, 2)}\n`);
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, sonarjs/no-unused-vars, sonarjs/no-dead-store
     const writeInRedisFunction = () => {
       switch (state) {
         case 'negatives': {
@@ -81,7 +87,14 @@ export class TestTensorListener {
         case 'positives': {
           return redisService.updatePositives(word);
         }
+
+        default: {
+          break;
+        }
       }
+
+      // eslint-disable-next-line unicorn/no-useless-undefined
+      return undefined;
     };
 
     const writeInGoogleSheetFunction = () => {
@@ -97,7 +110,14 @@ export class TestTensorListener {
         case 'positives': {
           return googleService.appendToSheet(sheetId, sheetPositiveName, word);
         }
+
+        default: {
+          break;
+        }
       }
+
+      // eslint-disable-next-line unicorn/no-useless-undefined
+      return undefined;
     };
 
     switch (state) {
@@ -107,7 +127,14 @@ export class TestTensorListener {
         // return writeInRedisFunction();
         return writeInGoogleSheetFunction();
       }
+
+      default: {
+        break;
+      }
     }
+
+    // eslint-disable-next-line unicorn/no-useless-undefined
+    return undefined;
   }
 
   /**
@@ -118,6 +145,7 @@ export class TestTensorListener {
     /**
      * @param context
      * */
+    // eslint-disable-next-line sonarjs/cognitive-complexity
     const finalMiddleware = async (context: GrammyContext) => {
       const storage = this.storage[this.getStorageKey(context)];
 
@@ -147,19 +175,19 @@ export class TestTensorListener {
         return;
       }
 
-      let status: boolean | null = null;
+      let isPositive: boolean | null = null;
 
       if (positivesCount > negativesCount && positivesCount > skipsCount) {
-        status = true;
+        isPositive = true;
       } else if (negativesCount > positivesCount && negativesCount > skipsCount) {
-        status = false;
+        isPositive = false;
       }
 
       let winUsers: string[] | undefined;
 
-      if (status === true) {
+      if (isPositive === true) {
         winUsers = storage.positives;
-      } else if (status === false) {
+      } else if (isPositive === false) {
         winUsers = storage.negatives;
       } else {
         winUsers = storage.skips;
@@ -173,17 +201,17 @@ export class TestTensorListener {
         throw new Error('Cannot find origin message');
       }
 
-      if (status === true) {
+      if (isPositive === true) {
         await this.writeDataset('positives', originMessage.text || originMessage.caption || '');
-      } else if (status === false) {
+      } else if (isPositive === false) {
         await this.writeDataset('negatives', originMessage.text || originMessage.caption || '');
       }
 
       let text = '⏭ пропуск';
 
-      if (status === true) {
+      if (isPositive === true) {
         text = '✅ спам';
-      } else if (status === false) {
+      } else if (isPositive === false) {
         text = '⛔️ не спам';
       }
 
@@ -211,6 +239,9 @@ export class TestTensorListener {
             if (context.chat?.id && context.msg?.message_id) {
               return context.api.deleteMessage(context.chat?.id, context.msg?.message_id);
             }
+
+            // eslint-disable-next-line unicorn/no-useless-undefined
+            return undefined;
           })
           .catch(console.error);
       }, removeTime * 1000);
@@ -377,6 +408,7 @@ export class TestTensorListener {
        * */
       context.api.config.use(throttler);
 
+      // eslint-disable-next-line sonarjs/different-types-comparison
       if (context.from?.id !== creatorId) {
         if (context.chat?.type !== 'supergroup') {
           await context.reply('В особистих не працюю 😝');

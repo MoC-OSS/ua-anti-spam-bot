@@ -1,9 +1,10 @@
 import type { ChatMember } from '@grammyjs/types/manage';
 import { Composer } from 'grammy';
 
-import { onlyNotDeletedFilter, onlyWhenBotAdminFilter } from '@bot/filters';
+import { onlyNotDeletedFilter } from '@bot/filters/only-not-deleted.filter';
+import { onlyWhenBotAdminFilter } from '@bot/filters/only-when-bot-admin.filter';
 
-import type { GrammyContext } from '@types/';
+import type { GrammyContext } from '@app-types/context';
 
 /**
  * @description Remove join and leave messages from chat

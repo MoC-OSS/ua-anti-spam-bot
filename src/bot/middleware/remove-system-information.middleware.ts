@@ -1,6 +1,6 @@
-import type { GrammyMiddleware } from '@types/';
+import type { GrammyMiddleware } from '@app-types/context';
 
-import { removeSystemInformationUtil as removeSystemInformationUtility } from '@utils/';
+import { removeSystemInformationUtility } from '@utils/remove-system-information.util';
 
 /**
  * Middleware function that removes system information from the text stored in the context state.

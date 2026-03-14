@@ -1,6 +1,6 @@
-import type { GrammyMiddleware } from '@types/';
+import type { GrammyMiddleware } from '@app-types/context';
 
-import { optimizeWriteContextUtil as optimizeWriteContextUtility } from '@utils/';
+import { optimizeWriteContextUtility } from '@utils/optimize-write-context.util';
 
 export const logCreatorState: GrammyMiddleware = async (context, next) => {
   const writeContext = optimizeWriteContextUtility(context);

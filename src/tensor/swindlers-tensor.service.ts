@@ -3,8 +3,8 @@ import { environmentConfig } from '../config';
 import { BaseTensorService } from './base-tensor.service';
 
 export class SwindlersTensorService extends BaseTensorService {
-  constructor(modelPath: string, SPAM_THRESHOLD: number) {
-    super(modelPath, SPAM_THRESHOLD);
+  constructor(modelPath: string, spamThreshold: number) {
+    super(modelPath, spamThreshold);
     this.loadModelMetadata('./swindlers-temp/model.json', './swindlers-temp/vocab.json');
   }
 }

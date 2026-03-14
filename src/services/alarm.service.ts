@@ -4,11 +4,11 @@ import EventSource from 'eventsource';
 import ms from 'ms';
 import type TypedEmitter from 'typed-emitter';
 
-import type { AlarmNotification, AlarmStates } from '@types/alarm';
+import type { AlarmNotification, AlarmStates } from '@app-types/alarm';
 
 import { environmentConfig } from '../config';
 
-import { getAlarmMock } from './_mocks';
+import { getAlarmMock } from './_mocks/alarm.mocks';
 
 const apiUrl = 'https://alerts.com.ua/api/states';
 const apiOptions = { headers: { 'X-API-Key': environmentConfig.ALARM_KEY } };
@@ -40,8 +40,10 @@ export class AlarmService {
 
   source?: EventSource;
 
+  // eslint-disable-next-line sonarjs/deprecation
   reconnectInterval?: NodeJS.Timer;
 
+  // eslint-disable-next-line sonarjs/deprecation
   testAlarmInterval?: NodeJS.Timer;
 
   getStates(): Promise<AlarmStates> {
@@ -144,22 +146,23 @@ export class AlarmService {
        * SSE endpoint response
        * @see https://alerts.com.ua/en
        * */
-      const data = JSON.parse(event.data) as AlarmNotification | null;
+      const responseData = JSON.parse(event.data) as AlarmNotification | null;
 
-      if (data) {
-        this.updatesEmitter.emit(ALARM_EVENT_KEY, data);
+      if (responseData) {
+        this.updatesEmitter.emit(ALARM_EVENT_KEY, responseData);
       }
     });
   }
 
   initTestAlarms() {
-    let alert = true;
+    let isAlert = true;
 
     this.testAlarmInterval = setInterval(() => {
-      this.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(alert, TEST_ALARM_STATE));
-      alert = !alert;
+      this.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(isAlert, TEST_ALARM_STATE));
+      isAlert = !isAlert;
     }, ms('0.5m'));
   }
 }
 
+// eslint-disable-next-line sonarjs/deprecation
 export const alarmService = new AlarmService();

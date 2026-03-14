@@ -1,7 +1,7 @@
 import type { Message } from '@grammyjs/types';
 import type { NextFunction } from 'grammy';
 
-import type { GrammyContext } from 'types';
+import type { GrammyContext } from '@app-types/context';
 
 /**
  * Gets the text content from a given message.

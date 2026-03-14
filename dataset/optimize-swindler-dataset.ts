@@ -1,6 +1,6 @@
-import { swindlersGoogleService } from '@services/';
+import { swindlersGoogleService } from '@services/swindlers-google.service';
 
-import { removeDuplicates } from '@utils/';
+import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 import { removeSimilar } from './remove-similar';
 
@@ -9,6 +9,7 @@ const type = process.argv[2];
 const mentionRegexp = /\B@\w+/g;
 
 const urlRegexp =
+  // eslint-disable-next-line security/detect-unsafe-regex, sonarjs/slow-regex, sonarjs/regex-complexity, sonarjs/empty-string-repetition
   /(https?:\/\/(?:www\.|(?!www))?[\dA-Za-z][\dA-Za-z-]+[\dA-Za-z]\.\S{2,}|www\.[\dA-Za-z][\dA-Za-z-]+[\dA-Za-z]\.\S{2,}|(https?:\/\/(?:www\.|(?!www)))?[\dA-Za-z-]+\.\S{2,}|www\.?[\dA-Za-z]+\.\S{2,})/g;
 
 const processPromise = (response: string[]) =>

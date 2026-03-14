@@ -4,6 +4,6 @@
  * @param {string} message - The input string containing repeated consecutive letters.
  * @returns {string} A new string with repeated consecutive letters removed.
  */
-export function removeRepeatedLettersUtil(message: string): string {
+export function removeRepeatedLettersUtility(message: string): string {
   return message.replaceAll(/(.)\1+/g, '$1');
 }

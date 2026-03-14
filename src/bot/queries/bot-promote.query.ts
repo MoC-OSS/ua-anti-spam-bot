@@ -1,8 +1,8 @@
-import { adminReadyHasNoDeletePermissionMessage, getAdminReadyMessage, getStartChannelMessage } from '@message/';
+import { adminReadyHasNoDeletePermissionMessage, getAdminReadyMessage, getStartChannelMessage } from '@message';
 
-import type { GrammyQueryMiddleware } from '@types/';
+import type { GrammyQueryMiddleware } from '@app-types/context';
 
-import { handleError } from '@utils/';
+import { handleError } from '@utils/error-handler';
 
 /**
  * Promoted to admin

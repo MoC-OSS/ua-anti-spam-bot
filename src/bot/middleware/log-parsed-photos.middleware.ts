@@ -1,9 +1,9 @@
 import { InputFile } from 'grammy';
 import { isPrivate } from 'grammy-guard';
 
-import { onlyCreatorFilter } from '@bot/filters';
+import { onlyCreatorFilter } from '@bot/filters/only-creator.filter';
 
-import type { GrammyMiddleware } from '@types/';
+import type { GrammyMiddleware } from '@app-types/context';
 
 import { environmentConfig } from '../../config';
 

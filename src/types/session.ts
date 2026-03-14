@@ -5,7 +5,7 @@ import type { Chat } from 'typegram/manage';
 import type { State } from './alarm';
 import type { GrammyContext } from './context';
 
-export interface ChatSessionFlavor<S> {
+export interface ChatSessionFlavor<TSession> {
   /**
    * Session data on the context object.
    *
@@ -19,8 +19,8 @@ export interface ChatSessionFlavor<S> {
    * `getSessionKey(ctx) === undefined` for the respective context object
    * `ctx`.
    */
-  get chatSession(): S;
-  set chatSession(session: S | null | undefined);
+  get chatSession(): TSession;
+  set chatSession(session: TSession | null | undefined);
 }
 
 export interface UpdatesSessionData {
@@ -94,13 +94,13 @@ export interface LinkedChat {
 
 export interface Session {
   id: string;
-  data: SessionData;
+  payload: SessionData;
   linkedChats?: LinkedChat[];
 }
 
 export interface ChatSession {
   id: string;
-  data: ChatSessionData;
+  payload: ChatSessionData;
 }
 
 export interface SessionObject {

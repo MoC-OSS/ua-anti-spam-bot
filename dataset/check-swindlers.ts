@@ -1,10 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { initSwindlersContainer, swindlersGoogleService } from '@services/';
+import { initSwindlersContainer } from '@services/swindlers.container';
+import { swindlersGoogleService } from '@services/swindlers-google.service';
 
-import type { SwindlersResult } from '@types/';
-import { DatasetType } from '@types/';
+import { DatasetType } from '@app-types/dataset';
+import type { SwindlersResult } from '@app-types/swindlers';
 
 const type = process.argv[2] as DatasetType;
 
@@ -56,6 +57,7 @@ const logicMethodsMap = new Map([
   const invalidCases = results.filter((item) => currentMethods.checkIsInvalid(item));
   const filePath = `./temp/${currentMethods.fileName}.json`;
 
+  // eslint-disable-next-line security/detect-non-literal-fs-filename
   fs.writeFileSync(filePath, JSON.stringify(invalidCases, null, 2));
 
   console.info(`Found ${invalidCases.length} invalid cases!`);

@@ -3,11 +3,11 @@ import type { ChatFullInfo } from 'grammy/types';
 
 import type { ChatMemberOwner } from 'typegram';
 
-import type { GrammyContext } from '@types/';
+import type { GrammyContext } from '@app-types/context';
 
-import { getUserData, telegramUtil as telegramUtility } from './index';
+import { getUserData } from './generic.util';
 
-export class TelegramUtil {
+export class TelegramUtility {
   /**
    * @param {GrammyContext} context
    * @returns {boolean}
@@ -52,6 +52,7 @@ export class TelegramUtil {
       return `@${user.username}`;
     }
 
+    // eslint-disable-next-line sonarjs/no-nested-template-literals
     return `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}`;
   }
 
@@ -62,8 +63,8 @@ export class TelegramUtil {
     const { writeUsername, userId } = getUserData(context);
     const chatInfo = await context.getChat();
 
-    const chatTitle = telegramUtility.getChatTitle(context.chat);
-    const inviteLink = telegramUtility.getInviteLink(chatInfo);
+    const chatTitle = this.getChatTitle(context.chat);
+    const inviteLink = this.getInviteLink(chatInfo);
 
     const chatMention = chatTitle && (inviteLink ? `<a href="${inviteLink}">${chatTitle}</a>` : `<code>${chatTitle}</code>`);
 

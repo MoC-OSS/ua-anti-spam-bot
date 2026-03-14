@@ -1,6 +1,6 @@
 import FuzzySet from 'fuzzyset';
 
-import type { SwindlersBotsResult } from '@types/';
+import type { SwindlersBotsResult } from '@app-types/swindlers';
 
 import type { DynamicStorageService } from './dynamic-storage.service';
 import { mentionService } from './mention.service';
@@ -32,13 +32,13 @@ export class SwindlersBotsService {
     if (mentions) {
       let lastResult: SwindlersBotsResult | null = null;
 
-      const foundSwindlerMention = mentions.some((value) => {
+      const hasSwindlerMention = mentions.some((value) => {
         lastResult = this.isSpamBot(value);
 
         return lastResult.isSpam;
       });
 
-      if (foundSwindlerMention) {
+      if (hasSwindlerMention) {
         return lastResult;
       }
     }

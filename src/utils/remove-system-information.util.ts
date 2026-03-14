@@ -1,4 +1,4 @@
-import { logsStartMessages } from '@message/';
+import { logsStartMessages } from '@message';
 
 /**
  * Removes system information from a given message.
@@ -9,7 +9,7 @@ import { logsStartMessages } from '@message/';
  * @returns {string} The modified message with system information removed,
  * or the original message if no system information is found.
  */
-export const removeSystemInformationUtil = (message: string): string => {
+export const removeSystemInformationUtility = (message: string): string => {
   const hasLog = [...logsStartMessages.keys()].some((logStartMessage) => message.startsWith(logStartMessage));
 
   return hasLog ? message.split('\n').slice(3).join('\n') : message;

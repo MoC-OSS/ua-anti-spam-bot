@@ -1,7 +1,7 @@
 import type { RawApi, Transformer } from 'grammy';
 import type { Payload } from 'grammy/out/core/client';
 
-import type { RealApiMethodKeys } from '@testing/';
+import type { RealApiMethodKeys } from '@testing/outgoing-requests';
 
 import { logsChat, secondLogsChat } from '../../creator';
 

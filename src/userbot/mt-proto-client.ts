@@ -1,4 +1,4 @@
-import type { Chat, ProtoUpdate } from '@types/';
+import type { Chat, ProtoUpdate } from '@app-types/mtproto/mtproto.types';
 
 import type { API } from './api';
 
@@ -33,12 +33,14 @@ export class MtProtoClient {
     }
 
     if (peer.migrated_to) {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       return { ...peer.migrated_to, _: 'inputPeerChannel' };
     }
 
     switch (peer._) {
       case 'chat': {
         return {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           _: 'inputPeerChat',
           chat_id: peer.id,
         };
@@ -46,6 +48,7 @@ export class MtProtoClient {
 
       case 'channel': {
         return {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           _: 'inputPeerChannel',
           channel_id: peer.id,
           access_hash: peer.access_hash,
@@ -73,8 +76,10 @@ export class MtProtoClient {
   sendSelfMessage(message: string) {
     return this.api.call('messages.sendMessage', {
       message,
+      // eslint-disable-next-line sonarjs/pseudo-random, unicorn/number-literal-case
       random_id: Math.ceil(Math.random() * 0xff_ff_ff) + Math.ceil(Math.random() * 0xff_ff_ff),
       peer: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         _: 'inputPeerSelf',
       },
     });
@@ -87,6 +92,7 @@ export class MtProtoClient {
   sendPeerMessage(message: string, peer: Record<string, string>) {
     return this.api.call('messages.sendMessage', {
       message,
+      // eslint-disable-next-line sonarjs/pseudo-random, unicorn/number-literal-case
       random_id: Math.ceil(Math.random() * 0xff_ff_ff) + Math.ceil(Math.random() * 0xff_ff_ff),
       peer,
     });

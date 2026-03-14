@@ -1,5 +1,5 @@
-import type { GrammyMiddleware } from '@types/';
-import type { StateEntity } from '@types/state';
+import type { GrammyMiddleware } from '@app-types/context';
+import type { StateEntity } from '@app-types/state';
 
 /**
  * It parses the value of entities and save it into the state
@@ -9,6 +9,7 @@ export const parseEntities: GrammyMiddleware = (context, next) => {
 
   if (context.msg?.entities && text) {
     context.state.entities = context.msg.entities.map((entity): StateEntity => {
+      // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
       switch (entity.type) {
         case 'text_link': {
           return {

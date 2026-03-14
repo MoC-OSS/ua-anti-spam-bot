@@ -3,17 +3,20 @@ import { Composer } from 'grammy';
 import axios from 'axios';
 import FormData from 'form-data';
 
-import { LOGS_CHAT_THREAD_IDS } from '@const/';
+import { LOGS_CHAT_THREAD_IDS } from '@const/logs.const';
 
-import { getDeleteNsfwMessage, nsfwLogsStartMessage } from '@message/';
+import { getDeleteNsfwMessage, nsfwLogsStartMessage } from '@message';
 
-import type { NsfwTensorService } from '@tensor/';
+import type { NsfwTensorService } from '@tensor/nsfw-tensor.service';
 
-import type { GrammyContext, NsfwTensorPositiveResult, NsfwTensorResult } from '@types/';
-import { ImageType } from '@types/';
-import type { NsfwPhotoResult, StateImageAnimation, StateImageVideo } from '@types/state';
+import type { GrammyContext } from '@app-types/context';
+import { ImageType } from '@app-types/image';
+import type { NsfwTensorPositiveResult, NsfwTensorResult } from '@app-types/nsfw';
+import type { NsfwPhotoResult, StateImageAnimation, StateImageVideo } from '@app-types/state';
 
-import { getUserData, handleError, telegramUtil as telegramUtility } from '@utils/';
+import { handleError } from '@utils/error-handler';
+import { getUserData } from '@utils/generic.util';
+import { telegramUtility } from '@utils/util-instances';
 
 import { environmentConfig } from '../../../config';
 import { logsChat } from '../../../creator';
@@ -46,13 +49,15 @@ const saveNsfwMessage = async (context: GrammyContext) => {
     case ImageType.PHOTO: {
       const { caption } = imageData;
 
-      return context.api.sendPhoto(logsChat, meta.file_id, {
+      await context.api.sendPhoto(logsChat, meta.file_id, {
         caption: `${nsfwLogsStartMessage} ${type} (${(deletePrediction.probability * 100).toFixed(2)}%) from <code>${
           deletePrediction.className
         }</code> by user ${userMention}:\n\n${chatMention || userMention}\n${caption || ''}`,
         parse_mode: 'HTML',
         message_thread_id: LOGS_CHAT_THREAD_IDS.PORN,
       });
+
+      break;
     }
 
     /**
@@ -67,7 +72,7 @@ const saveNsfwMessage = async (context: GrammyContext) => {
         message_thread_id: LOGS_CHAT_THREAD_IDS.PORN,
       });
 
-      return context.api.sendMessage(
+      await context.api.sendMessage(
         logsChat,
         `${nsfwLogsStartMessage} ${type} ${context.state.nsfwResult.reason} ${setNameAddition} (${(
           deletePrediction.probability * 100
@@ -78,6 +83,8 @@ const saveNsfwMessage = async (context: GrammyContext) => {
           reply_to_message_id: stickerMessage.message_id,
         },
       );
+
+      break;
     }
 
     /**
@@ -89,13 +96,15 @@ const saveNsfwMessage = async (context: GrammyContext) => {
 
       const video = (imageData as StateImageVideo).video || (imageData as StateImageAnimation).animation;
 
-      return context.api.sendVideo(logsChat, video.file_id, {
+      await context.api.sendVideo(logsChat, video.file_id, {
         caption: `${nsfwLogsStartMessage} ${type} by ${context.state.nsfwResult.reason} (${(deletePrediction.probability * 100).toFixed(
           2,
         )}%) from <code>${deletePrediction.className}</code> by user ${userMention}:\n\n${chatMention || userMention}\n${caption || ''}`,
         parse_mode: 'HTML',
         message_thread_id: LOGS_CHAT_THREAD_IDS.PORN,
       });
+
+      break;
     }
 
     /**
@@ -108,7 +117,7 @@ const saveNsfwMessage = async (context: GrammyContext) => {
         message_thread_id: LOGS_CHAT_THREAD_IDS.PORN,
       });
 
-      return context.api.sendMessage(
+      await context.api.sendMessage(
         logsChat,
         `${nsfwLogsStartMessage} ${type} ${context.state.nsfwResult.reason} (${(deletePrediction.probability * 100).toFixed(
           2,
@@ -119,6 +128,8 @@ const saveNsfwMessage = async (context: GrammyContext) => {
           message_thread_id: LOGS_CHAT_THREAD_IDS.PORN,
         },
       );
+
+      break;
     }
 
     /**
@@ -126,9 +137,11 @@ const saveNsfwMessage = async (context: GrammyContext) => {
      * Never impossible
      * */
     default: {
-      return context.api.sendMessage(logsChat, `Unknown unhandled image type ${type} with meta ${JSON.stringify(meta)}`, {
+      await context.api.sendMessage(logsChat, `Unknown unhandled image type ${type} with meta ${JSON.stringify(meta)}`, {
         message_thread_id: LOGS_CHAT_THREAD_IDS.PORN,
       });
+
+      break;
     }
   }
 };
@@ -176,6 +189,7 @@ export const getNsfwFilterComposer = ({ nsfwTensorService }: NsfwFilterComposerP
           .post(`${host}/image`, formData, {
             headers: formData.getHeaders(),
           })
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           .then((response: { data: { result: NsfwTensorResult } }) => response.data.result);
 
       predictionResult = await (environmentConfig.USE_SERVER ? getServerResponse() : nsfwTensorService.predictVideo(imageBuffers));

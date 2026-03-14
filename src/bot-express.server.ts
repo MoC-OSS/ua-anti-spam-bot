@@ -4,8 +4,8 @@ import cors from 'cors';
 import express from 'express';
 
 import { apiRouter } from './express-logic/api.router';
+import type { GrammyContext } from './types/context';
 import { environmentConfig } from './config';
-import type { GrammyContext } from './types';
 
 export const runBotExpressServer = (bot: Bot<GrammyContext>) => {
   const app = express();

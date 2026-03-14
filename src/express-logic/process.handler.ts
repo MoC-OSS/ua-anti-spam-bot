@@ -1,7 +1,7 @@
 import lodashGet from 'lodash.get';
 import { removeLatinPartialLetters, removeNumber, removeSpecialSymbols } from 'ukrainian-ml-optimizer';
 
-import { messageUtil as messageUtility } from '@utils/';
+import { messageUtility } from '@utils/util-instances';
 
 import type { DatasetKeys } from '../../dataset/dataset';
 import { dataset } from '../../dataset/dataset';

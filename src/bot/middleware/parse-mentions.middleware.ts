@@ -1,10 +1,10 @@
 import type { NextFunction } from 'grammy';
 
-import type { GrammyContext } from 'types';
+import { mentionService } from '@services/mention.service';
 
-import { mentionService } from '@services/';
+import type { GrammyContext } from '@app-types/context';
 
-import { removeDuplicates } from '@utils/';
+import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 /**
  * @description

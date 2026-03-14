@@ -2,8 +2,8 @@ import type { Api, Bot, Context, RawApi } from 'grammy';
 
 import type { AsyncReturnType } from 'type-fest';
 
+import { NewMemberMockUpdate } from './updates/new-member-mock.update';
 import { OutgoingRequests } from './outgoing-requests';
-import { NewMemberMockUpdate } from './updates';
 
 /**
  * Override api responses if needed
@@ -27,8 +27,12 @@ export type ApiResponses = {
  * }, 15_000);
  * ```
  * */
-export const prepareBotForTesting = async <C extends Context, A extends Api = Api, B extends Bot<C, A> = Bot<C, A>>(
-  bot: B,
+export const prepareBotForTesting = async <
+  TContext extends Context,
+  TApi extends Api = Api,
+  TBot extends Bot<TContext, TApi> = Bot<TContext, TApi>,
+>(
+  bot: TBot,
   apiResponses: ApiResponses = {},
 ) => {
   const outgoingRequests = new OutgoingRequests();
@@ -36,7 +40,9 @@ export const prepareBotForTesting = async <C extends Context, A extends Api = Ap
   bot.api.config.use((previous, method, payload, signal) => {
     outgoingRequests.push({ method, payload, signal });
 
+    // eslint-disable-next-line security/detect-object-injection
     if (apiResponses[method]) {
+      // eslint-disable-next-line security/detect-object-injection
       return Promise.resolve({ ok: true, result: apiResponses[method] });
     }
 

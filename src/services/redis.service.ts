@@ -1,8 +1,8 @@
-import { redisClient } from '@db/';
+import * as redisClient from '@db/redis';
 
-import type { ChatSession, ChatSessionData, ChatSettings, Session } from '@types/';
+import type { ChatSession, ChatSessionData, ChatSettings, Session } from '@app-types/session';
 
-import { removeDuplicates } from '@utils/';
+import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 export interface RedisServiceSetSwindlersStatisticStatistic {
   [key: string]: string[];
@@ -72,6 +72,9 @@ export class RedisService {
     }
 
     console.error(`setBotTensorPercent error: ${newValue} is not a number`);
+
+    // eslint-disable-next-line unicorn/no-useless-undefined
+    return undefined;
   }
 
   /**
@@ -90,6 +93,9 @@ export class RedisService {
     }
 
     console.error(`setBotTensorPercent error: ${newValue} is not a number`);
+
+    // eslint-disable-next-line unicorn/no-useless-undefined
+    return undefined;
   }
 
   /**

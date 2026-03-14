@@ -1,7 +1,7 @@
-import { getRandomItem } from '@utils/';
+import { getRandomItem } from '@utils/generic.util';
 
-import type { DeleteObsceneMessageProperties } from '.';
-import { getDeleteUserAtomMessage } from '.';
+import type { DeleteObsceneMessageProperties } from './obscene.message';
+import { getDeleteUserAtomMessage } from './shared.message';
 
 /**
  * Messages to display when deleting content based on the denylist.

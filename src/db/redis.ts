@@ -1,8 +1,8 @@
 import * as redis from 'redis';
 import type { JsonObject, Primitive } from 'type-fest';
 
-import type { ChatSession, ChatSessionData, Session } from '@types/';
-import type { CustomJsonValue } from '@types/object';
+import type { CustomJsonValue } from '@app-types/object';
+import type { ChatSession, ChatSessionData, Session } from '@app-types/session';
 
 import { environmentConfig } from '../config';
 
@@ -58,7 +58,8 @@ export function setRawValue(key: string, value: ChatSessionData | CustomJsonValu
 
 export function setValue(key: string, value: JsonObject) {
   if (!key || !value) {
-    return;
+    // eslint-disable-next-line unicorn/no-useless-undefined
+    return undefined;
   }
 
   return client.set(key, JSON.stringify(value));
@@ -90,9 +91,10 @@ export async function getAllUserRecords(): Promise<Session[]> {
     .map((value, index) => {
       try {
         return {
+          // eslint-disable-next-line security/detect-object-injection
           id: filteredKeys[index],
-          data: JSON.parse(value || '{}') as Session['data'],
-        } as Session;
+          payload: JSON.parse(value || '{}') as Session['payload'],
+        } as unknown as Session;
       } catch {
         return null;
       }
@@ -114,9 +116,10 @@ export async function getAllChatRecords(): Promise<ChatSession[]> {
     .map((value, index) => {
       try {
         return {
+          // eslint-disable-next-line security/detect-object-injection
           id: filteredKeys[index],
-          data: JSON.parse(value || '{}') as ChatSession['data'],
-        } as ChatSession;
+          payload: JSON.parse(value || '{}') as ChatSession['payload'],
+        } as unknown as ChatSession;
       } catch {
         return null;
       }
@@ -137,9 +140,10 @@ export async function getAllRecords(): Promise<(ChatSession | Session)[]> {
 
         try {
           return {
+            // eslint-disable-next-line security/detect-object-injection
             id: keys[index],
-            data: JSON.parse(record || '{}') as Session['data'] & ChatSession['data'],
-          } as Session & ChatSession;
+            payload: JSON.parse(record || '{}') as Session['payload'] & ChatSession['payload'],
+          } as unknown as Session & ChatSession;
         } catch {
           return null;
         }

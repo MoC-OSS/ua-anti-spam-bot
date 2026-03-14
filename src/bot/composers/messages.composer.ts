@@ -1,31 +1,33 @@
 import { Composer } from 'grammy';
 
-import { onlyActiveDefaultSettingFilter, onlyActiveOptionalSettingFilter, onlyNotDeletedFilter, onlyWithTextFilter } from '@bot/filters';
-import {
-  botActiveMiddleware,
-  botRedisActive,
-  ignoreOld,
-  logContextMiddleware,
-  onlyNotAdmin,
-  onlyWhenBotAdmin,
-  parseCards,
-  parseEntities,
-  parseIsCounteroffensive,
-  parseIsRussian,
-  parseLocations,
-  parseMentions,
-  parseText,
-  parseUrls,
-  performanceEndMiddleware,
-  performanceStartMiddleware,
-  saveSpamMediaGroupMiddleware,
-} from '@bot/middleware';
+import { onlyActiveDefaultSettingFilter } from '@bot/filters/only-active-default-setting.filter';
+import { onlyActiveOptionalSettingFilter } from '@bot/filters/only-active-optional-setting.filter';
+import { onlyNotDeletedFilter } from '@bot/filters/only-not-deleted.filter';
+import { onlyWithTextFilter } from '@bot/filters/only-with-text.filter';
+import { botActiveMiddleware } from '@bot/middleware/bot-active.middleware';
+import { botRedisActive } from '@bot/middleware/bot-redis-active.middleware';
+import { ignoreOld } from '@bot/middleware/ignore-old.middleware';
+import { logContextMiddleware } from '@bot/middleware/log-context.middleware';
+import { onlyNotAdmin } from '@bot/middleware/only-not-admin.middleware';
+import { onlyWhenBotAdmin } from '@bot/middleware/only-when-bot-admin.middleware';
+import { parseCards } from '@bot/middleware/parse-cards.middleware';
+import { parseEntities } from '@bot/middleware/parse-entities.middleware';
+import { parseIsCounteroffensive } from '@bot/middleware/parse-is-counteroffensive.middleware';
+import { parseIsRussian } from '@bot/middleware/parse-is-russian.middleware';
+import { parseLocations } from '@bot/middleware/parse-locations.middleware';
+import { parseMentions } from '@bot/middleware/parse-mentions.middleware';
+import { parseText } from '@bot/middleware/parse-text.middleware';
+import { parseUrls } from '@bot/middleware/parse-urls.middleware';
+import { performanceEndMiddleware } from '@bot/middleware/performance-end.middleware';
+import { performanceStartMiddleware } from '@bot/middleware/performance-start.middleware';
+import { saveSpamMediaGroupMiddleware } from '@bot/middleware/save-spam-media-group.middleware';
 
-import { messageQuery } from '@const/';
+import { messageQuery } from '@const/message-query.const';
 
-import type { CounteroffensiveService } from '@services/';
+import type { CounteroffensiveService } from '@services/counteroffensive.service';
 
-import type { DefaultChatSettings, GrammyContext, GrammyMiddleware, OptionalChatSettings } from '@types/';
+import type { GrammyContext, GrammyMiddleware } from '@app-types/context';
+import type { DefaultChatSettings, OptionalChatSettings } from '@app-types/session';
 
 export interface MessagesComposerProperties {
   counteroffensiveService: CounteroffensiveService;

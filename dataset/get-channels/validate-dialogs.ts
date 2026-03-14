@@ -19,6 +19,7 @@ const typedDialogs = dialogs as Dialog[];
 (async () => {
   for (const [dialogIndex, dialog] of typedDialogs.entries()) {
     if (dialog.isValid === undefined) {
+      // eslint-disable-next-line security/detect-object-injection
       typedDialogs[dialogIndex].isValid = await input.confirm(`${dialog.title} - ${dialog.subtitle}`);
 
       fs.writeFileSync('./dialogs.json', JSON.stringify(typedDialogs, null, 2));

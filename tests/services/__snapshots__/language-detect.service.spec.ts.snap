@@ -1,0 +1,102 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`LanguageDetectService > detect > should detect russian 1`] = `
+[
+  {
+    "accuracy": 1,
+    "lang": "ru",
+  },
+]
+`;
+
+exports[`LanguageDetectService > detect > should detect surzhik as ukrainian 1`] = `
+[
+  {
+    "accuracy": 1,
+    "lang": "uk",
+  },
+]
+`;
+
+exports[`LanguageDetectService > detect > should detect ukrainian 1`] = `
+[
+  {
+    "accuracy": 1,
+    "lang": "uk",
+  },
+]
+`;
+
+exports[`LanguageDetectService > detect > should not detect russian when mixed 1`] = `
+[
+  {
+    "accuracy": 1,
+    "lang": "uk",
+  },
+]
+`;
+
+exports[`LanguageDetectService > isRussian > should except ukrainian for all messages 1`] = `
+[
+  [
+    {
+      "accuracy": 0.18797999999999998,
+      "lang": "ru",
+    },
+    {
+      "accuracy": 0.18236,
+      "lang": "uk",
+    },
+  ],
+  [
+    {
+      "accuracy": 0.125,
+      "lang": "ru",
+    },
+    {
+      "accuracy": 0.110275,
+      "lang": "uk",
+    },
+  ],
+  [
+    {
+      "accuracy": 1,
+      "lang": "uk",
+    },
+  ],
+  [
+    {
+      "accuracy": 1,
+      "lang": "uk",
+    },
+  ],
+  [
+    {
+      "accuracy": 1,
+      "lang": "uk",
+    },
+  ],
+  [
+    {
+      "accuracy": 1,
+      "lang": "uk",
+    },
+  ],
+  [
+    {
+      "accuracy": 0.125,
+      "lang": "uk",
+    },
+    {
+      "accuracy": 0.1049,
+      "lang": "ru",
+    },
+  ],
+  [
+    {
+      "accuracy": 1,
+      "lang": "uk",
+    },
+  ],
+]
+`;

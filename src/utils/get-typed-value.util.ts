@@ -12,5 +12,5 @@
  */
 export const getTypedValue =
   <T>() =>
-  <S extends T>(value: S): S =>
+  <TSession extends T>(value: TSession): TSession =>
     value;

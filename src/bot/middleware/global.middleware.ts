@@ -1,9 +1,12 @@
 import type { ChatMember } from '@grammyjs/types/manage';
 import type { NextFunction } from 'grammy';
 
-import type { AirRaidAlertSettings, ChatSettings, GrammyContext, GrammyMiddleware } from '@types/';
+import type { GrammyContext, GrammyMiddleware } from '@app-types/context';
+import type { AirRaidAlertSettings, ChatSettings } from '@app-types/session';
 
-import { emptyFunction, handleError, telegramUtil as telegramUtility } from '@utils/';
+import { emptyFunction } from '@utils/empty-functions.util';
+import { handleError } from '@utils/error-handler';
+import { telegramUtility } from '@utils/util-instances';
 
 import { environmentConfig } from '../../config';
 
@@ -13,6 +16,7 @@ export class GlobalMiddleware {
    * Checks some bot information and updates the session
    * */
   middleware(): GrammyMiddleware {
+    // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context: GrammyContext, next: NextFunction) => {
       /**
        * Channels doesn't have session.
@@ -50,19 +54,23 @@ export class GlobalMiddleware {
       disableChatWhileAirRaidAlert: false,
     };
 
+    // eslint-disable-next-line sonarjs/different-types-comparison
     if (context.chatSession.chatSettings === undefined) {
       context.chatSession.chatSettings = defaultChatSettings;
     }
 
+    // eslint-disable-next-line sonarjs/different-types-comparison
     if (context.chatSession.chatSettings.disableChatWhileAirRaidAlert === undefined) {
       context.chatSession.chatSettings.disableChatWhileAirRaidAlert = defaultChatSettings.disableChatWhileAirRaidAlert;
     }
 
+    // eslint-disable-next-line sonarjs/different-types-comparison
     if (context.chatSession.chatSettings.airRaidAlertSettings === undefined) {
       context.chatSession.chatSettings.airRaidAlertSettings = defaultAirRaidAlertSettings;
     }
 
     if (!leftStatuses.has(context.myChatMember?.new_chat_member.status || 'left')) {
+      // eslint-disable-next-line sonarjs/deprecation
       await context.getChatMembersCount().then((count) => {
         context.chatSession.chatMembersCount = count;
       });
@@ -87,6 +95,7 @@ export class GlobalMiddleware {
     /**
      * Handle no remove status
      * */
+    // eslint-disable-next-line sonarjs/different-types-comparison
     if (context.chatSession.botRemoved === undefined) {
       await context
         .getChat()

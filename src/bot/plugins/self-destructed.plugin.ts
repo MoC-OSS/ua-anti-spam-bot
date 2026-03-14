@@ -3,20 +3,23 @@ import type { Context, NextFunction } from 'grammy';
 
 import type { ParseMode } from 'typegram';
 
-export type SelfDestructedFlavor<C extends Context> = C & {
-  replyWithSelfDestructed: C['reply'];
-  replyWithSelfDestructedHTML: C['reply'];
-  replyWithSelfDestructedMarkdown: C['reply'];
-  replyWithSelfDestructedMarkdownV1: C['reply'];
-  replyWithSelfDestructedMarkdownV2: C['reply'];
-  replyWithPhotoWithSelfDestructedHTML: C['replyWithPhoto'];
+export type SelfDestructedFlavor<TContext extends Context> = TContext & {
+  replyWithSelfDestructed: TContext['reply'];
+  replyWithSelfDestructedHTML: TContext['reply'];
+  replyWithSelfDestructedMarkdown: TContext['reply'];
+  replyWithSelfDestructedMarkdownV1: TContext['reply'];
+  replyWithSelfDestructedMarkdownV2: TContext['reply'];
+  replyWithPhotoWithSelfDestructedHTML: TContext['replyWithPhoto'];
 };
 
 /**
  * Default callback.
  * Just removes the sent message.
  * */
-const defaultDeleteCallback = async <C extends Context>(context: C, replyResult: Message.PhotoMessage | Message.TextMessage) => {
+const defaultDeleteCallback = async <TContext extends Context>(
+  context: TContext,
+  replyResult: Message.PhotoMessage | Message.TextMessage,
+) => {
   await context.api.deleteMessage(replyResult.chat.id, replyResult.message_id);
 };
 
@@ -26,12 +29,12 @@ export type SelfDestructedCallback = typeof defaultDeleteCallback;
  * Build delete reply with parse modes
  * */
 const buildReplyWithParseMode =
-  <C extends Context>(
-    context: SelfDestructedFlavor<C>,
+  <TContext extends Context>(
+    context: SelfDestructedFlavor<TContext>,
     timeout: number,
     callback: SelfDestructedCallback,
     parseMode?: ParseMode,
-  ): C['reply'] =>
+  ): TContext['reply'] =>
   async (text, other, signal) => {
     const otherParameters = parseMode ? { ...other, parse_mode: parseMode } : other;
     const replyResult = await context.reply(text, otherParameters, signal);
@@ -49,12 +52,12 @@ const buildReplyWithParseMode =
  * Build delete reply with parse modes
  * */
 const buildReplyPhotoWithParseMode =
-  <C extends Context>(
-    context: SelfDestructedFlavor<C>,
+  <TContext extends Context>(
+    context: SelfDestructedFlavor<TContext>,
     timeout: number,
     callback: SelfDestructedCallback,
     parseMode?: ParseMode,
-  ): C['replyWithPhoto'] =>
+  ): TContext['replyWithPhoto'] =>
   async (text, other, signal) => {
     const otherParameters = parseMode ? { ...other, parse_mode: parseMode } : other;
     const replyResult = await context.replyWithPhoto(text, otherParameters, signal);
@@ -68,6 +71,7 @@ const buildReplyPhotoWithParseMode =
     return replyResult;
   };
 
+// eslint-disable-next-line no-secrets/no-secrets
 /**
  * Delete message after specified timeout.
  *
@@ -99,7 +103,7 @@ const buildReplyPhotoWithParseMode =
  * */
 export const selfDestructedReply =
   (timeout = 60_000, callback: SelfDestructedCallback = defaultDeleteCallback) =>
-  <C extends Context>(context: SelfDestructedFlavor<C>, next: NextFunction) => {
+  <TContext extends Context>(context: SelfDestructedFlavor<TContext>, next: NextFunction) => {
     context.replyWithSelfDestructed = buildReplyWithParseMode(context, timeout, callback);
     context.replyWithSelfDestructedHTML = buildReplyWithParseMode(context, timeout, callback, 'HTML');
     context.replyWithSelfDestructedMarkdown = buildReplyWithParseMode(context, timeout, callback, 'MarkdownV2');

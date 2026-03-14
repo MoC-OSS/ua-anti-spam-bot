@@ -1,6 +1,6 @@
 import * as typedDotenv from 'typed-dotenv';
 
-import type { EnvironmentConfig } from './types';
+import type { EnvironmentConfig } from './types/environment';
 
 const { error, env } = typedDotenv.config();
 

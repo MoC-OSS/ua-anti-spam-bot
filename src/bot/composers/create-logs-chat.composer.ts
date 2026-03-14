@@ -5,22 +5,25 @@ import { Composer, InputFile } from 'grammy';
 
 import type { ApiMethods } from 'typegram';
 
-import { onlyCreatorFilter } from '@bot/filters';
+import { onlyCreatorFilter } from '@bot/filters/only-creator.filter';
 
-import type { GrammyContext } from '@types/';
+import type { GrammyContext } from '@app-types/context';
 
-import { getTypedValue, handleError } from '@utils/';
+import { handleError } from '@utils/error-handler';
+import { getTypedValue } from '@utils/get-typed-value.util';
 
 type IconColor = Parameters<ApiMethods<void>['createForumTopic']>[0]['icon_color'];
 
+/* eslint-disable unicorn/number-literal-case */
 const iconColors = getTypedValue<Record<string, IconColor>>()({
-  bittersweet: 0xFB_6F_5F, // red
-  salomie: 0xFF_D6_7E, // yellow
-  lightGreen: 0x8E_EE_98, // green
-  mayaBlue: 0x6F_B9_F0, // blue
-  wisteria: 0xCB_86_DB, // violet
-  illusion: 0xFF_93_B2, // purple
+  bittersweet: 0xfb_6f_5f, // red
+  salomie: 0xff_d6_7e, // yellow
+  lightGreen: 0x8e_ee_98, // green
+  mayaBlue: 0x6f_b9_f0, // blue
+  wisteria: 0xcb_86_db, // violet
+  illusion: 0xff_93_b2, // purple
 });
+/* eslint-enable unicorn/number-literal-case */
 
 const groupPhotoPath = path.resolve('./src/assets/logs-chat-profile-photo.jpeg');
 const groupPhotoFile = new InputFile(groupPhotoPath);

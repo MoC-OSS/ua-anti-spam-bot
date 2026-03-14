@@ -57,7 +57,7 @@ async function main() {
   const baseUrl = typeof compilerOptions.baseUrl === 'string' ? compilerOptions.baseUrl : null;
   const baseForPathsAbs = baseUrl ? path.resolve(tsconfigDirectory, baseUrl) : tsconfigDirectory;
 
-  const added = [];
+  const added: string[] = [];
 
   // Keep existing order, append new keys in a stable order.
   for (const directoryName of sourceFolders.toSorted((firstFolder, secondFolder) => firstFolder.localeCompare(secondFolder))) {

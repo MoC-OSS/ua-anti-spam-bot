@@ -8,78 +8,78 @@ import { Composer } from 'grammy';
 
 import moment from 'moment-timezone';
 
-import { CommandSetter } from './bot/commands';
-import {
-  getBeforeAnyComposer,
-  getCreateLogsChatComposer,
-  getCreatorCommandsComposer,
-  getHealthCheckComposer,
-  getHotlineSecurityComposer,
-  getJoinLeaveComposer,
-  getMessagesComposer,
-  getPhotoComposer,
-  getPrivateCommandsComposer,
-  getPublicCommandsComposer,
-  getSaveToSheetComposer,
-  getTensorTrainingComposer,
-} from './bot/composers';
-import {
-  getDenylistComposer,
-  getNoCardsComposer,
-  getNoChannelMessagesComposer,
-  getNoCounterOffensiveComposer,
-  getNoForwardsComposer,
-  getNoLocationsComposer,
-  getNoMentionsComposer,
-  getNoObsceneComposer,
-  getNoRussianComposer,
-  getNoUrlsComposer,
-  getNsfwFilterComposer,
-  getStrategicComposer,
-  getSwindlersComposer,
-  getWarnObsceneComposer,
-  getWarnRussianComposer,
-} from './bot/composers/messages';
+import { CommandSetter } from './bot/commands/command-setter';
+import { getBeforeAnyComposer } from './bot/composers/before-any.composer';
+import { getCreateLogsChatComposer } from './bot/composers/create-logs-chat.composer';
+import { getCreatorCommandsComposer } from './bot/composers/creator-command.composer';
+import { getHealthCheckComposer } from './bot/composers/health-check.composer';
+import { getHotlineSecurityComposer } from './bot/composers/hotline-security.composer';
+import { getJoinLeaveComposer } from './bot/composers/join-leave.composer';
+import { getMessagesComposer } from './bot/composers/messages.composer';
+import { getDenylistComposer } from './bot/composers/messages/denylist.composer';
 import { getNoAntisemitismComposer } from './bot/composers/messages/no-antisemitism.composer';
+import { getNoCardsComposer } from './bot/composers/messages/no-cards.composer';
+import { getNoChannelMessagesComposer } from './bot/composers/messages/no-channel-messages.composer';
+import { getNoCounterOffensiveComposer } from './bot/composers/messages/no-counteroffensive.composer';
+import { getNoForwardsComposer } from './bot/composers/messages/no-forward.composer';
+import { getNoLocationsComposer } from './bot/composers/messages/no-locations.composer';
+import { getNoMentionsComposer } from './bot/composers/messages/no-mentions.composer';
+import { getNoObsceneComposer } from './bot/composers/messages/no-obscene.composer';
+import { getNoRussianComposer } from './bot/composers/messages/no-russian.composer';
+import { getNoUrlsComposer } from './bot/composers/messages/no-urls.composer';
+import { getNsfwFilterComposer } from './bot/composers/messages/nsfw-filter.composer';
 import { getNsfwMessageFilterComposer } from './bot/composers/messages/nsfw-message-filter.composer';
+import { getStrategicComposer } from './bot/composers/messages/strategic.composer';
+import { getSwindlersComposer } from './bot/composers/messages/swindlers.composer';
+import { getWarnObsceneComposer } from './bot/composers/messages/warn-obscene.composer';
+import { getWarnRussianComposer } from './bot/composers/messages/warn-russian.composer';
+import { getPhotoComposer } from './bot/composers/photos.composer';
+import { getPrivateCommandsComposer } from './bot/composers/private-command.composer';
+import { getPublicCommandsComposer } from './bot/composers/public-command.composer';
+import { getSaveToSheetComposer } from './bot/composers/save-to-sheet.composer';
 import { getSwindlersStatisticCommandsComposer } from './bot/composers/swindlers-statististics.composer';
-import { isNotChannel, onlyCreatorChatFilter } from './bot/filters';
-import { OnTextListener, TestTensorListener } from './bot/listeners';
+import { getTensorTrainingComposer } from './bot/composers/tensor-training.composer';
+import { isNotChannel } from './bot/filters/is-not-channel.filter';
+import { onlyCreatorChatFilter } from './bot/filters/only-creator-chat.filter';
+import { OnTextListener } from './bot/listeners/on-text.listener';
+import { TestTensorListener } from './bot/listeners/test-tensor.listener';
 import { MessageHandler } from './bot/message.handler';
-import {
-  adminCheckNotify,
-  deleteSpamMediaGroupMiddleware,
-  DeleteSwindlersMiddleware,
-  GlobalMiddleware,
-  logCreatorState,
-  stateMiddleware,
-} from './bot/middleware';
-import { chainFilters, selfDestructedReply } from './bot/plugins';
+import { adminCheckNotify } from './bot/middleware/admin-check-notify.middleware';
+import { deleteSpamMediaGroupMiddleware } from './bot/middleware/delete-spam-media-groups.middleware';
+import { DeleteSwindlersMiddleware } from './bot/middleware/delete-swindlers.middleware';
+import { GlobalMiddleware } from './bot/middleware/global.middleware';
+import { logCreatorState } from './bot/middleware/log-creator-state.middleware';
+import { stateMiddleware } from './bot/middleware/state.middleware';
 import { autoCommentReply } from './bot/plugins/auto-comment-reply.plugin';
-import { RedisChatSession, RedisSession } from './bot/sessionProviders';
-import { deleteMessageTransformer, disableLogsChatTransformer } from './bot/transformers';
+import { chainFilters } from './bot/plugins/chain-filters.plugin';
+import { selfDestructedReply } from './bot/plugins/self-destructed.plugin';
+import { RedisChatSession } from './bot/sessionProviders/redis-chat-session-storage';
+import { RedisSession } from './bot/sessionProviders/redis-session-storage';
+import { deleteMessageTransformer } from './bot/transformers/delete-message.transformer';
+import { disableLogsChatTransformer } from './bot/transformers/disable-logs-chat.transformer';
+import * as redisClient from './db/redis';
+import { alarmService } from './services/alarm.service';
+import { alarmChatService } from './services/alarm-chat.service';
+import { CounteroffensiveService } from './services/counteroffensive.service';
 import { NsfwDetectService } from './services/nsfw-detect.service';
+import { redisService } from './services/redis.service';
+import { S3Service } from './services/s3.service';
+import { initSwindlersContainer } from './services/swindlers.container';
+import { swindlersGoogleService } from './services/swindlers-google.service';
+import { initNsfwTensor } from './tensor/nsfw-tensor.service';
+import { initTensor } from './tensor/tensor.service';
+import type { GrammyContext, GrammyMenuContext } from './types/context';
+import { globalErrorHandler, wrapperErrorHandler } from './utils/error-handler';
+import { videoUtility } from './utils/video.util';
 import { environmentConfig } from './config';
 import { swindlerBotsChatId, swindlerHelpChatId, swindlerMessageChatId } from './creator';
-import { redisClient } from './db';
-import {
-  alarmChatService,
-  alarmService,
-  CounteroffensiveService,
-  initSwindlersContainer,
-  redisService,
-  S3Service,
-  swindlersGoogleService,
-} from './services';
-import { initNsfwTensor, initTensor } from './tensor';
-import type { GrammyContext, GrammyMenuContext } from './types';
-import { globalErrorHandler, videoUtil as videoUtility, wrapperErrorHandler } from './utils';
 
 moment.tz.setDefault('Europe/Kiev');
 moment.locale('uk');
 
 const rootMenu = new Menu<GrammyMenuContext>('root');
 
+// eslint-disable-next-line no-secrets/no-secrets
 /**
  * Gets main bot instance.
  * Disables redis logic if used in unit testing
