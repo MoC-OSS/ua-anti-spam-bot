@@ -9,9 +9,9 @@ import { SwindlersCardsService } from './swindlers-cards.service';
 import { SwindlersDetectService } from './swindlers-detect.service';
 import { SwindlersUrlsService } from './swindlers-urls.service';
 
-jest.mock('axios');
+vi.mock('axios');
 
-const axiosMock = axios as jest.Mocked<typeof axios>;
+const axiosMock = { get: vi.mocked(axios.get) };
 
 /**
  * @type {SwindlersDetectService}

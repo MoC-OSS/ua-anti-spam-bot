@@ -7,11 +7,11 @@ const mockContext = {} as Partial<GrammyContext> as GrammyContext;
 
 describe('nestedMiddleware', () => {
   it('should call all middlewares', async () => {
-    const mockMiddleware = jest.fn(async (context, next: NextFunction) => {
+    const mockMiddleware = vi.fn(async (context, next: NextFunction) => {
       await next();
     });
 
-    const finalMockMiddleware = jest.fn();
+    const finalMockMiddleware = vi.fn();
 
     await nestedMiddleware(
       async (context: GrammyContext, next: NextFunction) => {
@@ -26,11 +26,11 @@ describe('nestedMiddleware', () => {
   });
 
   it('should not call all middlewares', async () => {
-    const mockMiddleware = jest.fn(async (context: GrammyContext, next: NextFunction) => {
+    const mockMiddleware = vi.fn(async (context: GrammyContext, next: NextFunction) => {
       await next();
     });
 
-    const finalMockMiddleware = jest.fn();
+    const finalMockMiddleware = vi.fn();
 
     await nestedMiddleware(
       async () => {

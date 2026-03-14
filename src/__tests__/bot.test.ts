@@ -1,6 +1,5 @@
 import { Bot } from 'grammy';
 
-// eslint-disable-next-line jest/no-mocks-import
 import { realSwindlerMessage } from '../__mocks__/bot.mocks';
 import { getBot } from '../bot';
 import { environmentConfig } from '../config';

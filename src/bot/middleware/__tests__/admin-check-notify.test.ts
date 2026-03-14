@@ -1,7 +1,6 @@
 import { hydrateReply } from '@grammyjs/parse-mode';
 import { Bot } from 'grammy';
 
-// eslint-disable-next-line jest/no-mocks-import
 import { realSwindlerMessage } from '../../../__mocks__/bot.mocks';
 import type { ApiResponses, OutgoingRequests } from '../../../testing';
 import { MessageMockUpdate, prepareBotForTesting } from '../../../testing';

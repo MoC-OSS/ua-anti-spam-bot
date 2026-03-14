@@ -8,7 +8,8 @@
   "ignorePatterns": [
     "!src/**/*.{ts,js}",
     "!dataset/**/*.{ts,js}",
-    "node_modules"
+    "node_modules",
+    "vitest.config.ts"
   ],
   "root": true,
   "extends": [

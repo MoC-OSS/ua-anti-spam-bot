@@ -1,5 +1,5 @@
 /**
- * Jest global setup file.
+ * Vitest global setup file.
  * Polyfills deprecated Node.js `util` methods removed in Node 24 that are
  * still referenced by older native addons such as @tensorflow/tfjs-node.
  */

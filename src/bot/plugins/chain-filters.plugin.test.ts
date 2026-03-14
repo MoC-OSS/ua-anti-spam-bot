@@ -22,7 +22,7 @@ describe('chainFilters', () => {
   });
 
   it('should chain if function is passed', () => {
-    const mockFunction = jest.fn(() => true);
+    const mockFunction = vi.fn(() => true);
 
     const positiveResult = chainFilters(mockFunction, () => true)(mockContext);
     const negativeResult = chainFilters(mockFunction, () => false)(mockContext);

@@ -8,7 +8,7 @@ import type { SwindlersGoogleService } from '../swindlers-google.service';
 export const mockNewBot = '@Diia_move_bot';
 export const mockNewUrl = 'https://olx.new-darpay.site/some/234234234';
 
-export const getSheet = jest.fn(
+export const getSheet = vi.fn(
   <T extends true | false = false>(
     spreadsheetId: string,
     sheetName: string,
@@ -43,7 +43,7 @@ getSheet.mockReturnValueOnce(
   ]),
 );
 
-const getCompactSheet = jest.fn(() => Promise.resolve([mockNewBot]));
+const getCompactSheet = vi.fn(() => Promise.resolve([mockNewBot]));
 getCompactSheet.mockReturnValueOnce(Promise.resolve(['test message from swindler']));
 
 /**
@@ -60,7 +60,7 @@ export const mockSwindlersGoogleService = {
   getTrainingPositives: getCompactSheet,
   getBots: getCompactSheet,
   getDomains: getCompactSheet,
-  getCards: jest.fn(() => Promise.resolve(['4222422242224222'])),
+  getCards: vi.fn(() => Promise.resolve(['4222422242224222'])),
   getNotSwindlers: () => Promise.resolve([]),
   getSiteRegex: () => Promise.resolve([]),
 } as Partial<SwindlersGoogleService> as SwindlersGoogleService;

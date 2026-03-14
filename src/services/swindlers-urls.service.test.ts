@@ -4,9 +4,9 @@ import { mockDynamicStorageService, mockNewUrl } from './_mocks/index.mocks';
 import { SwindlersUrlsService } from './swindlers-urls.service';
 import { urlService } from './url.service';
 
-jest.mock('axios');
+vi.mock('axios');
 
-const axiosMock = axios as jest.Mocked<typeof axios>;
+const axiosMock = { get: vi.mocked(axios.get) };
 
 /**
  * @type {SwindlersUrlsService}
