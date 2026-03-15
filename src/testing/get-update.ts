@@ -2,6 +2,8 @@ import fs from 'node:fs';
 
 import type { Api, Bot, Context } from 'grammy';
 
+import { logger } from '@utils/logger';
+
 /**
  * Logs internal update to create mock updates.
  * Used for testing.
@@ -16,7 +18,7 @@ export const logUpdates = <TContext extends Context, TApi extends Api = Api, TBo
   bot.handleUpdate = (update, webhookReplyEnvelope) => {
     const stringifiedUpdate = JSON.stringify(update, null, 2);
 
-    console.info('logUpdates', stringifiedUpdate);
+    logger.info({ update: stringifiedUpdate }, 'logUpdates');
     fs.writeFileSync('./update.json', stringifiedUpdate);
 
     return originUpdate(update, webhookReplyEnvelope);

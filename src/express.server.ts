@@ -19,6 +19,7 @@ import type {
   TensorRequestBody,
   TensorResponseBody,
 } from './types/express';
+import { logger } from './utils/logger';
 import { videoService } from './video/video.service';
 import { environmentConfig } from './config';
 
@@ -57,7 +58,7 @@ const uploadMiddleware = multer({ storage: uploadMemoryStorage });
     const time = endTime - startTime;
 
     if (environmentConfig.DEBUG) {
-      console.info({ route: '/process', result, datasetPath, time, expressStartTime });
+      logger.info({ route: '/process', result, datasetPath, time, expressStartTime });
     }
 
     response.json({ result, time, expressStartTime });
@@ -73,7 +74,7 @@ const uploadMiddleware = multer({ storage: uploadMemoryStorage });
     const time = endTime - startTime;
 
     if (environmentConfig.DEBUG) {
-      console.info({ route: '/tensor', result, time, expressStartTime });
+      logger.info({ route: '/tensor', result, time, expressStartTime });
     }
 
     response.json({ result, time, expressStartTime });
@@ -92,7 +93,7 @@ const uploadMiddleware = multer({ storage: uploadMemoryStorage });
       const time = endTime - startTime;
 
       if (environmentConfig.DEBUG) {
-        console.info({ route: '/swindlers', result, time, expressStartTime });
+        logger.info({ route: '/swindlers', result, time, expressStartTime });
       }
 
       response.json({ result, time, expressStartTime });
@@ -119,7 +120,7 @@ const uploadMiddleware = multer({ storage: uploadMemoryStorage });
       const time = endTime - startTime;
 
       if (environmentConfig.DEBUG) {
-        console.info({ route: '/parse-video', screenshots, time, expressStartTime });
+        logger.info({ route: '/parse-video', screenshots, time, expressStartTime });
       }
 
       return response.json({ screenshots: screenshots.map((screenshot) => screenshot.toJSON()), time, expressStartTime });
@@ -148,7 +149,7 @@ const uploadMiddleware = multer({ storage: uploadMemoryStorage });
       const time = endTime - startTime;
 
       if (environmentConfig.DEBUG) {
-        console.info({ route: '/image', result, time, expressStartTime });
+        logger.info({ route: '/image', result, time, expressStartTime });
       }
 
       return response.json({ result, time, expressStartTime });
@@ -156,8 +157,8 @@ const uploadMiddleware = multer({ storage: uploadMemoryStorage });
   );
 
   app.listen(environmentConfig.PORT, environmentConfig.HOST, () => {
-    console.info(`Backend server started on http://${environmentConfig.HOST}:${environmentConfig.PORT}`);
+    logger.info(`Backend server started on http://${environmentConfig.HOST}:${environmentConfig.PORT}`);
   });
 })().catch((error) => {
-  console.error('Cannot start server. Reason:', error);
+  logger.error('Cannot start server. Reason:', error);
 });

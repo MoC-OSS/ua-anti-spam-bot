@@ -7,13 +7,14 @@ import { environmentConfig } from '../config';
 import { logsChat } from '../creator';
 
 import { emptyFunction } from './empty-functions.util';
+import { logger } from './logger';
 import { optimizeWriteContextUtility } from './optimize-write-context.util';
 
 /**
  * Handle single error with expected reason
  * */
 export const handleError = (catchError: unknown, reason = '') => {
-  console.error('**** REASON-HANDLED ERROR ****', reason || '$NO_REASON', catchError);
+  logger.error({ reason: reason || '$NO_REASON', err: catchError }, '**** REASON-HANDLED ERROR ****');
 };
 
 /**
@@ -22,23 +23,22 @@ export const handleError = (catchError: unknown, reason = '') => {
 export const globalErrorHandler: ErrorHandler<GrammyContext> = (botError) => {
   const { ctx, error } = botError;
 
-  console.error(`Error while handling update ${ctx.update.update_id}:`);
+  logger.error(`Error while handling update ${ctx.update.update_id}:`);
 
   if (error instanceof GrammyError) {
-    console.error('**** GLOBAL-HANDLED ERROR **** Error in request:', error.description);
+    logger.error({ description: error.description }, '**** GLOBAL-HANDLED ERROR **** Error in request:');
   } else if (error instanceof HttpError) {
-    console.error('**** GLOBAL-HANDLED ERROR **** Could not contact Telegram:', error);
+    logger.error({ err: error }, '**** GLOBAL-HANDLED ERROR **** Could not contact Telegram:');
   } else {
-    console.error('**** GLOBAL-HANDLED ERROR **** Unknown error:', error);
+    logger.error({ err: error }, '**** GLOBAL-HANDLED ERROR **** Unknown error:');
   }
 
   const writeContext = optimizeWriteContextUtility(ctx);
 
-  console.error('*** GLOBAL-HANDLED ERROR CTX ***', writeContext);
+  logger.error({ writeContext }, '*** GLOBAL-HANDLED ERROR CTX ***');
 
   if (environmentConfig.DEBUG) {
-    // eslint-disable-next-line no-console
-    console.trace('*** GLOBAL-HANDLED ERROR TRACE ***');
+    logger.trace('*** GLOBAL-HANDLED ERROR TRACE ***');
   }
 };
 
@@ -51,7 +51,7 @@ export const wrapperErrorHandler =
   async (context, next) => {
     try {
       if (!callback) {
-        console.error('wrapperErrorHandler received an empty value instead of function.');
+        logger.error('wrapperErrorHandler received an empty value instead of function.');
       }
 
       return await callback(context, next);
@@ -60,7 +60,7 @@ export const wrapperErrorHandler =
 
       const writeContext = optimizeWriteContextUtility(context);
 
-      console.error('*** FUNCTION-HANDLED ERROR CTX ***', writeContext);
+      logger.error({ writeContext }, '*** FUNCTION-HANDLED ERROR CTX ***');
 
       if (!environmentConfig.DEBUG && error instanceof Error) {
         context.api

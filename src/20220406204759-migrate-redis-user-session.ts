@@ -18,6 +18,7 @@ import { redisService } from './services/redis.service';
 import type { GrammyContext } from './types/context';
 import type { ChatSessionData, SessionData } from './types/session';
 import { handleError } from './utils/error-handler';
+import { logger } from './utils/logger';
 import { logsChat } from './creator';
 
 const getChatId = (sessionId: string) => sessionId.split(':')[0];
@@ -30,7 +31,7 @@ const migration = async (bot: Bot<GrammyContext>, botStartDate: Date) => {
   const compareDate = `${botStartDate.getFullYear()}-${botStartDate.getMonth() + 1}-${botStartDate.getDate()}`;
 
   if (compareDate !== '2022-4-10') {
-    console.info('Skip migration:', __filename);
+    logger.info(`Skip migration: ${__filename}`);
 
     return;
   }
@@ -52,7 +53,7 @@ const migration = async (bot: Bot<GrammyContext>, botStartDate: Date) => {
 
   const nonUniqueUserRecords = userRecords.filter((session) => uniqueUserRecords.some((record) => session.id !== record.id));
 
-  console.info({ uniqueUserRecords: uniqueUserRecords.length, nonUniqueUserRecords: nonUniqueUserRecords.length });
+  logger.info({ uniqueUserRecords: uniqueUserRecords.length, nonUniqueUserRecords: nonUniqueUserRecords.length });
 
   bot.api
     .sendMessage(
@@ -104,7 +105,7 @@ const migration = async (bot: Bot<GrammyContext>, botStartDate: Date) => {
 
         clearObject(chatSessionRecord);
 
-        console.info(`** Chat id has been migrated: ${record.id}`);
+        logger.info(`** Chat id has been migrated: ${record.id}`);
       } catch (error) {
         if (error instanceof GrammyError) {
           switch (error.description) {

@@ -6,6 +6,7 @@ import type { GoogleFullCellData, GoogleShortCellData } from '@app-types/google'
 
 import { handleError } from '@utils/error-handler';
 import { coerceArray } from '@utils/generic.util';
+import { logger } from '@utils/logger';
 
 import { environmentConfig } from '../config';
 
@@ -64,7 +65,7 @@ export class GoogleService {
 
       const values = valueRange.data.values as string[][] | null | undefined;
 
-      console.info({ sheetName, sheetKey, sheetStartFrom, length: values?.length });
+      logger.info({ sheetName, sheetKey, sheetStartFrom, length: values?.length });
 
       if (!values) {
         return [];

@@ -1,6 +1,8 @@
 /* eslint-disable camelcase */
 import type { CheckPassword, MTProtoError } from '@app-types/mtproto/mtproto.types';
 
+import { logger } from '@utils/logger';
+
 import { environmentConfig } from '../config';
 
 import { api } from './api';
@@ -67,7 +69,7 @@ const auth = async () => {
   const user = await getUser();
 
   if (!user) {
-    console.info('User is undefined, try to new connection');
+    logger.info('User is undefined, try to new connection');
 
     const phone = environmentConfig.USERBOT_LOGIN_PHONE;
     const code = environmentConfig.USERBOT_LOGIN_CODE;
@@ -90,7 +92,7 @@ const auth = async () => {
       }
     } catch (error: unknown) {
       if ((error as MTProtoError).error_message !== 'SESSION_PASSWORD_NEEDED') {
-        console.error(JSON.stringify(error));
+        logger.error(JSON.stringify(error));
 
         return api;
       }
@@ -116,7 +118,7 @@ const auth = async () => {
 
       const checkPasswordResult = await checkPassword({ srp_id, A, M1 });
 
-      console.info(checkPasswordResult);
+      logger.info(checkPasswordResult);
     }
   }
 

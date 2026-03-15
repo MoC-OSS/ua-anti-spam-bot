@@ -5,6 +5,7 @@ import FuzzySet from 'fuzzyset';
 import type { SwindlersBaseResult, SwindlersUrlsResult } from '@app-types/swindlers';
 
 import { DomainAllowList } from '@utils/domain-allow-list';
+import { logger } from '@utils/logger';
 
 import { environmentConfig } from '../config';
 
@@ -26,7 +27,7 @@ export class SwindlersUrlsService {
     private rate = 0.9,
   ) {
     this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
-    console.info('swindlersRegex', this.swindlersRegex);
+    logger.info({ swindlersRegex: this.swindlersRegex }, 'swindlersRegex updated');
 
     this.initFuzzySet();
     this.domainAllowList = new DomainAllowList(this.dynamicStorageService.notSwindlers);
@@ -34,7 +35,7 @@ export class SwindlersUrlsService {
     this.dynamicStorageService.fetchEmitter.on('fetch', () => {
       this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
       this.domainAllowList.updateDomains(this.dynamicStorageService.notSwindlers);
-      console.info('swindlersRegex', this.swindlersRegex);
+      logger.info({ swindlersRegex: this.swindlersRegex }, 'swindlersRegex updated');
       this.initFuzzySet();
     });
   }
@@ -130,12 +131,12 @@ export class SwindlersUrlsService {
 
               try {
                 if (!error.response) {
-                  console.error(error);
+                  logger.error(error);
                 }
 
                 return (error.response?.headers['location'] as string) || error.response?.config.url || url;
               } catch (nestedError: unknown) {
-                console.error(nestedError);
+                logger.error(nestedError);
 
                 return url;
               }

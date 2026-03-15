@@ -6,6 +6,7 @@ import { swindlersGoogleService } from '@services/swindlers-google.service';
 import type { SwindlersUrlsService } from '@services/swindlers-urls.service';
 import { urlService } from '@services/url.service';
 
+import { logger } from '@utils/logger';
 import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 const notSwindlers = new Set([
@@ -119,10 +120,10 @@ export const autoSwindlers = async (
   const newSwindlersBots = findSwindlersByPattern(swindlersBots, mentionRegexp).filter((bot) => !swindlersUsers.includes(bot));
   const newSwindlersCards = removeDuplicates([...swindlersCards, ...swindlers.flatMap((item) => cardsService.parseCards(item))]);
 
-  console.info('notMatchedUrls\n');
-  console.info(notMatchedUrls.join('\n'));
-  console.info('notMatchedDomains\n');
-  console.info(notMatchedDomains.join('\n'));
+  logger.info('notMatchedUrls\n');
+  logger.info(notMatchedUrls.join('\n'));
+  logger.info('notMatchedDomains\n');
+  logger.info(notMatchedDomains.join('\n'));
 
   const regexpPath = new URL('../temp/regexp.txt', import.meta.url);
   const notMatchedUrlsPath = new URL('../temp/notMatchedUrls.txt', import.meta.url);
@@ -135,11 +136,11 @@ export const autoSwindlers = async (
   // eslint-disable-next-line security/detect-non-literal-fs-filename
   fs.writeFileSync(notMatchedDomainsPath, notMatchedDomains.join('\n'));
 
-  console.info('*** Regex update info ***');
-  console.info('https://regex101.com/');
-  console.info(regexpPath, swindlersUrlsService.swindlersRegex.toString().length);
-  console.info(notMatchedUrlsPath, notMatchedUrls.length);
-  console.info(notMatchedDomainsPath, notMatchedDomains.length);
+  logger.info('*** Regex update info ***');
+  logger.info('https://regex101.com/');
+  logger.info(`${String(regexpPath)} ${swindlersUrlsService.swindlersRegex.toString().length}`);
+  logger.info(`${String(notMatchedUrlsPath)} ${notMatchedUrls.length}`);
+  logger.info(`${String(notMatchedDomainsPath)} ${notMatchedDomains.length}`);
 
   await swindlersGoogleService.clearBots();
   await swindlersGoogleService.updateBots(newSwindlersBots);

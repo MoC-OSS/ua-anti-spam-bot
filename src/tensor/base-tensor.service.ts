@@ -8,6 +8,8 @@ import * as tf from '@tensorflow/tfjs-node';
 
 import type { SwindlerTensorResult } from '@app-types/swindlers';
 
+import { logger } from '@utils/logger';
+
 import { environmentConfig } from '../config';
 
 /**
@@ -40,8 +42,8 @@ export class BaseTensorService {
       // eslint-disable-next-line security/detect-non-literal-fs-filename
       this.modelArtifacts = JSON.parse(fs.readFileSync(new URL(modelPath, import.meta.url)).toString()) as ModelArtifacts;
     } catch (error) {
-      console.error('Cannot parse model! Reason:');
-      console.error(error);
+      logger.error('Cannot parse model! Reason:');
+      logger.error(error);
     }
 
     // @ts-ignore

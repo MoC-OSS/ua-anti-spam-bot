@@ -1,6 +1,8 @@
 import { mockDynamicStorageService, mockNewBot } from '@services/_mocks/index.mocks';
 import { SwindlersBotsService } from '@services/swindlers-bots.service';
 
+import { logger } from '@utils/logger';
+
 /**
  * @type {SwindlersBotsService}
  * */
@@ -14,7 +16,7 @@ describe('SwindlersBotsService', () => {
   it('should compare new bot', () => {
     const result = swindlersBotsService.isSpamBot(mockNewBot);
 
-    console.info(result);
+    logger.info(result);
 
     expect(result.isSpam).toEqual(true);
   });

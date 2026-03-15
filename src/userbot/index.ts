@@ -7,6 +7,8 @@ import { initSwindlersContainer } from '@services/swindlers.container';
 
 import { initTensor } from '@tensor/tensor.service';
 
+import { logger } from '@utils/logger';
+
 import { loadUserbotDatasetExtras } from '../../dataset/dataset';
 
 import auth from './auth';
@@ -25,13 +27,13 @@ export interface ChatPeers {
   botsChat: Peer | null;
 }
 
-console.info('Start listener application');
+logger.info('Start listener application');
 
 auth()
   .then(async (api) => {
     const datasetExtras = await loadUserbotDatasetExtras();
 
-    await redisClient.client.connect().then(() => console.info('Redis client successfully started'));
+    await redisClient.client.connect().then(() => logger.info('Redis client successfully started'));
     const mtProtoClient = new MtProtoClient(api);
 
     const { dynamicStorageService, swindlersDetectService, swindlersBotsService, swindlersTensorService } = await initSwindlersContainer();
@@ -39,11 +41,11 @@ auth()
     const userbotStorage = new UserbotStorage();
 
     await userbotStorage.init();
-    console.info('Application is listening new messages.');
+    logger.info('Application is listening new messages.');
 
     const tensorService = await initTensor();
 
-    console.info('Tensor is ready.');
+    logger.info('Tensor is ready.');
 
     // findChannelAdmins(api);
     // return;
@@ -79,7 +81,7 @@ auth()
     // const testSwindlerResult = await updatesHandler.handleSwindlers(testMessage);
     // console.log(testSwindlerResult);
 
-    console.info('Userbot is ready and started.');
+    logger.info('Userbot is ready and started.');
 
     //
     // api.mtproto.updates.on('updatesTooLong', (updateInfo) => {
@@ -88,7 +90,7 @@ auth()
     //
 
     api.mtproto.updates.on('updateShortMessage', (updateInfo) => {
-      console.info('updateShortChatMessage:', updateInfo);
+      logger.info({ updateInfo }, 'updateShortChatMessage:');
     });
 
     // api.mtproto.updates.on('updateShortChatMessage', (updateInfo) => {
@@ -105,7 +107,7 @@ auth()
     //
 
     // api.mtproto.updates.on('updates', (updateInfo) => {
-    //   console.info('updates:', updateInfo.updates);
+    //   logger.info('updates:', updateInfo.updates);
     // });
     //
     // api.mtproto.updates.on('updateShortSentMessage', (updateInfo) => {
@@ -122,11 +124,11 @@ auth()
       try {
         await api.call('updates.getState');
       } catch (error) {
-        console.error(JSON.stringify(error));
+        logger.error(JSON.stringify(error));
       }
     }, ms('15s'));
   })
   .catch((error) => {
-    console.error('Cannot start userbot. Reason:\n', error);
+    logger.error('Cannot start userbot. Reason:\n', error);
     throw error;
   });

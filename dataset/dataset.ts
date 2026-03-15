@@ -1,4 +1,6 @@
 /* eslint-disable camelcase */
+import { logger } from '@utils/logger';
+
 import high_risk from './strings/high_risk.json';
 import houses from './strings/houses.json';
 import immediately from './strings/immediately.json';
@@ -37,7 +39,7 @@ export async function loadOptionalFile<T>(path: string, defaultValue: T): Promis
 export async function loadUserbotDatasetExtras() {
   const swindlersTopUsed = await loadOptionalFile<Record<string, number>>('./strings/swindlers_top_used.json', {});
 
-  console.info('Userbot dataset extras are loaded!');
+  logger.info('Userbot dataset extras are loaded!');
 
   return { swindlers_top_used: swindlersTopUsed };
 }
@@ -45,7 +47,7 @@ export async function loadUserbotDatasetExtras() {
 /**
  * Import all datasets
  * */
-console.info('*0 Initing dataset...');
+logger.info('*0 Initing dataset...');
 
 export const dataset = {
   high_risk: processMessage(high_risk),
@@ -69,4 +71,4 @@ export type DatasetKeys = keyof typeof dataset;
  * */
 Object.freeze(dataset);
 
-console.info('*0 Dataset is ready.');
+logger.info('*0 Dataset is ready.');

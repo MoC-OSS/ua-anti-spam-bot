@@ -8,6 +8,7 @@ import MTProto from '@mtproto/core';
 import type { CheckPassword, MTProtoError, ProtoUpdate } from '@app-types/mtproto/mtproto.types';
 
 import { sleep } from '@utils/generic.util';
+import { logger } from '@utils/logger';
 
 import { environmentConfig } from '../config';
 
@@ -46,8 +47,8 @@ export class API {
     } catch (error: unknown) {
       const typedError = error as MTProtoError;
 
-      console.error(`${method} error:`, typedError);
-      console.error(JSON.stringify(typedError));
+      logger.error({ err: typedError }, `${method} error:`);
+      logger.error(JSON.stringify(typedError));
 
       const { error_code, error_message } = typedError;
 

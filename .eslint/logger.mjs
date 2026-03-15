@@ -20,13 +20,15 @@ function colorContext(context, method) {
 }
 
 export function eslintLogger(context) {
+  // eslint-disable-next-line no-console, lintlord/prefer-logger -- this module wraps console for ESLint configs; pino is not available in that context
   return {
-    // eslint-disable-next-line no-console,lintlord/prefer-logger
+    /* eslint-disable no-console, lintlord/prefer-logger */
     log: (...arguments_) => console.log(colorContext(context, 'log'), ...arguments_),
     info: (...arguments_) => console.info(colorContext(context, 'info'), ...arguments_),
     warn: (...arguments_) => console.warn(colorContext(context, 'warn'), ...arguments_),
     error: (...arguments_) => console.error(colorContext(context, 'error'), ...arguments_),
     dir: (...arguments_) => console.dir(colorContext(context, 'dir'), ...arguments_),
     table: (...arguments_) => console.table(colorContext(context, 'table'), ...arguments_),
+    /* eslint-enable no-console, lintlord/prefer-logger */
   };
 }

@@ -5,6 +5,7 @@ import { parsePhoto } from '@bot/middleware/parse-photo.middleware';
 
 import type { GrammyContext } from '@app-types/context';
 
+import { logger } from '@utils/logger';
 import { videoUtility } from '@utils/video.util';
 
 import { videoService } from '@video/video.service';
@@ -44,7 +45,7 @@ export const getGetVideoNoteConverterComposer = () => {
     const { videoFile, videoName } = await videoUtility.getVideo(context);
 
     if (!videoFile) {
-      console.info('IMPOSSIBLE: There is no video.', videoFile);
+      logger.info({ videoFile }, 'IMPOSSIBLE: There is no video.');
 
       return next();
     }

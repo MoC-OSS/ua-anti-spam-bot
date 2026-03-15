@@ -10,6 +10,7 @@ import type { GrammyContext } from '@app-types/context';
 import type { SwindlerTensorResult } from '@app-types/swindlers';
 
 import { handleError } from '@utils/error-handler';
+import { logger } from '@utils/logger';
 
 import type { DatasetKeys } from '../../dataset/dataset';
 import { environmentConfig } from '../config';
@@ -381,7 +382,7 @@ export class MessageHandler {
     }
 
     if (!message) {
-      console.error('Cannot parse the message!', message);
+      logger.error({ message }, 'Cannot parse the message!');
 
       return '';
     }

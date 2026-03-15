@@ -6,6 +6,8 @@ import type TypedEmitter from 'typed-emitter';
 
 import type { AlarmNotification, AlarmStates } from '@app-types/alarm';
 
+import { logger } from '@utils/logger';
+
 import { environmentConfig } from '../config';
 
 import { getAlarmMock } from './_mocks/alarm.mocks';
@@ -57,7 +59,7 @@ export class AlarmService {
     //     .then((response) => response.data)
     //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     //     .catch((error: Record<any, any>) => {
-    //       console.info(`Alarm API is not responding:  ${JSON.stringify(error)}`);
+    //       logger.info(`Alarm API is not responding:  ${JSON.stringify(error)}`);
     //       return {
     //         states: [],
     //         last_update: new Date().toISOString(),
@@ -132,15 +134,15 @@ export class AlarmService {
     });
 
     this.source.addEventListener('error', (event: MessageEvent & Record<string, any>) => {
-      console.info(`Subscribe to Alarm API fail:  ${event.message as string}`);
+      logger.info(`Subscribe to Alarm API fail:  ${event.message as string}`);
     });
 
     this.source.addEventListener('open', () => {
-      console.info('Opening a connection to Alarm API ...');
+      logger.info('Opening a connection to Alarm API ...');
     });
 
     this.source.addEventListener('hello', () => {
-      console.info('Connection to Alarm API opened successfully.');
+      logger.info('Connection to Alarm API opened successfully.');
 
       // Hello pings every 1h
       if (!isConnected) {

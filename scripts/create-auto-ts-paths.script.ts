@@ -5,6 +5,8 @@ import path from 'node:path';
 import type { CompilerOptions } from 'typescript';
 import * as ts from 'typescript';
 
+import { logger } from '@utils/logger';
+
 const DEFAULT_TSCONFIG_NAME = 'tsconfig.json';
 const SRC_DIR_NAME = 'src';
 const ALIAS_PREFIX = '@';
@@ -38,7 +40,7 @@ async function main() {
   const sourceFolders = await readImmediateSubdirs(sourceDirectoryAbs);
 
   if (sourceFolders.length === 0) {
-    console.info(`No subfolders found in ${sourceDirectoryAbs}. Nothing to add.`);
+    logger.info(`No subfolders found in ${sourceDirectoryAbs}. Nothing to add.`);
 
     return;
   }
@@ -84,7 +86,7 @@ async function main() {
   }
 
   if (added.length === 0) {
-    console.info('No new aliases to add. tsconfig.json unchanged.');
+    logger.info('No new aliases to add. tsconfig.json unchanged.');
 
     return;
   }
@@ -93,10 +95,10 @@ async function main() {
 
   await fs.writeFile(tsconfigPath, nextText, 'utf8');
 
-  console.info(`Added ${added.length} alias(es) to compilerOptions.paths:`);
+  logger.info(`Added ${added.length} alias(es) to compilerOptions.paths:`);
 
   for (const newPath of added) {
-    console.info(`  - ${newPath}`);
+    logger.info(`  - ${newPath}`);
   }
 }
 
@@ -210,6 +212,6 @@ function formatTsDiagnostic(diagnostic: ts.Diagnostic) {
 main().catch((error) => {
   const message = error instanceof Error ? error.message : String(error);
 
-  console.error(message);
+  logger.error(message);
   process.exitCode = 1;
 });

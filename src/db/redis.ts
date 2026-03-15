@@ -4,6 +4,8 @@ import type { JsonObject, Primitive } from 'type-fest';
 import type { CustomJsonValue } from '@app-types/object';
 import type { ChatSession, ChatSessionData, Session } from '@app-types/session';
 
+import { logger } from '@utils/logger';
+
 import { environmentConfig } from '../config';
 
 export const redisSelectors = {
@@ -46,7 +48,7 @@ export async function getValue<T>(key: string): Promise<T> {
 
     return (JSON.parse(sourceSession || '{}') || {}) as T;
   } catch (error) {
-    console.error(error);
+    logger.error(error);
 
     return {} as T;
   }
@@ -150,7 +152,7 @@ export async function getAllRecords(): Promise<(ChatSession | Session)[]> {
       })
       .filter(Boolean) as (Session & ChatSession)[];
   } catch (error) {
-    console.error(error);
+    logger.error(error);
 
     return [];
   }

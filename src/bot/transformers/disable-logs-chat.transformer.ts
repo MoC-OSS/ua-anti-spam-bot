@@ -3,6 +3,8 @@ import type { Payload } from 'grammy/out/core/client';
 
 import type { RealApiMethodKeys } from '@testing/outgoing-requests';
 
+import { logger } from '@utils/logger';
+
 import { logsChat, secondLogsChat } from '../../creator';
 
 export const disableLogsChatTransformer: Transformer = (previous, method, payload, signal) => {
@@ -33,7 +35,7 @@ export const disableLogsChatTransformer: Transformer = (previous, method, payloa
   const isLogsChatRequest = chatId === logsChat || chatId === secondLogsChat;
 
   if (isSendMethod && isLogsChatRequest) {
-    console.info(`Disabled log into logs chat. Method: ${method}. Payload:`, payload);
+    logger.info({ payload }, `Disabled log into logs chat. Method: ${method}.`);
 
     return Promise.resolve({ ok: true, result: true as never });
   }

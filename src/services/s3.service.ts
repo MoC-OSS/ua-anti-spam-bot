@@ -3,6 +3,8 @@ import path from 'node:path';
 
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
+import { logger } from '@utils/logger';
+
 import { environmentConfig } from '../config';
 
 export class S3Service {
@@ -26,7 +28,7 @@ export class S3Service {
         new GetObjectCommand({ Bucket: this.config.bucket || '', Key: path.join(this.config.path, fileName) }),
       );
 
-      console.info(new URL(fileName, fsFolderPath));
+      logger.info(new URL(fileName, fsFolderPath));
 
       const body = (await response.Body?.transformToString()) || '';
 

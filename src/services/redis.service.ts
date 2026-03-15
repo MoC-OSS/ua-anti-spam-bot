@@ -2,6 +2,7 @@ import * as redisClient from '@db/redis';
 
 import type { ChatSession, ChatSessionData, ChatSettings, Session } from '@app-types/session';
 
+import { logger } from '@utils/logger';
 import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 export interface RedisServiceSetSwindlersStatisticStatistic {
@@ -71,7 +72,7 @@ export class RedisService {
       return redisClient.setRawValue(this.redisSelectors.trainingStartRank, newValue);
     }
 
-    console.error(`setBotTensorPercent error: ${newValue} is not a number`);
+    logger.error(`setBotTensorPercent error: ${newValue} is not a number`);
 
     // eslint-disable-next-line unicorn/no-useless-undefined
     return undefined;
@@ -92,7 +93,7 @@ export class RedisService {
       return redisClient.setRawValue(this.redisSelectors.botTensorPercent, newValue);
     }
 
-    console.error(`setBotTensorPercent error: ${newValue} is not a number`);
+    logger.error(`setBotTensorPercent error: ${newValue} is not a number`);
 
     // eslint-disable-next-line unicorn/no-useless-undefined
     return undefined;

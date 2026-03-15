@@ -8,6 +8,7 @@ import type { GrammyBot } from '@app-types/context';
 import type { ChatSession, ChatSessionData } from '@app-types/session';
 
 import { handleError } from '@utils/error-handler';
+import { logger } from '@utils/logger';
 
 import { ALARM_EVENT_KEY, alarmService } from './alarm.service';
 import { redisService } from './redis.service';
@@ -111,7 +112,7 @@ export class AlarmChatService {
             }
           })
           .catch((error) => {
-            console.error('Error while scheduling the limiter', error);
+            logger.error('Error while scheduling the limiter', error);
           });
       }
     });

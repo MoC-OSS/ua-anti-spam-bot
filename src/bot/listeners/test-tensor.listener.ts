@@ -16,6 +16,7 @@ import type { GrammyContext, GrammyMenuContext, GrammyMiddleware } from '@app-ty
 
 import { emptyFunction, emptyPromiseFunction } from '@utils/empty-functions.util';
 import { wrapperErrorHandler } from '@utils/error-handler';
+import { logger } from '@utils/logger';
 
 import { environmentConfig } from '../../config';
 import { creatorId, trainingChat } from '../../creator';
@@ -243,7 +244,7 @@ export class TestTensorListener {
             // eslint-disable-next-line unicorn/no-useless-undefined
             return undefined;
           })
-          .catch(console.error);
+          .catch((error: unknown) => logger.error(error));
       }, removeTime * 1000);
 
       delete this.storage[this.getStorageKey(context)];
@@ -447,7 +448,7 @@ export class TestTensorListener {
           })
           .catch(emptyFunction);
       } catch (error) {
-        console.error(error);
+        logger.error(error);
 
         if (error instanceof Error) {
           context

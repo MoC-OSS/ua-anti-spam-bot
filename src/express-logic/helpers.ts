@@ -7,6 +7,8 @@ import { redisService } from '@services/redis.service';
 import type { GrammyContext } from '@app-types/context';
 import type { ChatDetails, LinkedChat, Session } from '@app-types/session';
 
+import { logger } from '@utils/logger';
+
 import { environmentConfig } from '../config';
 
 export const getUserIdFromAuthorizationHeader = (authorizationHeader: string | undefined): string => {
@@ -40,7 +42,7 @@ export const getChatAvatar = async (bot: Bot<GrammyContext>, filePath: string) =
 
     return `data:image/jpeg;base64, ${avatar}`;
   } catch (error) {
-    console.info(error);
+    logger.info(error);
 
     return '';
   }
@@ -82,7 +84,7 @@ export const updateChatsList = async (linkedChats: LinkedChat[], bot: Bot<Grammy
       return formattedChat;
     } catch (error) {
       if (error instanceof Error) {
-        console.error(error);
+        logger.error(error);
       }
 
       return deletedChat(chat.id, chat.name);

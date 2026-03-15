@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 
+import { logger } from '@utils/logger';
 import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 import { antisemitismDictionaryActionUrl, antisemitismDictionaryNounsUrl, antisemitismDictionaryThreadsUrl } from './dataset-antisemitism';
@@ -29,7 +30,7 @@ filesToOptimize.forEach((url) => {
 
   // eslint-disable-next-line security/detect-non-literal-fs-filename
   fs.writeFileSync(url, `${processDictionary(file).join('\n')}\n`);
-  console.info('Optimize file:', url.pathname);
+  logger.info(`Optimize file: ${url.pathname}`);
 });
 
-console.info('Done');
+logger.info('Done');

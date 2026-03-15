@@ -6,6 +6,7 @@ import * as input from 'input';
 
 // @ts-ignore
 import dialogs = require('./dialogs.json');
+import { logger } from '@utils/logger';
 
 export interface Dialog {
   href: string;
@@ -35,5 +36,5 @@ const typedDialogs = dialogs as Dialog[];
     ),
   );
 })().catch((error) => {
-  console.error('Cannot run optimization due to:', error);
+  logger.error('Cannot run optimization due to:', error);
 });

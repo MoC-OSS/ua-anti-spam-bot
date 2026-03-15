@@ -2,6 +2,8 @@ import fs from 'node:fs';
 
 import type { ProtoUpdate, User } from '@app-types/mtproto/mtproto.types';
 
+import { logger } from '@utils/logger';
+
 import type { API } from './api';
 
 /**
@@ -16,7 +18,7 @@ export async function findChannelAdmins(api: API) {
 
   const testChannel = resolvedPeer.chats[0];
 
-  console.info('Search Channel Found:', testChannel);
+  logger.info({ testChannel }, 'Search Channel Found:');
 
   const chatPeer = {
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -33,7 +35,7 @@ export async function findChannelAdmins(api: API) {
     limit: 100,
   });
 
-  console.info(admins);
+  logger.info(admins);
 
   fs.writeFileSync(
     `./admins.${chat}.txt`,

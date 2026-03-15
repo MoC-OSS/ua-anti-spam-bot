@@ -2,6 +2,8 @@
 import { initSwindlersContainer } from '@services/swindlers.container';
 import { swindlersGoogleService } from '@services/swindlers-google.service';
 
+import { logger } from '@utils/logger';
+
 import { autoSwindlers } from './auto-swindlers';
 import { getSwindlersTopUsed } from './get-swindlers-top-used';
 
@@ -13,11 +15,11 @@ const cases = Promise.all([
   swindlersGoogleService.getUsers(),
 ]);
 
-console.info('Loading training messages...');
+logger.info('Loading training messages...');
 
 cases
   .then(async ([positives, newSwindlersBots, testPositives, swindlersCards, swindlersUsers]) => {
-    console.info('Received training messages.');
+    logger.info('Received training messages.');
 
     const { swindlersUrlsService, swindlersCardsService } = await initSwindlersContainer();
 
@@ -35,5 +37,5 @@ cases
     process.exit(0);
   })
   .catch((error) => {
-    console.error('FATAL: Cannot get the cases. Reason:', error);
+    logger.error('FATAL: Cannot get the cases. Reason:', error);
   });

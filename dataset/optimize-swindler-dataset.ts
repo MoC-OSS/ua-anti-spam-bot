@@ -1,5 +1,6 @@
 import { swindlersGoogleService } from '@services/swindlers-google.service';
 
+import { logger } from '@utils/logger';
 import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 import { removeSimilar } from './remove-similar';
@@ -80,6 +81,6 @@ const processPromise = (response: string[]) =>
   // eslint-disable-next-line unicorn/no-process-exit
   process.exit(0);
 })().catch((error) => {
-  console.error('FATAL: Cannot optimize dataset. Reason:', error);
+  logger.error('FATAL: Cannot optimize dataset. Reason:', error);
   throw error;
 });

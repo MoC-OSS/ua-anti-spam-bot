@@ -1,12 +1,13 @@
 import * as typedDotenv from 'typed-dotenv';
 
 import type { EnvironmentConfig } from './types/environment';
+import { logger } from './utils/logger';
 
 const { error, env } = typedDotenv.config();
 
 if (error) {
-  console.error('Something wrong with env variables');
-  console.error(error);
+  logger.error('Something wrong with env variables');
+  logger.error(error);
   // eslint-disable-next-line unicorn/no-process-exit
   process.exit();
 }

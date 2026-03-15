@@ -1,5 +1,7 @@
 import fs from 'node:fs';
 
+import { logger } from '@utils/logger';
+
 import { getTopUsed } from './get-top-used';
 
 /**
@@ -33,8 +35,8 @@ export const getSwindlersTopUsed = (dataset: string[]) => {
     result[word] = count;
   });
 
-  console.info(sorted);
-  console.info(sortedTwo);
+  logger.info(sorted);
+  logger.info(sortedTwo);
 
   // eslint-disable-next-line security/detect-non-literal-fs-filename
   fs.writeFileSync(new URL('strings/swindlers_top_used.json', import.meta.url), JSON.stringify(result, null, 2));

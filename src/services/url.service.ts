@@ -1,3 +1,4 @@
+import { logger } from '@utils/logger';
 import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 import { EXCEPTION_DOMAINS, NON_WORD_REGEX, URL_REGEXP, VALID_URL_REGEXP } from './constants/swindlers-urls.constant';
@@ -43,7 +44,7 @@ export class UrlService {
 
       return `${new URL(validUrl).host}/`;
     } catch (error) {
-      console.error('Cannot get URL domain:', url, error);
+      logger.error({ url, err: error }, 'Cannot get URL domain:');
 
       return url;
     }

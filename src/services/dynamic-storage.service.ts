@@ -6,6 +6,7 @@ import { optimizeText } from 'ukrainian-ml-optimizer';
 
 import { GOOGLE_SHEETS_NAMES } from '@const/google-sheets.const';
 
+import { logger } from '@utils/logger';
 import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 import type { dataset } from '../../dataset/dataset';
@@ -86,7 +87,7 @@ export class DynamicStorageService {
 
     setInterval(() => {
       this.updateStorage().catch((error) => {
-        console.error('Cannot update swindlers on interval. Reason:', error);
+        logger.error('Cannot update swindlers on interval. Reason:', error);
       });
     }, ms('1h'));
   }
@@ -129,7 +130,7 @@ export class DynamicStorageService {
         this.counteroffensiveTriggers = this.parseRegexItems(counteroffensiveTriggers);
         this.nsfwMessages = nsfwMessages;
         this.fetchEmitter.emit('fetch');
-        console.info('got DynamicStorageService messages', new Date());
+        logger.info({ time: new Date() }, 'got DynamicStorageService messages');
       },
     );
   }

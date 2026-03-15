@@ -1,13 +1,15 @@
 import { EXCEPTION_DOMAINS } from '@services/constants/swindlers-urls.constant';
 import { urlService } from '@services/url.service';
 
+import { logger } from '@utils/logger';
+
 describe('UrlService', () => {
   describe('parseUrls', () => {
     it('should parse urls', () => {
       const text = 'test https://url.com/ test url.com';
       const result = urlService.parseUrls(text);
 
-      console.info(text);
+      logger.info(text);
 
       expect(result).toEqual(['https://url.com']);
     });
@@ -16,7 +18,7 @@ describe('UrlService', () => {
       const text = 'test https://url.com/, test url.com. http://24.site/?order=946, http://24privat.site/?order=94696970126<';
       const result = urlService.parseUrls(text);
 
-      console.info(text);
+      logger.info(text);
 
       // eslint-disable-next-line sonarjs/no-clear-text-protocols
       expect(result).toEqual(['https://url.com', 'http://24.site/?order=946', 'http://24privat.site/?order=94696970126']);
@@ -40,7 +42,7 @@ describe('UrlService', () => {
       const text = `https://${EXCEPTION_DOMAINS.join(' https://')}`;
       const result = urlService.parseUrls(text);
 
-      console.info(text);
+      logger.info(text);
 
       expect(result).toEqual([]);
     });

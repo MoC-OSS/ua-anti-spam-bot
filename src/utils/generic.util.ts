@@ -5,6 +5,7 @@ import type { ChatSettings } from '@app-types/session';
 
 import { environmentConfig } from '../config';
 
+import { logger } from './logger';
 import { optimizeWriteContextUtility } from './optimize-write-context.util';
 
 /**
@@ -14,7 +15,7 @@ export function logContext(context: GrammyContext) {
   if (environmentConfig.DEBUG) {
     const writeContext = optimizeWriteContextUtility(context);
 
-    console.info(JSON.stringify(writeContext, null, 2));
+    logger.info(JSON.stringify(writeContext, null, 2));
 
     fs.writeFileSync('./last-ctx.json', `${JSON.stringify(writeContext, null, 2)}\n`);
   }
@@ -173,7 +174,7 @@ export function logSkipMiddleware(context: GrammyContext, reason: string, extra?
   if (environmentConfig.DEBUG || environmentConfig.DEBUG_MIDDLEWARE) {
     // @ts-ignore
 
-    console.info(`Skip due to ${reason} in chat ${context.chat?.title || '$empty_title'}`, extra);
+    logger.info(`Skip due to ${reason} in chat ${context.chat?.title || '$empty_title'}`, extra);
   }
 }
 

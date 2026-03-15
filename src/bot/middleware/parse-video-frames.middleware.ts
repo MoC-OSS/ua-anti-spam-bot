@@ -6,6 +6,7 @@ import type { ParseVideoSuccessResponseBody } from '@app-types/express';
 import type { StateImageParsedFrames } from '@app-types/state';
 
 import { handleError } from '@utils/error-handler';
+import { logger } from '@utils/logger';
 import { videoUtility } from '@utils/video.util';
 
 import { videoService } from '@video/video.service';
@@ -48,7 +49,7 @@ export const parseVideoFrames: GrammyMiddleware = async (context, next) => {
     const { videoFile, videoName } = await videoUtility.downloadVideo(video, fileName);
 
     if (!videoFile) {
-      console.info('IMPOSSIBLE: There is no video.', video);
+      logger.info({ video }, 'IMPOSSIBLE: There is no video.');
 
       return next();
     }

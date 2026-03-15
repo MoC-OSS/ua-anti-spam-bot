@@ -16,6 +16,7 @@ import type { GrammyContext, GrammyMiddleware } from '@app-types/context';
 
 import { handleError } from '@utils/error-handler';
 import { compareDatesWithOffset, getUserData } from '@utils/generic.util';
+import { logger } from '@utils/logger';
 import { telegramUtility } from '@utils/util-instances';
 
 import { environmentConfig } from '../../config';
@@ -47,7 +48,7 @@ export class OnTextListener {
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context: GrammyContext, next: NextFunction) => {
       // TODO use for ctx prod debug
-      // console.info('enter onText ******', ctx.chat?.title, '******', ctx.state.text);
+      // logger.info('enter onText ******', ctx.chat?.title, '******', ctx.state.text);
 
       const message = context.state.text;
       /**
@@ -58,7 +59,7 @@ export class OnTextListener {
       // }
 
       if (!context.chat?.id) {
-        console.error(Date.toString(), 'Cannot access the chat:', context.chat);
+        logger.error({ chat: context.chat, date: Date.toString() }, 'Cannot access the chat:');
 
         return next();
       }
@@ -167,7 +168,7 @@ export class OnTextListener {
               return undefined;
             });
         } catch (error) {
-          console.error('Cannot delete the message. Reason:', error);
+          logger.error({ err: error }, 'Cannot delete the message.');
         }
       }
 

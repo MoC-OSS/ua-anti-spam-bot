@@ -8,6 +8,7 @@ import * as tf from '@tensorflow/tfjs-node';
 import { alarmService } from './services/alarm.service';
 import type { GrammyContext } from './types/context';
 import { sleep } from './utils/generic.util';
+import { logger } from './utils/logger';
 import { getBot } from './bot';
 import { runBotExpressServer } from './bot-express.server';
 import { environmentConfig } from './config';
@@ -22,9 +23,9 @@ import { logsChat } from './creator';
     tf.enableProdMode();
   }
 
-  console.info('Waiting for the old instance to down...');
+  logger.info('Waiting for the old instance to down...');
   await sleep(environmentConfig.ENV === 'local' ? 0 : ms('5s'));
-  console.info('Starting a new instance...');
+  logger.info('Starting a new instance...');
 
   const initialBot = new Bot<GrammyContext>(environmentConfig?.BOT_TOKEN);
   const bot = await getBot(initialBot);
@@ -62,7 +63,7 @@ import { logsChat } from './creator';
     await bot.init();
   }
 
-  console.info(`Bot @${bot.botInfo.username} started!`, new Date().toString());
+  logger.info(`Bot @${bot.botInfo.username} started! ${new Date().toString()}`);
 
   if (environmentConfig.ENV !== 'local') {
     bot.api
@@ -70,7 +71,7 @@ import { logsChat } from './creator';
         parse_mode: 'HTML',
       })
       .catch(() => {
-        console.error('This bot is not authorized in this LOGS chat!');
+        logger.error('This bot is not authorized in this LOGS chat!');
       });
 
     /**
@@ -78,13 +79,13 @@ import { logsChat } from './creator';
      * */
     alarmService.updatesEmitter.on('connect', (reason) => {
       bot.api.sendMessage(logsChat, `🎉 Air Raid Alarm API has been started by ${reason} reason!`).catch(() => {
-        console.error('This bot is not authorized in this LOGS chat!');
+        logger.error('This bot is not authorized in this LOGS chat!');
       });
     });
 
     alarmService.updatesEmitter.on('close', (reason) => {
       bot.api.sendMessage(logsChat, `⛔️ Air Raid Alarm API has been stopped by ${reason} reason!`).catch(() => {
-        console.error('This bot is not authorized in this LOGS chat!');
+        logger.error('This bot is not authorized in this LOGS chat!');
       });
     });
   }
@@ -98,6 +99,6 @@ import { logsChat } from './creator';
 
   process.once('SIGTERM', stopRunner);
 })().catch((error) => {
-  console.error('FATAL: Bot crashed with error:', error);
+  logger.error('FATAL: Bot crashed with error:', error);
   throw error;
 });

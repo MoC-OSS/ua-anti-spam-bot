@@ -2,6 +2,8 @@
 import Queue from 'queue';
 import workerFarm from 'worker-farm';
 
+import { logger } from '@utils/logger';
+
 import type { RemoveSimilarResult } from './remove-similar-logic';
 
 const workers = workerFarm(require.resolve('./remove-similar-logic'), ['execute']);
@@ -61,7 +63,7 @@ export const removeSimilar = async (array: RemoveSimilarArray[], compareRate = 0
     filteredArray.forEach((first, firstIndex, self) => {
       jobQueue.push(async (): Promise<RemoveSimilarFinalResult> => {
         if (firstIndex % 100 === 0) {
-          console.info(firstIndex, 'of', filteredArray.length, ((firstIndex / filteredArray.length) * 100).toFixed(2), '%');
+          logger.info(firstIndex, 'of', filteredArray.length, ((firstIndex / filteredArray.length) * 100).toFixed(2), '%');
         }
 
         for (const [secondIndex, second] of self.entries()) {
@@ -99,7 +101,7 @@ export const removeSimilar = async (array: RemoveSimilarArray[], compareRate = 0
             throw error;
           }
 
-          console.info('all done:', jobQueue.results);
+          logger.info({ results: jobQueue.results }, 'all done:');
           workerFarm.end(workers);
 
           resolve(jobQueue.results as RemoveSimilarFinalResult[][]);

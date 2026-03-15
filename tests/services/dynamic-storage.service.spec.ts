@@ -1,6 +1,8 @@
 import { mockDataset, mockGoogleService, mockSwindlersGoogleService } from '@services/_mocks/index.mocks';
 import { DynamicStorageService } from '@services/dynamic-storage.service';
 
+import { logger } from '@utils/logger';
+
 /**
  * @type {DynamicStorageService}
  * */
@@ -26,7 +28,7 @@ describe('DynamicStorageService', () => {
 
   it('should emit event on fetch dataset', async () => {
     dynamicStorageService.fetchEmitter.on('fetch', () => {
-      console.info('emmited');
+      logger.info('emmited');
       expect(true).toBeTruthy();
     });
 

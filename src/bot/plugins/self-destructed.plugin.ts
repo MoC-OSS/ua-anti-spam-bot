@@ -3,6 +3,8 @@ import type { Context, NextFunction } from 'grammy';
 
 import type { ParseMode } from 'typegram';
 
+import { logger } from '@utils/logger';
+
 export type SelfDestructedFlavor<TContext extends Context> = TContext & {
   replyWithSelfDestructed: TContext['reply'];
   replyWithSelfDestructedHTML: TContext['reply'];
@@ -41,7 +43,7 @@ const buildReplyWithParseMode =
 
     setTimeout(() => {
       callback(context, replyResult).catch((error) => {
-        console.error('Cannot self destruct the message. Error:', error);
+        logger.error('Cannot self destruct the message. Error:', error);
       });
     }, timeout);
 
@@ -64,7 +66,7 @@ const buildReplyPhotoWithParseMode =
 
     setTimeout(() => {
       callback(context, replyResult).catch((error) => {
-        console.error('Cannot self destruct the message. Error:', error);
+        logger.error('Cannot self destruct the message. Error:', error);
       });
     }, timeout);
 

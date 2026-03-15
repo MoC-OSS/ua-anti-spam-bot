@@ -1,5 +1,7 @@
 import { mentionService } from '@services/mention.service';
 
+import { logger } from '@utils/logger';
+
 const expectedMentions = ['@test_mention', '@another_mention'];
 const expectedUrls = ['t.me/test_mention', 'https://t.me/another_mention', 'not-t.me/not-a-mention'];
 
@@ -16,7 +18,7 @@ describe('MentionService', () => {
       const text = `test message with ${expectedUrls[0]}. Find it here: ${expectedUrls[1]}. Should not match: ${expectedUrls[2]}`;
       const result = mentionService.parseMentions(text);
 
-      console.info(text);
+      logger.info(text);
 
       expect(result).toEqual(expectedMentions);
     });
@@ -32,7 +34,7 @@ describe('MentionService', () => {
       const text = `@another_test ${expectedUrls[0]}. Find it here: ${expectedMentions[1]} ${expectedUrls[1]}. Should not match: ${expectedMentions[2]} ${expectedUrls[2]}`;
       const result = mentionService.parseMentions(text);
 
-      console.info(text);
+      logger.info(text);
 
       expect(result).toEqual(['@another_test', '@another_mention', '@test_mention']);
     });
@@ -56,7 +58,7 @@ describe('MentionService', () => {
       const text = `@another_test ${exceptionMentions[0]}`;
       const result = mentionService.parseMentions(text, exceptionMentions);
 
-      console.info(text);
+      logger.info(text);
 
       expect(result).toEqual(['@another_test']);
     });

@@ -5,6 +5,7 @@ import express from 'express';
 
 import { apiRouter } from './express-logic/api.router';
 import type { GrammyContext } from './types/context';
+import { logger } from './utils/logger';
 import { environmentConfig } from './config';
 
 export const runBotExpressServer = (bot: Bot<GrammyContext>) => {
@@ -17,7 +18,7 @@ export const runBotExpressServer = (bot: Bot<GrammyContext>) => {
   app.get('/health-check', (request, response) => response.json({ status: 'ok' }));
 
   app.listen(environmentConfig.BOT_PORT, environmentConfig.BOT_HOST, () => {
-    console.info(`Bot-server started on https://${environmentConfig.BOT_HOST}:${environmentConfig.BOT_PORT}`);
+    logger.info(`Bot-server started on https://${environmentConfig.BOT_HOST}:${environmentConfig.BOT_PORT}`);
   });
 
   return app;

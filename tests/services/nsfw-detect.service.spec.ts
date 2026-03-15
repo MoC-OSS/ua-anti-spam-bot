@@ -2,6 +2,8 @@ import { getMockDynamicStorageService } from '@services/_mocks/index.mocks';
 import type { DynamicStorageService } from '@services/dynamic-storage.service';
 import { NsfwDetectService } from '@services/nsfw-detect.service';
 
+import { logger } from '@utils/logger';
+
 /**
  * @type {SwindlersBotsService}
  * */
@@ -17,7 +19,7 @@ describe('NsfwDetectService', () => {
   it('should compare new message', () => {
     const result = nsfwDetectService.isSpamMessage('Радую голой фоточкой всіх нових в каналі');
 
-    console.info(result);
+    logger.info(result);
 
     expect(result.isSpam).toEqual(true);
   });
@@ -40,7 +42,7 @@ describe('NsfwDetectService', () => {
     it('should process message when find any nsfw message', () => {
       const result = nsfwDetectService.processMessage('Радую голой фоточкой всіх нових в каналі');
 
-      console.info(result);
+      logger.info(result);
 
       expect(result).toBeTruthy();
       expect(result?.isSpam).toBeTruthy();

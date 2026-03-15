@@ -6,6 +6,8 @@ import { redisService } from '@services/redis.service';
 
 import type { ChatSession, Session } from '@app-types/session';
 
+import { logger } from '@utils/logger';
+
 async function processSession() {
   try {
     const sessionPath = './temp/telegraf-session.json';
@@ -46,7 +48,7 @@ async function processSession() {
     // eslint-disable-next-line security/detect-non-literal-fs-filename
     fs.writeFileSync(new URL('temp/processed-telegraf-session.tsv', import.meta.url), csv, { encoding: 'utf8' });
   } catch (error) {
-    console.error('Failed to load sessions:', error);
+    logger.error({ err: error }, 'Failed to load sessions:');
   }
 }
 

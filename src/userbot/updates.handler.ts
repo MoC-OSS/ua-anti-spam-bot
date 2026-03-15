@@ -17,6 +17,7 @@ import type { TensorService } from '@tensor/tensor.service';
 import type { ProtoUpdate } from '@app-types/mtproto/mtproto.types';
 import type { SwindlerType } from '@app-types/swindlers';
 
+import { logger } from '@utils/logger';
 import { removeSystemInformationUtility } from '@utils/remove-system-information.util';
 
 import type { loadUserbotDatasetExtras } from '../../dataset/dataset';
@@ -62,7 +63,7 @@ export class UpdatesHandler {
     this.swindlersTopUsed = Object.keys(datasetExtras.swindlers_top_used);
 
     if (this.swindlersTopUsed.length === 0) {
-      console.info('WARN: swindlers_top_used are not generated! You need to run `npm run download-swindlers` to generate this file!');
+      logger.info('WARN: swindlers_top_used are not generated! You need to run `npm run download-swindlers` to generate this file!');
     }
   }
 
@@ -102,7 +103,7 @@ export class UpdatesHandler {
      * @param {SwindlerType} from
      * */
     const processFoundSwindler = async (spamRate: number, from: SwindlerType) => {
-      console.info(true, from, spamRate, message);
+      logger.info(true, from, spamRate, message);
 
       const isGoodMatch = matchArray.has(from);
       const isRateGood = from !== 'tensor' || spamRate > 0.95;
@@ -162,7 +163,7 @@ export class UpdatesHandler {
 
       if (isUnique) {
         await this.mtProtoClient.sendPeerMessage(message, this.chatPeers.helpChat);
-        console.info(null, spamResult.results?.foundTensor?.spamRate, message);
+        logger.info({ spamRate: spamResult.results?.foundTensor?.spamRate, message });
 
         return { spam: false, reason: 'help message' };
       }
@@ -204,7 +205,7 @@ export class UpdatesHandler {
 
       const { isSpam, spamRate } = await this.tensorService.predict(clearMessageText, 0.7);
 
-      console.info(isSpam, spamRate, message);
+      logger.info({ isSpam, spamRate, message });
 
       if (isSpam && spamRate < 0.9) {
         const isNew = await this.userbotStorage.handleMessage(clearMessageText);
@@ -224,13 +225,11 @@ export class UpdatesHandler {
         }
 
         if (isNew) {
-          this.mtProtoClient
-            .sendPeerMessage(clearMessageText, this.chatPeers.trainingChat)
-            .catch(() => console.error('send message error'));
+          this.mtProtoClient.sendPeerMessage(clearMessageText, this.chatPeers.trainingChat).catch(() => logger.error('send message error'));
         }
       }
     } catch (error) {
-      console.error('Failed to load entities:', error);
+      logger.error({ err: error }, 'Failed to load entities:');
     }
   }
 }

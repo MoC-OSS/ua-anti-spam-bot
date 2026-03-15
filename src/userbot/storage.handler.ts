@@ -6,6 +6,8 @@ import { googleService } from '@services/google.service';
 import { redisService } from '@services/redis.service';
 import { swindlersGoogleService } from '@services/swindlers-google.service';
 
+import { logger } from '@utils/logger';
+
 import { environmentConfig } from '../config';
 
 const limits = {
@@ -30,7 +32,7 @@ export class UserbotStorage {
     ]);
 
     return cases.then(([positives, negatives, swindlerPositives, helpMessages, redisHelp]) => {
-      console.info('got TrainingTempMessages');
+      logger.info('got TrainingTempMessages');
       this.lastMessages = [...positives, ...negatives];
       this.swindlerMessages = swindlerPositives;
       this.helpMessages = [...helpMessages, ...(Array.isArray(redisHelp) ? redisHelp : [])].filter(Boolean);

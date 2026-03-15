@@ -68,6 +68,7 @@ import { initNsfwTensor } from './tensor/nsfw-tensor.service';
 import { initTensor } from './tensor/tensor.service';
 import type { GrammyContext, GrammyMenuContext } from './types/context';
 import { globalErrorHandler, wrapperErrorHandler } from './utils/error-handler';
+import { logger } from './utils/logger';
 import { videoUtility } from './utils/video.util';
 import { environmentConfig } from './config';
 import { swindlerBotsChatId, swindlerHelpChatId, swindlerMessageChatId } from './creator';
@@ -91,7 +92,7 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
  * */
 export const getBot = async (bot: Bot<GrammyContext>) => {
   if (!environmentConfig.UNIT_TESTING) {
-    await redisClient.client.connect().then(() => console.info('Redis client successfully started'));
+    await redisClient.client.connect().then(() => logger.info('Redis client successfully started'));
   }
 
   const s3Service = new S3Service();
