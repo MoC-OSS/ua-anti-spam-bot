@@ -63,6 +63,10 @@ export class CommandSetter {
       { command: 'status', description: this.buildStatus() },
     ];
 
-    await this.bot.api.setMyCommands(this.commands);
+    try {
+      await this.bot.api.setMyCommands(this.commands);
+    } catch (error) {
+      console.error('Failed to register bot commands (non-fatal):', (error as Error).message);
+    }
   }
 }

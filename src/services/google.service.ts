@@ -30,6 +30,13 @@ export class GoogleService {
     try {
       const keys = JSON.parse(environmentConfig.GOOGLE_CREDITS) as JWTInput;
 
+      // Normalize the private key: replace literal \n escape sequences with actual newlines.
+      // This is needed when the key is stored in .env files where JSON escape sequences
+      // are not expanded by the dotenv parser.
+      if (keys.private_key) {
+        keys.private_key = keys.private_key.replaceAll(String.raw`\n`, '\n');
+      }
+
       const client = new JWT({
         email: keys.client_email,
         key: keys.private_key,

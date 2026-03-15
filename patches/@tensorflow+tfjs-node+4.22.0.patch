@@ -1,0 +1,309 @@
+diff --git a/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Makefile b/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Makefile
+index 9bdb236..745f575 100644
+--- a/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Makefile
++++ b/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Makefile
+@@ -336,8 +336,8 @@ ifeq ($(strip $(foreach prefix,$(NO_LOAD),\
+ endif
+ 
+ quiet_cmd_regen_makefile = ACTION Regenerating $@
+-cmd_regen_makefile = cd $(srcdir); /Users/master/.nvm/versions/node/v24.14.0/lib/node_modules/npm/node_modules/node-gyp/gyp/gyp_main.py -fmake --ignore-environment "-Dlibrary=shared_library" "-Dvisibility=default" "-Dnode_root_dir=/Users/master/Library/Caches/node-gyp/24.14.0" "-Dnode_gyp_dir=/Users/master/.nvm/versions/node/v24.14.0/lib/node_modules/npm/node_modules/node-gyp" "-Dnode_lib_file=/Users/master/Library/Caches/node-gyp/24.14.0/<(target_arch)/node.lib" "-Dmodule_root_dir=/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node" "-Dnode_engine=v8" "--depth=." "-Goutput_dir=." "--generator-output=build" -I/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/build/config.gypi -I/Users/master/.nvm/versions/node/v24.14.0/lib/node_modules/npm/node_modules/node-gyp/addon.gypi -I/Users/master/Library/Caches/node-gyp/24.14.0/include/node/common.gypi "--toplevel-dir=." binding.gyp
+-Makefile: $(srcdir)/../../../../../../../../../../Users/master/.nvm/versions/node/v24.14.0/lib/node_modules/npm/node_modules/node-gyp/addon.gypi $(srcdir)/../../../../../../../../../../Users/master/Library/Caches/node-gyp/24.14.0/include/node/common.gypi $(srcdir)/binding.gyp $(srcdir)/build/config.gypi
++cmd_regen_makefile = cd $(srcdir); /Users/master/.nvm/versions/node/v24.14.0/lib/node_modules/npm/node_modules/node-gyp/gyp/gyp_main.py -fmake --ignore-environment "-Dlibrary=shared_library" "-Dvisibility=default" "-Dnode_root_dir=/Users/master/Library/Caches/node-gyp/24.14.0" "-Dnode_gyp_dir=/Users/master/.nvm/versions/node/v24.14.0/lib/node_modules/npm/node_modules/node-gyp" "-Dnode_lib_file=/Users/master/Library/Caches/node-gyp/24.14.0/<(target_arch)/node.lib" "-Dmodule_root_dir=/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node" "-Dnode_engine=v8" "--depth=." "-Goutput_dir=." "--generator-output=build" -I/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/build/config.gypi -I/Users/master/.nvm/versions/node/v24.14.0/lib/node_modules/npm/node_modules/node-gyp/addon.gypi -I/Users/master/Library/Caches/node-gyp/24.14.0/include/node/common.gypi "--toplevel-dir=." binding.gyp
++Makefile: $(srcdir)/../../../../../../../.nvm/versions/node/v24.14.0/lib/node_modules/npm/node_modules/node-gyp/addon.gypi $(srcdir)/../../../../../../../Library/Caches/node-gyp/24.14.0/include/node/common.gypi $(srcdir)/binding.gyp $(srcdir)/build/config.gypi
+ 	$(call do_cmd,regen_makefile)
+ 
+ # "all" is a concatenation of the "all" targets from all the included
+diff --git a/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/.deps/Release/obj.target/tfjs_binding/binding/tfjs_backend.o.d b/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/.deps/Release/obj.target/tfjs_binding/binding/tfjs_backend.o.d
+index cf81f7e..e5564a0 100644
+--- a/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/.deps/Release/obj.target/tfjs_binding/binding/tfjs_backend.o.d
++++ b/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/.deps/Release/obj.target/tfjs_binding/binding/tfjs_backend.o.d
+@@ -1,20 +1,20 @@
+-cmd_Release/obj.target/tfjs_binding/binding/tfjs_backend.o := c++ -o Release/obj.target/tfjs_binding/binding/tfjs_backend.o ../binding/tfjs_backend.cc '-DNODE_GYP_MODULE_NAME=tfjs_binding' '-DUSING_UV_SHARED=1' '-DUSING_V8_SHARED=1' '-DV8_DEPRECATION_WARNINGS=1' '-D_GLIBCXX_USE_CXX11_ABI=1' '-D_FILE_OFFSET_BITS=64' '-D_DARWIN_USE_64_BIT_INODE=1' '-D_LARGEFILE_SOURCE' '-DOPENSSL_NO_PINSHARED' '-DOPENSSL_THREADS' '-DBUILDING_NODE_EXTENSION' -I/Users/master/Library/Caches/node-gyp/24.14.0/include/node -I/Users/master/Library/Caches/node-gyp/24.14.0/src -I/Users/master/Library/Caches/node-gyp/24.14.0/deps/openssl/config -I/Users/master/Library/Caches/node-gyp/24.14.0/deps/openssl/openssl/include -I/Users/master/Library/Caches/node-gyp/24.14.0/deps/uv/include -I/Users/master/Library/Caches/node-gyp/24.14.0/deps/zlib -I/Users/master/Library/Caches/node-gyp/24.14.0/deps/v8/include -I../.. -I/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include  -O3 -gdwarf-2 -fno-strict-aliasing -mmacosx-version-min=13.5 -arch arm64 -Wall -Wendif-labels -W -Wno-unused-parameter -std=gnu++20 -stdlib=libc++ -fno-rtti -fno-exceptions -MMD -MF ./Release/.deps/Release/obj.target/tfjs_binding/binding/tfjs_backend.o.d.raw   -c
++cmd_Release/obj.target/tfjs_binding/binding/tfjs_backend.o := c++ -o Release/obj.target/tfjs_binding/binding/tfjs_backend.o ../binding/tfjs_backend.cc '-DNODE_GYP_MODULE_NAME=tfjs_binding' '-DUSING_UV_SHARED=1' '-DUSING_V8_SHARED=1' '-DV8_DEPRECATION_WARNINGS=1' '-D_GLIBCXX_USE_CXX11_ABI=1' '-D_FILE_OFFSET_BITS=64' '-D_DARWIN_USE_64_BIT_INODE=1' '-D_LARGEFILE_SOURCE' '-DOPENSSL_NO_PINSHARED' '-DOPENSSL_THREADS' '-DBUILDING_NODE_EXTENSION' -I/Users/master/Library/Caches/node-gyp/24.14.0/include/node -I/Users/master/Library/Caches/node-gyp/24.14.0/src -I/Users/master/Library/Caches/node-gyp/24.14.0/deps/openssl/config -I/Users/master/Library/Caches/node-gyp/24.14.0/deps/openssl/openssl/include -I/Users/master/Library/Caches/node-gyp/24.14.0/deps/uv/include -I/Users/master/Library/Caches/node-gyp/24.14.0/deps/zlib -I/Users/master/Library/Caches/node-gyp/24.14.0/deps/v8/include -I../.. -I/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include  -O3 -gdwarf-2 -fno-strict-aliasing -mmacosx-version-min=13.5 -arch arm64 -Wall -Wendif-labels -W -Wno-unused-parameter -std=gnu++20 -stdlib=libc++ -fno-rtti -fno-exceptions -MMD -MF ./Release/.deps/Release/obj.target/tfjs_binding/binding/tfjs_backend.o.d.raw   -c
+ Release/obj.target/tfjs_binding/binding/tfjs_backend.o: \
+   ../binding/tfjs_backend.cc ../binding/tfjs_backend.h \
+   /Users/master/Library/Caches/node-gyp/24.14.0/include/node/node_api.h \
+   /Users/master/Library/Caches/node-gyp/24.14.0/include/node/js_native_api.h \
+   /Users/master/Library/Caches/node-gyp/24.14.0/include/node/js_native_api_types.h \
+   /Users/master/Library/Caches/node-gyp/24.14.0/include/node/node_api_types.h \
+-  /private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/c_api.h \
+-  /private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_attrtype.h \
+-  /private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_datatype.h \
+-  /private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_status.h \
+-  /private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_tensor.h \
+-  /private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/c_api_macros.h \
+-  /private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_tstring.h \
+-  /private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/core/platform/ctstring.h \
+-  /private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/core/platform/ctstring_internal.h \
+-  /private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/eager/c_api.h \
++  /Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/c_api.h \
++  /Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_attrtype.h \
++  /Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_datatype.h \
++  /Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_status.h \
++  /Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_tensor.h \
++  /Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/c_api_macros.h \
++  /Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_tstring.h \
++  /Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/core/platform/ctstring.h \
++  /Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/core/platform/ctstring_internal.h \
++  /Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/eager/c_api.h \
+   ../binding/napi_auto_ref.h ../binding/utils.h \
+   ../binding/tf_auto_status.h ../binding/tf_auto_tensor.h \
+   ../binding/tfe_auto_op.h
+@@ -24,16 +24,16 @@ Release/obj.target/tfjs_binding/binding/tfjs_backend.o: \
+ /Users/master/Library/Caches/node-gyp/24.14.0/include/node/js_native_api.h:
+ /Users/master/Library/Caches/node-gyp/24.14.0/include/node/js_native_api_types.h:
+ /Users/master/Library/Caches/node-gyp/24.14.0/include/node/node_api_types.h:
+-/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/c_api.h:
+-/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_attrtype.h:
+-/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_datatype.h:
+-/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_status.h:
+-/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_tensor.h:
+-/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/c_api_macros.h:
+-/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_tstring.h:
+-/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/core/platform/ctstring.h:
+-/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/core/platform/ctstring_internal.h:
+-/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/eager/c_api.h:
++/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/c_api.h:
++/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_attrtype.h:
++/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_datatype.h:
++/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_status.h:
++/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_tensor.h:
++/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/c_api_macros.h:
++/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_tstring.h:
++/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/core/platform/ctstring.h:
++/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/core/platform/ctstring_internal.h:
++/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/eager/c_api.h:
+ ../binding/napi_auto_ref.h:
+ ../binding/utils.h:
+ ../binding/tf_auto_status.h:
+diff --git a/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/.deps/Release/obj.target/tfjs_binding/binding/tfjs_binding.o.d b/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/.deps/Release/obj.target/tfjs_binding/binding/tfjs_binding.o.d
+index e451e13..2a6a938 100644
+--- a/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/.deps/Release/obj.target/tfjs_binding/binding/tfjs_binding.o.d
++++ b/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/.deps/Release/obj.target/tfjs_binding/binding/tfjs_binding.o.d
+@@ -1,4 +1,4 @@
+-cmd_Release/obj.target/tfjs_binding/binding/tfjs_binding.o := c++ -o Release/obj.target/tfjs_binding/binding/tfjs_binding.o ../binding/tfjs_binding.cc '-DNODE_GYP_MODULE_NAME=tfjs_binding' '-DUSING_UV_SHARED=1' '-DUSING_V8_SHARED=1' '-DV8_DEPRECATION_WARNINGS=1' '-D_GLIBCXX_USE_CXX11_ABI=1' '-D_FILE_OFFSET_BITS=64' '-D_DARWIN_USE_64_BIT_INODE=1' '-D_LARGEFILE_SOURCE' '-DOPENSSL_NO_PINSHARED' '-DOPENSSL_THREADS' '-DBUILDING_NODE_EXTENSION' -I/Users/master/Library/Caches/node-gyp/24.14.0/include/node -I/Users/master/Library/Caches/node-gyp/24.14.0/src -I/Users/master/Library/Caches/node-gyp/24.14.0/deps/openssl/config -I/Users/master/Library/Caches/node-gyp/24.14.0/deps/openssl/openssl/include -I/Users/master/Library/Caches/node-gyp/24.14.0/deps/uv/include -I/Users/master/Library/Caches/node-gyp/24.14.0/deps/zlib -I/Users/master/Library/Caches/node-gyp/24.14.0/deps/v8/include -I../.. -I/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include  -O3 -gdwarf-2 -fno-strict-aliasing -mmacosx-version-min=13.5 -arch arm64 -Wall -Wendif-labels -W -Wno-unused-parameter -std=gnu++20 -stdlib=libc++ -fno-rtti -fno-exceptions -MMD -MF ./Release/.deps/Release/obj.target/tfjs_binding/binding/tfjs_binding.o.d.raw   -c
++cmd_Release/obj.target/tfjs_binding/binding/tfjs_binding.o := c++ -o Release/obj.target/tfjs_binding/binding/tfjs_binding.o ../binding/tfjs_binding.cc '-DNODE_GYP_MODULE_NAME=tfjs_binding' '-DUSING_UV_SHARED=1' '-DUSING_V8_SHARED=1' '-DV8_DEPRECATION_WARNINGS=1' '-D_GLIBCXX_USE_CXX11_ABI=1' '-D_FILE_OFFSET_BITS=64' '-D_DARWIN_USE_64_BIT_INODE=1' '-D_LARGEFILE_SOURCE' '-DOPENSSL_NO_PINSHARED' '-DOPENSSL_THREADS' '-DBUILDING_NODE_EXTENSION' -I/Users/master/Library/Caches/node-gyp/24.14.0/include/node -I/Users/master/Library/Caches/node-gyp/24.14.0/src -I/Users/master/Library/Caches/node-gyp/24.14.0/deps/openssl/config -I/Users/master/Library/Caches/node-gyp/24.14.0/deps/openssl/openssl/include -I/Users/master/Library/Caches/node-gyp/24.14.0/deps/uv/include -I/Users/master/Library/Caches/node-gyp/24.14.0/deps/zlib -I/Users/master/Library/Caches/node-gyp/24.14.0/deps/v8/include -I../.. -I/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include  -O3 -gdwarf-2 -fno-strict-aliasing -mmacosx-version-min=13.5 -arch arm64 -Wall -Wendif-labels -W -Wno-unused-parameter -std=gnu++20 -stdlib=libc++ -fno-rtti -fno-exceptions -MMD -MF ./Release/.deps/Release/obj.target/tfjs_binding/binding/tfjs_binding.o.d.raw   -c
+ Release/obj.target/tfjs_binding/binding/tfjs_binding.o: \
+   ../binding/tfjs_binding.cc \
+   /Users/master/Library/Caches/node-gyp/24.14.0/include/node/node_api.h \
+@@ -6,16 +6,16 @@ Release/obj.target/tfjs_binding/binding/tfjs_binding.o: \
+   /Users/master/Library/Caches/node-gyp/24.14.0/include/node/js_native_api_types.h \
+   /Users/master/Library/Caches/node-gyp/24.14.0/include/node/node_api_types.h \
+   ../binding/tfjs_backend.h \
+-  /private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/c_api.h \
+-  /private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_attrtype.h \
+-  /private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_datatype.h \
+-  /private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_status.h \
+-  /private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_tensor.h \
+-  /private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/c_api_macros.h \
+-  /private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_tstring.h \
+-  /private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/core/platform/ctstring.h \
+-  /private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/core/platform/ctstring_internal.h \
+-  /private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/eager/c_api.h \
++  /Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/c_api.h \
++  /Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_attrtype.h \
++  /Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_datatype.h \
++  /Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_status.h \
++  /Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_tensor.h \
++  /Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/c_api_macros.h \
++  /Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_tstring.h \
++  /Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/core/platform/ctstring.h \
++  /Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/core/platform/ctstring_internal.h \
++  /Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/eager/c_api.h \
+   ../binding/utils.h ../binding/tf_auto_status.h
+ ../binding/tfjs_binding.cc:
+ /Users/master/Library/Caches/node-gyp/24.14.0/include/node/node_api.h:
+@@ -23,15 +23,15 @@ Release/obj.target/tfjs_binding/binding/tfjs_binding.o: \
+ /Users/master/Library/Caches/node-gyp/24.14.0/include/node/js_native_api_types.h:
+ /Users/master/Library/Caches/node-gyp/24.14.0/include/node/node_api_types.h:
+ ../binding/tfjs_backend.h:
+-/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/c_api.h:
+-/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_attrtype.h:
+-/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_datatype.h:
+-/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_status.h:
+-/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_tensor.h:
+-/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/c_api_macros.h:
+-/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_tstring.h:
+-/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/core/platform/ctstring.h:
+-/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/core/platform/ctstring_internal.h:
+-/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/eager/c_api.h:
++/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/c_api.h:
++/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_attrtype.h:
++/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_datatype.h:
++/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_status.h:
++/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_tensor.h:
++/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/c_api_macros.h:
++/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/tf_tstring.h:
++/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/core/platform/ctstring.h:
++/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/core/platform/ctstring_internal.h:
++/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include/tensorflow/c/eager/c_api.h:
+ ../binding/utils.h:
+ ../binding/tf_auto_status.h:
+diff --git a/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/.deps/Release/tfjs_binding.node.d b/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/.deps/Release/tfjs_binding.node.d
+index 50e2adb..f8dd43c 100644
+--- a/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/.deps/Release/tfjs_binding.node.d
++++ b/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/.deps/Release/tfjs_binding.node.d
+@@ -1 +1 @@
+-cmd_Release/tfjs_binding.node := c++ -bundle -undefined dynamic_lookup -Wl,-search_paths_first -mmacosx-version-min=13.5 -arch arm64 -L./Release -stdlib=libc++  -o Release/tfjs_binding.node Release/obj.target/tfjs_binding/binding/tfjs_backend.o Release/obj.target/tfjs_binding/binding/tfjs_binding.o /private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/lib/libtensorflow.2.dylib /private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/lib/libtensorflow_framework.2.dylib
++cmd_Release/tfjs_binding.node := c++ -bundle -undefined dynamic_lookup -Wl,-search_paths_first -mmacosx-version-min=13.5 -arch arm64 -L./Release -stdlib=libc++  -o Release/tfjs_binding.node Release/obj.target/tfjs_binding/binding/tfjs_backend.o Release/obj.target/tfjs_binding/binding/tfjs_binding.o /Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/lib/libtensorflow.2.dylib /Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/lib/libtensorflow_framework.2.dylib
+diff --git a/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/.deps/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node.d b/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/.deps/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node.d
+new file mode 100644
+index 0000000..1622c90
+--- /dev/null
++++ b/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/.deps/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node.d
+@@ -0,0 +1 @@
++cmd_/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node := ln -f "Release/tfjs_binding.node" "/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node" 2>/dev/null || (rm -rf "/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node" && cp -af "Release/tfjs_binding.node" "/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node")
+diff --git a/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/.deps/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node.d b/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/.deps/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node.d
+deleted file mode 100644
+index 060ffcc..0000000
+--- a/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/.deps/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node.d
++++ /dev/null
+@@ -1 +0,0 @@
+-cmd_/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node := ln -f "Release/tfjs_binding.node" "/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node" 2>/dev/null || (rm -rf "/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node" && cp -af "Release/tfjs_binding.node" "/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node")
+diff --git a/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/obj.target/tfjs_binding/binding/tfjs_backend.o b/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/obj.target/tfjs_binding/binding/tfjs_backend.o
+index a7849c7..774408a 100644
+Binary files a/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/obj.target/tfjs_binding/binding/tfjs_backend.o and b/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/obj.target/tfjs_binding/binding/tfjs_backend.o differ
+diff --git a/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/obj.target/tfjs_binding/binding/tfjs_binding.o b/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/obj.target/tfjs_binding/binding/tfjs_binding.o
+index 726f711..870c118 100644
+Binary files a/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/obj.target/tfjs_binding/binding/tfjs_binding.o and b/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/obj.target/tfjs_binding/binding/tfjs_binding.o differ
+diff --git a/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/tfjs_binding.node b/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/tfjs_binding.node
+index c1ce2a0..8732102 100755
+Binary files a/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/tfjs_binding.node and b/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/Release/tfjs_binding.node differ
+diff --git a/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/action_after_build.target.mk b/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/action_after_build.target.mk
+index d402732..9d03402 100644
+--- a/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/action_after_build.target.mk
++++ b/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/action_after_build.target.mk
+@@ -3,12 +3,12 @@
+ TOOLSET := target
+ TARGET := action_after_build
+ ### Generated for copy rule.
+-/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node: TOOLSET := $(TOOLSET)
+-/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node: $(builddir)/tfjs_binding.node FORCE_DO_CMD
++/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node: TOOLSET := $(TOOLSET)
++/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node: $(builddir)/tfjs_binding.node FORCE_DO_CMD
+ 	$(call do_cmd,copy)
+ 
+-all_deps += /private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node
+-binding_gyp_action_after_build_target_copies = /private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node
++all_deps += /Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node
++binding_gyp_action_after_build_target_copies = /Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node
+ 
+ ### Rules for final target.
+ # Build our special outputs first.
+diff --git a/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/config.gypi b/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/config.gypi
+index aed434e..78d3404 100644
+--- a/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/config.gypi
++++ b/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/config.gypi
+@@ -498,9 +498,9 @@
+     "python": "/Library/Developer/CommandLineTools/usr/bin/python3",
+     "standalone_static_library": 1,
+     "fallback_to_build": "true",
+-    "module": "/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node",
++    "module": "/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node",
+     "module_name": "tfjs_binding",
+-    "module_path": "/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/lib/napi-v8",
++    "module_path": "/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/lib/napi-v8",
+     "napi_version": "10",
+     "node_abi_napi": "napi",
+     "node_napi_label": "napi-v8",
+@@ -508,12 +508,11 @@
+     "user_agent": "npm/11.9.0 node/v24.14.0 darwin arm64 workspaces/false",
+     "cache": "/Users/master/.npm",
+     "node_gyp": "/Users/master/.nvm/versions/node/v24.14.0/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js",
+-    "force": "true",
+     "npm_version": "11.9.0",
+-    "init_module": "/Users/master/.npm-init.js",
+     "userconfig": "/Users/master/.npmrc",
++    "init_module": "/Users/master/.npm-init.js",
+     "globalconfig": "/Users/master/.nvm/versions/node/v24.14.0/etc/npmrc",
+-    "local_prefix": "/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68",
++    "local_prefix": "/Users/master/Documents/Projects/own/ua-anti-spam-bot",
+     "global_prefix": "/Users/master/.nvm/versions/node/v24.14.0"
+   },
+   "target_defaults": {
+diff --git a/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/tfjs_binding.target.mk b/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/tfjs_binding.target.mk
+index 7d36f15..754c818 100644
+--- a/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/tfjs_binding.target.mk
++++ b/node_modules/@tensorflow/tfjs-node/build-tmp-napi-v8/tfjs_binding.target.mk
+@@ -55,7 +55,7 @@ INCS_Debug := \
+ 	-I/Users/master/Library/Caches/node-gyp/24.14.0/deps/zlib \
+ 	-I/Users/master/Library/Caches/node-gyp/24.14.0/deps/v8/include \
+ 	-I$(srcdir)/.. \
+-	-I/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include
++	-I/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include
+ 
+ DEFS_Release := \
+ 	'-DNODE_GYP_MODULE_NAME=tfjs_binding' \
+@@ -108,7 +108,7 @@ INCS_Release := \
+ 	-I/Users/master/Library/Caches/node-gyp/24.14.0/deps/zlib \
+ 	-I/Users/master/Library/Caches/node-gyp/24.14.0/deps/v8/include \
+ 	-I$(srcdir)/.. \
+-	-I/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/include
++	-I/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/include
+ 
+ OBJS := \
+ 	$(obj).target/$(TARGET)/binding/tfjs_backend.o \
+@@ -167,8 +167,8 @@ LIBTOOLFLAGS_Release := \
+ 	-Wl,-search_paths_first
+ 
+ LIBS := \
+-	/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/lib/libtensorflow.2.dylib \
+-	/private/var/folders/vj/6qqp9t_n59551v5tv8xxp_300000gn/T/tmp-18794-Vmgt9W3sis68/node_modules/@tensorflow/tfjs-node/deps/lib/libtensorflow_framework.2.dylib
++	/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/lib/libtensorflow.2.dylib \
++	/Users/master/Documents/Projects/own/ua-anti-spam-bot/node_modules/@tensorflow/tfjs-node/deps/lib/libtensorflow_framework.2.dylib
+ 
+ $(builddir)/tfjs_binding.node: GYP_LDFLAGS := $(LDFLAGS_$(BUILDTYPE))
+ $(builddir)/tfjs_binding.node: LIBS := $(LIBS)
+diff --git a/node_modules/@tensorflow/tfjs-node/dist/kernels/TopK.js b/node_modules/@tensorflow/tfjs-node/dist/kernels/TopK.js
+index c701385..98fc98b 100644
+--- a/node_modules/@tensorflow/tfjs-node/dist/kernels/TopK.js
++++ b/node_modules/@tensorflow/tfjs-node/dist/kernels/TopK.js
+@@ -27,8 +27,8 @@ exports.topKConfig = {
+         var x = args.inputs.x;
+         var backend = args.backend;
+         var _a = args.attrs, k = _a.k, sorted = _a.sorted;
+-        var kCount = (0, util_1.isNullOrUndefined)(k) ? 1 : k;
+-        var isSorted = (0, util_1.isNullOrUndefined)(sorted) ? true : sorted;
++        var kCount = k == null ? 1 : k;
++        var isSorted = sorted == null ? true : sorted;
+         var opAttrs = [
+             { name: 'sorted', type: backend.binding.TF_ATTR_BOOL, value: isSorted },
+             (0, nodejs_kernel_backend_1.createTensorsTypeOpAttr)('T', x.dtype),
+diff --git a/node_modules/@tensorflow/tfjs-node/dist/nodejs_kernel_backend.js b/node_modules/@tensorflow/tfjs-node/dist/nodejs_kernel_backend.js
+index 988ea4e..b2e11a8 100644
+--- a/node_modules/@tensorflow/tfjs-node/dist/nodejs_kernel_backend.js
++++ b/node_modules/@tensorflow/tfjs-node/dist/nodejs_kernel_backend.js
+@@ -672,7 +672,7 @@ exports.getTFDType = getTFDType;
+  * Tensors.
+  */
+ function createTensorsTypeOpAttr(attrName, tensorsOrDtype) {
+-    if ((0, util_1.isNullOrUndefined)(tensorsOrDtype)) {
++    if (tensorsOrDtype == null) {
+         throw new Error('Invalid input tensors value.');
+     }
+     return {
+@@ -686,7 +686,7 @@ function createTensorsTypeOpAttr(attrName, tensorsOrDtype) {
+ exports.createTensorsTypeOpAttr = createTensorsTypeOpAttr;
+ // TODO(yassogba) remove? who uses this?
+ function createOpAttr(attrName, tensorsOrDtype, value) {
+-    if ((0, util_1.isNullOrUndefined)(tensorsOrDtype)) {
++    if (tensorsOrDtype == null) {
+         throw new Error('Invalid input tensors value.');
+     }
+     return { name: attrName, type: nodeBackend().binding.TF_BOOL, value: value };
+@@ -694,10 +694,10 @@ function createOpAttr(attrName, tensorsOrDtype, value) {
+ exports.createOpAttr = createOpAttr;
+ /** Returns the dtype number for a single or list of input Tensors. */
+ function getTFDTypeForInputs(tensors) {
+-    if ((0, util_1.isNullOrUndefined)(tensors)) {
++    if (tensors == null) {
+         throw new Error('Invalid input tensors value.');
+     }
+-    if ((0, util_1.isArray)(tensors)) {
++    if (Array.isArray(tensors)) {
+         for (var i = 0; i < tensors.length; i++) {
+             return getTFDType(tensors[i].dtype);
+         }
+diff --git a/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node b/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node
+index c1ce2a0..8732102 100755
+Binary files a/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node and b/node_modules/@tensorflow/tfjs-node/lib/napi-v8/tfjs_binding.node differ
