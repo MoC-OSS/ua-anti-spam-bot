@@ -3,14 +3,17 @@ import { InputFile } from 'grammy';
 
 import escapeHTML from 'escape-html';
 
-import type { MessageHandler } from '@bot/message.handler';
-import { isFilteredByRules } from '@bot/spam.handlers';
+import { logsChat, privateTrainingChat } from '@bot/creator';
+import type { MessageHandler } from '@bot/handlers/message.handler';
+import { isFilteredByRules } from '@bot/handlers/spam.handler';
 
 import { LOGS_CHAT_THREAD_IDS } from '@const/logs.const';
 
 import { cannotDeleteMessage, getCannotDeleteMessage, getDebugMessage, getDeleteMessage } from '@message'; // spamDeleteMessage
 
 import { redisService } from '@services/redis.service';
+
+import { environmentConfig } from '@shared/config';
 
 import type { GrammyContext, GrammyMiddleware } from '@app-types/context';
 
@@ -19,9 +22,6 @@ import { handleError } from '@utils/error-handler.util';
 import { getUserData } from '@utils/generic.util';
 import { logger } from '@utils/logger.util';
 import { telegramUtility } from '@utils/util-instances.util';
-
-import { environmentConfig } from '../../config';
-import { logsChat, privateTrainingChat } from '../../creator';
 
 /**
  * Listener that processes incoming text messages, detects spam via tensor rules,

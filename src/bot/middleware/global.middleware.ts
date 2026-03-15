@@ -1,14 +1,14 @@
 import type { ChatMember } from '@grammyjs/types/manage';
 import type { NextFunction } from 'grammy';
 
+import { environmentConfig } from '@shared/config';
+
 import type { GrammyContext, GrammyMiddleware } from '@app-types/context';
 import type { AirRaidAlertSettings, ChatSettings } from '@app-types/session';
 
 import { emptyFunction } from '@utils/empty-functions.util';
 import { handleError } from '@utils/error-handler.util';
 import { telegramUtility } from '@utils/util-instances.util';
-
-import { environmentConfig } from '../../config';
 
 /**
  * Manages chat session initialization and updates on every incoming message.

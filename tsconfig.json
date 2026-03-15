@@ -26,34 +26,34 @@
         "./src/assets/*"
       ],
       "@bot": [
-        "./src/bot.ts"
+        "./src/bot/bot.ts"
       ],
       "@bot/*": [
         "./src/bot/*"
       ],
       "@const/*": [
-        "./src/const/*"
+        "./src/shared/const/*"
       ],
       "@db/*": [
-        "./src/db/*"
+        "./src/shared/db/*"
       ],
-      "@definitions/*": [
-        "./src/definitions/*"
+      "@dataset/*": [
+        "./src/dataset/*"
       ],
-      "@express-logic/*": [
-        "./src/express-logic/*"
+      "@server/*": [
+        "./src/server/*"
       ],
       "@message": [
-        "./src/message.ts"
+        "./src/bot/messages/index.ts"
       ],
       "@message/*": [
-        "./src/message/*"
-      ],
-      "@packages/*": [
-        "./src/packages/*"
+        "./src/bot/messages/*"
       ],
       "@services/*": [
         "./src/services/*"
+      ],
+      "@shared/*": [
+        "./src/shared/*"
       ],
       "@tensor/*": [
         "./src/tensor/*"
@@ -62,16 +62,16 @@
         "./src/testing/*"
       ],
       "@app-types/*": [
-        "./src/types/*"
+        "./src/shared/types/*"
       ],
       "@userbot/*": [
         "./src/userbot/*"
       ],
       "@utils/*": [
-        "./src/utils/*"
+        "./src/shared/utils/*"
       ],
       "@video/*": [
-        "./src/video/*"
+        "./src/shared/video/*"
       ]
     },
     "forceConsistentCasingInFileNames": true,

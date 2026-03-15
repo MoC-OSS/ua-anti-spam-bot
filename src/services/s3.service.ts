@@ -8,9 +8,9 @@ import path from 'node:path';
 
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
-import { logger } from '@utils/logger.util';
+import { environmentConfig } from '@shared/config';
 
-import { environmentConfig } from '../config';
+import { logger } from '@utils/logger.util';
 
 export class S3Service {
   s3 = new S3Client({

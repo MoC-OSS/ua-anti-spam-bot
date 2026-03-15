@@ -3,12 +3,16 @@ import * as fs from 'node:fs';
 import { Menu } from '@grammyjs/menu';
 import type { Transformer } from 'grammy';
 
+import { creatorId, trainingChat } from '@bot/creator';
+
 import { GOOGLE_SHEETS_NAMES } from '@const/google-sheets.const';
 
 import { getTensorTestResult } from '@message';
 
 import { googleService } from '@services/google.service';
 import { redisService } from '@services/redis.service';
+
+import { environmentConfig } from '@shared/config';
 
 import type { TensorService } from '@tensor/tensor.service';
 
@@ -17,9 +21,6 @@ import type { GrammyContext, GrammyMenuContext, GrammyMiddleware } from '@app-ty
 import { emptyFunction, emptyPromiseFunction } from '@utils/empty-functions.util';
 import { wrapperErrorHandler } from '@utils/error-handler.util';
 import { logger } from '@utils/logger.util';
-
-import { environmentConfig } from '../../config';
-import { creatorId, trainingChat } from '../../creator';
 
 const defaultTime = 30;
 const removeTime = 30;

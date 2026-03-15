@@ -1,10 +1,10 @@
 import { InputFile } from 'grammy';
 
+import { creatorId } from '@bot/creator';
+
 import * as redisClient from '@db/redis.client';
 
 import type { GrammyMiddleware } from '@app-types/context';
-
-import { creatorId } from '../../../creator';
 
 export class SessionCommand {
   /**

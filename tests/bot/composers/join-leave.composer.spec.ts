@@ -3,9 +3,9 @@ import { Bot } from 'grammy';
 import { getJoinLeaveComposer } from '@bot/composers/join-leave.composer';
 import { stateMiddleware } from '@bot/middleware/state.middleware';
 
-import { mockChatSession } from '@testing/../testing-main';
 import type { OutgoingRequests } from '@testing/outgoing-requests';
 import { prepareBotForTesting } from '@testing/prepare';
+import { mockChatSession } from '@testing/testing-main';
 import { LeftMemberMockUpdate } from '@testing/updates/left-member-mock.update';
 import { NewMemberMockUpdate } from '@testing/updates/new-member-mock.update';
 

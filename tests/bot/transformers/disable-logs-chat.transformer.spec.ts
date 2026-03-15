@@ -1,5 +1,6 @@
 import { Bot } from 'grammy';
 
+import { logsChat } from '@bot/creator';
 import { disableLogsChatTransformer } from '@bot/transformers/disable-logs-chat.transformer';
 
 import type { OutgoingRequests } from '@testing/outgoing-requests';
@@ -7,8 +8,6 @@ import { prepareBotForTesting } from '@testing/prepare';
 import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
 
 import type { GrammyContext } from '@app-types/context';
-
-import { logsChat } from '../../../src/creator';
 
 let outgoingRequests: OutgoingRequests;
 const bot = new Bot<GrammyContext>('mock');

@@ -8,6 +8,8 @@ import fs from 'node:fs';
 
 import { optimizeText } from 'ukrainian-ml-optimizer';
 
+import { environmentConfig } from '@shared/config';
+
 import type { LayersModel } from '@tensorflow/tfjs';
 import type { ModelArtifacts } from '@tensorflow/tfjs-core/dist/io/types';
 import * as tf from '@tensorflow/tfjs-node';
@@ -15,8 +17,6 @@ import * as tf from '@tensorflow/tfjs-node';
 import type { SwindlerTensorResult } from '@app-types/swindlers';
 
 import { logger } from '@utils/logger.util';
-
-import { environmentConfig } from '../config';
 
 /**
  * Class that shares logic for tensor services

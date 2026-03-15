@@ -17,7 +17,7 @@ Do not stop until all required checks pass cleanly.
 ## Project context
 
 | Item                | Value                                                  |
-| ------------------- |--------------------------------------------------------|
+| ------------------- | ------------------------------------------------------ |
 | Root                | `.`                                                    |
 | Runtime             | Node.js 24.x                                           |
 | Package manager     | `npm`                                                  |

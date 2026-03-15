@@ -1,18 +1,17 @@
 import { Bot } from 'grammy';
 
 import { getNoAntisemitismComposer } from '@bot/composers/messages/no-antisemitism.composer';
+import { i18n } from '@bot/i18n';
 import { parseText } from '@bot/middleware/parse-text.middleware';
 import { stateMiddleware } from '@bot/middleware/state.middleware';
 import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
 
-import { mockChatSession } from '@testing/../testing-main';
 import type { OutgoingRequests } from '@testing/outgoing-requests';
 import { prepareBotForTesting } from '@testing/prepare';
+import { mockChatSession } from '@testing/testing-main';
 import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
 
 import type { GrammyContext } from '@app-types/context';
-
-import { i18n } from '../../../../src/i18n';
 
 let outgoingRequests: OutgoingRequests;
 const { noAntisemitismComposer: noAntisemitismComposerTest } = getNoAntisemitismComposer();

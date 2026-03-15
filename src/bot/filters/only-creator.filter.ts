@@ -1,6 +1,6 @@
-import type { GrammyContext } from '@app-types/context';
+import { creatorId } from '@bot/creator';
 
-import { creatorId } from '../../creator';
+import type { GrammyContext } from '@app-types/context';
 
 /**
  * @description

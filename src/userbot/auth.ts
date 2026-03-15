@@ -1,9 +1,9 @@
 /* eslint-disable camelcase */
+import { environmentConfig } from '@shared/config';
+
 import type { CheckPassword, MTProtoError } from '@app-types/mtproto/mtproto.types';
 
 import { logger } from '@utils/logger.util';
-
-import { environmentConfig } from '../config';
 
 import { api } from './api';
 

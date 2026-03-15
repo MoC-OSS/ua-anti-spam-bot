@@ -4,10 +4,10 @@
  * for military and warship contexts where such terms are acceptable.
  */
 
+import { dataset } from '@dataset/dataset';
+
 import type { SearchSetTokens } from '@utils/search-set.util';
 import { SearchSet } from '@utils/search-set.util';
-
-import { dataset } from '../../dataset/dataset';
 
 export class ObsceneService {
   private readonly warshipAllowList = new SearchSet(['корабль', 'корабель', 'кораблю']);

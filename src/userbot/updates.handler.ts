@@ -4,6 +4,8 @@ import { forEachSeries } from 'p-iteration';
 import type { SetNonNullable } from 'type-fest';
 import { mentionRegexp, urlRegexp } from 'ukrainian-ml-optimizer';
 
+import type { loadUserbotDatasetExtras } from '@dataset/dataset';
+
 import type { DynamicStorageService } from '@services/dynamic-storage.service';
 import { mentionService } from '@services/mention.service';
 import { redisService } from '@services/redis.service';
@@ -19,8 +21,6 @@ import type { SwindlerType } from '@app-types/swindlers';
 
 import { logger } from '@utils/logger.util';
 import { removeSystemInformationUtility } from '@utils/remove-system-information.util';
-
-import type { loadUserbotDatasetExtras } from '../../dataset/dataset';
 
 import type { ChatPeers } from './index';
 import type { MtProtoClient } from './mt-proto-client';

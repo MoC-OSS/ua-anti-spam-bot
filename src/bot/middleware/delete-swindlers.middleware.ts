@@ -4,12 +4,16 @@ import { InputFile } from 'grammy';
 import axios from 'axios';
 import escapeHTML from 'escape-html';
 
+import { logsChat, secondLogsChat } from '@bot/creator';
+
 import { LOGS_CHAT_THREAD_IDS, SECOND_LOGS_CHAT_THREAD_IDS } from '@const/logs.const';
 
 import { cannotDeleteMessage, getCannotDeleteMessage, swindlerLogsStartMessage } from '@message';
 import { getSwindlersWarningMessage } from '@message/swindlers.message';
 
 import type { SwindlersDetectService } from '@services/swindlers-detect.service';
+
+import { environmentConfig } from '@shared/config';
 
 import type { GrammyContext, GrammyMiddleware } from '@app-types/context';
 import type { SwindlerResponseBody } from '@app-types/express';
@@ -20,9 +24,6 @@ import { compareDatesWithOffset } from '@utils/date-format.util';
 import { handleError } from '@utils/error-handler.util';
 import { revealHiddenUrls } from '@utils/reveal-hidden-urls.util';
 import { telegramUtility } from '@utils/util-instances.util';
-
-import { environmentConfig } from '../../config';
-import { logsChat, secondLogsChat } from '../../creator';
 
 const host = `http://${environmentConfig.HOST}:${environmentConfig.PORT}`;
 

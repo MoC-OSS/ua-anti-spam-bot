@@ -1,6 +1,7 @@
 import { Bot } from 'grammy';
 
 import { getNsfwMessageFilterComposer } from '@bot/composers/messages/nsfw-message-filter.composer';
+import { i18n } from '@bot/i18n';
 import { parseText } from '@bot/middleware/parse-text.middleware';
 import { stateMiddleware } from '@bot/middleware/state.middleware';
 import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
@@ -8,14 +9,12 @@ import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
 import { mockDynamicStorageService } from '@services/_mocks/index.mocks';
 import { NsfwDetectService } from '@services/nsfw-detect.service';
 
-import { mockChatSession } from '@testing/../testing-main';
 import type { OutgoingRequests } from '@testing/outgoing-requests';
 import { prepareBotForTesting } from '@testing/prepare';
+import { mockChatSession } from '@testing/testing-main';
 import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
 
 import type { GrammyContext } from '@app-types/context';
-
-import { i18n } from '../../../../src/i18n';
 
 let outgoingRequests: OutgoingRequests;
 const nsfwDetectService = new NsfwDetectService(mockDynamicStorageService, 0.6);

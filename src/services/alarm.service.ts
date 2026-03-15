@@ -10,11 +10,11 @@ import { EventSource } from 'eventsource';
 import ms from 'ms';
 import type TypedEmitter from 'typed-emitter';
 
+import { environmentConfig } from '@shared/config';
+
 import type { AlarmNotification, AlarmStates } from '@app-types/alarm';
 
 import { logger } from '@utils/logger.util';
-
-import { environmentConfig } from '../config';
 
 import { getAlarmMock } from './_mocks/alarm.mocks';
 

@@ -12,6 +12,60 @@ grammY is a powerful and user-friendly framework for building Telegram bots usin
 
 The framework comes with comprehensive documentation available at https://grammy.dev, which covers everything from getting started with installing and configuring the framework to more advanced topics like handling bot commands, keyboard interactions, and file uploads. The documentation is easy to follow and provides plenty of examples to help you get started with building your own Telegram bot.
 
+## Project Structure
+
+The project is organized into **three services** and **shared infrastructure**:
+
+```
+src/
+├── bot/              # Grammy Telegram bot service
+│   ├── index.ts      # Bot entry point
+│   ├── bot.ts        # Bot assembly & middleware chain
+│   ├── bot-server.ts # Bot health/admin REST API
+│   ├── commands/     # Telegram command handlers (public/ & private/)
+│   ├── composers/    # Grammy composers for features & message filters
+│   ├── middleware/    # Request processing middleware (parsing, guards, state)
+│   ├── filters/      # Boolean filter functions for conditional logic
+│   ├── handlers/     # Message & spam processing handlers
+│   ├── plugins/      # Custom Grammy plugins (self-destruct, auto-reply)
+│   ├── transformers/  # Grammy API call transformers
+│   ├── session-providers/ # Redis session storage
+│   ├── queries/      # Telegram callback query handlers
+│   ├── listeners/    # Event listeners (speech-to-text, tensor training)
+│   ├── menus/        # Grammy Menu definitions
+│   └── messages/     # Bot response message templates
+│
+├── server/           # ML API Express server (standalone)
+│   ├── index.ts      # Server entry point
+│   ├── api.router.ts # REST API routes
+│   └── middleware/    # Express middleware
+│
+├── userbot/          # MTProto userbot for research
+│
+├── services/         # Shared business logic services
+├── tensor/           # TensorFlow.js ML models (spam, swindler, NSFW)
+├── dataset/          # Dataset library (imported by app code)
+│   ├── dataset.ts    # Main dataset loader
+│   └── strings/      # JSON data files
+│
+├── shared/           # Shared infrastructure
+│   ├── config.ts     # Environment configuration
+│   ├── db/           # Redis client
+│   ├── types/        # TypeScript type definitions
+│   ├── const/        # Application constants
+│   ├── utils/        # Utility functions
+│   └── video/        # Video processing service
+│
+├── testing/          # Test utilities and mocks
+├── locales/          # i18n translation files
+└── assets/           # Static assets
+
+dataset/              # Dataset CLI scripts (standalone tools)
+│   └── scripts/      # check-swindlers, download, optimize scripts
+scripts/              # Developer tooling scripts
+tests/                # Vitest test suite (mirrors src/ structure)
+```
+
 ## Table of Content
 
 - [Before you start](#before-you-start)
@@ -55,7 +109,7 @@ If you from [Master of Code Global](https://masterofcode.com/) (MOC), PM me for 
 ```
 ua-anti-spam-bot-ml-v3.zip
 .env.new
-``` 
+```
 
 ### 2. Github Access
 
@@ -82,7 +136,7 @@ nvm use
 
 #### Node
 
-If you have Windows or want to install Node into the system, find the download Node.js version specified in `.nvmrc`. 
+If you have Windows or want to install Node into the system, find the download Node.js version specified in `.nvmrc`.
 
 ### 3. Installing Redis
 
@@ -163,7 +217,6 @@ ALARM_KEY=
 
 Extract and copy `ua-anti-spam-bot-ml-v3.zip` to `src/tensor/temp`.
 
-
 ## For external users
 
 If you are an external user, you need to set the following parameters for the following fields in `.env`
@@ -180,14 +233,14 @@ DISABLE_GOOGLE_API=true
 
 If you don't have `ALARM_KEY`, you need to specify the value like this:
 
-```bash
+````bash
 DISABLE_ALARM_API=true
 
 If you're outside the MOC organization, use the copy-swindlers.sh script to copy models from `./src/tensor/swindlers-temp` into the `./src/tensor/temp` destination:
 
 ```bash
 ./copy-swindlers.sh
-```
+````
 
 ## Running your bot
 
@@ -204,6 +257,7 @@ After it, navigate to your bot and call `/start` command. If you receive the ans
 Then, try to call `/enable` command. If you receive the answer, your bot is set correctly and ready to be used.
 
 ### Docker
+
 If you want to run the bot via Docker, make sure that you have [Docker](https://docs.docker.com/engine/install) and [Docker Compose](https://docs.docker.com/compose/install) installed.
 Then, run the following command to start the bot in Docker:
 
@@ -218,8 +272,8 @@ docker-compose up --build
 We use `branch-name-lint`.
 To push a branch, be sure you have right prefix, ticket name in uppercase, and description split by underscore. Example branch name:
 
-  * feature/UABOT-8_create_lp_ui_elements
-  * hotfix/UABOT-11_add_missing_login_routes
+- feature/UABOT-8_create_lp_ui_elements
+- hotfix/UABOT-11_add_missing_login_routes
 
 Read more: https://github.com/barzik/branch-name-lint
 
@@ -228,8 +282,8 @@ Read more: https://github.com/barzik/branch-name-lint
 We use Conversational Commits Conversational with `commitlint`.
 To make a commit, be sure you follow it. Example:
 
-* feat(UABOT-20): add the users page
-* refactor(UABOT-10): refactor tests
+- feat(UABOT-20): add the users page
+- refactor(UABOT-10): refactor tests
 
 Read more: https://www.conventionalcommits.org
 
@@ -241,8 +295,8 @@ We have a pretty heavy `eslint` and `prettier` setup, so you don't need to be wo
 
 Don't forget to setup your IDE:
 
-1) **WebStorm:** Enable `eslint` plugin in this repo;
-2) **VSCode:** Download and enable `eslint` plugin in this repo.
+1. **WebStorm:** Enable `eslint` plugin in this repo;
+2. **VSCode:** Download and enable `eslint` plugin in this repo.
 
 ## Credits
 

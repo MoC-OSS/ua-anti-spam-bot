@@ -1,8 +1,8 @@
 import type { NextFunction } from 'grammy';
 
-import type { GrammyContext } from '@app-types/context';
+import { environmentConfig } from '@shared/config';
 
-import { environmentConfig } from '../../config';
+import type { GrammyContext } from '@app-types/context';
 
 /**
  * Used for performance checking

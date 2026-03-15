@@ -2,18 +2,17 @@ import { Bot } from 'grammy';
 
 import { getMessagesRegisterComposer } from '@bot/composers/messages.composer';
 import { getNoCardsComposer } from '@bot/composers/messages/no-cards.composer';
+import { i18n } from '@bot/i18n';
 import { parseCards } from '@bot/middleware/parse-cards.middleware';
 import { stateMiddleware } from '@bot/middleware/state.middleware';
 import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
 
-import { mockChatSession } from '@testing/../testing-main';
 import type { OutgoingRequests } from '@testing/outgoing-requests';
 import { prepareBotForTesting } from '@testing/prepare';
+import { mockChatSession } from '@testing/testing-main';
 import { MessagePrivateMockUpdate } from '@testing/updates/message-private-mock.update';
 
 import type { GrammyContext } from '@app-types/context';
-
-import { i18n } from '../src/i18n';
 
 let outgoingRequests: OutgoingRequests;
 const bot = new Bot<GrammyContext>('mock');

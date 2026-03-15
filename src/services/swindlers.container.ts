@@ -4,9 +4,9 @@
  * Acts as a composition root for the swindler detection subsystem.
  */
 
-import { initSwindlersTensor } from '@tensor/swindlers-tensor.service';
+import { dataset } from '@dataset/dataset';
 
-import { dataset } from '../../dataset/dataset';
+import { initSwindlersTensor } from '@tensor/swindlers-tensor.service';
 
 import { DynamicStorageService } from './dynamic-storage.service';
 import { googleService } from './google.service';

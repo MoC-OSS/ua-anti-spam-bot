@@ -3,9 +3,9 @@ import { isPrivateChat } from 'grammy-guard';
 
 import { onlyCreatorFilter } from '@bot/filters/only-creator.filter';
 
-import type { GrammyMiddleware } from '@app-types/context';
+import { environmentConfig } from '@shared/config';
 
-import { environmentConfig } from '../../config';
+import type { GrammyMiddleware } from '@app-types/context';
 
 /**
  * Logs parsed photos

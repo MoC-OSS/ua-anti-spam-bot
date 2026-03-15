@@ -3,9 +3,13 @@ import { Composer } from 'grammy';
 import axios from 'axios';
 import FormData from 'form-data';
 
+import { logsChat } from '@bot/creator';
+
 import { LOGS_CHAT_THREAD_IDS } from '@const/logs.const';
 
 import { getDeleteNsfwMessage, nsfwLogsStartMessage } from '@message';
+
+import { environmentConfig } from '@shared/config';
 
 import type { NsfwTensorService } from '@tensor/nsfw-tensor.service';
 
@@ -17,9 +21,6 @@ import type { NsfwPhotoResult, StateImageAnimation, StateImageVideo } from '@app
 import { handleError } from '@utils/error-handler.util';
 import { getUserData } from '@utils/generic.util';
 import { telegramUtility } from '@utils/util-instances.util';
-
-import { environmentConfig } from '../../../config';
-import { logsChat } from '../../../creator';
 
 const host = `http://${environmentConfig.HOST}:${environmentConfig.PORT}`;
 

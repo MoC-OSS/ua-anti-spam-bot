@@ -8,12 +8,12 @@ import type { AxiosError } from 'axios';
 import axios from 'axios';
 import FuzzySet from 'fuzzyset';
 
+import { environmentConfig } from '@shared/config';
+
 import type { SwindlersBaseResult, SwindlersUrlsResult } from '@app-types/swindlers';
 
 import { DomainAllowList } from '@utils/domain-allow-list.util';
 import { logger } from '@utils/logger.util';
-
-import { environmentConfig } from '../config';
 
 import { EXCEPTION_DOMAINS, SHORTS } from './constants/swindlers-urls.constant';
 import type { DynamicStorageService } from './dynamic-storage.service';

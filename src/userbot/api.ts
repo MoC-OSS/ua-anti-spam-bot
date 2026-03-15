@@ -5,12 +5,12 @@ import type { JsonObject } from 'type-fest';
 
 import MTProto from '@mtproto/core';
 
+import { environmentConfig } from '@shared/config';
+
 import type { CheckPassword, MTProtoError, ProtoUpdate } from '@app-types/mtproto/mtproto.types';
 
 import { sleep } from '@utils/generic.util';
 import { logger } from '@utils/logger.util';
-
-import { environmentConfig } from '../config';
 
 export interface LocalMTProtoCrypto {
   getSRPParams(parameters: JsonObject): Promise<Omit<CheckPassword, 'srp_id'>>;

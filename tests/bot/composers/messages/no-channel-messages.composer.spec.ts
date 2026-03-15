@@ -1,20 +1,19 @@
 import { Bot } from 'grammy';
 
 import { getNoChannelMessagesComposer } from '@bot/composers/messages/no-channel-messages.composer';
+import { i18n } from '@bot/i18n';
 import { logContextMiddleware } from '@bot/middleware/log-context.middleware';
 import { parseText } from '@bot/middleware/parse-text.middleware';
 import { stateMiddleware } from '@bot/middleware/state.middleware';
 import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
 
-import { mockChatSession } from '@testing/../testing-main';
 import type { OutgoingRequests } from '@testing/outgoing-requests';
 import { prepareBotForTesting } from '@testing/prepare';
+import { mockChatSession } from '@testing/testing-main';
 import { MessagePrivateMockUpdate } from '@testing/updates/message-private-mock.update';
 import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
 
 import type { GrammyContext } from '@app-types/context';
-
-import { i18n } from '../../../../src/i18n';
 
 let outgoingRequests: OutgoingRequests;
 const { noChannelMessagesComposer } = getNoChannelMessagesComposer();

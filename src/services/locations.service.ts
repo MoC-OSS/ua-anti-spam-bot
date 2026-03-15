@@ -3,7 +3,7 @@
  * @description Parses Ukrainian location names from messages using a static dataset.
  */
 
-import { dataset } from '../../dataset/dataset';
+import { dataset } from '@dataset/dataset';
 
 export class LocationsService {
   /**

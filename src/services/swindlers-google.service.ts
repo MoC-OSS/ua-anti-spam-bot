@@ -6,7 +6,7 @@
 
 import { GOOGLE_SHEETS_NAMES } from '@const/google-sheets.const';
 
-import { environmentConfig } from '../config';
+import { environmentConfig } from '@shared/config';
 
 import type { GoogleService } from './google.service';
 import { googleService as localGoogleService } from './google.service';

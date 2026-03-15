@@ -3,13 +3,13 @@ import type { SetNonNullable } from 'type-fest';
 
 import * as redisClient from '@db/redis.client';
 
+import { loadUserbotDatasetExtras } from '@dataset/dataset';
+
 import { initSwindlersContainer } from '@services/swindlers.container';
 
 import { initTensor } from '@tensor/tensor.service';
 
 import { logger } from '@utils/logger.util';
-
-import { loadUserbotDatasetExtras } from '../../dataset/dataset';
 
 import auth from './auth';
 import type { Peer } from './mt-proto-client';

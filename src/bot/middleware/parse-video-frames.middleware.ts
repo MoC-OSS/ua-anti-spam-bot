@@ -1,6 +1,8 @@
 import axios from 'axios';
 import FormData from 'form-data';
 
+import { environmentConfig } from '@shared/config';
+
 import type { GrammyMiddleware } from '@app-types/context';
 import type { ParseVideoSuccessResponseBody } from '@app-types/express';
 import type { StateImageParsedFrames } from '@app-types/state';
@@ -10,8 +12,6 @@ import { logger } from '@utils/logger.util';
 import { videoUtility } from '@utils/video.util';
 
 import { videoService } from '@video/video.service';
-
-import { environmentConfig } from '../../config';
 
 const host = `http://${environmentConfig.HOST}:${environmentConfig.PORT}`;
 

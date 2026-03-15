@@ -4,9 +4,9 @@
  * combined with obscenity detection heuristics.
  */
 
-import { SearchSet } from '@utils/search-set.util';
+import { dataset } from '@dataset/dataset';
 
-import { dataset } from '../../dataset/dataset';
+import { SearchSet } from '@utils/search-set.util';
 
 import { ObsceneService } from './obscene.service';
 

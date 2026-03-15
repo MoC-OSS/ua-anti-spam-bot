@@ -1,10 +1,10 @@
+import { creatorId } from '@bot/creator';
+
 import { redisService } from '@services/redis.service';
 
 import type { GrammyMiddleware } from '@app-types/context';
 
 import { logger } from '@utils/logger.util';
-
-import { creatorId } from '../../creator';
 
 /**
  * Short-circuits the middleware chain when the bot is deactivated via Redis.

@@ -2,6 +2,8 @@ import { Composer } from 'grammy';
 
 import escapeHTML from 'escape-html';
 
+import { logsChat } from '@bot/creator';
+
 import { LOGS_CHAT_THREAD_IDS } from '@const/logs.const';
 
 import { obsceneDeleteLogsStartMessage } from '@message';
@@ -15,8 +17,6 @@ import { censorWord } from '@utils/censor-word.util';
 import { getUserData } from '@utils/generic.util';
 import type { SearchSetResult } from '@utils/search-set.util';
 import { telegramUtility } from '@utils/util-instances.util';
-
-import { logsChat } from '../../../creator';
 
 /**
  * @description Remove strategic information logic

@@ -9,7 +9,6 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Copy packages
-COPY src/packages/* ./src/packages/
 
 #RUN npm install
 # If you are building your code for production

@@ -1,11 +1,11 @@
 import type { RawApi, Transformer } from 'grammy';
 import type { Payload } from 'grammy/out/core/client';
 
+import { logsChat, secondLogsChat } from '@bot/creator';
+
 import type { RealApiMethodKeys } from '@testing/outgoing-requests';
 
 import { logger } from '@utils/logger.util';
-
-import { logsChat, secondLogsChat } from '../../creator';
 
 /**
  * API transformer that intercepts send methods targeting the logs chat

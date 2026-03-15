@@ -1,19 +1,19 @@
 import { Bot } from 'grammy';
 
 import { getBot } from '@bot';
+import { logsChat, secondLogsChat } from '@bot/creator';
 
-import { mockChatSession, mockSession } from '@testing/../testing-main';
+import { environmentConfig } from '@shared/config';
+
 import type { OutgoingRequests } from '@testing/outgoing-requests';
 import { prepareBotForTesting } from '@testing/prepare';
+import { mockChatSession, mockSession } from '@testing/testing-main';
 import { LeftMemberMockUpdate } from '@testing/updates/left-member-mock.update';
 import { MessagePrivateMockUpdate } from '@testing/updates/message-private-mock.update';
 import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
 import { NewMemberMockUpdate } from '@testing/updates/new-member-mock.update';
 
 import type { GrammyContext } from '@app-types/context';
-
-import { environmentConfig } from '../src/config';
-import { logsChat, secondLogsChat } from '../src/creator';
 
 // eslint-disable-next-line vitest/no-mocks-import
 import { realSwindlerMessage } from './__mocks__/bot.mocks';

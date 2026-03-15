@@ -13,11 +13,12 @@ import { optimizeText } from 'ukrainian-ml-optimizer';
 
 import { GOOGLE_SHEETS_NAMES } from '@const/google-sheets.const';
 
+import type { dataset } from '@dataset/dataset';
+
+import { environmentConfig } from '@shared/config';
+
 import { logger } from '@utils/logger.util';
 import { removeDuplicates } from '@utils/remove-duplicates.util';
-
-import type { dataset } from '../../dataset/dataset';
-import { environmentConfig } from '../config';
 
 import type { GoogleService } from './google.service';
 import type { SwindlersGoogleService } from './swindlers-google.service';

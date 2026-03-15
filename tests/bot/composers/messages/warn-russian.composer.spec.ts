@@ -8,9 +8,9 @@ import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
 
 import { mockDynamicStorageService } from '@services/_mocks/index.mocks';
 
-import { mockChatSession } from '@testing/../testing-main';
 import type { OutgoingRequests } from '@testing/outgoing-requests';
 import { prepareBotForTesting } from '@testing/prepare';
+import { mockChatSession } from '@testing/testing-main';
 import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
 
 import type { GrammyContext } from '@app-types/context';

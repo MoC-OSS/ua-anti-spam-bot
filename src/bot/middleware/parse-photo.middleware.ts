@@ -5,11 +5,11 @@ import type { NextFunction } from 'grammy';
 import axios from 'axios';
 import sharp from 'sharp';
 
+import { environmentConfig } from '@shared/config';
+
 import type { GrammyContext } from '@app-types/context';
 import { ImageType } from '@app-types/image';
 import type { StateImage } from '@app-types/state';
-
-import { environmentConfig } from '../../config';
 
 /**
  * @description

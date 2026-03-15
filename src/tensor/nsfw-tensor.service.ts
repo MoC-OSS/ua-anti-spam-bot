@@ -7,11 +7,11 @@
 import type { NSFWJS, PredictionType } from 'nsfwjs';
 import * as nsfw from 'nsfwjs';
 
+import { environmentConfig } from '@shared/config';
+
 import * as tf from '@tensorflow/tfjs-node';
 
 import type { NsfwTensorNegativeResult, NsfwTensorPositiveResult, NsfwTensorResult } from '@app-types/nsfw';
-
-import { environmentConfig } from '../config';
 
 export class NsfwTensorService {
   model!: NSFWJS;

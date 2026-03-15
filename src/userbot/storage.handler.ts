@@ -6,9 +6,9 @@ import { googleService } from '@services/google.service';
 import { redisService } from '@services/redis.service';
 import { swindlersGoogleService } from '@services/swindlers-google.service';
 
-import { logger } from '@utils/logger.util';
+import { environmentConfig } from '@shared/config';
 
-import { environmentConfig } from '../config';
+import { logger } from '@utils/logger.util';
 
 const limits = {
   STORAGE: 999_999_999,

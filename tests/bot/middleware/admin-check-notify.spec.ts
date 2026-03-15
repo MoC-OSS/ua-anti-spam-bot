@@ -2,6 +2,7 @@ import { Bot } from 'grammy';
 
 import { getBeforeAnyComposer } from '@bot/composers/before-any.composer';
 import { getNoCardsComposer } from '@bot/composers/messages/no-cards.composer';
+import { i18n } from '@bot/i18n';
 import { adminCheckNotify } from '@bot/middleware/admin-check-notify.middleware';
 import { onlyNotAdmin } from '@bot/middleware/only-not-admin.middleware';
 import { parseCards } from '@bot/middleware/parse-cards.middleware';
@@ -9,15 +10,14 @@ import { parseText } from '@bot/middleware/parse-text.middleware';
 import { stateMiddleware } from '@bot/middleware/state.middleware';
 import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
 
-import { mockChatSession, mockState } from '@testing/../testing-main';
 import type { OutgoingRequests } from '@testing/outgoing-requests';
 import type { ApiResponses } from '@testing/prepare';
 import { prepareBotForTesting } from '@testing/prepare';
+import { mockChatSession, mockState } from '@testing/testing-main';
 import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
 
 import type { GrammyContext } from '@app-types/context';
 
-import { i18n } from '../../../src/i18n';
 // eslint-disable-next-line vitest/no-mocks-import
 import { realSwindlerMessage } from '../../__mocks__/bot.mocks';
 

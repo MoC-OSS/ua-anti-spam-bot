@@ -6,9 +6,9 @@
 
 import type { S3Service } from '@services/s3.service';
 
-import { logger } from '@utils/logger.util';
+import { environmentConfig } from '@shared/config';
 
-import { environmentConfig } from '../config';
+import { logger } from '@utils/logger.util';
 
 import { BaseTensorService } from './base-tensor.service';
 

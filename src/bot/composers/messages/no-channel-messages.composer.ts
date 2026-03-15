@@ -2,6 +2,8 @@ import { Composer } from 'grammy';
 
 import escapeHTML from 'escape-html';
 
+import { logsChat } from '@bot/creator';
+
 import { LOGS_CHAT_THREAD_IDS } from '@const/logs.const';
 
 import { channelMessageLogsStartMessage, getDeleteFeatureMessage } from '@message';
@@ -10,8 +12,6 @@ import type { GrammyContext } from '@app-types/context';
 
 import { getEnabledFeaturesString, getUserData } from '@utils/generic.util';
 import { telegramUtility } from '@utils/util-instances.util';
-
-import { logsChat } from '../../../creator';
 
 const CHANNEL_BOT_ID = 136_817_688;
 
