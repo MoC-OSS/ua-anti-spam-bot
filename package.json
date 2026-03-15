@@ -8,11 +8,9 @@
   "scripts": {
     "start:bot": "tsx watch src/index.ts",
     "start:bot:prod": "tsx src/index.ts",
-    "start:bot:js:prod": "node dist/src/index.js",
     "start:userbot:prod": "tsx ./src/userbot/index.ts",
     "start:server": "tsx watch ./src/express.server.ts",
     "start:server:prod": "tsx ./src/express.server.ts",
-    "start:server:js:prod": "node ./dist/src/express.server.js",
     "start:server:cluster": "(npx pm2 delete all || exit 0) && npx pm2 start ./src/express.server.ts -i max && npx pm2 monit || echo '*** Install PM2 globally'",
     "check-swindler:positives": "tsx ./dataset/check-swindlers.ts positives",
     "check-swindler:negatives": "tsx ./dataset/check-swindlers.ts negatives",
@@ -21,7 +19,6 @@
     "optimize-swindler": "tsx dataset/optimize-swindler-dataset.ts positives && tsx dataset/optimize-swindler-dataset.ts negatives",
     "optimize-obscene": "tsx ./dataset/obscene-optimization.ts",
     "prepare": "husky",
-    "test": "vitest run",
     "health-check": "echo health-check",
     "lint": "npm-run-all --parallel lint:js lint:type-check test",
     "lint:branch-name": "branch-name-lint ./.branchlintrc.json",
@@ -32,6 +29,7 @@
     "lint:type-check": "tsc --noEmit",
     "format:md": "npx prettier --write \"**/*.md\"",
     "typecheck": "npx tsc --noEmit",
+    "test": "vitest run",
     "test:coverage": "npx vitest run --coverage",
     "format": "npx prettier . --write"
   },
