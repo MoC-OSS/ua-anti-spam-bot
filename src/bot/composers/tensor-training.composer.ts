@@ -12,6 +12,7 @@ import type { GrammyContext } from '@app-types/context';
 import { environmentConfig } from '../../config';
 import { trainingChat } from '../../creator';
 
+/** Properties for configuring the tensor training composer. */
 export interface TensorTrainingComposerProperties {
   tensorListener: TestTensorListener;
   trainingThrottler: Transformer;

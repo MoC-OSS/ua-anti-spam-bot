@@ -14,16 +14,19 @@ import { redisService } from '@services/redis.service';
 
 import type { GrammyContext, GrammyMiddleware } from '@app-types/context';
 
-import { handleError } from '@utils/error-handler';
-import { compareDatesWithOffset, getUserData } from '@utils/generic.util';
-import { logger } from '@utils/logger';
-import { telegramUtility } from '@utils/util-instances';
+import { compareDatesWithOffset } from '@utils/date-format.util';
+import { handleError } from '@utils/error-handler.util';
+import { getUserData } from '@utils/generic.util';
+import { logger } from '@utils/logger.util';
+import { telegramUtility } from '@utils/util-instances.util';
 
 import { environmentConfig } from '../../config';
 import { logsChat, privateTrainingChat } from '../../creator';
 
-// const slavaWords = ['слава україні', 'слава украине', 'слава зсу'];
-
+/**
+ * Listener that processes incoming text messages, detects spam via tensor rules,
+ * deletes offending messages, and sends notifications to the chat and logs.
+ */
 export class OnTextListener {
   /**
    * @param {Bot} bot

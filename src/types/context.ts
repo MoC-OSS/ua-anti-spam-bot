@@ -1,3 +1,9 @@
+/**
+ * @module context
+ * @description Core Grammy context type definitions. Combines Grammy's base Context
+ * with session, chat-session, state, i18n, menu, and self-destructed reply flavors.
+ */
+
 import type { I18nFlavor } from '@grammyjs/i18n';
 import type { MenuFlavor } from '@grammyjs/menu';
 import type { Bot, CommandContext, Composer, Context, Filter, FilterQuery, MiddlewareFn, SessionFlavor } from 'grammy';

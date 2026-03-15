@@ -1,4 +1,4 @@
-import { SearchSet } from '@utils/search-set';
+import { SearchSet } from '@utils/search-set.util';
 
 describe('SearchSet', () => {
   it('should find a word if it in set', () => {

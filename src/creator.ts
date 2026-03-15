@@ -1,6 +1,13 @@
+/**
+ * @module creator
+ * @description Hardcoded Telegram chat and user IDs for the bot's administrative channels.
+ * Includes the creator user ID, log chats, training chats, and swindler-related chat IDs.
+ *
+ * @todo Remove hardcoded values in favor of environment configuration and purge from Git history.
+ */
+
 import { environmentConfig } from './config';
 
-// TODO remove this file later and from Git-history
 export const creatorId = environmentConfig.CREATOR_ID ?? 341_977_297;
 
 export const helpChat = 'https://t.me/+UOWRWv3JSB1mYTZi';

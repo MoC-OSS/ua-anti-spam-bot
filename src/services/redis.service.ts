@@ -1,8 +1,14 @@
-import * as redisClient from '@db/redis';
+/**
+ * @module redis.service
+ * @description Application-level Redis operations for managing sessions, statistics,
+ * chat settings, and swindler data persistence.
+ */
+
+import * as redisClient from '@db/redis.client';
 
 import type { ChatSession, ChatSessionData, ChatSettings, Session } from '@app-types/session';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 export interface RedisServiceSetSwindlersStatisticStatistic {

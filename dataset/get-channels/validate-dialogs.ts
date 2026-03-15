@@ -6,7 +6,7 @@ import * as input from 'input';
 
 // @ts-ignore
 import dialogs = require('./dialogs.json');
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 export interface Dialog {
   href: string;

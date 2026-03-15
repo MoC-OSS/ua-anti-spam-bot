@@ -6,7 +6,7 @@ import { getSwindlersHelpMessage } from '@message/swindlers.message';
 
 import type { GrammyContext } from '@app-types/context';
 
-import { handleError } from '@utils/error-handler';
+import { handleError } from '@utils/error-handler.util';
 
 /**
  * @description Health-check helper composer

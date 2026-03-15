@@ -2,6 +2,10 @@ import type { GrammyMiddleware } from '@app-types/context';
 
 import { optimizeWriteContextUtility } from '@utils/optimize-write-context.util';
 
+/**
+ * Replies with the current parsed state as JSON for the bot creator's debugging.
+ * Always calls `next()`.
+ */
 export const logCreatorState: GrammyMiddleware = async (context, next) => {
   const writeContext = optimizeWriteContextUtility(context);
 

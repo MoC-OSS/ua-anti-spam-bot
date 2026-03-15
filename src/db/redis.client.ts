@@ -1,10 +1,16 @@
+/**
+ * @module redis.client
+ * @description Low-level Redis client wrapper. Manages the connection lifecycle,
+ * provides typed selector constants, and exposes get/set helpers for sessions and JSON data.
+ */
+
 import * as redis from 'redis';
 import type { JsonObject, Primitive } from 'type-fest';
 
 import type { CustomJsonValue } from '@app-types/object';
 import type { ChatSession, ChatSessionData, Session } from '@app-types/session';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 import { environmentConfig } from '../config';
 

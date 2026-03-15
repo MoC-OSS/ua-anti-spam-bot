@@ -29,6 +29,7 @@ import type { CounteroffensiveService } from '@services/counteroffensive.service
 import type { GrammyContext, GrammyMiddleware } from '@app-types/context';
 import type { DefaultChatSettings, OptionalChatSettings } from '@app-types/session';
 
+/** Properties for the messages composer including all sub-module composers. */
 export interface MessagesComposerProperties {
   counteroffensiveService: CounteroffensiveService;
   noCardsComposer: Composer<GrammyContext>;

@@ -1,7 +1,11 @@
 import type { GrammyMiddleware } from '@app-types/context';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
+/**
+ * Short-circuits the middleware chain for messages older than the given threshold (default: 5 minutes).
+ * Prevents the bot from processing stale messages after downtime or restarts.
+ */
 export const ignoreOld =
   (threshold = 5 * 60): GrammyMiddleware =>
   (context, next) => {

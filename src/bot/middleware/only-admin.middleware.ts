@@ -5,6 +5,10 @@ import type { GrammyContext } from '@app-types/context';
 
 import { logSkipMiddleware } from '@utils/generic.util';
 
+/**
+ * Guards the middleware chain so only chat admins (or channel/private chat users) can proceed.
+ * Short-circuits with no response for non-admin users.
+ */
 export const onlyAdmin = async (context: GrammyContext, next: NextFunction) => {
   // No chat = no service
   if (!context.chat) {

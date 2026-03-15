@@ -4,6 +4,7 @@ import type { DeleteSwindlersMiddleware } from '@bot/middleware/delete-swindlers
 
 import type { GrammyContext } from '@app-types/context';
 
+/** Properties for the swindler message detection composer. */
 export interface SwindlersComposerProperties {
   deleteSwindlersMiddleware: DeleteSwindlersMiddleware;
 }

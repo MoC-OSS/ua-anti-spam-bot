@@ -8,7 +8,7 @@ import MTProto from '@mtproto/core';
 import type { CheckPassword, MTProtoError, ProtoUpdate } from '@app-types/mtproto/mtproto.types';
 
 import { sleep } from '@utils/generic.util';
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 import { environmentConfig } from '../config';
 

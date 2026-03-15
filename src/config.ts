@@ -1,3 +1,9 @@
+/**
+ * @module config
+ * @description Loads and validates environment variables via typed-dotenv.
+ * Exits the process immediately if required variables are missing.
+ */
+
 import * as typedDotenv from 'typed-dotenv';
 
 import type { EnvironmentConfig } from './types/environment';

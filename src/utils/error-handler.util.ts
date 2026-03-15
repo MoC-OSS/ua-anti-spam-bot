@@ -7,7 +7,7 @@ import { environmentConfig } from '../config';
 import { logsChat } from '../creator';
 
 import { emptyFunction } from './empty-functions.util';
-import { logger } from './logger';
+import { logger } from './logger.util';
 import { optimizeWriteContextUtility } from './optimize-write-context.util';
 
 /**

@@ -10,7 +10,7 @@ import { getDeleteDenylistMessage } from '@message/denylist.message';
 import type { GrammyContext } from '@app-types/context';
 
 import { getUserData } from '@utils/generic.util';
-import { telegramUtility } from '@utils/util-instances';
+import { telegramUtility } from '@utils/util-instances.util';
 
 import { logsChat } from '../../../creator';
 

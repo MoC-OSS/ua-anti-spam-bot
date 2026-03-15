@@ -14,9 +14,9 @@ import { ImageType } from '@app-types/image';
 import type { NsfwTensorPositiveResult, NsfwTensorResult } from '@app-types/nsfw';
 import type { NsfwPhotoResult, StateImageAnimation, StateImageVideo } from '@app-types/state';
 
-import { handleError } from '@utils/error-handler';
+import { handleError } from '@utils/error-handler.util';
 import { getUserData } from '@utils/generic.util';
-import { telegramUtility } from '@utils/util-instances';
+import { telegramUtility } from '@utils/util-instances.util';
 
 import { environmentConfig } from '../../../config';
 import { logsChat } from '../../../creator';
@@ -146,6 +146,7 @@ const saveNsfwMessage = async (context: GrammyContext) => {
   }
 };
 
+/** Properties for the NSFW image/video filter composer. */
 export interface NsfwFilterComposerProperties {
   nsfwTensorService: NsfwTensorService;
 }

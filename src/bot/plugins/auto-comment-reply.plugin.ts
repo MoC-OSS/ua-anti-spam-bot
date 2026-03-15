@@ -25,6 +25,10 @@ const METHODS = new Set<Methods<RawApi>>([
   'forwardMessage',
 ]);
 
+/**
+ * Middleware that automatically replies in the same thread when the message
+ * is a reply to a channel post, keeping discussion threads consistent.
+ */
 export function autoCommentReply<TContext extends Context>(): Middleware<TContext> {
   // eslint-disable-next-line unicorn/consistent-function-scoping
   return async (context, next) => {

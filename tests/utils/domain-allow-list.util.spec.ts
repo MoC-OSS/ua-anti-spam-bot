@@ -1,4 +1,4 @@
-import { DomainAllowList } from '@utils/domain-allow-list';
+import { DomainAllowList } from '@utils/domain-allow-list.util';
 
 describe('DomainAllowList', () => {
   it('should allow any url if the domain is present', () => {

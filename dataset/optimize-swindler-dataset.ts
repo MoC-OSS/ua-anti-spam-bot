@@ -1,6 +1,6 @@
 import { swindlersGoogleService } from '@services/swindlers-google.service';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 import { removeSimilar } from './remove-similar';

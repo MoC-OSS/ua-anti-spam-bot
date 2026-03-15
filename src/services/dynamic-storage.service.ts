@@ -1,3 +1,10 @@
+/**
+ * @module dynamic-storage.service
+ * @description In-memory cache service that syncs detection datasets from Google Sheets.
+ * Periodically refreshes swindler messages, bots, domains, cards, and other detection data.
+ * Emits a `fetch` event after each refresh so dependent services can reinitialize.
+ */
+
 import { EventEmitter } from 'node:events';
 
 import ms from 'ms';
@@ -6,7 +13,7 @@ import { optimizeText } from 'ukrainian-ml-optimizer';
 
 import { GOOGLE_SHEETS_NAMES } from '@const/google-sheets.const';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 import type { dataset } from '../../dataset/dataset';

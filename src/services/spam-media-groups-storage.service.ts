@@ -1,3 +1,10 @@
+/**
+ * @module spam-media-groups-storage.service
+ * @description Temporary in-memory storage for spam media group IDs.
+ * Tracks which media groups have been flagged to avoid duplicate deletions,
+ * with automatic expiration of stale entries.
+ */
+
 import ms from 'ms';
 
 import type { GrammyContext } from '@app-types/context';

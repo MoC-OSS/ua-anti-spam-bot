@@ -1,3 +1,9 @@
+/**
+ * @module swindlers.container
+ * @description Factory that initializes all swindler-detection services and their dependencies.
+ * Acts as a composition root for the swindler detection subsystem.
+ */
+
 import { initSwindlersTensor } from '@tensor/swindlers-tensor.service';
 
 import { dataset } from '../../dataset/dataset';
@@ -10,6 +16,12 @@ import { SwindlersDetectService } from './swindlers-detect.service';
 import { swindlersGoogleService } from './swindlers-google.service';
 import { SwindlersUrlsService } from './swindlers-urls.service';
 
+/**
+ * Initializes and wires all swindler-detection services.
+ * Loads the ML tensor model, verifies it works, and creates all detection services.
+ *
+ * @returns An object containing all initialized swindler services.
+ */
 export const initSwindlersContainer = async () => {
   const swindlersTensorService = await initSwindlersTensor();
 

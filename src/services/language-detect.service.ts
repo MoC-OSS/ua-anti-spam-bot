@@ -1,3 +1,9 @@
+/**
+ * @module language-detect.service
+ * @description Detects whether a message is written in Russian using character-level
+ * heuristics and the tinyld language detection library.
+ */
+
 import { detectAll } from 'tinyld/heavy';
 import { removeExtraSpaces, removeSpecialSymbols } from 'ukrainian-ml-optimizer';
 

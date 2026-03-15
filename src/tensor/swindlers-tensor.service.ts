@@ -1,3 +1,9 @@
+/**
+ * @module swindlers-tensor.service
+ * @description TensorFlow-based ML classifier for detecting swindler messages.
+ * Extends {@link BaseTensorService} with the swindlers-specific model files.
+ */
+
 import { environmentConfig } from '../config';
 
 import { BaseTensorService } from './base-tensor.service';

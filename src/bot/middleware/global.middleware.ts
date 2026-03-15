@@ -5,11 +5,15 @@ import type { GrammyContext, GrammyMiddleware } from '@app-types/context';
 import type { AirRaidAlertSettings, ChatSettings } from '@app-types/session';
 
 import { emptyFunction } from '@utils/empty-functions.util';
-import { handleError } from '@utils/error-handler';
-import { telegramUtility } from '@utils/util-instances';
+import { handleError } from '@utils/error-handler.util';
+import { telegramUtility } from '@utils/util-instances.util';
 
 import { environmentConfig } from '../../config';
 
+/**
+ * Manages chat session initialization and updates on every incoming message.
+ * Ensures chat info, bot admin status, and default settings are always up to date.
+ */
 export class GlobalMiddleware {
   /**
    * Global middleware.
@@ -37,6 +41,7 @@ export class GlobalMiddleware {
     };
   }
 
+  /** Updates chat metadata (type, title, members count) and initializes default chat settings if missing. */
   async updateChatInfo(context: GrammyContext) {
     const leftStatuses = new Set<ChatMember['status']>(['left', 'kicked']);
 

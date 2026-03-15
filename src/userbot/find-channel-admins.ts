@@ -2,7 +2,7 @@ import fs from 'node:fs';
 
 import type { ProtoUpdate, User } from '@app-types/mtproto/mtproto.types';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 import type { API } from './api';
 

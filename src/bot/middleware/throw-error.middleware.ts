@@ -1,6 +1,6 @@
 import type { GrammyMiddleware } from '@app-types/context';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 /**
  * @deprecated

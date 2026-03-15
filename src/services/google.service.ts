@@ -1,12 +1,18 @@
+/**
+ * @module google.service
+ * @description Google Sheets API client for reading and writing spam detection data.
+ * Manages JWT authentication and provides CRUD operations on spreadsheet ranges.
+ */
+
 import { JWT } from 'google-auth-library';
 import type { JWTInput } from 'google-auth-library/build/src/auth/credentials';
 import { google } from 'googleapis';
 
 import type { GoogleFullCellData, GoogleShortCellData } from '@app-types/google';
 
-import { handleError } from '@utils/error-handler';
+import { handleError } from '@utils/error-handler.util';
 import { coerceArray } from '@utils/generic.util';
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 import { environmentConfig } from '../config';
 

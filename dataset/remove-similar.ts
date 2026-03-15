@@ -2,7 +2,7 @@
 import Queue from 'queue';
 import workerFarm from 'worker-farm';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 import type { RemoveSimilarResult } from './remove-similar-logic';
 

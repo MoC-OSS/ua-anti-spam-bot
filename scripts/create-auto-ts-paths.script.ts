@@ -5,7 +5,7 @@ import path from 'node:path';
 import type { CompilerOptions } from 'typescript';
 import * as ts from 'typescript';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 const DEFAULT_TSCONFIG_NAME = 'tsconfig.json';
 const SRC_DIR_NAME = 'src';

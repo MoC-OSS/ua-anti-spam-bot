@@ -9,18 +9,22 @@ import type { TensorService } from '@tensor/tensor.service';
 import type { GrammyContext } from '@app-types/context';
 import type { SwindlerTensorResult } from '@app-types/swindlers';
 
-import { handleError } from '@utils/error-handler';
-import { logger } from '@utils/logger';
+import { handleError } from '@utils/error-handler.util';
+import { logger } from '@utils/logger.util';
 
 import type { DatasetKeys } from '../../dataset/dataset';
 import { environmentConfig } from '../config';
 
 const host = `http://${environmentConfig.HOST}:${environmentConfig.PORT}`;
 
+/** Return type for processTensorMessage containing the swindler tensor prediction result. */
 export interface MessageHandlerProcessTensorMessageReturn {
   result: SwindlerTensorResult;
 }
 
+/**
+ * Handles spam detection by running messages through tensor model and dataset rules.
+ */
 export class MessageHandler {
   /**
    * @param {TensorService} tensorService
@@ -255,6 +259,9 @@ export class MessageHandler {
     return finalHighRisk;
   }
 
+  /**
+   * Sends the message to the tensor service (or server) and returns the spam prediction result.
+   */
   async processTensorMessage(message: string, rate: number | null): Promise<MessageHandlerProcessTensorMessageReturn> {
     try {
       if (environmentConfig.USE_SERVER) {

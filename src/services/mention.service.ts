@@ -1,3 +1,8 @@
+/**
+ * @module mention.service
+ * @description Extracts @-mentions from messages, filtering out URLs and known exception accounts.
+ */
+
 import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 export class MentionService {

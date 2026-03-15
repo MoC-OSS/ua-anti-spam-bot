@@ -1,3 +1,9 @@
+/**
+ * @module index
+ * @description Application entry point. Initializes TensorFlow in production mode,
+ * creates the bot instance, starts the grammyjs runner, and launches the Express health server.
+ */
+
 import { run } from '@grammyjs/runner';
 import { Bot } from 'grammy';
 
@@ -8,7 +14,7 @@ import * as tf from '@tensorflow/tfjs-node';
 import { alarmService } from './services/alarm.service';
 import type { GrammyContext } from './types/context';
 import { sleep } from './utils/generic.util';
-import { logger } from './utils/logger';
+import { logger } from './utils/logger.util';
 import { getBot } from './bot';
 import { runBotExpressServer } from './bot-express.server';
 import { environmentConfig } from './config';

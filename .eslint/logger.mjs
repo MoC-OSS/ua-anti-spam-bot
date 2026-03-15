@@ -20,7 +20,6 @@ function colorContext(context, method) {
 }
 
 export function eslintLogger(context) {
-  // eslint-disable-next-line no-console, lintlord/prefer-logger -- this module wraps console for ESLint configs; pino is not available in that context
   return {
     /* eslint-disable no-console, lintlord/prefer-logger */
     log: (...arguments_) => console.log(colorContext(context, 'log'), ...arguments_),

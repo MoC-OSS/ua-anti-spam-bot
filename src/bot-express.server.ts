@@ -1,3 +1,9 @@
+/**
+ * @module bot-express.server
+ * @description Express HTTP server that exposes a REST API alongside the Telegram bot.
+ * Provides health-check, statistics, and administrative endpoints via {@link apiRouter}.
+ */
+
 import type { Bot } from 'grammy';
 
 import cors from 'cors';
@@ -5,7 +11,7 @@ import express from 'express';
 
 import { apiRouter } from './express-logic/api.router';
 import type { GrammyContext } from './types/context';
-import { logger } from './utils/logger';
+import { logger } from './utils/logger.util';
 import { environmentConfig } from './config';
 
 export const runBotExpressServer = (bot: Bot<GrammyContext>) => {

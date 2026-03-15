@@ -1,3 +1,9 @@
+/**
+ * @module swindlers-detect.service
+ * @description Orchestrator service that runs all swindler-detection checks (URLs, bots, cards, ML tensor)
+ * against incoming messages and returns a consolidated detection result.
+ */
+
 import { compareTwoStrings } from 'string-similarity';
 import { optimizeText } from 'ukrainian-ml-optimizer';
 

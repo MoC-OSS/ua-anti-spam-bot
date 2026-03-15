@@ -9,7 +9,7 @@ import { getDeleteFeatureMessage, mentionLogsStartMessage } from '@message';
 import type { GrammyContext } from '@app-types/context';
 
 import { getEnabledFeaturesString, getUserData } from '@utils/generic.util';
-import { telegramUtility } from '@utils/util-instances';
+import { telegramUtility } from '@utils/util-instances.util';
 
 import { logsChat } from '../../../creator';
 

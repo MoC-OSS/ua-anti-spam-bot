@@ -1,3 +1,9 @@
+/**
+ * @module telegram.util
+ * @description Utility class for common Telegram-related operations such as
+ * checking user roles, extracting chat info, and building admin lists.
+ */
+
 import type { Chat, User } from '@grammyjs/types/manage';
 import type { ChatFullInfo } from 'grammy/types';
 

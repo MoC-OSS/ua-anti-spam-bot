@@ -11,10 +11,11 @@ import type { DynamicStorageService } from '@services/dynamic-storage.service';
 import type { GrammyContext } from '@app-types/context';
 
 import { getRandomItem } from '@utils/generic.util';
-import { telegramUtility } from '@utils/util-instances';
+import { telegramUtility } from '@utils/util-instances.util';
 
 import { logsChat } from '../../../creator';
 
+/** Properties for the warn-Russian language composer. */
 export interface WarnRussianComposerProperties {
   dynamicStorageService: DynamicStorageService;
 }

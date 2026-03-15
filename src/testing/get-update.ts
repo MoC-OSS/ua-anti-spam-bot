@@ -2,7 +2,7 @@ import fs from 'node:fs';
 
 import type { Api, Bot, Context } from 'grammy';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 /**
  * Logs internal update to create mock updates.

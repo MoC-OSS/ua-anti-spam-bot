@@ -3,10 +3,14 @@ import type { Payload } from 'grammy/out/core/client';
 
 import type { RealApiMethodKeys } from '@testing/outgoing-requests';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 import { logsChat, secondLogsChat } from '../../creator';
 
+/**
+ * API transformer that intercepts send methods targeting the logs chat
+ * and suppresses them, useful for testing without sending real log messages.
+ */
 export const disableLogsChatTransformer: Transformer = (previous, method, payload, signal) => {
   const sendMethods = new Set<RealApiMethodKeys>([
     'sendMessage',

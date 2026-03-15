@@ -1,3 +1,9 @@
+/**
+ * @module nsfw-tensor.service
+ * @description NSFW image classification service powered by NSFWJS (TensorFlow.js).
+ * Classifies images as Hentai, Porn, Sexy, or safe content.
+ */
+
 import type { NSFWJS, PredictionType } from 'nsfwjs';
 import * as nsfw from 'nsfwjs';
 

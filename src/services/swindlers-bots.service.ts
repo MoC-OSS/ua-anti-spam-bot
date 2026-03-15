@@ -1,3 +1,9 @@
+/**
+ * @module swindlers-bots.service
+ * @description Detects known swindler bots in messages using fuzzy string matching
+ * against a dynamically-updated list of bot usernames.
+ */
+
 import FuzzySet from 'fuzzyset';
 
 import type { SwindlersBotsResult } from '@app-types/swindlers';

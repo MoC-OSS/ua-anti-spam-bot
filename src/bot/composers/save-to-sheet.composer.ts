@@ -12,12 +12,16 @@ import type { swindlersGoogleService } from '@services/swindlers-google.service'
 
 import type { GrammyContext, GrammyMenuContext } from '@app-types/context';
 
+/** Properties for configuring the save-to-sheet composer. */
 export interface SaveToSheetComposerProperties {
   chatId: number;
   rootMenu: Menu<GrammyMenuContext>;
   updateMethod: typeof swindlersGoogleService.appendBot;
 }
 
+/**
+ * Composer that forwards messages to a Google Sheet with inline buttons to classify them as spam or not.
+ */
 export const getSaveToSheetComposer = ({ chatId, rootMenu, updateMethod }: SaveToSheetComposerProperties) => {
   const saveToSheetComposer = new Composer<GrammyContext>();
 

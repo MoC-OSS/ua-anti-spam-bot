@@ -1,3 +1,9 @@
+/**
+ * @module session
+ * @description Type definitions for user and chat session data stored in Redis.
+ * Includes per-user session (swindler stats, settings) and per-chat session (features, alarms).
+ */
+
 import type { MessageEntity } from '@grammyjs/types/message';
 
 import type { Chat } from 'typegram/manage';

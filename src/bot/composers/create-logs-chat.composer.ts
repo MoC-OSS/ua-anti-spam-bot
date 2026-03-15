@@ -9,7 +9,7 @@ import { onlyCreatorFilter } from '@bot/filters/only-creator.filter';
 
 import type { GrammyContext } from '@app-types/context';
 
-import { handleError } from '@utils/error-handler';
+import { handleError } from '@utils/error-handler.util';
 import { getTypedValue } from '@utils/get-typed-value.util';
 
 type IconColor = Parameters<ApiMethods<void>['createForumTopic']>[0]['icon_color'];

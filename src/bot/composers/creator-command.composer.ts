@@ -15,6 +15,7 @@ import type { GrammyContext, GrammyMenuContext } from '@app-types/context';
 
 import { featurePollComposer } from './feature-poll.composer';
 
+/** Properties required to initialize the creator commands composer. */
 export interface CreatorCommandsComposerProperties {
   commandSetter: CommandSetter;
   rootMenu: Menu<GrammyMenuContext>;

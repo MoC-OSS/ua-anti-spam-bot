@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 import high_risk from './strings/high_risk.json';
 import houses from './strings/houses.json';

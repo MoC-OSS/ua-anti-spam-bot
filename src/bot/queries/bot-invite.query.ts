@@ -4,8 +4,12 @@ import { getBotJoinMessage } from '@message';
 
 import type { GrammyQueryMiddleware } from '@app-types/context';
 
-import { telegramUtility } from '@utils/util-instances';
+import { telegramUtility } from '@utils/util-instances.util';
 
+/**
+ * Handles the bot being invited to a group or channel.
+ * Resets removal state and sends a welcome/setup message to the chat admins.
+ */
 export const botInviteQuery: GrammyQueryMiddleware<'my_chat_member'> = async (context, next) => {
   const newStatuses = new Set<ChatMember['status']>(['member', 'administrator']);
   const oldStatuses = new Set<ChatMember['status']>(['left', 'kicked']);

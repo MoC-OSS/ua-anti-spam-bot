@@ -1,3 +1,9 @@
+/**
+ * @module swindlers-google.service
+ * @description Reads and writes swindler detection training data, bot lists, domains,
+ * and card numbers from/to Google Sheets.
+ */
+
 import { GOOGLE_SHEETS_NAMES } from '@const/google-sheets.const';
 
 import { environmentConfig } from '../config';

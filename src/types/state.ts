@@ -1,3 +1,9 @@
+/**
+ * @module state
+ * @description Type definitions for per-message processing state attached to `context.state`.
+ * Tracks parsed user info, detection results, photo/video metadata, and spam verdicts.
+ */
+
 import type { User } from '@grammyjs/types/manage';
 import type { Animation, MessageEntity, PhotoSize, Sticker, Video, VideoNote } from '@grammyjs/types/message';
 

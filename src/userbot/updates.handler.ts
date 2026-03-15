@@ -17,7 +17,7 @@ import type { TensorService } from '@tensor/tensor.service';
 import type { ProtoUpdate } from '@app-types/mtproto/mtproto.types';
 import type { SwindlerType } from '@app-types/swindlers';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 import { removeSystemInformationUtility } from '@utils/remove-system-information.util';
 
 import type { loadUserbotDatasetExtras } from '../../dataset/dataset';

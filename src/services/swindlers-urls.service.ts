@@ -1,11 +1,17 @@
+/**
+ * @module swindlers-urls.service
+ * @description Detects swindler URLs in messages using domain fuzzy matching,
+ * regex patterns, URL redirect resolution, and an allow-list.
+ */
+
 import type { AxiosError } from 'axios';
 import axios from 'axios';
 import FuzzySet from 'fuzzyset';
 
 import type { SwindlersBaseResult, SwindlersUrlsResult } from '@app-types/swindlers';
 
-import { DomainAllowList } from '@utils/domain-allow-list';
-import { logger } from '@utils/logger';
+import { DomainAllowList } from '@utils/domain-allow-list.util';
+import { logger } from '@utils/logger.util';
 
 import { environmentConfig } from '../config';
 

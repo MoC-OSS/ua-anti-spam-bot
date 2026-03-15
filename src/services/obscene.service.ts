@@ -1,5 +1,11 @@
-import type { SearchSetTokens } from '@utils/search-set';
-import { SearchSet } from '@utils/search-set';
+/**
+ * @module obscene.service
+ * @description Detects obscene/profane language in messages using keyword sets and allow-lists
+ * for military and warship contexts where such terms are acceptable.
+ */
+
+import type { SearchSetTokens } from '@utils/search-set.util';
+import { SearchSet } from '@utils/search-set.util';
 
 import { dataset } from '../../dataset/dataset';
 

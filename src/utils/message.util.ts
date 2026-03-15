@@ -1,7 +1,10 @@
-// const CyrillicToTranslit = require('cyrillic-to-translit-js');
-import Fuse from 'fuse.js';
+/**
+ * @module message.util
+ * @description Utility class for fuzzy text matching in messages using Fuse.js.
+ * Supports both strict (exact word match) and loose (substring) matching modes.
+ */
 
-// const cyrillicToTranslit = new CyrillicToTranslit();
+import Fuse from 'fuse.js';
 
 const options = {
   shouldSort: true,

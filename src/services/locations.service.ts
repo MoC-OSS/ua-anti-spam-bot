@@ -1,3 +1,8 @@
+/**
+ * @module locations.service
+ * @description Parses Ukrainian location names from messages using a static dataset.
+ */
+
 import { dataset } from '../../dataset/dataset';
 
 export class LocationsService {

@@ -11,10 +11,11 @@ import type { NsfwDetectService } from '@services/nsfw-detect.service';
 import type { GrammyContext } from '@app-types/context';
 
 import { getUserData } from '@utils/generic.util';
-import { telegramUtility } from '@utils/util-instances';
+import { telegramUtility } from '@utils/util-instances.util';
 
 import { logsChat } from '../../../creator';
 
+/** Properties for the NSFW text message filter composer. */
 export interface NsfwMessageFilterComposerProperties {
   nsfwDetectService: NsfwDetectService;
 }

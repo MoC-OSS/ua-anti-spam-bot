@@ -1,3 +1,9 @@
+/**
+ * @module generic.util
+ * @description General-purpose utility functions for context logging, user data extraction,
+ * string manipulation, feature settings, and whitelist checks.
+ */
+
 import fs from 'node:fs';
 
 import type { GrammyContext } from '@app-types/context';
@@ -5,7 +11,7 @@ import type { ChatSettings } from '@app-types/session';
 
 import { environmentConfig } from '../config';
 
-import { logger } from './logger';
+import { logger } from './logger.util';
 import { optimizeWriteContextUtility } from './optimize-write-context.util';
 
 /**
@@ -33,24 +39,6 @@ export function truncateString(inputString: string, inputNumber: number) {
   }
 
   return inputString;
-}
-
-/**
- * @param {Date} date
- * */
-export function formatDate(date: Date) {
-  return new Intl.DateTimeFormat('uk-UA', { dateStyle: 'full', timeStyle: 'long', timeZone: 'Europe/Kiev' }).format(date);
-}
-
-/**
- * @param {Date} date
- * */
-export function formatDateIntoAccusative(date: Date) {
-  return formatDate(date)
-    .replace('середа', 'середу')
-    .replace("п'ятниця", "п'ятницю")
-    .replace('субота', 'суботу')
-    .replace('неділя', 'неділю');
 }
 
 /**
@@ -176,17 +164,6 @@ export function logSkipMiddleware(context: GrammyContext, reason: string, extra?
 
     logger.info(`Skip due to ${reason} in chat ${context.chat?.title || '$empty_title'}`, extra);
   }
-}
-
-/**
- * @param {Date} initialDate
- * @param {Date} compareDate
- * @param {number} hours
- * */
-export function compareDatesWithOffset(initialDate: Date, compareDate: Date, hours: number) {
-  const additionalTime = 1000 * 60 * 60 * hours;
-
-  return +initialDate + additionalTime < +compareDate;
 }
 
 /**

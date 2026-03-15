@@ -13,12 +13,12 @@ import { forEach } from 'p-iteration';
  * */
 import Queue from 'queue-promise';
 
-import * as redisClient from './db/redis';
+import * as redisClient from './db/redis.client';
 import { redisService } from './services/redis.service';
 import type { GrammyContext } from './types/context';
 import type { ChatSessionData, SessionData } from './types/session';
-import { handleError } from './utils/error-handler';
-import { logger } from './utils/logger';
+import { handleError } from './utils/error-handler.util';
+import { logger } from './utils/logger.util';
 import { logsChat } from './creator';
 
 const getChatId = (sessionId: string) => sessionId.split(':')[0];

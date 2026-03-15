@@ -1,6 +1,6 @@
 import { mentionService } from '@services/mention.service';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 const expectedMentions = ['@test_mention', '@another_mention'];
 const expectedUrls = ['t.me/test_mention', 'https://t.me/another_mention', 'not-t.me/not-a-mention'];

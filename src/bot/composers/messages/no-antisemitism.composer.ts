@@ -13,8 +13,8 @@ import type { GrammyContext } from '@app-types/context';
 
 import { censorWord } from '@utils/censor-word.util';
 import { getUserData } from '@utils/generic.util';
-import type { SearchSetResult } from '@utils/search-set';
-import { telegramUtility } from '@utils/util-instances';
+import type { SearchSetResult } from '@utils/search-set.util';
+import { telegramUtility } from '@utils/util-instances.util';
 
 import { logsChat } from '../../../creator';
 

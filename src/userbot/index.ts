@@ -1,24 +1,21 @@
 import ms from 'ms';
 import type { SetNonNullable } from 'type-fest';
 
-import * as redisClient from '@db/redis';
+import * as redisClient from '@db/redis.client';
 
 import { initSwindlersContainer } from '@services/swindlers.container';
 
 import { initTensor } from '@tensor/tensor.service';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 import { loadUserbotDatasetExtras } from '../../dataset/dataset';
 
 import auth from './auth';
-// const { findChannelAdmins } = require('./find-channel-admins');
 import type { Peer } from './mt-proto-client';
 import { MtProtoClient } from './mt-proto-client';
 import { UserbotStorage } from './storage.handler';
 import { UpdatesHandler } from './updates.handler';
-
-// const testMessage = ``.trim();
 
 export interface ChatPeers {
   trainingChat: Peer | null;

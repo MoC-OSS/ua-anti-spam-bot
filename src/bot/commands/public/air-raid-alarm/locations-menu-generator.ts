@@ -11,7 +11,7 @@ import { alarmChatService } from '@services/alarm-chat.service';
 import type { State } from '@app-types/alarm';
 import type { GrammyContext, GrammyMenuContext } from '@app-types/context';
 
-import { handleError } from '@utils/error-handler';
+import { handleError } from '@utils/error-handler.util';
 import { isIdWhitelisted } from '@utils/generic.util';
 
 /**

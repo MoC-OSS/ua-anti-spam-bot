@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 import { getTopUsed } from './get-top-used';
 

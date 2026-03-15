@@ -17,6 +17,7 @@ import type { GrammyContext } from '@app-types/context';
 
 import { getGetVideoNoteConverterComposer } from './video-note-converter.composer';
 
+/** Properties required to initialize the private (whitelisted) commands composer. */
 export interface PrivateCommandsComposerProperties {
   bot: Bot<GrammyContext>;
   commandSetter: CommandSetter;

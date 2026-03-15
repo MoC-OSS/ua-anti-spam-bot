@@ -1,3 +1,34 @@
+/**
+ * @module bot
+ * @description Core bot assembly module. Initializes all services, creates composers/middleware,
+ * and registers them on the bot instance in the correct order.
+ *
+ * **Middleware registration order:**
+ *
+ * 1. `sequentialize()` — Prevent concurrent updates per user/chat
+ * 2. `selfDestructedReply()` — Plugin: auto-delete bot replies after timeout
+ * 3. `autoCommentReply()` — Plugin: auto-reply to linked channel comments
+ * 4. `i18n` — Internationalization middleware (Ukrainian default)
+ * 5. `stateMiddleware` — Initialize `context.state` for message processing
+ * 6. `redisSession` / `redisChatSession` — Session persistence (disabled in tests)
+ * 7. `deleteMessageTransformer` — API transformer to track deleted messages
+ * 8. disable-logs-chat transformer — Suppress logs chat messages (when configured)
+ * 9. `rootMenu` — grammyjs Menu plugin for inline keyboards
+ * 10. `globalMiddleware` — Update session defaults and chat info
+ * 11. `beforeAnyComposer` — Pre-processing for all updates
+ * 12. **notChannelComposer** (filtered: non-channel updates only):
+ *     - `deleteSpamMediaGroupMiddleware` — Batch-delete spam media groups
+ *     - Command composers (health, hotline, logs, creator, private, public)
+ *     - Swindler save-to-sheet composers
+ *     - `joinLeaveComposer` — Handle member join/leave events
+ *     - `tensorTrainingComposer` — Tensor model training interface
+ *     - `messagesComposer` — Main message filtering pipeline
+ *     - `photosComposer` — Photo/NSFW filtering
+ *     - `adminCheckNotify` — Notify admins of bot status
+ *     - `logCreatorState` — Debug logging for creator chat
+ * 13. `globalErrorHandler` — Catch-all error boundary
+ */
+
 import { Menu } from '@grammyjs/menu';
 import { sequentialize } from '@grammyjs/runner';
 import { apiThrottler } from '@grammyjs/transformer-throttler';
@@ -51,11 +82,11 @@ import { stateMiddleware } from './bot/middleware/state.middleware';
 import { autoCommentReply } from './bot/plugins/auto-comment-reply.plugin';
 import { chainFilters } from './bot/plugins/chain-filters.plugin';
 import { selfDestructedReply } from './bot/plugins/self-destructed.plugin';
-import { RedisChatSession } from './bot/sessionProviders/redis-chat-session-storage';
-import { RedisSession } from './bot/sessionProviders/redis-session-storage';
+import { RedisChatSession } from './bot/session-providers/redis-chat-session-storage.provider';
+import { RedisSession } from './bot/session-providers/redis-session-storage.provider';
 import { deleteMessageTransformer } from './bot/transformers/delete-message.transformer';
 import { disableLogsChatTransformer } from './bot/transformers/disable-logs-chat.transformer';
-import * as redisClient from './db/redis';
+import * as redisClient from './db/redis.client';
 import { alarmService } from './services/alarm.service';
 import { alarmChatService } from './services/alarm-chat.service';
 import { CounteroffensiveService } from './services/counteroffensive.service';
@@ -67,8 +98,8 @@ import { swindlersGoogleService } from './services/swindlers-google.service';
 import { initNsfwTensor } from './tensor/nsfw-tensor.service';
 import { initTensor } from './tensor/tensor.service';
 import type { GrammyContext, GrammyMenuContext } from './types/context';
-import { globalErrorHandler, wrapperErrorHandler } from './utils/error-handler';
-import { logger } from './utils/logger';
+import { globalErrorHandler, wrapperErrorHandler } from './utils/error-handler.util';
+import { logger } from './utils/logger.util';
 import { videoUtility } from './utils/video.util';
 import { environmentConfig } from './config';
 import { swindlerBotsChatId, swindlerHelpChatId, swindlerMessageChatId } from './creator';

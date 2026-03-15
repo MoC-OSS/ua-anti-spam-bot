@@ -5,7 +5,7 @@ import { parsePhoto } from '@bot/middleware/parse-photo.middleware';
 
 import type { GrammyContext } from '@app-types/context';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 import { videoUtility } from '@utils/video.util';
 
 import { videoService } from '@video/video.service';

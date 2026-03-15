@@ -5,8 +5,8 @@ import type { GrammyMiddleware } from '@app-types/context';
 import type { ParseVideoSuccessResponseBody } from '@app-types/express';
 import type { StateImageParsedFrames } from '@app-types/state';
 
-import { handleError } from '@utils/error-handler';
-import { logger } from '@utils/logger';
+import { handleError } from '@utils/error-handler.util';
+import { logger } from '@utils/logger.util';
 import { videoUtility } from '@utils/video.util';
 
 import { videoService } from '@video/video.service';

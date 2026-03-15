@@ -4,7 +4,7 @@ import type { BotCommand } from 'typegram';
 
 import type { GrammyContext } from '@app-types/context';
 
-import { formatDateIntoAccusative } from '@utils/generic.util';
+import { formatDateIntoAccusative } from '@utils/date-format.util';
 
 /**
  * Handles bot public available commands

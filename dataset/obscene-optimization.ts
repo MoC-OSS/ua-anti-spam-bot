@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 import { antisemitismDictionaryActionUrl, antisemitismDictionaryNounsUrl, antisemitismDictionaryThreadsUrl } from './dataset-antisemitism';

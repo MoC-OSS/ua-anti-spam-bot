@@ -1,6 +1,12 @@
+/**
+ * @module tensor.service
+ * @description General-purpose spam tensor classification service.
+ * Extends {@link BaseTensorService} with the default model files.
+ */
+
 import type { S3Service } from '@services/s3.service';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 import { environmentConfig } from '../config';
 

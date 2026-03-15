@@ -1,3 +1,8 @@
+/**
+ * @module statistics-google.service
+ * @description Writes bot feature-toggle statistics to Google Sheets for reporting.
+ */
+
 import { GOOGLE_SHEETS_NAMES } from '@const/google-sheets.const';
 
 import { environmentConfig } from '../config';

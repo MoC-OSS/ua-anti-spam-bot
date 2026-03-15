@@ -1,7 +1,7 @@
 import type { InputFile } from 'grammy';
 import { Composer } from 'grammy';
 
-import { onlySwindlersStatisticWhitelistedFilter } from '@bot/filters/only-swindlers-statistic-whitelisted';
+import { onlySwindlersStatisticWhitelistedFilter } from '@bot/filters/only-swindlers-statistic-whitelisted.filter';
 
 import { redisService } from '@services/redis.service';
 import { swindlersGoogleService } from '@services/swindlers-google.service';
@@ -55,6 +55,9 @@ const getStatisticFromSheet = async (): Promise<GetStatisticFromSheetReturn> => 
   });
 };
 
+/**
+ * Composer that provides commands to download swindler statistics as CSV (all or new since last check).
+ */
 export const getSwindlersStatisticCommandsComposer = () => {
   const swindlersStatisticComposer = new Composer<GrammyContext>();
 

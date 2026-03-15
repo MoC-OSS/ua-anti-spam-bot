@@ -1,3 +1,9 @@
+/**
+ * @module csv.util
+ * @description Utility functions for generating CSV files from columnar data.
+ * Produces Grammy InputFile objects ready to send as Telegram documents.
+ */
+
 import { InputFile } from 'grammy';
 
 function processCsvValue(value: string) {

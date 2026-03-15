@@ -1,7 +1,7 @@
 import { EXCEPTION_DOMAINS } from '@services/constants/swindlers-urls.constant';
 import { urlService } from '@services/url.service';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 describe('UrlService', () => {
   describe('parseUrls', () => {

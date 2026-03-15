@@ -9,7 +9,7 @@ import { redisService } from '@services/redis.service';
 import type { GrammyContext, GrammyMenuContext } from '@app-types/context';
 import type { ChatSession } from '@app-types/session';
 
-import { handleError } from '@utils/error-handler';
+import { handleError } from '@utils/error-handler.util';
 
 export class UpdatesCommand {
   private menu: Menu<GrammyMenuContext> | undefined;

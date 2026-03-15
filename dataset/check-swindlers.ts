@@ -7,7 +7,7 @@ import { swindlersGoogleService } from '@services/swindlers-google.service';
 import { DatasetType } from '@app-types/dataset';
 import type { SwindlersResult } from '@app-types/swindlers';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 const type = process.argv[2] as DatasetType;
 

@@ -1,6 +1,6 @@
 import { InputFile } from 'grammy';
 
-import * as redisClient from '@db/redis';
+import * as redisClient from '@db/redis.client';
 
 import type { GrammyMiddleware } from '@app-types/context';
 

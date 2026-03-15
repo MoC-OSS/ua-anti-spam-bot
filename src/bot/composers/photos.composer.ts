@@ -18,6 +18,7 @@ import { performanceStartMiddleware } from '@bot/middleware/performance-start.mi
 import type { GrammyContext, GrammyMiddleware } from '@app-types/context';
 import type { DefaultChatSettings } from '@app-types/session';
 
+/** Properties for the photos composer including the NSFW filter sub-composer. */
 export interface PhotosComposerProperties {
   nsfwFilterComposer: Composer<GrammyContext>;
 }

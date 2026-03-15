@@ -1,3 +1,9 @@
+/**
+ * @module nsfw-detect.service
+ * @description Service for detecting NSFW message content using fuzzy string matching.
+ * Refreshes its internal FuzzySet when the dynamic storage emits a `fetch` event.
+ */
+
 import FuzzySet from 'fuzzyset';
 
 import type { SwindlersBotsResult } from '@app-types/swindlers';

@@ -1,4 +1,10 @@
-import { logger } from '@utils/logger';
+/**
+ * @module url.service
+ * @description Utility service for parsing and validating URLs from raw message text.
+ * Handles URL normalization, deduplication, and domain extraction.
+ */
+
+import { logger } from '@utils/logger.util';
 import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 import { EXCEPTION_DOMAINS, NON_WORD_REGEX, URL_REGEXP, VALID_URL_REGEXP } from './constants/swindlers-urls.constant';

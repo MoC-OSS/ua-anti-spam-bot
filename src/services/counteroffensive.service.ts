@@ -1,3 +1,9 @@
+/**
+ * @module counteroffensive.service
+ * @description Detects messages related to Ukrainian counteroffensive topics
+ * using a set of dynamic trigger patterns (regex and string-based).
+ */
+
 import type { CounterOffensiveResult } from '@app-types/state';
 
 import type { DynamicStorageService } from './dynamic-storage.service';

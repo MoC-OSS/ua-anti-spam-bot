@@ -3,8 +3,9 @@ import type { Context, NextFunction } from 'grammy';
 
 import type { ParseMode } from 'typegram';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
+/** Context flavor that adds self-destructing reply methods to the bot context. */
 export type SelfDestructedFlavor<TContext extends Context> = TContext & {
   replyWithSelfDestructed: TContext['reply'];
   replyWithSelfDestructedHTML: TContext['reply'];
@@ -25,6 +26,7 @@ const defaultDeleteCallback = async <TContext extends Context>(
   await context.api.deleteMessage(replyResult.chat.id, replyResult.message_id);
 };
 
+/** Callback type invoked when a self-destructed message's timeout expires. */
 export type SelfDestructedCallback = typeof defaultDeleteCallback;
 
 /**

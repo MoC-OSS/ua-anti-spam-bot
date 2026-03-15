@@ -1,7 +1,7 @@
 import { mockDynamicStorageService, mockNewBot } from '@services/_mocks/index.mocks';
 import { SwindlersBotsService } from '@services/swindlers-bots.service';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 /**
  * @type {SwindlersBotsService}

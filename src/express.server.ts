@@ -19,7 +19,7 @@ import type {
   TensorRequestBody,
   TensorResponseBody,
 } from './types/express';
-import { logger } from './utils/logger';
+import { logger } from './utils/logger.util';
 import { videoService } from './video/video.service';
 import { environmentConfig } from './config';
 

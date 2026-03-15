@@ -15,8 +15,8 @@ import type { TensorService } from '@tensor/tensor.service';
 import type { GrammyContext, GrammyMenuContext, GrammyMiddleware } from '@app-types/context';
 
 import { emptyFunction, emptyPromiseFunction } from '@utils/empty-functions.util';
-import { wrapperErrorHandler } from '@utils/error-handler';
-import { logger } from '@utils/logger';
+import { wrapperErrorHandler } from '@utils/error-handler.util';
+import { logger } from '@utils/logger.util';
 
 import { environmentConfig } from '../../config';
 import { creatorId, trainingChat } from '../../creator';
@@ -24,6 +24,7 @@ import { creatorId, trainingChat } from '../../creator';
 const defaultTime = 30;
 const removeTime = 30;
 
+/** Stores voting state for a single tensor test message (spam/not-spam/skip). */
 export interface TestTensorStorage {
   positives?: string[];
   negatives?: string[];
@@ -45,6 +46,10 @@ const getAnyUsername = (context: GrammyContext) => {
   return username ? `@${username}` : (fullName ?? '');
 };
 
+/**
+ * Listener for testing the tensor model interactively with voting buttons
+ * (spam / not spam / skip) and writing results to Google Sheets.
+ */
 export class TestTensorListener {
   menu?: Menu<GrammyMenuContext>;
 
@@ -59,6 +64,9 @@ export class TestTensorListener {
    */
   constructor(private tensorService: TensorService) {}
 
+  /**
+   * Writes a voted-on message to the appropriate dataset (positives or negatives) in Google Sheets.
+   */
   writeDataset(state: 'negatives' | 'positives', word: string) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, sonarjs/no-unused-vars, sonarjs/no-dead-store
     const writeInFileFunction = () => {

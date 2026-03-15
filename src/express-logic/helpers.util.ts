@@ -7,7 +7,7 @@ import { redisService } from '@services/redis.service';
 import type { GrammyContext } from '@app-types/context';
 import type { ChatDetails, LinkedChat, Session } from '@app-types/session';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 import { environmentConfig } from '../config';
 

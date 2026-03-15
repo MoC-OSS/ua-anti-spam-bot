@@ -1,7 +1,7 @@
 import { mockDataset, mockGoogleService, mockSwindlersGoogleService } from '@services/_mocks/index.mocks';
 import { DynamicStorageService } from '@services/dynamic-storage.service';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 /**
  * @type {DynamicStorageService}

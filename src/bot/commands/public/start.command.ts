@@ -2,9 +2,9 @@ import { getGroupStartMessage, getStartMessage } from '@message';
 
 import type { GrammyMiddleware } from '@app-types/context';
 
-import { handleError } from '@utils/error-handler';
+import { handleError } from '@utils/error-handler.util';
 import { getUserData } from '@utils/generic.util';
-import { telegramUtility } from '@utils/util-instances';
+import { telegramUtility } from '@utils/util-instances.util';
 
 export class StartCommand {
   /**

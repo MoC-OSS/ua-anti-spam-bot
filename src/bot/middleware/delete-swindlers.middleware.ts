@@ -16,10 +16,10 @@ import type { SwindlerResponseBody } from '@app-types/express';
 import type { LooseAutocomplete } from '@app-types/generic';
 import type { SwindlersResult, SwindlerType } from '@app-types/swindlers';
 
-import { handleError } from '@utils/error-handler';
-import { compareDatesWithOffset } from '@utils/generic.util';
+import { compareDatesWithOffset } from '@utils/date-format.util';
+import { handleError } from '@utils/error-handler.util';
 import { revealHiddenUrls } from '@utils/reveal-hidden-urls.util';
-import { telegramUtility } from '@utils/util-instances';
+import { telegramUtility } from '@utils/util-instances.util';
 
 import { environmentConfig } from '../../config';
 import { logsChat, secondLogsChat } from '../../creator';
@@ -30,6 +30,10 @@ const SWINDLER_SETTINGS = {
   WARNING_DELAY: 86_400_000 * 3,
 };
 
+/**
+ * Detects and removes scam/swindler messages from chats.
+ * Logs matched messages, sends warning notifications, and deletes the offending content.
+ */
 export class DeleteSwindlersMiddleware {
   constructor(
     private bot: Bot<GrammyContext>,
@@ -64,6 +68,7 @@ export class DeleteSwindlersMiddleware {
     };
   }
 
+  /** Checks a message against the swindlers detection service, falling back to local detection if the server is unavailable. */
   async checkMessage(message: string): Promise<SwindlersResult> {
     try {
       if (environmentConfig.USE_SERVER) {
@@ -132,6 +137,7 @@ export class DeleteSwindlersMiddleware {
     return undefined;
   }
 
+  /** Attempts to delete the swindler message. Notifies admins if deletion fails due to missing permissions. */
   async removeMessage(context: GrammyContext) {
     try {
       return await context.deleteMessage();

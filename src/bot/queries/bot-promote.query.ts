@@ -2,7 +2,7 @@ import { getAdminReadyMessage, getStartChannelMessage } from '@message';
 
 import type { GrammyQueryMiddleware } from '@app-types/context';
 
-import { handleError } from '@utils/error-handler';
+import { handleError } from '@utils/error-handler.util';
 
 /**
  * Promoted to admin

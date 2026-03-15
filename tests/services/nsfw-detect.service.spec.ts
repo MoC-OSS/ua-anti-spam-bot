@@ -2,7 +2,7 @@ import { getMockDynamicStorageService } from '@services/_mocks/index.mocks';
 import type { DynamicStorageService } from '@services/dynamic-storage.service';
 import { NsfwDetectService } from '@services/nsfw-detect.service';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 /**
  * @type {SwindlersBotsService}

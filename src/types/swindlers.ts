@@ -1,12 +1,8 @@
-// TODO use when ts will be available
-// export enum SwindlerTypeEnum {
-//   SITE = 'site',
-//   MENTION = 'mention',
-//   CARD = 'card',
-//   TENSOR = 'tensor',
-//   COMPARE = 'compare',
-//   NO_MATCH = 'no match',
-// }
+/**
+ * @module swindlers
+ * @description Type definitions for swindler detection results across all detection methods
+ * (URL, bot, card, tensor ML, string comparison).
+ */
 
 import type fs from 'node:fs';
 

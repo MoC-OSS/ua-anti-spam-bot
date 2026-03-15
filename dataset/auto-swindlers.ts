@@ -6,7 +6,7 @@ import { swindlersGoogleService } from '@services/swindlers-google.service';
 import type { SwindlersUrlsService } from '@services/swindlers-urls.service';
 import { urlService } from '@services/url.service';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 const notSwindlers = new Set([

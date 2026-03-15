@@ -13,7 +13,7 @@ import type { ChatData, ChatSettings, Session } from '@app-types/session';
 
 import { headersMiddleware } from './middleware/headers.middleware';
 import { validateMiddleware } from './middleware/web-view-auth.middleware';
-import { getChatAvatar, getLinkedChats, getUserIdFromAuthorizationHeader, updateChatsList } from './helpers';
+import { getChatAvatar, getLinkedChats, getUserIdFromAuthorizationHeader, updateChatsList } from './helpers.util';
 
 export const apiRouter = (bot: Bot<GrammyContext>) => {
   const botRoute = Router();

@@ -1,3 +1,9 @@
+/**
+ * @module swindlers-cards.service
+ * @description Detects known swindler payment card numbers in messages
+ * by comparing parsed card numbers against a dynamic blacklist.
+ */
+
 import { cardsService } from './cards.service';
 import type { DynamicStorageService } from './dynamic-storage.service';
 

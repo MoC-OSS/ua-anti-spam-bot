@@ -4,6 +4,7 @@ import type { OnTextListener } from '@bot/listeners/on-text.listener';
 
 import type { GrammyContext } from '@app-types/context';
 
+/** Properties for the strategic information filter composer. */
 export interface StrategicComposerProperties {
   onTextListener: OnTextListener;
 }

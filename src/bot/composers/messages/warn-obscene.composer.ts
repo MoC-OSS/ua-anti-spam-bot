@@ -11,8 +11,8 @@ import { obsceneService } from '@services/obscene.service';
 
 import type { GrammyContext } from '@app-types/context';
 
-import type { SearchSetResult } from '@utils/search-set';
-import { telegramUtility } from '@utils/util-instances';
+import type { SearchSetResult } from '@utils/search-set.util';
+import { telegramUtility } from '@utils/util-instances.util';
 
 import { logsChat } from '../../../creator';
 

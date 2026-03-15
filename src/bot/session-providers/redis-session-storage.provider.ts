@@ -3,10 +3,11 @@ import { RedisMiddleware } from '@bot/middleware/redis.middleware';
 import type { GrammyContext } from '@app-types/context';
 import type { RedisSessionOptions } from '@app-types/session';
 
-export class RedisChatSession extends RedisMiddleware {
+/** Redis-backed session storage provider keyed by `chatId:userId` (one session per user per chat). */
+export class RedisSession extends RedisMiddleware {
   constructor() {
     const redisOptions: RedisSessionOptions = {
-      property: 'chatSession',
+      property: 'session',
       state: {},
       format: {},
       getSessionKey: (context: GrammyContext): string => {
@@ -24,7 +25,7 @@ export class RedisChatSession extends RedisMiddleware {
           chatInstance = context.from.id;
         }
 
-        return `${chatInstance}`;
+        return `${chatInstance}:${context.from.id}`;
       },
     };
 

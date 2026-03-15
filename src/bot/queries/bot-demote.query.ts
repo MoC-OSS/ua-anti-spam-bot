@@ -1,6 +1,6 @@
 import type { GrammyQueryMiddleware } from '@app-types/context';
 
-import { handleError } from '@utils/error-handler';
+import { handleError } from '@utils/error-handler.util';
 
 /**
  * Demoted to regular user

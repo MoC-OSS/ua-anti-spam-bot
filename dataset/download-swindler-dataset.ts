@@ -2,7 +2,7 @@
 import { initSwindlersContainer } from '@services/swindlers.container';
 import { swindlersGoogleService } from '@services/swindlers-google.service';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 import { autoSwindlers } from './auto-swindlers';
 import { getSwindlersTopUsed } from './get-swindlers-top-used';

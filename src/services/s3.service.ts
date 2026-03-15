@@ -1,9 +1,14 @@
+/**
+ * @module s3.service
+ * @description AWS S3 client service for downloading TensorFlow model files.
+ */
+
 import fs from 'node:fs';
 import path from 'node:path';
 
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 import { environmentConfig } from '../config';
 

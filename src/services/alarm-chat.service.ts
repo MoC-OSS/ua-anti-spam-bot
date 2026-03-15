@@ -1,3 +1,9 @@
+/**
+ * @module alarm-chat.service
+ * @description Manages air-raid alarm notifications for individual Telegram chats.
+ * Sends start/end notifications and handles per-chat mute/unmute settings.
+ */
+
 import Bottleneck from 'bottleneck';
 import pIteration from 'p-iteration';
 import type { Chat } from 'typegram/manage';
@@ -7,8 +13,8 @@ import { alarmEndNotificationMessage, chatIsMutedMessage, chatIsUnmutedMessage, 
 import type { GrammyBot } from '@app-types/context';
 import type { ChatSession, ChatSessionData } from '@app-types/session';
 
-import { handleError } from '@utils/error-handler';
-import { logger } from '@utils/logger';
+import { handleError } from '@utils/error-handler.util';
+import { logger } from '@utils/logger.util';
 
 import { ALARM_EVENT_KEY, alarmService } from './alarm.service';
 import { redisService } from './redis.service';

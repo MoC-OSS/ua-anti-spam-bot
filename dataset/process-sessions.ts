@@ -6,7 +6,7 @@ import { redisService } from '@services/redis.service';
 
 import type { ChatSession, Session } from '@app-types/session';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 async function processSession() {
   try {

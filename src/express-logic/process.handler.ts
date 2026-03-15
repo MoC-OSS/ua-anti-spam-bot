@@ -1,6 +1,6 @@
 import { removeLatinPartialLetters, removeNumber, removeSpecialSymbols } from 'ukrainian-ml-optimizer';
 
-import { messageUtility } from '@utils/util-instances';
+import { messageUtility } from '@utils/util-instances.util';
 
 import type { DatasetKeys } from '../../dataset/dataset';
 import { dataset } from '../../dataset/dataset';

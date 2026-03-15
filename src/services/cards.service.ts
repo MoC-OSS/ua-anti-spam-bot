@@ -1,3 +1,9 @@
+/**
+ * @module cards.service
+ * @description Parses and validates payment card numbers from raw message text
+ * using regex extraction and credit-card validation.
+ */
+
 import isCreditCard from 'validator/lib/isCreditCard';
 
 export class CardsService {

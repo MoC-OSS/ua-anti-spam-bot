@@ -8,6 +8,7 @@ import { redisService } from '@services/redis.service';
 
 import type { GrammyContext } from '@app-types/context';
 
+/** Properties required to initialize the public commands composer. */
 export interface PublicCommandsComposerProperties {
   startTime: Date;
 }

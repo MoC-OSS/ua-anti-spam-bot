@@ -10,7 +10,7 @@ import { statisticsGoogleService } from '@services/statistics-google.service';
 import type { GrammyMiddleware } from '@app-types/context';
 import type { FeaturesSessionsData } from '@app-types/session';
 
-import { handleError } from '@utils/error-handler';
+import { handleError } from '@utils/error-handler.util';
 import { optimizeWriteContextUtility } from '@utils/optimize-write-context.util';
 
 export class StatisticsCommand {

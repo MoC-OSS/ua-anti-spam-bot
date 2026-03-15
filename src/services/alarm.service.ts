@@ -1,3 +1,9 @@
+/**
+ * @module alarm.service
+ * @description Polls the Ukrainian air-raid alert API (alerts.com.ua) via SSE
+ * and emits alarm start/end events for each region.
+ */
+
 import { EventEmitter } from 'node:events';
 
 import { EventSource } from 'eventsource';
@@ -6,7 +12,7 @@ import type TypedEmitter from 'typed-emitter';
 
 import type { AlarmNotification, AlarmStates } from '@app-types/alarm';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 import { environmentConfig } from '../config';
 

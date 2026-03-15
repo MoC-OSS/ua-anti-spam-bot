@@ -1,3 +1,9 @@
+/**
+ * @module i18n
+ * @description Configures grammyjs i18n plugin with Ukrainian as the default locale.
+ * Also exports count constants used for randomizing obscene warning/delete messages.
+ */
+
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 

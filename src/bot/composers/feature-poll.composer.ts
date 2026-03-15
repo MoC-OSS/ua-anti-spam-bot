@@ -9,11 +9,14 @@ import { redisService } from '@services/redis.service';
 import type { GrammyContext } from '@app-types/context';
 import type { ChatSession } from '@app-types/session';
 
-import { handleError } from '@utils/error-handler';
+import { handleError } from '@utils/error-handler.util';
 
 const supportChatId = -1_001_788_350_185;
 const pollId = 4080;
 
+/**
+ * Sends a feature poll message to selected supergroups using rate-limited bulk sending.
+ */
 async function bulkSending(context: GrammyContext, sessions: ChatSession[]) {
   return new Promise<void>((resolve) => {
     const limiter = new Bottleneck({
@@ -67,6 +70,7 @@ async function bulkSending(context: GrammyContext, sessions: ChatSession[]) {
   });
 }
 
+/** Composer that handles the `/feature_poll` command to survey supergroups about new features. */
 export const featurePollComposer = new Composer<GrammyContext>();
 
 featurePollComposer.command('feature_poll', async (context) => {

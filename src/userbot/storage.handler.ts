@@ -6,7 +6,7 @@ import { googleService } from '@services/google.service';
 import { redisService } from '@services/redis.service';
 import { swindlersGoogleService } from '@services/swindlers-google.service';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 import { environmentConfig } from '../config';
 

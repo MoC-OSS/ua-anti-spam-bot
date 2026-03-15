@@ -1,3 +1,9 @@
+/**
+ * @module base-tensor.service
+ * @description Abstract base class for TensorFlow.js text classification services.
+ * Handles model loading, vocabulary tokenization, text prediction, and training/export.
+ */
+
 import fs from 'node:fs';
 
 import { optimizeText } from 'ukrainian-ml-optimizer';
@@ -8,7 +14,7 @@ import * as tf from '@tensorflow/tfjs-node';
 
 import type { SwindlerTensorResult } from '@app-types/swindlers';
 
-import { logger } from '@utils/logger';
+import { logger } from '@utils/logger.util';
 
 import { environmentConfig } from '../config';
 
