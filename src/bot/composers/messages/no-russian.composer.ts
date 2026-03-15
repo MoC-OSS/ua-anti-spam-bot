@@ -58,8 +58,11 @@ export const getNoRussianComposer = ({ dynamicStorageService }: NoRussianCompose
         const { writeUsername, userId } = getUserData(context);
 
         await context.replyWithSelfDestructedHTML(
-          getDeleteRussianMessage({ writeUsername, userId, message: getRandomItem(dynamicStorageService.ukrainianLanguageResponses) }) +
-            getUkrainianMessageExtra(russianFeature.percent),
+          getDeleteRussianMessage(context, {
+            writeUsername,
+            userId,
+            message: getRandomItem(dynamicStorageService.ukrainianLanguageResponses),
+          }) + getUkrainianMessageExtra(russianFeature.percent),
         );
       }
     }

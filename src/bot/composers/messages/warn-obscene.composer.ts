@@ -49,7 +49,7 @@ export const getWarnObsceneComposer = () => {
     if (isFeatureEnabled && isObscene) {
       await saveObsceneMessage(context, isObscene);
 
-      await context.replyWithSelfDestructedHTML(getWarnObsceneMessage(), {
+      await context.replyWithSelfDestructedHTML(getWarnObsceneMessage(context), {
         reply_to_message_id: context.msg?.message_id,
       });
     }

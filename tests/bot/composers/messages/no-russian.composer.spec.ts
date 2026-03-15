@@ -15,6 +15,8 @@ import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.upd
 
 import type { GrammyContext } from '@app-types/context';
 
+import { i18n } from '../../../../src/i18n';
+
 let outgoingRequests: OutgoingRequests;
 const { noRussianComposer } = getNoRussianComposer({ dynamicStorageService: mockDynamicStorageService });
 const bot = new Bot<GrammyContext>('mock');
@@ -28,6 +30,7 @@ const { chatSession, mockChatSessionMiddleware } = mockChatSession({
 
 describe('noRussianComposer', () => {
   beforeAll(async () => {
+    bot.use(i18n);
     bot.use(selfDestructedReply());
 
     bot.use(stateMiddleware);

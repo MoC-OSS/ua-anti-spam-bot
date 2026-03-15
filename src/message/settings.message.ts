@@ -1,16 +1,10 @@
+import type { GrammyContext } from '@app-types/context';
+
 import { environmentConfig } from '../config';
 
-/**
- * Generic - Settings
- * */
+export const getLinkToWebView = (context: GrammyContext) =>
+  `${context.t('settings-link-to-web-view')}\n\n🔗 ${environmentConfig.WEB_VIEW_URL}`;
 
-export const linkToWebView = `⚙️Відкрити налаштування:
+export const getHasNoLinkedChats = (context: GrammyContext) => context.t('settings-has-no-linked-chats');
 
-🔗 ${environmentConfig.WEB_VIEW_URL}`;
-
-export const hasNoLinkedChats = `
-⛔️ У Вас немає прив'язаних чатів.
-
-Будь ласка, зайдіть у групу і натисніть /settings.`;
-
-export const isNotAdminMessage = '😔 Ви не є адміністратором чату!';
+export const getIsNotAdminMessage = (context: GrammyContext) => context.t('settings-is-not-admin');

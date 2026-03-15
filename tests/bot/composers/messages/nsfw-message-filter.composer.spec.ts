@@ -15,6 +15,8 @@ import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.upd
 
 import type { GrammyContext } from '@app-types/context';
 
+import { i18n } from '../../../../src/i18n';
+
 let outgoingRequests: OutgoingRequests;
 const nsfwDetectService = new NsfwDetectService(mockDynamicStorageService, 0.6);
 const { nsfwMessageFilterComposer } = getNsfwMessageFilterComposer({ nsfwDetectService });
@@ -29,6 +31,7 @@ const { chatSession, mockChatSessionMiddleware } = mockChatSession({
 
 describe('nsfwMessageFilterComposer', () => {
   beforeAll(async () => {
+    bot.use(i18n);
     bot.use(selfDestructedReply());
 
     bot.use(stateMiddleware);

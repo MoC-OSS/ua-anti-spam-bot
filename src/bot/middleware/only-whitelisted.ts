@@ -1,7 +1,5 @@
 import type { NextFunction } from 'grammy';
 
-import { getDeclinedMassSendingMessage } from '@message';
-
 import type { GrammyContext } from '@app-types/context';
 
 import { isIdWhitelisted } from '@utils/generic.util';
@@ -15,7 +13,7 @@ export async function onlyWhitelisted(context: GrammyContext, next: NextFunction
     return next();
   }
 
-  await context.reply(getDeclinedMassSendingMessage);
+  await context.reply(context.t('updates-declined'));
 
   // eslint-disable-next-line unicorn/no-useless-undefined
   return undefined;

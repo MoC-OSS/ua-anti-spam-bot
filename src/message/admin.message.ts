@@ -1,2 +1,3 @@
-export const checkAdminNotification =
-  '❗УВАГА! UA Anti Spam Bot перевіряє повідомлення адміністраторів, данну опцію можна вимкнути в налаштуваннях.';
+import type { GrammyContext } from '@app-types/context';
+
+export const getCheckAdminNotification = (context: GrammyContext) => context.t('check-admin-notification');

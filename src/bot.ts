@@ -71,6 +71,7 @@ import { globalErrorHandler, wrapperErrorHandler } from './utils/error-handler';
 import { videoUtility } from './utils/video.util';
 import { environmentConfig } from './config';
 import { swindlerBotsChatId, swindlerHelpChatId, swindlerMessageChatId } from './creator';
+import { i18n } from './i18n';
 
 moment.tz.setDefault('Europe/Kiev');
 moment.locale('uk');
@@ -265,6 +266,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
 
   bot.use(selfDestructedReply());
   bot.use(autoCommentReply());
+  bot.use(i18n);
 
   bot.use(stateMiddleware);
 

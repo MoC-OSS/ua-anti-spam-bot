@@ -56,7 +56,7 @@ export const getNoAntisemitismComposer = () => {
 
       if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
         await context.replyWithSelfDestructedHTML(
-          getDeleteAntisemitismMessage({ writeUsername, userId, word: censorWord(isAntisemitism.origin) }),
+          getDeleteAntisemitismMessage(context, { writeUsername, userId, word: censorWord(isAntisemitism.origin) }),
         );
       }
     }

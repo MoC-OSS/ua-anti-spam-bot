@@ -2,7 +2,7 @@ import type { MenuRange } from '@grammyjs/menu';
 
 import { onlyAdmin } from '@bot/middleware/only-admin.middleware';
 
-import { getAirRaidAlarmSettingsMessage, nextPage, previousPage } from '@message';
+import { getAirRaidAlarmSettingsMessage } from '@message';
 
 import { generateTestState } from '@services/_mocks/alarm.mocks';
 import { TEST_ALARM_STATE } from '@services/alarm.service';
@@ -40,19 +40,22 @@ export const dynamicLocationMenu = (_context: GrammyMenuContext, range: MenuRang
     return range.text(displayLocationName, onlyAdmin, (context: GrammyContext) => {
       context.chatSession.chatSettings.airRaidAlertSettings.state = locationName;
       alarmChatService.updateChat(context.chatSession, context.chat?.id);
-      context.editMessageText(getAirRaidAlarmSettingsMessage(_context.chatSession.chatSettings), { parse_mode: 'HTML' }).catch(handleError);
+
+      context
+        .editMessageText(getAirRaidAlarmSettingsMessage(context, _context.chatSession.chatSettings), { parse_mode: 'HTML' })
+        .catch(handleError);
     });
   }
 
   function createNextButton() {
-    return range.text(nextPage, onlyAdmin, (context) => {
+    return range.text(_context.t('pagination-next-page'), onlyAdmin, (context) => {
       context.menu.update();
       context.chatSession.chatSettings.airRaidAlertSettings.pageNumber += 1;
     });
   }
 
   function createPreviousButton() {
-    return range.text(previousPage, onlyAdmin, (context) => {
+    return range.text(_context.t('pagination-previous-page'), onlyAdmin, (context) => {
       context.menu.update();
       context.chatSession.chatSettings.airRaidAlertSettings.pageNumber -= 1;
     });

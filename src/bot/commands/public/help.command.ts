@@ -43,7 +43,7 @@ export class HelpCommand {
 
       context
         .replyWithSelfDestructedHTML(
-          getHelpMessage({
+          getHelpMessage(context, {
             startLocaleTime,
             isAdmin,
             canDelete,

@@ -52,7 +52,7 @@ export const getNoUrlsComposer = () => {
       await saveUrlsMessage(context, urls, text);
 
       if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
-        await context.replyWithSelfDestructedHTML(getDeleteFeatureMessage({ writeUsername, userId, featuresString }));
+        await context.replyWithSelfDestructedHTML(getDeleteFeatureMessage(context, { writeUsername, userId, featuresString }));
       }
     }
 

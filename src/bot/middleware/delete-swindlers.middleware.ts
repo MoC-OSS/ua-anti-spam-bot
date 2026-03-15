@@ -7,7 +7,7 @@ import escapeHTML from 'escape-html';
 import { LOGS_CHAT_THREAD_IDS, SECOND_LOGS_CHAT_THREAD_IDS } from '@const/logs.const';
 
 import { cannotDeleteMessage, getCannotDeleteMessage, swindlerLogsStartMessage } from '@message';
-import { swindlersWarningMessage } from '@message/swindlers.message';
+import { getSwindlersWarningMessage } from '@message/swindlers.message';
 
 import type { SwindlersDetectService } from '@services/swindlers-detect.service';
 
@@ -123,7 +123,7 @@ export class DeleteSwindlersMiddleware {
     if (shouldSend) {
       context.chatSession.lastWarningDate = new Date();
 
-      return context.reply(swindlersWarningMessage, {
+      return context.reply(getSwindlersWarningMessage(context), {
         parse_mode: 'HTML',
       });
     }
@@ -152,7 +152,10 @@ export class DeleteSwindlersMiddleware {
           .getChatAdmins(context, context.chat.id)
           .then(({ adminsString }) => {
             context
-              .reply(getCannotDeleteMessage({ adminsString }), { parse_mode: 'HTML', reply_to_message_id: context.msg?.message_id })
+              .reply(getCannotDeleteMessage(context, { adminsString }), {
+                parse_mode: 'HTML',
+                reply_to_message_id: context.msg?.message_id,
+              })
               .catch(handleError);
 
             context.api

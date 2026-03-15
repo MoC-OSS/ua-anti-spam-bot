@@ -1,6 +1,6 @@
 import type { NextFunction } from 'grammy';
 
-import { checkAdminNotification } from '@message/admin.message';
+import { getCheckAdminNotification } from '@message/admin.message';
 
 import type { GrammyContext, GrammyMiddleware } from '@app-types/context';
 
@@ -15,7 +15,7 @@ export const adminCheckNotify: GrammyMiddleware = async (context: GrammyContext,
   const isChatNotPrivate = context.chat?.type !== 'private';
 
   if (!isCheckAdminNotified && isUserAdmin && isDeleted && isChatNotPrivate) {
-    return context.replyWithSelfDestructedHTML(checkAdminNotification as string);
+    return context.replyWithSelfDestructedHTML(getCheckAdminNotification(context));
   }
 
   logSkipMiddleware(context, 'bot kicked or not admin', context.chatSession);

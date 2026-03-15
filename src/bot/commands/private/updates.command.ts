@@ -2,7 +2,7 @@ import { Menu } from '@grammyjs/menu';
 
 import Bottleneck from 'bottleneck';
 
-import { cancelMessageSending, confirmationMessage, getSuccessfulMessage, getUpdateMessage, getUpdatesMessage } from '@message';
+import { getSuccessfulMessage, getUpdateMessage, getUpdatesMessage } from '@message';
 
 import { redisService } from '@services/redis.service';
 
@@ -28,7 +28,7 @@ export class UpdatesCommand {
       (session) => (session.payload.chatType === 'private' || session.payload.chatType === 'supergroup') && !session.payload.botRemoved,
     );
 
-    await context.reply(`${confirmationMessage}\nВсього чатів: ${sessions.length}`);
+    await context.reply(`${context.t('updates-confirmation')}\n${context.t('updates-total-chats', { count: sessions.length })}`);
     await context.reply(userInput || '', { entities: textEntities ?? undefined, reply_markup: this.menu });
   }
 
@@ -42,28 +42,18 @@ export class UpdatesCommand {
   }
 
   initialization() {
-    /**
-     * @param {GrammyContext} context
-     * */
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context: GrammyContext) => {
       context.session.step = 'confirmation';
-      await context.reply(getUpdatesMessage(), { parse_mode: 'HTML' });
+      await context.reply(getUpdatesMessage(context), { parse_mode: 'HTML' });
     };
   }
 
   confirmation() {
-    /**
-     * @param {GrammyContext} context
-     * */
-
     return this.middleware.bind(this);
   }
 
   messageSending() {
-    /**
-     * @param {GrammyContext} context
-     * */
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context: GrammyContext) => {
       context.session.step = 'idle';
@@ -77,7 +67,7 @@ export class UpdatesCommand {
         await this.bulkSending(context, superGroupSessions, 'supergroup');
         await this.bulkSending(context, privateGroupSessions, 'private');
       } else {
-        await context.reply(cancelMessageSending);
+        await context.reply(context.t('updates-cancelled'));
       }
     };
   }
@@ -124,12 +114,12 @@ export class UpdatesCommand {
 
       limiter.on('done', () => {
         if (finishedCount % chunkSize === 0) {
-          context.reply(getUpdateMessage({ totalCount, successCount, finishedCount, type })).catch(handleError);
+          context.reply(getUpdateMessage(context, { totalCount, successCount, finishedCount, type })).catch(handleError);
         }
       });
 
       limiter.on('empty', () => {
-        context.reply(getSuccessfulMessage({ totalCount, successCount })).catch(handleError);
+        context.reply(getSuccessfulMessage(context, { totalCount, successCount })).catch(handleError);
         resolve();
       });
     });

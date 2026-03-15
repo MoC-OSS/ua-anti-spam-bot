@@ -14,6 +14,8 @@ import { MessagePrivateMockUpdate } from '@testing/updates/message-private-mock.
 
 import type { GrammyContext } from '@app-types/context';
 
+import { i18n } from '../../../../src/i18n';
+
 let outgoingRequests: OutgoingRequests;
 const { noLocationsComposer } = getNoLocationsComposer();
 const bot = new Bot<GrammyContext>('mock');
@@ -27,6 +29,7 @@ const { chatSession, mockChatSessionMiddleware } = mockChatSession({
 
 describe('noLocationsComposer', () => {
   beforeAll(async () => {
+    bot.use(i18n);
     bot.use(selfDestructedReply());
 
     bot.use(stateMiddleware);

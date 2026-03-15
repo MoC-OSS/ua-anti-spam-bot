@@ -53,7 +53,7 @@ export const getNoLocationsComposer = () => {
       await saveLocationMessage(context, locations, text);
 
       if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
-        await context.replyWithSelfDestructedHTML(getDeleteFeatureMessage({ writeUsername, userId, featuresString }));
+        await context.replyWithSelfDestructedHTML(getDeleteFeatureMessage(context, { writeUsername, userId, featuresString }));
       }
     }
 

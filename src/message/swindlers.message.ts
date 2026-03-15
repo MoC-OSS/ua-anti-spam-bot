@@ -1,39 +1,9 @@
-/**
- * Generic - Swindlers
- * */
-export const swindlersUpdateStartMessage = 'Починаю оновлення списку шахраїв...';
+import type { GrammyContext } from '@app-types/context';
 
-export const swindlersUpdateEndMessage = 'Оновлення спіску шахраїв завершено.';
+export const getSwindlersUpdateStartMessage = (context: GrammyContext) => context.t('swindlers-update-start');
 
-export const swindlersWarningMessage = `<b>❗УВАГА! UA Anti Spam Bot 🇺🇦 помітив повідомлення від шахраїв в цьому чаті!</b>
+export const getSwindlersUpdateEndMessage = (context: GrammyContext) => context.t('swindlers-update-end');
 
-Будьте обережні та дотримуйтесь правил інформаційної безпеки:
+export const getSwindlersWarningMessage = (context: GrammyContext) => context.t('swindlers-warning');
 
-🔶 Не переходьте за підозрілими посиланнями із чатів!
-🔶 Уникайте реєстрацій та передачі персональних даних стороннім неперевіреним ресурсам.
-🔶 Ніколи не вводьте захищені дані ваших платіжних карток (CVV-код та PIN).
-
-Якщо ви стали жертвою шахраїв або ваш акаунт зламали, звертайтесь на безоплатну гарячу лінію з цифрової безпеки.
-
-Отримати фахову консультацію:
-👉 @nadiyno_bot
-
-Детальніше за командою /hotline_security
-`;
-
-export const swindlersHelpMessage = `
-<b>NADIYNO: гаряча лінія з цифрової безпеки</b>
-
-* Отримали підозрілий дзвінок нібито з банку?
-* Купуєте онлайн, але не впевнені в безпечності сайту?
-* Ваш акаунт зламали?
-
-Опишіть вашу проблему та отримайте фахову консультацію.
-Це безоплатно та конфіденційно.
-
-Запитайте у фахівця!
-👉 @nadiyno_bot
-
-Детальніше про платформу:
-💻 https://nadiyno.org/
-`.trim();
+export const getSwindlersHelpMessage = (context: GrammyContext) => context.t('swindlers-help');

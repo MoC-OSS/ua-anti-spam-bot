@@ -54,7 +54,7 @@ export const getNoCounterOffensiveComposer = () => {
       const { writeUsername, userId } = getUserData(context);
 
       if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
-        await context.replyWithSelfDestructedHTML(getDeleteCounteroffensiveMessage({ writeUsername, userId }));
+        await context.replyWithSelfDestructedHTML(getDeleteCounteroffensiveMessage(context, { writeUsername, userId }));
       }
     }
 

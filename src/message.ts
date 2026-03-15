@@ -1,90 +1,44 @@
 import moment from 'moment-timezone';
 
-import type { DeleteMessageAtomProperties } from './message/shared.message';
-import { getDeleteUserAtomMessage } from './message/shared.message';
-import type { CustomJsonObject } from './types/object';
+import type { GrammyContext } from './types/context';
 import type { ChatSessionData, FeaturesSessionsData } from './types/session';
 import { formatStateIntoAccusative, getRandomItem } from './utils/generic.util';
 import { environmentConfig } from './config';
 import { helpChat } from './creator';
+import { ALARM_END_DAY_COUNT, ALARM_END_GENERIC_COUNT, ALARM_END_NIGHT_COUNT, ALARM_START_GENERIC_COUNT, i18n } from './i18n';
 
 // eslint-disable-next-line no-barrel-files/no-barrel-files
-export { checkAdminNotification } from './message/admin.message';
+export { getCheckAdminNotification } from './message/admin.message';
 
 // eslint-disable-next-line no-barrel-files/no-barrel-files
-export { deleteAntisemitismMessages, getDeleteAntisemitismMessage } from './message/antisemitism.message';
+export { getDeleteAntisemitismMessage } from './message/antisemitism.message';
 
 // eslint-disable-next-line no-barrel-files/no-barrel-files
-export { deleteObsceneMessages, getDeleteObsceneMessage, getWarnObsceneMessage, warnObsceneMessages } from './message/obscene.message';
+export { getDeleteObsceneMessage, getWarnObsceneMessage } from './message/obscene.message';
 
 // eslint-disable-next-line no-barrel-files/no-barrel-files
 export type { DeleteObsceneMessageProperties } from './message/obscene.message';
 
 // eslint-disable-next-line no-barrel-files/no-barrel-files
-export { hasNoLinkedChats, isNotAdminMessage, linkToWebView } from './message/settings.message';
+export { getHasNoLinkedChats, getIsNotAdminMessage, getLinkToWebView } from './message/settings.message';
 
 // eslint-disable-next-line no-barrel-files/no-barrel-files
 export type { DeleteMessageAtomProperties } from './message/shared.message';
 
 // eslint-disable-next-line no-barrel-files/no-barrel-files
-export { getDeleteUserAtomMessage } from './message/shared.message';
+export {
+  getSwindlersHelpMessage,
+  getSwindlersUpdateEndMessage,
+  getSwindlersUpdateStartMessage,
+  getSwindlersWarningMessage,
+} from './message/swindlers.message';
 
 // eslint-disable-next-line no-barrel-files/no-barrel-files
-export {
-  swindlersHelpMessage,
-  swindlersUpdateEndMessage,
-  swindlersUpdateStartMessage,
-  swindlersWarningMessage,
-} from './message/swindlers.message';
+export { getDeleteDenylistMessage } from './message/denylist.message';
 
 export const randomBanEmojis = ['👮🏻‍♀️', '🤦🏼‍♀️', '🙅🏻‍♀️'];
 
 export const randomLocationBanEmojis = ['🏡', '🏘️', '🌳'];
-
-function getCurrentTimeAndDate() {
-  return moment().format('LT');
-}
-
-export interface GenericBotProperties {
-  botName: string;
-}
-
-/**
- * Generic
- * */
-export const getAdminReadyMessage = ({ botName }: GenericBotProperties) =>
-  `
-😎 <b>Тепер я адміністратор.</b> Готовий до роботи.
-⚙️ Всі налаштування бота доступні за командою <b>/settings@${botName}</b>
-
-👩‍💻 Якщо бот не працює чи є питання і пропозиції, пишіть в <a href="${helpChat}">чат підтримки</a>.
-`.trim();
-
-export const adminReadyHasNoDeletePermissionMessage = '😢 Тепер я адміністратор. Але не маю права на видалення повідомлень.';
-
-export const startAdminReadyMessage = '✅ Я активований і виконую свою роботу.';
-
-export const memberReadyMessage = '😴 Тепер я деактивований. Відпочиваю... ';
-
-export const makeAdminMessage = `⛔️ Я не активований!
-<b>☝️Зроби мене адміністратором, щоб я міг видаляти повідомлення, а також все інше що я вмію, за твоїм бажанням.</b>`;
-
-export const hasDeletePermissionMessage = '✅ Я маю права на видалення повідомлень.';
-
-export const hasNoDeletePermissionMessage = '⛔ Я не маю права на видалення повідомлень.';
-
-export const featureNoAdminMessage = '⛔️ Я не активований!\n<b>☝️Зроби мене адміністратором, щоб я міг дати цей функціонал.</b>';
-
-/**
- * Generic - Air alarm
- * */
-export const chatIsMutedMessage = `
-🤫 Можливість відправляти повідомлення під час повітряної тривоги тимчасово заблокована!
-`;
-
-export const chatIsUnmutedMessage = `
-💬 Блокування повідомлень зняті. Приємного спілкування!
-`;
 
 export const isNight = () => {
   const hours = +moment().format('H');
@@ -94,187 +48,176 @@ export const isNight = () => {
 
 export const getDayTimeEmoji = () => (isNight() ? '🌖' : '☀️');
 
-export const getRandomAlarmStartText = () => {
+function getCurrentTime() {
+  return moment().format('LT');
+}
+
+function randomT(locale: string, prefix: string, count: number): string {
+  // eslint-disable-next-line sonarjs/pseudo-random
+  const index = Math.floor(Math.random() * count) + 1;
+
+  return i18n.t(locale, `${prefix}-${index}`);
+}
+
+const getRandomAlarmStartText = (): string => {
   const currentTimeEmoji = getDayTimeEmoji();
   const randomAlarmEmoji = getRandomItem(['⚠️', '❗️', '🔊', '🚨', '📢', '❕', currentTimeEmoji]);
+  const text = randomT('uk', 'alarm-start', ALARM_START_GENERIC_COUNT);
 
-  const genericMessages = [
-    '<b>НЕ нехтуйте</b> повітряною тривогою.',
-    'Покиньте вулиці та пройдіть в укриття!',
-    'Пройдіть до укриття!',
-    'Будьте обережні!',
-    'Будьте в укриттях.',
-    'Не ігноруйте сигнали повітряної тривоги!',
-    'Не ігноруйте тривогу!',
-    'Перебувайте в укриттях до завершення повітряної тривоги!',
-  ];
-
-  return `${getRandomItem(genericMessages)} ${randomAlarmEmoji}`;
+  return `${text} ${randomAlarmEmoji}`;
 };
 
-export const getRandomAlarmEndText = () => {
+const getRandomAlarmEndText = (): string => {
   const currentTimeEmoji = getDayTimeEmoji();
-  const randomAlarmEmoji = `${getRandomItem(['🇺🇦', '🙏', currentTimeEmoji])} `;
+  const randomAlarmEmoji = `${getRandomItem(['🇺🇦', '��', currentTimeEmoji])} `;
 
-  const genericMessages = [
-    'Будьте обережні',
-    'Бережіть себе',
-    'Дякуємо силам ППО!',
-    'Слава ЗСУ!',
-    'Усім мирного неба над головою',
-    'Дякуємо ППО за роботу!',
-  ].map((item) => `${item} ${randomAlarmEmoji}`);
+  if (isNight()) {
+    const totalCount = ALARM_END_GENERIC_COUNT + ALARM_END_NIGHT_COUNT;
+    // eslint-disable-next-line sonarjs/pseudo-random
+    const index = Math.floor(Math.random() * totalCount) + 1;
 
-  const nightMessages = [`Всім тихої ночі! ${currentTimeEmoji}`, `Всім гарного вечора і тихої ночі! ${currentTimeEmoji}`];
-  const dayMessages = ['Всім гарного дня! ☀️'];
+    if (index <= ALARM_END_GENERIC_COUNT) {
+      return `${i18n.t('uk', `alarm-end-${index}`)} ${randomAlarmEmoji}`;
+    }
 
-  return isNight() ? getRandomItem([...genericMessages, ...nightMessages]) : getRandomItem([...genericMessages, ...dayMessages]);
+    return `${i18n.t('uk', `alarm-end-night-${index - ALARM_END_GENERIC_COUNT}`)} ${currentTimeEmoji}`;
+  }
+
+  const totalCount = ALARM_END_GENERIC_COUNT + ALARM_END_DAY_COUNT;
+  // eslint-disable-next-line sonarjs/pseudo-random
+  const index = Math.floor(Math.random() * totalCount) + 1;
+
+  if (index <= ALARM_END_GENERIC_COUNT) {
+    return `${i18n.t('uk', `alarm-end-${index}`)} ${randomAlarmEmoji}`;
+  }
+
+  return i18n.t('uk', `alarm-end-day-${index - ALARM_END_GENERIC_COUNT}`);
 };
 
 /**
  * @param {ChatSessionData['chatSettings']} settings
  * @param isRepeatedAlarm
  * */
-export const getAlarmStartNotificationMessage = (settings: ChatSessionData['chatSettings'], isRepeatedAlarm = false) => `
-🔴 <b> ${getCurrentTimeAndDate()} ${isRepeatedAlarm ? 'Повторна повітряна' : 'Повітряна'} тривога в ${formatStateIntoAccusative(
-  settings.airRaidAlertSettings.state || '',
-)}!</b>
-${getRandomAlarmStartText()}
-`;
+export const getAlarmStartNotificationMessage = (settings: ChatSessionData['chatSettings'], isRepeatedAlarm = false) =>
+  i18n.t('uk', 'alarm-start-notification', {
+    time: getCurrentTime(),
+    repeated: isRepeatedAlarm ? 'yes' : 'no',
+    state: formatStateIntoAccusative(settings.airRaidAlertSettings.state || ''),
+    text: getRandomAlarmStartText(),
+  });
 
 /**
  * @param {ChatSessionData['chatSettings']} settings
  * */
-export const alarmEndNotificationMessage = (settings: ChatSessionData['chatSettings']) => `
-🟢 <b>${getCurrentTimeAndDate()} Відбій тривоги в ${formatStateIntoAccusative(settings.airRaidAlertSettings.state || '')}!</b>
-${getRandomAlarmEndText()}
-`;
+export const alarmEndNotificationMessage = (settings: ChatSessionData['chatSettings']) =>
+  i18n.t('uk', 'alarm-end-notification', {
+    time: getCurrentTime(),
+    state: formatStateIntoAccusative(settings.airRaidAlertSettings.state || ''),
+    text: getRandomAlarmEndText(),
+  });
 
-export const cancelMessageSending = 'Розсилка була відмінена!';
+export const chatIsMutedMessage = () => i18n.t('uk', 'alarm-chat-muted');
+
+export const chatIsUnmutedMessage = () => i18n.t('uk', 'alarm-chat-unmuted');
+
 /**
  * Complex - Settings
  * */
-
-export const getAirRaidAlarmSettingsMessage = (settings: ChatSessionData['chatSettings']) =>
-  `
-<b>🤖 Налаштування повітряної тривоги в поточному чаті.</b>
-Тут ти можеш змінити регіон до якого відноситься цей чат.
-
-🏰 ${
+export const getAirRaidAlarmSettingsMessage = (context: GrammyContext, settings: ChatSessionData['chatSettings']) =>
+  [
+    context.t('alarm-settings-title'),
+    context.t('alarm-settings-description'),
+    '',
     settings.airRaidAlertSettings.state
-      ? `✅ ${settings.airRaidAlertSettings.state} - твій вибраний регіон.`
-      : '⛔️ Ти ще не вибрав свій регіон.'
-  }
+      ? `🏰 ${context.t('alarm-settings-state-set', { state: settings.airRaidAlertSettings.state })}`
+      : `🏰 ${context.t('alarm-settings-state-not-set')}`,
+    '',
+    context.t('alarm-settings-change-hint'),
+  ].join('\n');
 
-Для зміни налаштувань, натисніть на відповідну кнопку нижче. 👇
-`.trim();
+export interface GenericBotProperties {
+  botName: string;
+}
 
-export const nextPage = 'Наступна сторінка ⏩';
+export const getAdminReadyMessage = (context: GrammyContext, { botName }: GenericBotProperties) =>
+  context.t('bot-admin-ready', { botName, helpChat });
 
-export const previousPage = '⏪ Попередня сторінка';
-
-/**
- *
- * Message that bots sends before confirmation
- *
- * */
-export const confirmationMessage = `
- Ось що буде надіслано до чатів:
- `.trim();
-
-/**
- * Complex
- * */
-export const startMessageAtom = `
-Привіт! 🇺🇦✌️
-<b>UA Anti Spam Bot 🇺🇦</b> — це безоплатний інструмент, який полегшує адміністрування Telegram-каналів і груп під час повномасштабної війни.
-
-<b>Можливості UA Anti Spam Bot, які ввімкнені за замовчуванням:</b>
-- 🚀 Боремося зі шкідливими коментарями, що загрожують здоров’ю наших громадян і військовослужбовців: переміщення ЗСУ, локації “прильотів”, блокпости та інше.
-- 💰 Захист від фішингу та шахраїв. Блокуємо шахрайські коментарі, збори, несправжню допомогу від організацій.
-- 🔞 Без порнографії. Блокуємо коментарі з відвертим характером та дорослим контентом (18+).
-- ✋ Автоматичне видалення повідомлень приєднання та прощання, щоб зберегти конфіденційність ваших ділових обговорень.
-
-<b>Можливості UA Anti Spam Bot, які можна опціонально налаштувати:</b>
-- 📢 Сповіщення в чаті про початок і відбій повітряної тривоги у вашому регіоні.
-- 🤫 Вимикання чату під час повітряної тривоги.
-- 💳 Блокування коментарів зі зборами грошей на банківські картки.
-- ↩️ Блокування пересланих повідомлень чи коментарів зі згадуваннями @.
-- 🔗 Блокування коментарів, якщо в них є будь-які посилання.
-- 💬 Блокування коментарів, якщо вони надіслані від імені телеграм каналу.
-- 📍 Не розголошуємо локації. Блокуємо коментарі з будь-якими локаціями.
-- ☢️ Попередження про використання російської мови як мови окупанта в коментарі користувача разом із мотивацією перейти на українську.
-- 🪆 Блокування коментарів, написаних російською мовою як мовою окупанта, разом із мотивацією переходити на українську мову.
-`.trim();
-
-/**
- *
- * Message that bots sends if user has no rights to perform mass sending
- *
- * */
-export const getDeclinedMassSendingMessage = 'Вибач, але у тебе немає прав для цієї команди.😞'.trim();
-
-export interface DeleteMessageProperties extends DeleteMessageAtomProperties {
+export interface DeleteMessageProperties {
+  writeUsername: string;
+  userId?: number;
   wordMessage: string;
   debugMessage: string;
   withLocation?: boolean;
 }
 
 /**
- *
  * Message that bot sends on delete
- *
  * */
-export const getDeleteMessage = ({ writeUsername, userId, wordMessage, debugMessage, withLocation }: DeleteMessageProperties) =>
-  `
-${getDeleteUserAtomMessage({ writeUsername, userId })}
+export const getDeleteMessage = (
+  context: GrammyContext,
+  { writeUsername, userId, wordMessage, debugMessage, withLocation }: DeleteMessageProperties,
+) => {
+  const atom =
+    userId && writeUsername ? context.t('delete-user-atom-with-user', { userId, writeUsername }) : context.t('delete-user-atom-no-user');
 
-${getRandomItem(withLocation ? randomLocationBanEmojis : randomBanEmojis)} <b>Причина</b>: поширення потенційно стратегічної інформації${
-    withLocation ? ' з повідомленням локації' : ''
-  }${wordMessage}.
+  const reason = withLocation ? context.t('delete-strategic-reason-location') : context.t('delete-strategic-reason');
 
-✊🏻 «<b>єВорог</b>» — новий бот від Мінцифри, яким не зможуть скористатися окупанти.
-Повідомляйте цю інформацію йому.
+  const body = context.t('delete-strategic-message', { reason, wordMessage });
 
-👉🏻 @evorog_bot
+  return [atom, '', body, debugMessage].filter(Boolean).join('\n').trim();
+};
 
-
-
-${debugMessage}`.trim();
-
-export interface DeleteFeatureMessageProperties extends DeleteMessageAtomProperties {
+export interface DeleteFeatureMessageProperties {
+  writeUsername: string;
+  userId?: number;
   featuresString: string;
 }
 
-export const getDeleteFeatureMessage = ({ writeUsername, userId, featuresString }: DeleteFeatureMessageProperties) => `
-${getDeleteUserAtomMessage({ writeUsername, userId })}
+export const getDeleteFeatureMessage = (
+  context: GrammyContext,
+  { writeUsername, userId, featuresString }: DeleteFeatureMessageProperties,
+) => {
+  const atom =
+    userId && writeUsername ? context.t('delete-user-atom-with-user', { userId, writeUsername }) : context.t('delete-user-atom-no-user');
 
-🤫 Відправка повідомлень з <b>${featuresString}</b> недоступна по правилам цього чату.
-`;
+  return `${atom}\n\n${context.t('delete-feature-message', { featuresString })}`;
+};
 
-export const getDeleteNsfwMessage = ({ writeUsername, userId }: DeleteMessageAtomProperties) =>
-  `
-${getDeleteUserAtomMessage({ writeUsername, userId })}
+export interface GetDeleteNsfwMessageField {
+  writeUsername: string;
+  userId?: number;
+}
 
-🔞 Зображення або текст з <b>відвертим характером</b> та <b>дорослим контентом (18+)</b> заборонені.
-`.trim();
+export const getDeleteNsfwMessage = (context: GrammyContext, { writeUsername, userId }: GetDeleteNsfwMessageField) => {
+  const atom =
+    userId && writeUsername ? context.t('delete-user-atom-with-user', { userId, writeUsername }) : context.t('delete-user-atom-no-user');
 
-export const getDeleteCounteroffensiveMessage = ({ writeUsername, userId }: DeleteMessageAtomProperties) => `
-${getDeleteUserAtomMessage({ writeUsername, userId })}
+  return `${atom}\n\n${context.t('delete-nsfw-message')}`;
+};
 
-🤫 Міноборони рекомендує не обговорювати контрнаступ ЗСУ. Тому, будь ласка, уникайте коментарів на цю тему!
-`;
+export interface GetDeleteCounteroffensiveMessageField {
+  writeUsername: string;
+  userId?: number;
+}
+
+export const getDeleteCounteroffensiveMessage = (
+  context: GrammyContext,
+  { writeUsername, userId }: GetDeleteCounteroffensiveMessageField,
+) => {
+  const atom =
+    userId && writeUsername ? context.t('delete-user-atom-with-user', { userId, writeUsername }) : context.t('delete-user-atom-no-user');
+
+  return `${atom}\n\n${context.t('delete-counteroffensive-message')}`;
+};
 
 export interface DebugMessageProperties {
   message: string | undefined;
-  byRules: CustomJsonObject;
+  byRules: Record<string, unknown>;
   startTime: Date;
 }
 
 /**
- *
  * Returns debug message that bot adds to delete message if environmentConfig is debug
- *
  * */
 export const getDebugMessage = ({ message, byRules, startTime }: DebugMessageProperties) =>
   `
@@ -309,118 +252,126 @@ export interface FeaturesStatisticsMessageProperties {
   chatsCount: number;
 }
 
-/**
- *
- * Message that bot sends on /statistics
- *
- * */
-export const getChatStatisticsMessage = ({
-  adminsChatsCount,
-  botRemovedCount,
-  channelCount,
-  groupCount,
-  memberChatsCount,
-  privateCount,
-  superGroupsCount,
-  totalSessionCount,
-  totalUserCounts,
-}: ChatStatisticsMessageProperties) =>
-  `
-<b>Кількість всіх: </b>
-• Чатів - ${totalSessionCount} 🎉
-• Користувачів - ${totalUserCounts} 🎉
-
-<b>Статистика по групам</b>
-
-👨‍👩‍👧‍👦 Супер-груп чатів: <b>${superGroupsCount}</b>
-👩‍👦 Груп чатів: <b>${groupCount}</b>
-
-✅ Активний адмін: в <b>${adminsChatsCount}</b> групах
-⛔️ Вимкнений адмін: в <b>${memberChatsCount}</b> групах
-
-😢 Бота видалили: із <b>${botRemovedCount}</b> груп
-
-<b>Інша статистика</b>
-
-💁‍♂️ Приватних чатів: <b>${privateCount}</b>
-🔔 Каналів: <b>${channelCount}</b>
-
-
-`.trim();
-
-function getPercentage(digits: number) {
-  return (digits * 100).toFixed(2);
+function toPercent(count: number, total: number) {
+  return ((count / total) * 100).toFixed(2);
 }
 
 /**
- *
  * Message that bot sends on /statistics
- *
  * */
-export const getFeaturesStatisticsMessage = ({ features, chatsCount }: FeaturesStatisticsMessageProperties) =>
-  `
-<b>Статистика по фічам з ${chatsCount} чатів</b>
+export const getChatStatisticsMessage = (
+  context: GrammyContext,
+  {
+    adminsChatsCount,
+    botRemovedCount,
+    channelCount,
+    groupCount,
+    memberChatsCount,
+    privateCount,
+    superGroupsCount,
+    totalSessionCount,
+    totalUserCounts,
+  }: ChatStatisticsMessageProperties,
+) =>
+  [
+    context.t('statistics-chat-header'),
+    context.t('statistics-chats-count', { count: totalSessionCount }),
+    context.t('statistics-users-count', { count: totalUserCounts }),
+    '',
+    context.t('statistics-groups-header'),
+    '',
+    context.t('statistics-super-groups', { count: superGroupsCount }),
+    context.t('statistics-groups', { count: groupCount }),
+    '',
+    context.t('statistics-admin-active', { count: adminsChatsCount }),
+    context.t('statistics-admin-disabled', { count: memberChatsCount }),
+    '',
+    context.t('statistics-bot-removed', { count: botRemovedCount }),
+    '',
+    context.t('statistics-other-header'),
+    '',
+    context.t('statistics-private', { count: privateCount }),
+    context.t('statistics-channels', { count: channelCount }),
+  ].join('\n');
 
-<b>🔴 Виключений дефолтний функціонал:</b>
-🚀 Бот видаляє стратегічну інформацію: <b>${features.disableStrategicInfo} (${getPercentage(
-    features.disableStrategicInfo / chatsCount,
-  )}%)</b>
-❗ Бот повідомляє про причину видалення повідомлення: <b>${features.disableDeleteMessage} (${getPercentage(
-    features.disableDeleteMessage / chatsCount,
-  )}%)</b>
-💰 Бот видаляє повідомлення шахраїв: <b>${features.disableSwindlerMessage} (${getPercentage(
-    features.disableSwindlerMessage / chatsCount,
-  )}%)</b>
-✋ Бот видаляє повідомлення приєдання та прощання: <b>${features.disableDeleteServiceMessage} (${getPercentage(
-    features.disableDeleteServiceMessage / chatsCount,
-  )}%)</b>
-🔞 Бот видаляє зображення відвертого змісту та дорослий контент: <b>${features.disableNsfwFilter} (${getPercentage(
-    features.disableNsfwFilter / chatsCount,
-  )}%)</b>
-🚫 Бот видаляє повідомлення антисемітського змісту: <b>${features.disableDeleteAntisemitism} (${getPercentage(
-    features.disableDeleteAntisemitism / chatsCount,
-  )}%)</b>
-
-<b>🟢 Включений опціональний функціонал:</b>
-🤫 Бот вимикає чат під час повітряної тривоги: <b>${features.disableChatWhileAirRaidAlert} (${getPercentage(
-    features.disableChatWhileAirRaidAlert / chatsCount,
-  )}%)</b>
-💳 Бот видаляє повідомлення з картками: <b>${features.enableDeleteCards} (${getPercentage(features.enableDeleteCards / chatsCount)}%)</b>
-🔗 Бот видаляє повідомлення з посиланнями: <b>${features.enableDeleteUrls} (${getPercentage(features.enableDeleteUrls / chatsCount)}%)</b>
-📍 Бот видаляє повідомлення з локаціями: <b>${features.enableDeleteLocations} (${getPercentage(
-    features.enableDeleteLocations / chatsCount,
-  )}%)</b>
-⚓ Бот видаляє повідомлення зі @ згадуваннями: <b>${features.enableDeleteMentions} (${getPercentage(
-    features.enableDeleteMentions / chatsCount,
-  )}%)</b>
-↩️ Бот видаляє повідомлення з пересиланнями: <b>${features.enableDeleteForwards} (${getPercentage(
-    features.enableDeleteForwards / chatsCount,
-  )}%)</b>
-💬 Бот видаляє повідомлення від інших телеграм каналів: <b>${features.enableDeleteChannelMessages} (${getPercentage(
-    features.enableDeleteForwards / chatsCount,
-  )}%)</b>
-🏃 Бот видаляє повідомлення з контрнаступом: <b>${features.enableDeleteCounteroffensive} (${getPercentage(
-    features.enableDeleteCounteroffensive / chatsCount,
-  )}%)</b>
-🪆 Бот видаляє повідомлення з російською мовою: <b>${features.enableDeleteRussian} (${getPercentage(
-    features.enableDeleteRussian / chatsCount,
-  )}%)</b>
-☢ Бот попереджає про заборону російської мови: <b>${features.enableWarnRussian} (${getPercentage(
-    features.enableWarnRussian / chatsCount,
-  )}%)</b>
-📢 Бот повідомляє про початок і завершення повітряної тривоги: <b>${features.notificationMessage} (${getPercentage(
-    features.notificationMessage / chatsCount,
-  )}%)</b>
-🤬 Бот видаляє повідомлення з нецензурною лексикою: <b>${features.enableDeleteObscene} (${getPercentage(
-    features.enableDeleteObscene / chatsCount,
-  )}%)</b>
-⚠ Бот попереджає про заборону нецензурної лексики: <b>${features.enableWarnObscene} (${getPercentage(
-    features.enableWarnObscene / chatsCount,
-  )}%)</b>
-
-
-
-`.trim();
+/**
+ * Message that bot sends on /statistics for features
+ * */
+export const getFeaturesStatisticsMessage = (context: GrammyContext, { features, chatsCount }: FeaturesStatisticsMessageProperties) =>
+  [
+    context.t('features-statistics-header', { chatsCount }),
+    '',
+    context.t('features-statistics-disabled-header'),
+    context.t('feature-stat-strategic', {
+      count: features.disableStrategicInfo,
+      percent: toPercent(features.disableStrategicInfo, chatsCount),
+    }),
+    context.t('feature-stat-delete-message', {
+      count: features.disableDeleteMessage,
+      percent: toPercent(features.disableDeleteMessage, chatsCount),
+    }),
+    context.t('feature-stat-swindler', {
+      count: features.disableSwindlerMessage,
+      percent: toPercent(features.disableSwindlerMessage, chatsCount),
+    }),
+    context.t('feature-stat-service-messages', {
+      count: features.disableDeleteServiceMessage,
+      percent: toPercent(features.disableDeleteServiceMessage, chatsCount),
+    }),
+    context.t('feature-stat-nsfw', { count: features.disableNsfwFilter, percent: toPercent(features.disableNsfwFilter, chatsCount) }),
+    context.t('feature-stat-antisemitism', {
+      count: features.disableDeleteAntisemitism,
+      percent: toPercent(features.disableDeleteAntisemitism, chatsCount),
+    }),
+    '',
+    context.t('features-statistics-enabled-header'),
+    context.t('feature-stat-alarm-mute', {
+      count: features.disableChatWhileAirRaidAlert,
+      percent: toPercent(features.disableChatWhileAirRaidAlert, chatsCount),
+    }),
+    context.t('feature-stat-cards', { count: features.enableDeleteCards, percent: toPercent(features.enableDeleteCards, chatsCount) }),
+    context.t('feature-stat-urls', { count: features.enableDeleteUrls, percent: toPercent(features.enableDeleteUrls, chatsCount) }),
+    context.t('feature-stat-locations', {
+      count: features.enableDeleteLocations,
+      percent: toPercent(features.enableDeleteLocations, chatsCount),
+    }),
+    context.t('feature-stat-mentions', {
+      count: features.enableDeleteMentions,
+      percent: toPercent(features.enableDeleteMentions, chatsCount),
+    }),
+    context.t('feature-stat-forwards', {
+      count: features.enableDeleteForwards,
+      percent: toPercent(features.enableDeleteForwards, chatsCount),
+    }),
+    context.t('feature-stat-channel-messages', {
+      count: features.enableDeleteChannelMessages,
+      percent: toPercent(features.enableDeleteForwards, chatsCount),
+    }),
+    context.t('feature-stat-counteroffensive', {
+      count: features.enableDeleteCounteroffensive,
+      percent: toPercent(features.enableDeleteCounteroffensive, chatsCount),
+    }),
+    context.t('feature-stat-delete-russian', {
+      count: features.enableDeleteRussian,
+      percent: toPercent(features.enableDeleteRussian, chatsCount),
+    }),
+    context.t('feature-stat-warn-russian', {
+      count: features.enableWarnRussian,
+      percent: toPercent(features.enableWarnRussian, chatsCount),
+    }),
+    context.t('feature-stat-alarm-notify', {
+      count: features.notificationMessage,
+      percent: toPercent(features.notificationMessage, chatsCount),
+    }),
+    context.t('feature-stat-delete-obscene', {
+      count: features.enableDeleteObscene,
+      percent: toPercent(features.enableDeleteObscene, chatsCount),
+    }),
+    context.t('feature-stat-warn-obscene', {
+      count: features.enableWarnObscene,
+      percent: toPercent(features.enableWarnObscene, chatsCount),
+    }),
+  ].join('\n');
 
 export interface HelpMessageProperties {
   startLocaleTime: string;
@@ -431,65 +382,38 @@ export interface HelpMessageProperties {
 }
 
 /**
- *
- * Message that bot sends on /get_new_statistic where no new data
- *
- * */
-export const noNewStatisticMessage = 'Немає нових записів.';
-
-/**
- *
  * Help handler
- *
  * */
-export const getHelpMessage = ({ startLocaleTime, isAdmin, canDelete, user, userId }: HelpMessageProperties) =>
-  `
-<a href="tg://user?id=${userId}">${user}</a>
-
-${isAdmin ? startAdminReadyMessage : makeAdminMessage}
-${canDelete ? hasDeletePermissionMessage : hasNoDeletePermissionMessage}
-
-<b>Якщо повідомлення було видалено помилково:</b>
-
-• Попросіть адміністраторів написати його самостійно;
-• Пришліть його скріншотом.
-
-<b>Останнє оновлення боту:</b>
-
-${startLocaleTime},
-
-Якщо є запитання, пишіть в <a href="${helpChat}">чат підтримки</a>.
-
-<b>Гаряча лінія допомоги:</b>
-
-Якщо ви стали жертвою шахраїв або ваш акаунт зламали, звертайтесь на безоплатну гарячу лінію з цифрової безпеки.
-
-Отримати фахову консультацію:
-👉 @nadiyno_bot
-
-Детальніше за командою /hotline_security
-`.trim();
+export const getHelpMessage = (context: GrammyContext, { startLocaleTime, isAdmin, canDelete, user, userId }: HelpMessageProperties) =>
+  [
+    `<a href="tg://user?id=${userId}">${user}</a>`,
+    '',
+    isAdmin ? context.t('bot-admin-active') : context.t('bot-make-admin'),
+    canDelete ? context.t('bot-has-delete-permission') : context.t('bot-no-delete-permission'),
+    '',
+    context.t('help-if-wrong-delete'),
+    '',
+    context.t('help-if-wrong-delete-option-1'),
+    context.t('help-if-wrong-delete-option-2'),
+    '',
+    context.t('help-last-update'),
+    '',
+    `${startLocaleTime},`,
+    '',
+    context.t('help-support-chat', { helpChat }),
+    '',
+    context.t('help-hotline-header'),
+    '',
+    context.t('help-hotline-text'),
+    '',
+    'Детальніше за командою /hotline_security',
+  ].join('\n');
 
 /**
- *
  * Message that bot will send when user uses /start in private
- *
  * */
-export const getStartMessage = () =>
-  `
-${startMessageAtom}
-
-<b>Щоб бот запрацював у чаті:</b>
-
-1) Додайте бот в чат
-2) Зробіть бота адміністратором.
-
-Розробник бота — @dimkasmile за підтримки IT-компанії Master of Code Global.
-Якщо бот не працює, пишіть в <a href="${helpChat}">чат підтримки</a>.
-
-Дивись відео з інструкцією нижче:
-https://youtu.be/RX0cZYf1Lm4
-`.trim();
+export const getStartMessage = (context: GrammyContext) =>
+  [context.t('start-message-atom'), '', context.t('start-private-instructions', { helpChat })].join('\n');
 
 export interface GroupStartMessageProperties {
   adminsString?: string;
@@ -500,86 +424,65 @@ export interface GroupStartMessageProperties {
 }
 
 /**
- *
  * Message that bot sends when user uses /start in the group
- *
  * */
-export const getGroupStartMessage = ({ adminsString, isAdmin = false, canDelete, user = '', userId }: GroupStartMessageProperties) =>
-  `
-${userId ? `<a href="tg://user?id=${userId}">${user}</a>` : user}
+export const getGroupStartMessage = (
+  context: GrammyContext,
+  { adminsString, isAdmin = false, canDelete, user = '', userId }: GroupStartMessageProperties,
+) => {
+  const lines: string[] = [
+    userId ? `<a href="tg://user?id=${userId}">${user}</a>` : user,
+    '',
+    isAdmin ? context.t('bot-admin-active') : context.t('bot-make-admin'),
+    canDelete ? context.t('bot-has-delete-permission') : context.t('bot-no-delete-permission'),
+  ];
 
-${isAdmin ? startAdminReadyMessage : makeAdminMessage}
-${canDelete ? hasDeletePermissionMessage : hasNoDeletePermissionMessage}
+  if (!isAdmin || !canDelete) {
+    lines.push('');
+    lines.push(adminsString ? context.t('start-group-admins-help', { adminsString }) : context.t('start-group-creator-help'));
+  }
 
-${((!isAdmin || !canDelete) && (adminsString ? `З цим може допомогти: ${adminsString}` : 'З цим може допомогти творець чату')) || ''}
-`.trim();
+  return lines.join('\n').trim();
+};
 
 export interface CannotDeleteMessageProperties {
   adminsString?: string;
 }
 
-export const getCannotDeleteMessage = ({ adminsString }: CannotDeleteMessageProperties) =>
-  `
-<b>😢 Не можу видалити це повідомлення.</b>
-Я не маю прав на видалення або в Telegram стався збій.
-
-🧐 Перевірте права чи зробіть мене адміністратором знову.
-${adminsString ? `З цим може допомогти: ${adminsString}` : 'З цим може допомогти творець чату'}
-`.trim();
+export const getCannotDeleteMessage = (context: GrammyContext, { adminsString }: CannotDeleteMessageProperties) =>
+  context.t('cannot-delete-message', { adminsString: adminsString ?? 'none' });
 
 /**
- *
  * Message that bot sends when user invites it into a channel
- *
  * */
-export const getStartChannelMessage = ({ botName }: GenericBotProperties) =>
-  `
-Привіт! Повідомлення від офіційного чат-боту @${botName}.
-Ви мене додали в <b>канал</b> як адміністратора, але я не можу перевіряти повідомлення в коментарях.
-
-Видаліть мене і додайте в <b>чат каналу</b> каналу <b>як адміністратора</b>.
-Якщо є запитання, пишіть в <a href="${helpChat}">чат підтримки</a>
-`.trim();
+export const getStartChannelMessage = (context: GrammyContext, { botName }: GenericBotProperties) =>
+  context.t('start-channel-message', { botName, helpChat });
 
 /**
- *
  * Message when bot asks user what does he want to send to all private chats
- *
  * */
-export const getUpdatesMessage = () =>
-  `
-Напиши після цього повідомлення те, що ти хочеш відправити по всім активним сесіям:
-
-`.trim();
+export const getUpdatesMessage = (context: GrammyContext) => context.t('updates-prompt');
 
 export interface UpdateMessageProperties {
   totalCount: number;
   finishedCount: number;
   successCount: number;
-  type: string; // TODO add type
+  type: string;
 }
 
-export const getUpdateMessage = ({ totalCount, finishedCount, successCount, type }: UpdateMessageProperties) =>
-  `
-Було опрацьовано ${finishedCount}/${totalCount} повідомлень для ${type}...
-Успішно ${successCount} повідомлень.
-`.trim();
+export const getUpdateMessage = (context: GrammyContext, { totalCount, finishedCount, successCount, type }: UpdateMessageProperties) =>
+  [
+    context.t('updates-progress', { total: totalCount, finished: finishedCount, type }),
+    context.t('updates-progress-success', { success: successCount }),
+  ].join('\n');
 
 export interface SuccessfulMessageProperties {
   totalCount: number;
   successCount: number;
 }
 
-/**
- *
- * Message that bots sends before confirmation
- *
- * */
-export const getSuccessfulMessage = ({ totalCount, successCount }: SuccessfulMessageProperties) =>
-  `
-Розсилка завершена!
-Було відправлено ${successCount}/${totalCount} повідомлень.
-`.trim();
+export const getSuccessfulMessage = (context: GrammyContext, { totalCount, successCount }: SuccessfulMessageProperties) =>
+  [context.t('updates-done'), context.t('updates-done-count', { total: totalCount, success: successCount })].join('\n');
 
 export interface BotJoinMessageProperties {
   adminsString?: string;
@@ -588,16 +491,14 @@ export interface BotJoinMessageProperties {
 }
 
 /**
- *
- * Message that bot sends when user invites in into a group
- *
+ * Message that bot sends when user invites it into a group
  * */
-export const getBotJoinMessage = ({ adminsString, isAdmin = false, canDelete }: BotJoinMessageProperties) =>
-  `
-${startMessageAtom}
-
-${getGroupStartMessage({ adminsString, isAdmin, canDelete, user: undefined, userId: undefined }).trim()}
-`.trim();
+export const getBotJoinMessage = (context: GrammyContext, { adminsString, isAdmin = false, canDelete }: BotJoinMessageProperties) =>
+  [
+    context.t('start-message-atom'),
+    '',
+    getGroupStartMessage(context, { adminsString, isAdmin, canDelete, user: undefined, userId: undefined }).trim(),
+  ].join('\n');
 
 export interface TensorTestResultProperties {
   chance: string;
@@ -607,29 +508,32 @@ export interface TensorTestResultProperties {
 /**
  * Test messages
  */
-export const getTensorTestResult = ({ chance, isSpam }: TensorTestResultProperties) =>
-  `
-🎲 Шанс спаму - <b>${chance}</b>
-🤔 Я вважаю...<b>${isSpam ? '✅ Це спам' : '⛔️ Це не спам'}</b>
-`.trim();
+export const getTensorTestResult = (context: GrammyContext, { chance, isSpam }: TensorTestResultProperties) =>
+  [
+    context.t('tensor-test-spam-chance', { chance }),
+    isSpam ? context.t('tensor-test-verdict-spam') : context.t('tensor-test-verdict-not-spam'),
+  ].join('\n');
 
 /**
  * Russian warn/delete messages
  * */
 
-export interface DeleteRussianMessageProperties extends DeleteMessageAtomProperties {
+export interface DeleteRussianMessageProperties {
+  writeUsername: string;
+  userId?: number;
   message: string;
 }
 
 export const getWarnRussianMessage = (message: string) => `🫶🇺🇦 ${message}`;
 
-export const getDeleteRussianMessage = ({ writeUsername, userId, message }: DeleteRussianMessageProperties) => `
-${getDeleteUserAtomMessage({ writeUsername, userId })}
+export const getDeleteRussianMessage = (context: GrammyContext, { writeUsername, userId, message }: DeleteRussianMessageProperties) => {
+  const atom =
+    userId && writeUsername ? context.t('delete-user-atom-with-user', { userId, writeUsername }) : context.t('delete-user-atom-no-user');
 
-${getWarnRussianMessage(message)}
-`;
+  return `${atom}\n\n${getWarnRussianMessage(message)}`;
+};
 
-export const getUkrainianMessageExtra = (percent: number) => (percent === 200 ? '\nВ українській мові немає букв ъ, ы, э, та ё 🇺🇦' : '');
+export const getUkrainianMessageExtra = (percent: number) => (percent === 200 ? `\n${i18n.t('uk', 'russian-extra-letters')}` : '');
 
 /**
  * Logs

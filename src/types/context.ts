@@ -1,3 +1,4 @@
+import type { I18nFlavor } from '@grammyjs/i18n';
 import type { MenuFlavor } from '@grammyjs/menu';
 import type { Bot, CommandContext, Composer, Context, Filter, FilterQuery, MiddlewareFn, SessionFlavor } from 'grammy';
 
@@ -9,7 +10,8 @@ import type { State, StateFlavor } from './state';
 export type GrammyContext = SelfDestructedFlavor<Context> &
   SessionFlavor<SessionData> &
   ChatSessionFlavor<ChatSessionData> &
-  StateFlavor<State>;
+  StateFlavor<State> &
+  I18nFlavor;
 
 export type GrammyMenuContext = GrammyContext & MenuFlavor;
 

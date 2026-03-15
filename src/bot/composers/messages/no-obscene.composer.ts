@@ -55,7 +55,9 @@ export const getNoObsceneComposer = () => {
       const { writeUsername, userId } = getUserData(context);
 
       if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
-        await context.replyWithSelfDestructedHTML(getDeleteObsceneMessage({ writeUsername, userId, word: censorWord(isObscene.origin) }));
+        await context.replyWithSelfDestructedHTML(
+          getDeleteObsceneMessage(context, { writeUsername, userId, word: censorWord(isObscene.origin) }),
+        );
       }
     }
 

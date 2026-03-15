@@ -1,8 +1,7 @@
 import { onlyNotAdminFilter } from '@bot/filters/only-not-admin.filter';
 import { onlyWhenBotAdminFilter } from '@bot/filters/only-when-bot-admin.filter';
 
-import { featureNoAdminMessage } from '@message';
-import { hasNoLinkedChats, isNotAdminMessage, linkToWebView } from '@message/settings.message';
+import { getHasNoLinkedChats, getIsNotAdminMessage, getLinkToWebView } from '@message/settings.message';
 
 import type { RedisService } from '@services/redis.service';
 
@@ -34,16 +33,16 @@ export class SettingsCommand {
         const userSession = await this.redisService.getUserSession(userId);
         const chats = userSession?.linkedChats || [];
 
-        return chats.length > 0 ? context.reply(linkToWebView) : context.reply(hasNoLinkedChats);
+        return chats.length > 0 ? context.reply(getLinkToWebView(context)) : context.reply(getHasNoLinkedChats(context));
       }
 
       if (!isChatPrivate) {
         if (isNotAdmin) {
-          return context.replyWithSelfDestructedHTML(isNotAdminMessage);
+          return context.replyWithSelfDestructedHTML(getIsNotAdminMessage(context));
         }
 
         if (!isBotAdmin) {
-          return context.replyWithSelfDestructedHTML(featureNoAdminMessage);
+          return context.replyWithSelfDestructedHTML(context.t('bot-feature-no-admin'));
         }
 
         const chatTitle = context.chat?.title;
@@ -65,7 +64,7 @@ export class SettingsCommand {
           }
         }
 
-        return context.replyWithSelfDestructedHTML(linkToWebView);
+        return context.replyWithSelfDestructedHTML(getLinkToWebView(context));
       }
 
       // eslint-disable-next-line unicorn/no-useless-undefined

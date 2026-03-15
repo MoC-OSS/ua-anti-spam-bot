@@ -435,7 +435,7 @@ export class TestTensorListener {
         const { spamRate, isSpam } = await this.tensorService.predict(message || '', null);
 
         const chance = `${(spamRate * 100).toFixed(4)}%`;
-        const tensorTestMessage = getTensorTestResult({ chance, isSpam });
+        const tensorTestMessage = getTensorTestResult(context, { chance, isSpam });
 
         this.initTensorSession(context, tensorTestMessage);
 

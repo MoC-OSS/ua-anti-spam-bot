@@ -13,6 +13,8 @@ import { MessagePrivateMockUpdate } from '@testing/updates/message-private-mock.
 
 import type { GrammyContext } from '@app-types/context';
 
+import { i18n } from '../src/i18n';
+
 let outgoingRequests: OutgoingRequests;
 const bot = new Bot<GrammyContext>('mock');
 
@@ -29,6 +31,7 @@ describe('edit message test', () => {
 
     registerModule(parseCards, noCardsComposer);
 
+    bot.use(i18n);
     bot.use(stateMiddleware);
     bot.use(selfDestructedReply());
     bot.use(mockChatSessionMiddleware);

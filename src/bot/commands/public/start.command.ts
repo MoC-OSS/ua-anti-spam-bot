@@ -1,4 +1,4 @@
-import { getGroupStartMessage, getStartMessage, makeAdminMessage } from '@message';
+import { getGroupStartMessage, getStartMessage } from '@message';
 
 import type { GrammyMiddleware } from '@app-types/context';
 
@@ -19,7 +19,7 @@ export class StartCommand {
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context) => {
       if (context.chat?.type === 'private') {
-        return context.reply(getStartMessage(), { parse_mode: 'HTML' });
+        return context.reply(getStartMessage(context), { parse_mode: 'HTML' });
       }
 
       const isAdmin = context.chatSession.isBotAdmin;
@@ -33,7 +33,7 @@ export class StartCommand {
 
       if (!isAdmin || !canDelete) {
         return context.replyWithSelfDestructedHTML(
-          getGroupStartMessage({ isAdmin, canDelete, user: writeUsername === '@GroupAnonymousBot' ? '' : writeUsername, userId }),
+          getGroupStartMessage(context, { isAdmin, canDelete, user: writeUsername === '@GroupAnonymousBot' ? '' : writeUsername, userId }),
         );
       }
 
@@ -46,11 +46,16 @@ export class StartCommand {
         .then(({ adminsString }) => {
           context
             .replyWithSelfDestructedHTML(
-              getGroupStartMessage({ adminsString, isAdmin, canDelete, user: writeUsername === '@GroupAnonymousBot' ? '' : writeUsername }),
+              getGroupStartMessage(context, {
+                adminsString,
+                isAdmin,
+                canDelete,
+                user: writeUsername === '@GroupAnonymousBot' ? '' : writeUsername,
+              }),
             )
             .catch(async (getAdminsError) => {
               handleError(getAdminsError);
-              await context.reply(makeAdminMessage, { parse_mode: 'HTML' });
+              await context.reply(context.t('bot-make-admin'), { parse_mode: 'HTML' });
             });
         })
         .catch(handleError);

@@ -64,7 +64,7 @@ export const getNsfwMessageFilterComposer = ({ nsfwDetectService }: NsfwMessageF
       if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
         const { writeUsername, userId } = getUserData(context);
 
-        await context.replyWithSelfDestructedHTML(getDeleteNsfwMessage({ writeUsername, userId }));
+        await context.replyWithSelfDestructedHTML(getDeleteNsfwMessage(context, { writeUsername, userId }));
       }
     }
 

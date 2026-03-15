@@ -5,8 +5,6 @@ import { getBeforeAnyComposer } from '@bot/composers/before-any.composer';
 import { stateMiddleware } from '@bot/middleware/state.middleware';
 import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
 
-import { hasNoLinkedChats } from '@message/settings.message';
-
 import { mockRedisService } from '@services/_mocks/index.mocks';
 
 import { mockChatSession } from '@testing/../testing-main';
@@ -17,6 +15,8 @@ import { MessagePrivateMockUpdate } from '@testing/updates/message-private-mock.
 import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
 
 import type { GrammyContext } from '@app-types/context';
+
+import { i18n } from '../../../../src/i18n';
 
 let outgoingRequests: OutgoingRequests;
 const bot = new Bot<GrammyContext>('mock');
@@ -71,6 +71,7 @@ describe('SettingsCommand', () => {
   beforeAll(async () => {
     const { beforeAnyComposer } = getBeforeAnyComposer();
 
+    bot.use(i18n);
     bot.use(selfDestructedReply());
 
     bot.use(stateMiddleware);
@@ -111,7 +112,10 @@ describe('SettingsCommand', () => {
       const actualMethods = outgoingRequests.getMethods();
 
       expect(expectedMethods).toEqual(actualMethods);
-      expect(outgoingRequests.getAll<'deleteMessage', 'sendMessage'>()[1]?.payload.text).toEqual(hasNoLinkedChats);
+
+      expect(outgoingRequests.getAll<'deleteMessage', 'sendMessage'>()[1]?.payload.text).toEqual(
+        i18n.t('uk', 'settings-has-no-linked-chats'),
+      );
     });
 
     it('should send link if there are linked chats', async () => {
@@ -132,7 +136,10 @@ describe('SettingsCommand', () => {
       const actualMethods = outgoingRequests.getMethods();
 
       expect(expectedMethods).toEqual(actualMethods);
-      expect(outgoingRequests.getAll<'deleteMessage', 'sendMessage'>()[1]?.payload.text).not.toEqual(hasNoLinkedChats);
+
+      expect(outgoingRequests.getAll<'deleteMessage', 'sendMessage'>()[1]?.payload.text).not.toEqual(
+        i18n.t('uk', 'settings-has-no-linked-chats'),
+      );
     });
   });
 

@@ -2,8 +2,6 @@ import type { NextFunction } from 'grammy';
 
 import { onlyCreatorFilter } from '@bot/filters/only-creator.filter';
 
-import { getDeclinedMassSendingMessage } from '@message';
-
 import type { GrammyContext } from '@app-types/context';
 
 /**
@@ -15,7 +13,7 @@ export async function onlyCreator(context: GrammyContext, next: NextFunction) {
     return next();
   }
 
-  await context.reply(getDeclinedMassSendingMessage);
+  await context.reply(context.t('updates-declined'));
 
   // eslint-disable-next-line unicorn/no-useless-undefined
   return undefined;

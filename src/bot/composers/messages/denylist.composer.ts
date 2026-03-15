@@ -58,7 +58,7 @@ export const getDenylistComposer = () => {
         if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
           const { writeUsername, userId } = getUserData(context);
 
-          await context.replyWithSelfDestructedHTML(getDeleteDenylistMessage({ writeUsername, userId, word: denyWord }));
+          await context.replyWithSelfDestructedHTML(getDeleteDenylistMessage(context, { writeUsername, userId, word: denyWord }));
         }
       }
     }

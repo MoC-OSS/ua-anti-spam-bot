@@ -1,4 +1,4 @@
-import { swindlersUpdateEndMessage, swindlersUpdateStartMessage } from '@message/swindlers.message';
+import { getSwindlersUpdateEndMessage, getSwindlersUpdateStartMessage } from '@message/swindlers.message';
 
 import type { DynamicStorageService } from '@services/dynamic-storage.service';
 
@@ -20,13 +20,15 @@ export class SwindlersUpdateCommand {
      * */
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context: GrammyContext) => {
-      await context.reply(swindlersUpdateStartMessage).then(async (message) => {
+      await context.reply(getSwindlersUpdateStartMessage(context)).then(async (message) => {
         // eslint-disable-next-line camelcase
         const { message_id } = message;
 
         // @ts-ignore
-        // eslint-disable-next-line camelcase
-        await this.dynamicStorageService.updateStorage().then(() => context.editMessageText(swindlersUpdateEndMessage, { message_id }));
+
+        await this.dynamicStorageService
+          .updateStorage()
+          .then(() => context.editMessageText(getSwindlersUpdateEndMessage(context), { message_id }));
       });
     };
   }

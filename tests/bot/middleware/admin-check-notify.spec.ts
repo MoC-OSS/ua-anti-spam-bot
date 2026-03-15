@@ -17,6 +17,7 @@ import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.upd
 
 import type { GrammyContext } from '@app-types/context';
 
+import { i18n } from '../../../src/i18n';
 // eslint-disable-next-line vitest/no-mocks-import
 import { realSwindlerMessage } from '../../__mocks__/bot.mocks';
 
@@ -49,6 +50,7 @@ describe('admin-check-notify', () => {
   });
 
   beforeAll(async () => {
+    bot.use(i18n);
     bot.use(mockChatSessionMiddleware);
     bot.use(mockStateMiddleware);
     bot.use(beforeAnyComposer);

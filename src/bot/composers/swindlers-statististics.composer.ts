@@ -3,8 +3,6 @@ import { Composer } from 'grammy';
 
 import { onlySwindlersStatisticWhitelistedFilter } from '@bot/filters/only-swindlers-statistic-whitelisted';
 
-import { noNewStatisticMessage } from '@message';
-
 import { redisService } from '@services/redis.service';
 import { swindlersGoogleService } from '@services/swindlers-google.service';
 
@@ -82,7 +80,7 @@ export const getSwindlersStatisticCommandsComposer = () => {
     const isNoDiff = Object.values(diff).every((array) => array.length === 0);
 
     if (isNoDiff) {
-      return context.reply(noNewStatisticMessage);
+      return context.reply(context.t('no-new-statistic'));
     }
 
     await redisService.setSwindlersStatistic(fromSheet);

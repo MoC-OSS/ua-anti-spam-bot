@@ -102,7 +102,7 @@ export class OnTextListener {
             .then(async () => {
               if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
                 await context.replyWithSelfDestructedHTML(
-                  getDeleteMessage({
+                  getDeleteMessage(context, {
                     writeUsername,
                     userId,
                     wordMessage: '',
@@ -129,7 +129,10 @@ export class OnTextListener {
                   .getChatAdmins(context, context.chat.id)
                   .then(({ adminsString }) => {
                     context
-                      .reply(getCannotDeleteMessage({ adminsString }), { parse_mode: 'HTML', reply_to_message_id: context.msg?.message_id })
+                      .reply(getCannotDeleteMessage(context, { adminsString }), {
+                        parse_mode: 'HTML',
+                        reply_to_message_id: context.msg?.message_id,
+                      })
                       .catch(handleError);
 
                     this.bot.api

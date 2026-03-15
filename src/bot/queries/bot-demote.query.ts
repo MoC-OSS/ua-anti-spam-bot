@@ -1,5 +1,3 @@
-import { memberReadyMessage } from '@message';
-
 import type { GrammyQueryMiddleware } from '@app-types/context';
 
 import { handleError } from '@utils/error-handler';
@@ -11,7 +9,7 @@ export const botDemoteQuery: GrammyQueryMiddleware<'my_chat_member'> = async (co
   if (context.myChatMember.old_chat_member.status === 'administrator' && context.myChatMember.new_chat_member.status === 'member') {
     delete context.chatSession.botAdminDate;
     context.chatSession.isBotAdmin = false;
-    context.reply(memberReadyMessage).catch(handleError);
+    context.reply(context.t('bot-member-inactive')).catch(handleError);
   }
 
   return next();

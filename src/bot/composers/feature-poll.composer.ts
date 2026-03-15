@@ -56,12 +56,12 @@ async function bulkSending(context: GrammyContext, sessions: ChatSession[]) {
 
     limiter.on('done', () => {
       if (finishedCount % chunkSize === 0) {
-        context.reply(getUpdateMessage({ totalCount, successCount, finishedCount, type: 'feature_poll' })).catch(handleError);
+        context.reply(getUpdateMessage(context, { totalCount, successCount, finishedCount, type: 'feature_poll' })).catch(handleError);
       }
     });
 
     limiter.on('empty', () => {
-      context.reply(getSuccessfulMessage({ totalCount, successCount })).catch(handleError);
+      context.reply(getSuccessfulMessage(context, { totalCount, successCount })).catch(handleError);
       resolve();
     });
   });

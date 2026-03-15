@@ -16,6 +16,8 @@ import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.upd
 
 import type { GrammyContext } from '@app-types/context';
 
+import { i18n } from '../../../../src/i18n';
+
 let outgoingRequests: OutgoingRequests;
 const { noCounterOffensiveComposer } = getNoCounterOffensiveComposer();
 const bot = new Bot<GrammyContext>('mock');
@@ -30,6 +32,7 @@ const counteroffensiveService = new CounteroffensiveService(mockDynamicStorageSe
 
 describe('noCounteroffensiveComposer', () => {
   beforeAll(async () => {
+    bot.use(i18n);
     bot.use(selfDestructedReply());
 
     bot.use(stateMiddleware);

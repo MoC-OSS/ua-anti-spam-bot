@@ -133,8 +133,8 @@ export class AlarmChatService {
     }
 
     if (chat.payload.chatSettings.disableChatWhileAirRaidAlert) {
-      startAlarmMessage += chatIsMutedMessage;
-      endAlarmMessage += chatIsUnmutedMessage;
+      startAlarmMessage += chatIsMutedMessage();
+      endAlarmMessage += chatIsUnmutedMessage();
     }
 
     if (isAlarm) {

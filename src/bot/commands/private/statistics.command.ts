@@ -87,7 +87,7 @@ export class StatisticsCommand {
           });
 
         await context.reply(
-          getChatStatisticsMessage({
+          getChatStatisticsMessage(context, {
             adminsChatsCount,
             botRemovedCount,
             channelCount,
@@ -102,7 +102,7 @@ export class StatisticsCommand {
         );
 
         await context.reply(
-          getFeaturesStatisticsMessage({
+          getFeaturesStatisticsMessage(context, {
             features,
             chatsCount: adminsChatsCount,
           }),
