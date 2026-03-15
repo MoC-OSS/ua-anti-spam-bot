@@ -72,7 +72,7 @@ Follow these rules unconditionally:
 
 - Production code belongs under `src/`.
 - Tests belong under `tests/`.
-- Keep test filenames on the Vitest convention with a `.test.ts` suffix when adding new tests for this repository.
+- Keep test filenames on the Vitest convention with a `.spec.ts` suffix when adding new tests for this repository.
 
 ### Step 4 - Add or update tests
 
