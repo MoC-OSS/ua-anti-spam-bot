@@ -77,10 +77,14 @@ const getRandomAlarmEndText = (): string => {
     const index = Math.floor(Math.random() * totalCount) + 1;
 
     if (index <= ALARM_END_GENERIC_COUNT) {
-      return `${i18n.t('uk', `alarm-end-${index}`)} ${randomAlarmEmoji}`;
+      const key = `alarm-end-${index}` as const;
+
+      return `${i18n.t('uk', key)} ${randomAlarmEmoji}`;
     }
 
-    return `${i18n.t('uk', `alarm-end-night-${index - ALARM_END_GENERIC_COUNT}`)} ${currentTimeEmoji}`;
+    const nightKey = `alarm-end-night-${index - ALARM_END_GENERIC_COUNT}` as const;
+
+    return `${i18n.t('uk', nightKey)} ${currentTimeEmoji}`;
   }
 
   const totalCount = ALARM_END_GENERIC_COUNT + ALARM_END_DAY_COUNT;
@@ -88,10 +92,14 @@ const getRandomAlarmEndText = (): string => {
   const index = Math.floor(Math.random() * totalCount) + 1;
 
   if (index <= ALARM_END_GENERIC_COUNT) {
-    return `${i18n.t('uk', `alarm-end-${index}`)} ${randomAlarmEmoji}`;
+    const key = `alarm-end-${index}` as const;
+
+    return `${i18n.t('uk', key)} ${randomAlarmEmoji}`;
   }
 
-  return i18n.t('uk', `alarm-end-day-${index - ALARM_END_GENERIC_COUNT}`);
+  const dayKey = `alarm-end-day-${index - ALARM_END_GENERIC_COUNT}` as const;
+
+  return i18n.t('uk', dayKey);
 };
 
 /**
@@ -438,8 +446,7 @@ export const getGroupStartMessage = (
   ];
 
   if (!isAdmin || !canDelete) {
-    lines.push('');
-    lines.push(adminsString ? context.t('start-group-admins-help', { adminsString }) : context.t('start-group-creator-help'));
+    lines.push('', adminsString ? context.t('start-group-admins-help', { adminsString }) : context.t('start-group-creator-help'));
   }
 
   return lines.join('\n').trim();

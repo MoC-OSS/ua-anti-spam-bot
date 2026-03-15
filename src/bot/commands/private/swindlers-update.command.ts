@@ -25,9 +25,9 @@ export class SwindlersUpdateCommand {
         const { message_id } = message;
 
         // @ts-ignore
-
         await this.dynamicStorageService
           .updateStorage()
+          // eslint-disable-next-line camelcase
           .then(() => context.editMessageText(getSwindlersUpdateEndMessage(context), { message_id }));
       });
     };
