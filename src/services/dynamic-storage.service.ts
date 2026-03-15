@@ -61,6 +61,7 @@ export class DynamicStorageService {
   fetchEmitter: TypedEmitter<FetchEvents>;
 
   /**
+   * Initializes the dynamic storage with Google service clients and a local dataset fallback.
    * @param {SwindlersGoogleService} swindlersGoogleService
    * @param {GoogleService} googleService
    * @param {any} localDataset

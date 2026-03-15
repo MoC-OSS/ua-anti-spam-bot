@@ -73,6 +73,7 @@ export class UpdatesCommand {
   }
 
   /**
+   * Sends a message to all given chat sessions with rate limiting and progress tracking.
    * @param {GrammyContext} context
    * @param {ChatSession[]} sessions
    * @param {string} type

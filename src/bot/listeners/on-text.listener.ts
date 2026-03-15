@@ -29,11 +29,12 @@ import { logsChat, privateTrainingChat } from '../../creator';
  */
 export class OnTextListener {
   /**
+   * Initializes the listener with bot instance, start time, and message handler.
+   *
    * @param {Bot} bot
    * @param {Date} startTime
    * @param {MessageHandler} messageHandler
    */
-
   constructor(
     private bot: Bot<GrammyContext>,
     private startTime: Date,
@@ -45,6 +46,8 @@ export class OnTextListener {
    * */
   middleware(): GrammyMiddleware {
     /**
+     * Processes a text message through spam detection rules.
+     *
      * @param {GrammyContext} context
      * @param {NextFunction} next
      * */

@@ -11,6 +11,7 @@ export class CardsService {
   cardRegex = /(?:\d{4}.?){3}\d{4}/g;
 
   /**
+   * Extracts and validates credit card numbers from raw message text.
    * @param {string} message - raw message from user to parse
    *
    * @returns {string[]}

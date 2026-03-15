@@ -1,7 +1,19 @@
+/**
+ * @module verify-telegram-web-app-data
+ * @description Validates Telegram Web App init data using HMAC-SHA256 signature verification.
+ */
+
 import CryptoJS from 'crypto-js';
 
 import { environmentConfig } from '../config';
 
+/**
+ * Verifies Telegram Web App init data by comparing its HMAC-SHA256 hash
+ * against a hash computed from the bot token.
+ *
+ * @param telegramInitData - The raw init data string from the Telegram Web App.
+ * @returns `true` if the signature is valid.
+ */
 export const verifyTelegramWebAppData = (telegramInitData: string): boolean => {
   const initData = new URLSearchParams(telegramInitData);
   const hash = initData.get('hash');

@@ -39,6 +39,8 @@ export class UpdatesHandler {
   swindlersTopUsed: string[];
 
   /**
+   * Initializes the handler with all required services and dataset extras.
+   *
    * @param {MtProtoClient} mtProtoClient
    * @param {SetNonNullable<ChatPeers, keyof ChatPeers>} chatPeers
    * @param {TensorService} tensorService
@@ -68,6 +70,8 @@ export class UpdatesHandler {
   }
 
   /**
+   * Filters raw Telegram updates for new or edited channel messages.
+   *
    * @param {ProtoUpdate} updateInfo
    * @param {(string: string) => any} callback
    * */
@@ -88,6 +92,8 @@ export class UpdatesHandler {
   }
 
   /**
+   * Analyzes a message for swindler content and reports matches.
+   *
    * @param {string} message
    * */
   async handleSwindlers(message: string) {
@@ -99,6 +105,8 @@ export class UpdatesHandler {
     }
 
     /**
+     * Processes a confirmed swindler match by logging and forwarding the message.
+     *
      * @param {number} spamRate
      * @param {SwindlerType} from
      * */
@@ -173,6 +181,8 @@ export class UpdatesHandler {
   }
 
   /**
+   * Processes a message for tensor training data collection.
+   *
    * @param {string} message
    * */
   async handleTraining(message: string) {

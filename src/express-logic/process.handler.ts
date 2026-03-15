@@ -1,3 +1,9 @@
+/**
+ * @module process.handler
+ * @description Handles message classification against dataset keyword lists.
+ * Supports single-word, multi-word, and full-text fuzzy matching.
+ */
+
 import { removeLatinPartialLetters, removeNumber, removeSpecialSymbols } from 'ukrainian-ml-optimizer';
 
 import { messageUtility } from '@utils/util-instances.util';
@@ -7,6 +13,8 @@ import { dataset } from '../../dataset/dataset';
 
 class ProcessHandler {
   /**
+   * Matches a message against a dataset keyword list using fuzzy or strict matching.
+   *
    * @param {string} message
    * @param {DatasetKeys} datasetPath
    * @param {boolean} strict
@@ -30,6 +38,8 @@ class ProcessHandler {
   }
 
   /**
+   * Matches a single-word message against the dataset word list.
+   *
    * @private
    *
    * @returns {string | null}

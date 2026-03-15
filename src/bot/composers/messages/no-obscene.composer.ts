@@ -25,6 +25,7 @@ export const getNoObsceneComposer = () => {
   const noObsceneComposer = new Composer<GrammyContext>();
 
   /**
+   * Logs a deleted obscene message to the logs chat.
    * @param {GrammyContext} context
    * @param {SearchSetResult} searchResult
    * */

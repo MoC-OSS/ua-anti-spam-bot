@@ -1,4 +1,6 @@
 /**
+ * Returns elements present in `bigArray` but not in `smallArray`.
+ *
  * @template T
  * @param {T} smallArray
  * @param {T} bigArray
@@ -22,6 +24,8 @@ export interface SetOfArraysDiffReturn {
 }
 
 /**
+ * Computes per-key array diffs between two record objects.
+ *
  * @template T
  * @param { [key: string]: string[] } smallSet
  * @param { [key: string]: string[] } bigSet

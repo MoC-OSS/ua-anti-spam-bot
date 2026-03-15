@@ -84,6 +84,7 @@ export class DeleteSwindlersMiddleware {
   }
 
   /**
+   * Logs the detected swindler message to the main and secondary logs chats.
    * @param {GrammyContext} context
    * @param {number} maxChance
    * @param {SwindlerType | string} from

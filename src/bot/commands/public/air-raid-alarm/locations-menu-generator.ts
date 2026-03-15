@@ -15,6 +15,7 @@ import { handleError } from '@utils/error-handler.util';
 import { isIdWhitelisted } from '@utils/generic.util';
 
 /**
+ * Generates a dynamic paginated location menu for air raid alert settings.
  * @param {GrammyContext} _context
  * @param {MenuRange<GrammyContext>} range
  * @param alertStates
@@ -35,6 +36,7 @@ export const dynamicLocationMenu = (_context: GrammyMenuContext, range: MenuRang
     // TODO UABOT-35 update MiddlewareMenu to handle dynamic buttons
 
     /**
+     * Creates a selectable text button for a location in the menu.
      * @param {GrammyContext} context
      * */
     return range.text(displayLocationName, onlyAdmin, (context: GrammyContext) => {

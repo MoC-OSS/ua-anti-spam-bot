@@ -23,6 +23,7 @@ export const getWarnObsceneComposer = () => {
   const warnObsceneComposer = new Composer<GrammyContext>();
 
   /**
+   * Logs a warned obscene message to the logs chat.
    * @param {GrammyContext} context
    * @param {SearchSetResult} searchResult
    * */

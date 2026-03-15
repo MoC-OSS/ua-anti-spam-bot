@@ -20,6 +20,7 @@ export const getNoLocationsComposer = () => {
   const noLocationsComposer = new Composer<GrammyContext>();
 
   /**
+   * Logs a deleted location message to the logs chat.
    * @param {GrammyContext} context
    * @param {string[]} locations
    * @param {string} [message]

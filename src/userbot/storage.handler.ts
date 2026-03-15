@@ -74,6 +74,8 @@ export class UserbotStorage {
   }
 
   /**
+   * Checks whether a text is unique compared to existing dataset entries using string similarity.
+   *
    * @param {string} text
    * @param {string[]} dataset
    * @param {number} [rate]

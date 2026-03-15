@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 
+/** Express middleware that sets permissive CORS headers on all responses. */
 export const headersMiddleware = (request: Request, response: Response, next: NextFunction) => {
   response.header('Access-Control-Allow-Origin', '*');
   response.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');

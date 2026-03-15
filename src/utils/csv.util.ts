@@ -6,6 +6,9 @@
 
 import { InputFile } from 'grammy';
 
+/**
+ * Sanitizes a value for CSV output by stripping special characters.
+ * */
 function processCsvValue(value: string) {
   return `"${value
     .replaceAll(/[^\da-z\u0400-\u04FF]/gi, ' ')
@@ -13,6 +16,9 @@ function processCsvValue(value: string) {
     .trim()}"`;
 }
 
+/**
+ * Converts column arrays into a 2D row-major CSV matrix with headers.
+ * */
 function toCsvRows(headers: string[], columns: string[][]) {
   const output = [headers];
   // eslint-disable-next-line unicorn/no-array-reduce, sonarjs/reduce-initial-value
@@ -26,6 +32,9 @@ function toCsvRows(headers: string[], columns: string[][]) {
   return output;
 }
 
+/**
+ * Serializes a 2D string array into CSV format.
+ * */
 function toCsvString(csvData: string[][]) {
   let output = '';
 
@@ -35,6 +44,9 @@ function toCsvString(csvData: string[][]) {
   return output;
 }
 
+/**
+ * Creates a Grammy InputFile from columnar data for sending as a Telegram document.
+ * */
 export function csvConstructor(headers: string[], columns: string[][], fileName: string): InputFile {
   const csvString = toCsvString(toCsvRows(headers, columns));
 

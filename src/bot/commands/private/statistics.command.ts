@@ -20,6 +20,7 @@ export class StatisticsCommand {
    * */
   middleware(): GrammyMiddleware {
     /**
+     * Handles the /statistics command and replies with aggregated bot statistics.
      * @param {GrammyContext} context
      * */
     // eslint-disable-next-line unicorn/consistent-function-scoping

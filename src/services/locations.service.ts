@@ -7,6 +7,7 @@ import { dataset } from '../../dataset/dataset';
 
 export class LocationsService {
   /**
+   * Extracts Ukrainian location names found in the message text.
    * @param {string} message - raw message from user to parse
    *
    * @returns {string[]}

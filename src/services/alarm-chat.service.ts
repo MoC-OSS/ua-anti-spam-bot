@@ -43,6 +43,7 @@ export class AlarmChatService {
   }
 
   /**
+   * Checks whether the given region currently has an active alarm.
    * @param {string} state
    * @returns {boolean}
    * */
@@ -51,6 +52,7 @@ export class AlarmChatService {
   }
 
   /**
+   * Updates or removes a chat from the alarm notification list based on its settings.
    * @param {ChatSessionData} chatSession
    * @param {string} id
    * */
@@ -125,6 +127,7 @@ export class AlarmChatService {
   }
 
   /**
+   * Processes an alarm event for a chat, sending notifications and toggling chat permissions.
    * @param {ChatSession} chat
    * @param {boolean} isAlarm
    * @param isRepeatedAlarm

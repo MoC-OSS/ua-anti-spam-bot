@@ -22,6 +22,7 @@ export const getNoChannelMessagesComposer = () => {
   const noChannelMessagesComposer = new Composer<GrammyContext>();
 
   /**
+   * Logs a deleted channel message to the logs chat.
    * @param {GrammyContext} context
    * @param {number} [parentChannelId]
    * @param {number} [senderChatId]

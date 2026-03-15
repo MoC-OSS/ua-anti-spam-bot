@@ -16,6 +16,7 @@ export class StatisticsGoogleService {
   constructor(private googleService: GoogleService) {}
 
   /**
+   * Appends a row of statistic values to the statistics Google Sheet.
    * @private
    * @param {string|number[]} cases
    *

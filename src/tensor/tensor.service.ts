@@ -19,6 +19,11 @@ export class TensorService extends BaseTensorService {
   }
 }
 
+/**
+ * Creates and initializes a {@link TensorService}, optionally downloading the model from S3.
+ *
+ * @param s3Service - Optional S3 service for remote model download.
+ */
 export const initTensor = async (s3Service?: S3Service) => {
   if (environmentConfig.S3_BUCKET && s3Service) {
     try {

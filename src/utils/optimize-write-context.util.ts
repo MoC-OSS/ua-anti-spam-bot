@@ -4,7 +4,7 @@ import type { NsfwPhotoResult } from '@app-types/state';
 import { deepCopy } from './deep-copy.util';
 
 /**
- * Optimize real grammy context for logging
+ * Creates a deep copy of the Grammy context with large buffers and tensors stripped for compact logging.
  * */
 export function optimizeWriteContextUtility(context: GrammyContext): RealGrammyContext {
   const writeContext = deepCopy(context) as RealGrammyContext;

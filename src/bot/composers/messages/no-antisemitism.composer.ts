@@ -25,6 +25,7 @@ export const getNoAntisemitismComposer = () => {
   const noAntisemitismComposer = new Composer<GrammyContext>();
 
   /**
+   * Logs a detected antisemitism message to the logs chat.
    * @param {GrammyContext} context
    * @param {SearchSetResult} searchResult
    * */

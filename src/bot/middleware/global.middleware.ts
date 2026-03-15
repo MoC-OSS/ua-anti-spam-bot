@@ -83,6 +83,7 @@ export class GlobalMiddleware {
   }
 
   /**
+   * Updates bot admin status and removal flags when chat session values are missing.
    * @param {GrammyContext} context
    * */
   async updateChatSessionIfEmpty(context: GrammyContext) {

@@ -20,6 +20,7 @@ export const getNoCardsComposer = () => {
   const noCardsComposer = new Composer<GrammyContext>();
 
   /**
+   * Logs a deleted card-containing message to the logs chat.
    * @param {GrammyContext} context
    * @param {string[]} cards
    * @param {string} [message]

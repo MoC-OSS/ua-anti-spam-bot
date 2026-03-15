@@ -8,6 +8,7 @@ import { getUserData } from '@utils/generic.util';
 
 export class HelpCommand {
   /**
+   * Initializes the help command with the bot start time.
    * @param {Date} startTime
    * */
   constructor(private startTime: Date) {}
@@ -18,6 +19,7 @@ export class HelpCommand {
    * */
   middleware(): GrammyMiddleware {
     /**
+     * Handles the /help command and replies with bot usage information.
      * @param {GrammyContext} context
      * */
     // eslint-disable-next-line unicorn/consistent-function-scoping

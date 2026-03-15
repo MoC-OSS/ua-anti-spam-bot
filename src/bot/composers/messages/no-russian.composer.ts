@@ -27,6 +27,7 @@ export const getNoRussianComposer = ({ dynamicStorageService }: NoRussianCompose
   const noRussianComposer = new Composer<GrammyContext>();
 
   /**
+   * Logs a deleted Russian-language message to the logs chat.
    * @param {GrammyContext} context
    * @param {number} maxChance
    * @param {string} [message]

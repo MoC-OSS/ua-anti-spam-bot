@@ -20,6 +20,7 @@ export const getNoCounterOffensiveComposer = () => {
   const noCounterOffensiveComposer = new Composer<GrammyContext>();
 
   /**
+   * Logs a deleted counteroffensive message to the logs chat.
    * @param {GrammyContext} context
    * @param {string | RegExp} reason
    * @param {number} maxChance

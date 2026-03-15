@@ -27,6 +27,7 @@ export interface MessageHandlerProcessTensorMessageReturn {
  */
 export class MessageHandler {
   /**
+   * Holds the tensor service instance for spam prediction.
    * @param {TensorService} tensorService
    * */
   tensorService: TensorService;

@@ -20,6 +20,7 @@ export const getNoUrlsComposer = () => {
   const noUrlsComposer = new Composer<GrammyContext>();
 
   /**
+   * Logs a deleted URL-containing message to the logs chat.
    * @param {GrammyContext} context
    * @param {string[]} urls
    * @param {string} [message]

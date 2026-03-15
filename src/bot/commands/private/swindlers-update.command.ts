@@ -6,6 +6,7 @@ import type { GrammyContext } from '@app-types/context';
 
 export class SwindlersUpdateCommand {
   /**
+   * Initializes the command with the dynamic storage service.
    * @param {DynamicStorageService} dynamicStorageService
    * */
 
@@ -16,6 +17,7 @@ export class SwindlersUpdateCommand {
    * */
   middleware() {
     /**
+     * Handles the /swindlers_update command and refreshes the swindler storage.
      * @param {GrammyContext} context
      * */
     // eslint-disable-next-line unicorn/consistent-function-scoping

@@ -41,6 +41,12 @@ export class BaseTensorService {
     protected spamThreshold: number,
   ) {}
 
+  /**
+   * Loads the model metadata (vocabulary and topology) from local JSON files.
+   *
+   * @param modelPath - Relative path to the model JSON file.
+   * @param vocabPath - Relative path to the vocabulary JSON file.
+   */
   loadModelMetadata(modelPath: string, vocabPath: string) {
     try {
       // eslint-disable-next-line security/detect-non-literal-fs-filename
@@ -57,18 +63,31 @@ export class BaseTensorService {
     this.modelLength = this.modelArtifacts?.modelTopology?.model_config?.config.layers[1].config.input_length as number;
   }
 
+  /**
+   * Updates the spam detection threshold used by {@link predict}.
+   *
+   * @param newThreshold - New threshold value (ignored if falsy or non-numeric).
+   */
   setSpamThreshold(newThreshold: number | string | null) {
     if (newThreshold && +newThreshold) {
       this.spamThreshold = +newThreshold;
     }
   }
 
+  /** Loads the TensorFlow LayersModel from the configured model path. */
   async loadModel() {
     const fullModelPath = new URL(this.modelPath, import.meta.url);
 
     this.model = await tf.loadLayersModel(fullModelPath.toString());
   }
 
+  /**
+   * Runs the loaded ML model on a text message and returns a spam probability result.
+   *
+   * @param word - The text to classify.
+   * @param rate - Optional custom threshold override; falls back to the instance threshold.
+   * @returns A promise resolving to the tensor prediction result with spam rate and verdict.
+   */
   predict(word: string, rate: number | null): Promise<SwindlerTensorResult> {
     if (!this.model) {
       return Promise.resolve({
@@ -85,9 +104,7 @@ export class BaseTensorService {
 
     const deleteRank = rate || this.spamThreshold;
 
-    /**
-     * @type {Stats | null}
-     * */
+    /** File stats for the model file, used in test-tensor mode. */
     let fileStat: fs.Stats | null = null;
 
     if (environmentConfig.TEST_TENSOR) {
@@ -112,6 +129,13 @@ export class BaseTensorService {
     ) as Promise<SwindlerTensorResult>;
   }
 
+  /**
+   * Converts a text message into a fixed-length numeric tensor for model input.
+   * Applies text optimization, dictionary lookup, and START/UNKNOWN/PAD encoding.
+   *
+   * @param message - The raw text to tokenize.
+   * @returns An object with the token array and the corresponding TensorFlow tensor.
+   */
   tokenize(message: string) {
     // Always start with the START token.
     const returnArray = [this.dictionaryExtras.START];

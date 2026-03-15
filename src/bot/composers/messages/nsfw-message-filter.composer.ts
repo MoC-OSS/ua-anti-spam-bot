@@ -27,6 +27,7 @@ export const getNsfwMessageFilterComposer = ({ nsfwDetectService }: NsfwMessageF
   const nsfwMessageFilterComposer = new Composer<GrammyContext>();
 
   /**
+   * Logs a detected NSFW text message to the logs chat.
    * @param {GrammyContext} context
    * @param {number} maxChance
    * @param {string} [message]

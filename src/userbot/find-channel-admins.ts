@@ -7,6 +7,8 @@ import { logger } from '@utils/logger.util';
 import type { API } from './api';
 
 /**
+ * Resolves a Telegram channel and retrieves its administrator list via MTProto.
+ *
  * @param {API} api
  * */
 export async function findChannelAdmins(api: API) {

@@ -15,6 +15,7 @@ export class MentionService {
     /(https?:\/\/(?:www\.|(?!www))?[\dA-Za-z][\dA-Za-z-]+[\dA-Za-z]\.\S{2,}|www\.[\dA-Za-z][\dA-Za-z-]+[\dA-Za-z]\.\S{2,}|(https?:\/\/(?:www\.|(?!www)))?[\dA-Za-z-]+\.\S{2,}|www\.?[\dA-Za-z]+\.\S{2,})/g;
 
   /**
+   * Extracts @-mentions from the message, excluding URLs and known exceptions.
    * @param {string} message - raw message from user to parse
    * @param exceptionMentions - mentions to exclude from list
    *

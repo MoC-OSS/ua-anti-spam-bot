@@ -22,10 +22,17 @@ export class NsfwTensorService {
     ['Sexy', 0.8],
   ]);
 
+  /** Loads the InceptionV3 NSFW classification model. */
   async load() {
     this.model = await nsfw.load('InceptionV3');
   }
 
+  /**
+   * Decodes an image buffer into a 3D tensor, runs NSFW classification, and disposes the tensor.
+   *
+   * @param image - Raw image buffer to classify.
+   * @returns An array of prediction results sorted by probability.
+   */
   async classify(image: Buffer): Promise<PredictionType[]> {
     const tensor3d = tf.node.decodeImage(image, 3);
 
@@ -38,18 +45,19 @@ export class NsfwTensorService {
   }
 
   /**
-   * Classifies a video from the 5 classes returning a map of
-   * the most likely class names to their probability.
+   * Classifies multiple video frames in parallel and returns predictions for each.
    *
-   * @param imageArray
+   * @param imageArray - Array of image buffers (one per video frame).
    */
   classifyVideo(imageArray: Buffer[]): Promise<PredictionType[][]> {
     return Promise.all(imageArray.map((image) => this.classify(image)));
   }
 
   /**
-   * @returns prediction result for a frame
-   * */
+   * Classifies a single image and returns a spam/safe verdict with the highest prediction.
+   *
+   * @returns Prediction result for the image frame.
+   */
   async predict(image: Buffer): Promise<NsfwTensorResult> {
     const predictions = await this.classify(image);
 
@@ -72,8 +80,11 @@ export class NsfwTensorService {
   }
 
   /**
-   * @returns prediction result for array of image frames
-   * */
+   * Classifies an array of video frames and returns a combined spam/safe verdict.
+   * Stops early if any frame exceeds the spam threshold.
+   *
+   * @returns Aggregated prediction result across all frames.
+   */
   async predictVideo(imageArray: Buffer[]): Promise<NsfwTensorResult> {
     const framesPredictions = await this.classifyVideo(imageArray);
 
@@ -106,8 +117,8 @@ export class NsfwTensorService {
   }
 
   /**
-   * @description finds highest and delete prediction
-   * */
+   * Finds the highest NSFW prediction and the first prediction that exceeds the class threshold.
+   */
   private findHighestPrediction(predictions: PredictionType[]) {
     let highestPrediction!: PredictionType;
 
@@ -132,6 +143,10 @@ export class NsfwTensorService {
   }
 }
 
+/**
+ * Creates and initializes an {@link NsfwTensorService} instance.
+ * Skips model loading during unit tests.
+ */
 export const initNsfwTensor = async () => {
   const tensorService = new NsfwTensorService();
 

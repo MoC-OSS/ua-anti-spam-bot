@@ -30,6 +30,8 @@ export class VideoService {
   }
 
   /**
+   * Extracts evenly-spaced frames from an MP4 video buffer using ffmpeg.
+   *
    * @param video - MP4 buffer video
    * @param filename - name to save in fs, should include extension
    * @param duration - duration of the video

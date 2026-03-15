@@ -14,6 +14,7 @@ export class StartCommand {
    * */
   middleware(): GrammyMiddleware {
     /**
+     * Handles the /start command and replies with a welcome message.
      * @param {GrammyContext} context
      * */
     // eslint-disable-next-line unicorn/consistent-function-scoping

@@ -21,6 +21,8 @@ export class RedisService {
   redisSelectors = redisClient.redisSelectors;
 
   /**
+   * Retrieves the training chat whitelist from Redis.
+   *
    * @returns {Promise<string[]>}
    * */
   async getTrainingChatWhitelist() {
@@ -28,6 +30,8 @@ export class RedisService {
   }
 
   /**
+   * Retrieves the list of training bots from Redis.
+   *
    * @returns {Promise<string[]>}
    * */
   async getTrainingBots() {
@@ -35,6 +39,8 @@ export class RedisService {
   }
 
   /**
+   * Sets the training chat whitelist in Redis.
+   *
    * @param {string} newChatIds
    * */
   setTrainingChatWhitelist(newChatIds: string) {
@@ -42,6 +48,8 @@ export class RedisService {
   }
 
   /**
+   * Adds a chat ID to the training whitelist in Redis.
+   *
    * @param {string} newChatId
    * */
   async updateTrainingChatWhitelist(newChatId: string) {
@@ -64,6 +72,8 @@ export class RedisService {
   }
 
   /**
+   * Retrieves the current training start rank from Redis.
+   *
    * @returns {Promise<number>}
    * */
   getTrainingStartRank() {
@@ -71,6 +81,8 @@ export class RedisService {
   }
 
   /**
+   * Sets the training start rank in Redis.
+   *
    * @param {number} newValue
    * */
   setTrainingStartRank(newValue: number) {
@@ -85,6 +97,8 @@ export class RedisService {
   }
 
   /**
+   * Retrieves the bot tensor spam threshold percentage from Redis.
+   *
    * @returns {Promise<number>}
    * */
   getBotTensorPercent() {
@@ -92,6 +106,8 @@ export class RedisService {
   }
 
   /**
+   * Sets the bot tensor spam threshold percentage in Redis.
+   *
    * @param {number} newValue
    * */
   setBotTensorPercent(newValue: number) {
@@ -106,6 +122,8 @@ export class RedisService {
   }
 
   /**
+   * Retrieves the bot deactivation status from Redis.
+   *
    * @returns {Promise<boolean>}
    * */
   getIsBotDeactivated() {
@@ -113,6 +131,8 @@ export class RedisService {
   }
 
   /**
+   * Sets the bot deactivation status in Redis.
+   *
    * @param {boolean} newValue
    * */
   setIsBotDeactivated(newValue: boolean) {
@@ -120,6 +140,8 @@ export class RedisService {
   }
 
   /**
+   * Retrieves the list of negative training words from Redis.
+   *
    * @returns {Promise<string[]>}
    * */
   async getNegatives() {
@@ -127,6 +149,8 @@ export class RedisService {
   }
 
   /**
+   * Retrieves the list of positive training words from Redis.
+   *
    * @returns {Promise<string[]>}
    * */
   async getPositives() {
@@ -134,6 +158,8 @@ export class RedisService {
   }
 
   /**
+   * Appends a word to the negative training words list in Redis.
+   *
    * @param {string} word
    */
   async updateNegatives(word: string) {
@@ -145,6 +171,8 @@ export class RedisService {
   }
 
   /**
+   * Appends a word to the positive training words list in Redis.
+   *
    * @param {string} word
    */
   async updatePositives(word: string) {
@@ -164,6 +192,8 @@ export class RedisService {
   }
 
   /**
+   * Merges new session data into an existing chat session in Redis.
+   *
    * @param {string | number} chatId
    * @param {Partial<ChatSessionData>} newSession
    * */
@@ -222,6 +252,8 @@ export class RedisService {
   }
 
   /**
+   * Retrieves the session data for a specific chat from Redis.
+   *
    * @param {string} chatId
    * @returns {Promise<ChatSessionData>}
    * */
@@ -236,6 +268,8 @@ export class RedisService {
   }
 
   /**
+   * Retrieves temporary training messages from Redis.
+   *
    * @returns {Promise<string[]>}
    * */
   async getTrainingTempMessages() {
@@ -243,6 +277,8 @@ export class RedisService {
   }
 
   /**
+   * Stores temporary training messages in Redis.
+   *
    * @param {string[]} messages
    * */
   setTrainingTempMessages(messages: string[]) {
@@ -250,6 +286,8 @@ export class RedisService {
   }
 
   /**
+   * Stores swindler detection statistics in Redis.
+   *
    * @param {{ [key: string]: string[] }} statistic
    * */
   setSwindlersStatistic(statistic: RedisServiceSetSwindlersStatisticStatistic) {
@@ -257,6 +295,8 @@ export class RedisService {
   }
 
   /**
+   * Retrieves swindler detection statistics from Redis.
+   *
    * @returns {Promise<{[key: string]: string[] }>}
    * */
   async getSwindlersStatistic() {

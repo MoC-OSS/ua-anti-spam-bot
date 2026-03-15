@@ -8,6 +8,7 @@ import { creatorId } from '../../../creator';
 
 export class SessionCommand {
   /**
+   * Initializes the session command with the bot start time.
    * @param {Date} startTime
    * */
   constructor(private startTime: Date) {}
@@ -18,6 +19,7 @@ export class SessionCommand {
    * */
   middleware(): GrammyMiddleware {
     /**
+     * Handles the /session command and replies with a session dump file.
      * @param {GrammyContext} context
      * */
     // eslint-disable-next-line unicorn/consistent-function-scoping

@@ -3,6 +3,7 @@ import type { NextFunction } from 'grammy';
 import type { GrammyContext, GrammyMiddleware } from '@app-types/context';
 
 /**
+ * Composes multiple middlewares sequentially, stopping at the first one that does not call next.
  * @param {GrammyMiddleware} middlewares
  * @returns {GrammyMiddleware}
  * */

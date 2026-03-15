@@ -169,6 +169,8 @@ export abstract class GenericMockUpdate {
   abstract minimalUpdate: Partial<Update>;
 
   /**
+   * Casts a partial update to its strict generic type for type-safe assertions.
+   *
    * @param update - update to type
    * @returns typed but strict object value type
    * */
@@ -177,6 +179,8 @@ export abstract class GenericMockUpdate {
   }
 
   /**
+   * Casts a partial user object to its strict generic type.
+   *
    * @param user - user to type
    * @returns typed but strict object value type
    * */

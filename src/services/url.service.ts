@@ -11,6 +11,8 @@ import { EXCEPTION_DOMAINS, NON_WORD_REGEX, URL_REGEXP, VALID_URL_REGEXP } from 
 
 export class UrlService {
   /**
+   * Parses and normalizes URLs from raw message text, filtering invalid or excluded domains.
+   *
    * @param {string} message - raw message from user to parse
    * @param strict - is need to check in strict mode and doesn't check exception domains
    *
@@ -41,6 +43,8 @@ export class UrlService {
   }
 
   /**
+   * Extracts the domain (host + trailing slash) from a URL string.
+   *
    * @param {string} url
    * @returns {string | null}
    */

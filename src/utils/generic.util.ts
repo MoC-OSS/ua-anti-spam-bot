@@ -15,6 +15,8 @@ import { logger } from './logger.util';
 import { optimizeWriteContextUtility } from './optimize-write-context.util';
 
 /**
+ * Logs the current context to the console and a file when debug mode is enabled.
+ *
  * @param {GrammyContext} context
  * */
 export function logContext(context: GrammyContext) {
@@ -27,12 +29,18 @@ export function logContext(context: GrammyContext) {
   }
 }
 
+/**
+ * Returns a promise that resolves after the specified number of milliseconds.
+ * */
 export function sleep(time: number) {
   return new Promise((resolve) => {
     setTimeout(resolve, time);
   });
 }
 
+/**
+ * Truncates a string to the given length, appending ".." if it exceeds the limit.
+ * */
 export function truncateString(inputString: string, inputNumber: number) {
   if (inputString.length > inputNumber) {
     return `${inputString.slice(0, inputNumber)}..`;
@@ -42,6 +50,8 @@ export function truncateString(inputString: string, inputNumber: number) {
 }
 
 /**
+ * Converts a Ukrainian oblast name from nominative to accusative grammatical case.
+ *
  * @param {string} state
  * */
 export function formatStateIntoAccusative(state: string) {
@@ -57,6 +67,8 @@ export function formatStateIntoAccusative(state: string) {
 }
 
 /**
+ * Extracts basic user identification data (username, full name, user ID) from the context.
+ *
  * @param {GrammyContext} context
  * */
 export function getUserData(context: GrammyContext) {
@@ -98,6 +110,9 @@ export function joinUkrainianConjunctions(array: string[]): string {
   return `${resultSlice} та ${lastItem}`;
 }
 
+/**
+ * Builds a human-readable Ukrainian string listing all enabled chat moderation features.
+ * */
 export function getEnabledFeaturesString(chatSettings: ChatSettings): string {
   const features: string[] = [];
 
@@ -142,6 +157,8 @@ export function getEnabledFeaturesString(chatSettings: ChatSettings): string {
 }
 
 /**
+ * Returns a random element from the given array.
+ *
  * @template T
  *
  * @param {T[]} array
@@ -153,11 +170,12 @@ export function getRandomItem<T>(array: T[]): T {
 }
 
 /**
+ * Logs a debug message when a middleware is skipped, including the reason and chat title.
+ *
  * @param {GrammyContext} context
  * @param {string} reason
  * @param {any} [extra]
  * */
-
 export function logSkipMiddleware(context: GrammyContext, reason: string, extra?: any) {
   if (environmentConfig.DEBUG || environmentConfig.DEBUG_MIDDLEWARE) {
     // @ts-ignore
@@ -167,6 +185,8 @@ export function logSkipMiddleware(context: GrammyContext, reason: string, extra?
 }
 
 /**
+ * Checks whether the given user ID is in the global whitelist.
+ *
  * @param {number} id
  * */
 export function isIdWhitelisted(id: number | undefined) {
@@ -180,10 +200,16 @@ export function isIdWhitelisted(id: number | undefined) {
   return whitelist.includes(id.toString());
 }
 
+/**
+ * Wraps a single value in an array, or returns the value as-is if it is already an array.
+ * */
 export function coerceArray<T>(value: T | T[]): T[] {
   return Array.isArray(value) ? value : [value];
 }
 
+/**
+ * Checks whether the given user ID is whitelisted for receiving swindler statistics.
+ * */
 export function isIdWhitelistedForSwindlersStatistic(id: number | undefined) {
   // If channel or no id for some reason, it's not whitelisted
   if (!id) {

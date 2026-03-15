@@ -62,6 +62,8 @@ export class MtProtoClient {
   }
 
   /**
+   * Searches for Telegram contacts matching the query via MTProto.
+   *
    * @param {string} query
    * */
   contactsSearch(query: string) {
@@ -71,6 +73,8 @@ export class MtProtoClient {
   }
 
   /**
+   * Sends a message to the authenticated user's "Saved Messages" chat.
+   *
    * @param {string} message
    * */
   sendSelfMessage(message: string) {
@@ -86,6 +90,8 @@ export class MtProtoClient {
   }
 
   /**
+   * Sends a message to the specified peer via MTProto.
+   *
    * @param {string} message
    * @param {Record<string, any>} peer
    * */

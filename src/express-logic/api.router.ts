@@ -1,3 +1,6 @@
+/**
+ * Express router defining REST API endpoints for the bot's web dashboard.
+ */
 import type { Bot } from 'grammy';
 
 import type { Request, Response } from 'express';

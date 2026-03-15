@@ -25,6 +25,7 @@ export class NsfwDetectService {
   }
 
   /**
+   * Checks the message for NSFW content using fuzzy matching.
    * @param {string} message - raw message from user to parse
    */
   processMessage(message?: string): SwindlersBotsResult | null {
@@ -46,6 +47,7 @@ export class NsfwDetectService {
   }
 
   /**
+   * Evaluates a message against the NSFW fuzzy set and returns the match result.
    * @param {string} message
    * @param {number} [customRate]
    */

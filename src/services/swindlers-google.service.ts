@@ -51,6 +51,7 @@ export class SwindlersGoogleService {
    * */
 
   /**
+   * Fetches data from the swindlers spreadsheet for the given range.
    * @private
    * @param {string} range - range from {this.ranges}
    * @param {boolean} [compact=true]
@@ -64,6 +65,7 @@ export class SwindlersGoogleService {
   }
 
   /**
+   * Clears swindler data in the specified sheet range.
    * @private
    * @param {string} range - range from {this.ranges}
    * */
@@ -72,6 +74,7 @@ export class SwindlersGoogleService {
   }
 
   /**
+   * Overwrites swindler data in the specified sheet range.
    * @private
    * @param {string} range - range from {this.ranges}
    * @param {string[]} values - values to set
@@ -83,6 +86,7 @@ export class SwindlersGoogleService {
   }
 
   /**
+   * Appends a single value to the swindlers sheet at the given range.
    * @private
    * @param {string} range - range from {this.ranges}
    * @param {string} value - value to append
@@ -120,6 +124,7 @@ export class SwindlersGoogleService {
   }
 
   /**
+   * Updates the training negative cases in the swindlers sheet.
    * @param {string[]} cases - cases to update
    * */
   updateTrainingNegatives(cases: string[]) {
@@ -137,6 +142,7 @@ export class SwindlersGoogleService {
   }
 
   /**
+   * Updates the training positive cases in the swindlers sheet.
    * @param {string[]} cases - cases to update
    * */
   updateTrainingPositives(cases: string[]) {
@@ -144,6 +150,7 @@ export class SwindlersGoogleService {
   }
 
   /**
+   * Appends a single training positive case to the swindlers sheet.
    * @param {string} singleCase - case to append
    * */
   async appendTrainingPositives(singleCase: string) {
@@ -172,6 +179,7 @@ export class SwindlersGoogleService {
   }
 
   /**
+   * Overwrites the swindler bots list in the sheet.
    * @param {string[]} bots
    */
   updateBots(bots: string[]) {
@@ -193,6 +201,7 @@ export class SwindlersGoogleService {
   }
 
   /**
+   * Overwrites the swindler domains list in the sheet.
    * @param {string[]} domains
    */
   updateDomains(domains: string[]) {
@@ -210,6 +219,7 @@ export class SwindlersGoogleService {
   }
 
   /**
+   * Updates the testing negative cases in the swindlers sheet.
    * @param {string[]} cases - cases to update
    * */
   updateTestingNegatives(cases: string[]) {
@@ -225,6 +235,7 @@ export class SwindlersGoogleService {
   }
 
   /**
+   * Updates the testing positive cases in the swindlers sheet.
    * @param {string[]} cases - cases to update
    * */
   updateTestingPositives(cases: string[]) {
@@ -246,6 +257,7 @@ export class SwindlersGoogleService {
   }
 
   /**
+   * Overwrites the swindler sites list in the sheet.
    * @param {string[]} sites
    */
   updateSites(sites: string[]) {
@@ -273,6 +285,7 @@ export class SwindlersGoogleService {
   }
 
   /**
+   * Overwrites the swindler cards list in the sheet.
    * @param {string[]} cards
    */
   updateCards(cards: string[]) {

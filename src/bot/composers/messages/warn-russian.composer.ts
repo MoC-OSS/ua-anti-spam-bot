@@ -27,6 +27,7 @@ export const getWarnRussianComposer = ({ dynamicStorageService }: WarnRussianCom
   const warnRussianComposer = new Composer<GrammyContext>();
 
   /**
+   * Logs a warned Russian-language message to the logs chat.
    * @param {GrammyContext} context
    * @param {number} maxChance
    * @param {string} [message]

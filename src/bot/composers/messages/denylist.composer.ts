@@ -21,6 +21,7 @@ export const getDenylistComposer = () => {
   const denylistComposer = new Composer<GrammyContext>();
 
   /**
+   * Logs a denylist violation message to the logs chat.
    * @param {GrammyContext} context
    * @param {string} [message]
    * */

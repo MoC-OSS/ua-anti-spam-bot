@@ -1,4 +1,6 @@
 /**
+ * Removes duplicate values from an array using a Set.
+ *
  * @template T
  * @param {T} array
  *

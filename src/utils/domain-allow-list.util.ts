@@ -12,6 +12,9 @@ export class DomainAllowList {
     this.updateDomains(allowDomains);
   }
 
+  /**
+   * Replaces the internal allow-list with the provided domain entries.
+   * */
   updateDomains(allowDomains: string[]) {
     const baseUrls = allowDomains.filter((domain) => !domain.startsWith('@')).map((url) => this.processLink(url));
 
@@ -44,6 +47,9 @@ export class DomainAllowList {
     return newUrl;
   }
 
+  /**
+   * Checks whether a URL's domain is in the allow-list.
+   * */
   isAllowed(url: string): boolean {
     if (this.allowDomains.has(url)) {
       return true;

@@ -8,6 +8,8 @@ export class RankCommand {
   constructor(private tensorService: TensorService) {}
 
   /**
+   * Returns middleware that gets or sets the tensor spam detection rank.
+   *
    * @command /set_rank
    * */
   setRankMiddleware(): GrammyCommandMiddleware {
@@ -33,6 +35,8 @@ export class RankCommand {
   }
 
   /**
+   * Returns middleware that gets or sets the training start rank threshold.
+   *
    * @command /set_training_start_rank
    * */
   setTrainingStartRank(): GrammyCommandMiddleware {
@@ -57,6 +61,8 @@ export class RankCommand {
   }
 
   /**
+   * Returns middleware that gets or sets the training chat whitelist.
+   *
    * @command /set_training_chat_whitelist
    * */
   setTrainingChatWhitelist(): GrammyCommandMiddleware {
@@ -77,6 +83,8 @@ export class RankCommand {
   }
 
   /**
+   * Returns middleware that appends a chat to the training whitelist.
+   *
    * @command /update_training_chat_whitelist
    * */
   updateTrainingChatWhitelist(): GrammyCommandMiddleware {

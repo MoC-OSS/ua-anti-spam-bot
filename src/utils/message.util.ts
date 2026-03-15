@@ -16,6 +16,9 @@ const options = {
 };
 
 export class MessageUtility {
+  /**
+   * Searches for a keyword in the message text using direct or fuzzy matching.
+   * */
   // eslint-disable-next-line sonarjs/function-return-type
   findInText(message: string, searchFor: string, strict = false) {
     /**
@@ -53,6 +56,8 @@ export class MessageUtility {
   }
 
   /**
+   * Performs a fuzzy search for any of the given words within the message using Fuse.js.
+   *
    * @param {string} message
    * @param {string[]} wordsArray
    *

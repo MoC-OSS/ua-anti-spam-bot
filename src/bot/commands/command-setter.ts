@@ -14,6 +14,7 @@ export class CommandSetter {
   commands: BotCommand[] = [];
 
   /**
+   * Initializes the command setter with bot instance, start time, and active status.
    * @param {Bot} bot
    * @param {Date} startTime
    * @param {boolean} active
@@ -37,6 +38,7 @@ export class CommandSetter {
   }
 
   /**
+   * Sets the active status and refreshes the bot commands list.
    * @param {boolean} active
    */
   async setActive(active: boolean) {
@@ -50,6 +52,7 @@ export class CommandSetter {
    * */
   async updateCommands() {
     /**
+     * List of available bot commands with descriptions.
      * @param {BotCommand[]}
      * */
     this.commands = [

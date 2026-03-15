@@ -65,6 +65,7 @@ export class OutgoingRequests<TMethod extends RealApiMethodKeys = RealApiMethodK
   }
 
   /**
+   * Returns the first captured outgoing request.
    * @returns first request
    * */
   getFirst<TApi extends TMethod>(): Request<TApi> | null {
@@ -72,6 +73,7 @@ export class OutgoingRequests<TMethod extends RealApiMethodKeys = RealApiMethodK
   }
 
   /**
+   * Returns the last captured outgoing request.
    * @returns last request
    * */
   getLast<TApi extends TMethod>(): Request<TApi> | null {
@@ -83,6 +85,7 @@ export class OutgoingRequests<TMethod extends RealApiMethodKeys = RealApiMethodK
   }
 
   /**
+   * Returns the two most recent captured outgoing requests.
    * @returns two last request
    * */
   getTwoLast<TApi extends TMethod, TBot extends TMethod>() {
@@ -90,6 +93,7 @@ export class OutgoingRequests<TMethod extends RealApiMethodKeys = RealApiMethodK
   }
 
   /**
+   * Returns the three most recent captured outgoing requests.
    * @returns two last request
    * */
   getThreeLast<TApi extends TMethod, TBot extends TMethod, TContext extends TMethod>() {

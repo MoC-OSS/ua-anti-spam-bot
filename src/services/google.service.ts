@@ -44,6 +44,7 @@ export class GoogleService {
   }
 
   /**
+   * Fetches rows from a Google Sheets range and returns them as cell data objects.
    * @param {string} spreadsheetId
    * @param {string} sheetName
    * @param {string} [range]
@@ -101,6 +102,7 @@ export class GoogleService {
   }
 
   /**
+   * Clears all values in the specified Google Sheets range.
    * @param {string} spreadsheetId
    * @param {string} range
    *
@@ -122,6 +124,7 @@ export class GoogleService {
   }
 
   /**
+   * Appends one or more values as a new row to a Google Sheet.
    * @param {string} spreadsheetId
    * @param {string} sheetName
    * @param {T|T[]} value
@@ -146,6 +149,7 @@ export class GoogleService {
   }
 
   /**
+   * Overwrites the specified Google Sheets range with new values.
    * @param {string} spreadsheetId
    * @param {string} sheetName
    * @param {string[]} value
@@ -168,6 +172,7 @@ export class GoogleService {
   }
 
   /**
+   * Clears all values in a sheet, optionally within a specific range.
    * @param {string} spreadsheetId
    * @param {string} sheetName
    * @param {string} [range]

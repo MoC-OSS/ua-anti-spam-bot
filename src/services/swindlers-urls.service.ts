@@ -63,6 +63,8 @@ export class SwindlersUrlsService {
   }
 
   /**
+   * Scans the message for URLs and checks each against swindler detection rules.
+   *
    * @param {string} message - raw message from user to parse
    */
   async processMessage(message: string): Promise<SwindlersBaseResult | SwindlersUrlsResult | null> {
@@ -88,6 +90,8 @@ export class SwindlersUrlsService {
   }
 
   /**
+   * Resolves a URL (following redirects) and checks it against the swindler database.
+   *
    * @param {string} url
    * @param {number} [customRate]
    */
@@ -107,9 +111,7 @@ export class SwindlersUrlsService {
           .get(url, { maxRedirects: 0 })
           .then(() => url)
           .catch(
-            /**
-             * @param error
-             */
+            /** Handles redirect/connection errors when resolving URL redirects. */
             (error: NodeJS.ErrnoException & AxiosError) => {
               if (error.code === 'ENOTFOUND' && error.syscall === 'getaddrinfo') {
                 return url;

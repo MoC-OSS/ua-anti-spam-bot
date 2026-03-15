@@ -33,6 +33,7 @@ export class SwindlersDetectService {
   ) {}
 
   /**
+   * Runs all swindler detection checks on the message and returns a consolidated result.
    * @param {string} message - message to process
    *
    * @return {SwindlersResult}

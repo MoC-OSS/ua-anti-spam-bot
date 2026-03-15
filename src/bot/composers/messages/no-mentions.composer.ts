@@ -20,6 +20,7 @@ export const getNoMentionsComposer = () => {
   const noMentionsComposer = new Composer<GrammyContext>();
 
   /**
+   * Logs a deleted mentions message to the logs chat.
    * @param {GrammyContext} context
    * @param {string[]} mentions
    * @param {string} [message]
