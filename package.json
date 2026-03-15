@@ -18,10 +18,7 @@
     "download-swindler": "tsx dataset/download-swindler-dataset.ts && npm run optimize-swindler",
     "optimize-swindler": "tsx dataset/optimize-swindler-dataset.ts positives && tsx dataset/optimize-swindler-dataset.ts negatives",
     "optimize-obscene": "tsx ./dataset/obscene-optimization.ts",
-    "prepare": "husky",
-    "health-check": "echo health-check",
     "lint": "npm-run-all --parallel lint:js lint:type-check test",
-    "lint:commit-name": "commitlint --edit",
     "track-time": "smile-track",
     "lint:js": "cross-env TIMING=1 npx eslint --cache",
     "lint:js:fix": "npm run lint:js -- --fix",
@@ -30,7 +27,8 @@
     "typecheck": "npx tsc --noEmit",
     "test": "vitest run",
     "test:coverage": "npx vitest run --coverage",
-    "format": "npx prettier . --write"
+    "format": "npx prettier . --write",
+    "prepare": "husky"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1009.0",
