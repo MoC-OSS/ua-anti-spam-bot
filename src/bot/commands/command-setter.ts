@@ -5,6 +5,7 @@ import type { BotCommand } from 'typegram';
 import type { GrammyContext } from '@app-types/context';
 
 import { formatDateIntoAccusative } from '@utils/date-format.util';
+import { logger } from '@utils/logger.util';
 
 /**
  * Handles bot public available commands
@@ -66,7 +67,7 @@ export class CommandSetter {
     try {
       await this.bot.api.setMyCommands(this.commands);
     } catch (error) {
-      console.error('Failed to register bot commands (non-fatal):', (error as Error).message);
+      logger.error({ error }, 'Failed to register bot commands (non-fatal)');
     }
   }
 }

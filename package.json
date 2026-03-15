@@ -1,6 +1,6 @@
 {
   "name": "ua-anti-spam-bot",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "engines": {
     "node": ">=20.x"
@@ -25,7 +25,7 @@
     "lint:type-check": "tsc --noEmit",
     "format:md": "npx prettier --write \"**/*.md\"",
     "typecheck": "npx tsc --noEmit",
-    "test": "vitest run",
+    "test": "npx vitest run",
     "test:coverage": "npx vitest run --coverage",
     "format": "npx prettier . --write",
     "prepare": "husky",

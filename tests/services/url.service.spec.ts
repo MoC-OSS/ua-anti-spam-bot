@@ -47,6 +47,7 @@ describe('UrlService', () => {
       expect(result).toEqual([]);
     });
 
+    // eslint-disable-next-line sonarjs/todo-tag
     // TODO fix this case
     it('should not parse extra characters', () => {
       const text = 'https://test.site/get/0426053194✅🇺🇦/';

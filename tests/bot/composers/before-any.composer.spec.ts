@@ -28,6 +28,7 @@ describe('beforeAnyComposer', () => {
   describe('my_chat_member', () => {
     describe('channel type', () => {
       it('should tell about not right chat for channel joining', () => {
+        // eslint-disable-next-line sonarjs/todo-tag
         // TODO finish this test
         expect(outgoingRequests).toEqual(outgoingRequests);
       });
@@ -44,6 +45,16 @@ describe('beforeAnyComposer', () => {
 
       expect(actualMethods).toEqual(expectedMethods);
       expect(outgoingRequests.length).toEqual(1);
+    });
+
+    it('should call next immediately when from.id is absent', async () => {
+      const updateConstructor = new MessageMockUpdate('no sender');
+      const update = updateConstructor.buildOverwrite({ message: { from: undefined } });
+
+      await bot.handleUpdate(update);
+
+      // No getChatMember call expected because fromId guard returns next() early
+      expect(outgoingRequests.getMethods()).not.toContain('getChatMember');
     });
   });
 });
