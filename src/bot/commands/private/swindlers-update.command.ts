@@ -21,14 +21,15 @@ export class SwindlersUpdateCommand {
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context: GrammyContext) => {
       await context.reply(getSwindlersUpdateStartMessage(context)).then(async (message) => {
-        // eslint-disable-next-line camelcase
-        const { message_id } = message;
+        const chatId = context.chat?.id;
 
-        // @ts-ignore
+        if (!chatId) {
+          return;
+        }
+
         await this.dynamicStorageService
           .updateStorage()
-          // eslint-disable-next-line camelcase
-          .then(() => context.editMessageText(getSwindlersUpdateEndMessage(context), { message_id }));
+          .then(() => context.api.editMessageText(chatId, message.message_id, getSwindlersUpdateEndMessage(context)));
       });
     };
   }
