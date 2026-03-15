@@ -1,0 +1,4 @@
+{
+  "pattern": "^(feature|fix|hotfix|release)\\/(UABOT-\\d+).+$",
+  "errorMsg": "Branch does not match the allowed pattern. Example branch is `feature/UABOT-1234-branch-name`"
+}
