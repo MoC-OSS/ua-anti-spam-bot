@@ -6,16 +6,4 @@ import lintlord from 'eslint-plugin-lintlord';
  * @author Dmytro Vakulenko
  * @version 1.1.0
  */
-export default defineConfig([
-  lintlord.configs.strict,
-  {
-    rules: {
-      'lintlord/prefer-logger': [
-        'error',
-        {
-          mode: 'log-only',
-        },
-      ],
-    },
-  },
-]);
+export default defineConfig([lintlord.configs.strict]);

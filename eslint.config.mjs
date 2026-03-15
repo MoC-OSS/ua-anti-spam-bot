@@ -11,7 +11,7 @@ export default defineConfig([
   },
   // Extra ignores (migrated from .eslintignore)
   {
-    ignores: ['.eslint/**', '.husky/**', '.vscode/**', 'dist/**', 'e2e/**', 'temp/**', 'dataset/**/*.js'],
+    ignores: ['.husky/**', '.vscode/**', 'dist/**', 'e2e/**', 'temp/**', 'dataset/**/*.js'],
   },
   // Node config
   ...nodeConfigs,

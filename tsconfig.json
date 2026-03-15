@@ -84,7 +84,8 @@
     "src/**/*",
     "tests/**/*",
     "dataset/**/*",
-    "scripts/**/*"
+    "scripts/**/*",
+    ".eslint/**/*"
   ],
   "files": [
     "node_modules/vitest/globals.d.ts"
