@@ -1,6 +1,8 @@
 import pino from 'pino';
 
-const isLocal = process.env['ENV'] === 'local';
+import { environmentConfig } from '../config';
+
+const isLocal = environmentConfig.ENV === 'local';
 
 export const logger = pino({
   level: 'debug',
