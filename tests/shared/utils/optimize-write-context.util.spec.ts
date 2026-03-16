@@ -22,6 +22,16 @@ describe('optimizeWriteContextUtility', () => {
       expect(result).not.toHaveProperty('tg');
     });
 
+    it('should not throw when the context contains non-serializable properties such as functions', () => {
+      const context = buildMockContext({
+        // Simulates Grammy's context.api which has function-valued own properties.
+        // structuredClone would throw DataCloneError on such an object.
+        api: { raw: () => {}, config: { use: () => {} } },
+      } as any);
+
+      expect(() => optimizeWriteContextUtility(context)).not.toThrow();
+    });
+
     it('should not mutate the original context', () => {
       const context = buildMockContext();
 
