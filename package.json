@@ -112,6 +112,7 @@
     "eslint-config-naming": "^1.9.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jsdoc": "^62.8.0",
     "eslint-plugin-lintlord": "^1.1.0",
     "eslint-plugin-n": "^17.24.0",
     "eslint-plugin-no-barrel-files": "^1.2.2",
