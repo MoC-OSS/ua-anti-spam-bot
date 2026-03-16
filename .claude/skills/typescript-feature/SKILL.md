@@ -187,18 +187,242 @@ Before declaring the task complete, verify each item:
 - [ ] `version` in `package.json` was bumped according to Semantic Versioning
 - [ ] No rules, tests, or coverage thresholds were weakened to make the task pass
 
+## Feature Development Guide - Architecture & Patterns
+
+This project is a **Grammy-based Telegram bot** with a Composer pattern for organizing features. Understand this before implementing.
+
+### Architecture Overview
+
+Three main services:
+- **Bot** (`src/bot/`) - Grammy Telegram bot with feature composers
+- **Server** (`src/server/`) - Express REST API for ML inference
+- **Userbot** (`src/userbot/`) - MTProto userbot for research
+
+### Two Feature Types & Patterns
+
+#### 1️⃣ Text Message Features (Composers)
+
+**Pattern:** Service (detect) → Composer (handle) → Register
+
+```typescript
+// Service: src/services/my-feature.service.ts
+export class MyFeatureService {
+  checkFeature(message: string): SearchSetResult | null {
+    // Detection logic
+    return result || null;
+  }
+}
+export const myFeatureService = new MyFeatureService();
+
+// Composer: src/bot/composers/messages/my-feature.composer.ts
+export const getMyFeatureComposer = () => {
+  const myFeatureComposer = new Composer<GrammyContext>();
+  
+  myFeatureComposer.use(async (context, next) => {
+    const isEnabled = !context.chatSession.chatSettings.disableMyFeature;
+    const violation = myFeatureService.checkFeature(context.state.text || '');
+    
+    if (isEnabled && violation) {
+      await context.deleteMessage();  // or warning
+      await saveViolationLog(context, violation);
+      await notifyUser(context);
+    }
+    return next();
+  });
+  
+  return { myFeatureComposer };
+};
+
+// Registration: src/bot/composers/messages.composer.ts
+export interface MessagesComposerProperties {
+  myFeatureComposer: Composer<GrammyContext>;
+}
+export const getMessagesComposer = ({ myFeatureComposer }: ...) => {
+  registerDefaultSettingModule('disableMyFeature', myFeatureComposer);
+};
+```
+
+**Settings Types:**
+- **`disableXxx`** = Feature ON by default (core spam filters)
+- **`enableXxx`** = Feature OFF by default (optional filters)
+
+**Real Examples:**
+- Delete: `src/bot/composers/messages/no-antisemitism.composer.ts`
+- Warn: `src/bot/composers/messages/warn-obscene.composer.ts`
+
+#### 2️⃣ Image/Photo Features (Composers)
+
+**Pattern:** ML Service (analyze) → Composer (handle) → Register
+
+```typescript
+// Service: src/services/my-tensor.service.ts
+export class MyTensorService {
+  async analyze(imageBuffer: Buffer): Promise<Result> {
+    // ML model prediction
+  }
+}
+
+// Composer: src/bot/composers/my-image.composer.ts
+export const getMyImageComposer = ({ myTensorService }: Props) => {
+  const myImageComposer = new Composer<GrammyContext>();
+  
+  myImageComposer.use(async (context, next) => {
+    const imageData = context.state.photo;
+    if (!imageData) return next();
+    
+    try {
+      const result = await myTensorService.analyze(imageData.file);
+      if (result.isProblematic) {
+        await context.deleteMessage();
+        // Log and notify
+      }
+    } catch (error) {
+      handleError(error);
+    }
+    return next();
+  });
+  
+  return { myImageComposer };
+};
+```
+
+**Real Example:**
+- `src/bot/composers/messages/nsfw-filter.composer.ts`
+
+### Implementation Checklist
+
+For text features:
+- [ ] Service created: `src/services/my-feature.service.ts`
+- [ ] Service tests: `tests/services/my-feature.service.spec.ts`
+- [ ] Composer created: `src/bot/composers/messages/my-feature.composer.ts`
+- [ ] Composer registered in `src/bot/composers/messages.composer.ts`
+- [ ] Dependencies wired in `src/bot/bot.ts`
+- [ ] Message templates: `src/bot/messages/my-feature.message.ts`
+- [ ] Settings type added: `src/shared/types/session.ts`
+- [ ] e2e tests added: `tests/bot.spec.ts`
+- [ ] 80% test coverage verified: `npm run test:coverage`
+- [ ] All checks pass: `npm run typecheck && npm run lint && npm run test:run`
+
+### Key Patterns to Follow
+
+**Always:**
+- ✅ Log violations to logs chat: `context.api.sendMessage(logsChat, ...)`
+- ✅ Notify users when deleting: `context.replyWithSelfDestructedHTML(...)`
+- ✅ Use dependency injection for services
+- ✅ Keep services focused on detection only
+- ✅ Keep composers focused on orchestration only
+
+**Never:**
+- ❌ Hardcode service instances (pass as dependency)
+- ❌ Delete messages without logging
+- ❌ Use `any` type in TypeScript
+- ❌ Skip test coverage requirements (80% minimum)
+- ❌ Forget to register composers in parent
+- ❌ Delete without user notification
+
+### Code Style Requirements
+
+| Item | Standard |
+|------|----------|
+| Files | kebab-case.ts |
+| Classes | PascalCase |
+| Exports | camelCase |
+| Variables | camelCase |
+| Constants | UPPER_SNAKE_CASE |
+| TypeScript | Strict mode, no `any` |
+| Testing | 80% coverage minimum |
+| Documentation | JSDoc on public APIs |
+
+### Testing Standards
+
+Service tests (`tests/services/my-feature.service.spec.ts`):
+```typescript
+describe('MyFeatureService', () => {
+  it('should detect problematic content', () => {
+    expect(myFeatureService.checkFeature('bad')).toBeTruthy();
+  });
+  it('should allow normal content', () => {
+    expect(myFeatureService.checkFeature('good')).toBeNull();
+  });
+});
+```
+
+e2e tests (`tests/bot.spec.ts`):
+```typescript
+it('should delete and notify on violation', async () => {
+  const mockMessage = new MessageMockUpdate({ text: 'violating content' });
+  await bot.handleUpdate(mockMessage.update);
+  
+  expect(outgoingRequests.deleteMessage).toHaveBeenCalled();
+  expect(outgoingRequests.sendMessage).toHaveBeenCalledWith(
+    expect.any(Number),
+    expect.stringContaining('Your message was removed'),
+    expect.any(Object)
+  );
+});
+```
+
+### Reference Files in Codebase
+
+To understand patterns, study:
+- **Text deletion:** `src/bot/composers/messages/no-antisemitism.composer.ts`
+- **Text warning:** `src/bot/composers/messages/warn-obscene.composer.ts`
+- **Image/ML:** `src/bot/composers/messages/nsfw-filter.composer.ts`
+- **Simple service:** `src/services/antisemitism.service.ts`
+- **Complex service:** `src/services/swindlers-detect.service.ts`
+- **Registration hub:** `src/bot/composers/messages.composer.ts`
+- **Photo hub:** `src/bot/composers/photos.composer.ts`
+- **Test example:** `tests/services/antisemitism.service.spec.ts`
+
 ## Quick reference - key file locations
 
 ```text
 .
-|-- src/                  # main TypeScript source
-|-- tests/                # Vitest test suite
-|-- package.json          # scripts, dependencies, version
-|-- tsconfig.json         # TypeScript compiler config
-|-- vitest.config.ts      # test and coverage config
-|-- eslint.config.mjs     # ESLint entry point
-|-- .eslint/              # shared ESLint fragments
-`-- README.md             # project documentation
+|-- src/
+|   |-- bot/
+|   |   |-- composers/                    # Feature implementations (core pattern)
+|   |   |   |-- messages/                 # Text message features
+|   |   |   |-- photos.composer.ts        # Photo/image features
+|   |   |   └-- messages.composer.ts      # Registration hub for text
+|   |   |-- middleware/                   # Request parsing and state
+|   |   |-- messages/                     # Message templates
+|   |   └-- bot.ts                        # Dependency injection wiring
+|   |-- services/                         # Business logic (detection/analysis)
+|   |-- shared/                           # Types, config, utils
+|   └-- tensor/                           # ML models
+|-- tests/                                # Vitest test suite (80% coverage required)
+|-- package.json                          # scripts, dependencies
+|-- tsconfig.json                         # TypeScript compiler config
+|-- vitest.config.ts                      # Test and coverage config
+|-- eslint.config.mjs                     # ESLint config
+`-- README.md                             # Project documentation
 ```
+
+## When You Need More Information
+
+**If you get stuck or need more detail**, read these supplementary files from `.claude/skills/typescript-feature/`:
+
+1. **Need a quick 5-minute overview?**
+   → Read `QUICK_START.md`
+
+2. **Need step-by-step detailed implementation guide?**
+   → Read `ADDING_FEATURES.md` (covers all steps, testing, style, conventions in detail)
+
+3. **Need architecture overview and navigation?**
+   → Read `README.md`
+
+**How to read them**: If at any point during feature implementation you need more information about patterns, testing, or code style, explicitly use the `view` tool to read the appropriate supplementary file.
+
+### When to Read Each File
+
+| Situation | Read |
+|-----------|------|
+| "What's the basic pattern?" | SKILL.md (this file) |
+| "How do I implement feature X?" | SKILL.md steps + ADDING_FEATURES.md |
+| "What's the exact code structure?" | Code templates in SKILL.md |
+| "I need to understand testing better" | ADDING_FEATURES.md Testing Strategy section |
+| "Show me code examples" | ADDING_FEATURES.md Feature Type Patterns section |
+| "I'm stuck on naming/style" | SKILL.md Code Style Requirements + ADDING_FEATURES.md |
+| "How do composers work?" | SKILL.md + ADDING_FEATURES.md Architecture section |
 
 This skill applies exclusively to this repository.
