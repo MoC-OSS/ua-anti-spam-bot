@@ -12,6 +12,7 @@
     "strictNullChecks": true,
     "esModuleInterop": true,
     "strict": true,
+    "incremental": true,
     "skipLibCheck": true,
     "types": [],
     "typeRoots": [
