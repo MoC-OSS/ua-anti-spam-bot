@@ -63,9 +63,9 @@ export class DynamicStorageService {
 
   /**
    * Initializes the dynamic storage with Google service clients and a local dataset fallback.
-   * @param swindlersGoogleService
-   * @param googleService
-   * @param localDataset
+   * @param swindlersGoogleService - Google service for reading swindler detection data
+   * @param googleService - general Google Sheets service for auxiliary sheet reads
+   * @param localDataset - local dataset used as fallback when Google API is unavailable
    */
   constructor(
     private swindlersGoogleService: SwindlersGoogleService,
@@ -80,7 +80,7 @@ export class DynamicStorageService {
     this.counteroffensiveTriggers = localDataset.counteroffensiveTriggers || [];
     this.nsfwMessages = localDataset.nsfwMessages || [];
     this.notSwindlers = [];
-    // TODO replace this to EventTarget
+    // NOTE: replace this to EventTarget
 
     // @ts-expect-error
     // eslint-disable-next-line unicorn/prefer-event-target
@@ -149,12 +149,12 @@ export class DynamicStorageService {
 
   private parseRegexItems(strings: string[]): (RegExp | string)[] {
     return strings.map((string) => {
-      if (string.startsWith(this.REGEX_KEYWORD)) {
-        // eslint-disable-next-line security/detect-non-literal-regexp
-        return new RegExp(string.slice(this.REGEX_KEYWORD.length));
-      }
+      const result: RegExp | string = string.startsWith(this.REGEX_KEYWORD)
+        ? // eslint-disable-next-line security/detect-non-literal-regexp
+          new RegExp(string.slice(this.REGEX_KEYWORD.length))
+        : string;
 
-      return string;
+      return result;
     });
   }
 }

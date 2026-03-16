@@ -8,7 +8,8 @@ import { InputFile } from 'grammy';
 
 /**
  * Sanitizes a value for CSV output by stripping special characters.
- * @param value
+ * @param value - The raw string value to sanitize
+ * @returns The sanitized value wrapped in double quotes
  */
 function processCsvValue(value: string) {
   return `"${value
@@ -19,8 +20,9 @@ function processCsvValue(value: string) {
 
 /**
  * Converts column arrays into a 2D row-major CSV matrix with headers.
- * @param headers
- * @param columns
+ * @param headers - Array of column header names
+ * @param columns - Array of column data arrays
+ * @returns A 2D array of strings in row-major order with headers as the first row
  */
 function toCsvRows(headers: string[], columns: string[][]) {
   const output = [headers];
@@ -37,7 +39,8 @@ function toCsvRows(headers: string[], columns: string[][]) {
 
 /**
  * Serializes a 2D string array into CSV format.
- * @param csvData
+ * @param csvData - A 2D array of strings representing rows and columns
+ * @returns A CSV-formatted string with newlines between rows
  */
 function toCsvString(csvData: string[][]) {
   let output = '';
@@ -50,9 +53,10 @@ function toCsvString(csvData: string[][]) {
 
 /**
  * Creates a Grammy InputFile from columnar data for sending as a Telegram document.
- * @param headers
- * @param columns
- * @param fileName
+ * @param headers - Array of column header names
+ * @param columns - Array of column data arrays
+ * @param fileName - The base file name (without extension) for the generated CSV file
+ * @returns A Grammy InputFile containing the CSV data, ready to send as a Telegram document
  */
 export function csvConstructor(headers: string[], columns: string[][], fileName: string): InputFile {
   const csvString = toCsvString(toCsvRows(headers, columns));

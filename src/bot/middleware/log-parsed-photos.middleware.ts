@@ -9,8 +9,9 @@ import type { GrammyMiddleware } from '@app-types/context';
 
 /**
  * Logs parsed photos
- * @param context
- * @param next
+ * @param context - The Grammy context object
+ * @param next - The next middleware function in the chain
+ * @returns A promise that resolves when the middleware chain completes
  */
 export const logParsedPhotosMiddleware: GrammyMiddleware = async (context, next) => {
   const { photo, isDeleted } = context.state;

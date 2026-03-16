@@ -28,8 +28,10 @@ import { logger } from '@utils/logger.util';
 const getChatId = (sessionId: string) => sessionId.split(':')[0];
 
 /**
- * @param bot
- * @param botStartDate
+ * Migrates Redis user sessions to a new format if the migration date matches.
+ * @param bot - The Grammy bot instance used to interact with the Telegram API.
+ * @param botStartDate - The date the bot was started, used to determine if migration should run.
+ * @returns A promise that resolves when the migration is complete.
  */
 const migration = async (bot: Bot<GrammyContext>, botStartDate: Date) => {
   const compareDate = `${botStartDate.getFullYear()}-${botStartDate.getMonth() + 1}-${botStartDate.getDate()}`;

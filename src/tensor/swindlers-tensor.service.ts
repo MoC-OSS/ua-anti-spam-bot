@@ -19,6 +19,7 @@ export class SwindlersTensorService extends BaseTensorService {
 
 /**
  * Creates and initializes a {@link SwindlersTensorService} instance with model loaded.
+ * @returns A fully initialized SwindlersTensorService instance.
  */
 export const initSwindlersTensor = async () => {
   const tensorService = new SwindlersTensorService('./swindlers-temp/model.json', environmentConfig.TENSOR_RANK);

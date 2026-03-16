@@ -14,11 +14,12 @@ export class SwindlersUpdateCommand {
 
   /**
    * Handle /swindlers_update
+   * @returns The Grammy middleware function for /swindlers_update.
    */
   middleware() {
     /**
      * Handles the /swindlers_update command and refreshes the swindler storage.
-     * @param context
+     * @param context - Grammy bot context.
      */
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context: GrammyContext) => {

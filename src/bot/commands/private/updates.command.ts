@@ -74,10 +74,10 @@ export class UpdatesCommand {
 
   /**
    * Sends a message to all given chat sessions with rate limiting and progress tracking.
-   * @param context
-   * @param sessions
-   * @param type
-   * @returns
+   * @param context - Grammy bot context.
+   * @param sessions - The list of chat sessions to send the message to.
+   * @param type - The chat type label used in progress messages (e.g. 'supergroup').
+   * @returns A Promise that resolves when all messages have been processed.
    */
   bulkSending(context: GrammyContext, sessions: ChatSession[], type: string) {
     return new Promise<void>((resolve) => {

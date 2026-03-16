@@ -13,7 +13,7 @@ export class CardsService {
   /**
    * Extracts and validates credit card numbers from raw message text.
    * @param message - raw message from user to parse
-   * @returns
+   * @returns array of validated credit card number strings found in the message
    */
   parseCards(message: string): string[] {
     // eslint-disable-next-line sonarjs/prefer-regexp-exec

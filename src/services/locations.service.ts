@@ -9,7 +9,7 @@ export class LocationsService {
   /**
    * Extracts Ukrainian location names found in the message text.
    * @param message - raw message from user to parse
-   * @returns
+   * @returns array containing the first matching location name, or empty array if none found
    */
   parseLocations(message: string): string[] {
     const lowerMessage = message.toLowerCase();

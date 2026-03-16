@@ -4,8 +4,9 @@ import { handleError } from '@utils/error-handler.util';
 
 /**
  * Demoted to regular user
- * @param context
- * @param next
+ * @param context - Grammy query context for the my_chat_member update.
+ * @param next - The next middleware function in the chain.
+ * @returns A Promise that resolves when the middleware chain has been processed.
  */
 export const botDemoteQuery: GrammyQueryMiddleware<'my_chat_member'> = async (context, next) => {
   if (context.myChatMember.old_chat_member.status === 'administrator' && context.myChatMember.new_chat_member.status === 'member') {

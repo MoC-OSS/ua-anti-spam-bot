@@ -8,7 +8,8 @@ export type ChainFilter<TContext extends Context> = BooleanFilter<TContext> | Re
 
 /**
  * It helps to chain filters to simplify Grammy Composer's `filter` method logic.
- * @param filters
+ * @param filters - One or more filters: boolean values, filter functions, or objects of named boolean/function pairs.
+ * @returns A function that evaluates all provided filters against the context and returns `true` only if all pass.
  * @example
  * ```ts
  * composer

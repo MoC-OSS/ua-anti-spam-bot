@@ -55,8 +55,7 @@ export class SwindlersUrlsService {
   }
 
   /**
-   * @description
-   * Create and saves FuzzySet based on latest data from dynamic storage
+   * Creates and saves FuzzySet based on latest data from dynamic storage.
    */
   initFuzzySet() {
     this.swindlersFuzzySet = FuzzySet(this.dynamicStorageService.swindlerDomains);
@@ -65,6 +64,7 @@ export class SwindlersUrlsService {
   /**
    * Scans the message for URLs and checks each against swindler detection rules.
    * @param message - raw message from user to parse
+   * @returns promise resolving to detection result if swindler URL found, null otherwise
    */
   async processMessage(message: string): Promise<SwindlersBaseResult | SwindlersUrlsResult | null> {
     const urls = urlService.parseUrls(message);
@@ -90,8 +90,9 @@ export class SwindlersUrlsService {
 
   /**
    * Resolves a URL (following redirects) and checks it against the swindler database.
-   * @param url
-   * @param [customRate]
+   * @param url - URL string to validate against swindler detection rules
+   * @param [customRate] - optional fuzzy match threshold to override the default rate
+   * @returns promise resolving to a spam detection result with isSpam flag and match rate
    */
   async isSpamUrl(url: string, customRate?: number): Promise<SwindlersBaseResult | SwindlersUrlsResult> {
     if (!url) {
@@ -111,7 +112,8 @@ export class SwindlersUrlsService {
           .catch(
             /**
              * Handles redirect/connection errors when resolving URL redirects.
-             * @param error
+             * @param error - the Axios or network error containing redirect information
+             * @returns the redirect target URL, or the original URL on unrecoverable errors
              */
             (error: NodeJS.ErrnoException & AxiosError) => {
               if (error.code === 'ENOTFOUND' && error.syscall === 'getaddrinfo') {

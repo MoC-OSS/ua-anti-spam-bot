@@ -16,15 +16,15 @@ import { videoService } from '@video/video.service';
 const host = `http://${environmentConfig.HOST}:${environmentConfig.PORT}`;
 
 /**
- * @param context
- * @param next
- * @description
  * Parse video frames and saves into `context.state.photo.fileFrames`
+ * @param context - The Grammy context object
+ * @param next - The next middleware function in the chain
+ * @returns A promise that resolves when the middleware chain completes
  */
 export const parseVideoFrames: GrammyMiddleware = async (context, next) => {
   /**
-   * @reason https://core.telegram.org/bots/faq#how-do-i-download-files
-   * @workaround https://stackoverflow.com/questions/63410408/is-there-any-workarounds-for-downloading-files-20-mb-that-are-sent-to-bot-i
+   * See https://core.telegram.org/bots/faq#how-do-i-download-files
+   * and https://stackoverflow.com/questions/63410408/is-there-any-workarounds-for-downloading-files-20-mb-that-are-sent-to-bot-i
    */
   const MAX_VIDEO_SIZE = 20_000_000; // 20Mb
 

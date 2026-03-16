@@ -7,10 +7,10 @@ import type { GrammyContext } from '@app-types/context';
 import { logSkipMiddleware } from '@utils/generic.util';
 
 /**
- * @param context
- * @param next
- * @description
  * Skip messages before bot became admin
+ * @param context - The Grammy context object
+ * @param next - The next middleware function in the chain
+ * @returns A promise that resolves when the middleware chain completes
  */
 export function onlyWhenBotAdmin(context: GrammyContext, next: NextFunction) {
   const isBotAdmin = onlyWhenBotAdminFilter(context);

@@ -31,8 +31,9 @@ export const redisSelectors = {
 export const client = redis.createClient({ url: environmentConfig.REDIS_URL });
 
 /**
- *
- * @param key
+ * Retrieves and parses a raw JSON value from Redis by key, returning null on failure.
+ * @param key - The Redis key to fetch
+ * @returns The parsed value of type T, or null if the key is missing or parsing fails
  */
 export async function getRawValue<T>(key: string | null | undefined): Promise<T | null> {
   if (!key) {
@@ -49,8 +50,9 @@ export async function getRawValue<T>(key: string | null | undefined): Promise<T 
 }
 
 /**
- *
- * @param key
+ * Retrieves and parses a JSON value from Redis by key, returning an empty object on failure.
+ * @param key - The Redis key to fetch
+ * @returns The parsed value of type T, or an empty object if the key is missing or parsing fails
  */
 export async function getValue<T>(key: string): Promise<T> {
   if (!key) {
@@ -69,18 +71,20 @@ export async function getValue<T>(key: string): Promise<T> {
 }
 
 /**
- *
- * @param key
- * @param value
+ * Serializes and stores a raw value in Redis under the given key.
+ * @param key - The Redis key to set
+ * @param value - The value to serialize and store
+ * @returns A promise that resolves when the value has been stored
  */
 export function setRawValue(key: string, value: ChatSessionData | CustomJsonValue | Primitive | Session) {
   return client.set(key, JSON.stringify(value));
 }
 
 /**
- *
- * @param key
- * @param value
+ * Serializes and stores a JSON object in Redis under the given key, skipping empty inputs.
+ * @param key - The Redis key to set
+ * @param value - The JSON object to serialize and store
+ * @returns A promise that resolves when the value has been stored, or undefined if inputs are empty
  */
 export function setValue(key: string, value: JsonObject) {
   if (!key || !value) {
@@ -92,8 +96,9 @@ export function setValue(key: string, value: JsonObject) {
 }
 
 /**
- *
- * @param key
+ * Deletes a Redis key.
+ * @param key - The Redis key to remove
+ * @returns A promise resolving to the number of keys deleted, or null if no key was provided
  */
 export function removeKey(key: string) {
   if (!key) {
@@ -104,7 +109,8 @@ export function removeKey(key: string) {
 }
 
 /**
- *
+ * Returns all Redis keys that match the user session key pattern (userId:chatId).
+ * @returns A promise resolving to an array of matching user session key strings
  */
 export async function getAllUserKeys(): Promise<string[]> {
   const keys = await client.keys('*:*');
@@ -117,7 +123,8 @@ export async function getAllUserKeys(): Promise<string[]> {
 }
 
 /**
- *
+ * Retrieves all user session records from Redis as parsed Session objects.
+ * @returns A promise resolving to an array of Session objects for all user sessions
  */
 export async function getAllUserRecords(): Promise<Session[]> {
   const filteredKeys = await getAllUserKeys();
@@ -139,7 +146,8 @@ export async function getAllUserRecords(): Promise<Session[]> {
 }
 
 /**
- *
+ * Retrieves all chat session records from Redis as parsed ChatSession objects.
+ * @returns A promise resolving to an array of ChatSession objects for all chat sessions
  */
 export async function getAllChatRecords(): Promise<ChatSession[]> {
   const keys = await client.keys('*');
@@ -167,7 +175,8 @@ export async function getAllChatRecords(): Promise<ChatSession[]> {
 }
 
 /**
- *
+ * Retrieves all records from Redis, including both user and chat sessions.
+ * @returns A promise resolving to an array of all Session and ChatSession records
  */
 export async function getAllRecords(): Promise<(ChatSession | Session)[]> {
   try {

@@ -14,13 +14,14 @@ export interface HelpMessageProperties {
 
 /**
  * Returns the help message displayed via the /help command with bot status and support info.
- * @param context
- * @param root0
- * @param root0.startLocaleTime
- * @param root0.isAdmin
- * @param root0.canDelete
- * @param root0.user
- * @param root0.userId
+ * @param context - Grammy bot context.
+ * @param root0 - Help message properties.
+ * @param root0.startLocaleTime - Localized string representing the bot start/deploy time.
+ * @param root0.isAdmin - Whether the bot currently has admin rights in the chat.
+ * @param root0.canDelete - Whether the bot has permission to delete messages.
+ * @param root0.user - The display name of the user requesting help.
+ * @param root0.userId - The Telegram user ID of the user requesting help.
+ * @returns The formatted help message string.
  */
 export const getHelpMessage = (context: GrammyContext, { startLocaleTime, isAdmin, canDelete, user, userId }: HelpMessageProperties) =>
   [
@@ -49,7 +50,8 @@ export const getHelpMessage = (context: GrammyContext, { startLocaleTime, isAdmi
 
 /**
  * Returns the message displayed when a user uses /start in a private chat.
- * @param context
+ * @param context - Grammy bot context.
+ * @returns The formatted start message string for private chats.
  */
 export const getStartMessage = (context: GrammyContext) =>
   [context.t('start-message-atom'), '', context.t('start-private-instructions', { helpChat })].join('\n');
@@ -64,13 +66,14 @@ export interface GroupStartMessageProperties {
 
 /**
  * Returns the message displayed when a user uses /start in a group chat.
- * @param context
- * @param root0
- * @param root0.adminsString
- * @param root0.isAdmin
- * @param root0.canDelete
- * @param root0.user
- * @param root0.userId
+ * @param context - Grammy bot context.
+ * @param root0 - Group start message properties.
+ * @param root0.adminsString - Optional formatted string of admin mentions.
+ * @param root0.isAdmin - Whether the bot currently has admin rights.
+ * @param root0.canDelete - Whether the bot can delete messages.
+ * @param root0.user - The display name of the user.
+ * @param root0.userId - The Telegram user ID.
+ * @returns The formatted group start message string.
  */
 export const getGroupStartMessage = (
   context: GrammyContext,
@@ -92,9 +95,10 @@ export const getGroupStartMessage = (
 
 /**
  * Returns the message displayed when the bot is invited to a channel.
- * @param context
- * @param root0
- * @param root0.botName
+ * @param context - Grammy bot context.
+ * @param root0 - Generic bot properties.
+ * @param root0.botName - The bot's username.
+ * @returns The formatted channel start message string.
  */
 export const getStartChannelMessage = (context: GrammyContext, { botName }: GenericBotProperties) =>
   context.t('start-channel-message', { botName, helpChat });
@@ -107,11 +111,12 @@ export interface BotJoinMessageProperties {
 
 /**
  * Returns the message displayed when the bot is invited to a group.
- * @param context
- * @param root0
- * @param root0.adminsString
- * @param root0.isAdmin
- * @param root0.canDelete
+ * @param context - Grammy bot context.
+ * @param root0 - Bot join message properties.
+ * @param root0.adminsString - Optional formatted string of admin mentions.
+ * @param root0.isAdmin - Whether the bot has admin rights.
+ * @param root0.canDelete - Whether the bot can delete messages.
+ * @returns The formatted bot-join message string.
  */
 export const getBotJoinMessage = (context: GrammyContext, { adminsString, isAdmin = false, canDelete }: BotJoinMessageProperties) =>
   [

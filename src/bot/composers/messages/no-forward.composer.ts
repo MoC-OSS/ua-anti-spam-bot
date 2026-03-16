@@ -7,7 +7,8 @@ import type { GrammyContext } from '@app-types/context';
 import { getEnabledFeaturesString, getUserData } from '@utils/generic.util';
 
 /**
- * @description Remove strategic information logic
+ * Returns a composer that detects and deletes forwarded messages when the feature is enabled.
+ * @returns Object containing the no-forwards composer instance.
  */
 export const getNoForwardsComposer = () => {
   const noForwardsComposer = new Composer<GrammyContext>();

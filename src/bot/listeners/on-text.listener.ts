@@ -30,9 +30,9 @@ import { telegramUtility } from '@utils/util-instances.util';
 export class OnTextListener {
   /**
    * Initializes the listener with bot instance, start time, and message handler.
-   * @param bot
-   * @param startTime
-   * @param messageHandler
+   * @param bot - The Grammy bot instance.
+   * @param startTime - The timestamp when the bot was started.
+   * @param messageHandler - The handler responsible for processing messages.
    */
   constructor(
     private bot: Bot<GrammyContext>,
@@ -41,17 +41,19 @@ export class OnTextListener {
   ) {}
 
   /**
-   * Handles every received message
+   * Handles every received message.
+   * @returns The Grammy middleware function.
    */
   middleware(): GrammyMiddleware {
     /**
      * Processes a text message through spam detection rules.
-     * @param context
-     * @param next
+     * @param context - The Grammy context object.
+     * @param next - The next middleware function in the chain.
+     * @returns A promise that resolves when the middleware chain completes.
      */
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context: GrammyContext, next: NextFunction) => {
-      // TODO use for ctx prod debug
+      // NOTE use for ctx prod debug
       // logger.info('enter onText ******', ctx.chat?.title, '******', ctx.state.text);
 
       const message = context.state.text;
@@ -75,7 +77,7 @@ export class OnTextListener {
       const rep = await isFilteredByRules(context, this.messageHandler);
 
       if (rep.dataset) {
-        // TODO define the same types
+        // NOTE define the same types
 
         // @ts-ignore
         context.state.dataset = rep.dataset;

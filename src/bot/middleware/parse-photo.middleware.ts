@@ -12,11 +12,10 @@ import { ImageType } from '@app-types/image';
 import type { StateImage } from '@app-types/state';
 
 /**
- * @param context
- * @param next
- * @description
- * Add images into state.
- * Downloads the smallest one and appends into the state.
+ * Add images into state. Downloads the smallest one and appends into the state.
+ * @param context - The Grammy context object
+ * @param next - The next middleware function in the chain
+ * @returns A promise that resolves when the middleware chain completes
  */
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export async function parsePhoto(context: GrammyContext, next: NextFunction) {

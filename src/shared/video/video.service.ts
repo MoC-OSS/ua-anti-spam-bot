@@ -15,6 +15,7 @@ export class VideoService {
 
   /**
    * Create a `ffmpeg` command with specified `ffmpeg` and `ffprobe` binaries
+   * @returns A configured fluent-ffmpeg command instance
    */
   spawnCommand() {
     if (!ffmpegPath || !ffprobePath) {
@@ -34,6 +35,7 @@ export class VideoService {
    * @param video - MP4 buffer video
    * @param filename - name to save in fs, should include extension
    * @param duration - duration of the video
+   * @returns A promise resolving to an array of screenshot buffers, or an empty array if not a video
    */
   async extractFrames(video: Buffer, filename: string, duration?: number) {
     let localDuration = duration;
@@ -65,6 +67,7 @@ export class VideoService {
   /**
    * Returns video stats such as duration, width, height, and other meta
    * @param videoFile - video to get meta
+   * @returns A promise resolving to an FfprobeData object with video metadata
    */
   getVideoProbe(videoFile: URL): Promise<FfprobeData> {
     const command = this.spawnCommand();
@@ -132,7 +135,7 @@ export class VideoService {
   }
 
   /**
-   * @description Receives video, video name, and timestamps to generate buffers.<br>
+   * Receives video, video name, and timestamps to generate buffers.
    *
    * 1) It calls FFMPEG to capture screenshot on the passed timestamps;<br>
    * 2) FFMPEG generates them and saves in FS;<br>
@@ -140,6 +143,7 @@ export class VideoService {
    * @param videoFile - video file path to process
    * @param filename - name to save in fs, should include extension
    * @param duration - duration of the video
+   * @returns A promise resolving to an array of screenshot buffers extracted from the video
    */
   async takeScreenshotsFs(videoFile: URL, filename: string, duration: number) {
     const command = this.spawnCommand();

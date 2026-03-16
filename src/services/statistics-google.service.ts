@@ -17,7 +17,7 @@ export class StatisticsGoogleService {
 
   /**
    * Appends a row of statistic values to the statistics Google Sheet.
-   * @param cases
+   * @param cases - array of numeric or string values representing a statistics row
    * @returns Promise<any>
    */
   async appendToSheet(cases: (number | string)[]) {

@@ -10,12 +10,13 @@ export class StartCommand {
   /**
    * Handle /start
    * Returns help message
-   *
+   * @returns The Grammy middleware function for /start.
    */
   middleware(): GrammyMiddleware {
     /**
      * Handles the /start command and replies with a welcome message.
-     * @param context
+     * @param context - Grammy bot context.
+     * @returns A Promise that resolves when the reply has been sent.
      */
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context) => {

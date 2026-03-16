@@ -19,15 +19,17 @@ import type { SearchSetResult } from '@utils/search-set.util';
 import { telegramUtility } from '@utils/util-instances.util';
 
 /**
- * @description Delete antisemitism language messages
+ * Returns a composer that detects and deletes messages containing antisemitic language.
+ * @returns Object containing the no-antisemitism composer instance.
  */
 export const getNoAntisemitismComposer = () => {
   const noAntisemitismComposer = new Composer<GrammyContext>();
 
   /**
    * Logs a detected antisemitism message to the logs chat.
-   * @param context
-   * @param searchResult
+   * @param context - The Grammy context of the incoming message.
+   * @param searchResult - The search result containing the matched antisemitic word details.
+   * @returns Promise resolving to the sent log message.
    */
   async function saveAntisemitismMessage(context: GrammyContext, searchResult: SearchSetResult) {
     const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);

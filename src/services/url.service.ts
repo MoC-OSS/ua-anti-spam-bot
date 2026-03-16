@@ -42,8 +42,8 @@ export class UrlService {
 
   /**
    * Extracts the domain (host + trailing slash) from a URL string.
-   * @param url
-   * @returns
+   * @param url - URL string to extract the domain from
+   * @returns the domain with trailing slash, or the original URL string on parse error
    */
   getUrlDomain(url: string): string {
     try {

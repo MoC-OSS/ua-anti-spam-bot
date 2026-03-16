@@ -5,10 +5,10 @@ import type { GrammyContext } from '@app-types/context';
 import { logSkipMiddleware } from '@utils/generic.util';
 
 /**
- * @param context
- * @param next
- * @description
  * Skip messages without text and add text into state
+ * @param context - The Grammy context object
+ * @param next - The next middleware function in the chain
+ * @returns A promise that resolves when the middleware chain completes
  */
 export function onlyWithText(context: GrammyContext, next: NextFunction) {
   if (context.state.text) {

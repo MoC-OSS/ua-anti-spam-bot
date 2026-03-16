@@ -20,7 +20,8 @@ export interface SearchSetTokens {
 export class SearchSet extends Set {
   /**
    * Tokenizes and normalizes the input string for efficient keyword searching.
-   * @param string
+   * @param string - The raw input string to tokenize and normalize
+   * @returns An object containing the original words and the normalized words to search
    */
   tokenize(string: string): SearchSetTokens {
     const optimizedString = removeSpecialSymbols(string.toLowerCase()).replaceAll(/\s\s+/g, ' ').trim();
@@ -38,7 +39,8 @@ export class SearchSet extends Set {
 
   /**
    * Searches the set for any matching token and returns the first match with its origin word.
-   * @param string
+   * @param string - The input string or pre-tokenized SearchSetTokens object to search
+   * @returns A SearchSetResult with the matched token and its origin word, or null if no match found
    */
   search(string: SearchSetTokens | string): SearchSetResult | null {
     const { wordsToSearch, words } = (string as SearchSetTokens).wordsToSearch

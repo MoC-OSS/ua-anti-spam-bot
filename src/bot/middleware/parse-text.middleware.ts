@@ -11,10 +11,10 @@ import type { GrammyContext } from '@app-types/context';
 const getTextFromMessage = (message: Message | undefined) => message && (message.text || message.caption || message.poll?.question);
 
 /**
- * @param context
- * @param next
- * @description
  * Add text into state
+ * @param context - The Grammy context object
+ * @param next - The next middleware function in the chain
+ * @returns A promise that resolves when the middleware chain completes
  */
 export function parseText(context: GrammyContext, next: NextFunction) {
   const text = getTextFromMessage(context.msg) || getTextFromMessage(context.editedMessage);

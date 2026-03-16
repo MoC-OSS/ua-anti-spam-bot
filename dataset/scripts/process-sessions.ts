@@ -9,7 +9,8 @@ import type { ChatSession, Session } from '@app-types/session';
 import { logger } from '@utils/logger.util';
 
 /**
- *
+ * Processes all Redis chat sessions and migrates them to a new format.
+ * @returns A promise that resolves when all sessions have been processed.
  */
 async function processSession() {
   try {

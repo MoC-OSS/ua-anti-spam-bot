@@ -8,7 +8,8 @@ import { botPromoteQuery } from '@bot/queries/bot-promote.query';
 import type { GrammyContext } from '@app-types/context';
 
 /**
- * @description Message handling composer
+ * Composer that runs before all other composers to enrich context with admin status and handle chat member events.
+ * @returns An object containing the beforeAnyComposer instance.
  */
 export const getBeforeAnyComposer = () => {
   const beforeAnyComposer = new Composer<GrammyContext>();

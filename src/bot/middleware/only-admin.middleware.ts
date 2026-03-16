@@ -8,8 +8,9 @@ import { logSkipMiddleware } from '@utils/generic.util';
 /**
  * Guards the middleware chain so only chat admins (or channel/private chat users) can proceed.
  * Short-circuits with no response for non-admin users.
- * @param context
- * @param next
+ * @param context - The Grammy context object
+ * @param next - The next middleware function in the chain
+ * @returns A promise that resolves when the middleware chain completes
  */
 export const onlyAdmin = async (context: GrammyContext, next: NextFunction) => {
   // No chat = no service

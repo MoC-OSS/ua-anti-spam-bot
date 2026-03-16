@@ -21,18 +21,20 @@ export interface NoRussianComposerProperties {
 }
 
 /**
- * @param root0
- * @param root0.dynamicStorageService
- * @description Delete russian language messages
+ * Returns a composer that detects and deletes messages written in Russian language.
+ * @param root0 - Composer properties.
+ * @param root0.dynamicStorageService - Service providing dynamic Ukrainian language responses.
+ * @returns Object containing the no-Russian composer instance.
  */
 export const getNoRussianComposer = ({ dynamicStorageService }: NoRussianComposerProperties) => {
   const noRussianComposer = new Composer<GrammyContext>();
 
   /**
    * Logs a deleted Russian-language message to the logs chat.
-   * @param context
-   * @param maxChance
-   * @param [message]
+   * @param context - The Grammy context of the incoming message.
+   * @param maxChance - The Russian language detection confidence score (0–1).
+   * @param [message] - Optional message text override.
+   * @returns Promise resolving to the sent log message.
    */
   async function saveRussianMessage(context: GrammyContext, maxChance: number, message?: string) {
     const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);

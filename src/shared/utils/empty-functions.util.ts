@@ -1,6 +1,6 @@
 /**
- * Temporary fix for catch error handling
- * TODO rework with global grammy error handling
+ * Temporary fix for catch error handling.
+ * NOTE: rework with global grammy error handling
  */
 
 export const emptyFunction = () => {};

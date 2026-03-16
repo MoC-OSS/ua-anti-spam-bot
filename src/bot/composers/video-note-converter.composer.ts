@@ -11,7 +11,8 @@ import { videoUtility } from '@utils/video.util';
 import { videoService } from '@video/video.service';
 
 /**
- * @description Message handling composer
+ * Composer that converts videos sent with a /video_note command into Telegram video notes (round videos).
+ * @returns An object containing the videoNoteConverterComposer instance.
  */
 export const getGetVideoNoteConverterComposer = () => {
   const videoNoteConverterComposer = new Composer<GrammyContext>();

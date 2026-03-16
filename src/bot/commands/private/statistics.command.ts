@@ -17,11 +17,12 @@ export class StatisticsCommand {
   /**
    * Handle /statistics
    * Returns current statistics
+   * @returns The Grammy middleware function for /statistics.
    */
   middleware(): GrammyMiddleware {
     /**
      * Handles the /statistics command and replies with aggregated bot statistics.
-     * @param context
+     * @param context - Grammy bot context.
      */
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context) => {

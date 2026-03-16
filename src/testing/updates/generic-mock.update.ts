@@ -120,7 +120,7 @@ export abstract class GenericMockUpdate {
     from: this.genericUser,
   });
 
-  // todo setUserType method, now telegram doesn't have interface for User type in message
+  // NOTE: setUserType method, now telegram doesn't have interface for User type in message
   // setUserType(userType: ChatMember['status']) {
   //   const members: Partial<Record<ChatMember['status'], ChatMember>> = {
   //     creator: this.genericOwner,

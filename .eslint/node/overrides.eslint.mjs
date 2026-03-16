@@ -50,6 +50,10 @@ export default [
     },
     rules: {
       '@typescript-eslint/unbound-method': 'off',
+      'jsdoc/require-description': 'off',
+      'jsdoc/require-returns': 'off',
+      'jsdoc/require-param-description': 'off',
+      'jsdoc/require-param-type': 'off',
     },
   },
   // Disable no-extraneous-class for module files (e.g. NestJS *.module.ts)

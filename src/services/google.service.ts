@@ -54,11 +54,11 @@ export class GoogleService {
 
   /**
    * Fetches rows from a Google Sheets range and returns them as cell data objects.
-   * @param spreadsheetId
-   * @param sheetName
-   * @param range
-   * @param compact
-   * @returns
+   * @param spreadsheetId - ID of the target spreadsheet
+   * @param sheetName - name of the sheet tab to read
+   * @param range - optional cell range (e.g. 'A7:A'); defaults to RANGE constant
+   * @param compact - when true, returns flat string values instead of full cell data
+   * @returns array of cell data objects or strings depending on the compact flag
    */
   async getSheet<T extends false | true = false>(
     spreadsheetId: string,
@@ -111,9 +111,9 @@ export class GoogleService {
 
   /**
    * Clears all values in the specified Google Sheets range.
-   * @param spreadsheetId
-   * @param range
-   * @returns
+   * @param spreadsheetId - ID of the target spreadsheet
+   * @param range - the cell range to clear (e.g. 'Sheet1!A1:B2')
+   * @returns the API response or null on error
    */
   removeSheetRange(spreadsheetId: string, range: string) {
     // eslint-disable-next-line sonarjs/no-try-promise
@@ -132,10 +132,10 @@ export class GoogleService {
 
   /**
    * Appends one or more values as a new row to a Google Sheet.
-   * @param spreadsheetId
-   * @param sheetName
-   * @param value
-   * @param [range]
+   * @param spreadsheetId - ID of the target spreadsheet
+   * @param sheetName - name of the sheet tab to append to
+   * @param value - value or array of values to append
+   * @param [range] - optional starting range for append; defaults to RANGE constant
    */
   async appendToSheet<T>(spreadsheetId: string, sheetName: string, value: T | T[], range?: string) {
     const responseData = coerceArray(value);
@@ -157,10 +157,10 @@ export class GoogleService {
 
   /**
    * Overwrites the specified Google Sheets range with new values.
-   * @param spreadsheetId
-   * @param sheetName
-   * @param value
-   * @param [range]
+   * @param spreadsheetId - ID of the target spreadsheet
+   * @param sheetName - name of the sheet tab to update
+   * @param value - array of string values to write
+   * @param [range] - optional cell range to overwrite; defaults to RANGE constant
    */
   async updateSheet(spreadsheetId: string, sheetName: string, value: string[], range?: string) {
     try {
@@ -180,9 +180,9 @@ export class GoogleService {
 
   /**
    * Clears all values in a sheet, optionally within a specific range.
-   * @param spreadsheetId
-   * @param sheetName
-   * @param [range]
+   * @param spreadsheetId - ID of the target spreadsheet
+   * @param sheetName - name of the sheet tab to clear
+   * @param [range] - optional cell range to clear; defaults to RANGE constant
    */
   async clearSheet(spreadsheetId: string, sheetName: string, range?: string) {
     try {

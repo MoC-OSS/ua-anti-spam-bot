@@ -43,7 +43,7 @@ logger.info('Resolved import aliases from tsconfig paths:', aliases);
 const aliasesCount = Object.keys(aliases).length;
 
 /**
- * @description ESLint config for import alias linting using @dword-design/eslint-plugin-import-alias. Aliases are built dynamically from tsconfig.json using baseUrl.
+ * ESLint config for import alias linting using `@dword-design`/eslint-plugin-import-alias. Aliases are built dynamically from tsconfig.json using baseUrl.
  * @author Dmytro Vakulenko
  * @see https://github.com/dword-design/eslint-plugin-import-alias
  */

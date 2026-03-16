@@ -10,17 +10,19 @@ export interface DeleteRussianMessageProperties {
 
 /**
  * Returns a warning message for Russian language usage with a Ukrainian flag emoji.
- * @param message
+ * @param message - The localized warning text to prepend the flag emoji to.
+ * @returns The formatted Russian-language warning string.
  */
 export const getWarnRussianMessage = (message: string) => `🫶🇺🇦 ${message}`;
 
 /**
  * Returns a message explaining why a Russian-language message was deleted.
- * @param context
- * @param root0
- * @param root0.writeUsername
- * @param root0.userId
- * @param root0.message
+ * @param context - Grammy bot context.
+ * @param root0 - Delete Russian message properties.
+ * @param root0.writeUsername - The formatted username of the message author.
+ * @param root0.userId - The Telegram user ID of the message author.
+ * @param root0.message - The localized deletion reason message.
+ * @returns The formatted Russian-delete notification message string.
  */
 export const getDeleteRussianMessage = (context: GrammyContext, { writeUsername, userId, message }: DeleteRussianMessageProperties) => {
   const atom =
@@ -31,6 +33,7 @@ export const getDeleteRussianMessage = (context: GrammyContext, { writeUsername,
 
 /**
  * Returns extra Ukrainian language message based on detection percentage.
- * @param percent
+ * @param percent - The detection percentage (200 triggers an extra letters message).
+ * @returns An extra message string if percent equals 200, otherwise an empty string.
  */
 export const getUkrainianMessageExtra = (percent: number) => (percent === 200 ? `\n${i18n.t('uk', 'russian-extra-letters')}` : '');

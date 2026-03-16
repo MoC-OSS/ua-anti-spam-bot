@@ -27,12 +27,13 @@ export interface PrivateCommandsComposerProperties {
 }
 
 /**
- * @param root0
- * @param root0.bot
- * @param root0.commandSetter
- * @param root0.dynamicStorageService
- * @param root0.startTime
- * @description Public commands that are available for users
+ * Composer that registers bot commands available to whitelisted (private) users.
+ * @param root0 - Private commands composer properties.
+ * @param root0.bot - The Grammy bot instance used to trigger restarts.
+ * @param root0.commandSetter - Service used to register bot commands with Telegram.
+ * @param root0.dynamicStorageService - Service for managing dynamically-updated bot data.
+ * @param root0.startTime - The timestamp when the bot process started.
+ * @returns An object containing the privateCommandsComposer instance.
  */
 export const getPrivateCommandsComposer = ({ bot, commandSetter, dynamicStorageService, startTime }: PrivateCommandsComposerProperties) => {
   const privateCommandsComposer = new Composer<GrammyContext>();

@@ -44,8 +44,8 @@ export class AlarmChatService {
 
   /**
    * Checks whether the given region currently has an active alarm.
-   * @param state
-   * @returns
+   * @param state - the region/state name to check
+   * @returns true if the region is currently under alarm, undefined otherwise
    */
   isAlarmNow(state: string) {
     return this.alarms?.has(state);
@@ -53,8 +53,8 @@ export class AlarmChatService {
 
   /**
    * Updates or removes a chat from the alarm notification list based on its settings.
-   * @param chatSession
-   * @param id
+   * @param chatSession - the updated session data for the chat
+   * @param id - the chat identifier to update or remove
    */
   updateChat(chatSession: ChatSessionData, id: number | string | undefined) {
     if (!id) {
@@ -128,9 +128,9 @@ export class AlarmChatService {
 
   /**
    * Processes an alarm event for a chat, sending notifications and toggling chat permissions.
-   * @param chat
-   * @param isAlarm
-   * @param isRepeatedAlarm
+   * @param chat - the chat session to process the alarm for
+   * @param isAlarm - true if alarm started, false if alarm ended
+   * @param isRepeatedAlarm - true if this is a repeated alarm for the same state
    */
   async processChatAlarm(chat: ChatSession, isAlarm: boolean, isRepeatedAlarm = false) {
     const chatInfo = await this.api?.getChat(chat.id);

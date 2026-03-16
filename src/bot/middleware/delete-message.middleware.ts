@@ -3,6 +3,7 @@ import type { GrammyMiddleware } from '@app-types/context';
 /**
  * Delete user entered message
  * @param reason - why bot could not delete the message
+ * @returns A Grammy middleware function that deletes the message or replies with the reason
  */
 export const deleteMessageMiddleware =
   (reason: string): GrammyMiddleware =>

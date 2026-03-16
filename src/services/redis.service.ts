@@ -22,7 +22,7 @@ export class RedisService {
 
   /**
    * Retrieves the training chat whitelist from Redis.
-   * @returns
+   * @returns array of whitelisted chat ID strings
    */
   async getTrainingChatWhitelist() {
     return (await redisClient.getRawValue<string[]>(this.redisSelectors.trainingChatWhitelist)) || [];
@@ -30,7 +30,7 @@ export class RedisService {
 
   /**
    * Retrieves the list of training bots from Redis.
-   * @returns
+   * @returns array of training bot name strings
    */
   async getTrainingBots() {
     return (await redisClient.getRawValue<string[]>(this.redisSelectors.trainingBots)) || [];
@@ -38,7 +38,8 @@ export class RedisService {
 
   /**
    * Sets the training chat whitelist in Redis.
-   * @param newChatIds
+   * @param newChatIds - comma-separated string of chat IDs to set as the whitelist
+   * @returns promise resolving when the value is stored
    */
   setTrainingChatWhitelist(newChatIds: string) {
     return redisClient.setRawValue(this.redisSelectors.trainingChatWhitelist, newChatIds.replaceAll(' ', '').split(','));
@@ -46,7 +47,8 @@ export class RedisService {
 
   /**
    * Adds a chat ID to the training whitelist in Redis.
-   * @param newChatId
+   * @param newChatId - chat ID string to append to the whitelist
+   * @returns promise resolving when the updated whitelist is stored
    */
   async updateTrainingChatWhitelist(newChatId: string) {
     const currentChats = await this.getTrainingChatWhitelist();
@@ -69,7 +71,7 @@ export class RedisService {
 
   /**
    * Retrieves the current training start rank from Redis.
-   * @returns
+   * @returns promise resolving to the training start rank number, or null if not set
    */
   getTrainingStartRank() {
     return redisClient.getRawValue<number>(this.redisSelectors.trainingStartRank);
@@ -77,7 +79,8 @@ export class RedisService {
 
   /**
    * Sets the training start rank in Redis.
-   * @param newValue
+   * @param newValue - numeric rank value to store
+   * @returns promise resolving when stored, or undefined if value is invalid
    */
   setTrainingStartRank(newValue: number) {
     if (newValue && +newValue) {
@@ -92,7 +95,7 @@ export class RedisService {
 
   /**
    * Retrieves the bot tensor spam threshold percentage from Redis.
-   * @returns
+   * @returns promise resolving to the tensor threshold percentage, or null if not set
    */
   getBotTensorPercent() {
     return redisClient.getRawValue<number>(this.redisSelectors.botTensorPercent);
@@ -100,7 +103,8 @@ export class RedisService {
 
   /**
    * Sets the bot tensor spam threshold percentage in Redis.
-   * @param newValue
+   * @param newValue - numeric percentage value to store as the threshold
+   * @returns promise resolving when stored, or undefined if value is invalid
    */
   setBotTensorPercent(newValue: number) {
     if (newValue && +newValue) {
@@ -115,7 +119,7 @@ export class RedisService {
 
   /**
    * Retrieves the bot deactivation status from Redis.
-   * @returns
+   * @returns promise resolving to the boolean deactivation status, or null if not set
    */
   getIsBotDeactivated() {
     return redisClient.getRawValue<boolean>(this.redisSelectors.isBotDeactivated);
@@ -123,7 +127,8 @@ export class RedisService {
 
   /**
    * Sets the bot deactivation status in Redis.
-   * @param newValue
+   * @param newValue - boolean flag indicating whether the bot should be deactivated
+   * @returns promise resolving when the value is stored
    */
   setIsBotDeactivated(newValue: boolean) {
     return redisClient.setRawValue(this.redisSelectors.isBotDeactivated, newValue);
@@ -131,7 +136,7 @@ export class RedisService {
 
   /**
    * Retrieves the list of negative training words from Redis.
-   * @returns
+   * @returns promise resolving to array of negative training words
    */
   async getNegatives() {
     return (await redisClient.getRawValue<string[]>(this.redisSelectors.negatives)) || [];
@@ -139,7 +144,7 @@ export class RedisService {
 
   /**
    * Retrieves the list of positive training words from Redis.
-   * @returns
+   * @returns promise resolving to array of positive training words
    */
   async getPositives() {
     return (await redisClient.getRawValue<string[]>(this.redisSelectors.positives)) || [];
@@ -147,7 +152,8 @@ export class RedisService {
 
   /**
    * Appends a word to the negative training words list in Redis.
-   * @param word
+   * @param word - word to add to the negative training list
+   * @returns promise resolving when the updated list is stored
    */
   async updateNegatives(word: string) {
     const words = await this.getNegatives();
@@ -159,7 +165,8 @@ export class RedisService {
 
   /**
    * Appends a word to the positive training words list in Redis.
-   * @param word
+   * @param word - word to add to the positive training list
+   * @returns promise resolving when the updated list is stored
    */
   async updatePositives(word: string) {
     const words = await this.getPositives();
@@ -179,8 +186,9 @@ export class RedisService {
 
   /**
    * Merges new session data into an existing chat session in Redis.
-   * @param chatId
-   * @param newSession
+   * @param chatId - numeric or string chat identifier
+   * @param newSession - partial session data to merge into the existing session
+   * @returns promise resolving when the updated session is stored
    */
   async updateChatSession(chatId: number | string, newSession: Partial<ChatSessionData>) {
     const stringChatId = chatId.toString();
@@ -238,8 +246,8 @@ export class RedisService {
 
   /**
    * Retrieves the session data for a specific chat from Redis.
-   * @param chatId
-   * @returns
+   * @param chatId - numeric or string chat identifier
+   * @returns promise resolving to the ChatSessionData object, or null if not found
    */
   async getChatSession(chatId: number | string) {
     const stringChatId = chatId.toString();
@@ -253,7 +261,7 @@ export class RedisService {
 
   /**
    * Retrieves temporary training messages from Redis.
-   * @returns
+   * @returns promise resolving to array of temporary training message strings
    */
   async getTrainingTempMessages() {
     return (await redisClient.getRawValue<string[]>(this.redisSelectors.trainingTempMessages)) || [];
@@ -261,7 +269,8 @@ export class RedisService {
 
   /**
    * Stores temporary training messages in Redis.
-   * @param messages
+   * @param messages - array of message strings to save as temporary training data
+   * @returns promise resolving when the messages are stored
    */
   setTrainingTempMessages(messages: string[]) {
     return redisClient.setRawValue(this.redisSelectors.trainingTempMessages, messages);
@@ -269,7 +278,8 @@ export class RedisService {
 
   /**
    * Stores swindler detection statistics in Redis.
-   * @param statistic
+   * @param statistic - map of detection category names to arrays of flagged message strings
+   * @returns promise resolving when the statistics are stored
    */
   setSwindlersStatistic(statistic: RedisServiceSetSwindlersStatisticStatistic) {
     return redisClient.setRawValue(this.redisSelectors.swindlersStatistic, statistic);
@@ -277,7 +287,7 @@ export class RedisService {
 
   /**
    * Retrieves swindler detection statistics from Redis.
-   * @returns
+   * @returns promise resolving to the statistics map, or an empty object if not set
    */
   async getSwindlersStatistic() {
     return (await redisClient.getRawValue<{ [key: string]: string[] }>(this.redisSelectors.swindlersStatistic)) || {};

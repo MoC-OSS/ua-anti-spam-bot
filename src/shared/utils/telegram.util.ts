@@ -16,8 +16,8 @@ import { getUserData } from './generic.util';
 export class TelegramUtility {
   /**
    * Checks if the message was forwarded from a linked channel rather than sent by a user.
-   * @param context
-   * @returns
+   * @param context - The Grammy context object
+   * @returns True if the sender is a linked channel bot, false otherwise
    */
   isFromChannel(context: GrammyContext): boolean {
     return context.from?.first_name === 'Channel' && context.from?.username === 'Channel_Bot';
@@ -25,7 +25,8 @@ export class TelegramUtility {
 
   /**
    * Returns the chat title, or a placeholder if unavailable.
-   * @param chat
+   * @param chat - The Telegram Chat object, may be undefined
+   * @returns The chat title string, or "$title" if unavailable
    */
   getChatTitle(chat?: Chat): string {
     return (chat && 'title' in chat && chat.title) || '$title';
@@ -33,7 +34,8 @@ export class TelegramUtility {
 
   /**
    * Extracts the invite link from chat info, if available.
-   * @param chatInfo
+   * @param chatInfo - The full chat info object returned by Telegram
+   * @returns The invite link string if present, or undefined
    */
   getInviteLink(chatInfo: ChatFullInfo): string | undefined {
     return ('invite_link' in chatInfo && chatInfo.invite_link) || undefined;
@@ -41,8 +43,9 @@ export class TelegramUtility {
 
   /**
    * Fetches the chat administrators and returns the creator, promotable admins, and a formatted string.
-   * @param context
-   * @param chatId
+   * @param context - The Grammy context object
+   * @param chatId - The numeric Telegram chat ID to fetch administrators for
+   * @returns A promise resolving to an object with creator, admins, promoteAdmins, adminsString, and finalAdmins
    */
   getChatAdmins(context: GrammyContext, chatId: number) {
     return context.api.getChatAdministrators(chatId).then((admins) => {
@@ -61,8 +64,9 @@ export class TelegramUtility {
   }
 
   /**
-   * Returns the user's @username mention, or their full name if no username is set.
-   * @param user
+   * Returns the user's `@username` mention, or their full name if no username is set.
+   * @param user - The Telegram User object
+   * @returns A string with the user mention or full name
    */
   getUserMentionOrName(user: User): string {
     if (user.username) {
@@ -75,7 +79,8 @@ export class TelegramUtility {
 
   /**
    * Get logs message parts for save a message into logs
-   * @param context
+   * @param context - The Grammy context object
+   * @returns A promise resolving to an object with userMention and chatMention strings
    */
   async getLogsSaveMessageParts(context: GrammyContext) {
     const { writeUsername, userId } = getUserData(context);

@@ -16,7 +16,8 @@ export class LanguageDetectService {
 
   /**
    * Helper function that detects if the message in russian
-   * @param message
+   * @param message - message text to analyze
+   * @returns detection result with boolean flag and confidence percent
    */
   isRussian(message: string): LanguageDetectionResult {
     /**
@@ -68,6 +69,7 @@ export class LanguageDetectService {
    * Detect possible languages from the passed message.
    * If it could not decide which language is used, it throws an error
    * @param message - message to get language
+   * @returns array of language detection results, empty if message is too short
    */
   detect(message: string) {
     const clearMessage = removeExtraSpaces(removeSpecialSymbols(message)).toLowerCase();

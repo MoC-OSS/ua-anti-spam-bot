@@ -21,18 +21,20 @@ export interface NsfwMessageFilterComposerProperties {
 }
 
 /**
- * @param root0
- * @param root0.nsfwDetectService
- * @description Delete russian language messages
+ * Returns a composer that detects and deletes text messages classified as NSFW.
+ * @param root0 - Composer properties.
+ * @param root0.nsfwDetectService - Service used to classify text messages for NSFW content.
+ * @returns Object containing the NSFW message filter composer instance.
  */
 export const getNsfwMessageFilterComposer = ({ nsfwDetectService }: NsfwMessageFilterComposerProperties) => {
   const nsfwMessageFilterComposer = new Composer<GrammyContext>();
 
   /**
    * Logs a detected NSFW text message to the logs chat.
-   * @param context
-   * @param maxChance
-   * @param [message]
+   * @param context - The Grammy context of the incoming message.
+   * @param maxChance - The NSFW detection confidence score (0–1).
+   * @param [message] - Optional message text override.
+   * @returns Promise resolving to the sent log message.
    */
   async function saveNsfwMessage(context: GrammyContext, maxChance: number, message?: string) {
     const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);

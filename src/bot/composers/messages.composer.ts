@@ -53,6 +53,7 @@ export interface MessagesComposerProperties {
 /**
  * Returns an object containing message handler registration functions and Composer instances.
  * Use it to add features on it
+ * @returns An object with messagesComposer, readyMessagesComposer, and registration helper functions.
  */
 export const getMessagesRegisterComposer = () => {
   const messagesComposer = new Composer<GrammyContext>();
@@ -74,7 +75,7 @@ export const getMessagesRegisterComposer = () => {
 
   /**
    * Registers a message handler module with correct filter to not make extra checks
-   * @param middlewares
+   * @param middlewares - One or more composer or middleware instances to register.
    */
   const registerModule = (...middlewares: (Composer<GrammyContext> | GrammyMiddleware)[]) => {
     readyMessagesComposer.filter((context) => onlyNotDeletedFilter(context)).use(...middlewares);
@@ -82,8 +83,8 @@ export const getMessagesRegisterComposer = () => {
 
   /**
    * Register a module that will be called only if optional settings is enabled
-   * @param key
-   * @param middlewares
+   * @param key - The DefaultChatSettings key that must be enabled for this module to run.
+   * @param middlewares - One or more composer or middleware instances to register.
    */
   const registerDefaultSettingModule = (key: keyof DefaultChatSettings, ...middlewares: (Composer<GrammyContext> | GrammyMiddleware)[]) => {
     readyMessagesComposer
@@ -94,8 +95,8 @@ export const getMessagesRegisterComposer = () => {
 
   /**
    * Register a module that will be called only if optional settings is enabled
-   * @param key
-   * @param middlewares
+   * @param key - The OptionalChatSettings key that must be enabled for this module to run.
+   * @param middlewares - One or more composer or middleware instances to register.
    */
   const registerOptionalSettingModule = (
     key: keyof OptionalChatSettings,
@@ -111,25 +112,26 @@ export const getMessagesRegisterComposer = () => {
 };
 
 /**
- * @param root0
- * @param root0.counteroffensiveService
- * @param root0.noCardsComposer
- * @param root0.noUrlsComposer
- * @param root0.noLocationsComposer
- * @param root0.noMentionsComposer
- * @param root0.noForwardsComposer
- * @param root0.strategicComposer
- * @param root0.swindlersComposer
- * @param root0.noRussianComposer
- * @param root0.warnRussianComposer
- * @param root0.noCounterOffensiveComposer
- * @param root0.noObsceneComposer
- * @param root0.warnObsceneComposer
- * @param root0.noAntisemitismComposer
- * @param root0.noChannelMessagesComposer
- * @param root0.nsfwMessageFilterComposer
- * @param root0.denylistComposer
- * @description Message handling composer
+ * Composer that wires all message filter sub-composers into the main message processing pipeline.
+ * @param root0 - Messages composer properties containing all sub-module composers.
+ * @param root0.counteroffensiveService - Service for detecting counter-offensive related content.
+ * @param root0.noCardsComposer - Composer that deletes messages containing payment card numbers.
+ * @param root0.noUrlsComposer - Composer that deletes messages containing URLs.
+ * @param root0.noLocationsComposer - Composer that deletes messages containing location data.
+ * @param root0.noMentionsComposer - Composer that deletes messages containing mentions.
+ * @param root0.noForwardsComposer - Composer that deletes forwarded messages.
+ * @param root0.strategicComposer - Composer that handles strategic information filtering.
+ * @param root0.swindlersComposer - Composer that detects and removes swindler messages.
+ * @param root0.noRussianComposer - Composer that deletes messages in Russian.
+ * @param root0.warnRussianComposer - Composer that warns about messages in Russian.
+ * @param root0.noCounterOffensiveComposer - Composer that deletes counter-offensive related messages.
+ * @param root0.noObsceneComposer - Composer that deletes messages with obscene content.
+ * @param root0.warnObsceneComposer - Composer that warns about messages with obscene content.
+ * @param root0.noAntisemitismComposer - Composer that deletes antisemitic messages.
+ * @param root0.noChannelMessagesComposer - Composer that deletes messages forwarded from channels.
+ * @param root0.nsfwMessageFilterComposer - Composer that filters NSFW text messages.
+ * @param root0.denylistComposer - Composer that blocks messages from denylisted users.
+ * @returns An object containing the configured messagesComposer instance.
  */
 export const getMessagesComposer = ({
   counteroffensiveService,
@@ -178,7 +180,7 @@ export const getMessagesComposer = ({
   registerOptionalSettingModule('enableWarnObscene', warnObsceneComposer);
   registerOptionalSettingModule('enableDeleteChannelMessages', noChannelMessagesComposer);
   registerOptionalSettingModule('enableDeleteDenylist', denylistComposer);
-  // TODO optimize this module
+  // NOTE optimize this module
   registerDefaultSettingModule('disableStrategicInfo', strategicComposer);
 
   readyMessagesComposer.use(saveSpamMediaGroupMiddleware);

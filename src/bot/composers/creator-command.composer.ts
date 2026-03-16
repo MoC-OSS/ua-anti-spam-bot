@@ -23,11 +23,12 @@ export interface CreatorCommandsComposerProperties {
 }
 
 /**
- * @param root0
- * @param root0.commandSetter
- * @param root0.rootMenu
- * @param root0.tensorService
- * @description Public commands that are available for users
+ * Composer that registers bot commands exclusively available to the bot creator.
+ * @param root0 - Creator commands composer properties.
+ * @param root0.commandSetter - Service used to register bot commands with Telegram.
+ * @param root0.rootMenu - The root menu instance used to attach sub-menus.
+ * @param root0.tensorService - Service for tensor model operations and retraining.
+ * @returns An object containing the creatorCommandsComposer instance.
  */
 export const getCreatorCommandsComposer = ({ commandSetter, rootMenu, tensorService }: CreatorCommandsComposerProperties) => {
   const creatorCommandsComposer = new Composer<GrammyContext>();

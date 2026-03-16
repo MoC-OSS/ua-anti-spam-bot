@@ -16,17 +16,19 @@ import { telegramUtility } from '@utils/util-instances.util';
 const CHANNEL_BOT_ID = 136_817_688;
 
 /**
- * @description Remove messages that has been left by channels in a comments
+ * Returns a composer that detects and deletes messages posted by channels in comment sections.
+ * @returns Object containing the no-channel-messages composer instance.
  */
 export const getNoChannelMessagesComposer = () => {
   const noChannelMessagesComposer = new Composer<GrammyContext>();
 
   /**
    * Logs a deleted channel message to the logs chat.
-   * @param context
-   * @param [parentChannelId]
-   * @param [senderChatId]
-   * @param [message]
+   * @param context - The Grammy context of the incoming message.
+   * @param [parentChannelId] - The ID of the parent channel the message is a reply from.
+   * @param [senderChatId] - The ID of the channel that sent the message.
+   * @param [message] - Optional message text override.
+   * @returns Promise resolving to the sent log message.
    */
   async function saveChannelMessage(context: GrammyContext, parentChannelId?: number, senderChatId?: number, message?: string) {
     const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);

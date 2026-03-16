@@ -14,9 +14,10 @@ export interface PublicCommandsComposerProperties {
 }
 
 /**
- * @param root0
- * @param root0.startTime
- * @description Public commands that are available for users
+ * Composer that registers public bot commands available to all users.
+ * @param root0 - Public commands composer properties.
+ * @param root0.startTime - The timestamp when the bot process started, used in the help command.
+ * @returns An object containing the publicCommandsComposer instance.
  */
 export const getPublicCommandsComposer = ({ startTime }: PublicCommandsComposerProperties) => {
   const publicCommandsComposer = new Composer<GrammyContext>();

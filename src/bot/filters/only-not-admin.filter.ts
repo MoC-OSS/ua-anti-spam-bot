@@ -5,15 +5,13 @@ import type { GrammyContext } from '@app-types/context';
 import { logSkipMiddleware } from '@utils/generic.util';
 
 /**
- * @param context
- * @description
- * Allow to execute next middlewares only if the user is not admin
- *
- * Reversed copy from
- * @see https://github.com/backmeupplz/grammy-middlewares/blob/main/src/middlewares/onlyAdmin.ts
+ * Allow to execute next middlewares only if the user is not admin.
+ * Reversed copy from {@link https://github.com/backmeupplz/grammy-middlewares/blob/main/src/middlewares/onlyAdmin.ts}
+ * @param context - The Grammy context object
+ * @returns True if the user is not an admin, false otherwise
  */
 export function onlyNotAdminFilter(context: GrammyContext): boolean {
-  // TODO use for ctx prod debug
+  // NOTE: use for ctx prod debug
   // console.info('enter onlyNotAdmin ******', ctx.chat?.title, '******', ctx.state.text);
 
   /**

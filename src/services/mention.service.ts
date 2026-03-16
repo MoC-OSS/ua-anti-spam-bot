@@ -18,7 +18,7 @@ export class MentionService {
    * Extracts @-mentions from the message, excluding URLs and known exceptions.
    * @param message - raw message from user to parse
    * @param exceptionMentions - mentions to exclude from list
-   * @returns
+   * @returns deduplicated array of mention strings found in the message
    */
   parseMentions(message: string, exceptionMentions: string[] = []): string[] {
     // eslint-disable-next-line sonarjs/prefer-regexp-exec

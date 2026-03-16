@@ -36,7 +36,8 @@ export interface TestTensorStorage {
 
 /**
  * Extracts a display username from the callback query sender.
- * @param context
+ * @param context - The Grammy context object.
+ * @returns The username string prefixed with @ or the full name, or an empty string.
  */
 const getAnyUsername = (context: GrammyContext) => {
   const username = context.callbackQuery?.from?.username;
@@ -63,14 +64,15 @@ export class TestTensorListener {
 
   /**
    * Initializes the listener with the tensor prediction service.
-   * @param tensorService
+   * @param tensorService - The tensor service used for spam prediction.
    */
   constructor(private tensorService: TensorService) {}
 
   /**
    * Writes a voted-on message to the appropriate dataset (positives or negatives) in Google Sheets.
-   * @param state
-   * @param word
+   * @param state - The dataset to write to: 'positives' or 'negatives'.
+   * @param word - The message text to record in the dataset.
+   * @returns A promise that resolves when the write operation completes.
    */
   writeDataset(state: 'negatives' | 'positives', word: string) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, sonarjs/no-unused-vars, sonarjs/no-dead-store
@@ -155,11 +157,13 @@ export class TestTensorListener {
    * Initializes the interactive voting menu with spam/not-spam/skip buttons.
    * @param throttler - throttler need to be defined once to work.
    * So we can't init it each time in middleware because it has new instance, and it doesn't throttle,
+   * @returns The initialized Grammy menu instance.
    */
   initMenu(throttler: Transformer): Menu<GrammyMenuContext> {
     /**
      * Processes final voting results and determines the spam classification.
-     * @param context
+     * @param context - The Grammy context object.
+     * @returns A promise that resolves when the final vote is processed.
      */
     // eslint-disable-next-line sonarjs/cognitive-complexity
     const finalMiddleware = async (context: GrammyContext) => {
@@ -368,8 +372,8 @@ export class TestTensorListener {
 
   /**
    * Initializes the voting storage session for a tensor test message.
-   * @param context
-   * @param message
+   * @param context - The Grammy context object.
+   * @param message - The message text to store for voting.
    */
   initTensorSession(context: GrammyContext, message: string) {
     if (!this.storage[this.getStorageKey(context)]?.originalMessage) {
@@ -385,7 +389,8 @@ export class TestTensorListener {
 
   /**
    * Generates a unique storage key from the chat and message identifiers.
-   * @param context
+   * @param context - The Grammy context object.
+   * @returns A string key in the format `chatId:messageId`.
    */
   getStorageKey(context: GrammyContext) {
     let chatInstance: number | string | undefined;
@@ -415,12 +420,13 @@ export class TestTensorListener {
    * Returns the main middleware for interactive tensor model testing.
    * @param throttler - throttler need to be defined once to work.
    * So we can't init it each time in middleware because it has new instance, and it doesn't throttle,
+   * @returns The Grammy middleware function.
    */
   middleware(throttler: Transformer): GrammyMiddleware {
     /**
      * Runs tensor prediction on the message and replies with voting buttons.
-     * @param context
-     * @param next
+     * @param context - The Grammy context object.
+     * @returns A promise that resolves when the message is processed.
      */
     return async (context) => {
       /**

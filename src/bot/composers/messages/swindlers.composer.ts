@@ -10,9 +10,10 @@ export interface SwindlersComposerProperties {
 }
 
 /**
- * @param root0
- * @param root0.deleteSwindlersMiddleware
- * @description Remove swindler messages logic
+ * Returns a composer that detects and deletes messages from swindlers and scammers.
+ * @param root0 - Composer properties.
+ * @param root0.deleteSwindlersMiddleware - Middleware that handles swindler message detection and deletion.
+ * @returns Object containing the swindlers composer instance.
  */
 export const getSwindlersComposer = ({ deleteSwindlersMiddleware }: SwindlersComposerProperties) => {
   const swindlersComposer = new Composer<GrammyContext>();

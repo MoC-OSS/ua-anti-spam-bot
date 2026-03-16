@@ -148,7 +148,7 @@ export type State = OnlyWithTextMiddlewareState &
   IsDeletedState &
   PerformanceMiddlewareState &
   StateIsAdmin & {
-    // TODO move into separate file src/types/swindlers.ts and add enum for reason
+    // NOTE: move into separate file src/types/swindlers.ts and add enum for reason
     swindlersResult?: {
       isSpam: boolean;
       rate: number;

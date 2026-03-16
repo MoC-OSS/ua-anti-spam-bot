@@ -40,15 +40,15 @@ export class UpdatesHandler {
 
   /**
    * Initializes the handler with all required services and dataset extras.
-   * @param mtProtoClient
-   * @param chatPeers
-   * @param tensorService
-   * @param swindlersTensorService
-   * @param dynamicStorageService
-   * @param swindlersBotsService
-   * @param userbotStorage
-   * @param swindlersDetectService
-   * @param datasetExtras
+   * @param mtProtoClient - The MTProto client used to send messages.
+   * @param chatPeers - The set of configured chat peer objects.
+   * @param tensorService - The spam tensor classification service.
+   * @param swindlersTensorService - The swindlers-specific tensor classification service.
+   * @param dynamicStorageService - The dynamic storage service for runtime data.
+   * @param swindlersBotsService - The service for tracking known swindler bots.
+   * @param userbotStorage - The userbot storage for message deduplication.
+   * @param swindlersDetectService - The service for detecting swindler messages.
+   * @param datasetExtras - Additional dataset files loaded at startup.
    */
   constructor(
     private mtProtoClient: MtProtoClient,
@@ -70,8 +70,8 @@ export class UpdatesHandler {
 
   /**
    * Filters raw Telegram updates for new or edited channel messages.
-   * @param updateInfo
-   * @param callback
+   * @param updateInfo - The raw Telegram update payload from MTProto.
+   * @param callback - Function called with the message text of each matching update.
    */
   filterUpdate(updateInfo: ProtoUpdate, callback: (string: string) => void) {
     const allowedTypes = new Set(['updateEditChannelMessage', 'updateNewChannelMessage']);
@@ -91,7 +91,8 @@ export class UpdatesHandler {
 
   /**
    * Analyzes a message for swindler content and reports matches.
-   * @param message
+   * @param message - The raw message text to analyze.
+   * @returns An object indicating whether the message is spam and the reason.
    */
   async handleSwindlers(message: string) {
     const finalMessage = removeSystemInformationUtility(message);
@@ -103,8 +104,8 @@ export class UpdatesHandler {
 
     /**
      * Processes a confirmed swindler match by logging and forwarding the message.
-     * @param spamRate
-     * @param from
+     * @param spamRate - The confidence score of the swindler detection.
+     * @param from - The detection method that identified the swindler.
      */
     const processFoundSwindler = async (spamRate: number, from: SwindlerType) => {
       logger.info(true, from, spamRate, message);
@@ -178,7 +179,7 @@ export class UpdatesHandler {
 
   /**
    * Processes a message for tensor training data collection.
-   * @param message
+   * @param message - The raw message text to evaluate for training data inclusion.
    */
   async handleTraining(message: string) {
     let clearMessageText = message;

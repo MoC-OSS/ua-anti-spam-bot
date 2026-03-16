@@ -45,7 +45,7 @@ export class SpamMediaGroupsStorage {
           delete this.storage[key];
         }
       });
-      // console.log('🟡', this.storage); //TODO check why empty server logs
+      // console.log('🟡', this.storage); // NOTE: check why empty server logs
     }, GROUP_EXPIRATION_CHECK_INTERVAL);
   }
 

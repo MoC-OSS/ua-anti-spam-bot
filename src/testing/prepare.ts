@@ -16,8 +16,9 @@ export type ApiResponses = {
  * Prepares bot for testing.
  * Collects and mocks API requests.
  * Sets default bot info.
- * @param bot
- * @param apiResponses
+ * @param bot - The Grammy bot instance to configure for testing.
+ * @param apiResponses - Optional map of API method names to mock responses.
+ * @returns An OutgoingRequests instance capturing all intercepted API calls.
  * @example
  * ```ts
  * beforeAll(async () => {

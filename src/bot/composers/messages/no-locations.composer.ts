@@ -14,16 +14,18 @@ import { getEnabledFeaturesString, getUserData } from '@utils/generic.util';
 import { telegramUtility } from '@utils/util-instances.util';
 
 /**
- * @description Remove message with any location
+ * Returns a composer that detects and deletes messages containing location data.
+ * @returns Object containing the no-locations composer instance.
  */
 export const getNoLocationsComposer = () => {
   const noLocationsComposer = new Composer<GrammyContext>();
 
   /**
    * Logs a deleted location message to the logs chat.
-   * @param context
-   * @param locations
-   * @param [message]
+   * @param context - The Grammy context of the incoming message.
+   * @param locations - List of location strings detected in the message.
+   * @param [message] - Optional message text override.
+   * @returns Promise resolving to the sent log message.
    */
   async function saveLocationMessage(context: GrammyContext, locations: string[], message?: string) {
     const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);

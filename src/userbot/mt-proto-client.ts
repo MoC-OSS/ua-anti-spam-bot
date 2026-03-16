@@ -63,7 +63,8 @@ export class MtProtoClient {
 
   /**
    * Searches for Telegram contacts matching the query via MTProto.
-   * @param query
+   * @param query - The search string to look up in contacts.
+   * @returns The MTProto API response containing matching contacts.
    */
   contactsSearch(query: string) {
     return this.api.call('contacts.search', {
@@ -73,7 +74,8 @@ export class MtProtoClient {
 
   /**
    * Sends a message to the authenticated user's "Saved Messages" chat.
-   * @param message
+   * @param message - The text content to send.
+   * @returns The MTProto API response for the sent message.
    */
   sendSelfMessage(message: string) {
     return this.api.call('messages.sendMessage', {
@@ -89,8 +91,9 @@ export class MtProtoClient {
 
   /**
    * Sends a message to the specified peer via MTProto.
-   * @param message
-   * @param peer
+   * @param message - The text content to send.
+   * @param peer - The target peer object describing the recipient.
+   * @returns The MTProto API response for the sent message.
    */
   sendPeerMessage(message: string, peer: Record<string, string>) {
     return this.api.call('messages.sendMessage', {

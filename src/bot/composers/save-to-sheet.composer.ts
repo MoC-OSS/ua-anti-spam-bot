@@ -21,10 +21,11 @@ export interface SaveToSheetComposerProperties {
 
 /**
  * Composer that forwards messages to a Google Sheet with inline buttons to classify them as spam or not.
- * @param root0
- * @param root0.chatId
- * @param root0.rootMenu
- * @param root0.updateMethod
+ * @param root0 - Save-to-sheet composer properties.
+ * @param root0.chatId - The Telegram chat ID whose messages should be forwarded to the sheet.
+ * @param root0.rootMenu - The root menu instance used to register the inline classification menu.
+ * @param root0.updateMethod - The Google Sheets service method used to append a new entry.
+ * @returns An object containing the saveToSheetComposer and menu instances.
  */
 export const getSaveToSheetComposer = ({ chatId, rootMenu, updateMethod }: SaveToSheetComposerProperties) => {
   const saveToSheetComposer = new Composer<GrammyContext>();

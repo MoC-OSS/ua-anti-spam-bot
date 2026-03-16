@@ -16,9 +16,9 @@ export class CommandSetter {
 
   /**
    * Initializes the command setter with bot instance, start time, and active status.
-   * @param bot
-   * @param startTime
-   * @param active
+   * @param bot - The Grammy bot instance.
+   * @param startTime - The time when the bot was started.
+   * @param active - Whether the bot is currently active/online.
    */
   constructor(
     private bot: Bot<GrammyContext>,
@@ -27,9 +27,8 @@ export class CommandSetter {
   ) {}
 
   /**
-   * @description
-   * Returns status depending on bot active status
-   * @returns
+   * Returns status depending on bot active status.
+   * @returns The formatted bot status string including active indicator and last deploy time.
    */
   buildStatus() {
     const activeStatus = this.active ? '🟢 Онлайн' : '🔴 Офлайн';
@@ -39,7 +38,7 @@ export class CommandSetter {
 
   /**
    * Sets the active status and refreshes the bot commands list.
-   * @param active
+   * @param active - New active state to apply to the bot.
    */
   async setActive(active: boolean) {
     this.active = active;
@@ -47,8 +46,7 @@ export class CommandSetter {
   }
 
   /**
-   * @description
-   * Build new commands and set them into the bot
+   * Build new commands and set them into the bot.
    */
   async updateCommands() {
     /**

@@ -29,7 +29,8 @@ const groupPhotoPath = path.resolve('./src/assets/logs-chat-profile-photo.jpeg')
 const groupPhotoFile = new InputFile(groupPhotoPath);
 
 /**
- * @description Creates all thread in forum for logs
+ * Creates all threads in a forum chat used for bot activity logs.
+ * @returns An object containing the createLogsChatComposer instance.
  */
 export const getCreateLogsChatComposer = () => {
   const createLogsChatComposer = new Composer<GrammyContext>();

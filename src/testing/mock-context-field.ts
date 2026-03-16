@@ -10,8 +10,9 @@ export interface MockContextFieldReturnType<TContext extends Context, TField ext
 // eslint-disable-next-line no-secrets/no-secrets
 /**
  * Mock field with strict partial typing and dynamically changing it for testing
- * @param fieldName
- * @param remap
+ * @param fieldName - The name of the context field to mock.
+ * @param remap - A function that transforms the mocked value and middleware into the desired return type.
+ * @returns A factory function that accepts a partial mocked value and returns the remapped result.
  * @example
  * ```ts
  * export interface MockSessionResult<

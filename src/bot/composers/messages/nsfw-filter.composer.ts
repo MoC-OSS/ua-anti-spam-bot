@@ -26,7 +26,8 @@ const host = `http://${environmentConfig.HOST}:${environmentConfig.PORT}`;
 
 /**
  * Save message into logs to review it and track logic
- * @param context
+ * @param context - The Grammy context of the incoming message.
+ * @returns Promise that resolves when the log message has been sent, or void if no NSFW result or image data.
  */
 const saveNsfwMessage = async (context: GrammyContext) => {
   if (!context.state.nsfwResult) {
@@ -154,9 +155,10 @@ export interface NsfwFilterComposerProperties {
 }
 
 /**
- * @param root0
- * @param root0.nsfwTensorService
- * @description Remove nsfw content
+ * Returns a composer that detects and deletes messages containing NSFW images or videos.
+ * @param root0 - Composer properties.
+ * @param root0.nsfwTensorService - Service used to run NSFW predictions on image/video content.
+ * @returns Object containing the NSFW filter composer instance.
  */
 export const getNsfwFilterComposer = ({ nsfwTensorService }: NsfwFilterComposerProperties) => {
   const nsfwFilterComposer = new Composer<GrammyContext>();

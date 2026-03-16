@@ -19,15 +19,17 @@ import type { SearchSetResult } from '@utils/search-set.util';
 import { telegramUtility } from '@utils/util-instances.util';
 
 /**
- * @description Remove strategic information logic
+ * Returns a composer that detects and deletes messages containing obscene language.
+ * @returns Object containing the no-obscene composer instance.
  */
 export const getNoObsceneComposer = () => {
   const noObsceneComposer = new Composer<GrammyContext>();
 
   /**
    * Logs a deleted obscene message to the logs chat.
-   * @param context
-   * @param searchResult
+   * @param context - The Grammy context of the incoming message.
+   * @param searchResult - The search result containing the matched obscene word details.
+   * @returns Promise resolving to the sent log message.
    */
   async function saveObsceneMessage(context: GrammyContext, searchResult: SearchSetResult) {
     const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);

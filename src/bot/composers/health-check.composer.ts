@@ -6,7 +6,8 @@ import { ignoreOld } from '@bot/middleware/ignore-old.middleware';
 import type { GrammyContext } from '@app-types/context';
 
 /**
- * @description Health-check helper composer
+ * Composer that provides a command to stress-test the bot process and verify that the health-check restarts it.
+ * @returns An object containing the healthCheckComposer instance.
  */
 export const getHealthCheckComposer = () => {
   const healthCheckComposer = new Composer<GrammyContext>();

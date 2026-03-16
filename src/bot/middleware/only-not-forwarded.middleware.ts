@@ -5,13 +5,13 @@ import type { GrammyContext } from '@app-types/context';
 import { logSkipMiddleware } from '@utils/generic.util';
 
 /**
- * @param context
- * @param next
- * @description
  * Allow to skip a forwarded message
+ * @param context - The Grammy context object
+ * @param next - The next middleware function in the chain
+ * @returns A promise that resolves when the middleware chain completes
  */
 export function onlyNotForwarded(context: GrammyContext, next: NextFunction) {
-  // TODO use for ctx prod debug
+  // NOTE use for ctx prod debug
   // console.info('enter onlyNotForwarded ******', ctx.chat?.title, '******', ctx.state.text);
 
   /**

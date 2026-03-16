@@ -3,8 +3,9 @@ import type { StateEntity } from '@app-types/state';
 
 /**
  * It parses the value of entities and save it into the state
- * @param context
- * @param next
+ * @param context - The Grammy context object
+ * @param next - The next middleware function in the chain
+ * @returns A promise that resolves when the middleware chain completes
  */
 export const parseEntities: GrammyMiddleware = (context, next) => {
   const { text } = context.state;

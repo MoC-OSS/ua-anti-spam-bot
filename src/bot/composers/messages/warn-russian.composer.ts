@@ -21,18 +21,20 @@ export interface WarnRussianComposerProperties {
 }
 
 /**
- * @param root0
- * @param root0.dynamicStorageService
- * @description Warn users that the chat is only for ukrainians
+ * Returns a composer that warns users writing in Russian that the chat is Ukrainian-only.
+ * @param root0 - Composer properties.
+ * @param root0.dynamicStorageService - Service providing dynamic Ukrainian language responses.
+ * @returns Object containing the warn-Russian composer instance.
  */
 export const getWarnRussianComposer = ({ dynamicStorageService }: WarnRussianComposerProperties) => {
   const warnRussianComposer = new Composer<GrammyContext>();
 
   /**
    * Logs a warned Russian-language message to the logs chat.
-   * @param context
-   * @param maxChance
-   * @param [message]
+   * @param context - The Grammy context of the incoming message.
+   * @param maxChance - The Russian language detection confidence score (0–1).
+   * @param [message] - Optional message text override.
+   * @returns Promise resolving to the sent log message.
    */
   async function saveRussianMessage(context: GrammyContext, maxChance: number, message?: string) {
     const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);

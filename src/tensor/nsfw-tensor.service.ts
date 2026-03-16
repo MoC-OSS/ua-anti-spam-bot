@@ -48,6 +48,7 @@ export class NsfwTensorService {
   /**
    * Classifies multiple video frames in parallel and returns predictions for each.
    * @param imageArray - Array of image buffers (one per video frame).
+   * @returns A promise resolving to an array of prediction arrays, one per frame.
    */
   classifyVideo(imageArray: Buffer[]): Promise<PredictionType[][]> {
     return Promise.all(imageArray.map((image) => this.classify(image)));
@@ -55,7 +56,7 @@ export class NsfwTensorService {
 
   /**
    * Classifies a single image and returns a spam/safe verdict with the highest prediction.
-   * @param image
+   * @param image - Raw image buffer to classify.
    * @returns Prediction result for the image frame.
    */
   async predict(image: Buffer): Promise<NsfwTensorResult> {
@@ -82,7 +83,7 @@ export class NsfwTensorService {
   /**
    * Classifies an array of video frames and returns a combined spam/safe verdict.
    * Stops early if any frame exceeds the spam threshold.
-   * @param imageArray
+   * @param imageArray - Array of image buffers representing video frames.
    * @returns Aggregated prediction result across all frames.
    */
   async predictVideo(imageArray: Buffer[]): Promise<NsfwTensorResult> {
@@ -118,7 +119,8 @@ export class NsfwTensorService {
 
   /**
    * Finds the highest NSFW prediction and the first prediction that exceeds the class threshold.
-   * @param predictions
+   * @param predictions - Array of NSFW prediction results to analyze.
+   * @returns An object containing the highest prediction and the first prediction exceeding its threshold.
    */
   private findHighestPrediction(predictions: PredictionType[]) {
     let highestPrediction!: PredictionType;
@@ -147,6 +149,7 @@ export class NsfwTensorService {
 /**
  * Creates and initializes an {@link NsfwTensorService} instance.
  * Skips model loading during unit tests.
+ * @returns A fully initialized NsfwTensorService instance.
  */
 export const initNsfwTensor = async () => {
   const tensorService = new NsfwTensorService();

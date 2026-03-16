@@ -8,11 +8,12 @@ import { logger } from '@utils/logger.util';
 import { api } from './api';
 
 /**
- *
- * @param root0
- * @param root0.srp_id
- * @param root0.A
- * @param root0.M1
+ * Verifies a Two-Factor Authentication password by calling auth.checkPassword via MTProto.
+ * @param root0 - Destructured SRP authentication parameters.
+ * @param root0.srp_id - The SRP session identifier.
+ * @param root0.A - The client's SRP public key.
+ * @param root0.M1 - The client's SRP proof.
+ * @returns The result of the auth.checkPassword API call.
  */
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function checkPassword({ srp_id, A, M1 }: CheckPassword) {
@@ -28,7 +29,8 @@ export function checkPassword({ srp_id, A, M1 }: CheckPassword) {
 }
 
 /**
- *
+ * Retrieves the currently authenticated user's full profile via MTProto.
+ * @returns The user's full profile object, or null if not authenticated.
  */
 async function getUser() {
   try {
@@ -44,8 +46,9 @@ async function getUser() {
 }
 
 /**
- *
- * @param phone
+ * Sends a verification code to the given phone number via MTProto.
+ * @param phone - The phone number to send the code to.
+ * @returns The API response containing the phone_code_hash.
  */
 function sendCode(phone: string) {
   return api.call('auth.sendCode', {
@@ -58,11 +61,12 @@ function sendCode(phone: string) {
 }
 
 /**
- *
- * @param root0
- * @param root0.code
- * @param root0.phone
- * @param root0.phone_code_hash
+ * Signs in to Telegram using phone number, verification code, and code hash.
+ * @param root0 - Destructured sign-in parameters.
+ * @param root0.code - The verification code received via SMS.
+ * @param root0.phone - The phone number used to request the code.
+ * @param root0.phone_code_hash - The hash returned by sendCode.
+ * @returns The result of the auth.signIn API call.
  */
 function signIn({ code, phone, phone_code_hash }) {
   return api.call('auth.signIn', {
@@ -73,10 +77,11 @@ function signIn({ code, phone, phone_code_hash }) {
 }
 
 /**
- *
- * @param root0
- * @param root0.phone
- * @param root0.phone_code_hash
+ * Registers a new Telegram account using the phone number and code hash.
+ * @param root0 - Destructured sign-up parameters.
+ * @param root0.phone - The phone number to register.
+ * @param root0.phone_code_hash - The hash returned by sendCode.
+ * @returns The result of the auth.signUp API call.
  */
 function signUp({ phone, phone_code_hash }) {
   return api.call('auth.signUp', {
@@ -88,7 +93,8 @@ function signUp({ phone, phone_code_hash }) {
 }
 
 /**
- *
+ * Retrieves the current account password settings for Two-Factor Authentication.
+ * @returns The account password settings from the MTProto API.
  */
 function getPassword() {
   return api.call<Record<string, string>>('account.getPassword');

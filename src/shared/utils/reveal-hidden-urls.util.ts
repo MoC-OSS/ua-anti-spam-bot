@@ -1,11 +1,12 @@
 import type { GrammyContext } from '@app-types/context';
 
 /**
- *
- * @param inputString
- * @param cutStart
- * @param cutEnd
- * @param url
+ * Replaces a hidden-URL text span in the input string with the actual URL.
+ * @param inputString - The message text to modify
+ * @param cutStart - The start offset of the text span to replace
+ * @param cutEnd - The end offset of the text span to replace
+ * @param url - The actual URL to insert in place of the hidden text
+ * @returns The modified string with the hidden URL revealed, or an empty string if input is undefined
  */
 function cutInHiddenUrls(inputString: string | undefined, cutStart: number, cutEnd: number, url: string): string {
   return inputString ? inputString.slice(0, Math.max(0, cutStart)) + url + inputString.slice(cutEnd) : '';
@@ -13,7 +14,7 @@ function cutInHiddenUrls(inputString: string | undefined, cutStart: number, cutE
 
 /**
  * Reveals real link that were used in the message
- * @param context
+ * @param context - The Grammy context object containing the message text and entities
  * @returns string
  */
 export function revealHiddenUrls(context: GrammyContext): string {

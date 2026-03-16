@@ -35,7 +35,7 @@ export class SwindlersDetectService {
   /**
    * Runs all swindler detection checks on the message and returns a consolidated result.
    * @param message - message to process
-   * @returns
+   * @returns detection result with isSpam flag, confidence rate, and matched reason
    */
   async isSwindlerMessage(message: string): Promise<SwindlersResult> {
     const results: SwindlersResultSummary = {};

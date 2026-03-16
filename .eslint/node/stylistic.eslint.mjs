@@ -1,9 +1,9 @@
 import stylistic from '@stylistic/eslint-plugin';
 
 /**
- * @description ESLint config for enforcing stylistic code rules using @stylistic/eslint-plugin. Applies padding and formatting rules for code consistency.
+ * ESLint config for enforcing stylistic code rules using `@stylistic`/eslint-plugin. Applies padding and formatting rules for code consistency.
  * @author Dmytro Vakulenko
- * @version 1.2
+ * @version 1.2.0
  * @see https://github.com/eslint-stylistic/eslint-stylistic
  */
 export default [

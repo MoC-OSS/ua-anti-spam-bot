@@ -5,7 +5,8 @@ import { logger } from '@utils/logger.util';
 import { getTopUsed } from './get-top-used';
 
 /**
- * @param dataset
+ * Counts the top-used tokens in a dataset after filtering and splitting.
+ * @param dataset - The array of strings to analyze for top-used tokens.
  */
 export const getSwindlersTopUsed = (dataset: string[]) => {
   const whitelist = ['україн'];

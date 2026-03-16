@@ -39,9 +39,10 @@ export const ALARM_END_DAY_COUNT = 1;
 /**
  * Get a random translated message from a numbered set of keys.
  * Keys must follow the pattern: `${prefix}-${index}` (1-based).
- * @param context
- * @param prefix
- * @param count
+ * @param context - Grammy bot context used for translation.
+ * @param prefix - The key prefix shared by all numbered translation variants.
+ * @param count - The total number of variants available for the given prefix.
+ * @returns A randomly selected translated string.
  */
 export function getRandomT(context: GrammyContext, prefix: string, count: number): string {
   // eslint-disable-next-line sonarjs/pseudo-random

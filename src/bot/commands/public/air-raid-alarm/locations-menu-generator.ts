@@ -16,9 +16,9 @@ import { isIdWhitelisted } from '@utils/generic.util';
 
 /**
  * Generates a dynamic paginated location menu for air raid alert settings.
- * @param _context
- * @param range
- * @param alertStates
+ * @param _context - Grammy menu context used for reading current session state.
+ * @param range - The menu range to populate with location buttons.
+ * @param alertStates - The list of available alert states to render as menu buttons.
  */
 export const dynamicLocationMenu = (_context: GrammyMenuContext, range: MenuRange<GrammyMenuContext>, alertStates: State[]) => {
   const states = isIdWhitelisted(_context.from?.id) ? [...alertStates, generateTestState(TEST_ALARM_STATE)] : alertStates;
@@ -32,12 +32,13 @@ export const dynamicLocationMenu = (_context: GrammyMenuContext, range: MenuRang
   const lastPageButtonsLimit = buttonIndex + lastPageButtonsNumber;
 
   /**
-   *
-   * @param locationName
+   * Creates a selectable text button for a location in the menu.
+   * @param locationName - The name of the location to render as a button.
+   * @returns The updated menu range with the new button appended.
    */
   function createTextButton(locationName: string) {
     const displayLocationName = state === locationName ? `✅ ${locationName}` : locationName;
-    // TODO UABOT-35 update MiddlewareMenu to handle dynamic buttons
+    // NOTE: UABOT-35 update MiddlewareMenu to handle dynamic buttons
 
     /**
      * Creates a selectable text button for a location in the menu.
@@ -54,7 +55,8 @@ export const dynamicLocationMenu = (_context: GrammyMenuContext, range: MenuRang
   }
 
   /**
-   *
+   * Creates a "next page" navigation button for the location menu.
+   * @returns The updated menu range with the next-page button appended.
    */
   function createNextButton() {
     return range.text(_context.t('pagination-next-page'), onlyAdmin, (context) => {
@@ -64,7 +66,8 @@ export const dynamicLocationMenu = (_context: GrammyMenuContext, range: MenuRang
   }
 
   /**
-   *
+   * Creates a "previous page" navigation button for the location menu.
+   * @returns The updated menu range with the previous-page button appended.
    */
   function createPreviousButton() {
     return range.text(_context.t('pagination-previous-page'), onlyAdmin, (context) => {

@@ -13,12 +13,12 @@ export interface RemoveSimilarResult {
 }
 
 /**
- *
- * @param root0
- * @param root0.first
- * @param root0.second
- * @param root0.rate
- * @param callback
+ * Compares two strings for similarity and invokes a callback with the result.
+ * @param root0 - The destructured properties object.
+ * @param root0.first - The first string to compare.
+ * @param root0.second - The second string to compare.
+ * @param root0.rate - The similarity threshold rate.
+ * @param callback - Function called with the similarity result.
  */
 export function execute({ first, second, rate }: RemoveSimilarProperties, callback: (value: RemoveSimilarResult) => void) {
   const result = stringSimilarity.compareTwoStrings(first, second);

@@ -9,7 +9,8 @@ import type { GrammyContext } from '@app-types/context';
 import { handleError } from '@utils/error-handler.util';
 
 /**
- * @description Health-check helper composer
+ * Composer that handles the hotline security command, replying with anti-swindler help information.
+ * @returns An object containing the hotlineSecurityComposer instance.
  */
 export const getHotlineSecurityComposer = () => {
   const hotlineSecurityComposer = new Composer<GrammyContext>();

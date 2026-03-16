@@ -6,11 +6,12 @@ import { logSkipMiddleware } from '@utils/generic.util';
 
 /**
  * Used for performance checking
- * @param context
- * @param next
+ * @param context - The Grammy context object
+ * @param next - The next middleware function in the chain
+ * @returns A promise that resolves when the middleware chain completes
  */
 export function botActiveMiddleware(context: GrammyContext, next: NextFunction) {
-  // TODO use for ctx prod debug
+  // NOTE use for ctx prod debug
   // console.info('enter botActiveMiddleware ******', ctx.chat?.title, '******', ctx.state.text);
 
   if (context.chat?.type !== 'private' && !context.chatSession.botRemoved && context.chatSession.isBotAdmin) {

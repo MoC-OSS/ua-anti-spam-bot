@@ -3,8 +3,8 @@ import type { DefaultChatSettings } from '@app-types/session';
 
 /**
  * Filter that checks whether a default chat setting has not been disabled.
- * @param key
- * @returns when default settings is enabled
+ * @param key - The key of the default chat setting to check
+ * @returns True if the default setting has not been disabled, false otherwise
  */
 export const onlyActiveDefaultSettingFilter =
   (key: keyof DefaultChatSettings): GrammyFilter =>

@@ -12,7 +12,8 @@ import { deepCopy } from './deep-copy.util';
  * serializable data — is deep-copied so that subsequent buffer-stripping mutations do not
  * affect the live context.  All other properties are shallow-referenced (sufficient for
  * read-only logging).
- * @param context
+ * @param context - The Grammy context object to create a logging-safe snapshot of
+ * @returns A sanitized context snapshot safe for logging
  */
 export function optimizeWriteContextUtility(context: GrammyContext): RealGrammyContext {
   const writeContext = { ...context, state: deepCopy(context.state) } as RealGrammyContext;

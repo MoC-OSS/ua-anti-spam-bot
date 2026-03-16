@@ -24,9 +24,10 @@ export interface PhotosComposerProperties {
 }
 
 /**
- * @param root0
- * @param root0.nsfwFilterComposer
- * @description Photo handling composer
+ * Composer that handles photo, sticker, video, animation, and video note messages through the NSFW filter pipeline.
+ * @param root0 - Photos composer properties.
+ * @param root0.nsfwFilterComposer - Composer that filters NSFW image and video content.
+ * @returns An object containing the photosComposer and registration helper functions.
  */
 export const getPhotoComposer = ({ nsfwFilterComposer }: PhotosComposerProperties) => {
   const photosComposer = new Composer<GrammyContext>();
@@ -50,7 +51,7 @@ export const getPhotoComposer = ({ nsfwFilterComposer }: PhotosComposerPropertie
 
   /**
    * Registers a message handler module with correct filter to not make extra checks
-   * @param middlewares
+   * @param middlewares - One or more composer or middleware instances to register.
    */
   const registerModule = (...middlewares: (Composer<GrammyContext> | GrammyMiddleware)[]) => {
     readyImageComposer.filter((context) => onlyNotDeletedFilter(context)).use(...middlewares);
@@ -58,8 +59,8 @@ export const getPhotoComposer = ({ nsfwFilterComposer }: PhotosComposerPropertie
 
   /**
    * Register a module that will be called only if optional settings is enabled
-   * @param key
-   * @param middlewares
+   * @param key - The DefaultChatSettings key that must be enabled for this module to run.
+   * @param middlewares - One or more composer or middleware instances to register.
    */
   const registerDefaultSettingModule = (key: keyof DefaultChatSettings, ...middlewares: (Composer<GrammyContext> | GrammyMiddleware)[]) => {
     readyImageComposer

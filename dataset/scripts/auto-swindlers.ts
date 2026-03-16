@@ -34,9 +34,11 @@ const startsWith = [
 const mentionRegexp = /\B@\w+/g;
 
 /**
- * @param swindlersUrlsService
- * @param savedSwindlersUrls
- * @param swindlers
+ * Processes and updates the swindlers URL lists by comparing saved and fetched URLs.
+ * @param swindlersUrlsService - The service for managing swindler URL lists.
+ * @param savedSwindlersUrls - The previously saved swindler URLs.
+ * @param swindlers - The current list of swindler message strings.
+ * @returns A promise that resolves when URL processing is complete.
  */
 async function processUrls(swindlersUrlsService: SwindlersUrlsService, savedSwindlersUrls: string[], swindlers: string[]) {
   const notMatchedDomains: string[] = [];
@@ -52,7 +54,9 @@ async function processUrls(swindlersUrlsService: SwindlersUrlsService, savedSwin
     })
     .map(
       /**
-       * @param url
+       * Maps a URL to its swindler check result.
+       * @param url - The URL string to process.
+       * @returns A promise resolving to an object with url, urlDomain, and isSwindlerResult.
        */
       (url) => {
         const urlDomain = urlService.getUrlDomain(url);
@@ -84,12 +88,14 @@ async function processUrls(swindlersUrlsService: SwindlersUrlsService, savedSwin
 }
 
 /**
- * @param swindlersUrlsService
- * @param swindlersCardsService
- * @param swindlers
- * @param swindlersBots
- * @param swindlersCards
- * @param swindlersUsers
+ * Orchestrates the full auto-swindlers update: URLs, bots, cards, and users.
+ * @param swindlersUrlsService - The service for managing swindler URL lists.
+ * @param swindlersCardsService - The service for managing swindler card numbers.
+ * @param swindlers - The current list of swindler message strings.
+ * @param swindlersBots - The current list of known swindler bot usernames.
+ * @param swindlersCards - The current list of known swindler card numbers.
+ * @param swindlersUsers - The current list of known swindler user identifiers.
+ * @returns A promise that resolves when the update is complete.
  */
 export const autoSwindlers = async (
   swindlersUrlsService: SwindlersUrlsService,
@@ -100,9 +106,10 @@ export const autoSwindlers = async (
   swindlersUsers: string[],
 ) => {
   /**
-   *
-   * @param items
-   * @param pattern
+   * Finds swindler items that match a given pattern in the messages.
+   * @param items - Existing list of known swindler items.
+   * @param pattern - Regex or string pattern to match against messages.
+   * @returns A deduplicated array of matched swindler items.
    */
   function findSwindlersByPattern(items: string[], pattern: RegExp | string) {
     // eslint-disable-next-line sonarjs/prefer-regexp-exec

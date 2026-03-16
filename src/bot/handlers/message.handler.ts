@@ -52,21 +52,19 @@ export class MessageHandler {
   }
 
   /**
-   * Strictly typing an object and return initial object as a const type
-   * @param paths
+   * Strictly typing an object and return initial object as a const type.
+   * @param paths - The dataset paths object to type strictly.
+   * @returns The same paths object cast to a strict const type.
    */
   getDatasetPaths<TPayload extends { [key in DatasetKeys]?: key }>(paths: TPayload): TPayload {
     return paths;
   }
 
   /**
-   * @description
-   * Check the message for the spam.
-   * The fastest methods should as early as possible.
-   * This function is performance-related.
-   * @param message - user message
-   * @param originMessage - original user message
-   * @returns is spam result
+   * Checks the message for spam. The fastest methods run first for performance.
+   * @param message - The sanitized user message to check.
+   * @param originMessage - The original unmodified user message text.
+   * @returns An object indicating whether the message is spam and which rule triggered.
    */
   async getTensorRank(message: string, originMessage: string) {
     const tensorRank = (await redisService.getBotTensorPercent()) || environmentConfig.TENSOR_RANK;
@@ -206,14 +204,11 @@ export class MessageHandler {
   }
 
   /**
-   * @deprecated
-   * NOTE: Deprecated since tensor logic
-   * @description
-   * Check the message for the spam.
-   * The fastest methods should as early as possible.
-   * This function is performance-related.
-   * @param message - user message
-   * @returns Delete Rule
+   * Checks the message for spam using the old dataset-based rule engine.
+   * The fastest methods run first for performance.
+   * @deprecated NOTE: Deprecated since tensor logic
+   * @param message - The user message to check.
+   * @returns An object containing the matched delete rule, if any.
    */
   async getDeleteRule(message: string) {
     /**
@@ -251,8 +246,9 @@ export class MessageHandler {
 
   /**
    * Sends the message to the tensor service (or server) and returns the spam prediction result.
-   * @param message
-   * @param rate
+   * @param message - The message text to evaluate.
+   * @param rate - The spam rate threshold, or null to use the default.
+   * @returns An object containing the tensor spam prediction result.
    */
   async processTensorMessage(message: string, rate: number | null): Promise<MessageHandlerProcessTensorMessageReturn> {
     try {
@@ -276,11 +272,11 @@ export class MessageHandler {
   }
 
   /**
-   * @description
-   * Makes request on the server and receives found word {string} or {null}
-   * @param message
-   * @param datasetPath
-   * @param strict
+   * Makes a request to the server and returns the found word or null.
+   * @param message - The message text to process.
+   * @param datasetPath - The dataset key identifying which dataset to check against.
+   * @param strict - Whether to use strict (exact) matching instead of fuzzy search.
+   * @returns An object containing the matched dataset and rule, or nulls if not found.
    */
   async processMessage(message: string, datasetPath: DatasetKeys, strict = false) {
     const deleteRule: {
@@ -323,10 +319,10 @@ export class MessageHandler {
   }
 
   /**
-   * @description
-   * Removes mentions and extra spaces from the message
-   * @param context
-   * @param originMessage
+   * Removes mentions and extra spaces from the message for cleaner spam detection.
+   * @param context - Grammy bot context used to access message entities.
+   * @param originMessage - The original raw message text to sanitize.
+   * @returns The sanitized message string with mentions and extra spaces removed.
    */
   sanitizeMessage(context: GrammyContext, originMessage: string): string {
     let message = originMessage;

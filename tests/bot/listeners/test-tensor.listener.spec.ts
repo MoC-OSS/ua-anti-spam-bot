@@ -263,7 +263,7 @@ describe('TestTensorListener', () => {
     });
 
     /**
-     * After mocking @grammyjs/menu, button-handler callbacks passed to .text()
+     * After mocking \@grammyjs/menu, button-handler callbacks passed to .text()
      * are captured in textSpy.mock.calls and can be invoked directly.
      * wrapperErrorHandler is mocked as identity so wrapped functions are unchanged.
      */

@@ -14,16 +14,18 @@ import { getEnabledFeaturesString, getUserData } from '@utils/generic.util';
 import { telegramUtility } from '@utils/util-instances.util';
 
 /**
- * @description Remove strategic information logic
+ * Returns a composer that detects and deletes messages containing user mentions.
+ * @returns Object containing the no-mentions composer instance.
  */
 export const getNoMentionsComposer = () => {
   const noMentionsComposer = new Composer<GrammyContext>();
 
   /**
    * Logs a deleted mentions message to the logs chat.
-   * @param context
-   * @param mentions
-   * @param [message]
+   * @param context - The Grammy context of the incoming message.
+   * @param mentions - List of user mentions detected in the message.
+   * @param [message] - Optional message text override.
+   * @returns Promise resolving to the sent log message.
    */
   async function saveMentionsMessage(context: GrammyContext, mentions: string[], message?: string) {
     const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);

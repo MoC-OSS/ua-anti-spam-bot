@@ -9,8 +9,9 @@ import { telegramUtility } from '@utils/util-instances.util';
 /**
  * Handles the bot being invited to a group or channel.
  * Resets removal state and sends a welcome/setup message to the chat admins.
- * @param context
- * @param next
+ * @param context - Grammy query context for the my_chat_member update.
+ * @param next - The next middleware function in the chain.
+ * @returns A Promise that resolves when the middleware chain has been processed.
  */
 export const botInviteQuery: GrammyQueryMiddleware<'my_chat_member'> = async (context, next) => {
   const newStatuses = new Set<ChatMember['status']>(['member', 'administrator']);

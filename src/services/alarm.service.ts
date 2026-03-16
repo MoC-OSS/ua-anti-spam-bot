@@ -39,7 +39,7 @@ export interface UpdatesEvents {
  * @deprecated
  */
 export class AlarmService {
-  // TODO replace with event target
+  // NOTE: replace with event target
 
   // @ts-expect-error
   // eslint-disable-next-line unicorn/prefer-event-target
@@ -54,7 +54,7 @@ export class AlarmService {
   testAlarmInterval?: NodeJS.Timer;
 
   getStates(): Promise<AlarmStates> {
-    // TODO replace this API with the new one
+    // NOTE: replace this API with the new one
     return Promise.resolve({
       states: [],
       last_update: new Date().toISOString(),
@@ -85,11 +85,11 @@ export class AlarmService {
 
   /**
    * Starts the connection
-   * @param reason
+   * @param reason - reason for enabling the connection
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   enable(reason: string) {
-    // TODO replace this API with the new one
+    // NOTE: replace this API with the new one
     // this.subscribeOnNotifications(reason);
     // this.initTestAlarms();
     //
@@ -102,7 +102,7 @@ export class AlarmService {
 
   /**
    * Closes the connection
-   * @param reason
+   * @param reason - reason for disabling the connection
    */
   disable(reason: string) {
     if (this.source) {
@@ -121,7 +121,7 @@ export class AlarmService {
 
   /**
    * Creates SSE subscription to Alarm API events
-   * @param reason
+   * @param reason - reason for creating the subscription (e.g. 'restart')
    */
   subscribeOnNotifications(reason: string) {
     if (environmentConfig.DISABLE_ALARM_API) {

@@ -1,8 +1,9 @@
 // Simple logger for ESLint configs with colored context
 /**
- *
- * @param context
- * @param method
+ * Colors a console output with ANSI escape codes based on the context and method.
+ * @param {string} context - The context label (e.g., ESLint plugin name).
+ * @param {string} method - The console method name (e.g., 'log', 'info', 'warn').
+ * @returns {string} A formatted string with ANSI color prefix and the context label.
  */
 function colorContext(context, method) {
   const METHOD_COLORS = {
@@ -25,8 +26,9 @@ function colorContext(context, method) {
 }
 
 /**
- *
- * @param context
+ * Creates a logger instance with context-prefixed, colored console output.
+ * @param {string} context - The context label to prefix log messages with.
+ * @returns {object} An object with log, info, warn, error, dir, and table methods.
  */
 export function eslintLogger(context) {
   return {

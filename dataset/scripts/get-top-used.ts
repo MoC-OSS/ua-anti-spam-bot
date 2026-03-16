@@ -1,10 +1,12 @@
 import { optimizeText } from 'ukrainian-ml-optimizer';
 
 /**
- * @param array
- * @param whitelist
- * @param split
- * @param additionalMap
+ * Counts the top-used tokens in an array by splitting and filtering with optional whitelist/map.
+ * @param array - The array of strings to analyze.
+ * @param whitelist - Tokens to exclude from the result.
+ * @param split - The delimiter used to split each string into tokens.
+ * @param additionalMap - Optional additional mapping to apply to tokens.
+ * @returns A sorted array of [token, count] pairs.
  */
 export function getTopUsed(
   array: string[],

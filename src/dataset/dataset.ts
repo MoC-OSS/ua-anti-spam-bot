@@ -17,8 +17,9 @@ import { obsceneDictionary } from './dataset-obscene';
 
 /**
  * Load optional file or fallbacks to default value
- * @param path
- * @param defaultValue
+ * @param path - The module path to attempt to import.
+ * @param defaultValue - The fallback value to return if the import fails.
+ * @returns The imported file's default export, or the defaultValue if not found.
  */
 export async function loadOptionalFile<T>(path: string, defaultValue: T): Promise<T> {
   let resolvedFile = defaultValue;
@@ -37,6 +38,7 @@ export async function loadOptionalFile<T>(path: string, defaultValue: T): Promis
 /**
  * Load non-existing files into dataset.
  * Should be called before any project calls
+ * @returns An object containing optional dataset extras such as swindlers_top_used.
  */
 export async function loadUserbotDatasetExtras() {
   const swindlersTopUsed = await loadOptionalFile<Record<string, number>>('./strings/swindlers_top_used.json', {});

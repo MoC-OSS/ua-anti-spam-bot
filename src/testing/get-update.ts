@@ -7,7 +7,7 @@ import { logger } from '@utils/logger.util';
 /**
  * Logs internal update to create mock updates.
  * Used for testing.
- * @param bot
+ * @param bot - The Grammy bot instance whose updates will be logged.
  * @internal
  */
 export const logUpdates = <TContext extends Context, TApi extends Api = Api, TBot extends Bot<TContext, TApi> = Bot<TContext, TApi>>(

@@ -9,18 +9,19 @@ import type { GrammyMiddleware } from '@app-types/context';
 export class SessionCommand {
   /**
    * Initializes the session command with the bot start time.
-   * @param startTime
+   * @param startTime - The time when the bot was started.
    */
   constructor(private startTime: Date) {}
 
   /**
    * Handle /session
    * Returns session file
+   * @returns The Grammy middleware function for /session.
    */
   middleware(): GrammyMiddleware {
     /**
      * Handles the /session command and replies with a session dump file.
-     * @param context
+     * @param context - Grammy bot context.
      */
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context) => {

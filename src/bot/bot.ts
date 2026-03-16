@@ -119,8 +119,9 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 // eslint-disable-next-line no-secrets/no-secrets
 /**
  * Gets main bot instance.
- * Disables redis logic if used in unit testing
- * @param bot
+ * Disables redis logic if used in unit testing.
+ * @param bot - The Grammy bot instance to configure and initialize.
+ * @returns A Promise that resolves to the fully configured bot instance.
  * @example
  * ```ts
  * const initialBot = new Bot<GrammyContext>(environmentConfig?.BOT_TOKEN);
@@ -150,7 +151,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   const airRaidAlarmStates = await alarmService.getStates();
 
   if (airRaidAlarmStates.states.length === 0) {
-    // TODO add advance logic for this
+    // NOTE: advance logic could be added here when no alarm states are available
     // console.error('No states are available. Air raid feature is not working...');
     // bot.api.sendMessage(logsChat, 'No states are available. Air raid feature is not working...').catch(emptyFunction);
   }

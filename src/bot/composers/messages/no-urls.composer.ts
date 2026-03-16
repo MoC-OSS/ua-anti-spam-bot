@@ -14,16 +14,18 @@ import { getEnabledFeaturesString, getUserData } from '@utils/generic.util';
 import { telegramUtility } from '@utils/util-instances.util';
 
 /**
- * @description Remove strategic information logic
+ * Returns a composer that detects and deletes messages containing URLs.
+ * @returns Object containing the no-URLs composer instance.
  */
 export const getNoUrlsComposer = () => {
   const noUrlsComposer = new Composer<GrammyContext>();
 
   /**
    * Logs a deleted URL-containing message to the logs chat.
-   * @param context
-   * @param urls
-   * @param [message]
+   * @param context - The Grammy context of the incoming message.
+   * @param urls - List of URLs detected in the message.
+   * @param [message] - Optional message text override.
+   * @returns Promise resolving to the sent log message.
    */
   async function saveUrlsMessage(context: GrammyContext, urls: string[], message?: string) {
     const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);

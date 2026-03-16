@@ -3,9 +3,9 @@ import type { GrammyContext } from '@app-types/context';
 import { isIdWhitelisted } from '@utils/generic.util';
 
 /**
- * @param context
- * @description
- * Allow actions only for bot whitelisted users
+ * Allow actions only for whitelisted users.
+ * @param context - The Grammy context object
+ * @returns True if the user is whitelisted, false otherwise
  */
 export function onlyWhitelistedFilter(context: GrammyContext) {
   return isIdWhitelisted(context.from?.id);

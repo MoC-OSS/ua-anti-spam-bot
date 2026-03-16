@@ -27,6 +27,7 @@ export class OutgoingRequests<TMethod extends RealApiMethodKeys = RealApiMethodK
 
   /**
    * Get length of the requests
+   * @returns The number of captured requests.
    */
   get length() {
     return this.requests.length;
@@ -34,7 +35,8 @@ export class OutgoingRequests<TMethod extends RealApiMethodKeys = RealApiMethodK
 
   /**
    * Builds an array of methods with strong and loose autocomplete
-   * @param methods
+   * @param methods - Array of API method names to build.
+   * @returns The same array typed as T[].
    */
   buildMethods<T extends TMethod>(methods: T[]): T[] {
     return methods;
@@ -42,6 +44,7 @@ export class OutgoingRequests<TMethod extends RealApiMethodKeys = RealApiMethodK
 
   /**
    * Get the outgoing request methods
+   * @returns An array of API method names from all captured requests.
    */
   getMethods(): TMethod[] {
     return this.requests.map((request) => request.method as TMethod);
@@ -49,7 +52,8 @@ export class OutgoingRequests<TMethod extends RealApiMethodKeys = RealApiMethodK
 
   /**
    * Add request at the end
-   * @param request
+   * @param request - The outgoing request to append.
+   * @returns The current instance for chaining.
    */
   push(request: Request<TMethod>): this {
     this.requests.push(request);
@@ -59,6 +63,7 @@ export class OutgoingRequests<TMethod extends RealApiMethodKeys = RealApiMethodK
 
   /**
    * Clear all requests
+   * @returns The current instance for chaining.
    */
   clear(): this {
     this.requests = [];

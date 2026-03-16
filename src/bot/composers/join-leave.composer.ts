@@ -7,7 +7,8 @@ import { onlyWhenBotAdminFilter } from '@bot/filters/only-when-bot-admin.filter'
 import type { GrammyContext } from '@app-types/context';
 
 /**
- * @description Remove join and leave messages from chat
+ * Composer that automatically deletes join and leave service messages from group chats.
+ * @returns An object containing the joinLeaveComposer instance.
  */
 export const getJoinLeaveComposer = () => {
   const joinLeaveComposer = new Composer<GrammyContext>();

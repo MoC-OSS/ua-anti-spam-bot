@@ -28,6 +28,7 @@ const METHODS = new Set<Methods<RawApi>>([
 /**
  * Middleware that automatically replies in the same thread when the message
  * is a reply to a channel post, keeping discussion threads consistent.
+ * @returns A Grammy middleware function that patches the API to add thread reply context.
  */
 export function autoCommentReply<TContext extends Context>(): Middleware<TContext> {
   // eslint-disable-next-line unicorn/consistent-function-scoping

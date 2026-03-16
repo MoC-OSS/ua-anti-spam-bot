@@ -10,10 +10,11 @@ import { logger } from '@utils/logger.util';
 /**
  * API transformer that intercepts send methods targeting the logs chat
  * and suppresses them, useful for testing without sending real log messages.
- * @param previous
- * @param method
- * @param payload
- * @param signal
+ * @param previous - The previous transformer in the chain to delegate to.
+ * @param method - The Telegram API method name being called.
+ * @param payload - The payload object for the API call.
+ * @param signal - An optional AbortSignal for cancellation.
+ * @returns A resolved promise with an ok result if suppressed, otherwise delegates to previous.
  */
 export const disableLogsChatTransformer: Transformer = (previous, method, payload, signal) => {
   const sendMethods = new Set<RealApiMethodKeys>([

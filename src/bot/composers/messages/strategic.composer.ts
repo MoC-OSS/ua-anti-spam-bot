@@ -10,9 +10,10 @@ export interface StrategicComposerProperties {
 }
 
 /**
- * @param root0
- * @param root0.onTextListener
- * @description Remove strategic information logic
+ * Returns a composer that detects and removes messages containing strategic military information.
+ * @param root0 - Composer properties.
+ * @param root0.onTextListener - Listener that handles text-based strategic content detection.
+ * @returns Object containing the strategic composer instance.
  */
 export const getStrategicComposer = ({ onTextListener }: StrategicComposerProperties) => {
   const strategicComposer = new Composer<GrammyContext>();

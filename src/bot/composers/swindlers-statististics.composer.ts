@@ -57,6 +57,7 @@ const getStatisticFromSheet = async (): Promise<GetStatisticFromSheetReturn> => 
 
 /**
  * Composer that provides commands to download swindler statistics as CSV (all or new since last check).
+ * @returns An object containing the swindlersStatisticComposer instance.
  */
 export const getSwindlersStatisticCommandsComposer = () => {
   const swindlersStatisticComposer = new Composer<GrammyContext>();

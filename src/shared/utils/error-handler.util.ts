@@ -13,8 +13,8 @@ import { optimizeWriteContextUtility } from './optimize-write-context.util';
 
 /**
  * Handle single error with expected reason
- * @param catchError
- * @param reason
+ * @param catchError - The caught error object to log
+ * @param reason - An optional human-readable description of where the error occurred
  */
 export const handleError = (catchError: unknown, reason = '') => {
   logger.error({ reason: reason || '$NO_REASON', err: catchError }, '**** REASON-HANDLED ERROR ****');
@@ -22,7 +22,7 @@ export const handleError = (catchError: unknown, reason = '') => {
 
 /**
  * Global error handler for the bot
- * @param botError
+ * @param botError - The Grammy bot error containing the context and the thrown error
  */
 export const globalErrorHandler: ErrorHandler<GrammyContext> = (botError) => {
   const { ctx, error } = botError;
@@ -49,6 +49,7 @@ export const globalErrorHandler: ErrorHandler<GrammyContext> = (botError) => {
 /**
  * Wrapper to catch async errors within a stage. Helps to avoid try catch blocks in there
  * @param callback - function to enter a stage
+ * @returns A wrapped middleware function that catches and logs errors
  */
 export const wrapperErrorHandler =
   <TContext extends GrammyContext = GrammyContext>(callback: MiddlewareFn<TContext>): MiddlewareFn<TContext> =>

@@ -19,10 +19,11 @@ export interface TensorTrainingComposerProperties {
 }
 
 /**
- * @param root0
- * @param root0.tensorListener
- * @param root0.trainingThrottler
- * @description Message handling composer
+ * Composer that processes messages in the designated training chat and sends them to the tensor model listener.
+ * @param root0 - Tensor training composer properties.
+ * @param root0.tensorListener - Listener that processes messages for tensor model training.
+ * @param root0.trainingThrottler - API transformer used to throttle training requests.
+ * @returns An object containing the tensorTrainingComposer instance.
  */
 export const getTensorTrainingComposer = ({ tensorListener, trainingThrottler }: TensorTrainingComposerProperties) => {
   const tensorTrainingComposer = new Composer<GrammyContext>();

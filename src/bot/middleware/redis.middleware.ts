@@ -16,7 +16,8 @@ export class RedisMiddleware {
 
   /**
    * Derives the Redis key for the current chat session.
-   * @param context
+   * @param context - The Grammy context object
+   * @returns The Redis key string for the current session
    */
   getSessionKey(context: GrammyContext): string {
     return this.options.getSessionKey(context);
@@ -24,7 +25,8 @@ export class RedisMiddleware {
 
   /**
    * Retrieves a session object from Redis by key.
-   * @param key
+   * @param key - The Redis key to retrieve
+   * @returns A promise resolving to the session object
    */
   getSession(key: string): Promise<JsonObject> {
     return redisClient.getValue(key);
@@ -32,8 +34,9 @@ export class RedisMiddleware {
 
   /**
    * Persists the session object to Redis.
-   * @param key
-   * @param payload
+   * @param key - The Redis key to save under
+   * @param payload - The session data to persist
+   * @returns A promise that resolves when the session is saved
    */
   saveSession(key: string, payload: JsonObject) {
     return redisClient.setValue(key, payload);
@@ -41,7 +44,8 @@ export class RedisMiddleware {
 
   /**
    * Returns the grammY middleware that loads and saves the session around downstream handlers.
-   * @param property
+   * @param property - The context property name to attach the session to
+   * @returns A grammY middleware function
    */
   middleware(property = this.options.property) {
     return async (context: GrammyContext, next: NextFunction) => {

@@ -44,8 +44,9 @@ export class DeleteSwindlersMiddleware {
   middleware(): GrammyMiddleware {
     /**
      * Delete messages that looks like from swindlers
-     * @param context
-     * @param next
+     * @param context - The Grammy context object
+     * @param next - The next middleware function in the chain
+     * @returns A promise that resolves when the middleware chain completes
      */
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context, next) => {
@@ -73,7 +74,8 @@ export class DeleteSwindlersMiddleware {
 
   /**
    * Checks a message against the swindlers detection service, falling back to local detection if the server is unavailable.
-   * @param message
+   * @param message - The message text to check for swindler content
+   * @returns A promise resolving to the swindlers detection result
    */
   async checkMessage(message: string): Promise<SwindlersResult> {
     try {
@@ -91,10 +93,11 @@ export class DeleteSwindlersMiddleware {
 
   /**
    * Logs the detected swindler message to the main and secondary logs chats.
-   * @param context
-   * @param maxChance
-   * @param from
-   * @param [message]
+   * @param context - The Grammy context object
+   * @param maxChance - The detection confidence score (0–1)
+   * @param from - The swindler type or detection source label
+   * @param [message] - Optional override for the message text to log
+   * @returns A promise that resolves when both log messages have been sent
    */
   async saveSwindlersMessage(context: GrammyContext, maxChance: number, from: LooseAutocomplete<SwindlerType>, message?: string) {
     const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
@@ -125,7 +128,8 @@ export class DeleteSwindlersMiddleware {
 
   /**
    * Sends warning to the chat, or skips if it was sent
-   * @param context
+   * @param context - The Grammy context object
+   * @returns A promise that resolves when the warning has been sent, or undefined if skipped
    */
   processWarningMessage(context: GrammyContext) {
     const shouldSend =
@@ -147,7 +151,8 @@ export class DeleteSwindlersMiddleware {
 
   /**
    * Attempts to delete the swindler message. Notifies admins if deletion fails due to missing permissions.
-   * @param context
+   * @param context - The Grammy context object
+   * @returns A promise that resolves when the message has been deleted or admins notified
    */
   async removeMessage(context: GrammyContext) {
     try {

@@ -8,8 +8,9 @@ import { logSkipMiddleware } from '@utils/generic.util';
 
 /**
  * Used for notifying admins about checking their messages
- * @param context
- * @param next
+ * @param context - The Grammy context object
+ * @param next - The next middleware function in the chain
+ * @returns A promise that resolves when the middleware chain completes
  */
 export const adminCheckNotify: GrammyMiddleware = async (context: GrammyContext, next: NextFunction) => {
   const { isCheckAdminNotified } = context.chatSession;

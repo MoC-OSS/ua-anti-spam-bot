@@ -16,10 +16,10 @@ export type SelfDestructedFlavor<TContext extends Context> = TContext & {
 };
 
 /**
- * Default callback.
- * Just removes the sent message.
- * @param context
- * @param replyResult
+ * Default callback that removes the sent message when the timeout expires.
+ * @param context - Grammy bot context used to call the delete API.
+ * @param replyResult - The message object returned from the reply call.
+ * @returns A Promise that resolves when the message has been deleted.
  */
 const defaultDeleteCallback = async <TContext extends Context>(
   context: TContext,
@@ -32,11 +32,12 @@ const defaultDeleteCallback = async <TContext extends Context>(
 export type SelfDestructedCallback = typeof defaultDeleteCallback;
 
 /**
- * Build delete reply with parse modes
- * @param context
- * @param timeout
- * @param callback
- * @param parseMode
+ * Builds a reply method that automatically deletes the sent text message after a timeout.
+ * @param context - The self-destructed flavor context to bind the reply to.
+ * @param timeout - Milliseconds to wait before deleting the sent message.
+ * @param callback - The callback invoked when the timeout expires to perform deletion.
+ * @param parseMode - Optional Telegram parse mode (e.g. 'HTML', 'MarkdownV2').
+ * @returns A Grammy-compatible reply method that schedules deletion after sending.
  */
 const buildReplyWithParseMode =
   <TContext extends Context>(
@@ -59,11 +60,12 @@ const buildReplyWithParseMode =
   };
 
 /**
- * Build delete reply with parse modes
- * @param context
- * @param timeout
- * @param callback
- * @param parseMode
+ * Builds a replyWithPhoto method that automatically deletes the sent photo message after a timeout.
+ * @param context - The self-destructed flavor context to bind the reply to.
+ * @param timeout - Milliseconds to wait before deleting the sent message.
+ * @param callback - The callback invoked when the timeout expires to perform deletion.
+ * @param parseMode - Optional Telegram parse mode (e.g. 'HTML', 'MarkdownV2').
+ * @returns A Grammy-compatible replyWithPhoto method that schedules deletion after sending.
  */
 const buildReplyPhotoWithParseMode =
   <TContext extends Context>(

@@ -14,7 +14,7 @@ export class DomainAllowList {
 
   /**
    * Replaces the internal allow-list with the provided domain entries.
-   * @param allowDomains
+   * @param allowDomains - Array of domain strings or pattern strings to allow
    */
   updateDomains(allowDomains: string[]) {
     const baseUrls = allowDomains.filter((domain) => !domain.startsWith('@')).map((url) => this.processLink(url));
@@ -25,7 +25,8 @@ export class DomainAllowList {
 
   /**
    * Processes a URL by removing common prefixes and suffixes.
-   * @param url
+   * @param url - The URL string to normalize
+   * @returns The normalized URL with protocol, www prefix, and trailing slash removed
    */
   processLink(url: string): string {
     let newUrl = url;
@@ -51,7 +52,8 @@ export class DomainAllowList {
 
   /**
    * Checks whether a URL's domain is in the allow-list.
-   * @param url
+   * @param url - The URL string to check against the allow-list
+   * @returns True if the URL domain is allowed, false otherwise
    */
   isAllowed(url: string): boolean {
     if (this.allowDomains.has(url)) {
@@ -75,7 +77,8 @@ export class DomainAllowList {
 
   /**
    * Creates a regular expression from a domain pattern.
-   * @param pattern
+   * @param pattern - The domain pattern string, may include wildcard `*` characters
+   * @returns A RegExp that matches URLs conforming to the given pattern
    */
   createRegexFromPattern(pattern: string) {
     // Escape special characters in the pattern and replace '*' with '.*'

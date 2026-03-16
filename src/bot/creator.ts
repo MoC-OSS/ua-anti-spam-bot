@@ -2,7 +2,7 @@
  * @module creator
  * @description Hardcoded Telegram chat and user IDs for the bot's administrative channels.
  * Includes the creator user ID, log chats, training chats, and swindler-related chat IDs.
- * @todo Remove hardcoded values in favor of environment configuration and purge from Git history.
+ * NOTE: Remove hardcoded values in favor of environment configuration and purge from Git history.
  */
 
 import { environmentConfig } from '@shared/config';

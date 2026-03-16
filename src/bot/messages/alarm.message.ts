@@ -9,6 +9,7 @@ import { formatStateIntoAccusative, getRandomItem } from '@utils/generic.util';
 
 /**
  * Checks whether current time is night-time (between 20:00 and 05:00).
+ * @returns `true` if it is currently night-time, `false` otherwise.
  */
 export const isNight = () => {
   const hours = +moment().format('H');
@@ -18,21 +19,24 @@ export const isNight = () => {
 
 /**
  * Returns an emoji representing the current time of day (moon at night, sun during the day).
+ * @returns A moon emoji at night or a sun emoji during the day.
  */
 export const getDayTimeEmoji = () => (isNight() ? '🌖' : '☀️');
 
 /**
- *
+ * Returns the current local time formatted as a short time string (HH:mm).
+ * @returns The formatted current time string.
  */
 function getCurrentTime() {
   return moment().format('LT');
 }
 
 /**
- *
- * @param locale
- * @param prefix
- * @param count
+ * Returns a random translated string from a numbered key set using the given i18n locale.
+ * @param locale - The locale code to use for translation (e.g. 'uk').
+ * @param prefix - The key prefix shared by all numbered variants (e.g. 'alarm-start').
+ * @param count - Total number of variants available for the given prefix.
+ * @returns A randomly selected translated string.
  */
 function randomT(locale: string, prefix: string, count: number): string {
   // eslint-disable-next-line sonarjs/pseudo-random
@@ -88,6 +92,7 @@ const getRandomAlarmEndText = (): string => {
  * Returns the air-raid alarm start notification message for a given chat.
  * @param settings - Chat settings containing alert state.
  * @param isRepeatedAlarm - Whether this is a repeated alarm notification.
+ * @returns The formatted alarm start notification string.
  */
 export const getAlarmStartNotificationMessage = (settings: ChatSessionData['chatSettings'], isRepeatedAlarm = false) =>
   i18n.t('uk', 'alarm-start-notification', {
@@ -100,6 +105,7 @@ export const getAlarmStartNotificationMessage = (settings: ChatSessionData['chat
 /**
  * Returns the air-raid alarm end notification message for a given chat.
  * @param settings - Chat settings containing alert state.
+ * @returns The formatted alarm end notification string.
  */
 export const alarmEndNotificationMessage = (settings: ChatSessionData['chatSettings']) =>
   i18n.t('uk', 'alarm-end-notification', {
@@ -110,11 +116,13 @@ export const alarmEndNotificationMessage = (settings: ChatSessionData['chatSetti
 
 /**
  * Returns a message indicating that the chat is muted during an air-raid alarm.
+ * @returns The localized chat-muted message string.
  */
 export const chatIsMutedMessage = () => i18n.t('uk', 'alarm-chat-muted');
 
 /**
  * Returns a message indicating that the chat has been unmuted after an air-raid alarm.
+ * @returns The localized chat-unmuted message string.
  */
 export const chatIsUnmutedMessage = () => i18n.t('uk', 'alarm-chat-unmuted');
 
@@ -122,6 +130,7 @@ export const chatIsUnmutedMessage = () => i18n.t('uk', 'alarm-chat-unmuted');
  * Returns the air-raid alarm settings message for a given chat.
  * @param context - Grammy bot context.
  * @param settings - Chat settings containing alert configuration.
+ * @returns The formatted alarm settings message string.
  */
 export const getAirRaidAlarmSettingsMessage = (context: GrammyContext, settings: ChatSessionData['chatSettings']) =>
   [

@@ -35,8 +35,9 @@ const obsceneDictionaryWhitelistEn = new Set(processTxtMessage(fs.readFileSync(o
 
 /**
  * Logic
- * @param whitelist
- * @param datasetUrl
+ * @param whitelist - The set of allowed words to prepend and use for filtering.
+ * @param datasetUrl - The URL of the text file containing the obscene dictionary entries.
+ * @returns An array of processed strings filtered by the translit whitelist.
  */
 function processObsceneDictionary(whitelist: Set<string>, datasetUrl: URL) {
   return processMessage([

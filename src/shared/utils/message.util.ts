@@ -18,11 +18,11 @@ const options = {
 export class MessageUtility {
   /**
    * Searches for a keyword in the message text using direct or fuzzy matching.
-   * @param message
-   * @param searchFor
-   * @param strict
+   * @param message - The message text to search within
+   * @param searchFor - The keyword or phrase to search for
+   * @param strict - When true, requires an exact whole-word match
+   * @returns The matched string if found, or false/null if not found
    */
-  // eslint-disable-next-line sonarjs/function-return-type
   findInText(message: string, searchFor: string, strict = false) {
     /**
      * Direct hit
@@ -60,9 +60,9 @@ export class MessageUtility {
 
   /**
    * Performs a fuzzy search for any of the given words within the message using Fuse.js.
-   * @param message
-   * @param wordsArray
-   * @returns
+   * @param message - The message text to search within
+   * @param wordsArray - Array of words to search for using fuzzy matching
+   * @returns The first matching word found, or null if none matched
    */
   fuseInText(message: string, wordsArray: string[]) {
     /**

@@ -19,9 +19,10 @@ export interface FeaturesStatisticsMessageProperties {
 }
 
 /**
- *
- * @param count
- * @param total
+ * Calculates the percentage that count represents of total, formatted to 2 decimal places.
+ * @param count - The part value to compute the percentage for.
+ * @param total - The total value used as the denominator.
+ * @returns The percentage string formatted to 2 decimal places.
  */
 function toPercent(count: number, total: number) {
   return ((count / total) * 100).toFixed(2);
@@ -29,17 +30,18 @@ function toPercent(count: number, total: number) {
 
 /**
  * Returns the chat statistics message displayed via the /statistics command.
- * @param context
- * @param root0
- * @param root0.adminsChatsCount
- * @param root0.botRemovedCount
- * @param root0.channelCount
- * @param root0.groupCount
- * @param root0.memberChatsCount
- * @param root0.privateCount
- * @param root0.superGroupsCount
- * @param root0.totalSessionCount
- * @param root0.totalUserCounts
+ * @param context - Grammy bot context.
+ * @param root0 - Chat statistics message properties.
+ * @param root0.adminsChatsCount - Number of chats where the bot has admin rights.
+ * @param root0.botRemovedCount - Number of chats where the bot was removed.
+ * @param root0.channelCount - Number of channel sessions.
+ * @param root0.groupCount - Number of regular group sessions.
+ * @param root0.memberChatsCount - Number of chats where the bot is a regular member.
+ * @param root0.privateCount - Number of private chat sessions.
+ * @param root0.superGroupsCount - Number of supergroup sessions.
+ * @param root0.totalSessionCount - Total number of chat sessions.
+ * @param root0.totalUserCounts - Total user count across all non-removed sessions.
+ * @returns The formatted chat statistics message string.
  */
 export const getChatStatisticsMessage = (
   context: GrammyContext,
@@ -78,10 +80,11 @@ export const getChatStatisticsMessage = (
 
 /**
  * Returns the features statistics message displaying usage percentages for each feature.
- * @param context
- * @param root0
- * @param root0.features
- * @param root0.chatsCount
+ * @param context - Grammy bot context.
+ * @param root0 - Features statistics message properties.
+ * @param root0.features - Feature usage counters aggregated across all sessions.
+ * @param root0.chatsCount - Total number of chats used as the percentage denominator.
+ * @returns The formatted features statistics message string.
  */
 export const getFeaturesStatisticsMessage = (context: GrammyContext, { features, chatsCount }: FeaturesStatisticsMessageProperties) =>
   [

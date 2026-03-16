@@ -8,10 +8,11 @@ export interface DebugMessageProperties {
 
 /**
  * Returns a debug message appended to delete messages when the bot runs in debug mode.
- * @param root0
- * @param root0.message
- * @param root0.byRules
- * @param root0.startTime
+ * @param root0 - Debug message properties.
+ * @param root0.message - The original user message text.
+ * @param root0.byRules - An object describing which rules triggered the deletion.
+ * @param root0.startTime - The bot start time (last deploy timestamp).
+ * @returns The formatted debug message string.
  */
 export const getDebugMessage = ({ message, byRules, startTime }: DebugMessageProperties) =>
   `

@@ -26,7 +26,8 @@ export class S3Service {
 
   /**
    * Download tensor flow model into the specific folder
-   * @param fsFolderPath
+   * @param fsFolderPath - URL pointing to the local folder where model files will be written
+   * @returns promise resolving when all model files have been downloaded and saved
    */
   downloadTensorFlowModel(fsFolderPath: URL) {
     const loadFilePromises = this.mlFiles.map(async (fileName) => {

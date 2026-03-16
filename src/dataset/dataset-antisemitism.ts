@@ -16,7 +16,8 @@ export const antisemitismDictionaryThreadsUrl = new URL('strings/antisemitism_th
 
 /**
  * Logic
- * @param datasetUrl
+ * @param datasetUrl - The URL of the text file containing antisemitism dictionary entries.
+ * @returns An array of processed and transliterated strings.
  */
 function processAntisemitismDictionary(datasetUrl: URL) {
   // eslint-disable-next-line security/detect-non-literal-fs-filename

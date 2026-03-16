@@ -75,9 +75,10 @@ export class UserbotStorage {
 
   /**
    * Checks whether a text is unique compared to existing dataset entries using string similarity.
-   * @param text
-   * @param dataset
-   * @param [rate]
+   * @param text - The text to check for uniqueness.
+   * @param dataset - The array of existing strings to compare against.
+   * @param [rate] - Optional similarity threshold; defaults to the LENGTH_RATE limit.
+   * @returns An object with isDifferent flag and the maxChance similarity score.
    */
   isUniqueText(text: string, dataset: string[], rate?: number | null) {
     const isEmpty = dataset.length === 0;
