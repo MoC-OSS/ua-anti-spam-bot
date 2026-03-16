@@ -1,20 +1,12 @@
-FROM public.ecr.aws/docker/library/node:20
+FROM public.ecr.aws/docker/library/node:24
 
-# Create app directory
 WORKDIR /usr/src/app
 
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
 COPY package*.json ./
+COPY patches ./patches
 
-# Copy packages
+RUN npm ci
 
-#RUN npm install
-# If you are building your code for production
-RUN npm i --only=production
-
-# Bundle app source
 COPY . .
 
-CMD [ "npm", "run", "start:server:js:prod" ]
+CMD ["npm", "run", "start:server:prod"]
