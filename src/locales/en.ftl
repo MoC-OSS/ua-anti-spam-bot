@@ -560,3 +560,11 @@ delete-denylist-7 = 🚫 Banned words are not allowed in our community. Please b
 delete-denylist-8 = 🚫 We strive for mutual respect and safety in communication. Please refrain from using banned words. 🙏
 
 delete-denylist-by-word = for the word "{ $word }"
+
+# ------------------------------------------------------------
+# Language command
+# ------------------------------------------------------------
+
+language-changed = ✅ Language changed to { $language }.
+language-invalid = ❌ Unsupported language. Available languages: uk, en.
+language-current = 🌐 Current language: { $language }.

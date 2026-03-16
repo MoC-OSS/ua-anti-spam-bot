@@ -35,6 +35,10 @@ export class GlobalMiddleware {
         return next();
       }
 
+      // Apply the per-chat language stored in the session. Defaults to Ukrainian
+      // so the bot always speaks Ukrainian unless explicitly changed via /language.
+      context.i18n.useLocale(context.chatSession.language ?? 'uk');
+
       await this.updateChatInfo(context);
       await this.updateChatSessionIfEmpty(context);
 

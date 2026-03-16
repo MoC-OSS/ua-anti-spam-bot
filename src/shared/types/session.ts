@@ -81,6 +81,8 @@ export interface ChatSettings extends BooleanChatSettings {
 export interface ChatSessionData {
   chatType?: Chat['type'];
   chatTitle?: string;
+  /** The UI language used in this chat. Defaults to 'uk' (Ukrainian). */
+  language?: string;
   chatMembersCount: number;
   botRemoved: boolean;
   isBotAdmin?: boolean;

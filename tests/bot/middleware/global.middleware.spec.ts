@@ -139,6 +139,7 @@ describe('GlobalMiddleware', () => {
             },
           },
           session: {},
+          i18n: { useLocale: vi.fn() },
         } as unknown as GrammyContext;
 
         await globalMiddleware.middleware()(context, next as unknown as NextFunction);

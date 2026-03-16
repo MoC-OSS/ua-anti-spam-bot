@@ -17,6 +17,9 @@ const __dirname = path.dirname(__filename);
 export const i18n = new I18n<GrammyContext>({
   defaultLocale: 'uk',
   directory: path.resolve(__dirname, '..', 'locales'),
+  // Always start with Ukrainian; the GlobalMiddleware overrides this with the
+  // per-chat language stored in chatSession after sessions are loaded.
+  localeNegotiator: () => 'uk',
 });
 
 /** Count constants for random message arrays */

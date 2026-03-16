@@ -2,6 +2,8 @@ import { helpChat } from '@bot/creator';
 
 import type { GrammyContext } from '@app-types/context';
 
+import { version } from '../../../package.json';
+
 import type { GenericBotProperties } from './delete.message';
 
 export interface HelpMessageProperties {
@@ -46,6 +48,8 @@ export const getHelpMessage = (context: GrammyContext, { startLocaleTime, isAdmi
     context.t('help-hotline-text'),
     '',
     'Детальніше за командою /hotline_security',
+    '',
+    `v${version}`,
   ].join('\n');
 
 /**

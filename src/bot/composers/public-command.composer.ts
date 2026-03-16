@@ -1,6 +1,7 @@
 import { Composer } from 'grammy';
 
 import { HelpCommand } from '@bot/commands/public/help.command';
+import { LanguageCommand } from '@bot/commands/public/language.command';
 import { SettingsCommand } from '@bot/commands/public/settings.command';
 import { StartCommand } from '@bot/commands/public/start.command';
 
@@ -26,11 +27,13 @@ export const getPublicCommandsComposer = ({ startTime }: PublicCommandsComposerP
   const startMiddleware = new StartCommand();
   const helpMiddleware = new HelpCommand(startTime);
   const settingsMiddleware = new SettingsCommand(redisService);
+  const languageMiddleware = new LanguageCommand();
 
   /* Command Register */
   publicCommandsComposer.command('start', startMiddleware.middleware());
   publicCommandsComposer.command(['help', 'status'], helpMiddleware.middleware());
   publicCommandsComposer.command('settings', settingsMiddleware.middleware());
+  publicCommandsComposer.command('language', languageMiddleware.middleware());
 
   return { publicCommandsComposer };
 };
