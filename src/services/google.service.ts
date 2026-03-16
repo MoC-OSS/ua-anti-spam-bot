@@ -137,7 +137,7 @@ export class GoogleService {
    * @param value - value or array of values to append
    * @param [range] - optional starting range for append; defaults to RANGE constant
    */
-  async appendToSheet<T>(spreadsheetId: string, sheetName: string, value: T | T[], range?: string) {
+  async appendToSheet<T>(spreadsheetId: string, sheetName: SheetNames, value: T | T[], range?: string) {
     const responseData = coerceArray(value);
 
     try {
@@ -162,7 +162,7 @@ export class GoogleService {
    * @param value - array of string values to write
    * @param [range] - optional cell range to overwrite; defaults to RANGE constant
    */
-  async updateSheet(spreadsheetId: string, sheetName: string, value: string[], range?: string) {
+  async updateSheet(spreadsheetId: string, sheetName: SheetNames, value: string[], range?: string) {
     try {
       await sheets.spreadsheets.values.update({
         spreadsheetId,
@@ -184,7 +184,7 @@ export class GoogleService {
    * @param sheetName - name of the sheet tab to clear
    * @param [range] - optional cell range to clear; defaults to RANGE constant
    */
-  async clearSheet(spreadsheetId: string, sheetName: string, range?: string) {
+  async clearSheet(spreadsheetId: string, sheetName: SheetNames, range?: string) {
     try {
       await sheets.spreadsheets.values.clear({
         spreadsheetId,

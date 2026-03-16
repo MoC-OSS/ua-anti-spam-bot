@@ -1,3 +1,5 @@
+import type { SheetNames } from '@const/google-sheets.const';
+
 import { GoogleService } from '@services/google.service';
 
 const { mockSheetsGet, mockSheetsClear, mockSheetsAppend, mockSheetsUpdate } = vi.hoisted(() => ({
@@ -58,7 +60,7 @@ describe('GoogleService', () => {
           },
         });
 
-        const result = await service.getSheet('spreadsheet-id', 'Sheet1', 'A7:A');
+        const result = await service.getSheet('spreadsheet-id', 'Sheet1' as SheetNames, 'A7:A');
 
         expect(result.length).toBe(3);
         expect(result[0]).toHaveProperty('value', 'value1');
@@ -75,7 +77,7 @@ describe('GoogleService', () => {
           },
         });
 
-        const result = await service.getSheet('spreadsheet-id', 'Sheet1', 'A7:A', true);
+        const result = await service.getSheet('spreadsheet-id', 'Sheet1' as SheetNames, 'A7:A', true);
 
         expect(result).toEqual(['val1', 'val2']);
       });
@@ -88,7 +90,7 @@ describe('GoogleService', () => {
           },
         });
 
-        const result = await service.getSheet('spreadsheet-id', 'Sheet1');
+        const result = await service.getSheet('spreadsheet-id', 'Sheet1' as SheetNames);
 
         expect(result).toEqual([]);
       });
@@ -101,7 +103,7 @@ describe('GoogleService', () => {
           },
         });
 
-        const result = await service.getSheet('spreadsheet-id', 'Sheet1');
+        const result = await service.getSheet('spreadsheet-id', 'Sheet1' as SheetNames);
 
         expect(result.length).toBe(2);
       });
@@ -111,7 +113,7 @@ describe('GoogleService', () => {
       it('should return empty array on API error', async () => {
         mockSheetsGet.mockRejectedValueOnce(new Error('API error'));
 
-        const result = await service.getSheet('spreadsheet-id', 'Sheet1');
+        const result = await service.getSheet('spreadsheet-id', 'Sheet1' as SheetNames);
 
         expect(result).toEqual([]);
       });
@@ -150,7 +152,7 @@ describe('GoogleService', () => {
       it('should call append with single value', async () => {
         mockSheetsAppend.mockResolvedValueOnce({});
 
-        await service.appendToSheet('spreadsheet-id', 'Sheet1', 'newvalue');
+        await service.appendToSheet('spreadsheet-id', 'Sheet1' as SheetNames, 'newvalue');
 
         expect(mockSheetsAppend).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -163,7 +165,7 @@ describe('GoogleService', () => {
       it('should call append with array value', async () => {
         mockSheetsAppend.mockResolvedValueOnce({});
 
-        await service.appendToSheet('spreadsheet-id', 'Sheet1', ['val1', 'val2']);
+        await service.appendToSheet('spreadsheet-id', 'Sheet1' as SheetNames, ['val1', 'val2']);
 
         expect(mockSheetsAppend).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -177,7 +179,7 @@ describe('GoogleService', () => {
       it('should not throw on API error', async () => {
         mockSheetsAppend.mockRejectedValueOnce(new Error('API error'));
 
-        await expect(service.appendToSheet('spreadsheet-id', 'Sheet1', 'value')).resolves.not.toThrow();
+        await expect(service.appendToSheet('spreadsheet-id', 'Sheet1' as SheetNames, 'value')).resolves.not.toThrow();
       });
     });
   });
@@ -187,7 +189,7 @@ describe('GoogleService', () => {
       it('should call update with correct parameters', async () => {
         mockSheetsUpdate.mockResolvedValueOnce({});
 
-        await service.updateSheet('spreadsheet-id', 'Sheet1', ['val1', 'val2']);
+        await service.updateSheet('spreadsheet-id', 'Sheet1' as SheetNames, ['val1', 'val2']);
 
         expect(mockSheetsUpdate).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -202,7 +204,7 @@ describe('GoogleService', () => {
       it('should not throw on API error', async () => {
         mockSheetsUpdate.mockRejectedValueOnce(new Error('API error'));
 
-        await expect(service.updateSheet('spreadsheet-id', 'Sheet1', [])).resolves.not.toThrow();
+        await expect(service.updateSheet('spreadsheet-id', 'Sheet1' as SheetNames, [])).resolves.not.toThrow();
       });
     });
   });
@@ -212,7 +214,7 @@ describe('GoogleService', () => {
       it('should call clear with the computed range', async () => {
         mockSheetsClear.mockResolvedValueOnce({});
 
-        await service.clearSheet('spreadsheet-id', 'Sheet1');
+        await service.clearSheet('spreadsheet-id', 'Sheet1' as SheetNames);
 
         expect(mockSheetsClear).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -225,7 +227,7 @@ describe('GoogleService', () => {
       it('should use custom range when provided', async () => {
         mockSheetsClear.mockResolvedValueOnce({});
 
-        await service.clearSheet('spreadsheet-id', 'Sheet1', 'B1:B');
+        await service.clearSheet('spreadsheet-id', 'Sheet1' as SheetNames, 'B1:B');
 
         expect(mockSheetsClear).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -239,7 +241,7 @@ describe('GoogleService', () => {
       it('should not throw on API error', async () => {
         mockSheetsClear.mockRejectedValueOnce(new Error('API error'));
 
-        await expect(service.clearSheet('spreadsheet-id', 'Sheet1')).resolves.not.toThrow();
+        await expect(service.clearSheet('spreadsheet-id', 'Sheet1' as SheetNames)).resolves.not.toThrow();
       });
     });
   });

@@ -14,8 +14,8 @@ export const LOGS_CHAT_THREAD_IDS = {
   CHANNEL_MESSAGES: 384_547,
   PORN_MESSAGES: 464_266,
   DENYLIST: 103_509,
-};
+} as const;
 
 export const SECOND_LOGS_CHAT_THREAD_IDS = {
   SWINDLERS: 10,
-};
+} as const;
