@@ -12,6 +12,11 @@ const javascriptPreset = jsdoc({
   config: 'flat/recommended-error',
 });
 
+/**
+ * @description ESLint plugin configuration for enforcing JSDoc comments and documentation standards in both JavaScript and TypeScript files, using separate presets for each language to ensure appropriate rules are applied. This config requires descriptions in JSDoc comments and extends recommended settings for both JS and TS.
+ * @author Dmytro Vakulenko
+ * @see https://github.com/gajus/eslint-plugin-jsdoc
+ */
 export default defineConfig([
   {
     ...typescriptPreset,
