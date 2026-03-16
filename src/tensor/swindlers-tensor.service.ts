@@ -6,6 +6,8 @@
 
 import { environmentConfig } from '@shared/config';
 
+import { logger } from '@utils/logger.util';
+
 import { BaseTensorService } from './base-tensor.service';
 
 export class SwindlersTensorService extends BaseTensorService {
@@ -21,7 +23,11 @@ export class SwindlersTensorService extends BaseTensorService {
 export const initSwindlersTensor = async () => {
   const tensorService = new SwindlersTensorService('./swindlers-temp/model.json', environmentConfig.TENSOR_RANK);
 
+  logger.info('Loading swindlers tensor model...');
+  const start = Date.now();
+
   await tensorService.loadModel();
+  logger.info(`Swindlers tensor model loaded in ${((Date.now() - start) / 1000).toFixed(2)}s.`);
 
   return tensorService;
 };

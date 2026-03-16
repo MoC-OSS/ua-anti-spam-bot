@@ -13,6 +13,8 @@ import * as tf from '@tensorflow/tfjs-node';
 
 import type { NsfwTensorNegativeResult, NsfwTensorPositiveResult, NsfwTensorResult } from '@app-types/nsfw';
 
+import { logger } from '@utils/logger.util';
+
 export class NsfwTensorService {
   model!: NSFWJS;
 
@@ -151,7 +153,11 @@ export const initNsfwTensor = async () => {
   const tensorService = new NsfwTensorService();
 
   if (!environmentConfig.UNIT_TESTING) {
+    logger.info('Loading NSFW tensor model...');
+    const start = Date.now();
+
     await tensorService.load();
+    logger.info(`NSFW tensor model loaded in ${((Date.now() - start) / 1000).toFixed(2)}s.`);
   }
 
   return tensorService;

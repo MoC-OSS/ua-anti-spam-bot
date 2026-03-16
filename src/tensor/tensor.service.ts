@@ -41,7 +41,11 @@ export const initTensor = async (s3Service?: S3Service) => {
   const tensorService = new TensorService('./temp/model.json', environmentConfig.TENSOR_RANK);
 
   if (!environmentConfig.UNIT_TESTING) {
+    logger.info('Loading spam tensor model...');
+    const start = Date.now();
+
     await tensorService.loadModel();
+    logger.info(`Spam tensor model loaded in ${((Date.now() - start) / 1000).toFixed(2)}s.`);
   }
 
   return tensorService;
