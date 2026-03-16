@@ -6,4 +6,6 @@ export const GOOGLE_SHEETS_NAMES = {
   STRATEGIC_NEGATIVE: 'NEGATIVE',
   STRATEGIC_POSITIVE: 'POSITIVE',
   STATISTICS: 'STATISTICS',
-};
+} as const;
+
+export type SheetNames = (typeof GOOGLE_SHEETS_NAMES)[keyof typeof GOOGLE_SHEETS_NAMES];

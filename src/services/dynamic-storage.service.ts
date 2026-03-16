@@ -89,9 +89,12 @@ export class DynamicStorageService {
 
   async init() {
     if (environmentConfig.DISABLE_GOOGLE_API) {
+      logger.info('Disabling GOOGLE_API');
+
       return;
     }
 
+    logger.info('Loading Storage Data from Google Sheets...');
     await this.updateStorage();
 
     setInterval(() => {

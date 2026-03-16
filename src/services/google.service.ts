@@ -8,6 +8,8 @@ import { JWT } from 'google-auth-library';
 import type { JWTInput } from 'google-auth-library/build/src/auth/credentials';
 import { google } from 'googleapis';
 
+import type { SheetNames } from '@const/google-sheets.const';
+
 import { environmentConfig } from '@shared/config';
 
 import type { GoogleFullCellData, GoogleShortCellData } from '@app-types/google';
@@ -52,16 +54,12 @@ export class GoogleService {
 
   /**
    * Fetches rows from a Google Sheets range and returns them as cell data objects.
-   * @param {string} spreadsheetId
-   * @param {string} sheetName
-   * @param {string} [range]
-   * @param {boolean} [compact=false]
    *
    * @returns {Promise<Record<string, any>[] | null>}
    * */
   async getSheet<T extends false | true = false>(
     spreadsheetId: string,
-    sheetName: string,
+    sheetName: SheetNames,
     range?: string,
     compact?: T,
   ): Promise<T extends true ? GoogleShortCellData[] : GoogleFullCellData[]> {
