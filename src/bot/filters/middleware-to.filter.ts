@@ -5,6 +5,7 @@ import type { GrammyContext, GrammyMiddleware } from '@app-types/context';
 /**
  * Converts a Grammy middleware into a boolean filter.
  * Runs the middleware and returns `true` if `next()` was called, `false` otherwise.
+ * @param middleware
  */
 export function middlewareToFilter(middleware: GrammyMiddleware) {
   let isNextCalled = false;

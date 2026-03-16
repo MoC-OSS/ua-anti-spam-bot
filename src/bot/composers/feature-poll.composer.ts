@@ -16,6 +16,8 @@ const pollId = 4080;
 
 /**
  * Sends a feature poll message to selected supergroups using rate-limited bulk sending.
+ * @param context
+ * @param sessions
  */
 async function bulkSending(context: GrammyContext, sessions: ChatSession[]) {
   return new Promise<void>((resolve) => {

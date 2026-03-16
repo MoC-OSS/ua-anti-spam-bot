@@ -4,8 +4,7 @@ import { DynamicStorageService } from '@services/dynamic-storage.service';
 import { logger } from '@utils/logger.util';
 
 /**
- * @type {DynamicStorageService}
- * */
+ */
 let dynamicStorageService: DynamicStorageService;
 
 describe('DynamicStorageService', () => {

@@ -4,8 +4,7 @@ import { SwindlersBotsService } from '@services/swindlers-bots.service';
 import { logger } from '@utils/logger.util';
 
 /**
- * @type {SwindlersBotsService}
- * */
+ */
 let swindlersBotsService: SwindlersBotsService;
 
 describe('SwindlersBotsService', () => {

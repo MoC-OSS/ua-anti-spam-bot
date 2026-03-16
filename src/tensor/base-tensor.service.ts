@@ -20,7 +20,7 @@ import { logger } from '@utils/logger.util';
 
 /**
  * Class that shares logic for tensor services
- * */
+ */
 export class BaseTensorService {
   model: LayersModel | null = null;
 
@@ -43,7 +43,6 @@ export class BaseTensorService {
 
   /**
    * Loads the model metadata (vocabulary and topology) from local JSON files.
-   *
    * @param modelPath - Relative path to the model JSON file.
    * @param vocabPath - Relative path to the vocabulary JSON file.
    */
@@ -65,7 +64,6 @@ export class BaseTensorService {
 
   /**
    * Updates the spam detection threshold used by {@link predict}.
-   *
    * @param newThreshold - New threshold value (ignored if falsy or non-numeric).
    */
   setSpamThreshold(newThreshold: number | string | null) {
@@ -83,7 +81,6 @@ export class BaseTensorService {
 
   /**
    * Runs the loaded ML model on a text message and returns a spam probability result.
-   *
    * @param word - The text to classify.
    * @param rate - Optional custom threshold override; falls back to the instance threshold.
    * @returns A promise resolving to the tensor prediction result with spam rate and verdict.
@@ -132,7 +129,6 @@ export class BaseTensorService {
   /**
    * Converts a text message into a fixed-length numeric tensor for model input.
    * Applies text optimization, dictionary lookup, and START/UNKNOWN/PAD encoding.
-   *
    * @param message - The raw text to tokenize.
    * @returns An object with the token array and the corresponding TensorFlow tensor.
    */

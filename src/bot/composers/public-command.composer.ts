@@ -14,8 +14,10 @@ export interface PublicCommandsComposerProperties {
 }
 
 /**
+ * @param root0
+ * @param root0.startTime
  * @description Public commands that are available for users
- * */
+ */
 export const getPublicCommandsComposer = ({ startTime }: PublicCommandsComposerProperties) => {
   const publicCommandsComposer = new Composer<GrammyContext>();
 

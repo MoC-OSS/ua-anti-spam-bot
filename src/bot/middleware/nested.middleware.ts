@@ -4,9 +4,9 @@ import type { GrammyContext, GrammyMiddleware } from '@app-types/context';
 
 /**
  * Composes multiple middlewares sequentially, stopping at the first one that does not call next.
- * @param {GrammyMiddleware} middlewares
- * @returns {GrammyMiddleware}
- * */
+ * @param middlewares
+ * @returns
+ */
 export const nestedMiddleware =
   (...middlewares: GrammyMiddleware[]) =>
   async (context: GrammyContext, next: NextFunction) => {

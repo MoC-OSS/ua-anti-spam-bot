@@ -47,17 +47,14 @@ export class SwindlersGoogleService {
   /**
    *
    * @namespace Basic methods
-   *
-   * */
+   */
 
   /**
    * Fetches data from the swindlers spreadsheet for the given range.
-   * @private
-   * @param {string} range - range from {this.ranges}
-   * @param {boolean} [compact=true]
-   *
+   * @param range - range from {this.ranges}
+   * @param [compact]
    * @returns Promise<Record<string, any>[] | null>
-   * */
+   */
   getSheet<T extends false | true = true>(range: string, compact: T) {
     const isCompact = compact === undefined ? (true as T) : compact;
 
@@ -66,40 +63,37 @@ export class SwindlersGoogleService {
 
   /**
    * Clears swindler data in the specified sheet range.
-   * @private
-   * @param {string} range - range from {this.ranges}
-   * */
+   * @param range - range from {this.ranges}
+   */
   clearSheet(range: string) {
     return this.googleService.clearSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, GOOGLE_SHEETS_NAMES.SWINDLERS, range);
   }
 
   /**
    * Overwrites swindler data in the specified sheet range.
-   * @private
-   * @param {string} range - range from {this.ranges}
-   * @param {string[]} values - values to set
-   *
+   * @param range - range from {this.ranges}
+   * @param values - values to set
    * @returns Promise<any>
-   * */
+   */
   updateSheet(range: string, values: string[]) {
     return this.googleService.updateSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, GOOGLE_SHEETS_NAMES.SWINDLERS, values, range);
   }
 
   /**
    * Appends a single value to the swindlers sheet at the given range.
-   * @private
-   * @param {string} range - range from {this.ranges}
-   * @param {string} value - value to append
-   *
+   * @param range - range from {this.ranges}
+   * @param value - value to append
    * @returns Promise<any>
-   * */
+   */
   appendToSheet(range: string, value: string) {
     return this.googleService.appendToSheet(environmentConfig.GOOGLE_SPREADSHEET_ID, GOOGLE_SHEETS_NAMES.SWINDLERS, value, range);
   }
 
   /**
+   * @param range
+   * @param value
    * @description Fixes a problem append
-   * */
+   */
   async smartAppendToSheet(range: string, value: string) {
     const values = await this.getSheet(range, true);
 
@@ -116,8 +110,7 @@ export class SwindlersGoogleService {
   /**
    *
    * @namespace Training cases
-   *
-   * */
+   */
 
   getTrainingNegatives() {
     return this.getSheet(this.ranges.TRAINING_NEGATIVES, true);
@@ -125,8 +118,8 @@ export class SwindlersGoogleService {
 
   /**
    * Updates the training negative cases in the swindlers sheet.
-   * @param {string[]} cases - cases to update
-   * */
+   * @param cases - cases to update
+   */
   updateTrainingNegatives(cases: string[]) {
     return this.updateSheet(this.ranges.TRAINING_NEGATIVES, cases);
   }
@@ -143,16 +136,16 @@ export class SwindlersGoogleService {
 
   /**
    * Updates the training positive cases in the swindlers sheet.
-   * @param {string[]} cases - cases to update
-   * */
+   * @param cases - cases to update
+   */
   updateTrainingPositives(cases: string[]) {
     return this.updateSheet(this.ranges.TRAINING_POSITIVES, cases);
   }
 
   /**
    * Appends a single training positive case to the swindlers sheet.
-   * @param {string} singleCase - case to append
-   * */
+   * @param singleCase - case to append
+   */
   async appendTrainingPositives(singleCase: string) {
     const values = await this.getTrainingPositives(false);
     const lastPosition = (values.at(-1)?.index || 0) + 1;
@@ -167,8 +160,7 @@ export class SwindlersGoogleService {
   /**
    *
    * @namespace Bots
-   *
-   * */
+   */
 
   getBots() {
     return this.getSheet(this.ranges.BOTS, true);
@@ -180,7 +172,7 @@ export class SwindlersGoogleService {
 
   /**
    * Overwrites the swindler bots list in the sheet.
-   * @param {string[]} bots
+   * @param bots
    */
   updateBots(bots: string[]) {
     return this.updateSheet(this.ranges.BOTS, bots);
@@ -193,8 +185,7 @@ export class SwindlersGoogleService {
   /**
    *
    * @namespace Domains
-   *
-   * */
+   */
 
   getDomains() {
     return this.getSheet(this.ranges.DOMAINS, true);
@@ -202,7 +193,7 @@ export class SwindlersGoogleService {
 
   /**
    * Overwrites the swindler domains list in the sheet.
-   * @param {string[]} domains
+   * @param domains
    */
   updateDomains(domains: string[]) {
     return this.updateSheet(this.ranges.DOMAINS, domains);
@@ -211,8 +202,7 @@ export class SwindlersGoogleService {
   /**
    *
    * @namespace Testing cases
-   *
-   * */
+   */
 
   getTestingNegatives() {
     return this.getSheet(this.ranges.TESTING_NEGATIVES, true);
@@ -220,8 +210,8 @@ export class SwindlersGoogleService {
 
   /**
    * Updates the testing negative cases in the swindlers sheet.
-   * @param {string[]} cases - cases to update
-   * */
+   * @param cases - cases to update
+   */
   updateTestingNegatives(cases: string[]) {
     return this.updateSheet(this.ranges.TESTING_NEGATIVES, cases);
   }
@@ -236,8 +226,8 @@ export class SwindlersGoogleService {
 
   /**
    * Updates the testing positive cases in the swindlers sheet.
-   * @param {string[]} cases - cases to update
-   * */
+   * @param cases - cases to update
+   */
   updateTestingPositives(cases: string[]) {
     return this.updateSheet(this.ranges.TESTING_POSITIVES, cases);
   }
@@ -249,8 +239,7 @@ export class SwindlersGoogleService {
   /**
    *
    * @namespace Sites
-   *
-   * */
+   */
 
   getSites() {
     return this.getSheet(this.ranges.SITES, true);
@@ -258,7 +247,7 @@ export class SwindlersGoogleService {
 
   /**
    * Overwrites the swindler sites list in the sheet.
-   * @param {string[]} sites
+   * @param sites
    */
   updateSites(sites: string[]) {
     return this.updateSheet(this.ranges.SITES, sites);
@@ -267,8 +256,7 @@ export class SwindlersGoogleService {
   /**
    *
    * @namespace Users
-   *
-   * */
+   */
 
   getUsers() {
     return this.getSheet(this.ranges.USERS, true);
@@ -277,8 +265,7 @@ export class SwindlersGoogleService {
   /**
    *
    * @namespace Cards
-   *
-   * */
+   */
 
   getCards() {
     return this.getSheet(this.ranges.CARDS, true);
@@ -286,7 +273,7 @@ export class SwindlersGoogleService {
 
   /**
    * Overwrites the swindler cards list in the sheet.
-   * @param {string[]} cards
+   * @param cards
    */
   updateCards(cards: string[]) {
     return this.updateSheet(this.ranges.CARDS, cards);
@@ -295,8 +282,7 @@ export class SwindlersGoogleService {
   /**
    *
    * @namespace Not swindlers
-   *
-   * */
+   */
 
   getNotSwindlers() {
     return this.getSheet(this.ranges.NOT_SWINDLERS, true);
@@ -305,8 +291,7 @@ export class SwindlersGoogleService {
   /**
    *
    * @namespace Site regex
-   *
-   * */
+   */
 
   getSiteRegex() {
     return this.getSheet(this.ranges.SITE_REGEX, true);

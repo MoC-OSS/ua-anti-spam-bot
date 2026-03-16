@@ -63,10 +63,10 @@ export class DynamicStorageService {
 
   /**
    * Initializes the dynamic storage with Google service clients and a local dataset fallback.
-   * @param {SwindlersGoogleService} swindlersGoogleService
-   * @param {GoogleService} googleService
-   * @param {any} localDataset
-   * */
+   * @param swindlersGoogleService
+   * @param googleService
+   * @param localDataset
+   */
   constructor(
     private swindlersGoogleService: SwindlersGoogleService,
     private googleService: GoogleService,

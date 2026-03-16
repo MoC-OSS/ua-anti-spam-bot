@@ -34,10 +34,10 @@ const startsWith = [
 const mentionRegexp = /\B@\w+/g;
 
 /**
- * @param {SwindlersUrlsService} swindlersUrlsService
- * @param {Record<string, any>[]} savedSwindlersUrls
- * @param {string[]} swindlers
- * */
+ * @param swindlersUrlsService
+ * @param savedSwindlersUrls
+ * @param swindlers
+ */
 async function processUrls(swindlersUrlsService: SwindlersUrlsService, savedSwindlersUrls: string[], swindlers: string[]) {
   const notMatchedDomains: string[] = [];
 
@@ -52,8 +52,8 @@ async function processUrls(swindlersUrlsService: SwindlersUrlsService, savedSwin
     })
     .map(
       /**
-       * @param {string} url
-       * */
+       * @param url
+       */
       (url) => {
         const urlDomain = urlService.getUrlDomain(url);
         const validUrl = url.endsWith('/') ? url : `${url}/`;
@@ -84,13 +84,13 @@ async function processUrls(swindlersUrlsService: SwindlersUrlsService, savedSwin
 }
 
 /**
- * @param {SwindlersUrlsService} swindlersUrlsService
- * @param {SwindlersCardsService} swindlersCardsService
- * @param {string[]} swindlers
- * @param {string[]} swindlersBots
- * @param {string[]} swindlersCards
- * @param {string[]} swindlersUsers
- * */
+ * @param swindlersUrlsService
+ * @param swindlersCardsService
+ * @param swindlers
+ * @param swindlersBots
+ * @param swindlersCards
+ * @param swindlersUsers
+ */
 export const autoSwindlers = async (
   swindlersUrlsService: SwindlersUrlsService,
   swindlersCardsService: SwindlersCardsService,
@@ -99,6 +99,11 @@ export const autoSwindlers = async (
   swindlersCards: string[],
   swindlersUsers: string[],
 ) => {
+  /**
+   *
+   * @param items
+   * @param pattern
+   */
   function findSwindlersByPattern(items: string[], pattern: RegExp | string) {
     // eslint-disable-next-line sonarjs/prefer-regexp-exec
     return removeDuplicates([...items, ...swindlers.flatMap((message) => message.match(pattern) || [])]).filter(

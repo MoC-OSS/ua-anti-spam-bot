@@ -6,7 +6,9 @@ import { logSkipMiddleware } from '@utils/generic.util';
 
 /**
  * Used for performance checking
- * */
+ * @param context
+ * @param next
+ */
 export function botActiveMiddleware(context: GrammyContext, next: NextFunction) {
   // TODO use for ctx prod debug
   // console.info('enter botActiveMiddleware ******', ctx.chat?.title, '******', ctx.state.text);

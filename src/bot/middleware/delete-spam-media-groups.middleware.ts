@@ -9,7 +9,9 @@ import type { GrammyContext } from '@app-types/context';
  *
  * If the message is part of a media group and the media group is spam,
  * then delete this message.
- * */
+ * @param context
+ * @param next
+ */
 export async function deleteSpamMediaGroupMiddleware(context: GrammyContext, next: NextFunction) {
   const isMediaGroup = context.message?.media_group_id;
 

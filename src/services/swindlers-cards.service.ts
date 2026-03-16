@@ -20,8 +20,7 @@ export class SwindlersCardsService {
 
   /**
    * Checks whether the given card number is in the swindler blacklist.
-   *
-   * @param {string} name
+   * @param name
    */
   isSpam(name: string): boolean {
     return this.cards.includes(name);
@@ -29,8 +28,7 @@ export class SwindlersCardsService {
 
   /**
    * Parses card numbers from the message and checks them against the blacklist.
-   *
-   * @param {string} message - raw message from user to parse
+   * @param message - raw message from user to parse
    */
   processMessage(message: string): true | null {
     const cards = cardsService.parseCards(message);

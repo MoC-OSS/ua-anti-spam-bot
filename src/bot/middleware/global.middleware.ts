@@ -18,14 +18,14 @@ export class GlobalMiddleware {
   /**
    * Global middleware.
    * Checks some bot information and updates the session
-   * */
+   */
   middleware(): GrammyMiddleware {
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context: GrammyContext, next: NextFunction) => {
       /**
        * Channels doesn't have session.
        * TODO create a middleware to skip it
-       * */
+       */
       if (!context.chatSession || !context.session) {
         if (environmentConfig.DEBUG && context.chat?.type !== 'channel') {
           handleError(new Error('No session'), 'SESSION_ERROR');
@@ -41,7 +41,10 @@ export class GlobalMiddleware {
     };
   }
 
-  /** Updates chat metadata (type, title, members count) and initializes default chat settings if missing. */
+  /**
+   * Updates chat metadata (type, title, members count) and initializes default chat settings if missing.
+   * @param context
+   */
   async updateChatInfo(context: GrammyContext) {
     const leftStatuses = new Set<ChatMember['status']>(['left', 'kicked']);
 
@@ -84,13 +87,13 @@ export class GlobalMiddleware {
 
   /**
    * Updates bot admin status and removal flags when chat session values are missing.
-   * @param {GrammyContext} context
-   * */
+   * @param context
+   */
   async updateChatSessionIfEmpty(context: GrammyContext) {
     /**
      * Private always not kicked and admin
      * TODO handle private ban
-     * */
+     */
     if (context.chat?.type === 'private') {
       context.chatSession.botRemoved = false;
       context.chatSession.isBotAdmin = true;
@@ -100,7 +103,7 @@ export class GlobalMiddleware {
 
     /**
      * Handle no remove status
-     * */
+     */
     // eslint-disable-next-line sonarjs/different-types-comparison
     if (context.chatSession.botRemoved === undefined) {
       await context
@@ -115,7 +118,7 @@ export class GlobalMiddleware {
 
     /**
      * Handle no bot admin status
-     * */
+     */
     if (context.chatSession.isBotAdmin === undefined) {
       await context
         .getChatAdministrators()

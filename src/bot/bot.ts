@@ -120,13 +120,13 @@ const rootMenu = new Menu<GrammyMenuContext>('root');
 /**
  * Gets main bot instance.
  * Disables redis logic if used in unit testing
- *
+ * @param bot
  * @example
  * ```ts
  * const initialBot = new Bot<GrammyContext>(environmentConfig?.BOT_TOKEN);
  * const bot = await getBot(initialBot);
  * ```
- * */
+ */
 export const getBot = async (bot: Bot<GrammyContext>) => {
   if (!environmentConfig.UNIT_TESTING) {
     await redisClient.client.connect().then(() => logger.info('Redis client successfully started'));

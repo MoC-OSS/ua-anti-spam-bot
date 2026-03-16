@@ -20,7 +20,7 @@ export default [
        * - A lot of projects still supported IE11 / very old Chrome/Firefox/Safari.
        * - Babel transpiled for...of & generators to ES5.
        * - That required regenerator-runtime, which was relatively heavy.
-       * */
+       */
       'no-restricted-syntax': 'off',
     },
   },

@@ -74,12 +74,11 @@ export class UpdatesCommand {
 
   /**
    * Sends a message to all given chat sessions with rate limiting and progress tracking.
-   * @param {GrammyContext} context
-   * @param {ChatSession[]} sessions
-   * @param {string} type
-   *
-   * @returns {Promise<void>}
-   * */
+   * @param context
+   * @param sessions
+   * @param type
+   * @returns
+   */
   bulkSending(context: GrammyContext, sessions: ChatSession[], type: string) {
     return new Promise<void>((resolve) => {
       const limiter = new Bottleneck({

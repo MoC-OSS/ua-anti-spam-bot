@@ -4,6 +4,9 @@ import { TestTensorListener } from '@bot/listeners/test-tensor.listener';
 
 import { googleService } from '@services/google.service';
 
+/**
+ *
+ */
 vi.mock('@grammyjs/menu', () => ({
   // Must be a regular function (not arrow) so `new Menu(...)` works as a constructor.
   Menu: vi.fn().mockImplementation(function mockMenu(this: any) {
@@ -73,7 +76,10 @@ const mockTensorService = {
   predict: vi.fn().mockResolvedValue({ isSpam: false, spamRate: 0.1 }),
 } as any;
 
-/** Minimal context for getStorageKey / initTensorSession tests. */
+/**
+ * Minimal context for getStorageKey / initTensorSession tests.
+ * @param overrides
+ */
 function buildContext(overrides: Record<string, any> = {}): any {
   return {
     chat: { id: -100 },
@@ -87,6 +93,7 @@ function buildContext(overrides: Record<string, any> = {}): any {
 /**
  * Richer context needed for button-handler and finalMiddleware tests.
  * `fromOverrides` are merged into callbackQuery.from.
+ * @param fromOverrides
  */
 function buildFullContext(fromOverrides: Record<string, any> = {}): any {
   return {

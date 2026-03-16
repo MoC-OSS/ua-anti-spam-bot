@@ -3,7 +3,9 @@ import type { StateEntity } from '@app-types/state';
 
 /**
  * It parses the value of entities and save it into the state
- * */
+ * @param context
+ * @param next
+ */
 export const parseEntities: GrammyMiddleware = (context, next) => {
   const { text } = context.state;
 

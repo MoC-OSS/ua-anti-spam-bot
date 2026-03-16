@@ -6,10 +6,8 @@
 
 /**
  * Formats a Date into a full Ukrainian date-time string.
- *
  * @param date - The date to format.
  * @returns A formatted date string using Ukrainian locale with full date and long time style.
- *
  * @example
  * ```ts
  * formatDate(new Date()); // "середа, 15 березня 2026 р. о 15:00:03 за східноєвропейським стандартним часом"
@@ -22,7 +20,6 @@ export function formatDate(date: Date): string {
 /**
  * Formats a Date into an accusative-case Ukrainian string.
  * Converts nominative day names to accusative where Ukrainian grammar requires it.
- *
  * @param date - The date to format.
  * @returns A formatted date string with accusative day names.
  */
@@ -36,7 +33,6 @@ export function formatDateIntoAccusative(date: Date): string {
 
 /**
  * Checks whether `compareDate` is more than `hours` after `initialDate`.
- *
  * @param initialDate - The starting date.
  * @param compareDate - The date to compare against.
  * @param hours - The offset in hours.

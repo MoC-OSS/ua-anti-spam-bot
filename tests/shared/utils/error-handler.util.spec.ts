@@ -16,6 +16,10 @@ vi.mock('@utils/optimize-write-context.util', () => ({
   optimizeWriteContextUtility: vi.fn(() => ({ update: {}, state: {} })),
 }));
 
+/**
+ *
+ * @param apiOverrides
+ */
 function buildMockContext(apiOverrides: Record<string, unknown> = {}): any {
   return {
     update: { update_id: 42 },

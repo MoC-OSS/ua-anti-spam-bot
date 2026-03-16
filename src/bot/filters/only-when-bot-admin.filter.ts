@@ -2,8 +2,9 @@ import type { GrammyFilter } from '@app-types/context';
 
 /**
  * Filter that passes only when the bot has admin status and the message is after promotion.
- * @returns {true} when bot is admin
- * */
+ * @param context
+ * @returns when bot is admin
+ */
 export const onlyWhenBotAdminFilter: GrammyFilter = (context) => {
   if (context.chat?.type === 'private') {
     return true;

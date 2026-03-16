@@ -27,8 +27,13 @@ export interface PrivateCommandsComposerProperties {
 }
 
 /**
+ * @param root0
+ * @param root0.bot
+ * @param root0.commandSetter
+ * @param root0.dynamicStorageService
+ * @param root0.startTime
  * @description Public commands that are available for users
- * */
+ */
 export const getPrivateCommandsComposer = ({ bot, commandSetter, dynamicStorageService, startTime }: PrivateCommandsComposerProperties) => {
   const privateCommandsComposer = new Composer<GrammyContext>();
 

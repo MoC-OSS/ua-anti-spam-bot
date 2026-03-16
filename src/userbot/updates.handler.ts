@@ -40,17 +40,16 @@ export class UpdatesHandler {
 
   /**
    * Initializes the handler with all required services and dataset extras.
-   *
-   * @param {MtProtoClient} mtProtoClient
-   * @param {SetNonNullable<ChatPeers, keyof ChatPeers>} chatPeers
-   * @param {TensorService} tensorService
-   * @param {SwindlersTensorService} swindlersTensorService
-   * @param {DynamicStorageService} dynamicStorageService
-   * @param {SwindlersBotsService} swindlersBotsService
-   * @param {UserbotStorage} userbotStorage
-   * @param {SwindlersDetectService} swindlersDetectService
+   * @param mtProtoClient
+   * @param chatPeers
+   * @param tensorService
+   * @param swindlersTensorService
+   * @param dynamicStorageService
+   * @param swindlersBotsService
+   * @param userbotStorage
+   * @param swindlersDetectService
    * @param datasetExtras
-   * */
+   */
   constructor(
     private mtProtoClient: MtProtoClient,
     private chatPeers: SetNonNullable<ChatPeers, keyof ChatPeers>,
@@ -71,10 +70,9 @@ export class UpdatesHandler {
 
   /**
    * Filters raw Telegram updates for new or edited channel messages.
-   *
-   * @param {ProtoUpdate} updateInfo
-   * @param {(string: string) => any} callback
-   * */
+   * @param updateInfo
+   * @param callback
+   */
   filterUpdate(updateInfo: ProtoUpdate, callback: (string: string) => void) {
     const allowedTypes = new Set(['updateEditChannelMessage', 'updateNewChannelMessage']);
 
@@ -93,9 +91,8 @@ export class UpdatesHandler {
 
   /**
    * Analyzes a message for swindler content and reports matches.
-   *
-   * @param {string} message
-   * */
+   * @param message
+   */
   async handleSwindlers(message: string) {
     const finalMessage = removeSystemInformationUtility(message);
     const matchArray = new Set<SwindlerType>(['tensor', 'site', 'mention']);
@@ -106,10 +103,9 @@ export class UpdatesHandler {
 
     /**
      * Processes a confirmed swindler match by logging and forwarding the message.
-     *
-     * @param {number} spamRate
-     * @param {SwindlerType} from
-     * */
+     * @param spamRate
+     * @param from
+     */
     const processFoundSwindler = async (spamRate: number, from: SwindlerType) => {
       logger.info(true, from, spamRate, message);
 
@@ -163,7 +159,7 @@ export class UpdatesHandler {
 
     /**
      * Help try
-     * */
+     */
     const isHelp = this.swindlersTopUsed.some((item) => finalMessage.toLowerCase().includes(item));
 
     if (isHelp) {
@@ -182,9 +178,8 @@ export class UpdatesHandler {
 
   /**
    * Processes a message for tensor training data collection.
-   *
-   * @param {string} message
-   * */
+   * @param message
+   */
   async handleTraining(message: string) {
     let clearMessageText = message;
     const deleteFromMessagePath = './from-entities.json';

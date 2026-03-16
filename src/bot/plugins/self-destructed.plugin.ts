@@ -18,7 +18,9 @@ export type SelfDestructedFlavor<TContext extends Context> = TContext & {
 /**
  * Default callback.
  * Just removes the sent message.
- * */
+ * @param context
+ * @param replyResult
+ */
 const defaultDeleteCallback = async <TContext extends Context>(
   context: TContext,
   replyResult: Message.PhotoMessage | Message.TextMessage,
@@ -31,7 +33,11 @@ export type SelfDestructedCallback = typeof defaultDeleteCallback;
 
 /**
  * Build delete reply with parse modes
- * */
+ * @param context
+ * @param timeout
+ * @param callback
+ * @param parseMode
+ */
 const buildReplyWithParseMode =
   <TContext extends Context>(
     context: SelfDestructedFlavor<TContext>,
@@ -54,7 +60,11 @@ const buildReplyWithParseMode =
 
 /**
  * Build delete reply with parse modes
- * */
+ * @param context
+ * @param timeout
+ * @param callback
+ * @param parseMode
+ */
 const buildReplyPhotoWithParseMode =
   <TContext extends Context>(
     context: SelfDestructedFlavor<TContext>,
@@ -78,12 +88,9 @@ const buildReplyPhotoWithParseMode =
 // eslint-disable-next-line no-secrets/no-secrets
 /**
  * Delete message after specified timeout.
- *
  * @param timeout - timeout to wait before delete the sent message
  * @param callback - custom callback to call when message should be deleted
- *
  * @returns a regular grammy middleware
- *
  * @example
  * ```ts
  * type AppContext = ReplyWithSelfDestructedMessageFlavor<Context>;
@@ -104,7 +111,7 @@ const buildReplyPhotoWithParseMode =
  *
  * bot.on(':text', (context) => context.replyWithSelfDestructedMessage('text'));
  * ```
- * */
+ */
 export const selfDestructedReply =
   (timeout = 60_000, callback: SelfDestructedCallback = defaultDeleteCallback) =>
   <TContext extends Context>(context: SelfDestructedFlavor<TContext>, next: NextFunction) => {

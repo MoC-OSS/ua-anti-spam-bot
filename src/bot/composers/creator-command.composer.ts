@@ -23,8 +23,12 @@ export interface CreatorCommandsComposerProperties {
 }
 
 /**
+ * @param root0
+ * @param root0.commandSetter
+ * @param root0.rootMenu
+ * @param root0.tensorService
  * @description Public commands that are available for users
- * */
+ */
 export const getCreatorCommandsComposer = ({ commandSetter, rootMenu, tensorService }: CreatorCommandsComposerProperties) => {
   const creatorCommandsComposer = new Composer<GrammyContext>();
 

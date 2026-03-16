@@ -57,15 +57,14 @@ export class SwindlersUrlsService {
   /**
    * @description
    * Create and saves FuzzySet based on latest data from dynamic storage
-   * */
+   */
   initFuzzySet() {
     this.swindlersFuzzySet = FuzzySet(this.dynamicStorageService.swindlerDomains);
   }
 
   /**
    * Scans the message for URLs and checks each against swindler detection rules.
-   *
-   * @param {string} message - raw message from user to parse
+   * @param message - raw message from user to parse
    */
   async processMessage(message: string): Promise<SwindlersBaseResult | SwindlersUrlsResult | null> {
     const urls = urlService.parseUrls(message);
@@ -91,9 +90,8 @@ export class SwindlersUrlsService {
 
   /**
    * Resolves a URL (following redirects) and checks it against the swindler database.
-   *
-   * @param {string} url
-   * @param {number} [customRate]
+   * @param url
+   * @param [customRate]
    */
   async isSpamUrl(url: string, customRate?: number): Promise<SwindlersBaseResult | SwindlersUrlsResult> {
     if (!url) {
@@ -105,13 +103,16 @@ export class SwindlersUrlsService {
 
     /**
      * @see https://loige.co/unshorten-expand-short-urls-with-node-js/
-     * */
+     */
     const redirectUrl = SHORTS.includes(urlService.getUrlDomain(url).slice(0, -1))
       ? await axios
           .get(url, { maxRedirects: 0 })
           .then(() => url)
           .catch(
-            /** Handles redirect/connection errors when resolving URL redirects. */
+            /**
+             * Handles redirect/connection errors when resolving URL redirects.
+             * @param error
+             */
             (error: NodeJS.ErrnoException & AxiosError) => {
               if (error.code === 'ENOTFOUND' && error.syscall === 'getaddrinfo') {
                 return url;

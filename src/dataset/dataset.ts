@@ -17,7 +17,9 @@ import { obsceneDictionary } from './dataset-obscene';
 
 /**
  * Load optional file or fallbacks to default value
- * */
+ * @param path
+ * @param defaultValue
+ */
 export async function loadOptionalFile<T>(path: string, defaultValue: T): Promise<T> {
   let resolvedFile = defaultValue;
 
@@ -35,7 +37,7 @@ export async function loadOptionalFile<T>(path: string, defaultValue: T): Promis
 /**
  * Load non-existing files into dataset.
  * Should be called before any project calls
- * */
+ */
 export async function loadUserbotDatasetExtras() {
   const swindlersTopUsed = await loadOptionalFile<Record<string, number>>('./strings/swindlers_top_used.json', {});
 
@@ -46,7 +48,7 @@ export async function loadUserbotDatasetExtras() {
 
 /**
  * Import all datasets
- * */
+ */
 logger.info('*0 Initing dataset...');
 
 export const dataset = {
@@ -68,7 +70,7 @@ export type DatasetKeys = keyof typeof dataset;
 
 /**
  * Freeze the object
- * */
+ */
 Object.freeze(dataset);
 
 logger.info('*0 Dataset is ready.');

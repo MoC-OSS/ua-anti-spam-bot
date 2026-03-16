@@ -14,13 +14,11 @@ import { messageUtility } from '@utils/util-instances.util';
 class ProcessHandler {
   /**
    * Matches a message against a dataset keyword list using fuzzy or strict matching.
-   *
-   * @param {string} message
-   * @param {DatasetKeys} datasetPath
-   * @param {boolean} strict
-   *
-   * @returns {string | null}
-   * */
+   * @param message
+   * @param datasetPath
+   * @param strict
+   * @returns
+   */
   processHandler(message: string, datasetPath: DatasetKeys, strict = false) {
     const words = dataset[datasetPath.replace('_$', '') as DatasetKeys] as string[];
 
@@ -39,11 +37,10 @@ class ProcessHandler {
 
   /**
    * Matches a single-word message against the dataset word list.
-   *
-   * @private
-   *
-   * @returns {string | null}
-   * */
+   * @param message
+   * @param words
+   * @returns
+   */
   processOneWordMessage(message: string, words: string[]) {
     const processedMessage = removeNumber(removeLatinPartialLetters(removeSpecialSymbols(message))).toLowerCase();
 

@@ -12,6 +12,7 @@ import { deepCopy } from './deep-copy.util';
  * serializable data — is deep-copied so that subsequent buffer-stripping mutations do not
  * affect the live context.  All other properties are shallow-referenced (sufficient for
  * read-only logging).
+ * @param context
  */
 export function optimizeWriteContextUtility(context: GrammyContext): RealGrammyContext {
   const writeContext = { ...context, state: deepCopy(context.state) } as RealGrammyContext;
@@ -21,7 +22,7 @@ export function optimizeWriteContextUtility(context: GrammyContext): RealGrammyC
 
   /**
    * Remove extra buffers to optimise the output log
-   * */
+   */
   if (writeContext.state.photo?.file) {
     writeContext.state.photo.file = Buffer.from([]);
   }

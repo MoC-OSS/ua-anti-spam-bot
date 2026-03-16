@@ -8,7 +8,7 @@ export type ChainFilter<TContext extends Context> = BooleanFilter<TContext> | Re
 
 /**
  * It helps to chain filters to simplify Grammy Composer's `filter` method logic.
- *
+ * @param filters
  * @example
  * ```ts
  * composer
@@ -19,7 +19,7 @@ export type ChainFilter<TContext extends Context> = BooleanFilter<TContext> | Re
  *       })(context),
  *     )
  * ```
- * */
+ */
 export function chainFilters<TContext extends Context>(...filters: AtLeastOneArgument<ChainFilter<TContext>>) {
   return (context: TContext): boolean => {
     for (const filter of filters) {
@@ -27,7 +27,7 @@ export function chainFilters<TContext extends Context>(...filters: AtLeastOneArg
       switch (typeof filter) {
         /**
          * Raw boolean value
-         * */
+         */
         case 'boolean': {
           if (!filter) {
             return false;
@@ -38,14 +38,14 @@ export function chainFilters<TContext extends Context>(...filters: AtLeastOneArg
 
         /**
          * Object that has booleans
-         * */
+         */
         case 'object': {
           return !Object.values(filter).some((value) => (typeof value === 'function' ? !value(context) : !value));
         }
 
         /**
          * Function that returns boolean
-         * */
+         */
         case 'function': {
           if (!filter(context)) {
             return false;

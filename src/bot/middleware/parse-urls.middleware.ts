@@ -7,9 +7,11 @@ import type { GrammyContext } from '@app-types/context';
 import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 /**
+ * @param context
+ * @param next
  * @description
  * Add URLs into state. Parses URLs from parsed text from state,
- * */
+ */
 export function parseUrls(context: GrammyContext, next: NextFunction) {
   if (context.state.text && !context.state.urls) {
     const parsedUrls = urlService.parseUrls(context.state.text, true);

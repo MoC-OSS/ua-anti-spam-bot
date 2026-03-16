@@ -9,6 +9,8 @@ import { logger } from '@utils/logger.util';
 /**
  * Short-circuits the middleware chain when the bot is deactivated via Redis.
  * Always allows messages through for the bot creator in private chat.
+ * @param context
+ * @param next
  */
 export const botRedisActive: GrammyMiddleware = async (context, next) => {
   const isDeactivated = await redisService.getIsBotDeactivated();

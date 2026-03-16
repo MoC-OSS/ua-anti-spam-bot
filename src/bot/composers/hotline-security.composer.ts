@@ -10,7 +10,7 @@ import { handleError } from '@utils/error-handler.util';
 
 /**
  * @description Health-check helper composer
- * */
+ */
 export const getHotlineSecurityComposer = () => {
   const hotlineSecurityComposer = new Composer<GrammyContext>();
 

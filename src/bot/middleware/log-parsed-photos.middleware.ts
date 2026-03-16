@@ -9,7 +9,9 @@ import type { GrammyMiddleware } from '@app-types/context';
 
 /**
  * Logs parsed photos
- * */
+ * @param context
+ * @param next
+ */
 export const logParsedPhotosMiddleware: GrammyMiddleware = async (context, next) => {
   const { photo, isDeleted } = context.state;
   const isValidToLog = onlyCreatorFilter(context) || (isPrivateChat(context) && environmentConfig.ENV !== 'production');

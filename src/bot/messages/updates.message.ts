@@ -2,6 +2,7 @@ import type { GrammyContext } from '@app-types/context';
 
 /**
  * Returns the prompt message asking what the user wants to send to all private chats.
+ * @param context
  */
 export const getUpdatesMessage = (context: GrammyContext) => context.t('updates-prompt');
 
@@ -14,6 +15,12 @@ export interface UpdateMessageProperties {
 
 /**
  * Returns a progress message for the updates broadcast operation.
+ * @param context
+ * @param root0
+ * @param root0.totalCount
+ * @param root0.finishedCount
+ * @param root0.successCount
+ * @param root0.type
  */
 export const getUpdateMessage = (context: GrammyContext, { totalCount, finishedCount, successCount, type }: UpdateMessageProperties) =>
   [
@@ -28,6 +35,10 @@ export interface SuccessfulMessageProperties {
 
 /**
  * Returns the final success message after the updates broadcast completes.
+ * @param context
+ * @param root0
+ * @param root0.totalCount
+ * @param root0.successCount
  */
 export const getSuccessfulMessage = (context: GrammyContext, { totalCount, successCount }: SuccessfulMessageProperties) =>
   [context.t('updates-done'), context.t('updates-done-count', { total: totalCount, success: successCount })].join('\n');

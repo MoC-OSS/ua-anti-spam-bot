@@ -8,18 +8,18 @@ export class SwindlersUpdateCommand {
   /**
    * Initializes the command with the dynamic storage service.
    * @param {DynamicStorageService} dynamicStorageService
-   * */
+   */
 
   constructor(private dynamicStorageService: DynamicStorageService) {}
 
   /**
    * Handle /swindlers_update
-   * */
+   */
   middleware() {
     /**
      * Handles the /swindlers_update command and refreshes the swindler storage.
-     * @param {GrammyContext} context
-     * */
+     * @param context
+     */
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context: GrammyContext) => {
       await context.reply(getSwindlersUpdateStartMessage(context)).then(async (message) => {

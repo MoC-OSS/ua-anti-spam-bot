@@ -37,7 +37,7 @@ export interface UpdatesEvents {
 /**
  * @description Service for handling Alarm API
  * @deprecated
- * */
+ */
 export class AlarmService {
   // TODO replace with event target
 
@@ -76,7 +76,7 @@ export class AlarmService {
 
   /**
    * Restarts the connection
-   * */
+   */
   restart() {
     // It will automatically disconnect and reconnect again.
     // We don't need to call extra disable
@@ -85,7 +85,8 @@ export class AlarmService {
 
   /**
    * Starts the connection
-   * */
+   * @param reason
+   */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   enable(reason: string) {
     // TODO replace this API with the new one
@@ -101,7 +102,8 @@ export class AlarmService {
 
   /**
    * Closes the connection
-   * */
+   * @param reason
+   */
   disable(reason: string) {
     if (this.source) {
       this.source.close();
@@ -119,7 +121,8 @@ export class AlarmService {
 
   /**
    * Creates SSE subscription to Alarm API events
-   * */
+   * @param reason
+   */
   subscribeOnNotifications(reason: string) {
     if (environmentConfig.DISABLE_ALARM_API) {
       return;
@@ -161,7 +164,7 @@ export class AlarmService {
       /**
        * SSE endpoint response
        * @see https://alerts.com.ua/en
-       * */
+       */
       const responseData = JSON.parse(event.data) as AlarmNotification | null;
 
       if (responseData) {

@@ -11,12 +11,12 @@ export class StartCommand {
    * Handle /start
    * Returns help message
    *
-   * */
+   */
   middleware(): GrammyMiddleware {
     /**
      * Handles the /start command and replies with a welcome message.
-     * @param {GrammyContext} context
-     * */
+     * @param context
+     */
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context) => {
       if (context.chat?.type === 'private') {

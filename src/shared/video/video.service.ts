@@ -9,13 +9,13 @@ import ffmpeg from 'fluent-ffmpeg';
 
 /**
  * Service that helps to work with video content
- * */
+ */
 export class VideoService {
   readonly saveFolderPath = new URL('temp/', import.meta.url);
 
   /**
    * Create a `ffmpeg` command with specified `ffmpeg` and `ffprobe` binaries
-   * */
+   */
   spawnCommand() {
     if (!ffmpegPath || !ffprobePath) {
       throw new Error('No ffmpeg');
@@ -31,11 +31,10 @@ export class VideoService {
 
   /**
    * Extracts evenly-spaced frames from an MP4 video buffer using ffmpeg.
-   *
    * @param video - MP4 buffer video
    * @param filename - name to save in fs, should include extension
    * @param duration - duration of the video
-   * */
+   */
   async extractFrames(video: Buffer, filename: string, duration?: number) {
     let localDuration = duration;
     const videoFile = new URL(filename, this.saveFolderPath);
@@ -55,7 +54,7 @@ export class VideoService {
       } catch {
         /**
          * This is not a video so there is no frames
-         * */
+         */
         return [];
       }
     }
@@ -65,9 +64,8 @@ export class VideoService {
 
   /**
    * Returns video stats such as duration, width, height, and other meta
-   *
    * @param videoFile - video to get meta
-   * */
+   */
   getVideoProbe(videoFile: URL): Promise<FfprobeData> {
     const command = this.spawnCommand();
 
@@ -77,7 +75,7 @@ export class VideoService {
   /**
    * Convert a video into a round video note square video.
    * Resizes it to 512x512 with auto paddings.
-   * */
+   */
   async convertToVideoNote(videoFile: URL, fileName: never): Promise<Buffer>;
 
   async convertToVideoNote(videoFile: Buffer, fileName: string): Promise<Buffer>;
@@ -89,13 +87,13 @@ export class VideoService {
     if (videoFile instanceof URL) {
       /**
        * A regular file, just read it
-       * */
+       */
       videoPath = videoFile;
       outputVideoName = `${fileURLToPath(videoFile).split('/').splice(-1)[0]}-video-note.mp4`;
     } else {
       /**
        * Passed buffer, need to be saved and deleted after the operation
-       * */
+       */
       videoPath = new URL(`${fileName}.mp4`, this.saveFolderPath);
       outputVideoName = `${new Date().toString()}-video-note.mp4`;
       // eslint-disable-next-line security/detect-non-literal-fs-filename
@@ -124,7 +122,7 @@ export class VideoService {
 
     /**
      * Remove files from FS
-     * */
+     */
     // eslint-disable-next-line security/detect-non-literal-fs-filename
     await fsp.unlink(videoPath);
     // eslint-disable-next-line security/detect-non-literal-fs-filename
@@ -139,17 +137,16 @@ export class VideoService {
    * 1) It calls FFMPEG to capture screenshot on the passed timestamps;<br>
    * 2) FFMPEG generates them and saves in FS;<br>
    * 3) It reads these files, deletes, and returns them.
-   *
    * @param videoFile - video file path to process
    * @param filename - name to save in fs, should include extension
    * @param duration - duration of the video
-   * */
+   */
   async takeScreenshotsFs(videoFile: URL, filename: string, duration: number) {
     const command = this.spawnCommand();
 
     /**
      * Convert video into screenshots and return files
-     * */
+     */
     const fileNamePaths = await new Promise<string[]>((resolve) => {
       let localFileNames: string[] = [];
 
@@ -171,18 +168,18 @@ export class VideoService {
 
     /**
      * Join to have full paths
-     * */
+     */
     const fullFileNamePaths = fileNamePaths.map((filePath) => new URL(filePath, this.saveFolderPath));
 
     /**
      * Load files from FS
-     * */
+     */
     // eslint-disable-next-line security/detect-non-literal-fs-filename
     const screenshotBuffers = await Promise.all(fullFileNamePaths.map((fullPath) => fsp.readFile(fullPath)));
 
     /**
      * Remove files from FS
-     * */
+     */
     // eslint-disable-next-line security/detect-non-literal-fs-filename
     await Promise.all(fullFileNamePaths.map((fullPath) => fsp.unlink(fullPath)));
     // eslint-disable-next-line security/detect-non-literal-fs-filename

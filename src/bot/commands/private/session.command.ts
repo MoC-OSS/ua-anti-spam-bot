@@ -9,19 +9,19 @@ import type { GrammyMiddleware } from '@app-types/context';
 export class SessionCommand {
   /**
    * Initializes the session command with the bot start time.
-   * @param {Date} startTime
-   * */
+   * @param startTime
+   */
   constructor(private startTime: Date) {}
 
   /**
    * Handle /session
    * Returns session file
-   * */
+   */
   middleware(): GrammyMiddleware {
     /**
      * Handles the /session command and replies with a session dump file.
-     * @param {GrammyContext} context
-     * */
+     * @param context
+     */
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context) => {
       const chatId = context?.update?.message?.chat?.id;

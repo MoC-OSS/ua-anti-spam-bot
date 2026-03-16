@@ -10,7 +10,7 @@ import { forEach } from 'p-iteration';
  *
  * Deleted in
  * feat(UABOT-41): remove extra migration
- * */
+ */
 import Queue from 'queue-promise';
 
 import { logsChat } from '@bot/creator';
@@ -28,9 +28,9 @@ import { logger } from '@utils/logger.util';
 const getChatId = (sessionId: string) => sessionId.split(':')[0];
 
 /**
- * @param {Bot} bot
- * @param {Date} botStartDate
- * */
+ * @param bot
+ * @param botStartDate
+ */
 const migration = async (bot: Bot<GrammyContext>, botStartDate: Date) => {
   const compareDate = `${botStartDate.getFullYear()}-${botStartDate.getMonth() + 1}-${botStartDate.getDate()}`;
 
@@ -47,8 +47,7 @@ const migration = async (bot: Bot<GrammyContext>, botStartDate: Date) => {
   });
 
   /**
-   * @type {Session[]}
-   * */
+   */
   const userRecords = await redisService.getUserSessions();
 
   const uniqueUserRecords = userRecords.filter(
@@ -72,8 +71,7 @@ const migration = async (bot: Bot<GrammyContext>, botStartDate: Date) => {
     const chatId = getChatId(record.id);
 
     /**
-     * @type {ChatSessionData & SessionData}
-     * */
+     */
     let chatSessionRecord: Partial<ChatSessionData & SessionData> = {};
 
     const clearObject = (object: Partial<ChatSessionData & SessionData>) => {

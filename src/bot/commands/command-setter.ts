@@ -10,16 +10,16 @@ import { logger } from '@utils/logger.util';
 /**
  * Handles bot public available commands
  * @see https://grammy.dev/guide/commands.html#usage
- * */
+ */
 export class CommandSetter {
   commands: BotCommand[] = [];
 
   /**
    * Initializes the command setter with bot instance, start time, and active status.
-   * @param {Bot} bot
-   * @param {Date} startTime
-   * @param {boolean} active
-   * */
+   * @param bot
+   * @param startTime
+   * @param active
+   */
   constructor(
     private bot: Bot<GrammyContext>,
     private startTime: Date,
@@ -29,9 +29,8 @@ export class CommandSetter {
   /**
    * @description
    * Returns status depending on bot active status
-   *
-   * @returns {string}
-   * */
+   * @returns
+   */
   buildStatus() {
     const activeStatus = this.active ? '🟢 Онлайн' : '🔴 Офлайн';
 
@@ -40,7 +39,7 @@ export class CommandSetter {
 
   /**
    * Sets the active status and refreshes the bot commands list.
-   * @param {boolean} active
+   * @param active
    */
   async setActive(active: boolean) {
     this.active = active;
@@ -50,12 +49,12 @@ export class CommandSetter {
   /**
    * @description
    * Build new commands and set them into the bot
-   * */
+   */
   async updateCommands() {
     /**
      * List of available bot commands with descriptions.
      * @param {BotCommand[]}
-     * */
+     */
     this.commands = [
       { command: 'start', description: '🇺🇦 Почати роботу' },
       { command: 'help', description: '🙋🏻 Отримати допомогу' },

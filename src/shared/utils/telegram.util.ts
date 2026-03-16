@@ -16,33 +16,33 @@ import { getUserData } from './generic.util';
 export class TelegramUtility {
   /**
    * Checks if the message was forwarded from a linked channel rather than sent by a user.
-   *
-   * @param {GrammyContext} context
-   * @returns {boolean}
-   * */
+   * @param context
+   * @returns
+   */
   isFromChannel(context: GrammyContext): boolean {
     return context.from?.first_name === 'Channel' && context.from?.username === 'Channel_Bot';
   }
 
   /**
    * Returns the chat title, or a placeholder if unavailable.
-   * */
+   * @param chat
+   */
   getChatTitle(chat?: Chat): string {
     return (chat && 'title' in chat && chat.title) || '$title';
   }
 
   /**
    * Extracts the invite link from chat info, if available.
-   * */
+   * @param chatInfo
+   */
   getInviteLink(chatInfo: ChatFullInfo): string | undefined {
     return ('invite_link' in chatInfo && chatInfo.invite_link) || undefined;
   }
 
   /**
    * Fetches the chat administrators and returns the creator, promotable admins, and a formatted string.
-   *
-   * @param {GrammyContext} context
-   * @param {number} chatId
+   * @param context
+   * @param chatId
    */
   getChatAdmins(context: GrammyContext, chatId: number) {
     return context.api.getChatAdministrators(chatId).then((admins) => {
@@ -62,8 +62,7 @@ export class TelegramUtility {
 
   /**
    * Returns the user's @username mention, or their full name if no username is set.
-   *
-   * @param {User} user
+   * @param user
    */
   getUserMentionOrName(user: User): string {
     if (user.username) {
@@ -76,7 +75,8 @@ export class TelegramUtility {
 
   /**
    * Get logs message parts for save a message into logs
-   * */
+   * @param context
+   */
   async getLogsSaveMessageParts(context: GrammyContext) {
     const { writeUsername, userId } = getUserData(context);
     const chatInfo = await context.getChat();

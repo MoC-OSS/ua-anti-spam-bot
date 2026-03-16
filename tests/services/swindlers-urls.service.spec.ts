@@ -13,8 +13,7 @@ vi.mock('axios');
 const axiosMock = { get: vi.mocked(axios.get) };
 
 /**
- * @type {SwindlersUrlsService}
- * */
+ */
 let swindlersUrlsService: SwindlersUrlsService;
 
 describe('SwindlersUrlsService', () => {

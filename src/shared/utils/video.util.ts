@@ -15,13 +15,14 @@ import type {
 
 /**
  * Helps to manage video across the bot
- * */
+ */
 export class VideoUtility {
   private api!: GrammyBot['api'];
 
   /**
    * Way to parse video info from context
-   * */
+   * @param context
+   */
   private parsePhotoMap = new Map<ImageVideoTypes, (context: GrammyContext) => { video: StateVideoFormats; fileName: string | undefined }>([
     [
       ImageType.VIDEO,
@@ -71,22 +72,25 @@ export class VideoUtility {
 
   /**
    * Init the service
+   * @param api
    * @required
-   * */
+   */
   init(api: GrammyBot['api']) {
     this.api = api;
   }
 
   /**
    * Checks if context has a real parsed video
-   * */
+   * @param context
+   */
   isContextWithVideo(context: GrammyContext): boolean {
     return !!this.parsePhotoMap.get(context.state.photo?.type as ImageVideoTypes);
   }
 
   /**
    * Downloads a video from context object
-   * */
+   * @param context
+   */
   getVideo(context: GrammyContext) {
     const { video, fileName } = this.getVideoMeta(context);
 
@@ -95,7 +99,8 @@ export class VideoUtility {
 
   /**
    * Returns video meta including `video` and `fileName`
-   * */
+   * @param context
+   */
   getVideoMeta(context: GrammyContext) {
     const videoMethods = this.parsePhotoMap.get(context.state.photo?.type as ImageVideoTypes);
 
@@ -108,7 +113,9 @@ export class VideoUtility {
 
   /**
    * Downloads and returns the video
-   * */
+   * @param video
+   * @param fileName
+   */
   async downloadVideo(video: StateVideoFormats, fileName: string | undefined) {
     const videoName = `${video.file_unique_id}-${fileName?.toLowerCase() || 'unknown-type.mp4'}`;
 

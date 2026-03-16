@@ -60,6 +60,11 @@ vi.mock('@shared/config', () => ({
 // Helpers
 // ---------------------------------------------------------------------------
 
+/**
+ *
+ * @param spamRate
+ * @param deleteRank
+ */
 function createTensorResult(spamRate: number, deleteRank = 0.9) {
   return {
     spamRate,
@@ -73,6 +78,10 @@ const mockTensorService = {
   predict: vi.fn(),
 } as any;
 
+/**
+ *
+ * @param entities
+ */
 function buildMessageContext(entities?: unknown[]) {
   return {
     update: {

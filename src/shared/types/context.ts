@@ -23,7 +23,7 @@ export type GrammyMenuContext = GrammyContext & MenuFlavor;
 
 /**
  * Real object with hidden fields
- * */
+ */
 export type RealGrammyContext = GrammyContext & { tg: never; telegram: never; api: never };
 
 export type GrammyMiddleware<TContext extends GrammyContext = GrammyContext> = MiddlewareFn<TContext>;

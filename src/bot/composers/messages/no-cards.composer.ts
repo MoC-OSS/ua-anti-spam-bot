@@ -15,16 +15,16 @@ import { telegramUtility } from '@utils/util-instances.util';
 
 /**
  * @description Remove strategic information logic
- * */
+ */
 export const getNoCardsComposer = () => {
   const noCardsComposer = new Composer<GrammyContext>();
 
   /**
    * Logs a deleted card-containing message to the logs chat.
-   * @param {GrammyContext} context
-   * @param {string[]} cards
-   * @param {string} [message]
-   * */
+   * @param context
+   * @param cards
+   * @param [message]
+   */
   async function saveCardMessage(context: GrammyContext, cards: string[], message?: string) {
     const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const text = message || context.state?.text || '';

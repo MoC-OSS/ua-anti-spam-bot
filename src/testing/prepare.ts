@@ -7,7 +7,7 @@ import { OutgoingRequests } from './outgoing-requests';
 
 /**
  * Override api responses if needed
- * */
+ */
 export type ApiResponses = {
   [M in keyof RawApi]?: Partial<AsyncReturnType<RawApi[M]>>;
 };
@@ -16,7 +16,8 @@ export type ApiResponses = {
  * Prepares bot for testing.
  * Collects and mocks API requests.
  * Sets default bot info.
- *
+ * @param bot
+ * @param apiResponses
  * @example
  * ```ts
  * beforeAll(async () => {
@@ -26,7 +27,7 @@ export type ApiResponses = {
  *   });
  * }, 15_000);
  * ```
- * */
+ */
 export const prepareBotForTesting = async <
   TContext extends Context,
   TApi extends Api = Api,

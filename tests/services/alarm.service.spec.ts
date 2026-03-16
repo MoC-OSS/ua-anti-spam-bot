@@ -6,6 +6,9 @@ import { environmentConfig } from '@shared/config';
 const { createMockEventSource, getLastMockEsInstance } = vi.hoisted(() => {
   let lastInstance: any = null;
 
+  /**
+   *
+   */
   function createInstance() {
     const listeners: Record<string, ((...arguments_: any[]) => void)[]> = {};
 

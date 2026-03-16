@@ -5,7 +5,7 @@ import { mockContextField } from './mock-context-field';
 
 /**
  * Mock Session
- * */
+ */
 export interface MockSessionResult<
   TResult extends MockContextFieldReturnType<GrammyContext, 'session'> = MockContextFieldReturnType<GrammyContext, 'session'>,
 > {
@@ -20,7 +20,7 @@ export const mockSession = mockContextField<GrammyContext, 'session', MockSessio
 
 /**
  * Mock Chat Session
- * */
+ */
 export interface MockChatSessionResult<
   TResult extends MockContextFieldReturnType<GrammyContext, 'chatSession'> = MockContextFieldReturnType<GrammyContext, 'chatSession'>,
 > {
@@ -39,7 +39,7 @@ export const mockChatSession = mockContextField<GrammyContext, 'chatSession', Mo
 
 /**
  * Mock State
- * */
+ */
 export interface MockStateResult<
   TResult extends MockContextFieldReturnType<GrammyContext, 'state'> = MockContextFieldReturnType<GrammyContext, 'state'>,
 > {

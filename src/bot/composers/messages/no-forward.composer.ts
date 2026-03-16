@@ -8,7 +8,7 @@ import { getEnabledFeaturesString, getUserData } from '@utils/generic.util';
 
 /**
  * @description Remove strategic information logic
- * */
+ */
 export const getNoForwardsComposer = () => {
   const noForwardsComposer = new Composer<GrammyContext>();
 

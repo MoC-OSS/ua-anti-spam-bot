@@ -30,10 +30,9 @@ import { telegramUtility } from '@utils/util-instances.util';
 export class OnTextListener {
   /**
    * Initializes the listener with bot instance, start time, and message handler.
-   *
-   * @param {Bot} bot
-   * @param {Date} startTime
-   * @param {MessageHandler} messageHandler
+   * @param bot
+   * @param startTime
+   * @param messageHandler
    */
   constructor(
     private bot: Bot<GrammyContext>,
@@ -43,14 +42,13 @@ export class OnTextListener {
 
   /**
    * Handles every received message
-   * */
+   */
   middleware(): GrammyMiddleware {
     /**
      * Processes a text message through spam detection rules.
-     *
-     * @param {GrammyContext} context
-     * @param {NextFunction} next
-     * */
+     * @param context
+     * @param next
+     */
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context: GrammyContext, next: NextFunction) => {
       // TODO use for ctx prod debug
@@ -59,7 +57,7 @@ export class OnTextListener {
       const message = context.state.text;
       /**
        * Removed because ask to reduce chat messages
-       * */
+       */
       // if (slavaWords.some((word) => message.toLowerCase().includes(word.toLowerCase()))) {
       //   ctx.reply('Героям Слава! 🇺🇦', { reply_to_message_id: ctx?.update?.message?.message_id });
       // }

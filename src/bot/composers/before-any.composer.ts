@@ -9,7 +9,7 @@ import type { GrammyContext } from '@app-types/context';
 
 /**
  * @description Message handling composer
- * */
+ */
 export const getBeforeAnyComposer = () => {
   const beforeAnyComposer = new Composer<GrammyContext>();
 

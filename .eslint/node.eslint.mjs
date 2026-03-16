@@ -9,6 +9,7 @@ import airbnbBaseEslint from './node/airbnb-base.eslint.mjs';
 import customStyleEslint from './node/custom-style.eslint.mjs';
 import eslintRulesEslint from './node/eslint-rules.eslint.mjs';
 import importAliasEslint from './node/import-alias.eslint.mjs';
+import jsdocEslint from './node/jsdoc.eslint.mjs';
 import nConfig from './node/n.eslint.mjs';
 import namingEslint from './node/naming.eslint.mjs';
 import noBarrelFilesEslint from './node/no-barrel-files.eslint.mjs';
@@ -62,6 +63,8 @@ export default [
   ...airbnbBaseEslint,
   // Naming convention rules for TypeScript
   ...namingEslint,
+  // JSDoc rules with separate JS and TS presets
+  ...jsdocEslint,
   // Stylistic rules for JS/TS
   ...stylisticEslint,
   // Node.js best practices (eslint-plugin-n)

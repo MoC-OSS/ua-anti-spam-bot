@@ -20,15 +20,15 @@ import { telegramUtility } from '@utils/util-instances.util';
 
 /**
  * @description Remove strategic information logic
- * */
+ */
 export const getNoObsceneComposer = () => {
   const noObsceneComposer = new Composer<GrammyContext>();
 
   /**
    * Logs a deleted obscene message to the logs chat.
-   * @param {GrammyContext} context
-   * @param {SearchSetResult} searchResult
-   * */
+   * @param context
+   * @param searchResult
+   */
   async function saveObsceneMessage(context: GrammyContext, searchResult: SearchSetResult) {
     const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const text = context.state?.text || '';

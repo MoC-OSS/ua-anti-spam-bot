@@ -34,6 +34,9 @@ vi.mock('@utils/logger.util', () => ({
 
 const commandText = '/feature_poll';
 
+/**
+ *
+ */
 function getFeaturePollUpdate() {
   return new MessageMockUpdate(commandText).buildOverwrite({
     message: {
@@ -42,6 +45,11 @@ function getFeaturePollUpdate() {
   });
 }
 
+/**
+ *
+ * @param id
+ * @param membersCount
+ */
 function createSuperGroupSession(id: number, membersCount: number) {
   return {
     id: String(id),

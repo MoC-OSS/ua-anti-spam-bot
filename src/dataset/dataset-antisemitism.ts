@@ -7,7 +7,7 @@ import { processMessage, processTxtMessage } from './dataset-helpers';
 
 /**
  * Urls
- * */
+ */
 export const antisemitismDictionaryActionUrl = new URL('strings/antisemitism_action.txt', import.meta.url);
 
 export const antisemitismDictionaryNounsUrl = new URL('strings/antisemitism_nouns.txt', import.meta.url);
@@ -16,7 +16,8 @@ export const antisemitismDictionaryThreadsUrl = new URL('strings/antisemitism_th
 
 /**
  * Logic
- * */
+ * @param datasetUrl
+ */
 function processAntisemitismDictionary(datasetUrl: URL) {
   // eslint-disable-next-line security/detect-non-literal-fs-filename
   return processMessage(processTxtMessage(fs.readFileSync(datasetUrl).toString()).map((item) => removeRepeatedLettersUtility(item)));

@@ -8,7 +8,7 @@ import type { GrammyContext } from '@app-types/context';
 
 /**
  * @description Remove join and leave messages from chat
- * */
+ */
 export const getJoinLeaveComposer = () => {
   const joinLeaveComposer = new Composer<GrammyContext>();
 

@@ -28,7 +28,7 @@ import { logsChat } from './creator';
   /**
    * Tensorflow.js offers two flags, enableProdMode and enableDebugMode.
    * If you're going to use any TF model in production, be sure to enable prod mode before loading models.
-   * */
+   */
   if (environmentConfig.ENV === 'production') {
     tf.enableProdMode();
   }
@@ -68,7 +68,7 @@ import { logsChat } from './creator';
 
   /**
    * Check when the bot is run
-   * */
+   */
   if (!bot.isInited()) {
     await bot.init();
   }
@@ -86,7 +86,7 @@ import { logsChat } from './creator';
 
     /**
      * Enable alarm service only after bot is started
-     * */
+     */
     alarmService.updatesEmitter.on('connect', (reason) => {
       bot.api.sendMessage(logsChat, `🎉 Air Raid Alarm API has been started by ${reason} reason!`).catch(() => {
         logger.error('This bot is not authorized in this LOGS chat!');

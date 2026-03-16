@@ -31,8 +31,7 @@ export class SwindlersBotsService {
 
   /**
    * Checks the message for @-mentions matching known swindler bot usernames.
-   *
-   * @param {string} message - raw message from user to parse
+   * @param message - raw message from user to parse
    */
   processMessage(message: string): SwindlersBotsResult | null {
     const mentions = mentionService.parseMentions(message, this.exceptionMentions);
@@ -57,16 +56,15 @@ export class SwindlersBotsService {
   /**
    * @description
    * Create and saves FuzzySet based on latest data from dynamic storage
-   * */
+   */
   initFuzzySet() {
     this.swindlersBotsFuzzySet = FuzzySet(this.dynamicStorageService.swindlerBots);
   }
 
   /**
    * Checks whether a username matches a known swindler bot using fuzzy matching.
-   *
-   * @param {string} name
-   * @param {number} [customRate]
+   * @param name
+   * @param [customRate]
    */
   isSpamBot(name: string, customRate?: number): SwindlersBotsResult {
     const [[rate, nearestName]] = this.swindlersBotsFuzzySet.get(name) || [[0]];

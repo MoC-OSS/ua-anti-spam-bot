@@ -21,6 +21,10 @@ export interface SaveToSheetComposerProperties {
 
 /**
  * Composer that forwards messages to a Google Sheet with inline buttons to classify them as spam or not.
+ * @param root0
+ * @param root0.chatId
+ * @param root0.rootMenu
+ * @param root0.updateMethod
  */
 export const getSaveToSheetComposer = ({ chatId, rootMenu, updateMethod }: SaveToSheetComposerProperties) => {
   const saveToSheetComposer = new Composer<GrammyContext>();

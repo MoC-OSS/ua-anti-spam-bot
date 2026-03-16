@@ -14,6 +14,9 @@ export interface GenericBotProperties {
 
 /**
  * Returns a message confirming the bot has admin privileges and is ready.
+ * @param context
+ * @param root0
+ * @param root0.botName
  */
 export const getAdminReadyMessage = (context: GrammyContext, { botName }: GenericBotProperties) =>
   context.t('bot-admin-ready', { botName, helpChat });
@@ -28,6 +31,13 @@ export interface DeleteMessageProperties {
 
 /**
  * Returns the message that the bot sends when deleting a strategic/spam message.
+ * @param context
+ * @param root0
+ * @param root0.writeUsername
+ * @param root0.userId
+ * @param root0.wordMessage
+ * @param root0.debugMessage
+ * @param root0.withLocation
  */
 export const getDeleteMessage = (
   context: GrammyContext,
@@ -51,6 +61,11 @@ export interface DeleteFeatureMessageProperties {
 
 /**
  * Returns a message explaining why a message was deleted due to a feature rule.
+ * @param context
+ * @param root0
+ * @param root0.writeUsername
+ * @param root0.userId
+ * @param root0.featuresString
  */
 export const getDeleteFeatureMessage = (
   context: GrammyContext,
@@ -69,6 +84,10 @@ export interface GetDeleteNsfwMessageField {
 
 /**
  * Returns a message explaining why a message was deleted due to NSFW content.
+ * @param context
+ * @param root0
+ * @param root0.writeUsername
+ * @param root0.userId
  */
 export const getDeleteNsfwMessage = (context: GrammyContext, { writeUsername, userId }: GetDeleteNsfwMessageField) => {
   const atom =
@@ -84,6 +103,10 @@ export interface GetDeleteCounteroffensiveMessageField {
 
 /**
  * Returns a message explaining why a message was deleted due to counteroffensive content.
+ * @param context
+ * @param root0
+ * @param root0.writeUsername
+ * @param root0.userId
  */
 export const getDeleteCounteroffensiveMessage = (
   context: GrammyContext,
@@ -101,6 +124,9 @@ export interface CannotDeleteMessageProperties {
 
 /**
  * Returns a message indicating the bot cannot delete a message, with optional admin contact info.
+ * @param context
+ * @param root0
+ * @param root0.adminsString
  */
 export const getCannotDeleteMessage = (context: GrammyContext, { adminsString }: CannotDeleteMessageProperties) =>
   context.t('cannot-delete-message', { adminsString: adminsString ?? 'none' });

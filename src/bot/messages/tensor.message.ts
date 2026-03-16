@@ -7,6 +7,10 @@ export interface TensorTestResultProperties {
 
 /**
  * Returns the result of a tensor spam-detection test with chance and verdict.
+ * @param context
+ * @param root0
+ * @param root0.chance
+ * @param root0.isSpam
  */
 export const getTensorTestResult = (context: GrammyContext, { chance, isSpam }: TensorTestResultProperties) =>
   [

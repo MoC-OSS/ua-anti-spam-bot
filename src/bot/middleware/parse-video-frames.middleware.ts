@@ -16,21 +16,23 @@ import { videoService } from '@video/video.service';
 const host = `http://${environmentConfig.HOST}:${environmentConfig.PORT}`;
 
 /**
+ * @param context
+ * @param next
  * @description
  * Parse video frames and saves into `context.state.photo.fileFrames`
- * */
+ */
 export const parseVideoFrames: GrammyMiddleware = async (context, next) => {
   /**
    * @reason https://core.telegram.org/bots/faq#how-do-i-download-files
    * @workaround https://stackoverflow.com/questions/63410408/is-there-any-workarounds-for-downloading-files-20-mb-that-are-sent-to-bot-i
-   * */
+   */
   const MAX_VIDEO_SIZE = 20_000_000; // 20Mb
 
   const hasVideo = videoUtility.isContextWithVideo(context);
 
   /**
    * If no video in state
-   * */
+   */
   if (!hasVideo) {
     return next();
   }
@@ -44,7 +46,7 @@ export const parseVideoFrames: GrammyMiddleware = async (context, next) => {
 
   /**
    * Checks whatever is it video or animation and if it has a meta.
-   * */
+   */
   if (isVideoSmall) {
     const { videoFile, videoName } = await videoUtility.downloadVideo(video, fileName);
 

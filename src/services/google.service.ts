@@ -54,9 +54,12 @@ export class GoogleService {
 
   /**
    * Fetches rows from a Google Sheets range and returns them as cell data objects.
-   *
-   * @returns {Promise<Record<string, any>[] | null>}
-   * */
+   * @param spreadsheetId
+   * @param sheetName
+   * @param range
+   * @param compact
+   * @returns
+   */
   async getSheet<T extends false | true = false>(
     spreadsheetId: string,
     sheetName: SheetNames,
@@ -108,11 +111,10 @@ export class GoogleService {
 
   /**
    * Clears all values in the specified Google Sheets range.
-   * @param {string} spreadsheetId
-   * @param {string} range
-   *
-   * @returns {Promise<null>}
-   * */
+   * @param spreadsheetId
+   * @param range
+   * @returns
+   */
   removeSheetRange(spreadsheetId: string, range: string) {
     // eslint-disable-next-line sonarjs/no-try-promise
     try {
@@ -130,11 +132,11 @@ export class GoogleService {
 
   /**
    * Appends one or more values as a new row to a Google Sheet.
-   * @param {string} spreadsheetId
-   * @param {string} sheetName
-   * @param {T|T[]} value
-   * @param {string} [range]
-   * */
+   * @param spreadsheetId
+   * @param sheetName
+   * @param value
+   * @param [range]
+   */
   async appendToSheet<T>(spreadsheetId: string, sheetName: string, value: T | T[], range?: string) {
     const responseData = coerceArray(value);
 
@@ -155,11 +157,11 @@ export class GoogleService {
 
   /**
    * Overwrites the specified Google Sheets range with new values.
-   * @param {string} spreadsheetId
-   * @param {string} sheetName
-   * @param {string[]} value
-   * @param {string} [range]
-   * */
+   * @param spreadsheetId
+   * @param sheetName
+   * @param value
+   * @param [range]
+   */
   async updateSheet(spreadsheetId: string, sheetName: string, value: string[], range?: string) {
     try {
       await sheets.spreadsheets.values.update({
@@ -178,10 +180,10 @@ export class GoogleService {
 
   /**
    * Clears all values in a sheet, optionally within a specific range.
-   * @param {string} spreadsheetId
-   * @param {string} sheetName
-   * @param {string} [range]
-   * */
+   * @param spreadsheetId
+   * @param sheetName
+   * @param [range]
+   */
   async clearSheet(spreadsheetId: string, sheetName: string, range?: string) {
     try {
       await sheets.spreadsheets.values.clear({

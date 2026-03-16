@@ -8,6 +8,9 @@ import type { ChatSession, Session } from '@app-types/session';
 
 import { logger } from '@utils/logger.util';
 
+/**
+ *
+ */
 async function processSession() {
   try {
     const sessionPath = './temp/telegraf-session.json';

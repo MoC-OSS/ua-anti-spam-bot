@@ -14,22 +14,35 @@ import type { RedisSessionOptions } from '@app-types/session';
 export class RedisMiddleware {
   constructor(private options: RedisSessionOptions) {}
 
-  /** Derives the Redis key for the current chat session. */
+  /**
+   * Derives the Redis key for the current chat session.
+   * @param context
+   */
   getSessionKey(context: GrammyContext): string {
     return this.options.getSessionKey(context);
   }
 
-  /** Retrieves a session object from Redis by key. */
+  /**
+   * Retrieves a session object from Redis by key.
+   * @param key
+   */
   getSession(key: string): Promise<JsonObject> {
     return redisClient.getValue(key);
   }
 
-  /** Persists the session object to Redis. */
+  /**
+   * Persists the session object to Redis.
+   * @param key
+   * @param payload
+   */
   saveSession(key: string, payload: JsonObject) {
     return redisClient.setValue(key, payload);
   }
 
-  /** Returns the grammY middleware that loads and saves the session around downstream handlers. */
+  /**
+   * Returns the grammY middleware that loads and saves the session around downstream handlers.
+   * @param property
+   */
   middleware(property = this.options.property) {
     return async (context: GrammyContext, next: NextFunction) => {
       const key = this.getSessionKey(context);

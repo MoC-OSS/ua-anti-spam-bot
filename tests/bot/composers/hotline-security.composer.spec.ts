@@ -21,6 +21,9 @@ const { chatSession, mockChatSessionMiddleware } = mockChatSession({ isBotAdmin:
 
 const commandText = '/hotline_security';
 
+/**
+ *
+ */
 function getHotlineUpdate() {
   return new MessageMockUpdate(commandText).buildOverwrite({
     message: {
@@ -29,6 +32,9 @@ function getHotlineUpdate() {
   });
 }
 
+/**
+ *
+ */
 function getPrivateHotlineUpdate() {
   return new MessagePrivateMockUpdate(commandText).buildOverwrite({
     message: {

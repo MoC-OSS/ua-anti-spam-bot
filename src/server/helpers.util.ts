@@ -13,6 +13,7 @@ import { logger } from '@utils/logger.util';
 
 /**
  * Extracts the Telegram user ID from a Web App authorization header.
+ * @param authorizationHeader
  */
 export const getUserIdFromAuthorizationHeader = (authorizationHeader: string | undefined): string => {
   const userIdParameter: string = new URLSearchParams(authorizationHeader).get('user') || '';
@@ -22,6 +23,7 @@ export const getUserIdFromAuthorizationHeader = (authorizationHeader: string | u
 
 /**
  * Fetches the list of chats linked to a user from their Redis session.
+ * @param userId
  */
 export const getLinkedChats = async (userId: string) => {
   const userSessions = await redisService.getUserSession(userId);
@@ -31,6 +33,8 @@ export const getLinkedChats = async (userId: string) => {
 
 /**
  * Downloads a chat avatar via the Telegram Bot API and returns it as a base64 data URI.
+ * @param bot
+ * @param filePath
  */
 export const getChatAvatar = async (bot: Bot<GrammyContext>, filePath: string) => {
   if (!filePath) {
@@ -61,6 +65,9 @@ const deletedChat = (id: string, name: string) => ({ id, name, photo: '', users:
 
 /**
  * Fetches full details for all linked chats, updating stale chat names in Redis.
+ * @param linkedChats
+ * @param bot
+ * @param userId
  */
 export const updateChatsList = async (linkedChats: LinkedChat[], bot: Bot<GrammyContext>, userId: string) => {
   const chats = linkedChats.map(async (chat: LinkedChat, index: number) => {

@@ -4,7 +4,7 @@ import type { SwindlersResult, SwindlerTensorResult } from './swindlers';
 
 /**
  * Process
- * */
+ */
 export interface ProcessResponseBody {
   result: string | null;
   time: number;
@@ -19,7 +19,7 @@ export interface ProcessRequestBody {
 
 /**
  * Tensor
- * */
+ */
 export interface TensorResponseBody {
   result: SwindlerTensorResult;
   time: number;
@@ -33,7 +33,7 @@ export interface TensorRequestBody {
 
 /**
  * Swindler
- * */
+ */
 export interface SwindlerResponseBody {
   result: SwindlersResult;
   time: number;
@@ -46,7 +46,7 @@ export interface SwindlerRequestBody {
 
 /**
  * Parse video
- * */
+ */
 export interface ParseVideoSuccessResponseBody {
   screenshots: ReturnType<Buffer['toJSON']>[];
   time: number;

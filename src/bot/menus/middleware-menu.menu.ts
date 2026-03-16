@@ -5,7 +5,7 @@ import type { GrammyMenuContext, GrammyMiddleware } from '@app-types/context';
 /**
  * @description
  * Reimplementation of Grammy's menu to support menu-level middlewares.
- * */
+ */
 export class MiddlewareMenu<TContext extends GrammyMenuContext = GrammyMenuContext> extends Menu<TContext> {
   menuMiddlewares: GrammyMiddleware[] = [];
 

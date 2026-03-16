@@ -9,9 +9,8 @@ export class RankCommand {
 
   /**
    * Returns middleware that gets or sets the tensor spam detection rank.
-   *
    * @command /set_rank
-   * */
+   */
   setRankMiddleware(): GrammyCommandMiddleware {
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context) => {
@@ -36,9 +35,8 @@ export class RankCommand {
 
   /**
    * Returns middleware that gets or sets the training start rank threshold.
-   *
    * @command /set_training_start_rank
-   * */
+   */
   setTrainingStartRank(): GrammyCommandMiddleware {
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context) => {
@@ -62,9 +60,8 @@ export class RankCommand {
 
   /**
    * Returns middleware that gets or sets the training chat whitelist.
-   *
    * @command /set_training_chat_whitelist
-   * */
+   */
   setTrainingChatWhitelist(): GrammyCommandMiddleware {
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context) => {
@@ -84,9 +81,8 @@ export class RankCommand {
 
   /**
    * Returns middleware that appends a chat to the training whitelist.
-   *
    * @command /update_training_chat_whitelist
-   * */
+   */
   updateTrainingChatWhitelist(): GrammyCommandMiddleware {
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context) => {

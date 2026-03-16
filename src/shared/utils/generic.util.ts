@@ -16,9 +16,8 @@ import { optimizeWriteContextUtility } from './optimize-write-context.util';
 
 /**
  * Logs the current context to the console and a file when debug mode is enabled.
- *
- * @param {GrammyContext} context
- * */
+ * @param context
+ */
 export function logContext(context: GrammyContext) {
   if (environmentConfig.DEBUG) {
     const writeContext = optimizeWriteContextUtility(context);
@@ -31,7 +30,8 @@ export function logContext(context: GrammyContext) {
 
 /**
  * Returns a promise that resolves after the specified number of milliseconds.
- * */
+ * @param time
+ */
 export function sleep(time: number) {
   return new Promise((resolve) => {
     setTimeout(resolve, time);
@@ -40,7 +40,9 @@ export function sleep(time: number) {
 
 /**
  * Truncates a string to the given length, appending ".." if it exceeds the limit.
- * */
+ * @param inputString
+ * @param inputNumber
+ */
 export function truncateString(inputString: string, inputNumber: number) {
   if (inputString.length > inputNumber) {
     return `${inputString.slice(0, inputNumber)}..`;
@@ -51,9 +53,8 @@ export function truncateString(inputString: string, inputNumber: number) {
 
 /**
  * Converts a Ukrainian oblast name from nominative to accusative grammatical case.
- *
- * @param {string} state
- * */
+ * @param state
+ */
 export function formatStateIntoAccusative(state: string) {
   if (!state.includes('область')) {
     return state;
@@ -68,9 +69,8 @@ export function formatStateIntoAccusative(state: string) {
 
 /**
  * Extracts basic user identification data (username, full name, user ID) from the context.
- *
- * @param {GrammyContext} context
- * */
+ * @param context
+ */
 export function getUserData(context: GrammyContext) {
   const username = context.from?.username;
   const fullName = context.from?.last_name ? `${context.from?.first_name} ${context.from?.last_name}` : context.from?.first_name;
@@ -87,16 +87,14 @@ export function getUserData(context: GrammyContext) {
 
 /**
  * @description Returns valid ukrainian conjunctions
- *
  * @param array - array to join into conjunctions
- *
  * @example
  * ```ts
  * joinUkrainianConjunctions(['слово']); // слово
  * joinUkrainianConjunctions(['слово', 'діло']); // слово та діло
  * joinUkrainianConjunctions(['слово', 'діло', 'справа', 'енергія']); // слово, діло, справа та енергія
  * ```
- * */
+ */
 export function joinUkrainianConjunctions(array: string[]): string {
   if (array.length <= 1) {
     return array.join(', ');
@@ -112,7 +110,8 @@ export function joinUkrainianConjunctions(array: string[]): string {
 
 /**
  * Builds a human-readable Ukrainian string listing all enabled chat moderation features.
- * */
+ * @param chatSettings
+ */
 export function getEnabledFeaturesString(chatSettings: ChatSettings): string {
   const features: string[] = [];
 
@@ -128,7 +127,7 @@ export function getEnabledFeaturesString(chatSettings: ChatSettings): string {
 
   /**
    * Повідомлень з...
-   * */
+   */
 
   const settingsKeys = Object.keys(chatSettings) as (keyof ChatSettings)[];
 
@@ -158,12 +157,10 @@ export function getEnabledFeaturesString(chatSettings: ChatSettings): string {
 
 /**
  * Returns a random element from the given array.
- *
  * @template T
- *
- * @param {T[]} array
- * @returns {T} - random item from array
- * */
+ * @param array
+ * @returns - random item from array
+ */
 export function getRandomItem<T>(array: T[]): T {
   // eslint-disable-next-line sonarjs/pseudo-random
   return array[Math.floor(Math.random() * array.length)];
@@ -171,11 +168,10 @@ export function getRandomItem<T>(array: T[]): T {
 
 /**
  * Logs a debug message when a middleware is skipped, including the reason and chat title.
- *
- * @param {GrammyContext} context
- * @param {string} reason
- * @param {any} [extra]
- * */
+ * @param context
+ * @param reason
+ * @param [extra]
+ */
 export function logSkipMiddleware(context: GrammyContext, reason: string, extra?: any) {
   if (environmentConfig.DEBUG || environmentConfig.DEBUG_MIDDLEWARE) {
     // @ts-ignore
@@ -186,9 +182,8 @@ export function logSkipMiddleware(context: GrammyContext, reason: string, extra?
 
 /**
  * Checks whether the given user ID is in the global whitelist.
- *
- * @param {number} id
- * */
+ * @param id
+ */
 export function isIdWhitelisted(id: number | undefined) {
   // If channel or no id for some reason, it's not whitelisted
   if (!id) {
@@ -202,14 +197,16 @@ export function isIdWhitelisted(id: number | undefined) {
 
 /**
  * Wraps a single value in an array, or returns the value as-is if it is already an array.
- * */
+ * @param value
+ */
 export function coerceArray<T>(value: T | T[]): T[] {
   return Array.isArray(value) ? value : [value];
 }
 
 /**
  * Checks whether the given user ID is whitelisted for receiving swindler statistics.
- * */
+ * @param id
+ */
 export function isIdWhitelistedForSwindlersStatistic(id: number | undefined) {
   // If channel or no id for some reason, it's not whitelisted
   if (!id) {

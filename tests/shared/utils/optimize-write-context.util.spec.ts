@@ -2,6 +2,10 @@ import type { GrammyContext, RealGrammyContext } from '@app-types/context';
 
 import { optimizeWriteContextUtility } from '@utils/optimize-write-context.util';
 
+/**
+ *
+ * @param overrides
+ */
 function buildMockContext(overrides: Partial<RealGrammyContext> = {}): GrammyContext {
   return {
     tg: { token: 'test-token' },

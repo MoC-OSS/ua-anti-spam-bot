@@ -30,7 +30,7 @@ const groupPhotoFile = new InputFile(groupPhotoPath);
 
 /**
  * @description Creates all thread in forum for logs
- * */
+ */
 export const getCreateLogsChatComposer = () => {
   const createLogsChatComposer = new Composer<GrammyContext>();
 

@@ -20,7 +20,7 @@ import { realSwindlerMessage } from './__mocks__/bot.mocks';
 
 /**
  * Enable unit testing
- * */
+ */
 Object.assign(environmentConfig, { UNIT_TESTING: true, DISABLE_LOGS_CHAT: false, DEBUG: false });
 
 let outgoingRequests: OutgoingRequests;

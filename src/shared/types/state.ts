@@ -106,7 +106,7 @@ export type CounterOffensiveResult = CounterOffensiveNegativeResult | CounterOff
 
 /**
  * It requires only-with-text.middleware.js
- * */
+ */
 interface OnlyWithTextMiddlewareState {
   text?: string;
   clearText?: string;
@@ -136,7 +136,7 @@ export interface NsfwMessageResult {
 
 /**
  * It's used to skip text handlers when message already marked as deleted
- * */
+ */
 interface IsDeletedState {
   isDeleted?: boolean;
 }

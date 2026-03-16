@@ -93,6 +93,9 @@ const bot = new Bot<GrammyContext>('mock');
 const statsCommand = new StatisticsCommand();
 const { mockChatSessionMiddleware } = mockChatSession({});
 
+/**
+ *
+ */
 function getStatisticsCommandUpdate() {
   return new MessagePrivateMockUpdate('/statistics').buildOverwrite({
     message: {

@@ -36,8 +36,8 @@ export interface TestTensorStorage {
 
 /**
  * Extracts a display username from the callback query sender.
- * @param {GrammyContext} context
- * */
+ * @param context
+ */
 const getAnyUsername = (context: GrammyContext) => {
   const username = context.callbackQuery?.from?.username;
 
@@ -63,12 +63,14 @@ export class TestTensorListener {
 
   /**
    * Initializes the listener with the tensor prediction service.
-   * @param {TensorService} tensorService
+   * @param tensorService
    */
   constructor(private tensorService: TensorService) {}
 
   /**
    * Writes a voted-on message to the appropriate dataset (positives or negatives) in Google Sheets.
+   * @param state
+   * @param word
    */
   writeDataset(state: 'negatives' | 'positives', word: string) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars, sonarjs/no-unused-vars, sonarjs/no-dead-store
@@ -151,14 +153,14 @@ export class TestTensorListener {
 
   /**
    * Initializes the interactive voting menu with spam/not-spam/skip buttons.
-   * @param {Transformer} throttler - throttler need to be defined once to work.
+   * @param throttler - throttler need to be defined once to work.
    * So we can't init it each time in middleware because it has new instance, and it doesn't throttle,
-   * */
+   */
   initMenu(throttler: Transformer): Menu<GrammyMenuContext> {
     /**
      * Processes final voting results and determines the spam classification.
      * @param context
-     * */
+     */
     // eslint-disable-next-line sonarjs/cognitive-complexity
     const finalMiddleware = async (context: GrammyContext) => {
       const storage = this.storage[this.getStorageKey(context)];
@@ -231,7 +233,7 @@ export class TestTensorListener {
 
       /**
        * We need to use throttler for Test Tensor because telegram could ban the bot
-       * */
+       */
       context.api.config.use(throttler);
 
       await context
@@ -366,9 +368,9 @@ export class TestTensorListener {
 
   /**
    * Initializes the voting storage session for a tensor test message.
-   * @param {GrammyContext} context
+   * @param context
    * @param message
-   * */
+   */
   initTensorSession(context: GrammyContext, message: string) {
     if (!this.storage[this.getStorageKey(context)]?.originalMessage) {
       this.storage[this.getStorageKey(context)] = {
@@ -383,8 +385,8 @@ export class TestTensorListener {
 
   /**
    * Generates a unique storage key from the chat and message identifiers.
-   * @param {GrammyContext} context
-   * */
+   * @param context
+   */
   getStorageKey(context: GrammyContext) {
     let chatInstance: number | string | undefined;
 
@@ -411,19 +413,19 @@ export class TestTensorListener {
 
   /**
    * Returns the main middleware for interactive tensor model testing.
-   * @param {Transformer} throttler - throttler need to be defined once to work.
+   * @param throttler - throttler need to be defined once to work.
    * So we can't init it each time in middleware because it has new instance, and it doesn't throttle,
-   * */
+   */
   middleware(throttler: Transformer): GrammyMiddleware {
     /**
      * Runs tensor prediction on the message and replies with voting buttons.
-     * @param {GrammyContext} context
-     * @param {Next} next
-     * */
+     * @param context
+     * @param next
+     */
     return async (context) => {
       /**
        * We need to use throttler for Test Tensor because telegram could ban the bot
-       * */
+       */
       context.api.config.use(throttler);
 
       // eslint-disable-next-line sonarjs/different-types-comparison

@@ -32,6 +32,10 @@ vi.mock('@utils/logger.util', () => ({
   logger: { info: vi.fn(), error: vi.fn() },
 }));
 
+/**
+ *
+ * @param overrides
+ */
 function makeContext(overrides: Record<string, unknown> = {}): GrammyContext {
   return {
     chat: { type: 'supergroup', title: 'Test Chat' },

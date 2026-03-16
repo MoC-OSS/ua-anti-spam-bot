@@ -22,9 +22,10 @@ export const getDenylistComposer = () => {
 
   /**
    * Logs a denylist violation message to the logs chat.
-   * @param {GrammyContext} context
-   * @param {string} [message]
-   * */
+   * @param context
+   * @param [message]
+   * @param denyWord
+   */
   async function logDenylistMessage(context: GrammyContext, denyWord: string) {
     const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const fullText = context.state?.text || '';

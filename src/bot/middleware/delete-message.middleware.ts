@@ -2,9 +2,8 @@ import type { GrammyMiddleware } from '@app-types/context';
 
 /**
  * Delete user entered message
- *
  * @param reason - why bot could not delete the message
- * */
+ */
 export const deleteMessageMiddleware =
   (reason: string): GrammyMiddleware =>
   (context, next) => {

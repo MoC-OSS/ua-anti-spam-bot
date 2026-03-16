@@ -59,7 +59,7 @@ export const getMessagesRegisterComposer = () => {
 
   /**
    * Only these messages will be processed in this composer
-   * */
+   */
   const readyMessagesComposer = messagesComposer
     // Queries to follow
     .on(messageQuery)
@@ -74,14 +74,17 @@ export const getMessagesRegisterComposer = () => {
 
   /**
    * Registers a message handler module with correct filter to not make extra checks
-   * */
+   * @param middlewares
+   */
   const registerModule = (...middlewares: (Composer<GrammyContext> | GrammyMiddleware)[]) => {
     readyMessagesComposer.filter((context) => onlyNotDeletedFilter(context)).use(...middlewares);
   };
 
   /**
    * Register a module that will be called only if optional settings is enabled
-   * */
+   * @param key
+   * @param middlewares
+   */
   const registerDefaultSettingModule = (key: keyof DefaultChatSettings, ...middlewares: (Composer<GrammyContext> | GrammyMiddleware)[]) => {
     readyMessagesComposer
       .filter((context) => onlyNotDeletedFilter(context))
@@ -91,7 +94,9 @@ export const getMessagesRegisterComposer = () => {
 
   /**
    * Register a module that will be called only if optional settings is enabled
-   * */
+   * @param key
+   * @param middlewares
+   */
   const registerOptionalSettingModule = (
     key: keyof OptionalChatSettings,
     ...middlewares: (Composer<GrammyContext> | GrammyMiddleware)[]
@@ -106,8 +111,26 @@ export const getMessagesRegisterComposer = () => {
 };
 
 /**
+ * @param root0
+ * @param root0.counteroffensiveService
+ * @param root0.noCardsComposer
+ * @param root0.noUrlsComposer
+ * @param root0.noLocationsComposer
+ * @param root0.noMentionsComposer
+ * @param root0.noForwardsComposer
+ * @param root0.strategicComposer
+ * @param root0.swindlersComposer
+ * @param root0.noRussianComposer
+ * @param root0.warnRussianComposer
+ * @param root0.noCounterOffensiveComposer
+ * @param root0.noObsceneComposer
+ * @param root0.warnObsceneComposer
+ * @param root0.noAntisemitismComposer
+ * @param root0.noChannelMessagesComposer
+ * @param root0.nsfwMessageFilterComposer
+ * @param root0.denylistComposer
  * @description Message handling composer
- * */
+ */
 export const getMessagesComposer = ({
   counteroffensiveService,
   noCardsComposer,
@@ -133,7 +156,7 @@ export const getMessagesComposer = ({
   /**
    * Register modules.
    * The order should be right
-   * */
+   */
   registerDefaultSettingModule('disableDeleteAntisemitism', noAntisemitismComposer);
   registerDefaultSettingModule('disableNsfwFilter', nsfwMessageFilterComposer);
   registerDefaultSettingModule('disableSwindlerMessage', swindlersComposer);

@@ -39,6 +39,9 @@ export const ALARM_END_DAY_COUNT = 1;
 /**
  * Get a random translated message from a numbered set of keys.
  * Keys must follow the pattern: `${prefix}-${index}` (1-based).
+ * @param context
+ * @param prefix
+ * @param count
  */
 export function getRandomT(context: GrammyContext, prefix: string, count: number): string {
   // eslint-disable-next-line sonarjs/pseudo-random

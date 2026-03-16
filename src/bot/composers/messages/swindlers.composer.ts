@@ -10,8 +10,10 @@ export interface SwindlersComposerProperties {
 }
 
 /**
+ * @param root0
+ * @param root0.deleteSwindlersMiddleware
  * @description Remove swindler messages logic
- * */
+ */
 export const getSwindlersComposer = ({ deleteSwindlersMiddleware }: SwindlersComposerProperties) => {
   const swindlersComposer = new Composer<GrammyContext>();
 

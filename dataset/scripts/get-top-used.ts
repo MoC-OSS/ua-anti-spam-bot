@@ -1,11 +1,11 @@
 import { optimizeText } from 'ukrainian-ml-optimizer';
 
 /**
- * @param {string[]} array
- * @param {string[]} whitelist
- * @param {string} split
- * @param {(v: string) => string} additionalMap
- * */
+ * @param array
+ * @param whitelist
+ * @param split
+ * @param additionalMap
+ */
 export function getTopUsed(
   array: string[],
   whitelist: string[] = [],

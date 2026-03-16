@@ -17,17 +17,17 @@ const CHANNEL_BOT_ID = 136_817_688;
 
 /**
  * @description Remove messages that has been left by channels in a comments
- * */
+ */
 export const getNoChannelMessagesComposer = () => {
   const noChannelMessagesComposer = new Composer<GrammyContext>();
 
   /**
    * Logs a deleted channel message to the logs chat.
-   * @param {GrammyContext} context
-   * @param {number} [parentChannelId]
-   * @param {number} [senderChatId]
-   * @param {string} [message]
-   * */
+   * @param context
+   * @param [parentChannelId]
+   * @param [senderChatId]
+   * @param [message]
+   */
   async function saveChannelMessage(context: GrammyContext, parentChannelId?: number, senderChatId?: number, message?: string) {
     const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const text = message || context.state?.text || '';
@@ -55,7 +55,7 @@ export const getNoChannelMessagesComposer = () => {
      * It means an admin wrote the message, so we need to skip it.
      * UPDATED: Channel admins use GroupAnonymousBot identifier
      * https://github.com/42wim/matterbridge/issues/1654
-     * */
+     */
     const isChannel = fromId === CHANNEL_BOT_ID || context.from?.username === 'Channel_Bot';
 
     if (isFeatureEnabled && isChannel) {

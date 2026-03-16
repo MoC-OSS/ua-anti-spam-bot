@@ -7,8 +7,9 @@ import { logger } from '@utils/logger.util';
 /**
  * Logs internal update to create mock updates.
  * Used for testing.
+ * @param bot
  * @internal
- * */
+ */
 export const logUpdates = <TContext extends Context, TApi extends Api = Api, TBot extends Bot<TContext, TApi> = Bot<TContext, TApi>>(
   bot: TBot,
 ) => {

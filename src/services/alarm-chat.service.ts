@@ -44,18 +44,18 @@ export class AlarmChatService {
 
   /**
    * Checks whether the given region currently has an active alarm.
-   * @param {string} state
-   * @returns {boolean}
-   * */
+   * @param state
+   * @returns
+   */
   isAlarmNow(state: string) {
     return this.alarms?.has(state);
   }
 
   /**
    * Updates or removes a chat from the alarm notification list based on its settings.
-   * @param {ChatSessionData} chatSession
-   * @param {string} id
-   * */
+   * @param chatSession
+   * @param id
+   */
   updateChat(chatSession: ChatSessionData, id: number | string | undefined) {
     if (!id) {
       throw new Error('This is an invalid chat id');
@@ -128,10 +128,10 @@ export class AlarmChatService {
 
   /**
    * Processes an alarm event for a chat, sending notifications and toggling chat permissions.
-   * @param {ChatSession} chat
-   * @param {boolean} isAlarm
+   * @param chat
+   * @param isAlarm
    * @param isRepeatedAlarm
-   * */
+   */
   async processChatAlarm(chat: ChatSession, isAlarm: boolean, isRepeatedAlarm = false) {
     const chatInfo = await this.api?.getChat(chat.id);
     let startAlarmMessage = '';

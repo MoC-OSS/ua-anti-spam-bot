@@ -31,6 +31,9 @@ const apiResponses: ApiResponses = {
 
 const commandText = '/start';
 
+/**
+ *
+ */
 function getStartCommandUpdate() {
   return new MessageMockUpdate(commandText).buildOverwrite({
     message: {
@@ -39,6 +42,9 @@ function getStartCommandUpdate() {
   });
 }
 
+/**
+ *
+ */
 function getPrivateStartCommandUpdate() {
   return new MessagePrivateMockUpdate(commandText).buildOverwrite({
     message: {

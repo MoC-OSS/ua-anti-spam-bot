@@ -26,7 +26,8 @@ export class S3Service {
 
   /**
    * Download tensor flow model into the specific folder
-   * */
+   * @param fsFolderPath
+   */
   downloadTensorFlowModel(fsFolderPath: URL) {
     const loadFilePromises = this.mlFiles.map(async (fileName) => {
       const response = await this.s3.send(

@@ -10,6 +10,10 @@ import { logger } from '@utils/logger.util';
 /**
  * API transformer that intercepts send methods targeting the logs chat
  * and suppresses them, useful for testing without sending real log messages.
+ * @param previous
+ * @param method
+ * @param payload
+ * @param signal
  */
 export const disableLogsChatTransformer: Transformer = (previous, method, payload, signal) => {
   const sendMethods = new Set<RealApiMethodKeys>([

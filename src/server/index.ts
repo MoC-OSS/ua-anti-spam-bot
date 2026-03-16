@@ -36,7 +36,7 @@ const uploadMiddleware = multer({ storage: uploadMemoryStorage });
   /**
    * Tensorflow.js offers two flags, enableProdMode and enableDebugMode.
    * If you're going to use any TF model in production, be sure to enable prod mode before loading models.
-   * */
+   */
   if (environmentConfig.ENV === 'production') {
     tf.enableProdMode();
   }

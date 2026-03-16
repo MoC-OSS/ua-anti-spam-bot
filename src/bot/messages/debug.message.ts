@@ -8,6 +8,10 @@ export interface DebugMessageProperties {
 
 /**
  * Returns a debug message appended to delete messages when the bot runs in debug mode.
+ * @param root0
+ * @param root0.message
+ * @param root0.byRules
+ * @param root0.startTime
  */
 export const getDebugMessage = ({ message, byRules, startTime }: DebugMessageProperties) =>
   `

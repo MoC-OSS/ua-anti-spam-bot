@@ -55,6 +55,12 @@ export const chartMock: ChatFullInfo = {
   },
 };
 
+/**
+ *
+ * @param state
+ * @param disableChatWhileAirRaidAlert
+ * @param notificationMessage
+ */
 export function generateChatSessionData(
   state = generateRandomString(10),
   disableChatWhileAirRaidAlert = true,
@@ -90,10 +96,22 @@ export function generateChatSessionData(
   };
 }
 
+/**
+ *
+ * @param id
+ * @param payload
+ */
 export function generateChat(id: number, payload: ChatSessionData) {
   return { id: id.toString(), payload };
 }
 
+/**
+ *
+ * @param state
+ * @param disableChatWhileAirRaidAlertOn
+ * @param notificationMessageOn
+ * @param bothOff
+ */
 export function generateMockSessions(
   state = generateRandomString(10),
   disableChatWhileAirRaidAlertOn = 3,

@@ -7,9 +7,11 @@ import type { GrammyContext } from '@app-types/context';
 import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 /**
+ * @param context
+ * @param next
  * @description
  * Add mentions into state. Parses mentions from parsed text from state,
- * */
+ */
 export function parseMentions(context: GrammyContext, next: NextFunction) {
   if (context.state.text && !context.state.mentions) {
     const mentions = mentionService.parseMentions(context.state.text);

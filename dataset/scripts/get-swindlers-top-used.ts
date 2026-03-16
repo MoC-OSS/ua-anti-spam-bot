@@ -5,8 +5,8 @@ import { logger } from '@utils/logger.util';
 import { getTopUsed } from './get-top-used';
 
 /**
- * @param {string[]} dataset
- * */
+ * @param dataset
+ */
 export const getSwindlersTopUsed = (dataset: string[]) => {
   const whitelist = ['україн'];
   const sorted = getTopUsed(dataset, whitelist, ' ');

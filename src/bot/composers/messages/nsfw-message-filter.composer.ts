@@ -21,17 +21,19 @@ export interface NsfwMessageFilterComposerProperties {
 }
 
 /**
+ * @param root0
+ * @param root0.nsfwDetectService
  * @description Delete russian language messages
- * */
+ */
 export const getNsfwMessageFilterComposer = ({ nsfwDetectService }: NsfwMessageFilterComposerProperties) => {
   const nsfwMessageFilterComposer = new Composer<GrammyContext>();
 
   /**
    * Logs a detected NSFW text message to the logs chat.
-   * @param {GrammyContext} context
-   * @param {number} maxChance
-   * @param {string} [message]
-   * */
+   * @param context
+   * @param maxChance
+   * @param [message]
+   */
   async function saveNsfwMessage(context: GrammyContext, maxChance: number, message?: string) {
     const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const text = message || context.state?.text || '';

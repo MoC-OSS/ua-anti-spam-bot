@@ -6,7 +6,9 @@ import type { GrammyContext } from '@app-types/context';
 
 /**
  * Used for performance checking
- * */
+ * @param context
+ * @param next
+ */
 export async function performanceEndMiddleware(context: GrammyContext, next: NextFunction) {
   if (environmentConfig.DEBUG) {
     return context

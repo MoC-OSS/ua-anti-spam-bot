@@ -24,14 +24,16 @@ export interface PhotosComposerProperties {
 }
 
 /**
+ * @param root0
+ * @param root0.nsfwFilterComposer
  * @description Photo handling composer
- * */
+ */
 export const getPhotoComposer = ({ nsfwFilterComposer }: PhotosComposerProperties) => {
   const photosComposer = new Composer<GrammyContext>();
 
   /**
    * Only these photos will be processed in this composer
-   * */
+   */
   const readyImageComposer = photosComposer
     // Queries to follow
     .on([':photo', ':sticker', ':video', ':animation', ':video_note'])
@@ -48,14 +50,17 @@ export const getPhotoComposer = ({ nsfwFilterComposer }: PhotosComposerPropertie
 
   /**
    * Registers a message handler module with correct filter to not make extra checks
-   * */
+   * @param middlewares
+   */
   const registerModule = (...middlewares: (Composer<GrammyContext> | GrammyMiddleware)[]) => {
     readyImageComposer.filter((context) => onlyNotDeletedFilter(context)).use(...middlewares);
   };
 
   /**
    * Register a module that will be called only if optional settings is enabled
-   * */
+   * @param key
+   * @param middlewares
+   */
   const registerDefaultSettingModule = (key: keyof DefaultChatSettings, ...middlewares: (Composer<GrammyContext> | GrammyMiddleware)[]) => {
     readyImageComposer
       .filter((context) => onlyNotDeletedFilter(context))
@@ -66,16 +71,16 @@ export const getPhotoComposer = ({ nsfwFilterComposer }: PhotosComposerPropertie
   /**
    * Register modules.
    * The order should be right
-   * */
+   */
 
   /**
    * Register default modules that checks only thumb
-   * */
+   */
   registerDefaultSettingModule('disableNsfwFilter', nsfwFilterComposer);
 
   /**
    * Re-register modules that will checks video frames as well
-   * */
+   */
   registerModule(parseVideoFrames);
   registerDefaultSettingModule('disableNsfwFilter', nsfwFilterComposer);
 

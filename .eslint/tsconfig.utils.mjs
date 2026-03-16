@@ -12,7 +12,6 @@ const logger = eslintLogger('tsconfig-utils');
  * Parses a tsconfig file and returns its contents as a typed object.
  * @param {string} tsconfigPath - Path to the tsconfig file
  * @returns {import('type-fest').TsConfigJson | undefined} - Parsed tsconfig object, or undefined if parsing fails
- *
  * @example
  * // Given tsconfig.json:
  * {
@@ -51,7 +50,6 @@ export function parseTsconfig(tsconfigPath) {
  * @param {string} tsconfigPath - Path to the tsconfig file
  * @param {Set<string>} visited - Set of already visited files to prevent circular references
  * @returns {Record<string, string[]>} - An object where each key is a path alias (e.g. "@app/*") and the value is an array of paths (e.g. ["src/app/*"]).
- *
  * @example
  * // Given tsconfig.json:
  * {

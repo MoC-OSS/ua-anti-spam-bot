@@ -30,6 +30,10 @@ export const redisSelectors = {
 
 export const client = redis.createClient({ url: environmentConfig.REDIS_URL });
 
+/**
+ *
+ * @param key
+ */
 export async function getRawValue<T>(key: string | null | undefined): Promise<T | null> {
   if (!key) {
     return {} as T;
@@ -44,6 +48,10 @@ export async function getRawValue<T>(key: string | null | undefined): Promise<T 
   }
 }
 
+/**
+ *
+ * @param key
+ */
 export async function getValue<T>(key: string): Promise<T> {
   if (!key) {
     return {} as T;
@@ -60,10 +68,20 @@ export async function getValue<T>(key: string): Promise<T> {
   }
 }
 
+/**
+ *
+ * @param key
+ * @param value
+ */
 export function setRawValue(key: string, value: ChatSessionData | CustomJsonValue | Primitive | Session) {
   return client.set(key, JSON.stringify(value));
 }
 
+/**
+ *
+ * @param key
+ * @param value
+ */
 export function setValue(key: string, value: JsonObject) {
   if (!key || !value) {
     // eslint-disable-next-line unicorn/no-useless-undefined
@@ -73,6 +91,10 @@ export function setValue(key: string, value: JsonObject) {
   return client.set(key, JSON.stringify(value));
 }
 
+/**
+ *
+ * @param key
+ */
 export function removeKey(key: string) {
   if (!key) {
     return null;
@@ -81,6 +103,9 @@ export function removeKey(key: string) {
   return client.del(key);
 }
 
+/**
+ *
+ */
 export async function getAllUserKeys(): Promise<string[]> {
   const keys = await client.keys('*:*');
 
@@ -91,6 +116,9 @@ export async function getAllUserKeys(): Promise<string[]> {
   return keys.filter((key) => redisSelectors.userSessions.test(key));
 }
 
+/**
+ *
+ */
 export async function getAllUserRecords(): Promise<Session[]> {
   const filteredKeys = await getAllUserKeys();
   const values = await client.mGet(filteredKeys);
@@ -110,6 +138,9 @@ export async function getAllUserRecords(): Promise<Session[]> {
     .filter(Boolean) as Session[];
 }
 
+/**
+ *
+ */
 export async function getAllChatRecords(): Promise<ChatSession[]> {
   const keys = await client.keys('*');
 
@@ -135,6 +166,9 @@ export async function getAllChatRecords(): Promise<ChatSession[]> {
     .filter(Boolean) as ChatSession[];
 }
 
+/**
+ *
+ */
 export async function getAllRecords(): Promise<(ChatSession | Session)[]> {
   try {
     const keys = await client.keys('*');

@@ -1,16 +1,21 @@
 import type { GrammyContext } from '@app-types/context';
 
+/**
+ *
+ * @param inputString
+ * @param cutStart
+ * @param cutEnd
+ * @param url
+ */
 function cutInHiddenUrls(inputString: string | undefined, cutStart: number, cutEnd: number, url: string): string {
   return inputString ? inputString.slice(0, Math.max(0, cutStart)) + url + inputString.slice(cutEnd) : '';
 }
 
 /**
  * Reveals real link that were used in the message
- *
- * @param {GrammyContext} context
- *
+ * @param context
  * @returns string
- * */
+ */
 export function revealHiddenUrls(context: GrammyContext): string {
   let { text } = context.state;
   const entities = context.msg?.entities;

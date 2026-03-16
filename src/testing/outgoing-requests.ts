@@ -5,7 +5,7 @@ import type { AbortSignal } from 'abort-controller';
 
 /**
  * Request object, inherits from a grammy transformer
- * */
+ */
 export interface Request<TMethod extends Methods<RawApi> = Methods<RawApi>> {
   method: TMethod;
   payload: Payload<TMethod, RawApi>;
@@ -17,23 +17,24 @@ export type RealApiMethodKeys = keyof RawApi;
 /**
  * Collects outgoing requests and gives API to process these requests.
  * Helps to save typing.
- * */
+ */
 export class OutgoingRequests<TMethod extends RealApiMethodKeys = RealApiMethodKeys> {
   /**
    * Collected requests
    * @internal
-   * */
+   */
   requests: Request[] = [];
 
   /**
    * Get length of the requests
-   * */
+   */
   get length() {
     return this.requests.length;
   }
 
   /**
    * Builds an array of methods with strong and loose autocomplete
+   * @param methods
    */
   buildMethods<T extends TMethod>(methods: T[]): T[] {
     return methods;
@@ -48,7 +49,8 @@ export class OutgoingRequests<TMethod extends RealApiMethodKeys = RealApiMethodK
 
   /**
    * Add request at the end
-   * */
+   * @param request
+   */
   push(request: Request<TMethod>): this {
     this.requests.push(request);
 
@@ -57,7 +59,7 @@ export class OutgoingRequests<TMethod extends RealApiMethodKeys = RealApiMethodK
 
   /**
    * Clear all requests
-   * */
+   */
   clear(): this {
     this.requests = [];
 
@@ -67,7 +69,7 @@ export class OutgoingRequests<TMethod extends RealApiMethodKeys = RealApiMethodK
   /**
    * Returns the first captured outgoing request.
    * @returns first request
-   * */
+   */
   getFirst<TApi extends TMethod>(): Request<TApi> | null {
     return (this.requests[0] as Request<TApi>) || null;
   }
@@ -75,7 +77,7 @@ export class OutgoingRequests<TMethod extends RealApiMethodKeys = RealApiMethodK
   /**
    * Returns the last captured outgoing request.
    * @returns last request
-   * */
+   */
   getLast<TApi extends TMethod>(): Request<TApi> | null {
     if (this.requests.length === 0) {
       return null;
@@ -87,7 +89,7 @@ export class OutgoingRequests<TMethod extends RealApiMethodKeys = RealApiMethodK
   /**
    * Returns the two most recent captured outgoing requests.
    * @returns two last request
-   * */
+   */
   getTwoLast<TApi extends TMethod, TBot extends TMethod>() {
     return this.requests.slice(-2) as Partial<[Request<TApi>, Request<TBot>]>;
   }
@@ -95,14 +97,14 @@ export class OutgoingRequests<TMethod extends RealApiMethodKeys = RealApiMethodK
   /**
    * Returns the three most recent captured outgoing requests.
    * @returns two last request
-   * */
+   */
   getThreeLast<TApi extends TMethod, TBot extends TMethod, TContext extends TMethod>() {
     return this.requests.slice(-3) as Partial<[Request<TApi>, Request<TBot>, Request<TContext>]>;
   }
 
   /**
    * Returns all typed requests
-   * */
+   */
 
   getAll<TApi extends TMethod>(): Partial<[Request<TApi>]>;
 

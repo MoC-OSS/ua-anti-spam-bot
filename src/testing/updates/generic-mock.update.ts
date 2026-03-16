@@ -15,7 +15,7 @@ export type PartialUpdate<U extends Update = Update> = Partial<{
 /**
  * Mock update abstract class to extend.
  * Offers all main fields to declare
- * */
+ */
 export abstract class GenericMockUpdate {
   readonly genericUpdateId = 10_000;
 
@@ -49,7 +49,7 @@ export abstract class GenericMockUpdate {
 
   /**
    * Generic user atom used for `from` and `chat` properties
-   * */
+   */
   readonly genericUserAtom = this.getValidUser({
     last_name: 'GrammyMock LastName',
     id: 1_111_111,
@@ -66,7 +66,7 @@ export abstract class GenericMockUpdate {
 
   /**
    * Generic default user
-   * */
+   */
   readonly genericUser: User = {
     ...this.genericUserAtom,
     is_bot: false,
@@ -165,45 +165,41 @@ export abstract class GenericMockUpdate {
 
   /**
    * Minimal update for the update entity
-   * */
+   */
   abstract minimalUpdate: Partial<Update>;
 
   /**
    * Casts a partial update to its strict generic type for type-safe assertions.
-   *
    * @param update - update to type
    * @returns typed but strict object value type
-   * */
+   */
   static getValidUpdate<U extends PartialUpdate>(update: U): U {
     return update;
   }
 
   /**
    * Casts a partial user object to its strict generic type.
-   *
    * @param user - user to type
    * @returns typed but strict object value type
-   * */
+   */
   getValidUser<U extends Partial<User>>(user: U): U {
     return user;
   }
 
   /**
    * @returns regular actual merged update
-   *
    * @example
    * ```ts
    * build() {
    *   return this.update;
    * }
    * ```
-   * */
+   */
 
   abstract build(...parameters: any[]);
 
   /**
    * @returns update with extra update information to override
-   *
    * @example
    * ```ts
    * buildOverwrite<E extends PartialUpdate>(extra: E) {
@@ -211,7 +207,7 @@ export abstract class GenericMockUpdate {
    * }
    * ```
    * @param parameters
-   * */
+   */
   // abstract buildOverwrite<E extends PartialUpdate>(extra: E);
 
   abstract buildOverwrite(...parameters: any[]);

@@ -12,7 +12,7 @@ import { videoService } from '@video/video.service';
 
 /**
  * @description Message handling composer
- * */
+ */
 export const getGetVideoNoteConverterComposer = () => {
   const videoNoteConverterComposer = new Composer<GrammyContext>();
 

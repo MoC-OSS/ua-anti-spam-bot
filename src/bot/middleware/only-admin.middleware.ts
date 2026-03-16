@@ -8,6 +8,8 @@ import { logSkipMiddleware } from '@utils/generic.util';
 /**
  * Guards the middleware chain so only chat admins (or channel/private chat users) can proceed.
  * Short-circuits with no response for non-admin users.
+ * @param context
+ * @param next
  */
 export const onlyAdmin = async (context: GrammyContext, next: NextFunction) => {
   // No chat = no service
@@ -40,11 +42,10 @@ export const onlyAdmin = async (context: GrammyContext, next: NextFunction) => {
 
   /**
    * Check the member status
-   *
    * @description
    * 'creator', 'administrator' - for valid statuses.
    * 'left' - for anonymous admins when bot is not admin.
-   * */
+   */
   const adminStatuses = new Set<ChatMember['status']>(['creator', 'administrator', 'left']);
   const userStatuses = new Set<ChatMember['status']>(['member']);
 

@@ -18,12 +18,28 @@ export interface FeaturesStatisticsMessageProperties {
   chatsCount: number;
 }
 
+/**
+ *
+ * @param count
+ * @param total
+ */
 function toPercent(count: number, total: number) {
   return ((count / total) * 100).toFixed(2);
 }
 
 /**
  * Returns the chat statistics message displayed via the /statistics command.
+ * @param context
+ * @param root0
+ * @param root0.adminsChatsCount
+ * @param root0.botRemovedCount
+ * @param root0.channelCount
+ * @param root0.groupCount
+ * @param root0.memberChatsCount
+ * @param root0.privateCount
+ * @param root0.superGroupsCount
+ * @param root0.totalSessionCount
+ * @param root0.totalUserCounts
  */
 export const getChatStatisticsMessage = (
   context: GrammyContext,
@@ -62,6 +78,10 @@ export const getChatStatisticsMessage = (
 
 /**
  * Returns the features statistics message displaying usage percentages for each feature.
+ * @param context
+ * @param root0
+ * @param root0.features
+ * @param root0.chatsCount
  */
 export const getFeaturesStatisticsMessage = (context: GrammyContext, { features, chatsCount }: FeaturesStatisticsMessageProperties) =>
   [

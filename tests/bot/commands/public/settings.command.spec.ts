@@ -38,6 +38,9 @@ const setUserSessionSpy = vi.spyOn(mockRedisService, 'setUserSession');
 
 const commandMessage = '/settings';
 
+/**
+ *
+ */
 function getSettingsCommandUpdate() {
   return new MessageMockUpdate(commandMessage).buildOverwrite({
     message: {
@@ -52,6 +55,9 @@ function getSettingsCommandUpdate() {
   });
 }
 
+/**
+ *
+ */
 function getPrivateSettingsCommandUpdate() {
   return new MessagePrivateMockUpdate(commandMessage).buildOverwrite({
     message: {

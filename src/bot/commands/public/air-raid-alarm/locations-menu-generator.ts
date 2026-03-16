@@ -16,10 +16,10 @@ import { isIdWhitelisted } from '@utils/generic.util';
 
 /**
  * Generates a dynamic paginated location menu for air raid alert settings.
- * @param {GrammyContext} _context
- * @param {MenuRange<GrammyContext>} range
+ * @param _context
+ * @param range
  * @param alertStates
- * */
+ */
 export const dynamicLocationMenu = (_context: GrammyMenuContext, range: MenuRange<GrammyMenuContext>, alertStates: State[]) => {
   const states = isIdWhitelisted(_context.from?.id) ? [...alertStates, generateTestState(TEST_ALARM_STATE)] : alertStates;
   const pageIndex = _context.chatSession.chatSettings.airRaidAlertSettings.pageNumber;
@@ -31,6 +31,10 @@ export const dynamicLocationMenu = (_context: GrammyMenuContext, range: MenuRang
   let columnIndex = 0;
   const lastPageButtonsLimit = buttonIndex + lastPageButtonsNumber;
 
+  /**
+   *
+   * @param locationName
+   */
   function createTextButton(locationName: string) {
     const displayLocationName = state === locationName ? `✅ ${locationName}` : locationName;
     // TODO UABOT-35 update MiddlewareMenu to handle dynamic buttons
@@ -38,7 +42,7 @@ export const dynamicLocationMenu = (_context: GrammyMenuContext, range: MenuRang
     /**
      * Creates a selectable text button for a location in the menu.
      * @param {GrammyContext} context
-     * */
+     */
     return range.text(displayLocationName, onlyAdmin, (context: GrammyContext) => {
       context.chatSession.chatSettings.airRaidAlertSettings.state = locationName;
       alarmChatService.updateChat(context.chatSession, context.chat?.id);
@@ -49,6 +53,9 @@ export const dynamicLocationMenu = (_context: GrammyMenuContext, range: MenuRang
     });
   }
 
+  /**
+   *
+   */
   function createNextButton() {
     return range.text(_context.t('pagination-next-page'), onlyAdmin, (context) => {
       context.menu.update();
@@ -56,6 +63,9 @@ export const dynamicLocationMenu = (_context: GrammyMenuContext, range: MenuRang
     });
   }
 
+  /**
+   *
+   */
   function createPreviousButton() {
     return range.text(_context.t('pagination-previous-page'), onlyAdmin, (context) => {
       context.menu.update();

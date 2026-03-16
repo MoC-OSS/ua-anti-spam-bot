@@ -5,8 +5,7 @@ import { NsfwDetectService } from '@services/nsfw-detect.service';
 import { logger } from '@utils/logger.util';
 
 /**
- * @type {SwindlersBotsService}
- * */
+ */
 let nsfwDetectService: NsfwDetectService;
 let mockDynamicStorageService: DynamicStorageService;
 

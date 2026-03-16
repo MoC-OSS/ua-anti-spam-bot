@@ -14,12 +14,10 @@ vi.mock('axios');
 const axiosMock = { get: vi.mocked(axios.get) };
 
 /**
- * @type {SwindlersDetectService}
- * */
+ */
 let swindlersDetectService: SwindlersDetectService;
 /**
- * @type {SwindlersTensorService}
- * */
+ */
 let swindlersTensorService: SwindlersTensorService;
 const swindlersBotsService = new SwindlersBotsService(mockDynamicStorageService, 0.6);
 const swindlersCardsService = new SwindlersCardsService(mockDynamicStorageService);

@@ -14,6 +14,13 @@ export interface HelpMessageProperties {
 
 /**
  * Returns the help message displayed via the /help command with bot status and support info.
+ * @param context
+ * @param root0
+ * @param root0.startLocaleTime
+ * @param root0.isAdmin
+ * @param root0.canDelete
+ * @param root0.user
+ * @param root0.userId
  */
 export const getHelpMessage = (context: GrammyContext, { startLocaleTime, isAdmin, canDelete, user, userId }: HelpMessageProperties) =>
   [
@@ -42,6 +49,7 @@ export const getHelpMessage = (context: GrammyContext, { startLocaleTime, isAdmi
 
 /**
  * Returns the message displayed when a user uses /start in a private chat.
+ * @param context
  */
 export const getStartMessage = (context: GrammyContext) =>
   [context.t('start-message-atom'), '', context.t('start-private-instructions', { helpChat })].join('\n');
@@ -56,6 +64,13 @@ export interface GroupStartMessageProperties {
 
 /**
  * Returns the message displayed when a user uses /start in a group chat.
+ * @param context
+ * @param root0
+ * @param root0.adminsString
+ * @param root0.isAdmin
+ * @param root0.canDelete
+ * @param root0.user
+ * @param root0.userId
  */
 export const getGroupStartMessage = (
   context: GrammyContext,
@@ -77,6 +92,9 @@ export const getGroupStartMessage = (
 
 /**
  * Returns the message displayed when the bot is invited to a channel.
+ * @param context
+ * @param root0
+ * @param root0.botName
  */
 export const getStartChannelMessage = (context: GrammyContext, { botName }: GenericBotProperties) =>
   context.t('start-channel-message', { botName, helpChat });
@@ -89,6 +107,11 @@ export interface BotJoinMessageProperties {
 
 /**
  * Returns the message displayed when the bot is invited to a group.
+ * @param context
+ * @param root0
+ * @param root0.adminsString
+ * @param root0.isAdmin
+ * @param root0.canDelete
  */
 export const getBotJoinMessage = (context: GrammyContext, { adminsString, isAdmin = false, canDelete }: BotJoinMessageProperties) =>
   [

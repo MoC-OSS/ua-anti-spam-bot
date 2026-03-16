@@ -15,16 +15,16 @@ import { telegramUtility } from '@utils/util-instances.util';
 
 /**
  * @description Remove strategic information logic
- * */
+ */
 export const getNoUrlsComposer = () => {
   const noUrlsComposer = new Composer<GrammyContext>();
 
   /**
    * Logs a deleted URL-containing message to the logs chat.
-   * @param {GrammyContext} context
-   * @param {string[]} urls
-   * @param {string} [message]
-   * */
+   * @param context
+   * @param urls
+   * @param [message]
+   */
   async function saveUrlsMessage(context: GrammyContext, urls: string[], message?: string) {
     const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const text = message || context.state?.text || '';

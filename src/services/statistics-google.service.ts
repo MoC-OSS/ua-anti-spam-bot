@@ -17,11 +17,9 @@ export class StatisticsGoogleService {
 
   /**
    * Appends a row of statistic values to the statistics Google Sheet.
-   * @private
-   * @param {string|number[]} cases
-   *
+   * @param cases
    * @returns Promise<any>
-   * */
+   */
   async appendToSheet(cases: (number | string)[]) {
     return this.googleService.appendToSheet(
       environmentConfig.GOOGLE_SPREADSHEET_ID,

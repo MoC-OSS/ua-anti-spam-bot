@@ -7,6 +7,13 @@ import { logger } from '@utils/logger.util';
 
 import { api } from './api';
 
+/**
+ *
+ * @param root0
+ * @param root0.srp_id
+ * @param root0.A
+ * @param root0.M1
+ */
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function checkPassword({ srp_id, A, M1 }: CheckPassword) {
   return api.call('auth.checkPassword', {
@@ -20,6 +27,9 @@ export function checkPassword({ srp_id, A, M1 }: CheckPassword) {
   });
 }
 
+/**
+ *
+ */
 async function getUser() {
   try {
     return await api.call('users.getFullUser', {
@@ -33,6 +43,10 @@ async function getUser() {
   }
 }
 
+/**
+ *
+ * @param phone
+ */
 function sendCode(phone: string) {
   return api.call('auth.sendCode', {
     phone_number: phone,
@@ -43,6 +57,13 @@ function sendCode(phone: string) {
   });
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.code
+ * @param root0.phone
+ * @param root0.phone_code_hash
+ */
 function signIn({ code, phone, phone_code_hash }) {
   return api.call('auth.signIn', {
     phone_code: code,
@@ -51,6 +72,12 @@ function signIn({ code, phone, phone_code_hash }) {
   });
 }
 
+/**
+ *
+ * @param root0
+ * @param root0.phone
+ * @param root0.phone_code_hash
+ */
 function signUp({ phone, phone_code_hash }) {
   return api.call('auth.signUp', {
     phone_number: phone,
@@ -60,6 +87,9 @@ function signUp({ phone, phone_code_hash }) {
   });
 }
 
+/**
+ *
+ */
 function getPassword() {
   return api.call<Record<string, string>>('account.getPassword');
 }

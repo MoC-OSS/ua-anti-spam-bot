@@ -9,7 +9,9 @@ import type { GrammyContext } from '@app-types/context';
  *
  * If the message is part of a media group and has been deleted,
  * then caches spam media group id.
- * */
+ * @param context
+ * @param next
+ */
 export async function saveSpamMediaGroupMiddleware(context: GrammyContext, next: NextFunction) {
   const isMediaGroup = context.message?.media_group_id;
   const { isDeleted } = context.state;

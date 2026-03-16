@@ -30,6 +30,9 @@ const apiResponses: ApiResponses = {
 
 const commandText = '/help';
 
+/**
+ *
+ */
 function getHelpCommandUpdate() {
   return new MessageMockUpdate(commandText).buildOverwrite({
     message: {

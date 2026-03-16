@@ -10,7 +10,6 @@ import { environmentConfig } from '@shared/config';
 /**
  * Verifies Telegram Web App init data by comparing its HMAC-SHA256 hash
  * against a hash computed from the bot token.
- *
  * @param telegramInitData - The raw init data string from the Telegram Web App.
  * @returns `true` if the signature is valid.
  */

@@ -6,8 +6,10 @@ import type { GrammyContext } from '@app-types/context';
 import { revealHiddenUrls } from '@utils/reveal-hidden-urls.util';
 
 /**
+ * @param text
+ * @param entities
  * @returns GrammyContext
- * */
+ */
 const createContext = (text: string, entities: MessageEntity[]) => {
   const newContext = new Context(
     {

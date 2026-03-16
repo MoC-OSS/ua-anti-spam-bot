@@ -1,5 +1,9 @@
 import { TelegramUtility } from '@utils/telegram.util';
 
+/**
+ *
+ * @param overrides
+ */
 function buildMockUser(overrides: Record<string, unknown> = {}) {
   return {
     id: 123,
@@ -11,6 +15,10 @@ function buildMockUser(overrides: Record<string, unknown> = {}) {
   };
 }
 
+/**
+ *
+ * @param overrides
+ */
 function buildMockContext(overrides: Record<string, unknown> = {}): any {
   return {
     from: buildMockUser(),

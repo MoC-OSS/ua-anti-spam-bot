@@ -12,10 +12,12 @@ import { ImageType } from '@app-types/image';
 import type { StateImage } from '@app-types/state';
 
 /**
+ * @param context
+ * @param next
  * @description
  * Add images into state.
  * Downloads the smallest one and appends into the state.
- * */
+ */
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export async function parsePhoto(context: GrammyContext, next: NextFunction) {
   if (!context.state.photo && context.state.photo !== null) {

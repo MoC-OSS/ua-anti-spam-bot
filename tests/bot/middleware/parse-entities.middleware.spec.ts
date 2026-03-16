@@ -4,6 +4,10 @@ import { parseEntities } from '@bot/middleware/parse-entities.middleware';
 
 import type { GrammyContext } from '@app-types/context';
 
+/**
+ *
+ * @param overrides
+ */
 function buildContext(overrides: Partial<GrammyContext> = {}): GrammyContext {
   return {
     state: { text: '' },

@@ -16,6 +16,10 @@ vi.mock('@utils/remove-duplicates.util', () => ({
   removeDuplicates: (array: unknown[]) => array,
 }));
 
+/**
+ *
+ * @param overrides
+ */
 function buildContext(overrides: Partial<GrammyContext> = {}): GrammyContext {
   return {
     state: {},

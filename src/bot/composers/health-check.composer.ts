@@ -7,7 +7,7 @@ import type { GrammyContext } from '@app-types/context';
 
 /**
  * @description Health-check helper composer
- * */
+ */
 export const getHealthCheckComposer = () => {
   const healthCheckComposer = new Composer<GrammyContext>();
 

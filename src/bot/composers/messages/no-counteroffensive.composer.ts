@@ -15,17 +15,17 @@ import { telegramUtility } from '@utils/util-instances.util';
 
 /**
  * @description Remove messages which includes counteroffensive information
- * */
+ */
 export const getNoCounterOffensiveComposer = () => {
   const noCounterOffensiveComposer = new Composer<GrammyContext>();
 
   /**
    * Logs a deleted counteroffensive message to the logs chat.
-   * @param {GrammyContext} context
-   * @param {string | RegExp} reason
-   * @param {number} maxChance
-   * @param {string} [message]
-   * */
+   * @param context
+   * @param reason
+   * @param maxChance
+   * @param [message]
+   */
   async function saveCounteroffensiveMessage(context: GrammyContext, reason: RegExp | string, maxChance: number, message?: string) {
     const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const text = message || context.state?.text || '';

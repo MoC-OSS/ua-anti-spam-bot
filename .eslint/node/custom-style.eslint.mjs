@@ -3,7 +3,7 @@
  * @author Dmytro Vakulenko
  * @version 1.1
  * @see https://eslint.org/docs/latest/rules/
- * */
+ */
 export default [
   {
     name: 'custom-style',

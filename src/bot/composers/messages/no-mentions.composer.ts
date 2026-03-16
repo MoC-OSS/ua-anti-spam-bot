@@ -15,16 +15,16 @@ import { telegramUtility } from '@utils/util-instances.util';
 
 /**
  * @description Remove strategic information logic
- * */
+ */
 export const getNoMentionsComposer = () => {
   const noMentionsComposer = new Composer<GrammyContext>();
 
   /**
    * Logs a deleted mentions message to the logs chat.
-   * @param {GrammyContext} context
-   * @param {string[]} mentions
-   * @param {string} [message]
-   * */
+   * @param context
+   * @param mentions
+   * @param [message]
+   */
   async function saveMentionsMessage(context: GrammyContext, mentions: string[], message?: string) {
     const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const text = message || context.state?.text || '';

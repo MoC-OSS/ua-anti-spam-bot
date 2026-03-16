@@ -31,7 +31,6 @@ export class NsfwTensorService {
 
   /**
    * Decodes an image buffer into a 3D tensor, runs NSFW classification, and disposes the tensor.
-   *
    * @param image - Raw image buffer to classify.
    * @returns An array of prediction results sorted by probability.
    */
@@ -48,7 +47,6 @@ export class NsfwTensorService {
 
   /**
    * Classifies multiple video frames in parallel and returns predictions for each.
-   *
    * @param imageArray - Array of image buffers (one per video frame).
    */
   classifyVideo(imageArray: Buffer[]): Promise<PredictionType[][]> {
@@ -57,7 +55,7 @@ export class NsfwTensorService {
 
   /**
    * Classifies a single image and returns a spam/safe verdict with the highest prediction.
-   *
+   * @param image
    * @returns Prediction result for the image frame.
    */
   async predict(image: Buffer): Promise<NsfwTensorResult> {
@@ -84,7 +82,7 @@ export class NsfwTensorService {
   /**
    * Classifies an array of video frames and returns a combined spam/safe verdict.
    * Stops early if any frame exceeds the spam threshold.
-   *
+   * @param imageArray
    * @returns Aggregated prediction result across all frames.
    */
   async predictVideo(imageArray: Buffer[]): Promise<NsfwTensorResult> {
@@ -120,6 +118,7 @@ export class NsfwTensorService {
 
   /**
    * Finds the highest NSFW prediction and the first prediction that exceeds the class threshold.
+   * @param predictions
    */
   private findHighestPrediction(predictions: PredictionType[]) {
     let highestPrediction!: PredictionType;

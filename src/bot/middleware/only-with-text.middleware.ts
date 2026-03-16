@@ -5,9 +5,11 @@ import type { GrammyContext } from '@app-types/context';
 import { logSkipMiddleware } from '@utils/generic.util';
 
 /**
+ * @param context
+ * @param next
  * @description
  * Skip messages without text and add text into state
- * */
+ */
 export function onlyWithText(context: GrammyContext, next: NextFunction) {
   if (context.state.text) {
     return next();

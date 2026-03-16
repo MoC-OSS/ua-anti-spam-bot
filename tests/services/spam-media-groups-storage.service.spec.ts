@@ -1,5 +1,10 @@
 import { SpamMediaGroupsStorage } from '@services/spam-media-groups-storage.service';
 
+/**
+ *
+ * @param chatId
+ * @param mediaGroupId
+ */
 function buildMockContext(chatId: number | undefined, mediaGroupId: string | undefined): any {
   return {
     chat: chatId === undefined ? undefined : { id: chatId },

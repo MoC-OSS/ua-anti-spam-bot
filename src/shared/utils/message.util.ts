@@ -18,12 +18,15 @@ const options = {
 export class MessageUtility {
   /**
    * Searches for a keyword in the message text using direct or fuzzy matching.
-   * */
+   * @param message
+   * @param searchFor
+   * @param strict
+   */
   // eslint-disable-next-line sonarjs/function-return-type
   findInText(message: string, searchFor: string, strict = false) {
     /**
      * Direct hit
-     * */
+     */
     if (searchFor.length <= 4) {
       const directHit = strict
         ? message
@@ -38,7 +41,7 @@ export class MessageUtility {
 
     /**
      * Translit hit
-     * */
+     */
     // const translitHit = cyrillicToTranslit
     //   .transform(message, ' ')
     //   .toLowerCase()
@@ -50,23 +53,21 @@ export class MessageUtility {
 
     /**
      * Contains search
-     * */
+     */
     // return message.toLowerCase().includes(searchFor.toLowerCase());
     return false;
   }
 
   /**
    * Performs a fuzzy search for any of the given words within the message using Fuse.js.
-   *
-   * @param {string} message
-   * @param {string[]} wordsArray
-   *
-   * @returns {string | null}
-   * */
+   * @param message
+   * @param wordsArray
+   * @returns
+   */
   fuseInText(message: string, wordsArray: string[]) {
     /**
      * Fuse hit
-     * */
+     */
     const fuseInstance = new Fuse([message], options);
 
     return wordsArray.find((word) => fuseInstance.search(word).length > 0) || null;

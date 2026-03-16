@@ -1,4 +1,9 @@
 // Simple logger for ESLint configs with colored context
+/**
+ *
+ * @param context
+ * @param method
+ */
 function colorContext(context, method) {
   const METHOD_COLORS = {
     log: '\u001B[32m', // green
@@ -19,6 +24,10 @@ function colorContext(context, method) {
   return `[ESLint:${context}]`;
 }
 
+/**
+ *
+ * @param context
+ */
 export function eslintLogger(context) {
   return {
     /* eslint-disable no-console, lintlord/prefer-logger */

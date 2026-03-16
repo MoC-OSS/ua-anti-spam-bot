@@ -10,8 +10,10 @@ export interface StrategicComposerProperties {
 }
 
 /**
+ * @param root0
+ * @param root0.onTextListener
  * @description Remove strategic information logic
- * */
+ */
 export const getStrategicComposer = ({ onTextListener }: StrategicComposerProperties) => {
   const strategicComposer = new Composer<GrammyContext>();
 

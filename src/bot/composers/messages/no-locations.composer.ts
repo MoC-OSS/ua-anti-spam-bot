@@ -15,16 +15,16 @@ import { telegramUtility } from '@utils/util-instances.util';
 
 /**
  * @description Remove message with any location
- * */
+ */
 export const getNoLocationsComposer = () => {
   const noLocationsComposer = new Composer<GrammyContext>();
 
   /**
    * Logs a deleted location message to the logs chat.
-   * @param {GrammyContext} context
-   * @param {string[]} locations
-   * @param {string} [message]
-   * */
+   * @param context
+   * @param locations
+   * @param [message]
+   */
   async function saveLocationMessage(context: GrammyContext, locations: string[], message?: string) {
     const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const text = message || context.state?.text || '';

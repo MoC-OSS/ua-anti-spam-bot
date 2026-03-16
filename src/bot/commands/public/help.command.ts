@@ -9,19 +9,19 @@ import { getUserData } from '@utils/generic.util';
 export class HelpCommand {
   /**
    * Initializes the help command with the bot start time.
-   * @param {Date} startTime
-   * */
+   * @param startTime
+   */
   constructor(private startTime: Date) {}
 
   /**
    * Handle /help
    * Returns help message
-   * */
+   */
   middleware(): GrammyMiddleware {
     /**
      * Handles the /help command and replies with bot usage information.
-     * @param {GrammyContext} context
-     * */
+     * @param context
+     */
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context) => {
       const startLocaleTime = formatDate(this.startTime);

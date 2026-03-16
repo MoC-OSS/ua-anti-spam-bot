@@ -3,6 +3,10 @@ import { getDeleteDenylistMessage } from '@bot/messages/denylist.message';
 
 import type { GrammyContext } from '@app-types/context';
 
+/**
+ *
+ * @param tFunction
+ */
 function buildContext(tFunction?: (key: string, parameters?: unknown) => string): GrammyContext {
   return {
     t: tFunction ?? ((key: string, parameters?: unknown) => (parameters ? `${key}:${JSON.stringify(parameters)}` : key)),

@@ -49,15 +49,13 @@ const getCompactSheet = vi.fn(() => Promise.resolve([mockNewBot]));
 getCompactSheet.mockReturnValueOnce(Promise.resolve(['test message from swindler']));
 
 /**
- * @type {GoogleService}
- * */
+ */
 export const mockGoogleService = {
   getSheet,
 } as Partial<GoogleService> as GoogleService;
 
 /**
- * @type {SwindlersGoogleService}
- * */
+ */
 export const mockSwindlersGoogleService = {
   getTrainingPositives: getCompactSheet,
   getBots: getCompactSheet,

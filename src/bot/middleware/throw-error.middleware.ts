@@ -5,7 +5,7 @@ import { logger } from '@utils/logger.util';
 /**
  * @deprecated
  * @description Used to test global error handling
- * */
+ */
 export const throwErrorMiddleware: GrammyMiddleware = () => {
   logger.info('throwErrorMiddleware called');
   throw new Error('Test error');

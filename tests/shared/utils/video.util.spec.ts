@@ -13,6 +13,10 @@ vi.mock('@shared/config', () => ({
 
 const mockedAxiosGet = vi.mocked(axios.get);
 
+/**
+ *
+ * @param filePath
+ */
 function buildMockApi(filePath?: string) {
   return {
     getFile: vi.fn().mockResolvedValue({
@@ -22,6 +26,11 @@ function buildMockApi(filePath?: string) {
   };
 }
 
+/**
+ *
+ * @param type
+ * @param meta
+ */
 function buildVideoContext(type: string, meta: Record<string, unknown>) {
   return {
     state: {

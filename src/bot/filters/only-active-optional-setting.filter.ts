@@ -3,8 +3,9 @@ import type { OptionalChatSettings } from '@app-types/session';
 
 /**
  * Filter that checks whether an optional chat setting is enabled.
- * @returns {true} when optional settings is enabled
- * */
+ * @param key
+ * @returns when optional settings is enabled
+ */
 export const onlyActiveOptionalSettingFilter =
   (key: keyof OptionalChatSettings): GrammyFilter =>
   (context) =>

@@ -7,12 +7,12 @@ import { processMessage, processTxtMessage } from './dataset-helpers';
 
 /**
  * Allow lists
- * */
+ */
 const obsceneDictionaryTranslitWhitelist = new Set(['such', 'user', 'ept', 'derma', 'si', 'derme', 'site']);
 
 /**
  * Urls
- * */
+ */
 export const obsceneDictionaryUaUrl = new URL('strings/obscene_dictionary_ua.txt', import.meta.url);
 
 export const obsceneDictionaryRuUrl = new URL('strings/obscene_dictionary_ru.txt', import.meta.url);
@@ -25,7 +25,7 @@ const obsceneDictionaryWhitelistEnUrl = new URL('strings/obscene_dictionary_en_w
 
 /**
  * File allow lists
- * */
+ */
 // eslint-disable-next-line security/detect-non-literal-fs-filename
 const obsceneDictionaryWhitelistUa = new Set(processTxtMessage(fs.readFileSync(obsceneDictionaryWhitelistUaUrl).toString()));
 // eslint-disable-next-line security/detect-non-literal-fs-filename
@@ -35,7 +35,9 @@ const obsceneDictionaryWhitelistEn = new Set(processTxtMessage(fs.readFileSync(o
 
 /**
  * Logic
- * */
+ * @param whitelist
+ * @param datasetUrl
+ */
 function processObsceneDictionary(whitelist: Set<string>, datasetUrl: URL) {
   return processMessage([
     ...whitelist,

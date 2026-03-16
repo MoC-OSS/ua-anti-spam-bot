@@ -19,7 +19,6 @@ import { SwindlersUrlsService } from './swindlers-urls.service';
 /**
  * Initializes and wires all swindler-detection services.
  * Loads the ML tensor model, verifies it works, and creates all detection services.
- *
  * @returns An object containing all initialized swindler services.
  */
 export const initSwindlersContainer = async () => {

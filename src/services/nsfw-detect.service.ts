@@ -26,7 +26,7 @@ export class NsfwDetectService {
 
   /**
    * Checks the message for NSFW content using fuzzy matching.
-   * @param {string} message - raw message from user to parse
+   * @param message - raw message from user to parse
    */
   processMessage(message?: string): SwindlersBotsResult | null {
     const result = this.isSpamMessage(message);
@@ -41,15 +41,15 @@ export class NsfwDetectService {
   /**
    * @description
    * Create and saves FuzzySet based on latest data from dynamic storage
-   * */
+   */
   initFuzzySet() {
     this.nsfwMessagesFuzzySet = FuzzySet(this.dynamicStorageService.nsfwMessages);
   }
 
   /**
    * Evaluates a message against the NSFW fuzzy set and returns the match result.
-   * @param {string} message
-   * @param {number} [customRate]
+   * @param message
+   * @param [customRate]
    */
   isSpamMessage(message?: string, customRate?: number): SwindlersBotsResult {
     if (!message) {

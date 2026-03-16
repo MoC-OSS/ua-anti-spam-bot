@@ -46,6 +46,11 @@ let outgoingRequests: OutgoingRequests;
 const bot = new Bot<GrammyContext>('mock');
 const rankCommand = new RankCommand(mockTensorService);
 
+/**
+ *
+ * @param command
+ * @param match
+ */
 function buildCommandUpdate(command: string, match = '') {
   const full = match ? `${command} ${match}` : command;
 

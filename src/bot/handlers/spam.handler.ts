@@ -4,16 +4,15 @@ import type { MessageHandler } from './message.handler';
 
 /**
  * Checks whether a message is flagged as spam by the tensor-based rule engine.
- *
- * @param {GrammyContext} context
- * @param {MessageHandler} messageHandler
+ * @param context
+ * @param messageHandler
  */
 export const isFilteredByRules = async (context: GrammyContext, messageHandler: MessageHandler) => {
   const originMessage = context.state.text;
   const message = messageHandler.sanitizeMessage(context, originMessage || '');
   /**
    * Adapter for tensor
-   * */
+   */
   const result = await messageHandler.getTensorRank(message, originMessage || '');
 
   return {

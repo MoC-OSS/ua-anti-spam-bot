@@ -4,6 +4,7 @@ import type { DefaultChatSettings } from '@app-types/session';
 /**
  * Short-circuits the middleware chain when a specific chat setting is enabled.
  * Use to conditionally disable features based on per-chat default settings.
+ * @param key
  */
 export const ignoreByDefaultSettingsMiddleware =
   (key: keyof DefaultChatSettings): GrammyMiddleware =>

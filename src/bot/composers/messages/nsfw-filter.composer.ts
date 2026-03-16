@@ -26,7 +26,8 @@ const host = `http://${environmentConfig.HOST}:${environmentConfig.PORT}`;
 
 /**
  * Save message into logs to review it and track logic
- * */
+ * @param context
+ */
 const saveNsfwMessage = async (context: GrammyContext) => {
   if (!context.state.nsfwResult) {
     return;
@@ -46,7 +47,7 @@ const saveNsfwMessage = async (context: GrammyContext) => {
   switch (type) {
     /**
      * Save photo message
-     * */
+     */
     case ImageType.PHOTO: {
       const { caption } = imageData;
 
@@ -63,7 +64,7 @@ const saveNsfwMessage = async (context: GrammyContext) => {
 
     /**
      * Save sticker message
-     * */
+     */
     case ImageType.VIDEO_STICKER:
     case ImageType.STICKER: {
       const setNameAddition = meta.set_name ? `from <code>${meta.set_name}</code> sticker-pack` : '';
@@ -90,7 +91,7 @@ const saveNsfwMessage = async (context: GrammyContext) => {
 
     /**
      * Save photo and video message
-     * */
+     */
     case ImageType.ANIMATION:
     case ImageType.VIDEO: {
       const { caption } = imageData;
@@ -110,7 +111,7 @@ const saveNsfwMessage = async (context: GrammyContext) => {
 
     /**
      * Round video notes
-     * */
+     */
     case ImageType.VIDEO_NOTE: {
       const { videoNote } = imageData;
 
@@ -136,7 +137,7 @@ const saveNsfwMessage = async (context: GrammyContext) => {
     /**
      * Unknown type handling
      * Never impossible
-     * */
+     */
     default: {
       await context.api.sendMessage(logsChat, `Unknown unhandled image type ${type} with meta ${JSON.stringify(meta)}`, {
         message_thread_id: LOGS_CHAT_THREAD_IDS.PORN,
@@ -153,8 +154,10 @@ export interface NsfwFilterComposerProperties {
 }
 
 /**
+ * @param root0
+ * @param root0.nsfwTensorService
  * @description Remove nsfw content
- * */
+ */
 export const getNsfwFilterComposer = ({ nsfwTensorService }: NsfwFilterComposerProperties) => {
   const nsfwFilterComposer = new Composer<GrammyContext>();
 
@@ -170,7 +173,7 @@ export const getNsfwFilterComposer = ({ nsfwTensorService }: NsfwFilterComposerP
 
     /**
      * Get preview or extracted frames to check
-     * */
+     */
     const imageBuffers: Buffer[] = parsedPhoto && !hasFrames ? [parsedPhoto.file as Buffer] : parsedPhoto?.fileFrames || [];
 
     if (imageBuffers.length === 0) {

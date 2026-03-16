@@ -44,7 +44,9 @@ export class DeleteSwindlersMiddleware {
   middleware(): GrammyMiddleware {
     /**
      * Delete messages that looks like from swindlers
-     * */
+     * @param context
+     * @param next
+     */
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context, next) => {
       const message = revealHiddenUrls(context);
@@ -69,7 +71,10 @@ export class DeleteSwindlersMiddleware {
     };
   }
 
-  /** Checks a message against the swindlers detection service, falling back to local detection if the server is unavailable. */
+  /**
+   * Checks a message against the swindlers detection service, falling back to local detection if the server is unavailable.
+   * @param message
+   */
   async checkMessage(message: string): Promise<SwindlersResult> {
     try {
       if (environmentConfig.USE_SERVER) {
@@ -86,11 +91,11 @@ export class DeleteSwindlersMiddleware {
 
   /**
    * Logs the detected swindler message to the main and secondary logs chats.
-   * @param {GrammyContext} context
-   * @param {number} maxChance
-   * @param {SwindlerType | string} from
-   * @param {string} [message]
-   * */
+   * @param context
+   * @param maxChance
+   * @param from
+   * @param [message]
+   */
   async saveSwindlersMessage(context: GrammyContext, maxChance: number, from: LooseAutocomplete<SwindlerType>, message?: string) {
     const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const text = message || context.state?.text || '';
@@ -120,7 +125,8 @@ export class DeleteSwindlersMiddleware {
 
   /**
    * Sends warning to the chat, or skips if it was sent
-   * */
+   * @param context
+   */
   processWarningMessage(context: GrammyContext) {
     const shouldSend =
       !context.chatSession.lastWarningDate ||
@@ -139,7 +145,10 @@ export class DeleteSwindlersMiddleware {
     return undefined;
   }
 
-  /** Attempts to delete the swindler message. Notifies admins if deletion fails due to missing permissions. */
+  /**
+   * Attempts to delete the swindler message. Notifies admins if deletion fails due to missing permissions.
+   * @param context
+   */
   async removeMessage(context: GrammyContext) {
     try {
       return await context.deleteMessage();

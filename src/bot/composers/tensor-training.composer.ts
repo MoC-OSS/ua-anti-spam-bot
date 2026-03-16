@@ -19,14 +19,17 @@ export interface TensorTrainingComposerProperties {
 }
 
 /**
+ * @param root0
+ * @param root0.tensorListener
+ * @param root0.trainingThrottler
  * @description Message handling composer
- * */
+ */
 export const getTensorTrainingComposer = ({ tensorListener, trainingThrottler }: TensorTrainingComposerProperties) => {
   const tensorTrainingComposer = new Composer<GrammyContext>();
 
   /**
    * Only these messages will be processed in this composer
-   * */
+   */
   const composer = tensorTrainingComposer.filter((context) => context.chat?.id === trainingChat && environmentConfig.TEST_TENSOR);
 
   composer.on(messageQuery, parseText, onlyWithText, tensorListener.middleware(trainingThrottler));
