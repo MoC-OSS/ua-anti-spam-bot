@@ -19,6 +19,9 @@ RUN npm ci
 
 COPY . .
 
+RUN mkdir -p /usr/src/app/src/tensor/temp && \
+    chown -R node:node /usr/src/app/src/tensor/temp
+    
 # Switch to non-root user for security (node user already exists in Node.js base image)
 USER node
 
