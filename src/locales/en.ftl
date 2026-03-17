@@ -23,9 +23,9 @@ settings-link-to-web-view = ⚙️Open settings:
 
 settings-has-no-linked-chats =
     ⛔️ You have no linked chats.
-    
+
     Please join a group and press /settings.
-    
+
 settings-is-not-admin = 😔 You are not a chat administrator!
 
 # ------------------------------------------------------------
@@ -37,36 +37,36 @@ swindlers-update-end = Scammers list update complete.
 
 swindlers-warning =
     <b>❗WARNING! UA Anti Spam Bot 🇺🇦 detected a message from scammers in this chat!</b>
-    
+
     Be careful and follow information security rules:
-    
+
     🔶 Do not follow suspicious links from chats!
     🔶 Avoid registrations and sharing personal data with unverified third-party resources.
     🔶 Never enter your payment card security details (CVV code and PIN).
-    
+
     If you have become a victim of scammers or your account was hacked, contact the free digital security hotline.
-    
+
     Get expert consultation:
     👉 @nadiyno_bot
-    
+
     More info with /hotline_security command
-    
+
 swindlers-help =
     <b>NADIYNO: digital security hotline</b>
-    
+
     * Received a suspicious call supposedly from a bank?
     * Shopping online but unsure about the site's safety?
     * Your account was hacked?
-    
+
     Describe your problem and get expert consultation.
     It's free and confidential.
-    
+
     Ask an expert!
     👉 @nadiyno_bot
-    
+
     More about the platform:
     💻 https://nadiyno.org/
-    
+
 # ------------------------------------------------------------
 # Generic bot status / commands
 # ------------------------------------------------------------
@@ -87,9 +87,9 @@ command-hotline-description = 🚓 Digital security hotline
 bot-admin-ready =
     😎 <b>I am now an administrator.</b> Ready to work.
     ⚙️ All bot settings are available via the <b>/settings@{ $botName }</b> command
-    
+
     👩‍💻 If the bot is not working or you have questions and suggestions, write to <a href="{ $helpChat }">the support chat</a>.
-    
+
 bot-admin-ready-no-delete = 😢 I am now an administrator. But I don't have permission to delete messages.
 bot-admin-active = ✅ I am activated and doing my job.
 bot-member-inactive = 😴 I am now deactivated. Resting...
@@ -101,17 +101,17 @@ bot-no-delete-permission = ⛔ I don't have permission to delete messages.
 bot-feature-no-admin =
     ⛔️ I am not activated!
     <b>☝️Make me an administrator so I can provide this functionality.</b>
-    
+
 # ------------------------------------------------------------
 # Air raid alarm messages
 # ------------------------------------------------------------
 
 alarm-chat-muted =
     🤫 The ability to send messages during an air raid alert is temporarily blocked!
-    
+
 alarm-chat-unmuted =
     💬 Message blocking has been lifted. Enjoy chatting!
-    
+
 alarm-start-1 = <b>Do NOT ignore</b> the air raid alert.
 alarm-start-2 = Leave the streets and go to a shelter!
 alarm-start-3 = Go to a shelter!
@@ -163,12 +163,12 @@ delete-strategic-reason-location = spreading potentially strategic information w
 
 delete-strategic-message =
     🇺🇦 <b>Reason</b>: { $reason }{ $wordMessage }.
-    
+
     ✊🏻 «<b>єВорог</b>» — a new bot from the Ministry of Digital Transformation that occupiers cannot use.
     Report this information to it.
-    
+
     👉🏻 @evorog_bot
-    
+
 # ------------------------------------------------------------
 # Feature delete messages
 # ------------------------------------------------------------
@@ -195,13 +195,13 @@ feature-denylist = 🚫 banned words
 cannot-delete-message =
     <b>😢 I cannot delete this message.</b>
     I don't have delete permissions or Telegram experienced an error.
-    
+
     🧐 Check permissions or make me an administrator again.
     { $adminsString ->
         [none] The chat creator can help with this
         *[other] Can be helped by: { $adminsString }
     }
-    
+
 # ------------------------------------------------------------
 # Statistics messages
 # ------------------------------------------------------------
@@ -262,12 +262,12 @@ help-hotline-header = <b>Help hotline:</b>
 
 help-hotline-text =
     If you have become a victim of scammers or your account was hacked, contact the free digital security hotline.
-    
+
     Get expert consultation:
     👉 @nadiyno_bot
-    
+
     More info with /hotline_security command
-    
+
 help-bot-version = <b>Bot version:</b> { $version }
 
 # ------------------------------------------------------------
@@ -277,13 +277,13 @@ help-bot-version = <b>Bot version:</b> { $version }
 start-message-atom =
     Hi! 🇺🇦✌️
     <b>UA Anti Spam Bot 🇺🇦</b> is a free tool that simplifies the administration of Telegram channels and groups during the full-scale war.
-    
+
     <b>UA Anti Spam Bot features enabled by default:</b>
     - 🚀 We fight harmful comments that threaten the health of our citizens and military: ZSU movements, strike locations, checkpoints, and more.
     - 💰 Protection from phishing and scammers. We block scam comments, fundraisers, and fake assistance from organizations.
     - 🔞 No pornography. We block comments of explicit nature and adult content (18+).
     - ✋ Automatic deletion of join and farewell messages to preserve the privacy of your business discussions.
-    
+
     <b>UA Anti Spam Bot optional features:</b>
     - 📢 Notifications in chat about the start and end of air raid alerts in your region.
     - 🤫 Muting chat during an air raid alert.
@@ -294,29 +294,29 @@ start-message-atom =
     - 📍 We don't reveal locations. We block comments with any locations.
     - ☢️ Warning about the use of Russian as the occupier's language in a user's comment along with motivation to switch to Ukrainian.
     - 🪆 Blocking comments written in Russian as the occupier's language, along with motivation to switch to Ukrainian.
-    
+
 start-private-instructions =
     <b>To make the bot work in a chat:</b>
-    
+
     1) Add the bot to a chat
     2) Make the bot an administrator.
-    
+
     Bot developer — @dimkasmile supported by IT company Master of Code Global.
     If the bot is not working, write to <a href="{ $helpChat }">the support chat</a>.
-    
+
     Watch the instruction video below:
     https://youtu.be/RX0cZYf1Lm4
-    
+
 start-group-admins-help = This can be helped by: { $adminsString }
 start-group-creator-help = The chat creator can help with this
 
 start-channel-message =
     Hi! Message from official chatbot @{ $botName }.
     You added me to a <b>channel</b> as an administrator, but I cannot check messages in the comments.
-    
+
     Remove me and add me to the <b>channel chat</b> as an <b>administrator</b>.
     If you have questions, write to <a href="{ $helpChat }">the support chat</a>
-    
+
 # ------------------------------------------------------------
 # Updates / mass sending
 # ------------------------------------------------------------
