@@ -45,11 +45,9 @@ export const getHelpMessage = (context: GrammyContext, { startLocaleTime, isAdmi
     '',
     context.t('help-hotline-header'),
     '',
-    context.t('help-hotline-text'),
+    context.t('help-hotline-text', { version }),
     '',
-    'Детальніше за командою /hotline_security',
-    '',
-    `v${version}`,
+    context.t('help-bot-version', { version }),
   ].join('\n');
 
 /**

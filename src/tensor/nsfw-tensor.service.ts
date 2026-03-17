@@ -26,7 +26,8 @@ export class NsfwTensorService {
 
   /** Loads the InceptionV3 NSFW classification model. */
   async load() {
-    this.model = await nsfw.load('InceptionV3');
+    // For local development, we use the smaller MobileNetV2 model to speed up loading and inference. In production, we use the more accurate InceptionV3 model.
+    this.model = await (environmentConfig.ENV === 'local' ? nsfw.load('MobileNetV2') : nsfw.load('InceptionV3'));
   }
 
   /**
