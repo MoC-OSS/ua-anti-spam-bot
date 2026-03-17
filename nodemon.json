@@ -8,5 +8,6 @@
     "node_modules"
   ],
   "exec": "tsx",
+  "ext": "ts,mts,mjs,js,json,ftl",
   "watch": ["src", ".env", "package.json", "tsconfig.json"]
 }

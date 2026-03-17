@@ -6,10 +6,10 @@
     "node": ">=20.x"
   },
   "scripts": {
-    "start:bot": "tsx watch src/bot/index.ts",
+    "start:bot": "nodemon src/bot/index.ts",
     "start:bot:prod": "tsx src/bot/index.ts",
     "start:userbot:prod": "tsx ./src/userbot/index.ts",
-    "start:server": "tsx watch ./src/server/index.ts",
+    "start:server": "nodemon ./src/server/index.ts",
     "start:server:prod": "tsx ./src/server/index.ts",
     "start:server:cluster": "(npx pm2 delete all || exit 0) && npx pm2 start ./src/server/index.ts -i max && npx pm2 monit || echo '*** Install PM2 globally'",
     "check-swindler:positives": "tsx ./dataset/scripts/check-swindlers.ts positives",
@@ -128,6 +128,7 @@
     "input": "^1.0.1",
     "json5": "^2.2.3",
     "lint-staged": "^16.4.0",
+    "nodemon": "^3.1.14",
     "npm-run-all": "^4.1.5",
     "patch-package": "^8.0.1",
     "prettier": "^3.8.1",
