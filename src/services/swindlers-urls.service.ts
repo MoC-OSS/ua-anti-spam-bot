@@ -1,12 +1,21 @@
+/**
+ * @module swindlers-urls.service
+ * @description Detects swindler URLs in messages using domain fuzzy matching,
+ * regex patterns, URL redirect resolution, and an allow-list.
+ */
+
 import type { AxiosError } from 'axios';
 import axios from 'axios';
 import FuzzySet from 'fuzzyset';
 
-import { environmentConfig } from '../config';
-import type { SwindlersBaseResult, SwindlersUrlsResult } from '../types';
-import { DomainAllowList } from '../utils/domain-allow-list';
+import { environmentConfig } from '@shared/config';
 
-import { EXCEPTION_DOMAINS, SHORTS } from './constants';
+import type { SwindlersBaseResult, SwindlersUrlsResult } from '@app-types/swindlers';
+
+import { DomainAllowList } from '@utils/domain-allow-list.util';
+import { logger } from '@utils/logger.util';
+
+import { EXCEPTION_DOMAINS, SHORTS } from './constants/swindlers-urls.constant';
 import type { DynamicStorageService } from './dynamic-storage.service';
 import { urlService } from './url.service';
 
@@ -19,9 +28,12 @@ export class SwindlersUrlsService {
 
   domainAllowList: DomainAllowList;
 
-  constructor(private dynamicStorageService: DynamicStorageService, private rate = 0.9) {
+  constructor(
+    private dynamicStorageService: DynamicStorageService,
+    private rate = 0.9,
+  ) {
     this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
-    console.info('swindlersRegex', this.swindlersRegex);
+    logger.info({ swindlersRegex: this.swindlersRegex }, 'swindlersRegex updated');
 
     this.initFuzzySet();
     this.domainAllowList = new DomainAllowList(this.dynamicStorageService.notSwindlers);
@@ -29,40 +41,46 @@ export class SwindlersUrlsService {
     this.dynamicStorageService.fetchEmitter.on('fetch', () => {
       this.swindlersRegex = this.buildSiteRegex(this.dynamicStorageService.swindlerRegexSites);
       this.domainAllowList.updateDomains(this.dynamicStorageService.notSwindlers);
-      console.info('swindlersRegex', this.swindlersRegex);
+      logger.info({ swindlersRegex: this.swindlersRegex }, 'swindlersRegex updated');
       this.initFuzzySet();
     });
   }
 
   buildSiteRegex(sites: string[]): RegExp {
-    // eslint-disable-next-line unicorn/better-regex
+    // eslint-disable-next-line security/detect-unsafe-regex, sonarjs/duplicates-in-character-class
     const regex = /(?:https?:\/\/)?([[sites]])(?!ua).+/;
+
+    // eslint-disable-next-line security/detect-non-literal-regexp
     return new RegExp(regex.source.replace('[[sites]]', sites.join('|')));
   }
 
   /**
-   * @description
-   * Create and saves FuzzySet based on latest data from dynamic storage
-   * */
+   * Creates and saves FuzzySet based on latest data from dynamic storage.
+   */
   initFuzzySet() {
     this.swindlersFuzzySet = FuzzySet(this.dynamicStorageService.swindlerDomains);
   }
 
   /**
-   * @param {string} message - raw message from user to parse
+   * Scans the message for URLs and checks each against swindler detection rules.
+   * @param message - raw message from user to parse
+   * @returns promise resolving to detection result if swindler URL found, null otherwise
    */
   async processMessage(message: string): Promise<SwindlersBaseResult | SwindlersUrlsResult | null> {
     const urls = urlService.parseUrls(message);
+
     if (urls.length > 0) {
       let lastResult: SwindlersBaseResult | SwindlersUrlsResult | null = null;
       const getUrls = urls.map((url) => this.isSpamUrl(url));
       const allUrls = await Promise.all(getUrls);
-      const foundSwindlerUrl = allUrls.some((value) => {
+
+      const hasSwindlerUrl = allUrls.some((value) => {
         lastResult = value;
+
         return lastResult?.isSpam;
       });
 
-      if (foundSwindlerUrl) {
+      if (hasSwindlerUrl) {
         return lastResult;
       }
     }
@@ -71,8 +89,10 @@ export class SwindlersUrlsService {
   }
 
   /**
-   * @param {string} url
-   * @param {number} [customRate]
+   * Resolves a URL (following redirects) and checks it against the swindler database.
+   * @param url - URL string to validate against swindler detection rules
+   * @param [customRate] - optional fuzzy match threshold to override the default rate
+   * @returns promise resolving to a spam detection result with isSpam flag and match rate
    */
   async isSpamUrl(url: string, customRate?: number): Promise<SwindlersBaseResult | SwindlersUrlsResult> {
     if (!url) {
@@ -84,14 +104,16 @@ export class SwindlersUrlsService {
 
     /**
      * @see https://loige.co/unshorten-expand-short-urls-with-node-js/
-     * */
+     */
     const redirectUrl = SHORTS.includes(urlService.getUrlDomain(url).slice(0, -1))
       ? await axios
           .get(url, { maxRedirects: 0 })
           .then(() => url)
           .catch(
             /**
-             * @param error
+             * Handles redirect/connection errors when resolving URL redirects.
+             * @param error - the Axios or network error containing redirect information
+             * @returns the redirect target URL, or the original URL on unrecoverable errors
              */
             (error: NodeJS.ErrnoException & AxiosError) => {
               if (error.code === 'ENOTFOUND' && error.syscall === 'getaddrinfo') {
@@ -120,12 +142,13 @@ export class SwindlersUrlsService {
 
               try {
                 if (!error.response) {
-                  console.error(error);
+                  logger.error(error);
                 }
 
                 return (error.response?.headers['location'] as string) || error.response?.config.url || url;
               } catch (nestedError: unknown) {
-                console.error(nestedError);
+                logger.error(nestedError);
+
                 return url;
               }
             },
@@ -147,7 +170,7 @@ export class SwindlersUrlsService {
 
     const domain = urlService.getUrlDomain(redirectUrl);
 
-    if (EXCEPTION_DOMAINS.some((u) => domain.startsWith(u))) {
+    if (EXCEPTION_DOMAINS.some((exceptionDomain) => domain.startsWith(exceptionDomain))) {
       return {
         rate: 0,
         isSpam: false,
@@ -155,10 +178,12 @@ export class SwindlersUrlsService {
     }
 
     const isRegexpMatch = this.swindlersRegex.test(domain);
+
     if (isRegexpMatch) {
       const result = { isSpam: isRegexpMatch, rate: 200 } as SwindlersUrlsResult;
+
       if (environmentConfig.ENV !== 'production') {
-        result.currentName = domain.match(this.swindlersRegex)?.[0] || '$error';
+        result.currentName = this.swindlersRegex.exec(domain)?.[0] || '$error';
       }
 
       return result;

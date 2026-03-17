@@ -1,0 +1,50 @@
+diff --git a/node_modules/@tensorflow/tfjs-node/dist/kernels/TopK.js b/node_modules/@tensorflow/tfjs-node/dist/kernels/TopK.js
+index c701385..98fc98b 100644
+--- a/node_modules/@tensorflow/tfjs-node/dist/kernels/TopK.js
++++ b/node_modules/@tensorflow/tfjs-node/dist/kernels/TopK.js
+@@ -27,8 +27,8 @@ exports.topKConfig = {
+         var x = args.inputs.x;
+         var backend = args.backend;
+         var _a = args.attrs, k = _a.k, sorted = _a.sorted;
+-        var kCount = (0, util_1.isNullOrUndefined)(k) ? 1 : k;
+-        var isSorted = (0, util_1.isNullOrUndefined)(sorted) ? true : sorted;
++        var kCount = k == null ? 1 : k;
++        var isSorted = sorted == null ? true : sorted;
+         var opAttrs = [
+             { name: 'sorted', type: backend.binding.TF_ATTR_BOOL, value: isSorted },
+             (0, nodejs_kernel_backend_1.createTensorsTypeOpAttr)('T', x.dtype),
+diff --git a/node_modules/@tensorflow/tfjs-node/dist/nodejs_kernel_backend.js b/node_modules/@tensorflow/tfjs-node/dist/nodejs_kernel_backend.js
+index 988ea4e..b2e11a8 100644
+--- a/node_modules/@tensorflow/tfjs-node/dist/nodejs_kernel_backend.js
++++ b/node_modules/@tensorflow/tfjs-node/dist/nodejs_kernel_backend.js
+@@ -672,7 +672,7 @@ exports.getTFDType = getTFDType;
+  * Tensors.
+  */
+ function createTensorsTypeOpAttr(attrName, tensorsOrDtype) {
+-    if ((0, util_1.isNullOrUndefined)(tensorsOrDtype)) {
++    if (tensorsOrDtype == null) {
+         throw new Error('Invalid input tensors value.');
+     }
+     return {
+@@ -686,7 +686,7 @@ function createTensorsTypeOpAttr(attrName, tensorsOrDtype) {
+ exports.createTensorsTypeOpAttr = createTensorsTypeOpAttr;
+ // TODO(yassogba) remove? who uses this?
+ function createOpAttr(attrName, tensorsOrDtype, value) {
+-    if ((0, util_1.isNullOrUndefined)(tensorsOrDtype)) {
++    if (tensorsOrDtype == null) {
+         throw new Error('Invalid input tensors value.');
+     }
+     return { name: attrName, type: nodeBackend().binding.TF_BOOL, value: value };
+@@ -694,10 +694,10 @@ function createOpAttr(attrName, tensorsOrDtype, value) {
+ exports.createOpAttr = createOpAttr;
+ /** Returns the dtype number for a single or list of input Tensors. */
+ function getTFDTypeForInputs(tensors) {
+-    if ((0, util_1.isNullOrUndefined)(tensors)) {
++    if (tensors == null) {
+         throw new Error('Invalid input tensors value.');
+     }
+-    if ((0, util_1.isArray)(tensors)) {
++    if (Array.isArray(tensors)) {
+         for (var i = 0; i < tensors.length; i++) {
+             return getTFDType(tensors[i].dtype);
+         }

@@ -1,24 +1,31 @@
 import { Router } from '@grammyjs/router';
 import { Composer, InputFile } from 'grammy';
 
-import type { GrammyContext } from '../../types';
-import { videoUtil } from '../../utils';
-import { videoService } from '../../video';
-import { parsePhoto } from '../middleware';
+import { parsePhoto } from '@bot/middleware/parse-photo.middleware';
+
+import type { GrammyContext } from '@app-types/context';
+
+import { logger } from '@utils/logger.util';
+import { videoUtility } from '@utils/video.util';
+
+import { videoService } from '@video/video.service';
 
 /**
- * @description Message handling composer
- * */
+ * Composer that converts videos sent with a /video_note command into Telegram video notes (round videos).
+ * @returns An object containing the videoNoteConverterComposer instance.
+ */
 export const getGetVideoNoteConverterComposer = () => {
   const videoNoteConverterComposer = new Composer<GrammyContext>();
 
   videoNoteConverterComposer.command('video_note', (context) => {
     if (context.session.step === 'video_note') {
       context.session.step = 'idle';
+
       return context.reply('⛔️ Leave video_note mode.\nCall /video_note command again to start it.');
     }
 
     context.session.step = 'video_note';
+
     return context.reply('✅ Enter video_note mode.\nUse /video_note again to leave.');
   });
 
@@ -26,19 +33,21 @@ export const getGetVideoNoteConverterComposer = () => {
 
   /* Command Register */
   router.route('video_note', parsePhoto, async (context, next) => {
-    const hasVideo = videoUtil.isContextWithVideo(context);
+    const hasVideo = videoUtility.isContextWithVideo(context);
 
     if (!hasVideo) {
       context.session.step = 'idle';
+
       return context.reply('⛔️ No video, so leaving video_note mode.\nCall /video_note command again to start it.');
     }
 
     await context.replyWithChatAction('record_video_note');
 
-    const { videoFile, videoName } = await videoUtil.getVideo(context);
+    const { videoFile, videoName } = await videoUtility.getVideo(context);
 
     if (!videoFile) {
-      console.info('IMPOSSIBLE: There is no video.', videoFile);
+      logger.info({ videoFile }, 'IMPOSSIBLE: There is no video.');
+
       return next();
     }
 
@@ -46,6 +55,9 @@ export const getGetVideoNoteConverterComposer = () => {
 
     await context.replyWithChatAction('upload_video_note');
     await context.replyWithVideoNote(new InputFile(squareVideoFile));
+
+    // eslint-disable-next-line unicorn/no-useless-undefined
+    return undefined;
   });
 
   videoNoteConverterComposer.use(router);

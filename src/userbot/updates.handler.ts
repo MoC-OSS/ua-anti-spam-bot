@@ -1,15 +1,26 @@
-/* eslint-disable no-restricted-syntax,no-await-in-loop,no-unreachable,unicorn/prefer-module */
 import fs from 'node:fs';
+
 import { forEachSeries } from 'p-iteration';
 import type { SetNonNullable } from 'type-fest';
 import { mentionRegexp, urlRegexp } from 'ukrainian-ml-optimizer';
 
-import type { loadUserbotDatasetExtras } from '../../dataset/dataset';
-import type { DynamicStorageService, SwindlersBotsService, SwindlersDetectService } from '../services';
-import { mentionService, redisService, swindlersGoogleService } from '../services';
-import type { SwindlersTensorService, TensorService } from '../tensor';
-import type { ProtoUpdate, SwindlerType } from '../types';
-import { removeSystemInformationUtil } from '../utils';
+import type { loadUserbotDatasetExtras } from '@dataset/dataset';
+
+import type { DynamicStorageService } from '@services/dynamic-storage.service';
+import { mentionService } from '@services/mention.service';
+import { redisService } from '@services/redis.service';
+import type { SwindlersBotsService } from '@services/swindlers-bots.service';
+import type { SwindlersDetectService } from '@services/swindlers-detect.service';
+import { swindlersGoogleService } from '@services/swindlers-google.service';
+
+import type { SwindlersTensorService } from '@tensor/swindlers-tensor.service';
+import type { TensorService } from '@tensor/tensor.service';
+
+import type { ProtoUpdate } from '@app-types/mtproto/mtproto.types';
+import type { SwindlerType } from '@app-types/swindlers';
+
+import { logger } from '@utils/logger.util';
+import { removeSystemInformationUtility } from '@utils/remove-system-information.util';
 
 import type { ChatPeers } from './index';
 import type { MtProtoClient } from './mt-proto-client';
@@ -28,16 +39,17 @@ export class UpdatesHandler {
   swindlersTopUsed: string[];
 
   /**
-   * @param {MtProtoClient} mtProtoClient
-   * @param {SetNonNullable<ChatPeers, keyof ChatPeers>} chatPeers
-   * @param {TensorService} tensorService
-   * @param {SwindlersTensorService} swindlersTensorService
-   * @param {DynamicStorageService} dynamicStorageService
-   * @param {SwindlersBotsService} swindlersBotsService
-   * @param {UserbotStorage} userbotStorage
-   * @param {SwindlersDetectService} swindlersDetectService
-   * @param datasetExtras
-   * */
+   * Initializes the handler with all required services and dataset extras.
+   * @param mtProtoClient - The MTProto client used to send messages.
+   * @param chatPeers - The set of configured chat peer objects.
+   * @param tensorService - The spam tensor classification service.
+   * @param swindlersTensorService - The swindlers-specific tensor classification service.
+   * @param dynamicStorageService - The dynamic storage service for runtime data.
+   * @param swindlersBotsService - The service for tracking known swindler bots.
+   * @param userbotStorage - The userbot storage for message deduplication.
+   * @param swindlersDetectService - The service for detecting swindler messages.
+   * @param datasetExtras - Additional dataset files loaded at startup.
+   */
   constructor(
     private mtProtoClient: MtProtoClient,
     private chatPeers: SetNonNullable<ChatPeers, keyof ChatPeers>,
@@ -52,33 +64,38 @@ export class UpdatesHandler {
     this.swindlersTopUsed = Object.keys(datasetExtras.swindlers_top_used);
 
     if (this.swindlersTopUsed.length === 0) {
-      console.info('WARN: swindlers_top_used are not generated! You need to run `npm run download-swindlers` to generate this file!');
+      logger.info('WARN: swindlers_top_used are not generated! You need to run `npm run download-swindlers` to generate this file!');
     }
   }
 
   /**
-   * @param {ProtoUpdate} updateInfo
-   * @param {(string: string) => any} callback
-   * */
+   * Filters raw Telegram updates for new or edited channel messages.
+   * @param updateInfo - The raw Telegram update payload from MTProto.
+   * @param callback - Function called with the message text of each matching update.
+   */
   filterUpdate(updateInfo: ProtoUpdate, callback: (string: string) => void) {
     const allowedTypes = new Set(['updateEditChannelMessage', 'updateNewChannelMessage']);
 
     const newMessageUpdates = updateInfo.updates.filter((anUpdate) => allowedTypes.has(anUpdate._) && anUpdate.message?.message);
+
     if (!newMessageUpdates || newMessageUpdates.length === 0) {
       return;
     }
 
     for (const update of newMessageUpdates) {
       const { message } = update.message;
+
       callback(message);
     }
   }
 
   /**
-   * @param {string} message
-   * */
+   * Analyzes a message for swindler content and reports matches.
+   * @param message - The raw message text to analyze.
+   * @returns An object indicating whether the message is spam and the reason.
+   */
   async handleSwindlers(message: string) {
-    const finalMessage = removeSystemInformationUtil(message);
+    const finalMessage = removeSystemInformationUtility(message);
     const matchArray = new Set<SwindlerType>(['tensor', 'site', 'mention']);
 
     if (!mentionRegexp.test(finalMessage) && !urlRegexp.test(finalMessage)) {
@@ -86,11 +103,12 @@ export class UpdatesHandler {
     }
 
     /**
-     * @param {number} spamRate
-     * @param {SwindlerType} from
-     * */
+     * Processes a confirmed swindler match by logging and forwarding the message.
+     * @param spamRate - The confidence score of the swindler detection.
+     * @param from - The detection method that identified the swindler.
+     */
     const processFoundSwindler = async (spamRate: number, from: SwindlerType) => {
-      console.info(true, from, spamRate, message);
+      logger.info(true, from, spamRate, message);
 
       const isGoodMatch = matchArray.has(from);
       const isRateGood = from !== 'tensor' || spamRate > 0.95;
@@ -98,6 +116,7 @@ export class UpdatesHandler {
       if (isGoodMatch && isRateGood) {
         const allMentions = mentionService.parseMentions(message);
         const trainingBots = await redisService.getTrainingBots();
+
         const newMentions = (allMentions || []).filter(
           (item) => ![...this.dynamicStorageService.swindlerBots, ...trainingBots].includes(item),
         );
@@ -135,19 +154,22 @@ export class UpdatesHandler {
 
     if (spamResult.isSpam) {
       await processFoundSwindler(spamResult.rate, spamResult.reason);
+
       return { spam: true, reason: spamResult.reason, rate: spamResult.rate };
     }
 
     /**
      * Help try
-     * */
+     */
     const isHelp = this.swindlersTopUsed.some((item) => finalMessage.toLowerCase().includes(item));
 
     if (isHelp) {
       const isUnique = await this.userbotStorage.handleHelpMessage(finalMessage);
+
       if (isUnique) {
         await this.mtProtoClient.sendPeerMessage(message, this.chatPeers.helpChat);
-        console.info(null, spamResult.results?.foundTensor?.spamRate, message);
+        logger.info({ spamRate: spamResult.results?.foundTensor?.spamRate, message });
+
         return { spam: false, reason: 'help message' };
       }
     }
@@ -156,19 +178,23 @@ export class UpdatesHandler {
   }
 
   /**
-   * @param {string} message
-   * */
+   * Processes a message for tensor training data collection.
+   * @param message - The raw message text to evaluate for training data inclusion.
+   */
   async handleTraining(message: string) {
     let clearMessageText = message;
     const deleteFromMessagePath = './from-entities.json';
+
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, import/no-unresolved
       const { default: deleteFromMessage } = await import(deleteFromMessagePath);
 
       if (!deleteFromMessage || !Array.isArray(deleteFromMessage)) {
         return;
       }
+
+      // eslint-disable-next-line sonarjs/prefer-regexp-exec
       const mentions = clearMessageText.match(mentionRegexp);
+      // eslint-disable-next-line sonarjs/prefer-regexp-exec
       const urls = clearMessageText.match(urlRegexp);
 
       const telegramLinks = [...(mentions || []), ...(urls || [])];
@@ -177,25 +203,26 @@ export class UpdatesHandler {
       clearMessageText = clearMessageText.replace(urlRegexp, ' ');
 
       deleteFromMessage.forEach((deleteWord) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         clearMessageText = clearMessageText.replace(deleteWord, ' ');
       });
 
+      // eslint-disable-next-line sonarjs/no-regex-spaces
       clearMessageText = clearMessageText.replaceAll(/  +/g, ' ').split(' ').slice(0, 15).join(' ');
 
       const { isSpam, spamRate } = await this.tensorService.predict(clearMessageText, 0.7);
-      console.info(isSpam, spamRate, message);
+
+      logger.info({ isSpam, spamRate, message });
 
       if (isSpam && spamRate < 0.9) {
         const isNew = await this.userbotStorage.handleMessage(clearMessageText);
 
         if (telegramLinks.length > 0) {
-          // eslint-disable-next-line @typescript-eslint/no-misused-promises
           await forEachSeries(telegramLinks, async (mention) => {
             if (!deleteFromMessage.includes(mention) && !sentMentionsFromStart.includes(mention)) {
               sentMentionsFromStart.push(mention);
               deleteFromMessage.push(mention);
 
+              // eslint-disable-next-line security/detect-non-literal-fs-filename
               fs.writeFileSync(new URL('from-entities.json', import.meta.url), JSON.stringify(deleteFromMessage, null, 2));
 
               await this.mtProtoClient.sendSelfMessage(mention);
@@ -204,13 +231,11 @@ export class UpdatesHandler {
         }
 
         if (isNew) {
-          this.mtProtoClient
-            .sendPeerMessage(clearMessageText, this.chatPeers.trainingChat)
-            .catch(() => console.error('send message error'));
+          this.mtProtoClient.sendPeerMessage(clearMessageText, this.chatPeers.trainingChat).catch(() => logger.error('send message error'));
         }
       }
     } catch (error) {
-      console.error('Failed to load entities:', error);
+      logger.error({ err: error }, 'Failed to load entities:');
     }
   }
 }

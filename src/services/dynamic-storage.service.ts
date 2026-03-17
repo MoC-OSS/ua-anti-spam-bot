@@ -1,12 +1,24 @@
+/**
+ * @module dynamic-storage.service
+ * @description In-memory cache service that syncs detection datasets from Google Sheets.
+ * Periodically refreshes swindler messages, bots, domains, cards, and other detection data.
+ * Emits a `fetch` event after each refresh so dependent services can reinitialize.
+ */
+
 import { EventEmitter } from 'node:events';
+
 import ms from 'ms';
 import type TypedEmitter from 'typed-emitter';
 import { optimizeText } from 'ukrainian-ml-optimizer';
 
-import type { dataset } from '../../dataset/dataset';
-import { environmentConfig } from '../config';
-import { GOOGLE_SHEETS_NAMES } from '../const';
-import { removeDuplicates } from '../utils';
+import { GOOGLE_SHEETS_NAMES } from '@const/google-sheets.const';
+
+import type { dataset } from '@dataset/dataset';
+
+import { environmentConfig } from '@shared/config';
+
+import { logger } from '@utils/logger.util';
+import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 import type { GoogleService } from './google.service';
 import type { SwindlersGoogleService } from './swindlers-google.service';
@@ -21,7 +33,7 @@ export type LocalDataset = typeof dataset &
     swindlers_domains: string[];
     swindlers_cards: string[];
     swindlers_regex_sites: string[];
-    counteroffensiveTriggers: (string | RegExp)[];
+    counteroffensiveTriggers: (RegExp | string)[];
     nsfwMessages: string[];
   }>;
 
@@ -42,20 +54,24 @@ export class DynamicStorageService {
 
   ukrainianLanguageResponses: string[] = [];
 
-  counteroffensiveTriggers: (string | RegExp)[] = [];
+  counteroffensiveTriggers: (RegExp | string)[] = [];
 
   nsfwMessages: string[] = [];
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-expect-error
   fetchEmitter: TypedEmitter<FetchEvents>;
 
   /**
-   * @param {SwindlersGoogleService} swindlersGoogleService
-   * @param {GoogleService} googleService
-   * @param {any} localDataset
-   * */
-  constructor(private swindlersGoogleService: SwindlersGoogleService, private googleService: GoogleService, localDataset: LocalDataset) {
+   * Initializes the dynamic storage with Google service clients and a local dataset fallback.
+   * @param swindlersGoogleService - Google service for reading swindler detection data
+   * @param googleService - general Google Sheets service for auxiliary sheet reads
+   * @param localDataset - local dataset used as fallback when Google API is unavailable
+   */
+  constructor(
+    private swindlersGoogleService: SwindlersGoogleService,
+    private googleService: GoogleService,
+    localDataset: LocalDataset,
+  ) {
     this.swindlerMessages = [];
     this.swindlerBots = localDataset.swindlers_bots || [];
     this.swindlerDomains = localDataset.swindlers_domains || [];
@@ -64,8 +80,8 @@ export class DynamicStorageService {
     this.counteroffensiveTriggers = localDataset.counteroffensiveTriggers || [];
     this.nsfwMessages = localDataset.nsfwMessages || [];
     this.notSwindlers = [];
-    // TODO replace this to EventTarget
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // NOTE: replace this to EventTarget
+
     // @ts-expect-error
     // eslint-disable-next-line unicorn/prefer-event-target
     this.fetchEmitter = new EventEmitter() as TypedEmitter<FetchEvents>;
@@ -73,12 +89,17 @@ export class DynamicStorageService {
 
   async init() {
     if (environmentConfig.DISABLE_GOOGLE_API) {
+      logger.info('Disabling GOOGLE_API');
+
       return;
     }
+
+    logger.info('Loading Storage Data from Google Sheets...');
     await this.updateStorage();
+
     setInterval(() => {
       this.updateStorage().catch((error) => {
-        console.error('Cannot update swindlers on interval. Reason:', error);
+        logger.error('Cannot update swindlers on interval. Reason:', error);
       });
     }, ms('1h'));
   }
@@ -111,6 +132,7 @@ export class DynamicStorageService {
         this.swindlerMessages = removeDuplicates(swindlerPositives)
           .map((element) => optimizeText(element))
           .filter(Boolean);
+
         this.notSwindlers = removeDuplicates(notSwindlers);
         this.swindlerBots = removeDuplicates(swindlerBots).filter((item) => !this.notSwindlers.includes(item));
         this.swindlerDomains = removeDuplicates(swindlerDomains).filter((item) => !this.notSwindlers.includes(item));
@@ -120,18 +142,19 @@ export class DynamicStorageService {
         this.counteroffensiveTriggers = this.parseRegexItems(counteroffensiveTriggers);
         this.nsfwMessages = nsfwMessages;
         this.fetchEmitter.emit('fetch');
-        console.info('got DynamicStorageService messages', new Date());
+        logger.info({ time: new Date() }, 'got DynamicStorageService messages');
       },
     );
   }
 
-  private parseRegexItems(strings: string[]): (string | RegExp)[] {
+  private parseRegexItems(strings: string[]): (RegExp | string)[] {
     return strings.map((string) => {
-      if (string.startsWith(this.REGEX_KEYWORD)) {
-        return new RegExp(string.slice(this.REGEX_KEYWORD.length));
-      }
+      const result: RegExp | string = string.startsWith(this.REGEX_KEYWORD)
+        ? // eslint-disable-next-line security/detect-non-literal-regexp
+          new RegExp(string.slice(this.REGEX_KEYWORD.length))
+        : string;
 
-      return string;
+      return result;
     });
   }
 }

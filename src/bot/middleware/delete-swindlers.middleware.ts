@@ -1,15 +1,29 @@
-import axios from 'axios';
-import escapeHTML from 'escape-html';
 import type { Bot } from 'grammy';
 import { InputFile } from 'grammy';
-import type { GrammyContext, GrammyMiddleware, LooseAutocomplete, SwindlerResponseBody, SwindlersResult, SwindlerType } from 'types';
 
-import { environmentConfig } from '../../config';
-import { LOGS_CHAT_THREAD_IDS, SECOND_LOGS_CHAT_THREAD_IDS } from '../../const';
-import { logsChat, secondLogsChat } from '../../creator';
-import { cannotDeleteMessage, getCannotDeleteMessage, swindlerLogsStartMessage, swindlersWarningMessage } from '../../message';
-import type { SwindlersDetectService } from '../../services';
-import { compareDatesWithOffset, handleError, revealHiddenUrls, telegramUtil } from '../../utils';
+import axios from 'axios';
+import escapeHTML from 'escape-html';
+
+import { logsChat, secondLogsChat } from '@bot/creator';
+
+import { LOGS_CHAT_THREAD_IDS, SECOND_LOGS_CHAT_THREAD_IDS } from '@const/logs.const';
+
+import { cannotDeleteMessage, getCannotDeleteMessage, swindlerLogsStartMessage } from '@message';
+import { getSwindlersWarningMessage } from '@message/swindlers.message';
+
+import type { SwindlersDetectService } from '@services/swindlers-detect.service';
+
+import { environmentConfig } from '@shared/config';
+
+import type { GrammyContext, GrammyMiddleware } from '@app-types/context';
+import type { SwindlerResponseBody } from '@app-types/express';
+import type { LooseAutocomplete } from '@app-types/generic';
+import type { SwindlersResult, SwindlerType } from '@app-types/swindlers';
+
+import { compareDatesWithOffset } from '@utils/date-format.util';
+import { handleError } from '@utils/error-handler.util';
+import { revealHiddenUrls } from '@utils/reveal-hidden-urls.util';
+import { telegramUtility } from '@utils/util-instances.util';
 
 const host = `http://${environmentConfig.HOST}:${environmentConfig.PORT}`;
 
@@ -17,13 +31,24 @@ const SWINDLER_SETTINGS = {
   WARNING_DELAY: 86_400_000 * 3,
 };
 
+/**
+ * Detects and removes scam/swindler messages from chats.
+ * Logs matched messages, sends warning notifications, and deletes the offending content.
+ */
 export class DeleteSwindlersMiddleware {
-  constructor(private bot: Bot<GrammyContext>, private swindlersDetectService: SwindlersDetectService) {}
+  constructor(
+    private bot: Bot<GrammyContext>,
+    private swindlersDetectService: SwindlersDetectService,
+  ) {}
 
   middleware(): GrammyMiddleware {
     /**
      * Delete messages that looks like from swindlers
-     * */
+     * @param context - The Grammy context object
+     * @param next - The next middleware function in the chain
+     * @returns A promise that resolves when the middleware chain completes
+     */
+    // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context, next) => {
       const message = revealHiddenUrls(context);
 
@@ -35,6 +60,7 @@ export class DeleteSwindlersMiddleware {
         await this.saveSwindlersMessage(context, result.rate, result.displayReason || result.reason, message);
         await this.processWarningMessage(context);
         await this.removeMessage(context);
+
         return next();
       }
 
@@ -46,6 +72,11 @@ export class DeleteSwindlersMiddleware {
     };
   }
 
+  /**
+   * Checks a message against the swindlers detection service, falling back to local detection if the server is unavailable.
+   * @param message - The message text to check for swindler content
+   * @returns A promise resolving to the swindlers detection result
+   */
   async checkMessage(message: string): Promise<SwindlersResult> {
     try {
       if (environmentConfig.USE_SERVER) {
@@ -55,18 +86,21 @@ export class DeleteSwindlersMiddleware {
       return this.swindlersDetectService.isSwindlerMessage(message);
     } catch (error) {
       handleError(error, 'API_DOWN');
+
       return this.swindlersDetectService.isSwindlerMessage(message);
     }
   }
 
   /**
-   * @param {GrammyContext} context
-   * @param {number} maxChance
-   * @param {SwindlerType | string} from
-   * @param {string} [message]
-   * */
+   * Logs the detected swindler message to the main and secondary logs chats.
+   * @param context - The Grammy context object
+   * @param maxChance - The detection confidence score (0–1)
+   * @param from - The swindler type or detection source label
+   * @param [message] - Optional override for the message text to log
+   * @returns A promise that resolves when both log messages have been sent
+   */
   async saveSwindlersMessage(context: GrammyContext, maxChance: number, from: LooseAutocomplete<SwindlerType>, message?: string) {
-    const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
+    const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const text = message || context.state?.text || '';
 
     await context.api.sendMessage(
@@ -94,23 +128,32 @@ export class DeleteSwindlersMiddleware {
 
   /**
    * Sends warning to the chat, or skips if it was sent
-   * */
+   * @param context - The Grammy context object
+   * @returns A promise that resolves when the warning has been sent, or undefined if skipped
+   */
   processWarningMessage(context: GrammyContext) {
     const shouldSend =
       !context.chatSession.lastWarningDate ||
       (context.chatSession.lastWarningDate &&
         Date.now() > new Date(context.chatSession.lastWarningDate).getTime() + SWINDLER_SETTINGS.WARNING_DELAY);
+
     if (shouldSend) {
       context.chatSession.lastWarningDate = new Date();
-      return context.reply(swindlersWarningMessage, {
+
+      return context.reply(getSwindlersWarningMessage(context), {
         parse_mode: 'HTML',
       });
     }
+
+    // eslint-disable-next-line unicorn/no-useless-undefined
+    return undefined;
   }
 
   /**
-   * Delete messages that looks like from swindlers
-   * */
+   * Attempts to delete the swindler message. Notifies admins if deletion fails due to missing permissions.
+   * @param context - The Grammy context object
+   * @returns A promise that resolves when the message has been deleted or admins notified
+   */
   async removeMessage(context: GrammyContext) {
     try {
       return await context.deleteMessage();
@@ -123,20 +166,24 @@ export class DeleteSwindlersMiddleware {
         context.chatSession.lastLimitedDeletionDate = new Date();
 
         if (!context.chat?.id) {
-          return;
+          // eslint-disable-next-line unicorn/no-useless-undefined
+          return undefined;
         }
 
-        return telegramUtil
+        return telegramUtility
           .getChatAdmins(context, context.chat.id)
           .then(({ adminsString }) => {
             context
-              .replyWithHTML(getCannotDeleteMessage({ adminsString }), { reply_to_message_id: context.msg?.message_id })
+              .reply(getCannotDeleteMessage(context, { adminsString }), {
+                parse_mode: 'HTML',
+                reply_to_message_id: context.msg?.message_id,
+              })
               .catch(handleError);
 
             context.api
               .sendMessage(
                 logsChat,
-                `${cannotDeleteMessage}\n\n<code>${telegramUtil.getChatTitle(context.chat)}</code>\n${escapeHTML(context.msg?.text || '')}`,
+                `${cannotDeleteMessage}\n\n<code>${telegramUtility.getChatTitle(context.chat)}</code>\n${escapeHTML(context.msg?.text || '')}`,
                 {
                   parse_mode: 'HTML',
                   message_thread_id: LOGS_CHAT_THREAD_IDS.SWINDLERS,
@@ -157,6 +204,9 @@ export class DeleteSwindlersMiddleware {
           })
           .catch(handleError);
       }
+
+      // eslint-disable-next-line unicorn/no-useless-undefined
+      return undefined;
     }
   }
 }

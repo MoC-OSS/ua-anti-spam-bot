@@ -1,14 +1,24 @@
-import Bottleneck from 'bottleneck';
 import { Composer } from 'grammy';
 
-import { getSuccessfulMessage, getUpdateMessage } from '../../message';
-import { redisService } from '../../services';
-import type { ChatSession, GrammyContext } from '../../types';
-import { handleError } from '../../utils';
+import Bottleneck from 'bottleneck';
+
+import { getSuccessfulMessage, getUpdateMessage } from '@message';
+
+import { redisService } from '@services/redis.service';
+
+import type { GrammyContext } from '@app-types/context';
+import type { ChatSession } from '@app-types/session';
+
+import { handleError } from '@utils/error-handler.util';
 
 const supportChatId = -1_001_788_350_185;
 const pollId = 4080;
 
+/**
+ * Sends a feature poll message to selected supergroups using rate-limited bulk sending.
+ * @param context - The Grammy context from the triggering update.
+ * @param sessions - List of chat sessions to receive the poll message.
+ */
 async function bulkSending(context: GrammyContext, sessions: ChatSession[]) {
   return new Promise<void>((resolve) => {
     const limiter = new Bottleneck({
@@ -34,10 +44,12 @@ async function bulkSending(context: GrammyContext, sessions: ChatSession[]) {
         .schedule(async () => {
           await context.api
             .sendMessage(chartSession.id, message, { parse_mode: 'HTML' })
+            // eslint-disable-next-line sonarjs/no-nested-functions
             .then(() => {
               successCount += 1;
             })
             .catch(handleError)
+            // eslint-disable-next-line sonarjs/no-nested-functions
             .finally(() => {
               finishedCount += 1;
             });
@@ -49,26 +61,30 @@ async function bulkSending(context: GrammyContext, sessions: ChatSession[]) {
 
     limiter.on('done', () => {
       if (finishedCount % chunkSize === 0) {
-        context.reply(getUpdateMessage({ totalCount, successCount, finishedCount, type: 'feature_poll' })).catch(handleError);
+        context.reply(getUpdateMessage(context, { totalCount, successCount, finishedCount, type: 'feature_poll' })).catch(handleError);
       }
     });
 
     limiter.on('empty', () => {
-      context.reply(getSuccessfulMessage({ totalCount, successCount })).catch(handleError);
+      context.reply(getSuccessfulMessage(context, { totalCount, successCount })).catch(handleError);
       resolve();
     });
   });
 }
 
+/** Composer that handles the `/feature_poll` command to survey supergroups about new features. */
 export const featurePollComposer = new Composer<GrammyContext>();
 
 featurePollComposer.command('feature_poll', async (context) => {
   const allSessions = await redisService.getChatSessions();
+
   const superGroupsSessions = allSessions
-    .filter((session) => session.data.chatType === 'supergroup' && !session.data.botRemoved && session.data.chatMembersCount)
+    .filter((session) => session.payload.chatType === 'supergroup' && !session.payload.botRemoved && session.payload.chatMembersCount)
     .filter((session) => +session.id !== supportChatId);
 
-  const sortedSuperGroupsSessions = superGroupsSessions.sort((a, b) => b.data.chatMembersCount - a.data.chatMembersCount);
+  const sortedSuperGroupsSessions = superGroupsSessions.toSorted(
+    (left, right) => right.payload.chatMembersCount - left.payload.chatMembersCount,
+  );
 
   const sessions = sortedSuperGroupsSessions.slice(10, 60);
 

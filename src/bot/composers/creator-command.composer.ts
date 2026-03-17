@@ -2,15 +2,20 @@ import type { Menu } from '@grammyjs/menu';
 import { Router } from '@grammyjs/router';
 import { Composer } from 'grammy';
 
-import { redisService } from '../../services';
-import type { TensorService } from '../../tensor';
-import type { GrammyContext, GrammyMenuContext } from '../../types';
-import type { CommandSetter } from '../commands';
-import { RankCommand, UpdatesCommand } from '../commands';
-import { onlyCreatorFilter } from '../filters';
+import type { CommandSetter } from '@bot/commands/command-setter';
+import { RankCommand } from '@bot/commands/private/rank.command';
+import { UpdatesCommand } from '@bot/commands/private/updates.command';
+import { onlyCreatorFilter } from '@bot/filters/only-creator.filter';
+
+import { redisService } from '@services/redis.service';
+
+import type { TensorService } from '@tensor/tensor.service';
+
+import type { GrammyContext, GrammyMenuContext } from '@app-types/context';
 
 import { featurePollComposer } from './feature-poll.composer';
 
+/** Properties required to initialize the creator commands composer. */
 export interface CreatorCommandsComposerProperties {
   commandSetter: CommandSetter;
   rootMenu: Menu<GrammyMenuContext>;
@@ -18,22 +23,28 @@ export interface CreatorCommandsComposerProperties {
 }
 
 /**
- * @description Public commands that are available for users
- * */
+ * Composer that registers bot commands exclusively available to the bot creator.
+ * @param root0 - Creator commands composer properties.
+ * @param root0.commandSetter - Service used to register bot commands with Telegram.
+ * @param root0.rootMenu - The root menu instance used to attach sub-menus.
+ * @param root0.tensorService - Service for tensor model operations and retraining.
+ * @returns An object containing the creatorCommandsComposer instance.
+ */
 export const getCreatorCommandsComposer = ({ commandSetter, rootMenu, tensorService }: CreatorCommandsComposerProperties) => {
   const creatorCommandsComposer = new Composer<GrammyContext>();
 
   const composer = creatorCommandsComposer.filter((context) => onlyCreatorFilter(context));
 
-  const commandMap = new Map<string, string>();
-  commandMap.set('updates', 'Global bot updates to all users');
-  commandMap.set('disable', 'Global disable bot (only deleting strategic info)');
-  commandMap.set('enable', 'Global enable bot (only deleting strategic info)');
-  commandMap.set('leave', 'Leave bot from the chat');
-  commandMap.set('set_rank', 'Get/Set bot strategic rank number');
-  commandMap.set('set_training_start_rank', 'Get/Set bot strategic training chat rank number');
-  commandMap.set('set_training_chat_whitelist', 'Get/Set bot training chat ids');
-  commandMap.set('update_training_chat_whitelist', 'Get/Set bot add new training chat id');
+  const commandMap = new Map<string, string>([
+    ['updates', 'Global bot updates to all users'],
+    ['disable', 'Global disable bot (only deleting strategic info)'],
+    ['enable', 'Global enable bot (only deleting strategic info)'],
+    ['leave', 'Leave bot from the chat'],
+    ['set_rank', 'Get/Set bot strategic rank number'],
+    ['set_training_start_rank', 'Get/Set bot strategic training chat rank number'],
+    ['set_training_chat_whitelist', 'Get/Set bot training chat ids'],
+    ['update_training_chat_whitelist', 'Get/Set bot add new training chat id'],
+  ]);
 
   const commandString = [...commandMap.entries()].map(([name, description]) => `/${name} - ${description}`).join('\n');
 
@@ -58,6 +69,7 @@ export const getCreatorCommandsComposer = ({ commandSetter, rootMenu, tensorServ
     await redisService.setIsBotDeactivated(true);
     await commandSetter.setActive(false);
     await commandSetter.updateCommands();
+
     return context.reply('⛔️ Я виключений глобально');
   });
 
@@ -65,6 +77,7 @@ export const getCreatorCommandsComposer = ({ commandSetter, rootMenu, tensorServ
     await redisService.setIsBotDeactivated(false);
     await commandSetter.setActive(true);
     await commandSetter.updateCommands();
+
     return context.reply('✅ Я включений глобально');
   });
 

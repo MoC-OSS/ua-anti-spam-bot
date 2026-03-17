@@ -1,11 +1,12 @@
 import type { Message } from '@grammyjs/types';
 import type { Chat, ChatMemberAdministrator, ChatMemberOwner, User } from '@grammyjs/types/manage';
-import deepmerge from 'deepmerge';
 import type { Update } from 'grammy/out/types';
+
+import deepmerge from 'deepmerge';
 import type { MergeDeep } from 'type-fest';
 import type { ChatMemberMember } from 'typegram';
 
-import { getTypedValue } from '../../utils';
+import { getTypedValue } from '@utils/get-typed-value.util';
 
 export type PartialUpdate<U extends Update = Update> = Partial<{
   [key in keyof U]: Partial<U[key]>;
@@ -14,7 +15,7 @@ export type PartialUpdate<U extends Update = Update> = Partial<{
 /**
  * Mock update abstract class to extend.
  * Offers all main fields to declare
- * */
+ */
 export abstract class GenericMockUpdate {
   readonly genericUpdateId = 10_000;
 
@@ -48,7 +49,7 @@ export abstract class GenericMockUpdate {
 
   /**
    * Generic user atom used for `from` and `chat` properties
-   * */
+   */
   readonly genericUserAtom = this.getValidUser({
     last_name: 'GrammyMock LastName',
     id: 1_111_111,
@@ -65,7 +66,7 @@ export abstract class GenericMockUpdate {
 
   /**
    * Generic default user
-   * */
+   */
   readonly genericUser: User = {
     ...this.genericUserAtom,
     is_bot: false,
@@ -119,7 +120,7 @@ export abstract class GenericMockUpdate {
     from: this.genericUser,
   });
 
-  // todo setUserType method, now telegram doesn't have interface for User type in message
+  // NOTE: setUserType method, now telegram doesn't have interface for User type in message
   // setUserType(userType: ChatMember['status']) {
   //   const members: Partial<Record<ChatMember['status'], ChatMember>> = {
   //     creator: this.genericOwner,
@@ -149,9 +150,13 @@ export abstract class GenericMockUpdate {
       group: this.genericGroupChat,
       // channel: this.genericChannelChat,
     };
+
+    // eslint-disable-next-line security/detect-object-injection
     const chatUpdate = chatUpdates[chatType];
+
     if (chatUpdate) {
       const messageStruct = this.deepMerge({ message: this.genericMessagePartial }, { message: { chat: chatUpdate } });
+
       this.minimalUpdate = this.deepMerge(this.minimalUpdate, GenericMockUpdate.getValidUpdate(messageStruct));
     }
 
@@ -160,41 +165,41 @@ export abstract class GenericMockUpdate {
 
   /**
    * Minimal update for the update entity
-   * */
+   */
   abstract minimalUpdate: Partial<Update>;
 
   /**
+   * Casts a partial update to its strict generic type for type-safe assertions.
    * @param update - update to type
    * @returns typed but strict object value type
-   * */
+   */
   static getValidUpdate<U extends PartialUpdate>(update: U): U {
     return update;
   }
 
   /**
+   * Casts a partial user object to its strict generic type.
    * @param user - user to type
    * @returns typed but strict object value type
-   * */
+   */
   getValidUser<U extends Partial<User>>(user: U): U {
     return user;
   }
 
   /**
    * @returns regular actual merged update
-   *
    * @example
    * ```ts
    * build() {
    *   return this.update;
    * }
    * ```
-   * */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   */
+
   abstract build(...parameters: any[]);
 
   /**
    * @returns update with extra update information to override
-   *
    * @example
    * ```ts
    * buildOverwrite<E extends PartialUpdate>(extra: E) {
@@ -202,14 +207,12 @@ export abstract class GenericMockUpdate {
    * }
    * ```
    * @param parameters
-   * */
+   */
   // abstract buildOverwrite<E extends PartialUpdate>(extra: E);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   abstract buildOverwrite(...parameters: any[]);
 
-  deepMerge<A, B>(a: A, b: B): MergeDeep<A, B> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-explicit-any
-    return deepmerge(a as any, b as any);
+  deepMerge<TApi, TBot>(first: TApi, second: TBot): MergeDeep<TApi, TBot> {
+    return deepmerge(first as any, second as any);
   }
 }

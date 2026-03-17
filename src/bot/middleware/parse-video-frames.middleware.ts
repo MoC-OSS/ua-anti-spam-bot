@@ -1,30 +1,38 @@
 import axios from 'axios';
 import FormData from 'form-data';
 
-import { environmentConfig } from '../../config';
-import type { GrammyMiddleware, ParseVideoSuccessResponseBody } from '../../types';
-import type { StateImageParsedFrames } from '../../types/state';
-import { handleError, videoUtil } from '../../utils';
-import { videoService } from '../../video';
+import { environmentConfig } from '@shared/config';
+
+import type { GrammyMiddleware } from '@app-types/context';
+import type { ParseVideoSuccessResponseBody } from '@app-types/express';
+import type { StateImageParsedFrames } from '@app-types/state';
+
+import { handleError } from '@utils/error-handler.util';
+import { logger } from '@utils/logger.util';
+import { videoUtility } from '@utils/video.util';
+
+import { videoService } from '@video/video.service';
 
 const host = `http://${environmentConfig.HOST}:${environmentConfig.PORT}`;
 
 /**
- * @description
  * Parse video frames and saves into `context.state.photo.fileFrames`
- * */
+ * @param context - The Grammy context object
+ * @param next - The next middleware function in the chain
+ * @returns A promise that resolves when the middleware chain completes
+ */
 export const parseVideoFrames: GrammyMiddleware = async (context, next) => {
   /**
-   * @reason https://core.telegram.org/bots/faq#how-do-i-download-files
-   * @workaround https://stackoverflow.com/questions/63410408/is-there-any-workarounds-for-downloading-files-20-mb-that-are-sent-to-bot-i
-   * */
+   * See https://core.telegram.org/bots/faq#how-do-i-download-files
+   * and https://stackoverflow.com/questions/63410408/is-there-any-workarounds-for-downloading-files-20-mb-that-are-sent-to-bot-i
+   */
   const MAX_VIDEO_SIZE = 20_000_000; // 20Mb
 
-  const hasVideo = videoUtil.isContextWithVideo(context);
+  const hasVideo = videoUtility.isContextWithVideo(context);
 
   /**
    * If no video in state
-   * */
+   */
   if (!hasVideo) {
     return next();
   }
@@ -32,18 +40,19 @@ export const parseVideoFrames: GrammyMiddleware = async (context, next) => {
   /**
    * Main logic
    */
-  const { video, fileName } = videoUtil.getVideoMeta(context);
+  const { video, fileName } = videoUtility.getVideoMeta(context);
 
   const isVideoSmall = (video.file_size || 0) < MAX_VIDEO_SIZE;
 
   /**
    * Checks whatever is it video or animation and if it has a meta.
-   * */
+   */
   if (isVideoSmall) {
-    const { videoFile, videoName } = await videoUtil.downloadVideo(video, fileName);
+    const { videoFile, videoName } = await videoUtility.downloadVideo(video, fileName);
 
     if (!videoFile) {
-      console.info('IMPOSSIBLE: There is no video.', video);
+      logger.info({ video }, 'IMPOSSIBLE: There is no video.');
+
       return next();
     }
 
@@ -51,6 +60,7 @@ export const parseVideoFrames: GrammyMiddleware = async (context, next) => {
 
     try {
       const formData = new FormData();
+
       formData.append('video', videoFile, { filename: videoName });
 
       const getServerResponse = () =>

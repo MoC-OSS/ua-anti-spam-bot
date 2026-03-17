@@ -1,19 +1,31 @@
 import * as fs from 'node:fs';
+
 import { Menu } from '@grammyjs/menu';
 import type { Transformer } from 'grammy';
 
-import { environmentConfig } from '../../config';
-import { GOOGLE_SHEETS_NAMES } from '../../const';
-import { creatorId, trainingChat } from '../../creator';
-import { getTensorTestResult } from '../../message';
-import { googleService, redisService } from '../../services';
-import type { TensorService } from '../../tensor';
-import type { GrammyContext, GrammyMenuContext, GrammyMiddleware } from '../../types';
-import { emptyFunction, emptyPromiseFunction, wrapperErrorHandler } from '../../utils';
+import { creatorId, trainingChat } from '@bot/creator';
+
+import { GOOGLE_SHEETS_NAMES } from '@const/google-sheets.const';
+
+import { getTensorTestResult } from '@message';
+
+import { googleService } from '@services/google.service';
+import { redisService } from '@services/redis.service';
+
+import { environmentConfig } from '@shared/config';
+
+import type { TensorService } from '@tensor/tensor.service';
+
+import type { GrammyContext, GrammyMenuContext, GrammyMiddleware } from '@app-types/context';
+
+import { emptyFunction, emptyPromiseFunction } from '@utils/empty-functions.util';
+import { wrapperErrorHandler } from '@utils/error-handler.util';
+import { logger } from '@utils/logger.util';
 
 const defaultTime = 30;
 const removeTime = 30;
 
+/** Stores voting state for a single tensor test message (spam/not-spam/skip). */
 export interface TestTensorStorage {
   positives?: string[];
   negatives?: string[];
@@ -23,16 +35,24 @@ export interface TestTensorStorage {
 }
 
 /**
- * @param {GrammyContext} context
- * */
+ * Extracts a display username from the callback query sender.
+ * @param context - The Grammy context object.
+ * @returns The username string prefixed with @ or the full name, or an empty string.
+ */
 const getAnyUsername = (context: GrammyContext) => {
   const username = context.callbackQuery?.from?.username;
+
   const fullName = context.callbackQuery?.from?.last_name
     ? `${context.callbackQuery.from?.first_name} ${context.callbackQuery.from?.last_name}`
     : context.callbackQuery?.from?.first_name;
-  return username ? `@${username}` : fullName ?? '';
+
+  return username ? `@${username}` : (fullName ?? '');
 };
 
+/**
+ * Listener for testing the tensor model interactively with voting buttons
+ * (spam / not spam / skip) and writing results to Google Sheets.
+ */
 export class TestTensorListener {
   menu?: Menu<GrammyMenuContext>;
 
@@ -43,26 +63,37 @@ export class TestTensorListener {
   storage: Record<string, TestTensorStorage> = {};
 
   /**
-   * @param {TensorService} tensorService
+   * Initializes the listener with the tensor prediction service.
+   * @param tensorService - The tensor service used for spam prediction.
    */
   constructor(private tensorService: TensorService) {}
 
+  /**
+   * Writes a voted-on message to the appropriate dataset (positives or negatives) in Google Sheets.
+   * @param state - The dataset to write to: 'positives' or 'negatives'.
+   * @param word - The message text to record in the dataset.
+   * @returns A promise that resolves when the write operation completes.
+   */
   writeDataset(state: 'negatives' | 'positives', word: string) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, sonarjs/no-unused-vars, sonarjs/no-dead-store
     const writeInFileFunction = () => {
       const fileName = `./${state}.json`;
 
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
       if (!fs.existsSync(fileName)) {
+        // eslint-disable-next-line security/detect-non-literal-fs-filename
         fs.writeFileSync(fileName, '[]');
       }
 
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
       const file = JSON.parse(fs.readFileSync(fileName, 'utf8') || '[]') as string[];
       const newFile = [...new Set([...file, word])];
 
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
       fs.writeFileSync(fileName, `${JSON.stringify(newFile, null, 2)}\n`);
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, sonarjs/no-unused-vars, sonarjs/no-dead-store
     const writeInRedisFunction = () => {
       switch (state) {
         case 'negatives': {
@@ -72,21 +103,37 @@ export class TestTensorListener {
         case 'positives': {
           return redisService.updatePositives(word);
         }
+
+        default: {
+          break;
+        }
       }
+
+      // eslint-disable-next-line unicorn/no-useless-undefined
+      return undefined;
     };
 
     const writeInGoogleSheetFunction = () => {
       const sheetId = environmentConfig.GOOGLE_SPREADSHEET_ID;
       const sheetPositiveName = GOOGLE_SHEETS_NAMES.STRATEGIC_POSITIVE;
       const sheetNegativeName = GOOGLE_SHEETS_NAMES.STRATEGIC_NEGATIVE;
+
       switch (state) {
         case 'negatives': {
           return googleService.appendToSheet(sheetId, sheetNegativeName, word);
         }
+
         case 'positives': {
           return googleService.appendToSheet(sheetId, sheetPositiveName, word);
         }
+
+        default: {
+          break;
+        }
       }
+
+      // eslint-disable-next-line unicorn/no-useless-undefined
+      return undefined;
     };
 
     switch (state) {
@@ -96,17 +143,29 @@ export class TestTensorListener {
         // return writeInRedisFunction();
         return writeInGoogleSheetFunction();
       }
+
+      default: {
+        break;
+      }
     }
+
+    // eslint-disable-next-line unicorn/no-useless-undefined
+    return undefined;
   }
 
   /**
-   * @param {Transformer} throttler - throttler need to be defined once to work.
+   * Initializes the interactive voting menu with spam/not-spam/skip buttons.
+   * @param throttler - throttler need to be defined once to work.
    * So we can't init it each time in middleware because it has new instance, and it doesn't throttle,
-   * */
+   * @returns The initialized Grammy menu instance.
+   */
   initMenu(throttler: Transformer): Menu<GrammyMenuContext> {
     /**
-     * @param context
-     * */
+     * Processes final voting results and determines the spam classification.
+     * @param context - The Grammy context object.
+     * @returns A promise that resolves when the final vote is processed.
+     */
+    // eslint-disable-next-line sonarjs/cognitive-complexity
     const finalMiddleware = async (context: GrammyContext) => {
       const storage = this.storage[this.getStorageKey(context)];
 
@@ -118,6 +177,7 @@ export class TestTensorListener {
 
       if (!storage) {
         context.editMessageText(context.msg?.text || '', { reply_markup: undefined }).catch(emptyFunction);
+
         return;
       }
 
@@ -131,20 +191,23 @@ export class TestTensorListener {
         (negativesCount === skipsCount && negativesCount !== 0)
       ) {
         context.editMessageText(`${storage.originalMessage}\n\nЧекаю на більше оцінок...`).catch(emptyFunction);
+
         return;
       }
 
-      let status: boolean | null = null;
+      let isPositive: boolean | null = null;
+
       if (positivesCount > negativesCount && positivesCount > skipsCount) {
-        status = true;
+        isPositive = true;
       } else if (negativesCount > positivesCount && negativesCount > skipsCount) {
-        status = false;
+        isPositive = false;
       }
 
       let winUsers: string[] | undefined;
-      if (status === true) {
+
+      if (isPositive === true) {
         winUsers = storage.positives;
-      } else if (status === false) {
+      } else if (isPositive === false) {
         winUsers = storage.negatives;
       } else {
         winUsers = storage.skips;
@@ -158,22 +221,23 @@ export class TestTensorListener {
         throw new Error('Cannot find origin message');
       }
 
-      if (status === true) {
+      if (isPositive === true) {
         await this.writeDataset('positives', originMessage.text || originMessage.caption || '');
-      } else if (status === false) {
+      } else if (isPositive === false) {
         await this.writeDataset('negatives', originMessage.text || originMessage.caption || '');
       }
 
       let text = '⏭ пропуск';
-      if (status === true) {
+
+      if (isPositive === true) {
         text = '✅ спам';
-      } else if (status === false) {
+      } else if (isPositive === false) {
         text = '⛔️ не спам';
       }
 
       /**
        * We need to use throttler for Test Tensor because telegram could ban the bot
-       * */
+       */
       context.api.config.use(throttler);
 
       await context
@@ -195,8 +259,11 @@ export class TestTensorListener {
             if (context.chat?.id && context.msg?.message_id) {
               return context.api.deleteMessage(context.chat?.id, context.msg?.message_id);
             }
+
+            // eslint-disable-next-line unicorn/no-useless-undefined
+            return undefined;
           })
-          .catch(console.error);
+          .catch((error: unknown) => logger.error(error));
       }, removeTime * 1000);
 
       delete this.storage[this.getStorageKey(context)];
@@ -204,6 +271,7 @@ export class TestTensorListener {
 
     const processButtonMiddleware = wrapperErrorHandler((context) => {
       const storage = this.storage[this.getStorageKey(context)];
+
       context
         .editMessageText(`${storage.originalMessage}\n\nЧекаю ${storage.time} сек...\n${new Date().toISOString()}`, {
           parse_mode: 'HTML',
@@ -214,17 +282,20 @@ export class TestTensorListener {
       clearInterval(this.messageNodeIntervals[this.getStorageKey(context)]);
       storage.time = defaultTime;
 
-      this.messageNodeIntervals[this.getStorageKey(context)] = setInterval(() => {
-        storage.time -= 5;
+      this.messageNodeIntervals[this.getStorageKey(context)] = setInterval(
+        () => {
+          storage.time -= 5;
 
-        if (storage.time !== 0) {
-          context
-            .editMessageText(`${storage.originalMessage}\n\nЧекаю ${storage.time} сек...\n${new Date().toISOString()}`, {
-              parse_mode: 'HTML',
-            })
-            .catch(emptyFunction);
-        }
-      }, defaultTime * 1000 + 2000);
+          if (storage.time !== 0) {
+            context
+              .editMessageText(`${storage.originalMessage}\n\nЧекаю ${storage.time} сек...\n${new Date().toISOString()}`, {
+                parse_mode: 'HTML',
+              })
+              .catch(emptyFunction);
+          }
+        },
+        defaultTime * 1000 + 2000,
+      );
 
       this.messageNodeTimeouts[this.getStorageKey(context)] = setTimeout(() => {
         finalMiddleware(context).catch(emptyFunction);
@@ -241,8 +312,10 @@ export class TestTensorListener {
 
             const storage = this.storage[this.getStorageKey(context)];
             const username = getAnyUsername(context);
+
             storage.negatives = storage.negatives?.filter((item) => item !== username);
             storage.skips = storage.skips?.filter((item) => item !== username);
+
             if (!storage.positives?.includes(username)) {
               storage.positives?.push(username);
             }
@@ -258,8 +331,10 @@ export class TestTensorListener {
 
             const storage = this.storage[this.getStorageKey(context)];
             const username = getAnyUsername(context);
+
             storage.positives = storage.positives?.filter((item) => item !== username);
             storage.skips = storage.skips?.filter((item) => item !== username);
+
             if (!storage.negatives?.includes(username)) {
               storage.negatives?.push(username);
             }
@@ -276,8 +351,10 @@ export class TestTensorListener {
 
             const storage = this.storage[this.getStorageKey(context)];
             const username = getAnyUsername(context);
+
             storage.positives = storage.positives?.filter((item) => item !== username);
             storage.negatives = storage.negatives?.filter((item) => item !== username);
+
             if (!storage.skips?.includes(username)) {
               storage.skips?.push(username);
             }
@@ -294,9 +371,10 @@ export class TestTensorListener {
   }
 
   /**
-   * @param {GrammyContext} context
-   * @param message
-   * */
+   * Initializes the voting storage session for a tensor test message.
+   * @param context - The Grammy context object.
+   * @param message - The message text to store for voting.
+   */
   initTensorSession(context: GrammyContext, message: string) {
     if (!this.storage[this.getStorageKey(context)]?.originalMessage) {
       this.storage[this.getStorageKey(context)] = {
@@ -310,10 +388,13 @@ export class TestTensorListener {
   }
 
   /**
-   * @param {GrammyContext} context
-   * */
+   * Generates a unique storage key from the chat and message identifiers.
+   * @param context - The Grammy context object.
+   * @returns A string key in the format `chatId:messageId`.
+   */
   getStorageKey(context: GrammyContext) {
     let chatInstance: number | string | undefined;
+
     if (context.chat) {
       chatInstance = context.chat.id;
     } else if (context.callbackQuery) {
@@ -336,28 +417,34 @@ export class TestTensorListener {
   }
 
   /**
-   * @param {Transformer} throttler - throttler need to be defined once to work.
+   * Returns the main middleware for interactive tensor model testing.
+   * @param throttler - throttler need to be defined once to work.
    * So we can't init it each time in middleware because it has new instance, and it doesn't throttle,
-   * */
+   * @returns The Grammy middleware function.
+   */
   middleware(throttler: Transformer): GrammyMiddleware {
     /**
-     * @param {GrammyContext} context
-     * @param {Next} next
-     * */
+     * Runs tensor prediction on the message and replies with voting buttons.
+     * @param context - The Grammy context object.
+     * @returns A promise that resolves when the message is processed.
+     */
     return async (context) => {
       /**
        * We need to use throttler for Test Tensor because telegram could ban the bot
-       * */
+       */
       context.api.config.use(throttler);
 
+      // eslint-disable-next-line sonarjs/different-types-comparison
       if (context.from?.id !== creatorId) {
         if (context.chat?.type !== 'supergroup') {
           await context.reply('В особистих не працюю 😝');
+
           return;
         }
 
         if (context.chat.id !== trainingChat) {
           await context.reply('Я працюю тільки в одному супер чаті 😝');
+
           return;
         }
       }
@@ -366,6 +453,7 @@ export class TestTensorListener {
 
       if (!message && context.chat?.id && context.msg?.message_id) {
         await context.api.deleteMessage(context.chat?.id, context.msg?.message_id).catch();
+
         return;
       }
 
@@ -373,18 +461,20 @@ export class TestTensorListener {
         const { spamRate, isSpam } = await this.tensorService.predict(message || '', null);
 
         const chance = `${(spamRate * 100).toFixed(4)}%`;
-        const tensorTestMessage = getTensorTestResult({ chance, isSpam });
+        const tensorTestMessage = getTensorTestResult(context, { chance, isSpam });
 
         this.initTensorSession(context, tensorTestMessage);
 
         context
-          .replyWithHTML(tensorTestMessage, {
+          .reply(tensorTestMessage, {
+            parse_mode: 'HTML',
             reply_to_message_id: context.msg?.message_id,
             reply_markup: this.menu,
           })
           .catch(emptyFunction);
       } catch (error) {
-        console.error(error);
+        logger.error(error);
+
         if (error instanceof Error) {
           context
             .reply(`Cannot parse this message.\nError:\n${error.message}`, { reply_to_message_id: context.msg?.message_id })

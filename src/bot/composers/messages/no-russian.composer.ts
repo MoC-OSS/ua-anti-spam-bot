@@ -1,30 +1,43 @@
-import escapeHTML from 'escape-html';
 import { Composer } from 'grammy';
 
-import { LOGS_CHAT_THREAD_IDS } from '../../../const';
-import { logsChat } from '../../../creator';
-import { getDeleteRussianMessage, getUkrainianMessageExtra, russianDeleteLogsStartMessage } from '../../../message';
-import type { DynamicStorageService } from '../../../services';
-import type { GrammyContext } from '../../../types';
-import { getRandomItem, getUserData, telegramUtil } from '../../../utils';
+import escapeHTML from 'escape-html';
 
+import { logsChat } from '@bot/creator';
+
+import { LOGS_CHAT_THREAD_IDS } from '@const/logs.const';
+
+import { getDeleteRussianMessage, getUkrainianMessageExtra, russianDeleteLogsStartMessage } from '@message';
+
+import type { DynamicStorageService } from '@services/dynamic-storage.service';
+
+import type { GrammyContext } from '@app-types/context';
+
+import { getRandomItem, getUserData } from '@utils/generic.util';
+import { telegramUtility } from '@utils/util-instances.util';
+
+/** Properties for the no-Russian language composer. */
 export interface NoRussianComposerProperties {
   dynamicStorageService: DynamicStorageService;
 }
 
 /**
- * @description Delete russian language messages
- * */
+ * Returns a composer that detects and deletes messages written in Russian language.
+ * @param root0 - Composer properties.
+ * @param root0.dynamicStorageService - Service providing dynamic Ukrainian language responses.
+ * @returns Object containing the no-Russian composer instance.
+ */
 export const getNoRussianComposer = ({ dynamicStorageService }: NoRussianComposerProperties) => {
   const noRussianComposer = new Composer<GrammyContext>();
 
   /**
-   * @param {GrammyContext} context
-   * @param {number} maxChance
-   * @param {string} [message]
-   * */
+   * Logs a deleted Russian-language message to the logs chat.
+   * @param context - The Grammy context of the incoming message.
+   * @param maxChance - The Russian language detection confidence score (0–1).
+   * @param [message] - Optional message text override.
+   * @returns Promise resolving to the sent log message.
+   */
   async function saveRussianMessage(context: GrammyContext, maxChance: number, message?: string) {
-    const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
+    const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const text = message || context.state?.text || '';
 
     return context.api.sendMessage(
@@ -49,9 +62,13 @@ export const getNoRussianComposer = ({ dynamicStorageService }: NoRussianCompose
 
       if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
         const { writeUsername, userId } = getUserData(context);
+
         await context.replyWithSelfDestructedHTML(
-          getDeleteRussianMessage({ writeUsername, userId, message: getRandomItem(dynamicStorageService.ukrainianLanguageResponses) }) +
-            getUkrainianMessageExtra(russianFeature.percent),
+          getDeleteRussianMessage(context, {
+            writeUsername,
+            userId,
+            message: getRandomItem(dynamicStorageService.ukrainianLanguageResponses),
+          }) + getUkrainianMessageExtra(russianFeature.percent),
         );
       }
     }

@@ -1,26 +1,36 @@
-import escapeHTML from 'escape-html';
 import { Composer } from 'grammy';
 
-import { LOGS_CHAT_THREAD_IDS } from '../../../const';
-import { logsChat } from '../../../creator';
-import { urlLogsStartMessage } from '../../../message';
-import { getDeleteDenylistMessage } from '../../../message/denylist.message';
-import type { GrammyContext } from '../../../types';
-import { getUserData, telegramUtil } from '../../../utils';
+import escapeHTML from 'escape-html';
+
+import { logsChat } from '@bot/creator';
+
+import { LOGS_CHAT_THREAD_IDS } from '@const/logs.const';
+
+import { urlLogsStartMessage } from '@message';
+import { getDeleteDenylistMessage } from '@message/denylist.message';
+
+import type { GrammyContext } from '@app-types/context';
+
+import { getUserData } from '@utils/generic.util';
+import { telegramUtility } from '@utils/util-instances.util';
 
 /**
- * @description Remove strategic information logic
+ * Returns a composer that detects and deletes messages containing words from the chat's denylist.
+ * @returns Object containing the denylist composer instance.
  */
 export const getDenylistComposer = () => {
   const denylistComposer = new Composer<GrammyContext>();
 
   /**
-   * @param {GrammyContext} context
-   * @param {string} [message]
-   * */
+   * Logs a denylist violation message to the logs chat.
+   * @param context - The Grammy context of the incoming message.
+   * @param denyWord - The denied word that triggered the check.
+   * @returns Promise resolving to the sent log message.
+   */
   async function logDenylistMessage(context: GrammyContext, denyWord: string) {
-    const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
+    const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const fullText = context.state?.text || '';
+
     return context.api.sendMessage(
       logsChat,
       `${urlLogsStartMessage} (word: "${escapeHTML(denyWord)}") by user ${userMention}:\n\n${chatMention || userMention}\n${escapeHTML(
@@ -40,18 +50,22 @@ export const getDenylistComposer = () => {
     const { text } = context.state;
     const { chatSettings } = context.chatSession;
     const { denylist, enableDeleteDenylist } = chatSettings;
+
     if (Array.isArray(denylist) && denylist.length > 0 && text && enableDeleteDenylist) {
       const denyWord = denylist.find((word) => text.toLowerCase().includes(word.toLowerCase()));
+
       if (denyWord) {
         await context.deleteMessage();
         await logDenylistMessage(context, denyWord);
 
         if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
           const { writeUsername, userId } = getUserData(context);
-          await context.replyWithSelfDestructedHTML(getDeleteDenylistMessage({ writeUsername, userId, word: denyWord }));
+
+          await context.replyWithSelfDestructedHTML(getDeleteDenylistMessage(context, { writeUsername, userId, word: denyWord }));
         }
       }
     }
+
     return next();
   });
 

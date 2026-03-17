@@ -1,4 +1,11 @@
 node_modules
 npm-debug.log
+.env
+.DS_Store
+.agents
+.git
+.github
 .idea
 .vscode
+coverage
+dist

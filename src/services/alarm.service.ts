@@ -1,19 +1,31 @@
+/**
+ * @module alarm.service
+ * @description Polls the Ukrainian air-raid alert API (alerts.com.ua) via SSE
+ * and emits alarm start/end events for each region.
+ */
+
 import { EventEmitter } from 'node:events';
-import EventSource from 'eventsource';
+
+import { EventSource } from 'eventsource';
 import ms from 'ms';
 import type TypedEmitter from 'typed-emitter';
 
-import { environmentConfig } from '../config';
-import type { AlarmNotification, AlarmStates } from '../types/alarm';
+import { environmentConfig } from '@shared/config';
 
-import { getAlarmMock } from './_mocks';
+import type { AlarmNotification, AlarmStates } from '@app-types/alarm';
+
+import { logger } from '@utils/logger.util';
+
+import { getAlarmMock } from './_mocks/alarm.mocks';
 
 const apiUrl = 'https://alerts.com.ua/api/states';
-const apiOptions = { headers: { 'X-API-Key': environmentConfig.ALARM_KEY } };
 
 export const ALARM_CONNECT_KEY = 'connect';
+
 export const ALARM_CLOSE_KEY = 'close';
+
 export const ALARM_EVENT_KEY = 'update';
+
 export const TEST_ALARM_STATE = 'Московська область';
 
 export interface UpdatesEvents {
@@ -25,22 +37,24 @@ export interface UpdatesEvents {
 /**
  * @description Service for handling Alarm API
  * @deprecated
- * */
+ */
 export class AlarmService {
-  // TODO replace with event target
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // NOTE: replace with event target
+
   // @ts-expect-error
   // eslint-disable-next-line unicorn/prefer-event-target
   updatesEmitter = new EventEmitter() as TypedEmitter<UpdatesEvents>;
 
   source?: EventSource;
 
+  // eslint-disable-next-line sonarjs/deprecation
   reconnectInterval?: NodeJS.Timer;
 
+  // eslint-disable-next-line sonarjs/deprecation
   testAlarmInterval?: NodeJS.Timer;
 
   getStates(): Promise<AlarmStates> {
-    // TODO replace this API with the new one
+    // NOTE: replace this API with the new one
     return Promise.resolve({
       states: [],
       last_update: new Date().toISOString(),
@@ -51,7 +65,7 @@ export class AlarmService {
     //     .then((response) => response.data)
     //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     //     .catch((error: Record<any, any>) => {
-    //       console.info(`Alarm API is not responding:  ${JSON.stringify(error)}`);
+    //       logger.info(`Alarm API is not responding:  ${JSON.stringify(error)}`);
     //       return {
     //         states: [],
     //         last_update: new Date().toISOString(),
@@ -62,7 +76,7 @@ export class AlarmService {
 
   /**
    * Restarts the connection
-   * */
+   */
   restart() {
     // It will automatically disconnect and reconnect again.
     // We don't need to call extra disable
@@ -71,10 +85,11 @@ export class AlarmService {
 
   /**
    * Starts the connection
-   * */
+   * @param reason - reason for enabling the connection
+   */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   enable(reason: string) {
-    // TODO replace this API with the new one
+    // NOTE: replace this API with the new one
     // this.subscribeOnNotifications(reason);
     // this.initTestAlarms();
     //
@@ -87,7 +102,8 @@ export class AlarmService {
 
   /**
    * Closes the connection
-   * */
+   * @param reason - reason for disabling the connection
+   */
   disable(reason: string) {
     if (this.source) {
       this.source.close();
@@ -105,7 +121,8 @@ export class AlarmService {
 
   /**
    * Creates SSE subscription to Alarm API events
-   * */
+   * @param reason - reason for creating the subscription (e.g. 'restart')
+   */
   subscribeOnNotifications(reason: string) {
     if (environmentConfig.DISABLE_ALARM_API) {
       return;
@@ -113,18 +130,28 @@ export class AlarmService {
 
     this.disable(reason);
     let isConnected = false;
-    this.source = new EventSource(`${apiUrl}/live`, apiOptions);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
+    this.source = new EventSource(`${apiUrl}/live`, {
+      fetch: (url, init) =>
+        fetch(url, {
+          ...init,
+          headers: {
+            ...init.headers,
+            'X-API-Key': environmentConfig.ALARM_KEY,
+          },
+        }),
+    });
+
     this.source.addEventListener('error', (event: MessageEvent & Record<string, any>) => {
-      console.info(`Subscribe to Alarm API fail:  ${event.message as string}`);
+      logger.info(`Subscribe to Alarm API fail:  ${event.message as string}`);
     });
 
     this.source.addEventListener('open', () => {
-      console.info('Opening a connection to Alarm API ...');
+      logger.info('Opening a connection to Alarm API ...');
     });
 
     this.source.addEventListener('hello', () => {
-      console.info('Connection to Alarm API opened successfully.');
+      logger.info('Connection to Alarm API opened successfully.');
 
       // Hello pings every 1h
       if (!isConnected) {
@@ -133,25 +160,28 @@ export class AlarmService {
       }
     });
 
-    this.source.addEventListener('update', (event: MessageEvent<string>) => {
+    this.source.addEventListener('update', (event: MessageEvent) => {
       /**
        * SSE endpoint response
        * @see https://alerts.com.ua/en
-       * */
-      const data = JSON.parse(event.data) as AlarmNotification | null;
-      if (data) {
-        this.updatesEmitter.emit(ALARM_EVENT_KEY, data);
+       */
+      const responseData = JSON.parse(event.data) as AlarmNotification | null;
+
+      if (responseData) {
+        this.updatesEmitter.emit(ALARM_EVENT_KEY, responseData);
       }
     });
   }
 
   initTestAlarms() {
-    let alert = true;
+    let isAlert = true;
+
     this.testAlarmInterval = setInterval(() => {
-      this.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(alert, TEST_ALARM_STATE));
-      alert = !alert;
+      this.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(isAlert, TEST_ALARM_STATE));
+      isAlert = !isAlert;
     }, ms('0.5m'));
   }
 }
 
+// eslint-disable-next-line sonarjs/deprecation
 export const alarmService = new AlarmService();

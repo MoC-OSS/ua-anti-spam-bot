@@ -1,8 +1,15 @@
+/**
+ * @module swindlers-detect.service
+ * @description Orchestrator service that runs all swindler-detection checks (URLs, bots, cards, ML tensor)
+ * against incoming messages and returns a consolidated detection result.
+ */
+
 import { compareTwoStrings } from 'string-similarity';
 import { optimizeText } from 'ukrainian-ml-optimizer';
 
-import type { SwindlersTensorService } from '../tensor';
-import type { SwindlersResult, SwindlersResultSummary } from '../types';
+import type { SwindlersTensorService } from '@tensor/swindlers-tensor.service';
+
+import type { SwindlersResult, SwindlersResultSummary } from '@app-types/swindlers';
 
 import type { DynamicStorageService } from './dynamic-storage.service';
 import type { SwindlersBotsService } from './swindlers-bots.service';
@@ -10,7 +17,7 @@ import type { SwindlersCardsService } from './swindlers-cards.service';
 import type { SwindlersUrlsService } from './swindlers-urls.service';
 
 export class SwindlersDetectService {
-  SWINDLER_SETTINGS = {
+  swindlerSettings = {
     DELETE_CHANCE: 0.8,
     LOG_CHANGE: 0.8,
     SAME_CHECK: 0.9,
@@ -26,25 +33,27 @@ export class SwindlersDetectService {
   ) {}
 
   /**
-   * @param {string} message - message to process
-   *
-   * @return {SwindlersResult}
-   * */
+   * Runs all swindler detection checks on the message and returns a consolidated result.
+   * @param message - message to process
+   * @returns detection result with isSpam flag, confidence rate, and matched reason
+   */
   async isSwindlerMessage(message: string): Promise<SwindlersResult> {
     const results: SwindlersResultSummary = {};
-    const foundSwindlerUrl = await this.swindlersUrlsService.processMessage(message);
-    results.foundSwindlerUrl = foundSwindlerUrl;
+    const hasSwindlerUrl = await this.swindlersUrlsService.processMessage(message);
 
-    if (foundSwindlerUrl) {
+    results.foundSwindlerUrl = hasSwindlerUrl;
+
+    if (hasSwindlerUrl) {
       return {
         isSpam: true,
-        rate: foundSwindlerUrl.rate,
+        rate: hasSwindlerUrl.rate,
         reason: 'site',
         results,
       } as SwindlersResult;
     }
 
     const foundSwindlerMention = this.swindlersBotsService.processMessage(message);
+
     results.foundSwindlerMention = foundSwindlerMention;
 
     if (foundSwindlerMention) {
@@ -58,10 +67,11 @@ export class SwindlersDetectService {
       } as SwindlersResult;
     }
 
-    const foundCard = this.swindlersCardsService.processMessage(message);
-    results.foundCard = foundCard;
+    const hasCard = this.swindlersCardsService.processMessage(message);
 
-    if (foundCard) {
+    results.foundCard = hasCard;
+
+    if (hasCard) {
       return {
         isSpam: true,
         rate: 200,
@@ -71,6 +81,7 @@ export class SwindlersDetectService {
     }
 
     const foundTensor = await this.swindlersTensorService.predict(message, null);
+
     results.foundTensor = foundTensor;
 
     if (foundTensor.isSpam) {
@@ -94,21 +105,23 @@ export class SwindlersDetectService {
 
     let lastChance = 0;
     let maxChance = 0;
-    const foundSwindler = this.dynamicStorageService.swindlerMessages.some((text) => {
+
+    const hasSwindler = this.dynamicStorageService.swindlerMessages.some((text) => {
       lastChance = compareTwoStrings(processedMessage, text);
 
       if (lastChance > maxChance) {
         maxChance = lastChance;
       }
 
-      return lastChance >= this.SWINDLER_SETTINGS.DELETE_CHANCE;
+      return lastChance >= this.swindlerSettings.DELETE_CHANCE;
     });
+
     results.foundCompare = {
-      foundSwindler,
+      foundSwindler: hasSwindler,
       spamRate: maxChance,
     };
 
-    if (foundSwindler) {
+    if (hasSwindler) {
       return {
         isSpam: true,
         rate: maxChance,
@@ -117,7 +130,7 @@ export class SwindlersDetectService {
       } as SwindlersResult;
     }
 
-    if (maxChance > this.SWINDLER_SETTINGS.LOG_CHANGE) {
+    if (maxChance > this.swindlerSettings.LOG_CHANGE) {
       return {
         isSpam: false,
         rate: maxChance,

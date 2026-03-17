@@ -1,48 +1,65 @@
-import * as tf from '@tensorflow/tfjs-node';
-import type { NSFWJS, predictionType } from 'nsfwjs';
+/**
+ * @module nsfw-tensor.service
+ * @description NSFW image classification service powered by NSFWJS (TensorFlow.js).
+ * Classifies images as Hentai, Porn, Sexy, or safe content.
+ */
+
+import type { NSFWJS, PredictionType } from 'nsfwjs';
 import * as nsfw from 'nsfwjs';
 
-import { environmentConfig } from '../config';
-import type { NsfwTensorNegativeResult, NsfwTensorPositiveResult, NsfwTensorResult } from '../types';
+import { environmentConfig } from '@shared/config';
+
+import * as tf from '@tensorflow/tfjs-node';
+
+import type { NsfwTensorNegativeResult, NsfwTensorPositiveResult, NsfwTensorResult } from '@app-types/nsfw';
+
+import { logger } from '@utils/logger.util';
 
 export class NsfwTensorService {
   model!: NSFWJS;
 
-  readonly predictionChecks = new Map<predictionType['className'], number>([
+  readonly predictionChecks = new Map<PredictionType['className'], number>([
     ['Hentai', 0.85],
     ['Porn', 0.85],
     ['Sexy', 0.8],
   ]);
 
-  constructor(private modelPath: URL) {}
-
+  /** Loads the InceptionV3 NSFW classification model. */
   async load() {
-    this.model = await nsfw.load(this.modelPath.toString());
+    // For local development, we use the smaller MobileNetV2 model to speed up loading and inference. In production, we use the more accurate InceptionV3 model.
+    this.model = await (environmentConfig.ENV === 'local' ? nsfw.load('MobileNetV2') : nsfw.load('InceptionV3'));
   }
 
-  async classify(image: Buffer): Promise<predictionType[]> {
+  /**
+   * Decodes an image buffer into a 3D tensor, runs NSFW classification, and disposes the tensor.
+   * @param image - Raw image buffer to classify.
+   * @returns An array of prediction results sorted by probability.
+   */
+  async classify(image: Buffer): Promise<PredictionType[]> {
     const tensor3d = tf.node.decodeImage(image, 3);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
     // @ts-ignore
     const predictions = await this.model.classify(tensor3d);
+
     tensor3d.dispose(); // Tensor memory must be managed explicitly (it is not sufficient to let a tf.Tensor go out of scope for its memory to be released).
 
     return predictions;
   }
 
   /**
-   * Classifies a video from the 5 classes returning a map of
-   * the most likely class names to their probability.
-   *
-   * @param imageArray
+   * Classifies multiple video frames in parallel and returns predictions for each.
+   * @param imageArray - Array of image buffers (one per video frame).
+   * @returns A promise resolving to an array of prediction arrays, one per frame.
    */
-  classifyVideo(imageArray: Buffer[]): Promise<predictionType[][]> {
+  classifyVideo(imageArray: Buffer[]): Promise<PredictionType[][]> {
     return Promise.all(imageArray.map((image) => this.classify(image)));
   }
 
   /**
-   * @returns prediction result for a frame
-   * */
+   * Classifies a single image and returns a spam/safe verdict with the highest prediction.
+   * @param image - Raw image buffer to classify.
+   * @returns Prediction result for the image frame.
+   */
   async predict(image: Buffer): Promise<NsfwTensorResult> {
     const predictions = await this.classify(image);
 
@@ -65,16 +82,20 @@ export class NsfwTensorService {
   }
 
   /**
-   * @returns prediction result for array of image frames
-   * */
+   * Classifies an array of video frames and returns a combined spam/safe verdict.
+   * Stops early if any frame exceeds the spam threshold.
+   * @param imageArray - Array of image buffers representing video frames.
+   * @returns Aggregated prediction result across all frames.
+   */
   async predictVideo(imageArray: Buffer[]): Promise<NsfwTensorResult> {
     const framesPredictions = await this.classifyVideo(imageArray);
 
-    let highestPrediction!: predictionType;
-    let deletePrediction: predictionType | undefined;
+    let highestPrediction!: PredictionType;
+    let deletePrediction: PredictionType | undefined;
 
     framesPredictions.some((predictions) => {
       const predictionResult = this.findHighestPrediction([highestPrediction, ...predictions].filter(Boolean));
+
       deletePrediction = predictionResult.deletePrediction;
       highestPrediction = predictionResult.highestPrediction;
 
@@ -98,10 +119,12 @@ export class NsfwTensorService {
   }
 
   /**
-   * @description finds highest and delete prediction
-   * */
-  private findHighestPrediction(predictions: predictionType[]) {
-    let highestPrediction!: predictionType;
+   * Finds the highest NSFW prediction and the first prediction that exceeds the class threshold.
+   * @param predictions - Array of NSFW prediction results to analyze.
+   * @returns An object containing the highest prediction and the first prediction exceeding its threshold.
+   */
+  private findHighestPrediction(predictions: PredictionType[]) {
+    let highestPrediction!: PredictionType;
 
     const deletePrediction = predictions.find((currentPrediction) => {
       const spamThreshold = this.predictionChecks.get(currentPrediction.className);
@@ -124,11 +147,20 @@ export class NsfwTensorService {
   }
 }
 
+/**
+ * Creates and initializes an {@link NsfwTensorService} instance.
+ * Skips model loading during unit tests.
+ * @returns A fully initialized NsfwTensorService instance.
+ */
 export const initNsfwTensor = async () => {
-  const tensorService = new NsfwTensorService(new URL('nsfw-temp/model.json', import.meta.url));
+  const tensorService = new NsfwTensorService();
 
   if (!environmentConfig.UNIT_TESTING) {
+    logger.info('Loading NSFW tensor model...');
+    const start = Date.now();
+
     await tensorService.load();
+    logger.info(`NSFW tensor model loaded in ${((Date.now() - start) / 1000).toFixed(2)}s.`);
   }
 
   return tensorService;

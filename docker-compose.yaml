@@ -1,9 +1,8 @@
-version: "3"
-
 services:
   bot:
     container_name: "uaasb_bot"
     build:
+      context: .
       dockerfile: Dockerfile.local
     volumes:
       - ".:/usr/src/app"

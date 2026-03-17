@@ -1,9 +1,14 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import stringSimilarity from 'string-similarity';
 
-import { environmentConfig } from '../config';
-import { GOOGLE_SHEETS_NAMES } from '../const';
-import { googleService, redisService, swindlersGoogleService } from '../services';
+import { GOOGLE_SHEETS_NAMES } from '@const/google-sheets.const';
+
+import { googleService } from '@services/google.service';
+import { redisService } from '@services/redis.service';
+import { swindlersGoogleService } from '@services/swindlers-google.service';
+
+import { environmentConfig } from '@shared/config';
+
+import { logger } from '@utils/logger.util';
 
 const limits = {
   STORAGE: 999_999_999,
@@ -27,7 +32,7 @@ export class UserbotStorage {
     ]);
 
     return cases.then(([positives, negatives, swindlerPositives, helpMessages, redisHelp]) => {
-      console.info('got TrainingTempMessages');
+      logger.info('got TrainingTempMessages');
       this.lastMessages = [...positives, ...negatives];
       this.swindlerMessages = swindlerPositives;
       this.helpMessages = [...helpMessages, ...(Array.isArray(redisHelp) ? redisHelp : [])].filter(Boolean);
@@ -44,6 +49,7 @@ export class UserbotStorage {
 
       this.lastMessages.push(text);
       await redisService.setTrainingTempMessages(this.lastMessages);
+
       return true;
     }
 
@@ -60,6 +66,7 @@ export class UserbotStorage {
 
       this.helpMessages.push(text);
       await redisService.redisClient.setRawValue('training:help', this.helpMessages);
+
       return true;
     }
 
@@ -67,10 +74,12 @@ export class UserbotStorage {
   }
 
   /**
-   * @param {string} text
-   * @param {string[]} dataset
-   * @param {number} [rate]
-   * */
+   * Checks whether a text is unique compared to existing dataset entries using string similarity.
+   * @param text - The text to check for uniqueness.
+   * @param dataset - The array of existing strings to compare against.
+   * @param [rate] - Optional similarity threshold; defaults to the LENGTH_RATE limit.
+   * @returns An object with isDifferent flag and the maxChance similarity score.
+   */
   isUniqueText(text: string, dataset: string[], rate?: number | null) {
     const isEmpty = dataset.length === 0;
 
@@ -86,6 +95,7 @@ export class UserbotStorage {
 
     let lastChance = 0;
     let maxChance = 0;
+
     const isDifferent = !dataset.some((lastMessage) => {
       lastChance = stringSimilarity.compareTwoStrings(text, lastMessage);
 

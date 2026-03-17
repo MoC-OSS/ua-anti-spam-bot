@@ -1,22 +1,27 @@
 import type { NextFunction } from 'grammy';
-import type { GrammyContext } from 'types';
 
-import { logSkipMiddleware } from '../../utils';
+import type { GrammyContext } from '@app-types/context';
+
+import { logSkipMiddleware } from '@utils/generic.util';
 
 /**
- * @description
  * Allow to skip a forwarded message
- * */
+ * @param context - The Grammy context object
+ * @param next - The next middleware function in the chain
+ * @returns A promise that resolves when the middleware chain completes
+ */
 export function onlyNotForwarded(context: GrammyContext, next: NextFunction) {
-  // TODO use for ctx prod debug
+  // NOTE use for ctx prod debug
   // console.info('enter onlyNotForwarded ******', ctx.chat?.title, '******', ctx.state.text);
 
   /**
    * Skip forwarded messages
-   * */
+   */
   if (context.update?.message?.forward_origin) {
     logSkipMiddleware(context, 'regular forward');
-    return;
+
+    // eslint-disable-next-line unicorn/no-useless-undefined
+    return undefined;
   }
 
   return next();

@@ -1,4 +1,9 @@
-import { removeDuplicates } from '../utils';
+/**
+ * @module mention.service
+ * @description Extracts @-mentions from messages, filtering out URLs and known exception accounts.
+ */
+
+import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 export class MentionService {
   readonly mentionRegexp = /\B@\w+/g;
@@ -6,16 +11,20 @@ export class MentionService {
   readonly nonWordRegex = /\W/;
 
   readonly urlRegexp =
+    // eslint-disable-next-line security/detect-unsafe-regex, sonarjs/slow-regex, sonarjs/regex-complexity, sonarjs/empty-string-repetition
     /(https?:\/\/(?:www\.|(?!www))?[\dA-Za-z][\dA-Za-z-]+[\dA-Za-z]\.\S{2,}|www\.[\dA-Za-z][\dA-Za-z-]+[\dA-Za-z]\.\S{2,}|(https?:\/\/(?:www\.|(?!www)))?[\dA-Za-z-]+\.\S{2,}|www\.?[\dA-Za-z]+\.\S{2,})/g;
 
   /**
-   * @param {string} message - raw message from user to parse
+   * Extracts @-mentions from the message, excluding URLs and known exceptions.
+   * @param message - raw message from user to parse
    * @param exceptionMentions - mentions to exclude from list
-   *
-   * @returns {string[]}
+   * @returns deduplicated array of mention strings found in the message
    */
   parseMentions(message: string, exceptionMentions: string[] = []): string[] {
+    // eslint-disable-next-line sonarjs/prefer-regexp-exec
     const directMentions = message.match(this.mentionRegexp) || [];
+
+    // eslint-disable-next-line sonarjs/prefer-regexp-exec
     const linkMentions = (message.match(this.urlRegexp) || [])
       .filter((url) => url.split('/').includes('t.me'))
       .map((url) => url.split('/').splice(-1)[0])

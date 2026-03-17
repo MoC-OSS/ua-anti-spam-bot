@@ -23,7 +23,7 @@ export class MessageMockUpdate extends GenericMockUpdate {
     return this.minimalUpdate;
   }
 
-  buildOverwrite<E extends PartialUpdate>(extra: E) {
+  buildOverwrite<TExtra extends PartialUpdate>(extra: TExtra) {
     return this.deepMerge(this.minimalUpdate, extra);
   }
 }

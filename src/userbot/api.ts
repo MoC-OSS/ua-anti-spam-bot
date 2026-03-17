@@ -1,28 +1,36 @@
-/* eslint-disable camelcase,@typescript-eslint/no-explicit-any */
+/* eslint-disable camelcase */
 import { fileURLToPath } from 'node:url';
-import MTProto from '@mtproto/core';
+
 import type { JsonObject } from 'type-fest';
 
-import { environmentConfig } from '../config';
-import type { CheckPassword, MTProtoError, ProtoUpdate } from '../types';
-import { sleep } from '../utils';
+import MTProto from '@mtproto/core';
+
+import { environmentConfig } from '@shared/config';
+
+import type { CheckPassword, MTProtoError, ProtoUpdate } from '@app-types/mtproto/mtproto.types';
+
+import { sleep } from '@utils/generic.util';
+import { logger } from '@utils/logger.util';
+
+export interface LocalMTProtoCrypto {
+  getSRPParams(parameters: JsonObject): Promise<Omit<CheckPassword, 'srp_id'>>;
+}
+
+export interface LocalMTProtoUpdate {
+  on(type: string, callback: (updateInfo: ProtoUpdate) => any);
+}
 
 export interface LocalMTProto extends MTProto {
   call(method: string, parameters?: JsonObject, options?: JsonObject);
   setDefaultDc(number: number);
-  crypto: {
-    getSRPParams(parameters: JsonObject): Promise<Omit<CheckPassword, 'srp_id'>>;
-  };
-  updates: {
-    on(type: string, callback: (updateInfo: ProtoUpdate) => any);
-  };
+  crypto: LocalMTProtoCrypto;
+  updates: LocalMTProtoUpdate;
 }
 
 export class API {
   mtproto: LocalMTProto;
 
   constructor() {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call
     this.mtproto = new MTProto({
       api_id: environmentConfig.USERBOT_APP_ID,
       api_hash: environmentConfig.USERBOT_API_HASH,
@@ -35,12 +43,12 @@ export class API {
 
   async call<T extends Record<string, any>>(method: string, parameters?: JsonObject, options: JsonObject = {}): Promise<T> {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-return
       return await this.mtproto.call(method, parameters, options);
     } catch (error: unknown) {
       const typedError = error as MTProtoError;
-      console.error(`${method} error:`, typedError);
-      console.error(JSON.stringify(typedError));
+
+      logger.error({ err: typedError }, `${method} error:`);
+      logger.error(JSON.stringify(typedError));
 
       const { error_code, error_message } = typedError;
 
@@ -61,7 +69,6 @@ export class API {
         // If auth.sendCode call on incorrect DC need change default DC, because
         // call auth.signIn on incorrect DC return PHONE_CODE_EXPIRED error
         if (type === 'PHONE') {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           await this.mtproto.setDefaultDc(dcId);
         } else {
           Object.assign(options, { dcId });

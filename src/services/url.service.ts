@@ -1,16 +1,24 @@
-import { removeDuplicates } from '../utils';
+/**
+ * @module url.service
+ * @description Utility service for parsing and validating URLs from raw message text.
+ * Handles URL normalization, deduplication, and domain extraction.
+ */
 
-import { EXCEPTION_DOMAINS, NON_WORD_REGEX, URL_REGEXP, VALID_URL_REGEXP } from './constants';
+import { logger } from '@utils/logger.util';
+import { removeDuplicates } from '@utils/remove-duplicates.util';
+
+import { EXCEPTION_DOMAINS, NON_WORD_REGEX, URL_REGEXP, VALID_URL_REGEXP } from './constants/swindlers-urls.constant';
 
 export class UrlService {
   /**
-   * @param {string} message - raw message from user to parse
+   * Parses and normalizes URLs from raw message text, filtering invalid or excluded domains.
+   * @param message - raw message from user to parse
    * @param strict - is need to check in strict mode and doesn't check exception domains
-   *
-   * @returns {string[]} - parsed urls
+   * @returns - parsed urls
    */
   parseUrls(message: string, strict = false): string[] {
     return removeDuplicates(
+      // eslint-disable-next-line sonarjs/prefer-regexp-exec
       (message.match(URL_REGEXP) || ([] as string[]))
         .map((url) => {
           const clearUrl = url.trim();
@@ -23,6 +31,7 @@ export class UrlService {
           try {
             const urlInstance = new URL(url);
             const isNotExcluded = strict ? true : !EXCEPTION_DOMAINS.includes(urlInstance.host);
+
             return urlInstance && isNotExcluded && VALID_URL_REGEXP.test(url);
           } catch {
             return false;
@@ -32,15 +41,18 @@ export class UrlService {
   }
 
   /**
-   * @param {string} url
-   * @returns {string | null}
+   * Extracts the domain (host + trailing slash) from a URL string.
+   * @param url - URL string to extract the domain from
+   * @returns the domain with trailing slash, or the original URL string on parse error
    */
   getUrlDomain(url: string): string {
     try {
       const validUrl = url.slice(0, 4) === 'http' ? url : `https://${url}`;
+
       return `${new URL(validUrl).host}/`;
     } catch (error) {
-      console.error('Cannot get URL domain:', url, error);
+      logger.error({ url, err: error }, 'Cannot get URL domain:');
+
       return url;
     }
   }

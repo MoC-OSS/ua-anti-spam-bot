@@ -5,7 +5,7 @@ import { GenericMockUpdate } from './generic-mock.update';
 
 /**
  * Get private message update
- * */
+ */
 export class MessagePrivateMockUpdate extends GenericMockUpdate {
   readonly minimalUpdate = GenericMockUpdate.getValidUpdate({
     update_id: this.genericUpdateId,
@@ -35,7 +35,7 @@ export class MessagePrivateMockUpdate extends GenericMockUpdate {
     return this.buildUpdate();
   }
 
-  buildOverwrite<E extends PartialUpdate>(extra: E) {
+  buildOverwrite<TExtra extends PartialUpdate>(extra: TExtra) {
     return this.deepMerge(this.buildUpdate(), extra);
   }
 }

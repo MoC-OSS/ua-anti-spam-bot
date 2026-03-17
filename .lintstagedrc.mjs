@@ -8,14 +8,14 @@ const getLintFlags = (absolutePaths) => {
    * Some file paths are too long and cannot be added as parameter to eslint
    * https://serverfault.com/questions/9546/filename-length-limits-on-linux/9548#9548
    *
-   * */
-  const filePathLengthLimit = relativePaths.find((path) => path.length > 250);
+   */
+  const filePathLengthLimit = relativePaths.find((filePath) => filePath.length > 250);
 
   /**
    *
    * There is a case, when the command is too long and eslint cannot execute it.
    *
-   * */
+   */
   const isTooManyFilesToLint = relativePaths.length > 20;
 
   return {

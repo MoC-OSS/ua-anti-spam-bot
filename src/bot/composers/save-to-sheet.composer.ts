@@ -1,28 +1,43 @@
 import { Menu } from '@grammyjs/menu';
 import { Composer } from 'grammy';
-import { isChatId } from 'grammy-guard';
+import { isChatHasId } from 'grammy-guard';
 
-import { messageQuery } from '../../const';
-import type { swindlersGoogleService } from '../../services';
-import type { GrammyContext, GrammyMenuContext } from '../../types';
-import { onlyWithText, parseText, removeSystemInformationMiddleware } from '../middleware';
+import { onlyWithText } from '@bot/middleware/only-with-text.middleware';
+import { parseText } from '@bot/middleware/parse-text.middleware';
+import { removeSystemInformationMiddleware } from '@bot/middleware/remove-system-information.middleware';
 
+import { messageQuery } from '@const/message-query.const';
+
+import type { swindlersGoogleService } from '@services/swindlers-google.service';
+
+import type { GrammyContext, GrammyMenuContext } from '@app-types/context';
+
+/** Properties for configuring the save-to-sheet composer. */
 export interface SaveToSheetComposerProperties {
   chatId: number;
   rootMenu: Menu<GrammyMenuContext>;
   updateMethod: typeof swindlersGoogleService.appendBot;
 }
 
+/**
+ * Composer that forwards messages to a Google Sheet with inline buttons to classify them as spam or not.
+ * @param root0 - Save-to-sheet composer properties.
+ * @param root0.chatId - The Telegram chat ID whose messages should be forwarded to the sheet.
+ * @param root0.rootMenu - The root menu instance used to register the inline classification menu.
+ * @param root0.updateMethod - The Google Sheets service method used to append a new entry.
+ * @returns An object containing the saveToSheetComposer and menu instances.
+ */
 export const getSaveToSheetComposer = ({ chatId, rootMenu, updateMethod }: SaveToSheetComposerProperties) => {
   const saveToSheetComposer = new Composer<GrammyContext>();
 
-  const composer = saveToSheetComposer.filter(isChatId(chatId));
+  const composer = saveToSheetComposer.filter(isChatHasId(chatId));
 
   const menu = new Menu<GrammyMenuContext>(`saveToSheetMenu_${chatId}`);
 
   menu
     .text('✅ Додати в базу', async (context) => {
       await context.deleteMessage();
+
       await updateMethod(context.msg?.text || `$no_value_${chatId}`).catch(() =>
         context.reply('Дуже погана помилка, терміново подивіться sheet!'),
       );
@@ -35,6 +50,7 @@ export const getSaveToSheetComposer = ({ chatId, rootMenu, updateMethod }: SaveT
     const text = context.state.clearText!;
 
     await context.deleteMessage();
+
     await context.reply(text, {
       reply_markup: menu,
     });

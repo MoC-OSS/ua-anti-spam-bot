@@ -1,10 +1,12 @@
-/* eslint-disable no-await-in-loop,no-restricted-syntax */
+/* eslint-disable no-await-in-loop */
 import fs from 'node:fs';
+
 // eslint-disable-next-line import/no-extraneous-dependencies
 import * as input from 'input';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+
 // @ts-ignore
 import dialogs = require('./dialogs.json');
+import { logger } from '@utils/logger.util';
 
 export interface Dialog {
   href: string;
@@ -18,6 +20,7 @@ const typedDialogs = dialogs as Dialog[];
 (async () => {
   for (const [dialogIndex, dialog] of typedDialogs.entries()) {
     if (dialog.isValid === undefined) {
+      // eslint-disable-next-line security/detect-object-injection
       typedDialogs[dialogIndex].isValid = await input.confirm(`${dialog.title} - ${dialog.subtitle}`);
 
       fs.writeFileSync('./dialogs.json', JSON.stringify(typedDialogs, null, 2));
@@ -33,5 +36,5 @@ const typedDialogs = dialogs as Dialog[];
     ),
   );
 })().catch((error) => {
-  console.error('Cannot run optimization due to:', error);
+  logger.error('Cannot run optimization due to:', error);
 });

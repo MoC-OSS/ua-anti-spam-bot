@@ -16,3 +16,4 @@ creds.json
 coverage
 .DS_Store
 */.DS_Store
+.agents

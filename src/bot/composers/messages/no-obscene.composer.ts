@@ -1,26 +1,38 @@
-import escapeHTML from 'escape-html';
 import { Composer } from 'grammy';
 
-import { LOGS_CHAT_THREAD_IDS } from '../../../const';
-import { logsChat } from '../../../creator';
-import { getDeleteObsceneMessage, obsceneDeleteLogsStartMessage } from '../../../message';
-import { obsceneService } from '../../../services';
-import type { GrammyContext } from '../../../types';
-import type { SearchSetResult } from '../../../utils';
-import { censorWord, getUserData, telegramUtil } from '../../../utils';
+import escapeHTML from 'escape-html';
+
+import { logsChat } from '@bot/creator';
+
+import { LOGS_CHAT_THREAD_IDS } from '@const/logs.const';
+
+import { obsceneDeleteLogsStartMessage } from '@message';
+import { getDeleteObsceneMessage } from '@message/obscene.message';
+
+import { obsceneService } from '@services/obscene.service';
+
+import type { GrammyContext } from '@app-types/context';
+
+import { censorWord } from '@utils/censor-word.util';
+import { getUserData } from '@utils/generic.util';
+import type { SearchSetResult } from '@utils/search-set.util';
+import { telegramUtility } from '@utils/util-instances.util';
 
 /**
- * @description Remove strategic information logic
- * */
+ * Returns a composer that detects and deletes messages containing obscene language.
+ * @returns Object containing the no-obscene composer instance.
+ */
 export const getNoObsceneComposer = () => {
   const noObsceneComposer = new Composer<GrammyContext>();
 
   /**
-   * @param {GrammyContext} context
-   * @param {SearchSetResult} searchResult
-   * */
+   * Logs a deleted obscene message to the logs chat.
+   * @param context - The Grammy context of the incoming message.
+   * @param searchResult - The search result containing the matched obscene word details.
+   * @returns Promise resolving to the sent log message.
+   */
   async function saveObsceneMessage(context: GrammyContext, searchResult: SearchSetResult) {
-    const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
+    const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const text = context.state?.text || '';
 
     return context.api.sendMessage(
@@ -46,7 +58,9 @@ export const getNoObsceneComposer = () => {
       const { writeUsername, userId } = getUserData(context);
 
       if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
-        await context.replyWithSelfDestructedHTML(getDeleteObsceneMessage({ writeUsername, userId, word: censorWord(isObscene.origin) }));
+        await context.replyWithSelfDestructedHTML(
+          getDeleteObsceneMessage(context, { writeUsername, userId, word: censorWord(isObscene.origin) }),
+        );
       }
     }
 

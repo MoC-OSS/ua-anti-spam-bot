@@ -1,26 +1,38 @@
-import escapeHTML from 'escape-html';
 import { Composer } from 'grammy';
 
-import { LOGS_CHAT_THREAD_IDS } from '../../../const';
-import { logsChat } from '../../../creator';
-import { antisemitismDeleteLogsStartMessage, getDeleteAntisemitismMessage } from '../../../message';
-import { antisemitismService } from '../../../services/antisemitism.service';
-import type { GrammyContext } from '../../../types';
-import type { SearchSetResult } from '../../../utils';
-import { censorWord, getUserData, telegramUtil } from '../../../utils';
+import escapeHTML from 'escape-html';
+
+import { logsChat } from '@bot/creator';
+
+import { LOGS_CHAT_THREAD_IDS } from '@const/logs.const';
+
+import { antisemitismDeleteLogsStartMessage } from '@message';
+import { getDeleteAntisemitismMessage } from '@message/antisemitism.message';
+
+import { antisemitismService } from '@services/antisemitism.service';
+
+import type { GrammyContext } from '@app-types/context';
+
+import { censorWord } from '@utils/censor-word.util';
+import { getUserData } from '@utils/generic.util';
+import type { SearchSetResult } from '@utils/search-set.util';
+import { telegramUtility } from '@utils/util-instances.util';
 
 /**
- * @description Delete antisemitism language messages
- * */
+ * Returns a composer that detects and deletes messages containing antisemitic language.
+ * @returns Object containing the no-antisemitism composer instance.
+ */
 export const getNoAntisemitismComposer = () => {
   const noAntisemitismComposer = new Composer<GrammyContext>();
 
   /**
-   * @param {GrammyContext} context
-   * @param {SearchSetResult} searchResult
-   * */
+   * Logs a detected antisemitism message to the logs chat.
+   * @param context - The Grammy context of the incoming message.
+   * @param searchResult - The search result containing the matched antisemitic word details.
+   * @returns Promise resolving to the sent log message.
+   */
   async function saveAntisemitismMessage(context: GrammyContext, searchResult: SearchSetResult) {
-    const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
+    const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const text = context.state?.text || '';
 
     return context.api.sendMessage(
@@ -47,7 +59,7 @@ export const getNoAntisemitismComposer = () => {
 
       if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
         await context.replyWithSelfDestructedHTML(
-          getDeleteAntisemitismMessage({ writeUsername, userId, word: censorWord(isAntisemitism.origin) }),
+          getDeleteAntisemitismMessage(context, { writeUsername, userId, word: censorWord(isAntisemitism.origin) }),
         );
       }
     }

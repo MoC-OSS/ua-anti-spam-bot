@@ -4,13 +4,13 @@
 echo "\033[0;33m"
 echo "***************************************************"
 echo ""
-echo "We use branch-name-lint."
+echo "We use validate-branch-name."
 echo "To push a branch, be sure you have right prefix, ticket name in uppercase, and description split by underscore. Example branch name:"
 echo ""
-echo "  * feature/LBAT-8_create_lp_ui_elements"
-echo "  * hotfix/LBAT-11_add_missing_login_routes"
+echo "  * feature/UABOT-8_create_ui_elements"
+echo "  * hotfix/UABOT_add_missing_routes"
 echo ""
-echo "Read more: https://github.com/barzik/branch-name-lint"
+echo "Read more: https://github.com/JsonMa/validate-branch-name"
 echo ""
 echo "***************************************************"
 echo "\033[0m"
@@ -23,4 +23,5 @@ echo ""
 echo "***************************************************"
 echo "\033[0m"
 
+npx validate-branch-name
 npm run lint

@@ -1,43 +1,58 @@
 import type { Message } from '@grammyjs/types';
 import type { Context, NextFunction } from 'grammy';
+
 import type { ParseMode } from 'typegram';
 
-export type SelfDestructedFlavor<C extends Context> = C & {
-  replyWithSelfDestructed: C['reply'];
-  replyWithSelfDestructedHTML: C['reply'];
-  replyWithSelfDestructedMarkdown: C['reply'];
-  replyWithSelfDestructedMarkdownV1: C['reply'];
-  replyWithSelfDestructedMarkdownV2: C['reply'];
-  replyWithPhotoWithSelfDestructedHTML: C['replyWithPhoto'];
+import { logger } from '@utils/logger.util';
+
+/** Context flavor that adds self-destructing reply methods to the bot context. */
+export type SelfDestructedFlavor<TContext extends Context> = TContext & {
+  replyWithSelfDestructed: TContext['reply'];
+  replyWithSelfDestructedHTML: TContext['reply'];
+  replyWithSelfDestructedMarkdown: TContext['reply'];
+  replyWithSelfDestructedMarkdownV1: TContext['reply'];
+  replyWithSelfDestructedMarkdownV2: TContext['reply'];
+  replyWithPhotoWithSelfDestructedHTML: TContext['replyWithPhoto'];
 };
 
 /**
- * Default callback.
- * Just removes the sent message.
- * */
-const defaultDeleteCallback = async <C extends Context>(context: C, replyResult: Message.TextMessage | Message.PhotoMessage) => {
+ * Default callback that removes the sent message when the timeout expires.
+ * @param context - Grammy bot context used to call the delete API.
+ * @param replyResult - The message object returned from the reply call.
+ * @returns A Promise that resolves when the message has been deleted.
+ */
+const defaultDeleteCallback = async <TContext extends Context>(
+  context: TContext,
+  replyResult: Message.PhotoMessage | Message.TextMessage,
+) => {
   await context.api.deleteMessage(replyResult.chat.id, replyResult.message_id);
 };
 
+/** Callback type invoked when a self-destructed message's timeout expires. */
 export type SelfDestructedCallback = typeof defaultDeleteCallback;
 
 /**
- * Build delete reply with parse modes
- * */
+ * Builds a reply method that automatically deletes the sent text message after a timeout.
+ * @param context - The self-destructed flavor context to bind the reply to.
+ * @param timeout - Milliseconds to wait before deleting the sent message.
+ * @param callback - The callback invoked when the timeout expires to perform deletion.
+ * @param parseMode - Optional Telegram parse mode (e.g. 'HTML', 'MarkdownV2').
+ * @returns A Grammy-compatible reply method that schedules deletion after sending.
+ */
 const buildReplyWithParseMode =
-  <C extends Context>(
-    context: SelfDestructedFlavor<C>,
+  <TContext extends Context>(
+    context: SelfDestructedFlavor<TContext>,
     timeout: number,
     callback: SelfDestructedCallback,
     parseMode?: ParseMode,
-  ): C['reply'] =>
+  ): TContext['reply'] =>
   async (text, other, signal) => {
     const otherParameters = parseMode ? { ...other, parse_mode: parseMode } : other;
     const replyResult = await context.reply(text, otherParameters, signal);
 
     setTimeout(() => {
       callback(context, replyResult).catch((error) => {
-        console.error('Cannot self destruct the message. Error:', error);
+        logger.error('Cannot self destruct the message. Error:', error);
       });
     }, timeout);
 
@@ -45,36 +60,39 @@ const buildReplyWithParseMode =
   };
 
 /**
- * Build delete reply with parse modes
- * */
+ * Builds a replyWithPhoto method that automatically deletes the sent photo message after a timeout.
+ * @param context - The self-destructed flavor context to bind the reply to.
+ * @param timeout - Milliseconds to wait before deleting the sent message.
+ * @param callback - The callback invoked when the timeout expires to perform deletion.
+ * @param parseMode - Optional Telegram parse mode (e.g. 'HTML', 'MarkdownV2').
+ * @returns A Grammy-compatible replyWithPhoto method that schedules deletion after sending.
+ */
 const buildReplyPhotoWithParseMode =
-  <C extends Context>(
-    context: SelfDestructedFlavor<C>,
+  <TContext extends Context>(
+    context: SelfDestructedFlavor<TContext>,
     timeout: number,
     callback: SelfDestructedCallback,
     parseMode?: ParseMode,
-  ): C['replyWithPhoto'] =>
+  ): TContext['replyWithPhoto'] =>
   async (text, other, signal) => {
     const otherParameters = parseMode ? { ...other, parse_mode: parseMode } : other;
     const replyResult = await context.replyWithPhoto(text, otherParameters, signal);
 
     setTimeout(() => {
       callback(context, replyResult).catch((error) => {
-        console.error('Cannot self destruct the message. Error:', error);
+        logger.error('Cannot self destruct the message. Error:', error);
       });
     }, timeout);
 
     return replyResult;
   };
 
+// eslint-disable-next-line no-secrets/no-secrets
 /**
  * Delete message after specified timeout.
- *
  * @param timeout - timeout to wait before delete the sent message
  * @param callback - custom callback to call when message should be deleted
- *
  * @returns a regular grammy middleware
- *
  * @example
  * ```ts
  * type AppContext = ReplyWithSelfDestructedMessageFlavor<Context>;
@@ -95,10 +113,10 @@ const buildReplyPhotoWithParseMode =
  *
  * bot.on(':text', (context) => context.replyWithSelfDestructedMessage('text'));
  * ```
- * */
+ */
 export const selfDestructedReply =
   (timeout = 60_000, callback: SelfDestructedCallback = defaultDeleteCallback) =>
-  <C extends Context>(context: SelfDestructedFlavor<C>, next: NextFunction) => {
+  <TContext extends Context>(context: SelfDestructedFlavor<TContext>, next: NextFunction) => {
     context.replyWithSelfDestructed = buildReplyWithParseMode(context, timeout, callback);
     context.replyWithSelfDestructedHTML = buildReplyWithParseMode(context, timeout, callback, 'HTML');
     context.replyWithSelfDestructedMarkdown = buildReplyWithParseMode(context, timeout, callback, 'MarkdownV2');

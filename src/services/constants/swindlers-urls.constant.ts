@@ -447,13 +447,17 @@ export const EXCEPTION_DOMAINS = [
 export const NON_WORD_REGEX = /\W/;
 
 export const URL_REGEXP =
+  // eslint-disable-next-line security/detect-unsafe-regex, sonarjs/slow-regex, sonarjs/regex-complexity, sonarjs/empty-string-repetition
   /(https?:\/\/(?:www\.|(?!www))?[\dA-Za-z][\dA-Za-z-]+[\dA-Za-z]\.\S{2,}|www\.[\dA-Za-z][\dA-Za-z-]+[\dA-Za-z]\.\S{2,}|(https?:\/\/(?:www\.|(?!www)))?[\dA-Za-z-]+\.\S{2,}|www\.?[\dA-Za-z]+\.\S{2,})\W?/g;
+
+/* eslint-disable security/detect-non-literal-regexp, sonarjs/slow-regex */
 export const VALID_URL_REGEXP = new RegExp(
-  '^(https?:\\/\\/)?' + // protocol
-    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
-    '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
-    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
-    '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
-    '(\\#[-a-z\\d_]*)?$',
+  String.raw`^(https?:\/\/)?` + // protocol
+    String.raw`((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|` + // domain name
+    String.raw`((\d{1,3}\.){3}\d{1,3}))` + // OR ip (v4) address
+    String.raw`(\:\d+)?(\/[-a-z\d%_.~+]*)*` + // port and path
+    String.raw`(\?[;&a-z\d%_.~+=-]*)?` + // query string
+    String.raw`(\#[-a-z\d_]*)?$`,
   'i',
 );
+/* eslint-enable security/detect-non-literal-regexp, sonarjs/slow-regex */
