@@ -1,3 +1,7 @@
+# @tensorflow/tfjs-node ships pre-built binaries only for linux/amd64.
+# linux/arm64 is not in its ALL_SUPPORTED_COMBINATION list, so we pin the
+# platform explicitly. On Apple Silicon hosts this runs via Rosetta 2.
+# hadolint ignore=DL3029
 FROM --platform=linux/amd64 public.ecr.aws/docker/library/node:24
 
 WORKDIR /usr/src/app
