@@ -54,9 +54,9 @@ swindlers-warning =
 swindlers-help =
     <b>NADIYNO: digital security hotline</b>
 
-    * Received a suspicious call supposedly from a bank?
-    * Shopping online but unsure about the site's safety?
-    * Your account was hacked?
+    - Received a suspicious call supposedly from a bank?
+    - Shopping online but unsure about the site's safety?
+    - Your account was hacked?
 
     Describe your problem and get expert consultation.
     It's free and confidential.
