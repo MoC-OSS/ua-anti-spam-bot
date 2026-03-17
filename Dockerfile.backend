@@ -19,8 +19,7 @@ RUN npm ci
 
 COPY . .
 
-# Create non-root user and switch to it for security
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /usr/src/app
-USER appuser
+# Switch to non-root user for security (node user already exists in Node.js base image)
+USER node
 
 CMD ["npm", "run", "start:server:prod"]
