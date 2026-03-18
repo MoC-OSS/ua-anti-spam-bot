@@ -29,6 +29,7 @@
     "test:coverage": "npx vitest run --coverage",
     "format": "npx prettier . --write",
     "prepare": "husky",
+    "codex-prepare": "sh ./scripts/link-codex-skills.sh",
     "postinstall": "patch-package"
   },
   "dependencies": {
