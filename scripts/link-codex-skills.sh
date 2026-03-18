@@ -21,7 +21,7 @@ if [ -L "$LINK_PATH" ]; then
 fi
 
 if [ -e "$LINK_PATH" ]; then
-  echo "Error: $LINK_PATH exists and is not a symlink"
+  echo "Error: $LINK_PATH exists and is not a symlink" >&2
   exit 1
 fi
 
