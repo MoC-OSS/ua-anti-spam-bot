@@ -194,6 +194,7 @@ This project is a **Grammy-based Telegram bot** with a Composer pattern for orga
 ### Architecture Overview
 
 Three main services:
+
 - **Bot** (`src/bot/`) - Grammy Telegram bot with feature composers
 - **Server** (`src/server/`) - Express REST API for ML inference
 - **Userbot** (`src/userbot/`) - MTProto userbot for research
@@ -217,11 +218,11 @@ export const myFeatureService = new MyFeatureService();
 // Composer: src/bot/composers/messages/my-feature.composer.ts
 export const getMyFeatureComposer = () => {
   const myFeatureComposer = new Composer<GrammyContext>();
-  
+
   myFeatureComposer.use(async (context, next) => {
     const isEnabled = !context.chatSession.chatSettings.disableMyFeature;
     const violation = myFeatureService.checkFeature(context.state.text || '');
-    
+
     if (isEnabled && violation) {
       await context.deleteMessage();  // or warning
       await saveViolationLog(context, violation);
@@ -229,7 +230,7 @@ export const getMyFeatureComposer = () => {
     }
     return next();
   });
-  
+
   return { myFeatureComposer };
 };
 
@@ -243,10 +244,12 @@ export const getMessagesComposer = ({ myFeatureComposer }: ...) => {
 ```
 
 **Settings Types:**
+
 - **`disableXxx`** = Feature ON by default (core spam filters)
 - **`enableXxx`** = Feature OFF by default (optional filters)
 
 **Real Examples:**
+
 - Delete: `src/bot/composers/messages/no-antisemitism.composer.ts`
 - Warn: `src/bot/composers/messages/warn-obscene.composer.ts`
 
@@ -265,11 +268,11 @@ export class MyTensorService {
 // Composer: src/bot/composers/my-image.composer.ts
 export const getMyImageComposer = ({ myTensorService }: Props) => {
   const myImageComposer = new Composer<GrammyContext>();
-  
+
   myImageComposer.use(async (context, next) => {
     const imageData = context.state.photo;
     if (!imageData) return next();
-    
+
     try {
       const result = await myTensorService.analyze(imageData.file);
       if (result.isProblematic) {
@@ -281,17 +284,19 @@ export const getMyImageComposer = ({ myTensorService }: Props) => {
     }
     return next();
   });
-  
+
   return { myImageComposer };
 };
 ```
 
 **Real Example:**
+
 - `src/bot/composers/messages/nsfw-filter.composer.ts`
 
 ### Implementation Checklist
 
 For text features:
+
 - [ ] Service created: `src/services/my-feature.service.ts`
 - [ ] Service tests: `tests/services/my-feature.service.spec.ts`
 - [ ] Composer created: `src/bot/composers/messages/my-feature.composer.ts`
@@ -306,6 +311,7 @@ For text features:
 ### Key Patterns to Follow
 
 **Always:**
+
 - ✅ Log violations to logs chat: `context.api.sendMessage(logsChat, ...)`
 - ✅ Notify users when deleting: `context.replyWithSelfDestructedHTML(...)`
 - ✅ Use dependency injection for services
@@ -313,6 +319,7 @@ For text features:
 - ✅ Keep composers focused on orchestration only
 
 **Never:**
+
 - ❌ Hardcode service instances (pass as dependency)
 - ❌ Delete messages without logging
 - ❌ Use `any` type in TypeScript
@@ -322,20 +329,21 @@ For text features:
 
 ### Code Style Requirements
 
-| Item | Standard |
-|------|----------|
-| Files | kebab-case.ts |
-| Classes | PascalCase |
-| Exports | camelCase |
-| Variables | camelCase |
-| Constants | UPPER_SNAKE_CASE |
-| TypeScript | Strict mode, no `any` |
-| Testing | 80% coverage minimum |
-| Documentation | JSDoc on public APIs |
+| Item          | Standard              |
+| ------------- | --------------------- |
+| Files         | kebab-case.ts         |
+| Classes       | PascalCase            |
+| Exports       | camelCase             |
+| Variables     | camelCase             |
+| Constants     | UPPER_SNAKE_CASE      |
+| TypeScript    | Strict mode, no `any` |
+| Testing       | 80% coverage minimum  |
+| Documentation | JSDoc on public APIs  |
 
 ### Testing Standards
 
 Service tests (`tests/services/my-feature.service.spec.ts`):
+
 ```typescript
 describe('MyFeatureService', () => {
   it('should detect problematic content', () => {
@@ -348,16 +356,17 @@ describe('MyFeatureService', () => {
 ```
 
 e2e tests (`tests/bot.spec.ts`):
+
 ```typescript
 it('should delete and notify on violation', async () => {
   const mockMessage = new MessageMockUpdate({ text: 'violating content' });
   await bot.handleUpdate(mockMessage.update);
-  
+
   expect(outgoingRequests.deleteMessage).toHaveBeenCalled();
   expect(outgoingRequests.sendMessage).toHaveBeenCalledWith(
     expect.any(Number),
     expect.stringContaining('Your message was removed'),
-    expect.any(Object)
+    expect.any(Object),
   );
 });
 ```
@@ -365,6 +374,7 @@ it('should delete and notify on violation', async () => {
 ### Reference Files in Codebase
 
 To understand patterns, study:
+
 - **Text deletion:** `src/bot/composers/messages/no-antisemitism.composer.ts`
 - **Text warning:** `src/bot/composers/messages/warn-obscene.composer.ts`
 - **Image/ML:** `src/bot/composers/messages/nsfw-filter.composer.ts`
@@ -415,14 +425,14 @@ To understand patterns, study:
 
 ### When to Read Each File
 
-| Situation | Read |
-|-----------|------|
-| "What's the basic pattern?" | SKILL.md (this file) |
-| "How do I implement feature X?" | SKILL.md steps + ADDING_FEATURES.md |
-| "What's the exact code structure?" | Code templates in SKILL.md |
-| "I need to understand testing better" | ADDING_FEATURES.md Testing Strategy section |
-| "Show me code examples" | ADDING_FEATURES.md Feature Type Patterns section |
-| "I'm stuck on naming/style" | SKILL.md Code Style Requirements + ADDING_FEATURES.md |
-| "How do composers work?" | SKILL.md + ADDING_FEATURES.md Architecture section |
+| Situation                             | Read                                                  |
+| ------------------------------------- | ----------------------------------------------------- |
+| "What's the basic pattern?"           | SKILL.md (this file)                                  |
+| "How do I implement feature X?"       | SKILL.md steps + ADDING_FEATURES.md                   |
+| "What's the exact code structure?"    | Code templates in SKILL.md                            |
+| "I need to understand testing better" | ADDING_FEATURES.md Testing Strategy section           |
+| "Show me code examples"               | ADDING_FEATURES.md Feature Type Patterns section      |
+| "I'm stuck on naming/style"           | SKILL.md Code Style Requirements + ADDING_FEATURES.md |
+| "How do composers work?"              | SKILL.md + ADDING_FEATURES.md Architecture section    |
 
 This skill applies exclusively to this repository.
