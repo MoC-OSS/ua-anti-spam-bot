@@ -1,6 +1,6 @@
 {
   "name": "ua-anti-spam-bot",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "private": true,
   "engines": {
     "node": ">=20.x"

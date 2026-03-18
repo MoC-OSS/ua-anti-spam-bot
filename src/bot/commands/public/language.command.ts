@@ -1,7 +1,9 @@
 /**
  * @module language.command
- * @description Handles the /language command that lets users switch the bot's
- * reply language for the current chat. Supported locales: 'uk' (Ukrainian) and 'en' (English).
+ * @description Handles the /language command that lets chat administrators switch
+ * the bot's reply language for the current group chat. In private chats, the user
+ * may still switch their own bot language. Supported locales: 'uk' (Ukrainian) and
+ * 'en' (English).
  *
  * Behaviour:
  *  - `/language`     — toggles between Ukrainian and English
@@ -9,6 +11,8 @@
  *  - `/language en`  — sets the language to English
  *  - any other value — replies with an error listing supported codes
  */
+
+import { getIsNotAdminMessage } from '@message/settings.message';
 
 import type { GrammyCommandMiddleware } from '@app-types/context';
 
@@ -45,8 +49,16 @@ export class LanguageCommand {
   middleware(): GrammyCommandMiddleware {
     // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context) => {
+      const isPrivateChat = context.chat?.type === 'private';
+      const isActualUserAdmin = Boolean(context.state.isActualUserAdmin);
       const rawArgument = context.match?.toString().trim().toLowerCase() ?? '';
       const currentLanguage = context.chatSession.language ?? 'uk';
+
+      if (!isPrivateChat && !isActualUserAdmin) {
+        await context.replyWithSelfDestructedHTML(getIsNotAdminMessage(context));
+
+        return;
+      }
 
       let newLanguage: SupportedLanguage;
 
