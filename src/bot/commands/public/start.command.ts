@@ -25,7 +25,7 @@ export class StartCommand {
       }
 
       const isAdmin = context.chatSession.isBotAdmin;
-      const canDelete = Boolean(context.state.isCommandMessageDeleted);
+      const canDelete = Boolean(context.state.isDeleted);
 
       const { writeUsername, userId } = getUserData(context);
 

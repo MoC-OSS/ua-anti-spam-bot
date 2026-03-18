@@ -5,6 +5,7 @@ import { LanguageCommand } from '@bot/commands/public/language.command';
 import { RoleCommand } from '@bot/commands/public/role.command';
 import { SettingsCommand } from '@bot/commands/public/settings.command';
 import { StartCommand } from '@bot/commands/public/start.command';
+import { onlyNotDeletedFilter } from '@bot/filters/only-not-deleted.filter';
 
 import { redisService } from '@services/redis.service';
 
@@ -22,10 +23,9 @@ export interface PublicCommandsComposerProperties {
  * @returns A promise that resolves after the remaining middleware finishes.
  */
 const deleteHandledCommandMessage: GrammyCommandMiddleware = async (context, next) => {
-  context.state.isCommandMessageDeleted = await context
-    .deleteMessage()
-    .then(() => true)
-    .catch(() => false);
+  if (onlyNotDeletedFilter(context)) {
+    await context.deleteMessage().catch(() => {});
+  }
 
   return next();
 };
