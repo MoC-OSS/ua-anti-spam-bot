@@ -19,11 +19,6 @@ export class SettingsCommand {
       const isActualUserAdmin = Boolean(context.state.isActualUserAdmin);
       const isBotAdmin = onlyWhenBotAdminFilter(context);
 
-      await context
-        .deleteMessage()
-        .then(() => true)
-        .catch(() => false);
-
       if (!userId) {
         throw new Error('Invalid user id');
       }

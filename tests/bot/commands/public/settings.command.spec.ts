@@ -112,15 +112,13 @@ describe('SettingsCommand', () => {
 
       await bot.handleUpdate(getPrivateSettingsCommandUpdate());
 
-      const expectedMethods = outgoingRequests.buildMethods(['deleteMessage', 'sendMessage']);
+      const expectedMethods = outgoingRequests.buildMethods(['sendMessage']);
 
       const actualMethods = outgoingRequests.getMethods();
 
       expect(expectedMethods).toEqual(actualMethods);
 
-      expect(outgoingRequests.getAll<'deleteMessage', 'sendMessage'>()[1]?.payload.text).toEqual(
-        i18n.t('uk', 'settings-has-no-linked-chats'),
-      );
+      expect(outgoingRequests.getAll<'sendMessage'>()[0]?.payload.text).toEqual(i18n.t('uk', 'settings-has-no-linked-chats'));
     });
 
     it('should send link if there are linked chats', async () => {
@@ -136,15 +134,13 @@ describe('SettingsCommand', () => {
 
       await bot.handleUpdate(getPrivateSettingsCommandUpdate());
 
-      const expectedMethods = outgoingRequests.buildMethods(['deleteMessage', 'sendMessage']);
+      const expectedMethods = outgoingRequests.buildMethods(['sendMessage']);
 
       const actualMethods = outgoingRequests.getMethods();
 
       expect(expectedMethods).toEqual(actualMethods);
 
-      expect(outgoingRequests.getAll<'deleteMessage', 'sendMessage'>()[1]?.payload.text).not.toEqual(
-        i18n.t('uk', 'settings-has-no-linked-chats'),
-      );
+      expect(outgoingRequests.getAll<'sendMessage'>()[0]?.payload.text).not.toEqual(i18n.t('uk', 'settings-has-no-linked-chats'));
     });
   });
 
@@ -156,7 +152,7 @@ describe('SettingsCommand', () => {
 
       await bot.handleUpdate(getSettingsCommandUpdate());
 
-      const expectedMethods = outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']);
+      const expectedMethods = outgoingRequests.buildMethods(['getChatMember', 'sendMessage']);
 
       const actualMethods = outgoingRequests.getMethods();
 
@@ -168,7 +164,7 @@ describe('SettingsCommand', () => {
 
       await bot.handleUpdate(getSettingsCommandUpdate());
 
-      const expectedMethods = outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']);
+      const expectedMethods = outgoingRequests.buildMethods(['getChatMember', 'sendMessage']);
 
       const actualMethods = outgoingRequests.getMethods();
 
@@ -178,7 +174,7 @@ describe('SettingsCommand', () => {
     it('should add all admins when a regular admin calls', async () => {
       await bot.handleUpdate(getSettingsCommandUpdate());
 
-      const expectedMethods = outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'getChatAdministrators', 'sendMessage']);
+      const expectedMethods = outgoingRequests.buildMethods(['getChatMember', 'getChatAdministrators', 'sendMessage']);
 
       const actualMethods = outgoingRequests.getMethods();
 

@@ -145,10 +145,15 @@ interface StateIsAdmin {
   isUserAdmin?: boolean;
 }
 
+interface StateCommandMessage {
+  isCommandMessageDeleted?: boolean;
+}
+
 export type State = OnlyWithTextMiddlewareState &
   IsDeletedState &
   PerformanceMiddlewareState &
-  StateIsAdmin & {
+  StateIsAdmin &
+  StateCommandMessage & {
     // NOTE: move into separate file src/types/swindlers.ts and add enum for reason
     swindlersResult?: {
       isSpam: boolean;

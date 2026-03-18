@@ -84,7 +84,7 @@ describe('RoleCommand', () => {
   it('should enable user test mode for chat admins', async () => {
     await bot.handleUpdate(getRoleCommandUpdate(commandText));
 
-    expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']));
+    expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'sendMessage']));
     expect(session.roleMode).toBe('user');
   });
 
@@ -93,7 +93,7 @@ describe('RoleCommand', () => {
 
     await bot.handleUpdate(getRoleCommandUpdate('/role admin'));
 
-    expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']));
+    expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'sendMessage']));
     expect(session.roleMode).toBeUndefined();
   });
 
@@ -104,7 +104,7 @@ describe('RoleCommand', () => {
 
     await bot.handleUpdate(getRoleCommandUpdate(commandText));
 
-    expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']));
+    expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'sendMessage']));
     expect(session.roleMode).toBeUndefined();
   });
 
@@ -117,7 +117,7 @@ describe('RoleCommand', () => {
   it('should toggle to user test mode when called without an argument', async () => {
     await bot.handleUpdate(getRoleCommandUpdate('/role'));
 
-    expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']));
+    expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'sendMessage']));
     expect(session.roleMode).toBe('user');
   });
 
@@ -126,14 +126,14 @@ describe('RoleCommand', () => {
 
     await bot.handleUpdate(getRoleCommandUpdate('/role'));
 
-    expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']));
+    expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'sendMessage']));
     expect(session.roleMode).toBeUndefined();
   });
 
   it('should reject unsupported role arguments', async () => {
     await bot.handleUpdate(getRoleCommandUpdate('/role moderator'));
 
-    expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']));
+    expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'sendMessage']));
     expect(session.roleMode).toBeUndefined();
   });
 
@@ -148,7 +148,7 @@ describe('RoleCommand', () => {
 
     await bot.handleUpdate(update);
 
-    expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']));
+    expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'sendMessage']));
     expect(session.roleMode).toBeUndefined();
   });
 });

@@ -28,16 +28,7 @@ export class HelpCommand {
       const startLocaleTime = formatDate(this.startTime);
 
       const isAdmin = context.chatSession.isBotAdmin;
-      let canDelete = false;
-
-      try {
-        canDelete = await context
-          .deleteMessage()
-          .then(() => true)
-          .catch(() => false);
-      } catch (error) {
-        handleError(error);
-      }
+      const canDelete = Boolean(context.state.isCommandMessageDeleted);
 
       const { writeUsername, userId } = getUserData(context);
 
