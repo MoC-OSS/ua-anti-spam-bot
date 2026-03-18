@@ -10,6 +10,7 @@ export interface HelpMessageProperties {
   startLocaleTime: string;
   isAdmin?: boolean;
   canDelete: boolean;
+  showAdminRoleHelp: boolean;
   user: string;
   userId: number;
 }
@@ -21,16 +22,21 @@ export interface HelpMessageProperties {
  * @param root0.startLocaleTime - Localized string representing the bot start/deploy time.
  * @param root0.isAdmin - Whether the bot currently has admin rights in the chat.
  * @param root0.canDelete - Whether the bot has permission to delete messages.
+ * @param root0.showAdminRoleHelp - Whether to show the admin self-test role hint.
  * @param root0.user - The display name of the user requesting help.
  * @param root0.userId - The Telegram user ID of the user requesting help.
  * @returns The formatted help message string.
  */
-export const getHelpMessage = (context: GrammyContext, { startLocaleTime, isAdmin, canDelete, user, userId }: HelpMessageProperties) =>
-  [
+export const getHelpMessage = (
+  context: GrammyContext,
+  { startLocaleTime, isAdmin, canDelete, showAdminRoleHelp, user, userId }: HelpMessageProperties,
+) => {
+  const rawLines: (string[] | string | false)[] = [
     `<a href="tg://user?id=${userId}">${user}</a>`,
     '',
     isAdmin ? context.t('bot-admin-active') : context.t('bot-make-admin'),
     canDelete ? context.t('bot-has-delete-permission') : context.t('bot-no-delete-permission'),
+    showAdminRoleHelp && ['', context.t('help-admin-role-help')],
     '',
     context.t('help-if-wrong-delete'),
     '',
@@ -48,7 +54,12 @@ export const getHelpMessage = (context: GrammyContext, { startLocaleTime, isAdmi
     context.t('help-hotline-text', { version }),
     '',
     context.t('help-bot-version', { version }),
-  ].join('\n');
+  ];
+
+  const lines: string[] = rawLines.filter((line): line is string[] | string => line !== false).flat();
+
+  return lines.join('\n');
+};
 
 /**
  * Returns the message displayed when a user uses /start in a private chat.

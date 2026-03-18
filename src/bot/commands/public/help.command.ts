@@ -51,6 +51,7 @@ export class HelpCommand {
             startLocaleTime,
             isAdmin,
             canDelete,
+            showAdminRoleHelp: context.chat?.type !== 'private' && Boolean(context.state.isActualUserAdmin),
             user: writeUsername === '@GroupAnonymousBot' ? '' : writeUsername,
             userId,
           }),

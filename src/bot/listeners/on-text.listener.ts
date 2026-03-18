@@ -70,7 +70,7 @@ export class OnTextListener {
         return next();
       }
 
-      if (context.session?.isCurrentUserAdmin && !environmentConfig.DEBUG) {
+      if (context.state.isUserAdmin && !environmentConfig.DEBUG) {
         return next();
       }
 

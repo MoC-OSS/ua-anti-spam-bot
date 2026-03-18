@@ -141,6 +141,7 @@ interface IsDeletedState {
   isDeleted?: boolean;
 }
 interface StateIsAdmin {
+  isActualUserAdmin?: boolean;
   isUserAdmin?: boolean;
 }
 

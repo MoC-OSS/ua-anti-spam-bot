@@ -23,15 +23,15 @@ export const getBeforeAnyComposer = () => {
       return next();
     }
 
-    if (context.chat?.type === 'private') {
-      context.state.isUserAdmin = true;
+    const chatMember = context.chat?.type === 'private' ? null : await context.getChatMember(fromId);
+    const isActualUserAdmin = context.chat?.type === 'private' ? true : ['creator', 'administrator'].includes(chatMember?.status ?? '');
 
-      return next();
+    if (context.session) {
+      context.session.isCurrentUserAdmin = isActualUserAdmin;
     }
 
-    const chatMember = await context.getChatMember(fromId);
-
-    context.state.isUserAdmin = ['creator', 'administrator'].includes(chatMember.status);
+    context.state.isActualUserAdmin = isActualUserAdmin;
+    context.state.isUserAdmin = isActualUserAdmin && context.session?.roleMode !== 'user';
 
     return next();
   });

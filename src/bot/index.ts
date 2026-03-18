@@ -105,6 +105,10 @@ import { logsChat } from './creator';
   // Enable graceful stop
   const stopRunner = () => runner.isRunning() && runner.stop();
 
+  // const newMemoryUsage = process.memoryUsage();
+  //
+  // console.log(`Memory Usage: ${newMemoryUsage.rss / 1024 / 1024} MB`);
+
   process.once('SIGINT', stopRunner);
 
   process.once('SIGTERM', stopRunner);

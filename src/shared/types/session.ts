@@ -35,8 +35,11 @@ export interface UpdatesSessionData {
   textEntities: MessageEntity[];
 }
 
+export type RoleMode = 'user';
+
 export interface SessionData extends Partial<UpdatesSessionData> {
   isCurrentUserAdmin: boolean;
+  roleMode?: RoleMode;
 }
 
 export interface AirRaidAlertSettings {
