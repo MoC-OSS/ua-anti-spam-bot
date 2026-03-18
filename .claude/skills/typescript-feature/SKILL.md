@@ -1,7 +1,7 @@
 ---
 name: typescript-feature
 description: A comprehensive checklist and workflow for implementing or updating TypeScript features in this repository, covering design, implementation, testing, documentation, and versioning.
-version: 1.2.0
+version: 1.2.1
 ---
 
 # TypeScript Boilerplate - Feature Checklist
@@ -85,6 +85,12 @@ Every behavior change needs tests unless the user explicitly asks for a docs-onl
 - Split positive and negative cases into nested `describe` blocks.
 - Cover both happy paths and failure paths that are realistic for the change.
 - Do not delete or skip tests to make the suite pass.
+
+#### Bot end-to-end regression coverage
+
+- Treat `tests/bot.spec.ts` as the required end-to-end regression suite for core bot functionality.
+- When a change affects bot-visible behavior such as commands, composers, middleware, moderation flow, chat settings, or session-driven behavior, update `tests/bot.spec.ts` as part of the same task.
+- Do not treat narrow unit or command-specific specs as a substitute for `tests/bot.spec.ts` when the real bot flow changes.
 
 #### Coverage gate - 80% minimum
 
@@ -176,6 +182,7 @@ Before declaring the task complete, verify each item:
 - [ ] Types, control flow, and boundaries are modeled clearly
 - [ ] JSDoc was added where required
 - [ ] Tests were added or updated in `tests/` for behavior changes
+- [ ] `tests/bot.spec.ts` was reviewed and updated for bot-visible behavior changes
 - [ ] Test structure uses root `describe`, per-method `describe`, and nested positive or negative cases
 - [ ] `npm run format:md` was run when Markdown files changed
 - [ ] `npm run typecheck` exits 0
