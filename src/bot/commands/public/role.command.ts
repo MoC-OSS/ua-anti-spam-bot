@@ -39,6 +39,11 @@ export class RoleCommand {
         return;
       }
 
+      await context
+        .deleteMessage()
+        .then(() => true)
+        .catch(() => false);
+
       if (isAnonymousAdmin) {
         await context.replyWithSelfDestructedHTML(context.t('role-anonymous-admin'));
 
