@@ -256,6 +256,22 @@ After it, navigate to your bot and call `/start` command. If you receive the ans
 
 Then, try to call `/enable` command. If you receive the answer, your bot is set correctly and ready to be used.
 
+### Test moderation as an admin
+
+If you are a group administrator and want to test moderation without a second Telegram account, use the `/role` command directly in that group:
+
+```text
+/role
+```
+
+This toggles a per-chat test mode for your account only, so the bot will moderate your messages as if you were a regular user. To restore the normal behavior for administrators, run the same command again:
+
+```text
+/role
+```
+
+Note: this does not change your real Telegram permissions. Anonymous admins must temporarily disable anonymity before using `/role`, otherwise Telegram sends the command as `GroupAnonymousBot`.
+
 ### Docker
 
 If you want to run the bot via Docker, make sure that you have [Docker](https://docs.docker.com/engine/install) and [Docker Compose](https://docs.docker.com/compose/install) installed.

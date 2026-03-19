@@ -57,9 +57,24 @@ describe('LanguageCommand', () => {
   beforeEach(() => {
     outgoingRequests.clear();
     chatSession.language = undefined;
+
+    if (apiResponses.getChatMember) {
+      apiResponses.getChatMember.status = 'creator';
+    }
   });
 
   describe('middleware', () => {
+    it('should not allow a regular group member to change the language', async () => {
+      if (apiResponses.getChatMember) {
+        apiResponses.getChatMember.status = 'member';
+      }
+
+      await bot.handleUpdate(getLanguageCommandUpdate('en'));
+
+      expect(chatSession.language).toBeUndefined();
+      expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'sendMessage']));
+    });
+
     describe('toggle - no argument', () => {
       it('should toggle from Ukrainian (default) to English', async () => {
         chatSession.language = 'uk';

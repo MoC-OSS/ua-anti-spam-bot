@@ -26,7 +26,7 @@ Object.assign(environmentConfig, { UNIT_TESTING: true, DISABLE_LOGS_CHAT: false,
 let outgoingRequests: OutgoingRequests;
 let bot: Bot<GrammyContext>;
 
-const { mockSessionMiddleware } = mockSession({});
+const { session, mockSessionMiddleware } = mockSession({});
 
 const { chatSession, mockChatSessionMiddleware } = mockChatSession({
   isBotAdmin: true,
@@ -44,6 +44,36 @@ const baseIsolatedSettings = {
   disableStrategicInfo: true,
 };
 
+/**
+ * Builds a private command update.
+ * @param text - Command text.
+ * @returns Telegram private message update with command entity.
+ */
+function getPrivateCommandUpdate(text: string) {
+  const command = text.split(' ')[0] ?? text;
+
+  return new MessagePrivateMockUpdate(text).buildOverwrite({
+    message: {
+      entities: [{ offset: 0, length: command.length, type: 'bot_command' }],
+    },
+  });
+}
+
+/**
+ * Builds a group command update.
+ * @param text - Command text.
+ * @returns Telegram group message update with command entity.
+ */
+function getGroupCommandUpdate(text: string) {
+  const command = text.split(' ')[0] ?? text;
+
+  return new MessageMockUpdate(text).buildOverwrite({
+    message: {
+      entities: [{ offset: 0, length: command.length, type: 'bot_command' }],
+    },
+  });
+}
+
 describe('e2e bot testing', () => {
   beforeAll(async () => {
     const initialBot = new Bot<GrammyContext>(environmentConfig?.BOT_TOKEN || 'test');
@@ -60,6 +90,28 @@ describe('e2e bot testing', () => {
   }, 15_000);
 
   describe('private flow', () => {
+    describe('public commands', () => {
+      beforeEach(() => {
+        outgoingRequests.clear();
+        chatSession.language = undefined;
+        delete session.roleMode;
+      });
+
+      it('should handle /language in private chat', async () => {
+        await bot.handleUpdate(getPrivateCommandUpdate('/language'));
+
+        expect(chatSession.language).toBe('en');
+        expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['deleteMessage', 'sendMessage']));
+      });
+
+      it('should handle /role in private chat', async () => {
+        await bot.handleUpdate(getPrivateCommandUpdate('/role'));
+
+        expect(session.roleMode).toBeUndefined();
+        expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['deleteMessage', 'sendMessage']));
+      });
+    });
+
     describe('check regular message', () => {
       beforeEach(() => {
         outgoingRequests.clear();
@@ -121,6 +173,29 @@ describe('e2e bot testing', () => {
   });
 
   describe('group or super group flow', () => {
+    describe('public commands', () => {
+      beforeEach(() => {
+        outgoingRequests.clear();
+        chatSession.language = undefined;
+        chatSession.isBotAdmin = true;
+        delete session.roleMode;
+      });
+
+      it('should reject /language in a group for a non-admin user', async () => {
+        await bot.handleUpdate(getGroupCommandUpdate('/language'));
+
+        expect(chatSession.language).toBeUndefined();
+        expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']));
+      });
+
+      it('should reject /role in a group for a non-admin user', async () => {
+        await bot.handleUpdate(getGroupCommandUpdate('/role'));
+
+        expect(session.roleMode).toBeUndefined();
+        expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']));
+      });
+    });
+
     describe('check regular message', () => {
       beforeEach(() => {
         outgoingRequests.clear();

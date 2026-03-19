@@ -5,47 +5,54 @@ This skill provides comprehensive guidance for implementing and maintaining Type
 ## 📖 Documentation Structure
 
 ### 1. **QUICK_START.md** ⚡ (Start Here)
-   - 5-minute overview of the feature development process
-   - Two main patterns: text features vs. image features
-   - File checklist and quick recipe
-   - **Best for**: Getting oriented quickly
+
+- 5-minute overview of the feature development process
+- Two main patterns: text features vs. image features
+- File checklist and quick recipe
+- **Best for**: Getting oriented quickly
 
 ### 2. **ADDING_FEATURES.md** 📚 (Complete Reference)
-   - Deep dive into architecture and design patterns
-   - Step-by-step implementation guide
-   - Testing strategy and coverage requirements
-   - Code style conventions and best practices
-   - Real code examples from the codebase
-   - **Best for**: Implementing actual features
+
+- Deep dive into architecture and design patterns
+- Step-by-step implementation guide
+- Testing strategy and coverage requirements
+- Code style conventions and best practices
+- Real code examples from the codebase
+- **Best for**: Implementing actual features
 
 ### 3. **SKILL.md** ✅ (Quality Gate)
-   - The main TypeScript feature workflow checklist
-   - Project context and conventions
-   - Step-by-step quality gate process
-   - **Best for**: Ensuring code quality and completeness
+
+- The main TypeScript feature workflow checklist
+- Project context and conventions
+- Step-by-step quality gate process
+- **Best for**: Ensuring code quality and completeness
 
 ## 🚀 Quick Navigation
 
-| Need | Read |
-|------|------|
-| **Get started in 5 min** | QUICK_START.md |
-| **Implement a feature** | ADDING_FEATURES.md (step-by-step section) |
-| **Understand patterns** | ADDING_FEATURES.md (feature types section) |
-| **See examples** | ADDING_FEATURES.md (references section) |
-| **Learn testing** | ADDING_FEATURES.md (testing strategy section) |
-| **Quality checklist** | SKILL.md (self-review section) |
+| Need                     | Read                                          |
+| ------------------------ | --------------------------------------------- |
+| **Get started in 5 min** | QUICK_START.md                                |
+| **Implement a feature**  | ADDING_FEATURES.md (step-by-step section)     |
+| **Understand patterns**  | ADDING_FEATURES.md (feature types section)    |
+| **See examples**         | ADDING_FEATURES.md (references section)       |
+| **Learn testing**        | ADDING_FEATURES.md (testing strategy section) |
+| **Quality checklist**    | SKILL.md (self-review section)                |
 
 ## 🎯 Two Main Feature Types
 
 ### 1️⃣ Text Message Features (Composers)
+
 Process text content in messages:
+
 - Detection → Service layer
-- Handling → Composer layer  
+- Handling → Composer layer
 - Types: Delete or Warn
 - Examples: antisemitism detection, profanity filter
 
 ### 2️⃣ Image/Photo Features (Composers)
+
 Process images, videos, stickers:
+
 - ML models → TensorFlow services
 - Processing → Composer layer
 - Example: NSFW content detection
@@ -69,11 +76,13 @@ Process images, videos, stickers:
 ## 🏗️ Project Architecture
 
 ### Three Services
+
 - **Bot** (`src/bot/`) - Grammy Telegram bot with composers
 - **Server** (`src/server/`) - Express REST API for ML
 - **Userbot** (`src/userbot/`) - MTProto research tool
 
 ### Key Directories
+
 - `src/bot/composers/` - Feature implementations (core)
 - `src/services/` - Business logic (detection/analysis)
 - `src/bot/middleware/` - Request parsing
@@ -83,22 +92,26 @@ Process images, videos, stickers:
 ## 🔑 Key Concepts
 
 ### Composers
+
 - Grammy middleware bundles organizing features
 - Process updates in a pipeline
 - Two types: message (text) and photo (images)
 - Dependency-injected services for testability
 
 ### Settings
+
 - **Default** (`disableXxx`) - Feature on by default, can disable
 - **Optional** (`enableXxx`) - Feature off by default, can enable
 - Examples: disable NSFW filter, enable delete Russian
 
 ### Logging
+
 - All violations logged to central logs chat
 - Each feature has its own thread ID
 - Important for moderation and monitoring
 
 ### Testing
+
 - Service tests (detection logic)
 - e2e tests (full flow)
 - 80% minimum coverage enforced
@@ -107,21 +120,27 @@ Process images, videos, stickers:
 ## 💡 Example Patterns
 
 ### Delete Pattern (Text)
+
 ```typescript
 Check enabled → Detect violation → Log to chat → Delete message → Notify user
 ```
+
 Example: `no-antisemitism.composer.ts`
 
 ### Warn Pattern (Text)
+
 ```typescript
 Check enabled → Detect violation → Log to chat → Send warning reply
 ```
+
 Example: `warn-obscene.composer.ts`
 
 ### ML Pattern (Image)
+
 ```typescript
 Extract frames → Run ML model → Log result → Delete if needed
 ```
+
 Example: `nsfw-filter.composer.ts`
 
 ## 📚 Learning Path
@@ -135,20 +154,24 @@ Example: `nsfw-filter.composer.ts`
 ## 🔍 Key Files to Study
 
 ### Templates/Patterns
+
 - `src/bot/composers/messages/no-antisemitism.composer.ts` - Delete pattern (text)
 - `src/bot/composers/messages/warn-obscene.composer.ts` - Warn pattern (text)
 - `src/bot/composers/messages/nsfw-filter.composer.ts` - ML pattern (image)
 
 ### Services
+
 - `src/services/antisemitism.service.ts` - Simple pattern
 - `src/services/obscene.service.ts` - Dictionary-based
 - `src/services/swindlers-detect.service.ts` - Complex pattern
 
 ### Tests
+
 - `tests/services/antisemitism.service.spec.ts` - Service test example
 - `tests/bot.spec.ts` - e2e test example
 
 ### Hub Files
+
 - `src/bot/composers/messages.composer.ts` - Text feature registration
 - `src/bot/composers/photos.composer.ts` - Image feature registration
 

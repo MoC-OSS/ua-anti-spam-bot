@@ -9,7 +9,7 @@ import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
 
 import type { OutgoingRequests } from '@testing/outgoing-requests';
 import { prepareBotForTesting } from '@testing/prepare';
-import { mockChatSession, mockSession } from '@testing/testing-main';
+import { mockChatSession, mockState } from '@testing/testing-main';
 import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
 
 import type { GrammyContext } from '@app-types/context';
@@ -45,8 +45,8 @@ const { chatSession, mockChatSessionMiddleware } = mockChatSession({
   lastLimitedDeletionDate: undefined,
 });
 
-const { session, mockSessionMiddleware } = mockSession({
-  isCurrentUserAdmin: false,
+const { state, mockStateMiddleware } = mockState({
+  isUserAdmin: false,
 });
 
 const onTextListener = new OnTextListener(bot, new Date(), mockMessageHandler as any);
@@ -60,7 +60,7 @@ describe('strategicComposer', () => {
     bot.use(selfDestructedReply());
     bot.use(stateMiddleware);
     bot.use(parseText);
-    bot.use(mockSessionMiddleware);
+    bot.use(mockStateMiddleware);
     bot.use(mockChatSessionMiddleware);
     bot.use(strategicComposer);
 
@@ -78,7 +78,7 @@ describe('strategicComposer', () => {
     chatSession.isLimitedDeletion = false;
     chatSession.lastLimitedDeletionDate = undefined;
     chatSession.chatSettings.disableDeleteMessage = false;
-    session.isCurrentUserAdmin = false;
+    state.isUserAdmin = false;
   });
 
   describe('no spam detected', () => {
@@ -93,7 +93,7 @@ describe('strategicComposer', () => {
 
   describe('admin user', () => {
     it('should call next() without processing when user is admin and DEBUG is false', async () => {
-      session.isCurrentUserAdmin = true;
+      state.isUserAdmin = true;
 
       const update = new MessageMockUpdate('spam message').build();
 
@@ -242,7 +242,7 @@ describe('strategicComposer', () => {
         lastLimitedDeletionDate: undefined,
       });
 
-      const { mockSessionMiddleware: failSessionMiddleware } = mockSession({ isCurrentUserAdmin: false });
+      const { mockStateMiddleware: failStateMiddleware } = mockState({ isUserAdmin: false });
 
       const failOnTextListener = new OnTextListener(failBot, new Date(), mockMessageHandler as any);
       const { strategicComposer: failComposer } = getStrategicComposer({ onTextListener: failOnTextListener });
@@ -251,7 +251,7 @@ describe('strategicComposer', () => {
       failBot.use(selfDestructedReply());
       failBot.use(stateMiddleware);
       failBot.use(parseText);
-      failBot.use(failSessionMiddleware);
+      failBot.use(failStateMiddleware);
       failBot.use(failChatMiddleware);
       failBot.use(failComposer);
 
@@ -298,7 +298,7 @@ describe('strategicComposer', () => {
         lastLimitedDeletionDate: new Date(),
       });
 
-      const { mockSessionMiddleware: limitedSessionMiddleware } = mockSession({ isCurrentUserAdmin: false });
+      const { mockStateMiddleware: limitedStateMiddleware } = mockState({ isUserAdmin: false });
 
       const limitedOnTextListener = new OnTextListener(limitedBot, new Date(), mockMessageHandler as any);
       const { strategicComposer: limitedComposer } = getStrategicComposer({ onTextListener: limitedOnTextListener });
@@ -307,7 +307,7 @@ describe('strategicComposer', () => {
       limitedBot.use(selfDestructedReply());
       limitedBot.use(stateMiddleware);
       limitedBot.use(parseText);
-      limitedBot.use(limitedSessionMiddleware);
+      limitedBot.use(limitedStateMiddleware);
       limitedBot.use(limitedChatMiddleware);
       limitedBot.use(limitedComposer);
 
@@ -346,7 +346,7 @@ describe('strategicComposer', () => {
         lastLimitedDeletionDate: new Date(0), // epoch → threshold passed
       });
 
-      const { mockSessionMiddleware: expiredSessionMiddleware } = mockSession({ isCurrentUserAdmin: false });
+      const { mockStateMiddleware: expiredStateMiddleware } = mockState({ isUserAdmin: false });
 
       const expiredOnTextListener = new OnTextListener(expiredBot, new Date(), mockMessageHandler as any);
       const { strategicComposer: expiredComposer } = getStrategicComposer({ onTextListener: expiredOnTextListener });
@@ -355,7 +355,7 @@ describe('strategicComposer', () => {
       expiredBot.use(selfDestructedReply());
       expiredBot.use(stateMiddleware);
       expiredBot.use(parseText);
-      expiredBot.use(expiredSessionMiddleware);
+      expiredBot.use(expiredStateMiddleware);
       expiredBot.use(expiredChatMiddleware);
       expiredBot.use(expiredComposer);
 

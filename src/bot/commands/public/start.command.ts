@@ -25,11 +25,7 @@ export class StartCommand {
       }
 
       const isAdmin = context.chatSession.isBotAdmin;
-
-      const canDelete = await context
-        .deleteMessage()
-        .then(() => true)
-        .catch(() => false);
+      const canDelete = Boolean(context.state.isDeleted);
 
       const { writeUsername, userId } = getUserData(context);
 

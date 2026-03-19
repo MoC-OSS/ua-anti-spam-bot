@@ -67,12 +67,14 @@ export const getMyFeatureComposer = () => {
 #### 1. **Message Composers** (Text-Based Features)
 
 These handle text message content. Examples:
+
 - `no-antisemitism.composer.ts` - Detects and deletes antisemitic messages
 - `no-obscene.composer.ts` - Detects and deletes obscene language
 - `warn-obscene.composer.ts` - Warns instead of deleting
 - `swindlers.composer.ts` - Detects scam-related messages
 
 **Key characteristics:**
+
 - Operate on `context.state.text` (parsed message text)
 - Check feature settings from `context.chatSession.chatSettings`
 - Call services to perform detection/analysis
@@ -82,9 +84,11 @@ These handle text message content. Examples:
 #### 2. **Image/Photo Composers** (Media-Based Features)
 
 These handle images, videos, photos, stickers. Examples:
+
 - `nsfw-filter.composer.ts` - Detects and removes NSFW images using TensorFlow
 
 **Key characteristics:**
+
 - Operate on `context.state.photo` (parsed image data)
 - May use TensorFlow models or external APIs
 - Process extracted video frames or photo previews
@@ -99,6 +103,7 @@ These handle images, videos, photos, stickers. Examples:
 Used for detecting and **deleting** harmful text content.
 
 **Service Layer** (`src/services/`):
+
 ```typescript
 // Example: antisemitism.service.ts
 export class AntisemitismService {
@@ -112,15 +117,16 @@ export const antisemitismService = new AntisemitismService();
 ```
 
 **Composer Layer** (`src/bot/composers/messages/`):
+
 ```typescript
 export const getNoAntisemitismComposer = () => {
   const noAntisemitismComposer = new Composer<GrammyContext>();
 
   async function saveViolationMessage(context: GrammyContext, result: SearchSetResult) {
     // Log to logs chat with details
-    await context.api.sendMessage(logsChat, message, { 
+    await context.api.sendMessage(logsChat, message, {
       parse_mode: 'HTML',
-      message_thread_id: LOGS_CHAT_THREAD_IDS.ANTISEMITISM, 
+      message_thread_id: LOGS_CHAT_THREAD_IDS.ANTISEMITISM,
     });
   }
 
@@ -133,9 +139,7 @@ export const getNoAntisemitismComposer = () => {
       await saveViolationMessage(context, violation);
 
       // Send user notification
-      await context.replyWithSelfDestructedHTML(
-        getDeleteAntisemitismMessage(context, { word: violation.origin })
-      );
+      await context.replyWithSelfDestructedHTML(getDeleteAntisemitismMessage(context, { word: violation.origin }));
     }
 
     return next();
@@ -146,6 +150,7 @@ export const getNoAntisemitismComposer = () => {
 ```
 
 **Test** (`tests/services/`):
+
 ```typescript
 describe('AntisemitismService', () => {
   it('should detect harmful content', () => {
@@ -165,11 +170,13 @@ describe('AntisemitismService', () => {
 Used for **warning** users about content instead of deleting.
 
 **Differences from Pattern 1:**
+
 - Doesn't delete the message
 - Sends a warning reply
 - Typically for less severe violations
 
 Example: `warn-obscene.composer.ts`
+
 ```typescript
 export const getWarnObsceneComposer = () => {
   const warnObsceneComposer = new Composer<GrammyContext>();
@@ -180,10 +187,7 @@ export const getWarnObsceneComposer = () => {
 
     if (isEnabled && violation) {
       // Don't delete, just warn
-      await context.replyWithSelfDestructedHTML(
-        getWarnObsceneMessage(context),
-        { reply_to_message_id: context.msg?.message_id }
-      );
+      await context.replyWithSelfDestructedHTML(getWarnObsceneMessage(context), { reply_to_message_id: context.msg?.message_id });
     }
 
     return next();
@@ -198,6 +202,7 @@ export const getWarnObsceneComposer = () => {
 Used for **image/video analysis** with ML models or external APIs.
 
 Example: `nsfw-filter.composer.ts`
+
 ```typescript
 export interface NsfwFilterComposerProperties {
   nsfwTensorService: NsfwTensorService; // Injected dependency
@@ -232,6 +237,7 @@ export const getNsfwFilterComposer = ({ nsfwTensorService }: NsfwFilterComposerP
 ```
 
 **Key points for image composers:**
+
 - Extract image data from `context.state.photo`
 - Handle multiple formats: photos, videos, stickers, animations, video notes
 - Use ML models via `nsfwTensorService` or external APIs
@@ -340,10 +346,7 @@ export const getMyFeatureComposer = () => {
    * @param context The Grammy context
    * @param searchResult Detection result from the service
    */
-  async function saveViolationMessage(
-    context: GrammyContext,
-    searchResult: SearchSetResult
-  ) {
+  async function saveViolationMessage(context: GrammyContext, searchResult: SearchSetResult) {
     const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const text = context.state?.text || '';
 
@@ -355,7 +358,7 @@ export const getMyFeatureComposer = () => {
       {
         parse_mode: 'HTML',
         message_thread_id: LOGS_CHAT_THREAD_IDS.MY_FEATURE,
-      }
+      },
     );
   }
 
@@ -370,9 +373,7 @@ export const getMyFeatureComposer = () => {
 
       // Notify user
       const { writeUsername, userId } = getUserData(context);
-      await context.replyWithSelfDestructedHTML(
-        getMyFeatureMessage(context, { writeUsername, userId })
-      );
+      await context.replyWithSelfDestructedHTML(getMyFeatureMessage(context, { writeUsername, userId }));
     }
 
     return next();
@@ -421,6 +422,7 @@ export const getMyImageComposer = ({ myTensorService }: MyImageComposerPropertie
 ### Step 4: Register the Composer
 
 Composers are registered in either:
+
 - `src/bot/composers/messages.composer.ts` (for text features)
 - `src/bot/composers/photos.composer.ts` (for image features)
 
@@ -439,7 +441,7 @@ export const getMessagesComposer = ({
   myFeatureComposer,
 }: MessagesComposerProperties) => {
   // ...
-  
+
   // Register using default or optional setting
   registerDefaultSettingModule('disableMyFeature', myFeatureComposer);
   // OR
@@ -459,7 +461,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
   // ... existing setup
 
   const { myFeatureComposer } = getMyFeatureComposer();
-  
+
   // Pass to messages composer
   const { messagesComposer } = getMessagesComposer({
     // ... existing
@@ -477,10 +479,7 @@ import type { GrammyContext } from '@app-types/context';
 
 export const myFeatureWarnMessage = 'Your message was flagged for...';
 
-export function getMyFeatureMessage(
-  context: GrammyContext,
-  { writeUsername, userId }: { writeUsername: string; userId: number }
-): string {
+export function getMyFeatureMessage(context: GrammyContext, { writeUsername, userId }: { writeUsername: string; userId: number }): string {
   return `❌ User <a href="tg://user?id=${userId}">${writeUsername}</a>, 
     your message was removed because...`;
 }
@@ -560,13 +559,13 @@ it('should delete message and notify user when my feature detected', async () =>
   // Assertions on outgoingRequests
   expect(outgoingRequests.deleteMessage).toHaveBeenCalledWith(
     expect.any(Number), // chat_id
-    expect.any(Number)  // message_id
+    expect.any(Number), // message_id
   );
 
   expect(outgoingRequests.sendMessage).toHaveBeenCalledWith(
     expect.any(Number),
     expect.stringContaining('Your message was removed'),
-    expect.any(Object)
+    expect.any(Object),
   );
 });
 ```
@@ -574,6 +573,7 @@ it('should delete message and notify user when my feature detected', async () =>
 ### Coverage Requirements
 
 Maintain **80% minimum coverage**:
+
 - Lines: 80%
 - Functions: 80%
 - Branches: 80%
@@ -587,19 +587,20 @@ Run: `npm run test:coverage`
 
 ### Naming Conventions
 
-| Element | Pattern | Example |
-|---------|---------|---------|
-| Service class | `PascalCase` | `AntisemitismService` |
-| Service instance | `camelCase` | `antisemitismService` |
-| Composer getter | `get<Name>Composer` | `getNoAntisemitismComposer` |
-| Service file | `kebab-case.service.ts` | `antisemitism.service.ts` |
-| Composer file | `kebab-case.composer.ts` | `no-antisemitism.composer.ts` |
-| Test file | `*.spec.ts` | `antisemitism.service.spec.ts` |
-| Setting key | `camelCase` | `disableMyFeature` |
+| Element          | Pattern                  | Example                        |
+| ---------------- | ------------------------ | ------------------------------ |
+| Service class    | `PascalCase`             | `AntisemitismService`          |
+| Service instance | `camelCase`              | `antisemitismService`          |
+| Composer getter  | `get<Name>Composer`      | `getNoAntisemitismComposer`    |
+| Service file     | `kebab-case.service.ts`  | `antisemitism.service.ts`      |
+| Composer file    | `kebab-case.composer.ts` | `no-antisemitism.composer.ts`  |
+| Test file        | `*.spec.ts`              | `antisemitism.service.spec.ts` |
+| Setting key      | `camelCase`              | `disableMyFeature`             |
 
 ### Documentation
 
 Add JSDoc to:
+
 - All exported functions
 - Non-trivial internal functions
 - Complex logic
@@ -701,18 +702,23 @@ export const getMyComposer = ({ myService }: ComposerProperties) => {
 ### ✅ Good Patterns
 
 1. **Filter early, process late**
+
    ```typescript
    // Skip processing before it starts
    if (!isFeatureEnabled || !violationFound) return next();
    ```
 
 2. **Dependency injection**
+
    ```typescript
    // Composable and testable
-   export const getComposer = ({ service }: Props) => { /* ... */ };
+   export const getComposer = ({ service }: Props) => {
+     /* ... */
+   };
    ```
 
 3. **Logging violations**
+
    ```typescript
    // Always save violations for moderation review
    await saveViolationMessage(context, result);
@@ -727,18 +733,21 @@ export const getMyComposer = ({ myService }: ComposerProperties) => {
 ### ❌ Anti-Patterns
 
 1. **Silent deletion without logging**
+
    ```typescript
    // ❌ Never delete without recording
    await context.deleteMessage(); // No logging
    ```
 
 2. **Hardcoded service instances**
+
    ```typescript
    // ❌ Not testable
    const service = new MyService();
    ```
 
 3. **Blocking without settings**
+
    ```typescript
    // ❌ Force-enable features users might disable
    if (violation) await deleteMessage();
@@ -747,7 +756,9 @@ export const getMyComposer = ({ myService }: ComposerProperties) => {
 4. **No JSDoc for public APIs**
    ```typescript
    // ❌ Future developers won't know parameters
-   export function check(input: unknown): boolean { /* ... */ }
+   export function check(input: unknown): boolean {
+     /* ... */
+   }
    ```
 
 ---
@@ -764,6 +775,7 @@ export const getMyComposer = ({ myService }: ComposerProperties) => {
 ## Questions?
 
 Review these reference implementations:
+
 - Simple text detection: `no-obscene.composer.ts` + `obscene.service.ts`
 - Complex detection: `swindlers-detect.service.ts` + `swindlers.composer.ts`
 - Image analysis: `nsfw-filter.composer.ts` + `nsfw-tensor.service.ts`

@@ -58,6 +58,7 @@ export class CommandSetter {
       { command: 'help', description: '🙋🏻 Отримати допомогу' },
       { command: 'settings', description: '⚙️ Налаштування' },
       { command: 'language', description: '🌐 Змінити мову / Change language' },
+      { command: 'role', description: '🧪 Тест ролі адміністратора' },
       { command: 'hotline_security', description: '🚓 Гаряча лінія з цифрової безпеки' },
       { command: 'status', description: this.buildStatus() },
     ];

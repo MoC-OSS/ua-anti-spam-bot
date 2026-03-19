@@ -7,11 +7,13 @@ This bot uses **Grammy** (Telegram framework) with **Composers** as the core pat
 ### Two Main Paths
 
 #### 🔤 Text Message Feature (Delete or Warn)
+
 ```
 Service (detect content) → Composer (handle deletion/warning) → Register in messages.composer
 ```
 
 #### 📸 Image/Photo Feature (ML Analysis)
+
 ```
 Tensor Service (ML model) → Composer (handle images) → Register in photos.composer
 ```
@@ -21,6 +23,7 @@ Tensor Service (ML model) → Composer (handle images) → Register in photos.co
 ## Quick Recipe: Text Detection Feature
 
 ### 1. Create Service (`src/services/my-feature.service.ts`)
+
 ```typescript
 export class MyFeatureService {
   checkFeature(message: string): SearchSetResult | null {
@@ -32,6 +35,7 @@ export const myFeatureService = new MyFeatureService();
 ```
 
 ### 2. Create Tests (`tests/services/my-feature.service.spec.ts`)
+
 ```typescript
 describe('MyFeatureService', () => {
   it('should detect bad content', () => {
@@ -44,6 +48,7 @@ describe('MyFeatureService', () => {
 ```
 
 ### 3. Create Composer (`src/bot/composers/messages/my-feature.composer.ts`)
+
 ```typescript
 export const getMyFeatureComposer = () => {
   const myFeatureComposer = new Composer<GrammyContext>();
@@ -66,6 +71,7 @@ export const getMyFeatureComposer = () => {
 ```
 
 ### 4. Register Composer (`src/bot/composers/messages.composer.ts`)
+
 ```typescript
 // Add to interface
 export interface MessagesComposerProperties {
@@ -79,6 +85,7 @@ export const getMessagesComposer = ({ myFeatureComposer }: ...) => {
 ```
 
 ### 5. Wire Dependencies (`src/bot/bot.ts`)
+
 ```typescript
 const { myFeatureComposer } = getMyFeatureComposer();
 const { messagesComposer } = getMessagesComposer({
@@ -88,6 +95,7 @@ const { messagesComposer } = getMessagesComposer({
 ```
 
 ### 6. Add Settings Type (`src/shared/types/session.ts`)
+
 ```typescript
 interface DefaultChatSettings {
   disableMyFeature?: boolean; // Disable = feature is on by default
@@ -112,20 +120,24 @@ interface DefaultChatSettings {
 ## Common Files to Reference
 
 ### Message Composers (Text Features)
+
 - `src/bot/composers/messages/no-antisemitism.composer.ts` - **Delete pattern**
 - `src/bot/composers/messages/warn-obscene.composer.ts` - **Warn pattern**
 - `src/bot/composers/messages/swindlers.composer.ts` - **Complex detection**
 
 ### Image Composers (Media Features)
+
 - `src/bot/composers/photos.composer.ts` - **Image registration hub**
 - `src/bot/composers/messages/nsfw-filter.composer.ts` - **ML example**
 
 ### Services (Detection Logic)
+
 - `src/services/antisemitism.service.ts` - **Simple pattern**
 - `src/services/obscene.service.ts` - **Dictionary-based**
 - `src/services/swindlers-detect.service.ts` - **Complex pattern**
 
 ### Tests
+
 - `tests/services/antisemitism.service.spec.ts` - **Test structure**
 - `tests/bot.spec.ts` - **e2e test patterns**
 
@@ -134,17 +146,20 @@ interface DefaultChatSettings {
 ## Key Concepts
 
 ### Settings Types
+
 - **`disableXxx`** = Feature is **ON by default**, can be disabled
   - Used for core spam filters (antisemitism, NSFW, swindlers)
 - **`enableXxx`** = Feature is **OFF by default**, can be enabled
   - Used for optional filters (delete Russian, delete URLs)
 
 ### Context State
+
 - `context.state.text` - Parsed message text
 - `context.state.photo` - Parsed image data (file + metadata)
 - `context.state.myResult` - Store your results here
 
 ### Logging
+
 - Always log violations to logs chat using `context.api.sendMessage(logsChat, ...)`
 - Use appropriate thread ID: `LOGS_CHAT_THREAD_IDS.YOUR_FEATURE`
 
@@ -171,12 +186,16 @@ npm run lint:fix
 ## Common Patterns
 
 ### Check if Feature Enabled
+
 ```typescript
 const isEnabled = !context.chatSession.chatSettings.disableMyFeature;
-if (isEnabled && violation) { /* ... */ }
+if (isEnabled && violation) {
+  /* ... */
+}
 ```
 
 ### Save Violation Log
+
 ```typescript
 await context.api.sendMessage(logsChat, message, {
   parse_mode: 'HTML',
@@ -185,6 +204,7 @@ await context.api.sendMessage(logsChat, message, {
 ```
 
 ### Notify User (Self-Destructing Message)
+
 ```typescript
 await context.replyWithSelfDestructedHTML(userMessage, {
   reply_to_message_id: context.msg?.message_id,
@@ -192,6 +212,7 @@ await context.replyWithSelfDestructedHTML(userMessage, {
 ```
 
 ### Use Dataset for Dictionary Matching
+
 ```typescript
 const tokens = searchSet.tokenize(message);
 const result = dataset.my_dictionary.search(tokens);

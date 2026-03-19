@@ -1,6 +1,6 @@
 {
   "name": "ua-anti-spam-bot",
-  "version": "1.3.0",
+  "version": "1.4.5",
   "private": true,
   "engines": {
     "node": ">=20.x"
@@ -29,6 +29,7 @@
     "test:coverage": "npx vitest run --coverage",
     "format": "npx prettier . --write",
     "prepare": "husky",
+    "codex-prepare": "sh ./scripts/link-codex-skills.sh",
     "postinstall": "patch-package"
   },
   "dependencies": {

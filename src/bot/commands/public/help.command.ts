@@ -28,16 +28,7 @@ export class HelpCommand {
       const startLocaleTime = formatDate(this.startTime);
 
       const isAdmin = context.chatSession.isBotAdmin;
-      let canDelete = false;
-
-      try {
-        canDelete = await context
-          .deleteMessage()
-          .then(() => true)
-          .catch(() => false);
-      } catch (error) {
-        handleError(error);
-      }
+      const canDelete = Boolean(context.state.isDeleted);
 
       const { writeUsername, userId } = getUserData(context);
 
@@ -51,6 +42,7 @@ export class HelpCommand {
             startLocaleTime,
             isAdmin,
             canDelete,
+            showAdminRoleHelp: context.chat?.type !== 'private' && Boolean(context.state.isActualUserAdmin),
             user: writeUsername === '@GroupAnonymousBot' ? '' : writeUsername,
             userId,
           }),

@@ -1,4 +1,3 @@
-import { onlyNotAdminFilter } from '@bot/filters/only-not-admin.filter';
 import { onlyWhenBotAdminFilter } from '@bot/filters/only-when-bot-admin.filter';
 
 import { getHasNoLinkedChats, getIsNotAdminMessage, getLinkToWebView } from '@message/settings.message';
@@ -17,13 +16,8 @@ export class SettingsCommand {
       const isChatPrivate = context.chat?.type === 'private';
       const userId = context.from?.id.toString() ?? '';
       const chatId = context.chat?.id.toString() ?? '';
-      const isNotAdmin = onlyNotAdminFilter(context);
+      const isActualUserAdmin = Boolean(context.state.isActualUserAdmin);
       const isBotAdmin = onlyWhenBotAdminFilter(context);
-
-      await context
-        .deleteMessage()
-        .then(() => true)
-        .catch(() => false);
 
       if (!userId) {
         throw new Error('Invalid user id');
@@ -37,7 +31,7 @@ export class SettingsCommand {
       }
 
       if (!isChatPrivate) {
-        if (isNotAdmin) {
+        if (!isActualUserAdmin) {
           return context.replyWithSelfDestructedHTML(getIsNotAdminMessage(context));
         }
 

@@ -164,6 +164,10 @@ const uploadMiddleware = multer({ storage: uploadMemoryStorage });
   app.listen(environmentConfig.PORT, environmentConfig.HOST, () => {
     logger.info(`Backend server started on http://${environmentConfig.HOST}:${environmentConfig.PORT}`);
   });
+
+  const newMemoryUsage = process.memoryUsage();
+
+  logger.info(`Memory Usage: ${newMemoryUsage.rss / 1024 / 1024} MB`);
 })().catch((error) => {
   logger.error('Cannot start server. Reason:', error);
 });

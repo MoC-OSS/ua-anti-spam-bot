@@ -2,17 +2,33 @@ import { Composer } from 'grammy';
 
 import { HelpCommand } from '@bot/commands/public/help.command';
 import { LanguageCommand } from '@bot/commands/public/language.command';
+import { RoleCommand } from '@bot/commands/public/role.command';
 import { SettingsCommand } from '@bot/commands/public/settings.command';
 import { StartCommand } from '@bot/commands/public/start.command';
+import { onlyNotDeletedFilter } from '@bot/filters/only-not-deleted.filter';
 
 import { redisService } from '@services/redis.service';
 
-import type { GrammyContext } from '@app-types/context';
+import type { GrammyCommandMiddleware, GrammyContext } from '@app-types/context';
 
 /** Properties required to initialize the public commands composer. */
 export interface PublicCommandsComposerProperties {
   startTime: Date;
 }
+
+/**
+ * Deletes the handled public command message and stores the result on request state.
+ * @param context - Grammy command context.
+ * @param next - Next middleware in the command chain.
+ * @returns A promise that resolves after the remaining middleware finishes.
+ */
+const deleteHandledCommandMessage: GrammyCommandMiddleware = async (context, next) => {
+  if (onlyNotDeletedFilter(context)) {
+    await context.deleteMessage().catch(() => {});
+  }
+
+  return next();
+};
 
 /**
  * Composer that registers public bot commands available to all users.
@@ -23,17 +39,23 @@ export interface PublicCommandsComposerProperties {
 export const getPublicCommandsComposer = ({ startTime }: PublicCommandsComposerProperties) => {
   const publicCommandsComposer = new Composer<GrammyContext>();
 
+  const registerPublicCommand = (names: Parameters<typeof publicCommandsComposer.command>[0], middleware: GrammyCommandMiddleware) => {
+    publicCommandsComposer.command(names, deleteHandledCommandMessage, middleware);
+  };
+
   /* Commands */
   const startMiddleware = new StartCommand();
   const helpMiddleware = new HelpCommand(startTime);
   const settingsMiddleware = new SettingsCommand(redisService);
   const languageMiddleware = new LanguageCommand();
+  const roleMiddleware = new RoleCommand();
 
   /* Command Register */
-  publicCommandsComposer.command('start', startMiddleware.middleware());
-  publicCommandsComposer.command(['help', 'status'], helpMiddleware.middleware());
-  publicCommandsComposer.command('settings', settingsMiddleware.middleware());
-  publicCommandsComposer.command('language', languageMiddleware.middleware());
+  registerPublicCommand('start', startMiddleware.middleware());
+  registerPublicCommand(['help', 'status'], helpMiddleware.middleware());
+  registerPublicCommand('settings', settingsMiddleware.middleware());
+  registerPublicCommand('language', languageMiddleware.middleware());
+  registerPublicCommand('role', roleMiddleware.middleware());
 
   return { publicCommandsComposer };
 };

@@ -13,7 +13,11 @@ delete-user-atom-no-user = ❗️ <b>Message deleted</b>.
 # Admin notification
 # ------------------------------------------------------------
 
-check-admin-notification = ❗WARNING! UA Anti Spam Bot checks administrators' messages. This option can be disabled in settings.
+check-admin-notification =
+    ❗WARNING! UA Anti Spam Bot checks administrators' messages. This option can be disabled in settings.
+
+    To test moderation on your own messages, use /role.
+    Use /role again to return to the normal admin mode.
 
 # ------------------------------------------------------------
 # Settings messages
@@ -251,6 +255,8 @@ no-new-statistic = No new records.
 
 help-if-wrong-delete = <b>If a message was deleted by mistake:</b>
 
+help-admin-role-help = <b>Admin testing:</b> use /role to toggle moderation for your own messages in this chat.
+
 help-if-wrong-delete-option-1 = • Ask administrators to write it themselves;
 help-if-wrong-delete-option-2 = • Send it as a screenshot.
 
@@ -309,6 +315,18 @@ start-private-instructions =
 
 start-group-admins-help = This can be helped by: { $adminsString }
 start-group-creator-help = The chat creator can help with this
+
+# ------------------------------------------------------------
+# Role command
+# ------------------------------------------------------------
+
+role-private = Run /role in the group where you want to test moderation.
+role-anonymous-admin = Turn off anonymous admin mode to use /role. Telegram sends such commands as GroupAnonymousBot, so I cannot save a personal test role.
+role-invalid = Use /role to toggle between the regular admin mode and the user test mode.
+role-status-admin = <b>Your current test role:</b> administrator. Use /role if you want me to moderate your messages like a regular user.
+role-status-user = <b>Your current test role:</b> regular user. Use /role to restore the normal admin mode.
+role-changed-user = 🧪 Test mode enabled for this chat. I will now moderate your messages as if you were a regular user until you send /role again.
+role-changed-admin = 🛡 Test mode disabled for this chat. I will treat your messages as administrator messages again.
 
 start-channel-message =
     Hi! Message from official chatbot @{ $botName }.
