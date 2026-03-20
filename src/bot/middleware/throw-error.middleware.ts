@@ -1,10 +1,12 @@
-import type { GrammyMiddleware } from '../../types';
+import type { GrammyMiddleware } from '@app-types/context';
+
+import { logger } from '@utils/logger.util';
 
 /**
+ * Used to test global error handling
  * @deprecated
- * @description Used to test global error handling
- * */
+ */
 export const throwErrorMiddleware: GrammyMiddleware = () => {
-  console.info('throwErrorMiddleware called');
+  logger.info('throwErrorMiddleware called');
   throw new Error('Test error');
 };

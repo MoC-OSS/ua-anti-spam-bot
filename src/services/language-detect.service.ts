@@ -1,8 +1,13 @@
-// eslint-disable-next-line import/no-unresolved
+/**
+ * @module language-detect.service
+ * @description Detects whether a message is written in Russian using character-level
+ * heuristics and the tinyld language detection library.
+ */
+
 import { detectAll } from 'tinyld/heavy';
 import { removeExtraSpaces, removeSpecialSymbols } from 'ukrainian-ml-optimizer';
 
-import type { LanguageDetectionResult } from '../types';
+import type { LanguageDetectionResult } from '@app-types/language-detection';
 
 export class LanguageDetectService {
   readonly russianLetters = /[ъыэё]/i;
@@ -11,11 +16,13 @@ export class LanguageDetectService {
 
   /**
    * Helper function that detects if the message in russian
-   * */
+   * @param message - message text to analyze
+   * @returns detection result with boolean flag and confidence percent
+   */
   isRussian(message: string): LanguageDetectionResult {
     /**
      * If the message contains russian letters, we assume that this is russian
-     * */
+     */
     if (this.russianLetters.test(message)) {
       return {
         result: true,
@@ -37,7 +44,7 @@ export class LanguageDetectService {
 
       /**
        * If the message contains ukrainian letters, we assume that this is ukrainian
-       * */
+       */
       if (this.ukrainianLetters.test(message)) {
         return {
           result: false,
@@ -50,7 +57,7 @@ export class LanguageDetectService {
       /**
        * If tinyld cannot find the language, it returns an error.
        * So in this case we assume that this is not russian
-       * */
+       */
       return {
         result: false,
         percent: 0,
@@ -61,15 +68,15 @@ export class LanguageDetectService {
   /**
    * Detect possible languages from the passed message.
    * If it could not decide which language is used, it throws an error
-   *
    * @param message - message to get language
-   * */
+   * @returns array of language detection results, empty if message is too short
+   */
   detect(message: string) {
     const clearMessage = removeExtraSpaces(removeSpecialSymbols(message)).toLowerCase();
 
     /**
      * If the message is too short - no lang should be decided
-     * */
+     */
     if (clearMessage.length < 3) {
       return [];
     }

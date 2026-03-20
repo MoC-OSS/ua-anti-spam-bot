@@ -1,31 +1,52 @@
-import { environmentConfig } from '../config';
-import type { S3Service } from '../services';
+/**
+ * @module tensor.service
+ * @description General-purpose spam tensor classification service.
+ * Extends {@link BaseTensorService} with the default model files.
+ */
+
+import type { S3Service } from '@services/s3.service';
+
+import { environmentConfig } from '@shared/config';
+
+import { logger } from '@utils/logger.util';
 
 import { BaseTensorService } from './base-tensor.service';
 
 export class TensorService extends BaseTensorService {
-  constructor(modelPath: string, SPAM_THRESHOLD: number) {
-    super(modelPath, SPAM_THRESHOLD);
+  constructor(modelPath: string, spamThreshold: number) {
+    super(modelPath, spamThreshold);
     this.loadModelMetadata('./temp/model.json', './temp/vocab.json');
   }
 }
 
+/**
+ * Creates and initializes a {@link TensorService}, optionally downloading the model from S3.
+ * @param s3Service - Optional S3 service for remote model download.
+ * @returns A fully initialized TensorService instance.
+ */
 export const initTensor = async (s3Service?: S3Service) => {
   if (environmentConfig.S3_BUCKET && s3Service) {
     try {
-      console.info('* Staring new tensorflow S3 logic...');
+      logger.info('* Staring new tensorflow S3 logic...');
       await s3Service.downloadTensorFlowModel(new URL('temp/', import.meta.url));
-      console.info('Tensor flow model has been loaded from S3.');
+      logger.info('Tensor flow model has been loaded from S3.');
     } catch (error) {
-      console.error('Cannot download tensor flow model from S3.\nReason:', error);
-      console.error('Use the legacy model.');
+      logger.error({ err: error }, 'Cannot download tensor flow model from S3.');
+      logger.error('Use the legacy model.');
     }
   } else {
-    console.info('Skip loading model from S3 due to no S3_BUCKET or no s3Service.');
+    logger.info('Skip loading model from S3 due to no S3_BUCKET or no s3Service.');
   }
 
   const tensorService = new TensorService('./temp/model.json', environmentConfig.TENSOR_RANK);
-  await tensorService.loadModel();
+
+  if (!environmentConfig.UNIT_TESTING) {
+    logger.info('Loading spam tensor model...');
+    const start = Date.now();
+
+    await tensorService.loadModel();
+    logger.info(`Spam tensor model loaded in ${((Date.now() - start) / 1000).toFixed(2)}s.`);
+  }
 
   return tensorService;
 };

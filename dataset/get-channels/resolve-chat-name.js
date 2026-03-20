@@ -2,8 +2,8 @@ function sleep(time) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
 
-class TelegramPage {
-  static async getUntilFound(...methods) {
+const TelegramPage = {
+  async getUntilFound(...methods) {
     const maxTries = 3;
 
     for (let tryNumber = 0; tryNumber < maxTries; tryNumber++) {
@@ -19,13 +19,13 @@ class TelegramPage {
     }
 
     return null;
-  }
+  },
 
-  static getPersonTitle() {
+  getPersonTitle() {
     return document.querySelector('.chat .sidebar-header.topbar div.chat-info-container > div.chat-info span.peer-title');
-  }
+  },
 
-  static findPublicLink() {
+  findPublicLink() {
     const linkRow = document.querySelector('.sidebar-left-section-content .tgico-link .row-subtitle');
 
     if (!linkRow) {
@@ -33,25 +33,25 @@ class TelegramPage {
     }
 
     return linkRow.parentElement.querySelector('.row-title')?.innerText?.trim();
-  }
+  },
 
-  static findPrivateLink() {
+  findPrivateLink() {
     return document.querySelector('[onclick="joinchat(this)"]')?.href;
-  }
+  },
 
-  static closeChat() {
+  closeChat() {
     return document.querySelector('.sidebar-close-button').click();
-  }
-}
+  },
+};
 
 (async () => {
-  for (let dialog of dialogs) {
+  for (const dialog of dialogs) {
     if (dialog.private_link || dialog.public_link) {
       continue;
     }
 
     // Load the page
-    window.location.href = dialog.href;
+    globalThis.location.href = dialog.href;
     // document.querySelector('.bubbles .scrollable').scroll(0, 100);
 
     // Await until fully loaded
@@ -72,7 +72,7 @@ class TelegramPage {
     dialog.public_link = await TelegramPage.getUntilFound(TelegramPage.findPublicLink);
 
     if (dialog.public_link) {
-      dialog.public_name = '@' + dialog.public_link.split('/').splice(-1);
+      dialog.public_name = `@${dialog.public_link.split('/').splice(-1)}`;
     } else {
       dialog.private_link = await TelegramPage.getUntilFound(TelegramPage.findPrivateLink);
     }

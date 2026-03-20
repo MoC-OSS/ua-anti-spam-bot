@@ -1,17 +1,23 @@
 import type { Bot } from 'grammy';
 import { Composer } from 'grammy';
 
-import type { DynamicStorageService } from '../../services';
-import { ALARM_EVENT_KEY, alarmService } from '../../services';
-import { getAlarmMock } from '../../services/_mocks';
-import type { TensorService } from '../../tensor';
-import type { GrammyContext } from '../../types';
-import type { CommandSetter } from '../commands';
-import { SessionCommand, StatisticsCommand, SwindlersUpdateCommand } from '../commands';
-import { onlyWhitelistedFilter } from '../filters';
+import type { CommandSetter } from '@bot/commands/command-setter';
+import { SessionCommand } from '@bot/commands/private/session.command';
+import { StatisticsCommand } from '@bot/commands/private/statistics.command';
+import { SwindlersUpdateCommand } from '@bot/commands/private/swindlers-update.command';
+import { onlyWhitelistedFilter } from '@bot/filters/only-whitelisted.filter';
+
+import { getAlarmMock } from '@services/_mocks/alarm.mocks';
+import { ALARM_EVENT_KEY, alarmService } from '@services/alarm.service';
+import type { DynamicStorageService } from '@services/dynamic-storage.service';
+
+import type { TensorService } from '@tensor/tensor.service';
+
+import type { GrammyContext } from '@app-types/context';
 
 import { getGetVideoNoteConverterComposer } from './video-note-converter.composer';
 
+/** Properties required to initialize the private (whitelisted) commands composer. */
 export interface PrivateCommandsComposerProperties {
   bot: Bot<GrammyContext>;
   commandSetter: CommandSetter;
@@ -21,8 +27,14 @@ export interface PrivateCommandsComposerProperties {
 }
 
 /**
- * @description Public commands that are available for users
- * */
+ * Composer that registers bot commands available to whitelisted (private) users.
+ * @param root0 - Private commands composer properties.
+ * @param root0.bot - The Grammy bot instance used to trigger restarts.
+ * @param root0.commandSetter - Service used to register bot commands with Telegram.
+ * @param root0.dynamicStorageService - Service for managing dynamically-updated bot data.
+ * @param root0.startTime - The timestamp when the bot process started.
+ * @returns An object containing the privateCommandsComposer instance.
+ */
 export const getPrivateCommandsComposer = ({ bot, commandSetter, dynamicStorageService, startTime }: PrivateCommandsComposerProperties) => {
   const privateCommandsComposer = new Composer<GrammyContext>();
 
@@ -30,16 +42,17 @@ export const getPrivateCommandsComposer = ({ bot, commandSetter, dynamicStorageS
 
   const composer = privateCommandsComposer.filter((context) => onlyWhitelistedFilter(context));
 
-  const commandMap = new Map<string, string>();
-  commandMap.set('swindlers_update', 'Update swindlers database');
-  commandMap.set('session', 'Get bot session data');
-  commandMap.set('statistics', 'Get bot statistics');
-  commandMap.set('start_alarm', 'Start test alarm');
-  commandMap.set('end_alarm', 'End test alarm');
-  commandMap.set('restart_alarm', 'Restart alarm logic');
-  commandMap.set('disable_alarm', 'Disable alarm logic at all');
-  commandMap.set('restart', 'Kills the bot process and deletes it');
-  commandMap.set('video_note', 'Send a video with /video_note caption to convert it into video note');
+  const commandMap = new Map<string, string>([
+    ['swindlers_update', 'Update swindlers database'],
+    ['session', 'Get bot session data'],
+    ['statistics', 'Get bot statistics'],
+    ['start_alarm', 'Start test alarm'],
+    ['end_alarm', 'End test alarm'],
+    ['restart_alarm', 'Restart alarm logic'],
+    ['disable_alarm', 'Disable alarm logic at all'],
+    ['restart', 'Kills the bot process and deletes it'],
+    ['video_note', 'Send a video with /video_note caption to convert it into video note'],
+  ]);
 
   const commandString = [...commandMap.entries()].map(([name, description]) => `/${name} - ${description}`).join('\n');
 
@@ -79,9 +92,9 @@ export const getPrivateCommandsComposer = ({ bot, commandSetter, dynamicStorageS
   });
 
   composer.command('thread', async (context) => {
-    const message = await context.replyWithHTML(
-      `Message Thread Id:\n<code>${context.msg?.message_thread_id?.toString()}</code>` || 'No thread id',
-    );
+    const threadId = context.msg?.message_thread_id?.toString();
+    const message = await context.reply(threadId ? `Message Thread Id:\n<code>${threadId}</code>` : 'No thread id', { parse_mode: 'HTML' });
+
     await context.pinChatMessage(message.message_id);
   });
 

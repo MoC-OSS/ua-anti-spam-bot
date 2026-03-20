@@ -1,20 +1,21 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import ms from 'ms';
 import type { SetNonNullable } from 'type-fest';
 
-import { loadUserbotDatasetExtras } from '../../dataset/dataset';
-import { redisClient } from '../db';
-import { initSwindlersContainer } from '../services';
-import { initTensor } from '../tensor';
+import * as redisClient from '@db/redis.client';
+
+import { loadUserbotDatasetExtras } from '@dataset/dataset';
+
+import { initSwindlersContainer } from '@services/swindlers.container';
+
+import { initTensor } from '@tensor/tensor.service';
+
+import { logger } from '@utils/logger.util';
 
 import auth from './auth';
-// const { findChannelAdmins } = require('./find-channel-admins');
 import type { Peer } from './mt-proto-client';
 import { MtProtoClient } from './mt-proto-client';
 import { UserbotStorage } from './storage.handler';
 import { UpdatesHandler } from './updates.handler';
-
-// const testMessage = ``.trim();
 
 export interface ChatPeers {
   trainingChat: Peer | null;
@@ -23,27 +24,31 @@ export interface ChatPeers {
   botsChat: Peer | null;
 }
 
-console.info('Start listener application');
+logger.info('Start listener application');
+
 auth()
   .then(async (api) => {
     const datasetExtras = await loadUserbotDatasetExtras();
 
-    await redisClient.client.connect().then(() => console.info('Redis client successfully started'));
+    await redisClient.client.connect().then(() => logger.info('Redis client successfully started'));
     const mtProtoClient = new MtProtoClient(api);
 
     const { dynamicStorageService, swindlersDetectService, swindlersBotsService, swindlersTensorService } = await initSwindlersContainer();
 
     const userbotStorage = new UserbotStorage();
+
     await userbotStorage.init();
-    console.info('Application is listening new messages.');
+    logger.info('Application is listening new messages.');
 
     const tensorService = await initTensor();
-    console.info('Tensor is ready.');
+
+    logger.info('Tensor is ready.');
 
     // findChannelAdmins(api);
     // return;
 
     const allChats = await mtProtoClient.messagesGetAllChats();
+
     const chatPeers: ChatPeers = {
       trainingChat: mtProtoClient.resolvePeer(allChats.chats, 'UA Anti Spam Bot - Test'),
       helpChat: mtProtoClient.resolvePeer(allChats.chats, 'UA Anti Spam Bot - Help'),
@@ -51,6 +56,7 @@ auth()
       botsChat: mtProtoClient.resolvePeer(allChats.chats, 'UA Anti Spam Bot - Bots'),
     };
 
+    // eslint-disable-next-line security/detect-object-injection
     const notFoundChatPeer = Object.keys(chatPeers).find((key) => chatPeers[key] === null);
 
     if (notFoundChatPeer) {
@@ -72,15 +78,16 @@ auth()
     // const testSwindlerResult = await updatesHandler.handleSwindlers(testMessage);
     // console.log(testSwindlerResult);
 
-    console.info('Userbot is ready and started.');
+    logger.info('Userbot is ready and started.');
+
     //
     // api.mtproto.updates.on('updatesTooLong', (updateInfo) => {
     //   console.log('updatesTooLong:', updateInfo);
     // });
     //
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+
     api.mtproto.updates.on('updateShortMessage', (updateInfo) => {
-      console.info('updateShortChatMessage:', updateInfo);
+      logger.info({ updateInfo }, 'updateShortChatMessage:');
     });
 
     // api.mtproto.updates.on('updateShortChatMessage', (updateInfo) => {
@@ -95,32 +102,30 @@ auth()
     //   console.log('updatesCombined:', updateInfo);
     // });
     //
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+
     // api.mtproto.updates.on('updates', (updateInfo) => {
-    //   console.info('updates:', updateInfo.updates);
+    //   logger.info('updates:', updateInfo.updates);
     // });
     //
     // api.mtproto.updates.on('updateShortSentMessage', (updateInfo) => {
     //   console.log('updateShortSentMessage:', updateInfo);
     // });˚
     api.mtproto.updates.on('updates', (updateInfo) =>
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       updatesHandler.filterUpdate(updateInfo, async (message) => {
         // updatesHandler.handleTraining(message);
         await updatesHandler.handleSwindlers(message);
       }),
     );
 
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     setInterval(async () => {
       try {
         await api.call('updates.getState');
       } catch (error) {
-        console.error(JSON.stringify(error));
+        logger.error(JSON.stringify(error));
       }
     }, ms('15s'));
   })
   .catch((error) => {
-    console.error('Cannot start userbot. Reason:\n', error);
+    logger.error('Cannot start userbot. Reason:\n', error);
     throw error;
   });

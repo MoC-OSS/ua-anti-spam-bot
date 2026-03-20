@@ -1,0 +1,27 @@
+diff --git a/node_modules/jwa/index.js b/node_modules/jwa/index.js
+index 5072c34..d9cdd0a 100644
+--- a/node_modules/jwa/index.js
++++ b/node_modules/jwa/index.js
+@@ -163,7 +163,9 @@ function createKeySigner(bits) {
+     // Even though we are specifying "RSA" here, this works with ECDSA
+     // keys as well.
+     var signer = crypto.createSign('RSA-SHA' + bits);
+-    var sig = (signer.update(thing), signer.sign(privateKey, 'base64'));
++    // Wrap string/Buffer keys in a KeyObject for OpenSSL 3.x compatibility (Node.js v17+)
++    var key = (typeof privateKey === 'string' || Buffer.isBuffer(privateKey)) ? crypto.createPrivateKey(privateKey) : privateKey;
++    var sig = (signer.update(thing), signer.sign(key, 'base64'));
+     return fromBase64(sig);
+   }
+ }
+@@ -184,8 +186,10 @@ function createPSSKeySigner(bits) {
+     checkIsPrivateKey(privateKey);
+     thing = normalizeInput(thing);
+     var signer = crypto.createSign('RSA-SHA' + bits);
++    // Wrap string/Buffer keys in a KeyObject for OpenSSL 3.x compatibility (Node.js v17+)
++    var key = (typeof privateKey === 'string' || Buffer.isBuffer(privateKey)) ? crypto.createPrivateKey(privateKey) : privateKey;
+     var sig = (signer.update(thing), signer.sign({
+-      key: privateKey,
++      key: key,
+       padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
+       saltLength: crypto.constants.RSA_PSS_SALTLEN_DIGEST
+     }, 'base64'));

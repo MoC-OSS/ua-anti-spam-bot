@@ -1,16 +1,21 @@
 import { InputFile } from 'grammy';
-import { isPrivate } from 'grammy-guard';
+import { isPrivateChat } from 'grammy-guard';
 
-import { environmentConfig } from '../../config';
-import type { GrammyMiddleware } from '../../types';
-import { onlyCreatorFilter } from '../filters';
+import { onlyCreatorFilter } from '@bot/filters/only-creator.filter';
+
+import { environmentConfig } from '@shared/config';
+
+import type { GrammyMiddleware } from '@app-types/context';
 
 /**
  * Logs parsed photos
- * */
+ * @param context - The Grammy context object
+ * @param next - The next middleware function in the chain
+ * @returns A promise that resolves when the middleware chain completes
+ */
 export const logParsedPhotosMiddleware: GrammyMiddleware = async (context, next) => {
   const { photo, isDeleted } = context.state;
-  const isValidToLog = onlyCreatorFilter(context) || (isPrivate(context) && environmentConfig.ENV !== 'production');
+  const isValidToLog = onlyCreatorFilter(context) || (isPrivateChat(context) && environmentConfig.ENV !== 'production');
 
   if (isValidToLog && photo && 'fileFrames' in photo && photo.fileFrames) {
     const files = photo.fileFrames.map((frame, index) => new InputFile(frame, `${photo.meta.file_id}${index}.png`));

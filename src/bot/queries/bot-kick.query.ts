@@ -1,7 +1,14 @@
 import type { ChatMember } from '@grammyjs/types/manage';
 
-import type { GrammyQueryMiddleware } from '../../types';
+import type { GrammyQueryMiddleware } from '@app-types/context';
 
+/**
+ * Handles the bot being kicked or removed from a chat.
+ * Marks the bot as removed and clears admin-related session data.
+ * @param context - Grammy query context for the my_chat_member update.
+ * @param next - The next middleware function in the chain.
+ * @returns The result of calling the next middleware function.
+ */
 export const botKickQuery: GrammyQueryMiddleware<'my_chat_member'> = (context, next) => {
   const oldStatuses = new Set<ChatMember['status']>(['left', 'kicked']);
 

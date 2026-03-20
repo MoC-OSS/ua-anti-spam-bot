@@ -1,25 +1,34 @@
-import escapeHTML from 'escape-html';
 import { Composer } from 'grammy';
 
-import { LOGS_CHAT_THREAD_IDS } from '../../../const';
-import { logsChat } from '../../../creator';
-import { getDeleteFeatureMessage, locationLogsStartMessage } from '../../../message';
-import type { GrammyContext } from '../../../types';
-import { getEnabledFeaturesString, getUserData, telegramUtil } from '../../../utils';
+import escapeHTML from 'escape-html';
+
+import { logsChat } from '@bot/creator';
+
+import { LOGS_CHAT_THREAD_IDS } from '@const/logs.const';
+
+import { getDeleteFeatureMessage, locationLogsStartMessage } from '@message';
+
+import type { GrammyContext } from '@app-types/context';
+
+import { getEnabledFeaturesString, getUserData } from '@utils/generic.util';
+import { telegramUtility } from '@utils/util-instances.util';
 
 /**
- * @description Remove message with any location
- * */
+ * Returns a composer that detects and deletes messages containing location data.
+ * @returns Object containing the no-locations composer instance.
+ */
 export const getNoLocationsComposer = () => {
   const noLocationsComposer = new Composer<GrammyContext>();
 
   /**
-   * @param {GrammyContext} context
-   * @param {string[]} locations
-   * @param {string} [message]
-   * */
+   * Logs a deleted location message to the logs chat.
+   * @param context - The Grammy context of the incoming message.
+   * @param locations - List of location strings detected in the message.
+   * @param [message] - Optional message text override.
+   * @returns Promise resolving to the sent log message.
+   */
   async function saveLocationMessage(context: GrammyContext, locations: string[], message?: string) {
-    const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
+    const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const text = message || context.state?.text || '';
 
     return context.api.sendMessage(
@@ -43,10 +52,11 @@ export const getNoLocationsComposer = () => {
 
       const { writeUsername, userId } = getUserData(context);
       const featuresString = getEnabledFeaturesString(context.chatSession.chatSettings);
+
       await saveLocationMessage(context, locations, text);
 
       if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
-        await context.replyWithSelfDestructedHTML(getDeleteFeatureMessage({ writeUsername, userId, featuresString }));
+        await context.replyWithSelfDestructedHTML(getDeleteFeatureMessage(context, { writeUsername, userId, featuresString }));
       }
     }
 

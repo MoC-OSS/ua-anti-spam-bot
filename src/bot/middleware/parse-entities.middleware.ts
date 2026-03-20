@@ -1,14 +1,18 @@
-import type { GrammyMiddleware } from '../../types';
-import type { StateEntity } from '../../types/state';
+import type { GrammyMiddleware } from '@app-types/context';
+import type { StateEntity } from '@app-types/state';
 
 /**
  * It parses the value of entities and save it into the state
- * */
+ * @param context - The Grammy context object
+ * @param next - The next middleware function in the chain
+ * @returns A promise that resolves when the middleware chain completes
+ */
 export const parseEntities: GrammyMiddleware = (context, next) => {
   const { text } = context.state;
 
   if (context.msg?.entities && text) {
     context.state.entities = context.msg.entities.map((entity): StateEntity => {
+      // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
       switch (entity.type) {
         case 'text_link': {
           return {

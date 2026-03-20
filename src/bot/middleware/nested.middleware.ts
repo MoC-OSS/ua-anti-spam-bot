@@ -1,20 +1,22 @@
 import type { NextFunction } from 'grammy';
-import type { GrammyContext, GrammyMiddleware } from 'types';
+
+import type { GrammyContext, GrammyMiddleware } from '@app-types/context';
 
 /**
- * @param {GrammyMiddleware} middlewares
- * @returns {GrammyMiddleware}
- * */
+ * Composes multiple middlewares sequentially, stopping at the first one that does not call next.
+ * @param middlewares - The list of middleware functions to run in sequence
+ * @returns A middleware function that runs each provided middleware in order, stopping at the first that does not call next
+ */
 export const nestedMiddleware =
   (...middlewares: GrammyMiddleware[]) =>
   async (context: GrammyContext, next: NextFunction) => {
-    // eslint-disable-next-line no-restricted-syntax
     for (const middleware of middlewares) {
       let isNextCalled = false;
 
       // eslint-disable-next-line unicorn/consistent-function-scoping
       const localNext = () => {
         isNextCalled = true;
+
         return Promise.resolve();
       };
 

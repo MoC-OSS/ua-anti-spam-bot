@@ -1,62 +1,84 @@
-import escapeHTML from 'escape-html';
 import type { Bot, NextFunction } from 'grammy';
 import { InputFile } from 'grammy';
 
-import { environmentConfig } from '../../config';
-import { LOGS_CHAT_THREAD_IDS } from '../../const';
-import { logsChat, privateTrainingChat } from '../../creator';
-import { cannotDeleteMessage, getCannotDeleteMessage, getDebugMessage, getDeleteMessage } from '../../message'; // spamDeleteMessage
-import { redisService } from '../../services';
-import type { GrammyContext, GrammyMiddleware } from '../../types';
-import { compareDatesWithOffset, getUserData, handleError, telegramUtil } from '../../utils';
-import type { MessageHandler } from '../message.handler';
-import { isFilteredByRules } from '../spam.handlers';
+import escapeHTML from 'escape-html';
 
-// const slavaWords = ['слава україні', 'слава украине', 'слава зсу'];
+import { logsChat, privateTrainingChat } from '@bot/creator';
+import type { MessageHandler } from '@bot/handlers/message.handler';
+import { isFilteredByRules } from '@bot/handlers/spam.handler';
 
+import { LOGS_CHAT_THREAD_IDS } from '@const/logs.const';
+
+import { cannotDeleteMessage, getCannotDeleteMessage, getDebugMessage, getDeleteMessage } from '@message'; // spamDeleteMessage
+
+import { redisService } from '@services/redis.service';
+
+import { environmentConfig } from '@shared/config';
+
+import type { GrammyContext, GrammyMiddleware } from '@app-types/context';
+
+import { compareDatesWithOffset } from '@utils/date-format.util';
+import { handleError } from '@utils/error-handler.util';
+import { getUserData } from '@utils/generic.util';
+import { logger } from '@utils/logger.util';
+import { telegramUtility } from '@utils/util-instances.util';
+
+/**
+ * Listener that processes incoming text messages, detects spam via tensor rules,
+ * deletes offending messages, and sends notifications to the chat and logs.
+ */
 export class OnTextListener {
   /**
-   * @param {Bot} bot
-   * @param {Date} startTime
-   * @param {MessageHandler} messageHandler
+   * Initializes the listener with bot instance, start time, and message handler.
+   * @param bot - The Grammy bot instance.
+   * @param startTime - The timestamp when the bot was started.
+   * @param messageHandler - The handler responsible for processing messages.
    */
-
-  constructor(private bot: Bot<GrammyContext>, private startTime: Date, private messageHandler: MessageHandler) {}
+  constructor(
+    private bot: Bot<GrammyContext>,
+    private startTime: Date,
+    private messageHandler: MessageHandler,
+  ) {}
 
   /**
-   * Handles every received message
-   * */
+   * Handles every received message.
+   * @returns The Grammy middleware function.
+   */
   middleware(): GrammyMiddleware {
     /**
-     * @param {GrammyContext} context
-     * @param {NextFunction} next
-     * */
+     * Processes a text message through spam detection rules.
+     * @param context - The Grammy context object.
+     * @param next - The next middleware function in the chain.
+     * @returns A promise that resolves when the middleware chain completes.
+     */
+    // eslint-disable-next-line unicorn/consistent-function-scoping
     return async (context: GrammyContext, next: NextFunction) => {
-      // TODO use for ctx prod debug
-      // console.info('enter onText ******', ctx.chat?.title, '******', ctx.state.text);
+      // NOTE use for ctx prod debug
+      // logger.info('enter onText ******', ctx.chat?.title, '******', ctx.state.text);
 
       const message = context.state.text;
       /**
        * Removed because ask to reduce chat messages
-       * */
+       */
       // if (slavaWords.some((word) => message.toLowerCase().includes(word.toLowerCase()))) {
       //   ctx.reply('Героям Слава! 🇺🇦', { reply_to_message_id: ctx?.update?.message?.message_id });
       // }
 
       if (!context.chat?.id) {
-        console.error(Date.toString(), 'Cannot access the chat:', context.chat);
+        logger.error({ chat: context.chat, date: Date.toString() }, 'Cannot access the chat:');
+
         return next();
       }
 
-      if (context.session?.isCurrentUserAdmin && !environmentConfig.DEBUG) {
+      if (context.state.isUserAdmin && !environmentConfig.DEBUG) {
         return next();
       }
 
       const rep = await isFilteredByRules(context, this.messageHandler);
 
       if (rep.dataset) {
-        // TODO define the same types
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // NOTE define the same types
+
         // @ts-ignore
         context.state.dataset = rep.dataset;
         const { deleteRank, tensor } = rep.dataset;
@@ -87,7 +109,7 @@ export class OnTextListener {
             .then(async () => {
               if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
                 await context.replyWithSelfDestructedHTML(
-                  getDeleteMessage({
+                  getDeleteMessage(context, {
                     writeUsername,
                     userId,
                     wordMessage: '',
@@ -106,20 +128,24 @@ export class OnTextListener {
                 context.chatSession.lastLimitedDeletionDate = new Date();
 
                 if (!context.chat?.id) {
-                  return;
+                  // eslint-disable-next-line unicorn/no-useless-undefined
+                  return undefined;
                 }
 
-                return telegramUtil
+                return telegramUtility
                   .getChatAdmins(context, context.chat.id)
                   .then(({ adminsString }) => {
                     context
-                      .replyWithHTML(getCannotDeleteMessage({ adminsString }), { reply_to_message_id: context.msg?.message_id })
+                      .reply(getCannotDeleteMessage(context, { adminsString }), {
+                        parse_mode: 'HTML',
+                        reply_to_message_id: context.msg?.message_id,
+                      })
                       .catch(handleError);
 
                     this.bot.api
                       .sendMessage(
                         logsChat,
-                        `${cannotDeleteMessage}\n\n<code>${telegramUtil.getChatTitle(context.chat)}</code>\n${escapeHTML(
+                        `${cannotDeleteMessage}\n\n<code>${telegramUtility.getChatTitle(context.chat)}</code>\n${escapeHTML(
                           context.msg?.text || '',
                         )}`,
                         {
@@ -127,6 +153,7 @@ export class OnTextListener {
                           message_thread_id: LOGS_CHAT_THREAD_IDS.STRATEGIC,
                         },
                       )
+                      // eslint-disable-next-line sonarjs/no-nested-functions
                       .then(() => {
                         context.api
                           .sendDocument(
@@ -142,9 +169,12 @@ export class OnTextListener {
                   })
                   .catch(handleError);
               }
+
+              // eslint-disable-next-line unicorn/no-useless-undefined
+              return undefined;
             });
         } catch (error) {
-          console.error('Cannot delete the message. Reason:', error);
+          logger.error({ err: error }, 'Cannot delete the message.');
         }
       }
 

@@ -1,24 +1,20 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "ts-node": {
-    "swc": true,
-    "esm": true,
-    "experimentalSpecifierResolution": "node"
-  },
   "compilerOptions": {
     "target": "ES2022",
     "outDir": "dist",
-    "lib": ["es2022"],
+    "lib": [
+      "es2023"
+    ],
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "strictNullChecks": true,
     "esModuleInterop": true,
     "strict": true,
+    "incremental": true,
     "skipLibCheck": true,
-    "types": [
-      "jest"
-    ],
+    "types": [],
     "typeRoots": [
       "node_modules/@types",
       "src/lib-types"
@@ -26,21 +22,77 @@
     "paths": {
       "@mtproto/core": [
         "./src/lib-types/mtproto__core"
+      ],
+      "@assets/*": [
+        "./src/assets/*"
+      ],
+      "@bot": [
+        "./src/bot/bot.ts"
+      ],
+      "@bot/*": [
+        "./src/bot/*"
+      ],
+      "@const/*": [
+        "./src/shared/const/*"
+      ],
+      "@db/*": [
+        "./src/shared/db/*"
+      ],
+      "@dataset/*": [
+        "./src/dataset/*"
+      ],
+      "@server/*": [
+        "./src/server/*"
+      ],
+      "@message": [
+        "./src/bot/messages/index.ts"
+      ],
+      "@message/*": [
+        "./src/bot/messages/*"
+      ],
+      "@services/*": [
+        "./src/services/*"
+      ],
+      "@shared/*": [
+        "./src/shared/*"
+      ],
+      "@tensor/*": [
+        "./src/tensor/*"
+      ],
+      "@testing/*": [
+        "./src/testing/*"
+      ],
+      "@app-types/*": [
+        "./src/shared/types/*"
+      ],
+      "@userbot/*": [
+        "./src/userbot/*"
+      ],
+      "@utils/*": [
+        "./src/shared/utils/*"
+      ],
+      "@video/*": [
+        "./src/shared/video/*"
       ]
     },
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
-    "allowSyntheticDefaultImports": true,
-    "baseUrl": "src"
+    "allowSyntheticDefaultImports": true
   },
   "display": "Recommended",
   "include": [
+    "vitest.config.ts",
     "src/**/*",
-    "dataset/**/*"
+    "tests/**/*",
+    "dataset/**/*",
+    "scripts/**/*",
+    ".eslint/**/*"
+  ],
+  "files": [
+    "node_modules/vitest/globals.d.ts"
   ],
   "exclude": [
     "node_modules",
-    "**/*.spec.ts",
     "src/lib-types/**"
   ]
 }

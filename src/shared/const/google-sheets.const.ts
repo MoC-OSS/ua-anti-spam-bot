@@ -1,0 +1,11 @@
+export const GOOGLE_SHEETS_NAMES = {
+  UKRAINIAN_PHRASES: 'Ukrainian_phrases',
+  SWINDLERS: 'SWINDLERS',
+  COUNTER_OFFENSIVE: 'Counter_offensive',
+  NSFW: 'NSFW',
+  STRATEGIC_NEGATIVE: 'NEGATIVE',
+  STRATEGIC_POSITIVE: 'POSITIVE',
+  STATISTICS: 'STATISTICS',
+} as const;
+
+export type SheetNames = (typeof GOOGLE_SHEETS_NAMES)[keyof typeof GOOGLE_SHEETS_NAMES];

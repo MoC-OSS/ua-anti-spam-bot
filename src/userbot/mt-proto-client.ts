@@ -1,21 +1,21 @@
-import type { Chat, ProtoUpdate } from '../types';
+import type { Chat, ProtoUpdate } from '@app-types/mtproto/mtproto.types';
 
 import type { API } from './api';
 
 export type Peer =
   | {
       _: 'inputPeerChannel';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       [key: string]: any;
-    }
-  | {
-      _: `inputPeerChat`;
-      chat_id: string;
     }
   | {
       _: 'inputPeerChannel';
       channel_id: string;
       access_hash: string;
+    }
+  | {
+      _: 'inputPeerChat';
+      chat_id: string;
     };
 
 export class MtProtoClient {
@@ -33,19 +33,22 @@ export class MtProtoClient {
     }
 
     if (peer.migrated_to) {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       return { ...peer.migrated_to, _: 'inputPeerChannel' };
     }
 
     switch (peer._) {
       case 'chat': {
         return {
-          _: `inputPeerChat`,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          _: 'inputPeerChat',
           chat_id: peer.id,
         };
       }
 
       case 'channel': {
         return {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           _: 'inputPeerChannel',
           channel_id: peer.id,
           access_hash: peer.access_hash,
@@ -59,8 +62,10 @@ export class MtProtoClient {
   }
 
   /**
-   * @param {string} query
-   * */
+   * Searches for Telegram contacts matching the query via MTProto.
+   * @param query - The search string to look up in contacts.
+   * @returns The MTProto API response containing matching contacts.
+   */
   contactsSearch(query: string) {
     return this.api.call('contacts.search', {
       q: query,
@@ -68,25 +73,32 @@ export class MtProtoClient {
   }
 
   /**
-   * @param {string} message
-   * */
+   * Sends a message to the authenticated user's "Saved Messages" chat.
+   * @param message - The text content to send.
+   * @returns The MTProto API response for the sent message.
+   */
   sendSelfMessage(message: string) {
     return this.api.call('messages.sendMessage', {
       message,
+      // eslint-disable-next-line sonarjs/pseudo-random, unicorn/number-literal-case
       random_id: Math.ceil(Math.random() * 0xff_ff_ff) + Math.ceil(Math.random() * 0xff_ff_ff),
       peer: {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         _: 'inputPeerSelf',
       },
     });
   }
 
   /**
-   * @param {string} message
-   * @param {Record<string, any>} peer
-   * */
+   * Sends a message to the specified peer via MTProto.
+   * @param message - The text content to send.
+   * @param peer - The target peer object describing the recipient.
+   * @returns The MTProto API response for the sent message.
+   */
   sendPeerMessage(message: string, peer: Record<string, string>) {
     return this.api.call('messages.sendMessage', {
       message,
+      // eslint-disable-next-line sonarjs/pseudo-random, unicorn/number-literal-case
       random_id: Math.ceil(Math.random() * 0xff_ff_ff) + Math.ceil(Math.random() * 0xff_ff_ff),
       peer,
     });

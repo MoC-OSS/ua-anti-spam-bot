@@ -1,28 +1,40 @@
-import axios from 'axios';
-import FormData from 'form-data';
 import { Composer } from 'grammy';
 
-import { environmentConfig } from '../../../config';
-import { LOGS_CHAT_THREAD_IDS } from '../../../const';
-import { logsChat } from '../../../creator';
-import { getDeleteNsfwMessage, nsfwLogsStartMessage } from '../../../message';
-import type { NsfwTensorService } from '../../../tensor';
-import type { GrammyContext, NsfwTensorPositiveResult, NsfwTensorResult } from '../../../types';
-import { ImageType } from '../../../types';
-import type { NsfwPhotoResult, StateImageAnimation, StateImageVideo } from '../../../types/state';
-import { getUserData, handleError, telegramUtil } from '../../../utils';
+import axios from 'axios';
+import FormData from 'form-data';
+
+import { logsChat } from '@bot/creator';
+
+import { LOGS_CHAT_THREAD_IDS } from '@const/logs.const';
+
+import { getDeleteNsfwMessage, nsfwLogsStartMessage } from '@message';
+
+import { environmentConfig } from '@shared/config';
+
+import type { NsfwTensorService } from '@tensor/nsfw-tensor.service';
+
+import type { GrammyContext } from '@app-types/context';
+import { ImageType } from '@app-types/image';
+import type { NsfwTensorPositiveResult, NsfwTensorResult } from '@app-types/nsfw';
+import type { NsfwPhotoResult, StateImageAnimation, StateImageVideo } from '@app-types/state';
+
+import { handleError } from '@utils/error-handler.util';
+import { getUserData } from '@utils/generic.util';
+import { telegramUtility } from '@utils/util-instances.util';
 
 const host = `http://${environmentConfig.HOST}:${environmentConfig.PORT}`;
 
 /**
  * Save message into logs to review it and track logic
- * */
+ * @param context - The Grammy context of the incoming message.
+ * @returns Promise that resolves when the log message has been sent, or void if no NSFW result or image data.
+ */
 const saveNsfwMessage = async (context: GrammyContext) => {
   if (!context.state.nsfwResult) {
     return;
   }
 
-  const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
+  const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
   const imageData = context.state.photo;
 
   const { deletePrediction } = (context.state.nsfwResult as NsfwPhotoResult).tensor as NsfwTensorPositiveResult;
@@ -36,33 +48,34 @@ const saveNsfwMessage = async (context: GrammyContext) => {
   switch (type) {
     /**
      * Save photo message
-     * */
+     */
     case ImageType.PHOTO: {
       const { caption } = imageData;
 
-      return context.api.sendPhoto(logsChat, meta.file_id, {
+      await context.api.sendPhoto(logsChat, meta.file_id, {
         caption: `${nsfwLogsStartMessage} ${type} (${(deletePrediction.probability * 100).toFixed(2)}%) from <code>${
           deletePrediction.className
         }</code> by user ${userMention}:\n\n${chatMention || userMention}\n${caption || ''}`,
         parse_mode: 'HTML',
         message_thread_id: LOGS_CHAT_THREAD_IDS.PORN,
       });
+
+      break;
     }
 
     /**
      * Save sticker message
-     * */
+     */
     case ImageType.VIDEO_STICKER:
     case ImageType.STICKER: {
       const setNameAddition = meta.set_name ? `from <code>${meta.set_name}</code> sticker-pack` : '';
 
       const stickerMessage = await context.api.sendSticker(logsChat, meta.file_id, {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         message_thread_id: LOGS_CHAT_THREAD_IDS.PORN,
       });
 
-      return context.api.sendMessage(
+      await context.api.sendMessage(
         logsChat,
         `${nsfwLogsStartMessage} ${type} ${context.state.nsfwResult.reason} ${setNameAddition} (${(
           deletePrediction.probability * 100
@@ -73,29 +86,33 @@ const saveNsfwMessage = async (context: GrammyContext) => {
           reply_to_message_id: stickerMessage.message_id,
         },
       );
+
+      break;
     }
 
     /**
      * Save photo and video message
-     * */
+     */
     case ImageType.ANIMATION:
     case ImageType.VIDEO: {
       const { caption } = imageData;
 
       const video = (imageData as StateImageVideo).video || (imageData as StateImageAnimation).animation;
 
-      return context.api.sendVideo(logsChat, video.file_id, {
+      await context.api.sendVideo(logsChat, video.file_id, {
         caption: `${nsfwLogsStartMessage} ${type} by ${context.state.nsfwResult.reason} (${(deletePrediction.probability * 100).toFixed(
           2,
         )}%) from <code>${deletePrediction.className}</code> by user ${userMention}:\n\n${chatMention || userMention}\n${caption || ''}`,
         parse_mode: 'HTML',
         message_thread_id: LOGS_CHAT_THREAD_IDS.PORN,
       });
+
+      break;
     }
 
     /**
      * Round video notes
-     * */
+     */
     case ImageType.VIDEO_NOTE: {
       const { videoNote } = imageData;
 
@@ -103,7 +120,7 @@ const saveNsfwMessage = async (context: GrammyContext) => {
         message_thread_id: LOGS_CHAT_THREAD_IDS.PORN,
       });
 
-      return context.api.sendMessage(
+      await context.api.sendMessage(
         logsChat,
         `${nsfwLogsStartMessage} ${type} ${context.state.nsfwResult.reason} (${(deletePrediction.probability * 100).toFixed(
           2,
@@ -114,28 +131,35 @@ const saveNsfwMessage = async (context: GrammyContext) => {
           message_thread_id: LOGS_CHAT_THREAD_IDS.PORN,
         },
       );
+
+      break;
     }
 
     /**
      * Unknown type handling
      * Never impossible
-     * */
+     */
     default: {
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      return context.api.sendMessage(logsChat, `Unknown unhandled image type ${type} with meta ${JSON.stringify(meta)}`, {
+      await context.api.sendMessage(logsChat, `Unknown unhandled image type ${type} with meta ${JSON.stringify(meta)}`, {
         message_thread_id: LOGS_CHAT_THREAD_IDS.PORN,
       });
+
+      break;
     }
   }
 };
 
+/** Properties for the NSFW image/video filter composer. */
 export interface NsfwFilterComposerProperties {
   nsfwTensorService: NsfwTensorService;
 }
 
 /**
- * @description Remove nsfw content
- * */
+ * Returns a composer that detects and deletes messages containing NSFW images or videos.
+ * @param root0 - Composer properties.
+ * @param root0.nsfwTensorService - Service used to run NSFW predictions on image/video content.
+ * @returns Object containing the NSFW filter composer instance.
+ */
 export const getNsfwFilterComposer = ({ nsfwTensorService }: NsfwFilterComposerProperties) => {
   const nsfwFilterComposer = new Composer<GrammyContext>();
 
@@ -151,7 +175,7 @@ export const getNsfwFilterComposer = ({ nsfwTensorService }: NsfwFilterComposerP
 
     /**
      * Get preview or extracted frames to check
-     * */
+     */
     const imageBuffers: Buffer[] = parsedPhoto && !hasFrames ? [parsedPhoto.file as Buffer] : parsedPhoto?.fileFrames || [];
 
     if (imageBuffers.length === 0) {
@@ -162,6 +186,7 @@ export const getNsfwFilterComposer = ({ nsfwTensorService }: NsfwFilterComposerP
 
     try {
       const formData = new FormData();
+
       imageBuffers.forEach((photo, index) => {
         formData.append('image', photo, { filename: `image-${index}.jpeg` });
       });
@@ -171,6 +196,7 @@ export const getNsfwFilterComposer = ({ nsfwTensorService }: NsfwFilterComposerP
           .post(`${host}/image`, formData, {
             headers: formData.getHeaders(),
           })
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           .then((response: { data: { result: NsfwTensorResult } }) => response.data.result);
 
       predictionResult = await (environmentConfig.USE_SERVER ? getServerResponse() : nsfwTensorService.predictVideo(imageBuffers));
@@ -191,7 +217,7 @@ export const getNsfwFilterComposer = ({ nsfwTensorService }: NsfwFilterComposerP
       if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
         const { writeUsername, userId } = getUserData(context);
 
-        await context.replyWithSelfDestructedHTML(getDeleteNsfwMessage({ writeUsername, userId }));
+        await context.replyWithSelfDestructedHTML(getDeleteNsfwMessage(context, { writeUsername, userId }));
       }
     }
 

@@ -1,12 +1,16 @@
 import type { ChatFullInfo } from 'grammy/types';
 
-import type { AlarmNotification, ChatSessionData } from '../../types';
-import { getRandomItem } from '../../utils';
+import type { AlarmNotification } from '@app-types/alarm';
+import type { ChatSessionData } from '@app-types/session';
+
+import { getRandomItem } from '@utils/generic.util';
 
 import { generateRandomBoolean, generateRandomNumber, generateRandomString } from './helpers.mocks';
 
 export const testId = 1_234_567_890;
+
 export const testState = 'Львівська область';
+
 export const generateTestState = (state = testState) => ({
   id: generateRandomNumber(3),
   name: state,
@@ -42,8 +46,22 @@ export const chartMock: ChatFullInfo = {
   },
   accent_color_id: 0,
   max_reaction_count: 1,
+  accepted_gift_types: {
+    unlimited_gifts: false,
+    limited_gifts: false,
+    unique_gifts: false,
+    premium_subscription: false,
+    gifts_from_channels: false,
+  },
 };
 
+/**
+ * Generates a mock ChatSessionData object for testing alarm scenarios.
+ * @param state - the region/state name for air-raid alert settings
+ * @param disableChatWhileAirRaidAlert - whether to disable chat during alerts
+ * @param notificationMessage - whether to send a notification message on alarm
+ * @returns a mock ChatSessionData object
+ */
 export function generateChatSessionData(
   state = generateRandomString(10),
   disableChatWhileAirRaidAlert = true,
@@ -79,10 +97,24 @@ export function generateChatSessionData(
   };
 }
 
-export function generateChat(id: number, data: ChatSessionData) {
-  return { id: id.toString(), data };
+/**
+ * Creates a mock chat record with an id and session payload.
+ * @param id - numeric chat identifier
+ * @param payload - session data to associate with the chat
+ * @returns a chat object with stringified id and session payload
+ */
+export function generateChat(id: number, payload: ChatSessionData) {
+  return { id: id.toString(), payload };
 }
 
+/**
+ * Generates an array of mock chat sessions for testing alarm notification scenarios.
+ * @param state - the region/state name used in alarm settings
+ * @param disableChatWhileAirRaidAlertOn - number of chats with disableChatWhileAirRaidAlert enabled
+ * @param notificationMessageOn - number of chats with notificationMessage enabled
+ * @param bothOff - number of chats with both options disabled
+ * @returns array of mock chat records covering all alarm setting combinations
+ */
 export function generateMockSessions(
   state = generateRandomString(10),
   disableChatWhileAirRaidAlertOn = 3,
@@ -92,11 +124,14 @@ export function generateMockSessions(
   const disableChatWhileAirRaidAlertOnArray = Array.from({ length: disableChatWhileAirRaidAlertOn }, () =>
     generateChat(generateRandomNumber(10), generateChatSessionData(state, true, false)),
   );
+
   const notificationMessageOnArray = Array.from({ length: notificationMessageOn }, () =>
     generateChat(generateRandomNumber(10), generateChatSessionData(state, false, true)),
   );
+
   const bothOffArray = Array.from({ length: bothOff }, () =>
     generateChat(generateRandomNumber(10), generateChatSessionData(state, false, false)),
   );
+
   return [...disableChatWhileAirRaidAlertOnArray, ...notificationMessageOnArray, ...bothOffArray];
 }

@@ -1,14 +1,20 @@
 import path from 'node:path';
+
 import { apiThrottler } from '@grammyjs/transformer-throttler';
 import { Composer, InputFile } from 'grammy';
+
 import type { ApiMethods } from 'typegram';
 
-import type { GrammyContext } from '../../types';
-import { getTypedValue, handleError } from '../../utils';
-import { onlyCreatorFilter } from '../filters';
+import { onlyCreatorFilter } from '@bot/filters/only-creator.filter';
+
+import type { GrammyContext } from '@app-types/context';
+
+import { handleError } from '@utils/error-handler.util';
+import { getTypedValue } from '@utils/get-typed-value.util';
 
 type IconColor = Parameters<ApiMethods<void>['createForumTopic']>[0]['icon_color'];
 
+/* eslint-disable unicorn/number-literal-case */
 const iconColors = getTypedValue<Record<string, IconColor>>()({
   bittersweet: 0xfb_6f_5f, // red
   salomie: 0xff_d6_7e, // yellow
@@ -17,13 +23,15 @@ const iconColors = getTypedValue<Record<string, IconColor>>()({
   wisteria: 0xcb_86_db, // violet
   illusion: 0xff_93_b2, // purple
 });
+/* eslint-enable unicorn/number-literal-case */
 
 const groupPhotoPath = path.resolve('./src/assets/logs-chat-profile-photo.jpeg');
 const groupPhotoFile = new InputFile(groupPhotoPath);
 
 /**
- * @description Creates all thread in forum for logs
- * */
+ * Creates all threads in a forum chat used for bot activity logs.
+ * @returns An object containing the createLogsChatComposer instance.
+ */
 export const getCreateLogsChatComposer = () => {
   const createLogsChatComposer = new Composer<GrammyContext>();
 
@@ -31,6 +39,7 @@ export const getCreateLogsChatComposer = () => {
 
   composer.use((context, next) => {
     context.api.config.use(apiThrottler());
+
     return next();
   });
 
@@ -47,6 +56,7 @@ export const getCreateLogsChatComposer = () => {
     const pornTopic = await context.createForumTopic('Porn', {
       icon_color: iconColors.bittersweet,
     });
+
     const swindlersTopic = await context.createForumTopic('Swindlers', { icon_color: iconColors.salomie });
     const antiRussianTopic = await context.createForumTopic('Anti-Russian', { icon_color: iconColors.illusion });
     const strategicTopic = await context.createForumTopic('Strategic', { icon_color: iconColors.mayaBlue });
@@ -97,12 +107,13 @@ export const getCreateLogsChatComposer = () => {
       ),
     );
 
-    return context.replyWithHTML(
+    return context.reply(
       `The group is ready and all topics created! Chat ID is <pre>${context.chat.id}</pre> LOGS_CHAT_THREAD_IDS is <pre>${JSON.stringify(
         resultLogsThreadIds,
         null,
         2,
       )}</pre>`,
+      { parse_mode: 'HTML' },
     );
   });
 
@@ -127,7 +138,7 @@ export const getCreateLogsChatComposer = () => {
       ),
     );
 
-    return context.replyWithHTML(`The group is ready and all topics created! Chat ID is <pre>${context.chat.id}</pre>`);
+    return context.reply(`The group is ready and all topics created! Chat ID is <pre>${context.chat.id}</pre>`, { parse_mode: 'HTML' });
   });
 
   return { createLogsChatComposer };

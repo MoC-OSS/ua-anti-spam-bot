@@ -1,16 +1,21 @@
 import type { NextFunction } from 'grammy';
-import type { GrammyContext } from 'types';
 
-import { urlService } from '../../services';
-import { removeDuplicates } from '../../utils';
+import { urlService } from '@services/url.service';
+
+import type { GrammyContext } from '@app-types/context';
+
+import { removeDuplicates } from '@utils/remove-duplicates.util';
 
 /**
- * @description
- * Add URLs into state. Parses URLs from parsed text from state,
- * */
+ * Add URLs into state. Parses URLs from parsed text from state.
+ * @param context - The Grammy context object
+ * @param next - The next middleware function in the chain
+ * @returns A promise that resolves when the middleware chain completes
+ */
 export function parseUrls(context: GrammyContext, next: NextFunction) {
   if (context.state.text && !context.state.urls) {
     const parsedUrls = urlService.parseUrls(context.state.text, true);
+
     const entitiesUrls =
       context.state.entities
         ?.map((entity) => {

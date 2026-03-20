@@ -1,12 +1,15 @@
 import { Composer } from 'grammy';
 
-import { getDeleteFeatureMessage } from '../../../message';
-import type { GrammyContext } from '../../../types';
-import { getEnabledFeaturesString, getUserData } from '../../../utils';
+import { getDeleteFeatureMessage } from '@message';
+
+import type { GrammyContext } from '@app-types/context';
+
+import { getEnabledFeaturesString, getUserData } from '@utils/generic.util';
 
 /**
- * @description Remove strategic information logic
- * */
+ * Returns a composer that detects and deletes forwarded messages when the feature is enabled.
+ * @returns Object containing the no-forwards composer instance.
+ */
 export const getNoForwardsComposer = () => {
   const noForwardsComposer = new Composer<GrammyContext>();
 
@@ -21,7 +24,7 @@ export const getNoForwardsComposer = () => {
       const featuresString = getEnabledFeaturesString(context.chatSession.chatSettings);
 
       if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
-        await context.replyWithSelfDestructedHTML(getDeleteFeatureMessage({ writeUsername, userId, featuresString }));
+        await context.replyWithSelfDestructedHTML(getDeleteFeatureMessage(context, { writeUsername, userId, featuresString }));
       }
     }
 

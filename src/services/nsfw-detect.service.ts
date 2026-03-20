@@ -1,13 +1,22 @@
+/**
+ * @module nsfw-detect.service
+ * @description Service for detecting NSFW message content using fuzzy string matching.
+ * Refreshes its internal FuzzySet when the dynamic storage emits a `fetch` event.
+ */
+
 import FuzzySet from 'fuzzyset';
 
-import type { SwindlersBotsResult } from '../types';
+import type { SwindlersBotsResult } from '@app-types/swindlers';
 
 import type { DynamicStorageService } from './dynamic-storage.service';
 
 export class NsfwDetectService {
   nsfwMessagesFuzzySet!: FuzzySet;
 
-  constructor(private dynamicStorageService: DynamicStorageService, private rate = 0.9) {
+  constructor(
+    private dynamicStorageService: DynamicStorageService,
+    private rate = 0.9,
+  ) {
     this.initFuzzySet();
 
     this.dynamicStorageService.fetchEmitter.on('fetch', () => {
@@ -16,10 +25,13 @@ export class NsfwDetectService {
   }
 
   /**
-   * @param {string} message - raw message from user to parse
+   * Checks the message for NSFW content using fuzzy matching.
+   * @param message - raw message from user to parse
+   * @returns detection result if NSFW content found, null otherwise
    */
   processMessage(message?: string): SwindlersBotsResult | null {
     const result = this.isSpamMessage(message);
+
     if (result.isSpam) {
       return result;
     }
@@ -28,16 +40,17 @@ export class NsfwDetectService {
   }
 
   /**
-   * @description
-   * Create and saves FuzzySet based on latest data from dynamic storage
-   * */
+   * Creates and saves FuzzySet based on latest data from dynamic storage.
+   */
   initFuzzySet() {
     this.nsfwMessagesFuzzySet = FuzzySet(this.dynamicStorageService.nsfwMessages);
   }
 
   /**
-   * @param {string} message
-   * @param {number} [customRate]
+   * Evaluates a message against the NSFW fuzzy set and returns the match result.
+   * @param message - message text to evaluate
+   * @param [customRate] - optional fuzzy match threshold to override the default rate
+   * @returns spam detection result with isSpam flag, match rate, and nearest known NSFW message
    */
   isSpamMessage(message?: string, customRate?: number): SwindlersBotsResult {
     if (!message) {
@@ -50,6 +63,7 @@ export class NsfwDetectService {
     }
 
     const [[rate, nearestName]] = this.nsfwMessagesFuzzySet.get(message) || [[0]];
+
     return {
       isSpam: rate > (customRate || this.rate),
       rate,

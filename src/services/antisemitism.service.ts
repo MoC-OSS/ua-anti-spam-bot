@@ -1,5 +1,12 @@
-import { dataset } from '../../dataset/dataset';
-import { SearchSet } from '../utils/search-set';
+/**
+ * @module antisemitism.service
+ * @description Detects antisemitic content in messages using keyword dictionary matching
+ * combined with obscenity detection heuristics.
+ */
+
+import { dataset } from '@dataset/dataset';
+
+import { SearchSet } from '@utils/search-set.util';
 
 import { ObsceneService } from './obscene.service';
 

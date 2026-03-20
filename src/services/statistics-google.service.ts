@@ -1,26 +1,31 @@
-import { environmentConfig } from '../config';
-import { GOOGLE_SHEETS_NAMES } from '../const';
+/**
+ * @module statistics-google.service
+ * @description Writes bot feature-toggle statistics to Google Sheets for reporting.
+ */
+
+import { GOOGLE_SHEETS_NAMES } from '@const/google-sheets.const';
+
+import { environmentConfig } from '@shared/config';
 
 import type { GoogleService } from './google.service';
 import { googleService as localGoogleService } from './google.service';
 
 export class StatisticsGoogleService {
-  SHEETS_START_FROM = 'A2:A';
+  sheetsStartFrom = 'A2:A';
 
   constructor(private googleService: GoogleService) {}
 
   /**
-   * @private
-   * @param {string|number[]} cases
-   *
+   * Appends a row of statistic values to the statistics Google Sheet.
+   * @param cases - array of numeric or string values representing a statistics row
    * @returns Promise<any>
-   * */
-  async appendToSheet(cases: (string | number)[]) {
+   */
+  async appendToSheet(cases: (number | string)[]) {
     return this.googleService.appendToSheet(
       environmentConfig.GOOGLE_SPREADSHEET_ID,
       GOOGLE_SHEETS_NAMES.STATISTICS,
       cases,
-      this.SHEETS_START_FROM,
+      this.sheetsStartFrom,
     );
   }
 }

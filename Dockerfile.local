@@ -1,22 +1,29 @@
-FROM public.ecr.aws/docker/library/node:20
+# @tensorflow/tfjs-node ships pre-built binaries only for linux/amd64.
+# linux/arm64 is not in its ALL_SUPPORTED_COMBINATION list, so we pin the
+# platform explicitly. On Apple Silicon hosts this runs via Rosetta 2.
+# hadolint ignore=DL3029
+FROM --platform=linux/amd64 public.ecr.aws/docker/library/node:24
 
-# Create app directory
 WORKDIR /usr/src/app
 
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
+# Ensure native build tools are available so @tensorflow/tfjs-node can
+# compile its C++ binding from source when no pre-built binary is found.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 make g++ \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY package*.json ./
+COPY patches ./patches
 
-# Copy packages
-COPY src/packages/* ./src/packages/
-
-#RUN npm install
-# If you are building your code for production
-RUN npm i
+RUN npm ci
 RUN npm i nodemon -g
 
-# Bundle app source
 COPY . .
 
-CMD [ "npm", "run", "start:bot" ]
+RUN mkdir -p /usr/src/app/src/shared/video/temp && \
+    chown -R node:node /usr/src/app/src/shared/video/temp
+
+# Switch to non-root user for security (node user already exists in Node.js base image)
+USER node
+
+CMD ["npm", "run", "start:bot"]

@@ -5,7 +5,7 @@ import { GenericMockUpdate } from './generic-mock.update';
 
 /**
  * Get private message update
- * */
+ */
 export class MessagePrivateMockUpdate extends GenericMockUpdate {
   readonly minimalUpdate = GenericMockUpdate.getValidUpdate({
     update_id: this.genericUpdateId,
@@ -17,25 +17,25 @@ export class MessagePrivateMockUpdate extends GenericMockUpdate {
     },
   } as const);
 
-  readonly paramsUpdate = GenericMockUpdate.getValidUpdate({
-    message: {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      text: this.text,
-    },
-  });
-
-  readonly update = deepmerge(this.minimalUpdate, this.paramsUpdate);
-
-  constructor(private text: string) {
+  constructor(private readonly text: string) {
     super();
   }
 
-  build() {
-    return this.update;
+  private buildUpdate() {
+    const parametersUpdate = GenericMockUpdate.getValidUpdate({
+      message: {
+        text: this.text,
+      },
+    });
+
+    return deepmerge(this.minimalUpdate, parametersUpdate);
   }
 
-  buildOverwrite<E extends PartialUpdate>(extra: E) {
-    return this.deepMerge(this.update, extra);
+  build() {
+    return this.buildUpdate();
+  }
+
+  buildOverwrite<TExtra extends PartialUpdate>(extra: TExtra) {
+    return this.deepMerge(this.buildUpdate(), extra);
   }
 }

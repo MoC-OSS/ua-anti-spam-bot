@@ -1,7 +1,18 @@
-import { creatorId } from '../../creator';
-import { redisService } from '../../services';
-import type { GrammyMiddleware } from '../../types';
+import { creatorId } from '@bot/creator';
 
+import { redisService } from '@services/redis.service';
+
+import type { GrammyMiddleware } from '@app-types/context';
+
+import { logger } from '@utils/logger.util';
+
+/**
+ * Short-circuits the middleware chain when the bot is deactivated via Redis.
+ * Always allows messages through for the bot creator in private chat.
+ * @param context - The Grammy context object
+ * @param next - The next middleware function in the chain
+ * @returns A promise that resolves when the middleware chain completes
+ */
 export const botRedisActive: GrammyMiddleware = async (context, next) => {
   const isDeactivated = await redisService.getIsBotDeactivated();
   const isInLocal = context.chat?.type === 'private' && context.chat?.id === creatorId;
@@ -10,5 +21,8 @@ export const botRedisActive: GrammyMiddleware = async (context, next) => {
     return next();
   }
 
-  console.info('Skip due to redis:', context.chat?.id);
+  logger.info({ chatId: context.chat?.id }, 'Skip due to redis:');
+
+  // eslint-disable-next-line unicorn/no-useless-undefined
+  return undefined;
 };

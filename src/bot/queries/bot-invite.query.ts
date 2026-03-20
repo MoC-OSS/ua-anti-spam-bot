@@ -1,9 +1,18 @@
 import type { ChatAdministratorRights, ChatMember } from '@grammyjs/types/manage';
 
-import { getBotJoinMessage } from '../../message';
-import type { GrammyQueryMiddleware } from '../../types';
-import { telegramUtil } from '../../utils';
+import { getBotJoinMessage } from '@message';
 
+import type { GrammyQueryMiddleware } from '@app-types/context';
+
+import { telegramUtility } from '@utils/util-instances.util';
+
+/**
+ * Handles the bot being invited to a group or channel.
+ * Resets removal state and sends a welcome/setup message to the chat admins.
+ * @param context - Grammy query context for the my_chat_member update.
+ * @param next - The next middleware function in the chain.
+ * @returns A Promise that resolves when the middleware chain has been processed.
+ */
 export const botInviteQuery: GrammyQueryMiddleware<'my_chat_member'> = async (context, next) => {
   const newStatuses = new Set<ChatMember['status']>(['member', 'administrator']);
   const oldStatuses = new Set<ChatMember['status']>(['left', 'kicked']);
@@ -14,8 +23,9 @@ export const botInviteQuery: GrammyQueryMiddleware<'my_chat_member'> = async (co
   // Invite as a normal member or admin
   if (oldStatuses.has(context.myChatMember.old_chat_member.status) && newStatuses.has(context.myChatMember.new_chat_member.status)) {
     context.chatSession.botRemoved = false;
-    const { adminsString } = await telegramUtil.getChatAdmins(context, context.chat.id);
-    await context.replyWithHTML(getBotJoinMessage({ adminsString, isAdmin, canDelete }));
+    const { adminsString } = await telegramUtility.getChatAdmins(context, context.chat.id);
+
+    await context.reply(getBotJoinMessage(context, { adminsString, isAdmin, canDelete }), { parse_mode: 'HTML' });
   }
 
   return next();

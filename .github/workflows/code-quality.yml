@@ -1,0 +1,29 @@
+name: Lint
+
+on:
+  pull_request:
+    branches: [master, develop]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Type Check
+        run: npm run lint:type-check
+
+      - name: Lint
+        run: npm run lint:js

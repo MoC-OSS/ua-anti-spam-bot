@@ -1,18 +1,23 @@
 import type * as Buffer from 'node:buffer';
-import axios from 'axios';
+
 import type { NextFunction } from 'grammy';
+
+import axios from 'axios';
 import sharp from 'sharp';
 
-import { environmentConfig } from '../../config';
-import type { GrammyContext } from '../../types';
-import { ImageType } from '../../types';
-import type { StateImage } from '../../types/state';
+import { environmentConfig } from '@shared/config';
+
+import type { GrammyContext } from '@app-types/context';
+import { ImageType } from '@app-types/image';
+import type { StateImage } from '@app-types/state';
 
 /**
- * @description
- * Add images into state.
- * Downloads the smallest one and appends into the state.
- * */
+ * Add images into state. Downloads the smallest one and appends into the state.
+ * @param context - The Grammy context object
+ * @param next - The next middleware function in the chain
+ * @returns A promise that resolves when the middleware chain completes
+ */
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export async function parsePhoto(context: GrammyContext, next: NextFunction) {
   if (!context.state.photo && context.state.photo !== null) {
     const photo = context.msg?.photo;

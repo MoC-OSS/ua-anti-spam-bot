@@ -1,25 +1,34 @@
-import escapeHTML from 'escape-html';
 import { Composer } from 'grammy';
 
-import { LOGS_CHAT_THREAD_IDS } from '../../../const';
-import { logsChat } from '../../../creator';
-import { cardLogsStartMessage, getDeleteFeatureMessage } from '../../../message';
-import type { GrammyContext } from '../../../types';
-import { getEnabledFeaturesString, getUserData, telegramUtil } from '../../../utils';
+import escapeHTML from 'escape-html';
+
+import { logsChat } from '@bot/creator';
+
+import { LOGS_CHAT_THREAD_IDS } from '@const/logs.const';
+
+import { cardLogsStartMessage, getDeleteFeatureMessage } from '@message';
+
+import type { GrammyContext } from '@app-types/context';
+
+import { getEnabledFeaturesString, getUserData } from '@utils/generic.util';
+import { telegramUtility } from '@utils/util-instances.util';
 
 /**
- * @description Remove strategic information logic
- * */
+ * Returns a composer that detects and deletes messages containing card numbers.
+ * @returns Object containing the no-cards composer instance.
+ */
 export const getNoCardsComposer = () => {
   const noCardsComposer = new Composer<GrammyContext>();
 
   /**
-   * @param {GrammyContext} context
-   * @param {string[]} cards
-   * @param {string} [message]
-   * */
+   * Logs a deleted card-containing message to the logs chat.
+   * @param context - The Grammy context of the incoming message.
+   * @param cards - List of card numbers detected in the message.
+   * @param [message] - Optional message text override.
+   * @returns Promise resolving to the sent log message.
+   */
   async function saveCardMessage(context: GrammyContext, cards: string[], message?: string) {
-    const { userMention, chatMention } = await telegramUtil.getLogsSaveMessageParts(context);
+    const { userMention, chatMention } = await telegramUtility.getLogsSaveMessageParts(context);
     const text = message || context.state?.text || '';
 
     return context.api.sendMessage(
@@ -42,10 +51,11 @@ export const getNoCardsComposer = () => {
 
       const { writeUsername, userId } = getUserData(context);
       const featuresString = getEnabledFeaturesString(context.chatSession.chatSettings);
+
       await saveCardMessage(context, cards, text);
 
       if (context.chatSession.chatSettings.disableDeleteMessage !== true) {
-        await context.replyWithSelfDestructedHTML(getDeleteFeatureMessage({ writeUsername, userId, featuresString }));
+        await context.replyWithSelfDestructedHTML(getDeleteFeatureMessage(context, { writeUsername, userId, featuresString }));
       }
     }
 
