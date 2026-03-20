@@ -15,13 +15,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY package*.json ./
 COPY patches ./patches
 
-RUN npm ci
+RUN npm ci --omit=dev
 
 COPY . .
 
 RUN mkdir -p /usr/src/app/src/tensor/temp /usr/src/app/src/shared/video/temp && \
     chown -R node:node /usr/src/app/src/tensor/temp /usr/src/app/src/shared/video/temp
-    
+
 # Switch to non-root user for security (node user already exists in Node.js base image)
 USER node
 
