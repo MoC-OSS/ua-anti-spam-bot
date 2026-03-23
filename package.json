@@ -2,8 +2,20 @@
   "name": "ua-anti-spam-bot",
   "version": "1.4.8",
   "private": true,
+  "packageManager": "pnpm@10.32.1+sha512.a706938f0e89ac1456b6563eab4edf1d1faf3368d1191fc5c59790e96dc918e4456ab2e67d613de1043d2e8c81f87303e6b40d4ffeca9df15ef1ad567348f2be",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@tensorflow/tfjs-node",
+      "core-js",
+      "esbuild",
+      "ffmpeg-static",
+      "sharp",
+      "ukrainian-ml-optimizer"
+    ]
+  },
   "engines": {
-    "node": ">=20.x"
+    "node": ">=20.x",
+    "pnpm": ">=10.17.1"
   },
   "scripts": {
     "start:bot": "nodemon src/bot/index.ts",
@@ -15,19 +27,19 @@
     "check-swindler:positives": "tsx ./dataset/scripts/check-swindlers.ts positives",
     "check-swindler:negatives": "tsx ./dataset/scripts/check-swindlers.ts negatives",
     "build": "echo 'TODO: Delete it'",
-    "download-swindler": "tsx dataset/scripts/download-swindler-dataset.ts && npm run optimize-swindler",
+    "download-swindler": "tsx dataset/scripts/download-swindler-dataset.ts && pnpm run optimize-swindler",
     "optimize-swindler": "tsx dataset/scripts/optimize-swindler-dataset.ts positives && tsx dataset/scripts/optimize-swindler-dataset.ts negatives",
     "optimize-obscene": "tsx ./dataset/scripts/obscene-optimization.ts",
     "lint": "npm-run-all --parallel lint:js lint:type-check test",
     "track-time": "smile-track",
-    "lint:js": "cross-env TIMING=1 npx eslint --cache",
-    "lint:js:fix": "npm run lint:js -- --fix",
+    "lint:js": "cross-env TIMING=1 eslint --cache",
+    "lint:js:fix": "cross-env TIMING=1 eslint --cache --fix",
     "lint:type-check": "tsc --noEmit",
-    "format:md": "npx prettier --write \"**/*.md\"",
-    "typecheck": "npx tsc --noEmit",
-    "test": "npx vitest run",
-    "test:coverage": "npx vitest run --coverage",
-    "format": "npx prettier . --write",
+    "format:md": "prettier --write \"**/*.md\"",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "format": "prettier . --write",
     "prepare": "husky",
     "codex-prepare": "sh ./scripts/link-codex-skills.sh",
     "postinstall": "patch-package"

@@ -64,7 +64,7 @@ export class UpdatesHandler {
     this.swindlersTopUsed = Object.keys(datasetExtras.swindlers_top_used);
 
     if (this.swindlersTopUsed.length === 0) {
-      logger.info('WARN: swindlers_top_used are not generated! You need to run `npm run download-swindlers` to generate this file!');
+      logger.info('WARN: swindlers_top_used are not generated! You need to run `pnpm run download-swindler` to generate this file!');
     }
   }
 

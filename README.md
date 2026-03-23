@@ -76,17 +76,18 @@ tests/                # Vitest test suite (mirrors src/ structure)
   - [2. Installing `Node.js`](#2-installing-nodejs)
     - [NVM (recommended)](#nvm-recommended)
     - [Node](#node)
-  - [3. Installing Redis](#3-installing-redis)
+  - [3. Enabling `pnpm`](#3-enabling-pnpm)
+  - [4. Installing Redis](#4-installing-redis)
     - [Docker-compose (recommended)](#docker-compose-recommended)
     - [Install in System](#install-in-system)
-  - [4. Installing `node_modules`](#4-installing-node_modules)
-  - [5. Copy `.env` file](#5-copy-env-file)
-  - [6. Create your bot](#6-create-your-bot)
-  - [7. Set your Telegram ID](#7-set-your-telegram-id)
-  - [8. Set local testing `.env` variables](#8-set-local-testing-env-variables)
-  - [9. Set Google Credits (confidential)](#9-set-google-credits-confidential)
-  - [10. Set Alarm Credits (confidential)](#10-set-alarm-credits-confidential)
-  - [11. Copy tensor files](#11-copy-tensor-files)
+  - [5. Installing dependencies](#5-installing-dependencies)
+  - [6. Copy `.env` file](#6-copy-env-file)
+  - [7. Create your bot](#7-create-your-bot)
+  - [8. Set your Telegram ID](#8-set-your-telegram-id)
+  - [9. Set local testing `.env` variables](#9-set-local-testing-env-variables)
+  - [10. Set Google Credits (confidential)](#10-set-google-credits-confidential)
+  - [11. Set Alarm Credits (confidential)](#11-set-alarm-credits-confidential)
+  - [12. Copy tensor files](#12-copy-tensor-files)
 - [For external users](#for-external-users)
   - [1. Disable Google API](#1-disable-google-API)
   - [2. Disable Alarm API](#2-disable-alarm-API)
@@ -138,27 +139,40 @@ nvm use
 
 If you have Windows or want to install Node into the system, find the download Node.js version specified in `.nvmrc`.
 
-### 3. Installing Redis
+### 3. Enabling `pnpm`
+
+This repository uses `pnpm` and commits `pnpm-lock.yaml` as the source of truth for dependency resolution.
+
+Enable `corepack`, which ships with modern Node.js versions, and activate the pinned `pnpm` version from `package.json`:
+
+```bash
+corepack enable
+corepack use pnpm@10.17.1
+```
+
+### 4. Installing Redis
 
 #### Docker-compose (recommended)
 
-If you have `docker` and `docker-compose`, just run the following command:
+If you have Docker with the Compose plugin installed, run:
 
 ```bash
-docker-compose up -d redis
+docker compose up -d redis
 ```
 
 #### Install in System
 
-If you don't want to use `docker-compose`, you can [install redis in system](https://redis.io/).
+If you don't want to use Docker Compose, you can [install redis in system](https://redis.io/).
 
-### 4. Installing `node_modules`
+### 5. Installing dependencies
 
 ```bash
-npm i
+pnpm install --frozen-lockfile
 ```
 
-### 5. Copy `.env` file
+Do not regenerate `package-lock.json`; this project is managed with `pnpm`.
+
+### 6. Copy `.env` file
 
 Copy `.env.template` file to `.env`:
 
@@ -166,7 +180,7 @@ Copy `.env.template` file to `.env`:
 cp .env.template .env
 ```
 
-### 6. Create your bot
+### 7. Create your bot
 
 Now you need to get `BOT_TOKEN` from [@BotFather](https://t.me/BotFather). You may find instruction here: https://core.telegram.org/bots/tutorial#obtain-your-bot-token
 
@@ -176,7 +190,7 @@ Set it into `.env` file:
 BOT_TOKEN=4839574812:AAFD39kkdpWt3ywyRZergyOLMaJhac60qc
 ```
 
-### 7. Set your Telegram ID
+### 8. Set your Telegram ID
 
 You can ask [@RawDataBot](https://t.me/RawDataBot) to get your ID. Simply write `/start` and find `message.from.id`. E.g, it will be `999999999`.
 
@@ -186,7 +200,7 @@ Set it into `.env` file:
 CREATOR_ID=999999999
 ```
 
-### 8. Set local testing `.env` variables
+### 9. Set local testing `.env` variables
 
 We recommend to set the following variables in your .env file like this:
 
@@ -196,7 +210,7 @@ USE_SERVER=false
 DISABLE_LOGS_CHAT=true
 ```
 
-### 9. Set Google Credits (confidential)
+### 10. Set Google Credits (confidential)
 
 You need to obtain your own credits (or ask me if you from MOC team) and set them here:
 
@@ -205,7 +219,7 @@ GOOGLE_CREDITS=
 GOOGLE_SPREADSHEET_ID=
 ```
 
-### 10. Set Alarm Credits (confidential)
+### 11. Set Alarm Credits (confidential)
 
 We use https://alerts.com.ua/ to obtain air raid alarms. You need to ask for a key from the API developer (or me if you from MOC).
 
@@ -213,7 +227,7 @@ We use https://alerts.com.ua/ to obtain air raid alarms. You need to ask for a k
 ALARM_KEY=
 ```
 
-### 11. Copy tensor files
+### 12. Copy tensor files
 
 Extract and copy `ua-anti-spam-bot-ml-v3.zip` to `src/tensor/temp`.
 
@@ -247,7 +261,7 @@ If you're outside the MOC organization, use the copy-swindlers.sh script to copy
 To start your bot, simply run the following command:
 
 ```bash
-npm run start:bot
+pnpm run start:bot
 ```
 
 ### Enable bot in `Telegram`
@@ -278,8 +292,10 @@ If you want to run the bot via Docker, make sure that you have [Docker](https://
 Then, run the following command to start the bot in Docker:
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
+
+The Docker images install dependencies with `pnpm` using the committed `pnpm-lock.yaml`, and the builds keep a cached pnpm store to speed up rebuilds.
 
 ## Code Style
 
