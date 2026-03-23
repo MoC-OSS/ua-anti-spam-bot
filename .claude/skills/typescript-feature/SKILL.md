@@ -417,7 +417,7 @@ To understand patterns, study:
 
 ## When You Need More Information
 
-**If you get stuck or need more detail**, read these supplementary files from `.claude/skills/typescript-feature/`:
+**If you get stuck or need more detail**, read these supplementary files from `.claude/skills/typescript-feature/references/`:
 
 1. **Need a quick 5-minute overview?**
    → Read `QUICK_START.md`
