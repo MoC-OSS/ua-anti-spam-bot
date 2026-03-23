@@ -83,7 +83,7 @@
     "tsx": "^4.21.0",
     "typed-dotenv": "^10.0.2",
     "typegram": "^5.2.0",
-    "ukrainian-ml-optimizer": "github:DrSmile444/ukrainian-ml-optimizer",
+    "ukrainian-ml-optimizer": "^3.0.0",
     "validator": "^13.15.26"
   },
   "devDependencies": {
