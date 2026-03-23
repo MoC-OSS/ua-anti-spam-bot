@@ -13,7 +13,7 @@ WORKDIR /usr/src/app
 # Ensure native build tools are available so @tensorflow/tfjs-node can
 # compile its C++ binding from source when no pre-built binary is found.
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 make g++ \
+    python3 make g++ curl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY package.json package-lock.json ./
