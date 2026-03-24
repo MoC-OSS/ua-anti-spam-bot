@@ -103,7 +103,11 @@ export class VideoService {
         }
       }
 
-      return this.takeScreenshotsFs(videoFile, temporaryFileName, localDuration);
+      try {
+        return await this.takeScreenshotsFs(videoFile, temporaryFileName, localDuration);
+      } catch {
+        return [];
+      }
     } finally {
       await this.removeTempFile(videoFile);
     }
@@ -199,7 +203,7 @@ export class VideoService {
     /**
      * Convert video into screenshots and return files
      */
-    const fileNamePaths = await new Promise<string[]>((resolve) => {
+    const fileNamePaths = await new Promise<string[]>((resolve, reject) => {
       let localFileNames: string[] = [];
 
       command
@@ -207,13 +211,27 @@ export class VideoService {
         .on('filenames', (generatedFileNames: string[]) => {
           localFileNames = generatedFileNames;
         })
+        .on('error', (error) => {
+          reject(error);
+        })
         .on('end', () => {
           resolve(localFileNames);
         })
         .screenshots({
           size: '640x?',
           filename: `${filename}-%0i.png`,
-          count: Math.min(10, Math.ceil(duration)),
+          /**
+           * Use explicit second-based timestamps derived from the already-known duration
+           * instead of `count`. When `count` is used, fluent-ffmpeg converts it to percentage
+           * timemarks (e.g. '20%', '40%') which triggers an internal ffprobe call to resolve
+           * them to seconds. That second ffprobe call is the one that exits with code 1.
+           * Passing seconds directly skips the internal probe entirely.
+           */
+          timestamps: (() => {
+            const count = Math.min(10, Math.ceil(duration));
+
+            return Array.from({ length: count }, (_, index) => (duration / count) * (index + 0.5));
+          })(),
           folder: fileURLToPath(this.saveFolderPath),
         });
     });
