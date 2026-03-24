@@ -11,11 +11,9 @@ import { getDeleteNsfwMessage, nsfwLogsStartMessage } from '@message';
 
 import { environmentConfig } from '@shared/config';
 
-import type { NsfwTensorService } from '@tensor/nsfw-tensor.service';
-
 import type { GrammyContext } from '@app-types/context';
 import { ImageType } from '@app-types/image';
-import type { NsfwTensorPositiveResult, NsfwTensorResult } from '@app-types/nsfw';
+import type { NsfwPredictor, NsfwTensorPositiveResult, NsfwTensorResult } from '@app-types/nsfw';
 import type { NsfwPhotoResult, StateImageAnimation, StateImageVideo } from '@app-types/state';
 
 import { handleError } from '@utils/error-handler.util';
@@ -151,7 +149,7 @@ const saveNsfwMessage = async (context: GrammyContext) => {
 
 /** Properties for the NSFW image/video filter composer. */
 export interface NsfwFilterComposerProperties {
-  nsfwTensorService: NsfwTensorService;
+  nsfwTensorService: NsfwPredictor;
 }
 
 /**

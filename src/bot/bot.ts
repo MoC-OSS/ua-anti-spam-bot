@@ -50,7 +50,7 @@ import { swindlersGoogleService } from '@services/swindlers-google.service';
 
 import { environmentConfig } from '@shared/config';
 
-import { initNsfwTensor } from '@tensor/nsfw-tensor.service';
+import { initNsfwWorker } from '@tensor/nsfw-worker-service';
 import { initTensor } from '@tensor/tensor.service';
 
 import type { GrammyContext, GrammyMenuContext } from '@app-types/context';
@@ -138,7 +138,7 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
 
   tensorService.setSpamThreshold(await redisService.getBotTensorPercent());
 
-  const nsfwTensorService = await initNsfwTensor();
+  const nsfwTensorService = await initNsfwWorker();
 
   const { dynamicStorageService, swindlersDetectService } = await initSwindlersContainer();
 
