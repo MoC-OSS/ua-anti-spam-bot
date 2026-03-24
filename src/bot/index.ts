@@ -20,6 +20,8 @@ import type { GrammyContext } from '@app-types/context';
 import { sleep } from '@utils/generic.util';
 import { logger } from '@utils/logger.util';
 
+import { version } from '../../package.json';
+
 import { getBot } from './bot';
 import { runBotExpressServer } from './bot-server';
 import { logsChat } from './creator';
@@ -77,7 +79,7 @@ import { logsChat } from './creator';
 
   if (environmentConfig.ENV !== 'local') {
     bot.api
-      .sendMessage(logsChat, `🎉 <b>Bot @${bot.botInfo.username} has been started!</b>\n<i>${new Date().toString()}</i>`, {
+      .sendMessage(logsChat, `🎉 <b>Bot @${bot.botInfo.username} has been started!</b> v${version}\n<i>${new Date().toString()}</i>`, {
         parse_mode: 'HTML',
       })
       .catch(() => {
