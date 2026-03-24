@@ -46,6 +46,13 @@ interface PredictVideoMessage {
 
 const { modelType } = workerData as NsfwWorkerData;
 
+// Enable TensorFlow production mode to skip expensive dtype/shape validation
+// and NaN/Infinity checks, reducing per-inference overhead.
+// The worker inherits process.env from the parent, so ENV is available.
+if (process.env['ENV'] === 'production') {
+  tf.enableProdMode();
+}
+
 /** Spam probability thresholds per NSFW class (mirrors NsfwTensorService.predictionChecks). */
 const PREDICTION_CHECKS = new Map([
   ['Hentai', 0.85],
