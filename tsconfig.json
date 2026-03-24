@@ -84,6 +84,7 @@
     "vitest.config.ts",
     "src/**/*",
     "tests/**/*",
+    "benchmarks/**/*",
     "dataset/**/*",
     "scripts/**/*",
     ".eslint/**/*"
