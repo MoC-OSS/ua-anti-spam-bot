@@ -175,6 +175,16 @@ describe('VideoService', () => {
         expect(unlinkSpy).toHaveBeenCalledWith(writtenFile);
       });
 
+      it('returns no frames when takeScreenshotsFs fails', async () => {
+        vi.spyOn(fsp, 'writeFile').mockResolvedValue();
+        vi.spyOn(fsp, 'unlink').mockResolvedValue();
+        vi.spyOn(service, 'ensureSaveFolder').mockResolvedValue();
+        vi.spyOn(service, 'getVideoProbe').mockResolvedValue({ format: { duration: 2 } } as never);
+        vi.spyOn(service, 'takeScreenshotsFs').mockRejectedValue(new Error('ffprobe exited with code 1'));
+
+        await expect(service.extractFrames(Buffer.from('video'), 'clip.mp4')).resolves.toEqual([]);
+      });
+
       it('returns no frames when ffprobe reports an invalid duration', async () => {
         const unlinkSpy = vi.spyOn(fsp, 'unlink').mockResolvedValue();
 
@@ -310,7 +320,45 @@ describe('VideoService', () => {
   });
 
   describe('takeScreenshotsFs', () => {
+    describe('negative cases', () => {
+      it('rejects when ffmpeg emits an error event', async () => {
+        vi.spyOn(service, 'spawnCommand').mockReturnValue({
+          input: vi.fn().mockReturnThis(),
+          on(event: string, callback: (error: Error) => void) {
+            if (event === 'error') {
+              callback(new Error('ffprobe exited with code 1'));
+            }
+
+            return this;
+          },
+          screenshots: vi.fn().mockReturnThis(),
+        } as never);
+
+        await expect(service.takeScreenshotsFs(new URL('input.mp4', service.saveFolderPath), 'clip.mp4', 2)).rejects.toThrow(
+          'ffprobe exited with code 1',
+        );
+      });
+    });
+
     describe('positive cases', () => {
+      it('passes explicit second-based timestamps to avoid an internal ffprobe call', async () => {
+        // duration=4 → count=min(10,ceil(4))=4 → timestamps=[0.5, 1.5, 2.5, 3.5]
+        const screenshotsSpy = vi.fn().mockReturnThis();
+
+        vi.spyOn(service, 'spawnCommand').mockReturnValue({
+          input: vi.fn().mockReturnThis(),
+          on: vi.fn().mockReturnThis(),
+          screenshots: screenshotsSpy,
+        } as never);
+
+        service.takeScreenshotsFs(new URL('input.mp4', service.saveFolderPath), 'clip.mp4', 4).catch(() => {});
+
+        const [options] = screenshotsSpy.mock.calls[0] as [Record<string, unknown>];
+
+        expect(options).not.toHaveProperty('count');
+        expect(options.timestamps).toEqual([0.5, 1.5, 2.5, 3.5]);
+      });
+
       it('reads generated screenshots and removes them afterwards', async () => {
         let filenamesCallback: ((fileNames: string[]) => void) | undefined;
         let endCallback: (() => void) | undefined;
