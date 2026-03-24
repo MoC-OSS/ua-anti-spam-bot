@@ -9,8 +9,6 @@ import { Bot } from 'grammy';
 
 import ms from 'ms';
 
-import { alarmService } from '@services/alarm.service';
-
 import { environmentConfig } from '@shared/config';
 
 import * as tf from '@tensorflow/tfjs-node';
@@ -88,24 +86,7 @@ import { logsChat } from './creator';
       .catch(() => {
         logger.error('This bot is not authorized in this LOGS chat!');
       });
-
-    /**
-     * Enable alarm service only after bot is started
-     */
-    alarmService.updatesEmitter.on('connect', (reason) => {
-      bot.api.sendMessage(logsChat, `🎉 Air Raid Alarm API has been started by ${reason} reason!`).catch(() => {
-        logger.error('This bot is not authorized in this LOGS chat!');
-      });
-    });
-
-    alarmService.updatesEmitter.on('close', (reason) => {
-      bot.api.sendMessage(logsChat, `⛔️ Air Raid Alarm API has been stopped by ${reason} reason!`).catch(() => {
-        logger.error('This bot is not authorized in this LOGS chat!');
-      });
-    });
   }
-
-  alarmService.enable('bot_start');
 
   // Enable graceful stop
   const stopRunner = () => runner.isRunning() && runner.stop();

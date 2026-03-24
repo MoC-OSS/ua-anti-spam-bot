@@ -39,8 +39,6 @@ import moment from 'moment-timezone';
 
 import * as redisClient from '@db/redis.client';
 
-import { alarmService } from '@services/alarm.service';
-import { alarmChatService } from '@services/alarm-chat.service';
 import { CounteroffensiveService } from '@services/counteroffensive.service';
 import { NsfwDetectService } from '@services/nsfw-detect.service';
 import { redisService } from '@services/redis.service';
@@ -144,17 +142,8 @@ export const getBot = async (bot: Bot<GrammyContext>) => {
 
   const startTime = new Date();
 
-  if (!environmentConfig.UNIT_TESTING) {
-    await alarmChatService.init(bot.api);
-  }
-
-  const airRaidAlarmStates = await alarmService.getStates();
-
-  if (airRaidAlarmStates.states.length === 0) {
-    // NOTE: advance logic could be added here when no alarm states are available
-    // console.error('No states are available. Air raid feature is not working...');
-    // bot.api.sendMessage(logsChat, 'No states are available. Air raid feature is not working...').catch(emptyFunction);
-  }
+  // NOTE: Air raid alert feature is disabled. alarmChatService.init() is skipped
+  // until a replacement API is integrated.
 
   const commandSetter = new CommandSetter(bot, startTime, !(await redisService.getIsBotDeactivated()));
 
