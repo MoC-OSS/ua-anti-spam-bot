@@ -41,18 +41,24 @@ const uploadMiddleware = multer({ storage: uploadMemoryStorage });
     tf.enableProdMode();
   }
 
+  // Start health-check endpoint immediately so ALB probes pass during model loading.
+  // eslint-disable-next-line sonarjs/x-powered-by
+  const app = express();
+
+  app.use(express.json());
+  app.get('/healthcheck', (request, response) => response.json({ status: 'ok' }));
+
+  app.listen(environmentConfig.PORT, environmentConfig.HOST, () => {
+    logger.info(`Health-check server started on http://${environmentConfig.HOST}:${environmentConfig.PORT}`);
+  });
+
   const s3Service = new S3Service();
 
   const tensorService = await initTensor(s3Service);
   const nsfwTensorService = await initNsfwTensor();
   const { swindlersDetectService } = await initSwindlersContainer();
 
-  // eslint-disable-next-line sonarjs/x-powered-by
-  const app = express();
   const expressStartTime = new Date().toString();
-
-  app.use(express.json());
-  app.get('/healthcheck', (request, response) => response.json({ status: 'ok' }));
 
   app.post<'/process', RouteParameters<'/process'>, ProcessResponseBody, ProcessRequestBody>('/process', (request, response) => {
     const startTime = performance.now();
@@ -161,9 +167,7 @@ const uploadMiddleware = multer({ storage: uploadMemoryStorage });
     },
   );
 
-  app.listen(environmentConfig.PORT, environmentConfig.HOST, () => {
-    logger.info(`Backend server started on http://${environmentConfig.HOST}:${environmentConfig.PORT}`);
-  });
+  logger.info('Backend API routes registered. Server is fully ready.');
 
   const newMemoryUsage = process.memoryUsage();
 

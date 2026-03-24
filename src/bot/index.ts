@@ -23,7 +23,7 @@ import { logger } from '@utils/logger.util';
 import { version } from '../../package.json';
 
 import { getBot } from './bot';
-import { runBotExpressServer } from './bot-server';
+import { attachBotApiRoutes, startHealthCheckServer } from './bot-server';
 import { logsChat } from './creator';
 
 (async () => {
@@ -35,6 +35,9 @@ import { logsChat } from './creator';
     tf.enableProdMode();
   }
 
+  // Start health-check server immediately so ALB probes pass during model loading.
+  const healthApp = startHealthCheckServer();
+
   logger.info('Waiting for the old instance to down...');
   await sleep(environmentConfig.ENV === 'local' ? 0 : ms('5s'));
   logger.info('Starting a new instance...');
@@ -42,7 +45,7 @@ import { logsChat } from './creator';
   const initialBot = new Bot<GrammyContext>(environmentConfig?.BOT_TOKEN);
   const bot = await getBot(initialBot);
 
-  runBotExpressServer(bot);
+  attachBotApiRoutes(healthApp, bot);
 
   const runner = run(bot, {
     runner: {
