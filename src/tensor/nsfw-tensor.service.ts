@@ -47,12 +47,33 @@ export class NsfwTensorService {
   }
 
   /**
-   * Classifies multiple video frames in parallel and returns predictions for each.
+   * Classifies video frames one at a time and stops as soon as a frame exceeds
+   * the spam threshold, avoiding unnecessary inference on remaining frames.
+   *
+   * Implemented as tail recursion to satisfy both `no-await-in-loop` (no loop
+   * construct used) and `unicorn/no-array-reduce` (no reduce used).
    * @param imageArray - Array of image buffers (one per video frame).
-   * @returns A promise resolving to an array of prediction arrays, one per frame.
+   * @returns A promise resolving to prediction arrays for every frame that was checked.
    */
   classifyVideo(imageArray: Buffer[]): Promise<PredictionType[][]> {
-    return Promise.all(imageArray.map((image) => this.classify(image)));
+    const classifySequentially = async (remaining: Buffer[], accumulated: PredictionType[][]): Promise<PredictionType[][]> => {
+      const [current, ...rest] = remaining;
+
+      if (!current) {
+        return accumulated;
+      }
+
+      const predictions = await this.classify(current);
+      const updated = [...accumulated, predictions];
+
+      if (this.findHighestPrediction(predictions).deletePrediction) {
+        return updated;
+      }
+
+      return classifySequentially(rest, updated);
+    };
+
+    return classifySequentially(imageArray, []);
   }
 
   /**

@@ -1,4 +1,6 @@
+import { randomUUID } from 'node:crypto';
 import fsp from 'node:fs/promises';
+import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 
@@ -12,6 +14,42 @@ import ffmpeg from 'fluent-ffmpeg';
  */
 export class VideoService {
   readonly saveFolderPath = new URL('temp/', import.meta.url);
+
+  /**
+   * Ensures the temp folder exists before writing transient video artifacts.
+   * @returns A promise that resolves when the temp folder is ready
+   */
+  async ensureSaveFolder(): Promise<void> {
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
+    await fsp.mkdir(this.saveFolderPath, { recursive: true });
+  }
+
+  /**
+   * Builds a unique temp file name so concurrent or repeated requests never reuse stale files.
+   * @param fileName - original logical file name
+   * @returns A randomized safe file name for temp storage
+   */
+  buildTempFileName(fileName: string): string {
+    const safeFileName = fileName.replaceAll(/[^a-zA-Z0-9._-]/g, '_') || 'video.tmp';
+
+    return `${randomUUID()}-${safeFileName}`;
+  }
+
+  /**
+   * Removes a temp file if it exists.
+   * @param filePath - file to remove
+   * @returns A promise that resolves when cleanup is complete
+   */
+  async removeTempFile(filePath: URL): Promise<void> {
+    try {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
+      await fsp.unlink(filePath);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+        throw error;
+      }
+    }
+  }
 
   /**
    * Create a `ffmpeg` command with specified `ffmpeg` and `ffprobe` binaries
@@ -38,30 +76,41 @@ export class VideoService {
    * @returns A promise resolving to an array of screenshot buffers, or an empty array if not a video
    */
   async extractFrames(video: Buffer, filename: string, duration?: number) {
+    await this.ensureSaveFolder();
+
     let localDuration = duration;
-    const videoFile = new URL(filename, this.saveFolderPath);
+    const temporaryFileName = this.buildTempFileName(filename);
+    const videoFile = new URL(temporaryFileName, this.saveFolderPath);
 
     // eslint-disable-next-line security/detect-non-literal-fs-filename
     await fsp.writeFile(videoFile, video);
 
-    if (!localDuration) {
-      try {
-        const fileStat: FfprobeData = await this.getVideoProbe(videoFile);
+    try {
+      if (!localDuration) {
+        try {
+          const fileStat: FfprobeData = await this.getVideoProbe(videoFile);
 
-        if (!fileStat.format.duration || fileStat.format.duration < 0.1) {
-          throw new Error('Video has no duration');
+          if (!fileStat.format.duration || fileStat.format.duration < 0.1) {
+            throw new Error('Video has no duration');
+          }
+
+          localDuration = fileStat.format.duration;
+        } catch {
+          /**
+           * This is not a video so there is no frames
+           */
+          return [];
         }
+      }
 
-        localDuration = fileStat.format.duration;
+      try {
+        return await this.takeScreenshotsFs(videoFile, temporaryFileName, localDuration);
       } catch {
-        /**
-         * This is not a video so there is no frames
-         */
         return [];
       }
+    } finally {
+      await this.removeTempFile(videoFile);
     }
-
-    return this.takeScreenshotsFs(videoFile, filename, localDuration);
   }
 
   /**
@@ -84,54 +133,57 @@ export class VideoService {
   async convertToVideoNote(videoFile: Buffer, fileName: string): Promise<Buffer>;
 
   async convertToVideoNote(videoFile: Buffer | URL, fileName: string): Promise<Buffer> {
+    await this.ensureSaveFolder();
+
     let videoPath: URL;
-    let outputVideoName: string;
+    let shouldRemoveInputFile = false;
 
     if (videoFile instanceof URL) {
       /**
        * A regular file, just read it
        */
       videoPath = videoFile;
-      outputVideoName = `${fileURLToPath(videoFile).split('/').splice(-1)[0]}-video-note.mp4`;
     } else {
       /**
        * Passed buffer, need to be saved and deleted after the operation
        */
-      videoPath = new URL(`${fileName}.mp4`, this.saveFolderPath);
-      outputVideoName = `${new Date().toString()}-video-note.mp4`;
+      videoPath = new URL(this.buildTempFileName(`${fileName}.mp4`), this.saveFolderPath);
+      shouldRemoveInputFile = true;
       // eslint-disable-next-line security/detect-non-literal-fs-filename
       await fsp.writeFile(videoPath, videoFile);
     }
 
+    const outputVideoName = this.buildTempFileName(`${path.basename(fileURLToPath(videoPath))}-video-note.mp4`);
     const outputVideoPath = new URL(outputVideoName, this.saveFolderPath);
 
     const command = this.spawnCommand();
 
-    await new Promise((resolve) => {
-      command
-        .input(fileURLToPath(videoPath))
-        .size('512x?')
-        .aspect('1:1')
-        .autopad()
-        .output(fileURLToPath(outputVideoPath))
-        .on('end', () => {
-          resolve(null);
-        })
-        .run();
-    });
+    try {
+      await new Promise<void>((resolve, reject) => {
+        command
+          .input(fileURLToPath(videoPath))
+          .size('512x?')
+          .aspect('1:1')
+          .autopad()
+          .output(fileURLToPath(outputVideoPath))
+          .on('end', () => {
+            resolve();
+          })
+          .on('error', (error) => {
+            reject(error);
+          })
+          .run();
+      });
 
-    // eslint-disable-next-line security/detect-non-literal-fs-filename
-    const outputVideoBuffer = await fsp.readFile(outputVideoPath);
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
+      return await fsp.readFile(outputVideoPath);
+    } finally {
+      if (shouldRemoveInputFile) {
+        await this.removeTempFile(videoPath);
+      }
 
-    /**
-     * Remove files from FS
-     */
-    // eslint-disable-next-line security/detect-non-literal-fs-filename
-    await fsp.unlink(videoPath);
-    // eslint-disable-next-line security/detect-non-literal-fs-filename
-    await fsp.unlink(outputVideoPath);
-
-    return outputVideoBuffer;
+      await this.removeTempFile(outputVideoPath);
+    }
   }
 
   /**
@@ -151,7 +203,7 @@ export class VideoService {
     /**
      * Convert video into screenshots and return files
      */
-    const fileNamePaths = await new Promise<string[]>((resolve) => {
+    const fileNamePaths = await new Promise<string[]>((resolve, reject) => {
       let localFileNames: string[] = [];
 
       command
@@ -159,13 +211,27 @@ export class VideoService {
         .on('filenames', (generatedFileNames: string[]) => {
           localFileNames = generatedFileNames;
         })
+        .on('error', (error) => {
+          reject(error);
+        })
         .on('end', () => {
           resolve(localFileNames);
         })
         .screenshots({
           size: '640x?',
           filename: `${filename}-%0i.png`,
-          count: Math.min(10, Math.ceil(duration)),
+          /**
+           * Use explicit second-based timestamps derived from the already-known duration
+           * instead of `count`. When `count` is used, fluent-ffmpeg converts it to percentage
+           * timemarks (e.g. '20%', '40%') which triggers an internal ffprobe call to resolve
+           * them to seconds. That second ffprobe call is the one that exits with code 1.
+           * Passing seconds directly skips the internal probe entirely.
+           */
+          timestamps: (() => {
+            const count = Math.min(10, Math.ceil(duration));
+
+            return Array.from({ length: count }, (_, index) => (duration / count) * (index + 0.5));
+          })(),
           folder: fileURLToPath(this.saveFolderPath),
         });
     });
@@ -178,18 +244,14 @@ export class VideoService {
     /**
      * Load files from FS
      */
-    // eslint-disable-next-line security/detect-non-literal-fs-filename
-    const screenshotBuffers = await Promise.all(fullFileNamePaths.map((fullPath) => fsp.readFile(fullPath)));
-
-    /**
-     * Remove files from FS
-     */
-    // eslint-disable-next-line security/detect-non-literal-fs-filename
-    await Promise.all(fullFileNamePaths.map((fullPath) => fsp.unlink(fullPath)));
-    // eslint-disable-next-line security/detect-non-literal-fs-filename
-    await fsp.unlink(videoFile);
-
-    return screenshotBuffers;
+    try {
+      return await Promise.all(
+        // eslint-disable-next-line security/detect-non-literal-fs-filename
+        fullFileNamePaths.map((fullPath) => fsp.readFile(fullPath)),
+      );
+    } finally {
+      await Promise.all(fullFileNamePaths.map((fullPath) => this.removeTempFile(fullPath)));
+    }
   }
 }
 

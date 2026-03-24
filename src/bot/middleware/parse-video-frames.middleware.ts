@@ -45,6 +45,13 @@ export const parseVideoFrames: GrammyMiddleware = async (context, next) => {
   const isVideoSmall = (video.file_size || 0) < MAX_VIDEO_SIZE;
 
   /**
+   * Telegram provides duration (in whole seconds) on Video, Animation, and VideoNote.
+   * Passing it to extractFrames skips the ffprobe call for those types.
+   * VideoSticker (Sticker) has no duration field, so ffprobe runs as the fallback.
+   */
+  const telegramDuration = 'duration' in video ? (video.duration as number) : undefined;
+
+  /**
    * Checks whatever is it video or animation and if it has a meta.
    */
   if (isVideoSmall) {
@@ -63,6 +70,10 @@ export const parseVideoFrames: GrammyMiddleware = async (context, next) => {
 
       formData.append('video', videoFile, { filename: videoName });
 
+      if (telegramDuration !== undefined) {
+        formData.append('duration', String(telegramDuration));
+      }
+
       const getServerResponse = () =>
         axios
           .post<ParseVideoSuccessResponseBody>(`${host}/parse-video`, formData, {
@@ -70,10 +81,12 @@ export const parseVideoFrames: GrammyMiddleware = async (context, next) => {
           })
           .then((response) => response.data.screenshots.map((screenshot) => Buffer.from(screenshot.data)));
 
-      responseFiles = await (environmentConfig.USE_SERVER ? getServerResponse() : videoService.extractFrames(videoFile, videoName));
+      responseFiles = await (environmentConfig.USE_SERVER
+        ? getServerResponse()
+        : videoService.extractFrames(videoFile, videoName, telegramDuration));
     } catch (error) {
       handleError(error, 'API_DOWN');
-      responseFiles = await videoService.extractFrames(videoFile, videoName);
+      responseFiles = await videoService.extractFrames(videoFile, videoName, telegramDuration);
     }
 
     if (responseFiles && responseFiles.length > 0) {
