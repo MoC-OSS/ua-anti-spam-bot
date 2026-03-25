@@ -39,7 +39,7 @@ export async function parsePhoto(context: GrammyContext, next: NextFunction) {
     // Round video messages
     const videoNoteMeta = videoNote && videoNote.thumbnail;
 
-    const imageMeta = photoMeta || stickerMeta || videoStickerMeta || videoMeta || animationMeta || videoNoteMeta;
+    const imageMeta = photoMeta || stickerMeta || videoStickerMeta?.thumbnail || videoMeta || animationMeta || videoNoteMeta;
     let imageType: ImageType = ImageType.UNKNOWN;
 
     if (photoMeta) {
@@ -69,7 +69,7 @@ export async function parsePhoto(context: GrammyContext, next: NextFunction) {
       : null;
 
     context.state.photo = {
-      meta: imageMeta,
+      meta: videoStickerMeta ?? imageMeta,
       type: imageType,
       file: photoFile ? await sharp(photoFile).jpeg().toBuffer() : null,
       thumb: videoStickerMeta?.thumbnail,

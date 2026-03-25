@@ -7,6 +7,8 @@ import type { GrammyContext } from '@app-types/context';
 import { formatDateIntoAccusative } from '@utils/date-format.util';
 import { logger } from '@utils/logger.util';
 
+import { version } from '../../../package.json';
+
 /**
  * Handles bot public available commands
  * @see https://grammy.dev/guide/commands.html#usage
@@ -55,7 +57,7 @@ export class CommandSetter {
      */
     this.commands = [
       { command: 'start', description: '🇺🇦 Почати роботу' },
-      { command: 'help', description: '🙋🏻 Отримати допомогу' },
+      { command: 'help', description: `🙋🏻 Отримати допомогу / Версія ${version}` },
       { command: 'settings', description: '⚙️ Налаштування' },
       { command: 'language', description: '🌐 Змінити мову / Change language' },
       { command: 'role', description: '🧪 Тест ролі адміністратора' },

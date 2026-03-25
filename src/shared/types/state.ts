@@ -50,8 +50,10 @@ export interface StateImageParsedFrames {
 export interface StateImageVideoSticker extends StateImageParsedFrames {
   meta: Sticker;
   type: ImageType.VIDEO_STICKER;
-  thumb: PhotoSize;
-  file: Buffer;
+  /** Present only when Telegram provides a thumbnail for the video sticker. */
+  thumb?: PhotoSize;
+  /** Null when the sticker has no thumbnail (Sharp cannot process the raw video file). */
+  file: Buffer | null;
 }
 
 export interface StateImageVideo extends StateImageParsedFrames {

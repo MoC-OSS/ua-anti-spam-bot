@@ -38,6 +38,9 @@ describe('AlarmChatService', () => {
     alarmChatService.processChatAlarm = vi.fn(alarmChatService.processChatAlarm);
 
     await alarmChatService.init(apiMock as GrammyBot['api']);
+    // subscribeToAlarms is no longer called from init() while the feature is disabled.
+    // Call it explicitly here so the subscription tests can verify its behaviour.
+    alarmChatService.subscribeToAlarms();
   });
 
   // eslint-disable-next-line no-secrets/no-secrets

@@ -8,6 +8,12 @@ FROM --platform=linux/amd64 public.ecr.aws/docker/library/node:24
 
 ENV APP_WRITABLE_DIRS="/usr/src/app/src/tensor/temp /usr/src/app/src/shared/video/temp"
 
+# Suppress TF C++ informational messages that appear in Docker/AWS logs:
+#   "This TF binary is optimized to use available CPU instructions..."
+#   "TF-TRT Warning: Could not find TensorRT installations..."
+# 0=ALL 1=WARNING+ERROR 2=ERROR only 3=FATAL only
+ENV TF_CPP_MIN_LOG_LEVEL=2
+
 WORKDIR /usr/src/app
 
 # Ensure native build tools are available so @tensorflow/tfjs-node can
