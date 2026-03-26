@@ -5,7 +5,8 @@
     "./last-ctx.json",
     "./positives.json",
     "./negatives.json",
-    "node_modules"
+    "node_modules",
+    "./src/shared/video/temp/*"
   ],
   "exec": "tsx",
   "ext": "ts,mts,mjs,js,json,ftl",
