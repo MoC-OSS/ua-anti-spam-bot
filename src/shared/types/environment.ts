@@ -13,6 +13,10 @@ export interface ServerEnvironmentConfig {
   readonly USE_SERVER: boolean;
   readonly FRONTEND_HOST: string;
   readonly WEB_VIEW_URL: string;
+  /** Public base URL of the ML server (e.g. the ALB DNS). Used to register the alarm webhook with Stfalcon. */
+  readonly ALARM_WEBHOOK_BASE_URL?: string | null;
+  /** Shared secret sent in the `X-Alarm-Secret` header to authenticate incoming webhook calls. */
+  readonly ALARM_WEBHOOK_SECRET?: string | null;
 }
 
 export interface MiscellaneousEnvironmentConfig {
