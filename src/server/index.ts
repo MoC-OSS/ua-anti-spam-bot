@@ -2,7 +2,10 @@ import express from 'express';
 import type { RouteParameters } from 'express-serve-static-core';
 import multer from 'multer';
 
+import { createAlarmPublisher } from '@db/redis-pubsub';
+
 import { S3Service } from '@services/s3.service';
+import { stfalconAlarmApiService } from '@services/stfalcon-alarm-api.service';
 import { initSwindlersContainer } from '@services/swindlers.container';
 
 import { environmentConfig } from '@shared/config';
@@ -26,6 +29,7 @@ import { logger } from '@utils/logger.util';
 
 import { videoService } from '@video/video.service';
 
+import { createAlarmWebhookRouter } from './alarm-webhook.router';
 import { processHandler } from './process.handler';
 
 const uploadMemoryStorage = multer.memoryStorage();
@@ -172,6 +176,33 @@ const uploadMiddleware = multer({ storage: uploadMemoryStorage });
   const newMemoryUsage = process.memoryUsage();
 
   logger.info(`Memory Usage: ${newMemoryUsage.rss / 1024 / 1024} MB`);
+
+  // Initialize Redis publisher and mount the alarm webhook route.
+  if (!environmentConfig.DISABLE_ALARM_API) {
+    try {
+      const alarmPublisher = await createAlarmPublisher();
+
+      app.use(createAlarmWebhookRouter(alarmPublisher));
+      logger.info('Alarm webhook route mounted at POST /webhook/alarm.');
+
+      // Register (or re-register) the webhook URL with the Stfalcon API.
+      if (environmentConfig.ALARM_WEBHOOK_BASE_URL) {
+        const webhookUrl = `${environmentConfig.ALARM_WEBHOOK_BASE_URL}/webhook/alarm`;
+
+        await stfalconAlarmApiService.registerWebhook(webhookUrl).catch(async (error) => {
+          logger.warn(`Alarm webhook registration failed, attempting update: ${(error as Error).message}`);
+
+          await stfalconAlarmApiService.updateWebhook(webhookUrl).catch((updateError: unknown) => {
+            logger.error(updateError, 'Alarm webhook update also failed');
+          });
+        });
+      } else {
+        logger.warn('ALARM_WEBHOOK_BASE_URL is not set — skipping Stfalcon webhook registration.');
+      }
+    } catch (error) {
+      logger.error(error, 'Failed to initialize alarm webhook infrastructure');
+    }
+  }
 })().catch((error) => {
   logger.error('Cannot start server. Reason:', error);
 });
