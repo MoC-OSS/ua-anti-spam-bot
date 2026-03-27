@@ -1,16 +1,39 @@
-<h1 align="center">UA Anti Spam Bot 🇺🇦</h1>
-
 <p align="center">
-  <a href="https://github.com/MoC-OSS/ua-anti-spam-bot/commits/develop"><img src="https://img.shields.io/github/last-commit/MoC-OSS/ua-anti-spam-bot.svg" alt="last commit"></a>
+  <img src="docs/logo.svg" alt="UA Anti Spam Bot Logo" width="120" height="120" />
 </p>
 
-**UA Anti Spam Bot 🇺🇦** is a Node.js bot designed to detect and block spam messages on Ukrainian language groups and channels in Telegram. The bot is built on machine learning algorithms, natural language processing techniques, and basic algorithms which allow it to effectively detect and filter out unwanted messages.
+<h1 align="center">UA Anti Spam Bot</h1>
 
-**We use grammY**
+<p align="center">
+  <strong>Intelligent spam protection for Ukrainian Telegram communities</strong>
+</p>
 
-grammY is a powerful and user-friendly framework for building Telegram bots using Node.js. It provides a simple yet robust API for interacting with the Telegram Bot API and handling user messages, inline queries, and other events. With Grammy.js, you can quickly build complex bots with ease.
+<p align="center">
+  <a href="https://github.com/MoC-OSS/ua-anti-spam-bot/commits/develop">
+    <img src="https://img.shields.io/github/last-commit/MoC-OSS/ua-anti-spam-bot.svg" alt="Last Commit" />
+  </a>
+  <a href="https://grammy.dev">
+    <img src="https://img.shields.io/badge/powered%20by-grammY-2960AD" alt="Powered by grammY" />
+  </a>
+  <a href="https://nodejs.org">
+    <img src="https://img.shields.io/badge/runtime-Node.js%2024-339933?logo=node.js&logoColor=white" alt="Node.js 24" />
+  </a>
+  <a href="https://www.typescriptlang.org">
+    <img src="https://img.shields.io/badge/language-TypeScript-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
+  </a>
+</p>
 
-The framework comes with comprehensive documentation available at https://grammy.dev, which covers everything from getting started with installing and configuring the framework to more advanced topics like handling bot commands, keyboard interactions, and file uploads. The documentation is easy to follow and provides plenty of examples to help you get started with building your own Telegram bot.
+---
+
+**UA Anti Spam Bot** is a production-grade Node.js bot that detects and removes spam from Ukrainian-language Telegram groups and channels. It combines machine learning models (TensorFlow.js), natural language processing, and rule-based filters to keep communities safe and clean.
+
+### Key capabilities
+
+- **ML-powered spam detection** — TensorFlow.js models trained on Ukrainian-language data
+- **NSFW image filtering** — automatic moderation of inappropriate media
+- **Swindler & scam detection** — pattern-based identification of fraud attempts
+- **Configurable per-chat** — admins can tune every filter through an in-chat menu
+- **grammY framework** — built on the modern, type-safe Telegram bot framework ([grammy.dev](https://grammy.dev))
 
 ## Project Structure
 

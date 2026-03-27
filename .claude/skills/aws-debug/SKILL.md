@@ -68,6 +68,7 @@ aws elbv2 describe-target-groups --region <region>
 ```
 
 **Key things to verify:**
+
 - Which branch triggers which pipeline? (`pipeline.triggers[].gitConfiguration.push[].branches`)
 - Does the buildspec build separate images for each service, or one shared image?
 - Do imagedefinitions container names match the container names in task definitions?
@@ -90,6 +91,7 @@ aws codepipeline list-action-executions --pipeline-name <pipeline> \
 **If Build failed:** Check CodeBuild logs. Common causes: Docker build failure, ECR push auth failure, buildspec syntax.
 
 **If Deploy failed:** The ECS deployment didn't complete. Check for:
+
 - "The new deployment has failed and rolled back" = circuit breaker triggered
 - Check ECS service events for the timeline of what happened
 
@@ -105,6 +107,7 @@ aws ecs describe-services --cluster <cluster> --services <svc> --region <region>
 ```
 
 Read events chronologically. Look for:
+
 - "has started 1 tasks" followed by "registered 1 targets" = task started and entered ALB
 - "deregistered 1 targets" shortly after = health check failed or task died
 - Rapid cycling (start → register → deregister → start) = crash loop or health check timeout
@@ -118,13 +121,13 @@ aws ecs describe-tasks --cluster <cluster> --tasks <task-id> --region <region> \
 
 **Decode the results:**
 
-| exitCode | container reason | Meaning |
-|----------|-----------------|---------|
-| 0 | — | Graceful shutdown (SIGTERM from ECS) |
-| 1 | — | Application error (unhandled exception) |
-| 137 | `OutOfMemoryError: container killed due to memory usage` | OOM kill. Increase task memory. |
-| 137 | — (no OOM message) | SIGKILL — killed externally (health check or ECS stop) |
-| null | `CannotPullContainerError` | Image doesn't exist in ECR or IAM can't pull |
+| exitCode | container reason                                         | Meaning                                                |
+| -------- | -------------------------------------------------------- | ------------------------------------------------------ |
+| 0        | —                                                        | Graceful shutdown (SIGTERM from ECS)                   |
+| 1        | —                                                        | Application error (unhandled exception)                |
+| 137      | `OutOfMemoryError: container killed due to memory usage` | OOM kill. Increase task memory.                        |
+| 137      | — (no OOM message)                                       | SIGKILL — killed externally (health check or ECS stop) |
+| null     | `CannotPullContainerError`                               | Image doesn't exist in ECR or IAM can't pull           |
 
 ### Layer 3: Container logs
 
@@ -140,6 +143,7 @@ aws logs get-log-events --log-group-name /ecs/<service> \
 ```
 
 **Read logs tail-first.** The crash reason is always in the last few lines. Common patterns:
+
 - `Emitted 'error' event on ...` → unhandled Node.js EventEmitter error, process killed
 - `JavaScript heap out of memory` → Node.js OOM (different from container OOM)
 - Last log is mid-operation with no error → external kill (OOM, health check, SIGKILL)
@@ -178,11 +182,11 @@ aws ecs describe-services --cluster <cluster> --services <svc> --region <region>
 
 **Critical settings:**
 
-| Setting | Bad value | Good value | Why |
-|---------|-----------|------------|-----|
-| maximumPercent | 100 | 200 | 100 means ECS can't start a new task alongside the old one |
-| minimumHealthyPercent | 0 | 100 | 0 means ECS may kill all tasks before new ones are ready |
-| circuit breaker | disabled | enabled + rollback | Without it, a bad deployment loops forever |
+| Setting               | Bad value | Good value         | Why                                                        |
+| --------------------- | --------- | ------------------ | ---------------------------------------------------------- |
+| maximumPercent        | 100       | 200                | 100 means ECS can't start a new task alongside the old one |
+| minimumHealthyPercent | 0         | 100                | 0 means ECS may kill all tasks before new ones are ready   |
+| circuit breaker       | disabled  | enabled + rollback | Without it, a bad deployment loops forever                 |
 
 **The deadly combo:** `maxPercent:100 + minHealthyPercent:0` guarantees downtime on every deployment. ECS stops the old task first (minHealthy=0 allows it), then starts the new one (maxPercent=100 means only 1 at a time). If the new task fails, there are zero running tasks.
 
@@ -190,15 +194,15 @@ aws ecs describe-services --cluster <cluster> --services <svc> --region <region>
 
 After investigating both environments, diff every configurable surface:
 
-| Check | Command |
-|-------|---------|
-| Task def memory/CPU | `describe-task-definition` |
-| Task def env vars | `describe-task-definition` → `containerDefinitions[].environment` |
-| Task def log config | `describe-task-definition` → `containerDefinitions[].logConfiguration` |
-| ALB health thresholds | `describe-target-groups` |
-| Deployment config | `describe-services` → `deploymentConfiguration` |
-| Pipeline trigger branch | `get-pipeline` → `triggers` |
-| ECR image tags | `describe-images` |
+| Check                   | Command                                                                |
+| ----------------------- | ---------------------------------------------------------------------- |
+| Task def memory/CPU     | `describe-task-definition`                                             |
+| Task def env vars       | `describe-task-definition` → `containerDefinitions[].environment`      |
+| Task def log config     | `describe-task-definition` → `containerDefinitions[].logConfiguration` |
+| ALB health thresholds   | `describe-target-groups`                                               |
+| Deployment config       | `describe-services` → `deploymentConfiguration`                        |
+| Pipeline trigger branch | `get-pipeline` → `triggers`                                            |
+| ECR image tags          | `describe-images`                                                      |
 
 Any difference is a potential drift bug. Flag every discrepancy.
 
