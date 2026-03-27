@@ -1,64 +1,54 @@
-// eslint-disable-next-line sonarjs/deprecation
 import { ALARM_CLOSE_KEY, ALARM_CONNECT_KEY, ALARM_EVENT_KEY, AlarmService, TEST_ALARM_STATE } from '@services/alarm.service';
 
-import { environmentConfig } from '@shared/config';
+import type { AlarmPubSubMessage } from '@app-types/stfalcon-alarm';
 
-const { createMockEventSource, getLastMockEsInstance } = vi.hoisted(() => {
-  let lastInstance: any = null;
+const mockSubscriber = {
+  disconnect: vi.fn<() => Promise<void>>().mockResolvedValue(),
+};
 
-  /**
-   *
-   */
-  function createInstance() {
-    const listeners: Record<string, ((...arguments_: any[]) => void)[]> = {};
+const { createAlarmSubscriberMock, captureSubscriberHandler } = vi.hoisted(() => {
+  let capturedHandler: ((message: string) => void) | null = null;
 
-    lastInstance = {
-      addEventListener: vi.fn((event: string, handler: (...arguments_: any[]) => void) => {
-        // eslint-disable-next-line security/detect-object-injection
-        if (!listeners[event]) {
-          // eslint-disable-next-line security/detect-object-injection
-          listeners[event] = [];
-        }
+  const mock = vi.fn().mockImplementation((handler: (message: string) => void) => {
+    capturedHandler = handler;
 
-        // eslint-disable-next-line security/detect-object-injection
-        listeners[event].push(handler);
-      }),
-      close: vi.fn(),
-      _trigger(event: string, eventData?: unknown) {
-        // eslint-disable-next-line security/detect-object-injection
-        (listeners[event] || []).forEach((eventHandler) => eventHandler(eventData));
-      },
-    };
-
-    return lastInstance;
-  }
+    return Promise.resolve(mockSubscriber);
+  });
 
   return {
-    createMockEventSource: vi.fn().mockImplementation(createInstance),
-    getLastMockEsInstance: () => lastInstance,
+    createAlarmSubscriberMock: mock,
+    captureSubscriberHandler: () => capturedHandler,
   };
 });
 
-vi.mock('eventsource', () => ({
-  EventSource: createMockEventSource,
+vi.mock('@db/redis-pubsub', () => ({
+  createAlarmSubscriber: createAlarmSubscriberMock,
+  ALARM_CHANNEL: 'alarm:updates',
+}));
+
+vi.mock('@services/stfalcon-alarm-api.service', () => ({
+  stfalconAlarmApiService: {
+    getAlerts: vi.fn().mockResolvedValue([]),
+  },
 }));
 
 vi.mock('@shared/config', () => ({
   environmentConfig: {
-    DISABLE_ALARM_API: true,
+    DISABLE_ALARM_API: false,
     ALARM_KEY: 'test-key',
     ENV: 'test',
+    REDIS_URL: 'redis://localhost:6379',
   },
 }));
 
 describe('AlarmService', () => {
-  // eslint-disable-next-line sonarjs/deprecation
   let service: AlarmService;
 
   beforeEach(() => {
     vi.useFakeTimers();
-    // eslint-disable-next-line sonarjs/deprecation
     service = new AlarmService();
+    vi.clearAllMocks();
+    mockSubscriber.disconnect.mockResolvedValue();
   });
 
   afterEach(() => {
@@ -68,157 +58,196 @@ describe('AlarmService', () => {
 
   describe('getStates', () => {
     describe('positive cases', () => {
-      it('should return an object with empty states array', async () => {
+      it('should return mapped states when API returns regions', async () => {
+        const { stfalconAlarmApiService } = await import('@services/stfalcon-alarm-api.service');
+
+        vi.mocked(stfalconAlarmApiService.getAlerts).mockResolvedValue([
+          {
+            regionId: '4',
+            regionName: 'Львівська область',
+            regionType: 'State',
+            lastUpdate: '2024-01-01T12:00:00Z',
+            activeAlerts: [{ regionId: '4', regionType: 'State', type: 'AIR', lastUpdate: '2024-01-01T12:00:00Z' }],
+          },
+        ]);
+
+        const result = await service.getStates();
+
+        expect(result.states).toHaveLength(1);
+
+        expect(result.states[0]).toMatchObject({
+          id: 4,
+          name: 'Львівська область',
+          alert: true,
+        });
+
+        expect(result.last_update).toBeDefined();
+      });
+
+      it('should return empty states when API returns no regions', async () => {
+        const { stfalconAlarmApiService } = await import('@services/stfalcon-alarm-api.service');
+
+        vi.mocked(stfalconAlarmApiService.getAlerts).mockResolvedValue([]);
+
         const result = await service.getStates();
 
         expect(result.states).toEqual([]);
-        expect(result.last_update).toBeDefined();
       });
+
+      it('should return alert=false when region has no active alerts', async () => {
+        const { stfalconAlarmApiService } = await import('@services/stfalcon-alarm-api.service');
+
+        vi.mocked(stfalconAlarmApiService.getAlerts).mockResolvedValue([
+          {
+            regionId: '5',
+            regionName: 'Київська область',
+            regionType: 'State',
+            lastUpdate: '2024-01-01T10:00:00Z',
+            activeAlerts: [],
+          },
+        ]);
+
+        const result = await service.getStates();
+
+        expect(result.states[0]).toMatchObject({ id: 5, name: 'Київська область', alert: false });
+      });
+
+      it('should return empty states and log error when API throws', async () => {
+        const { stfalconAlarmApiService } = await import('@services/stfalcon-alarm-api.service');
+
+        vi.mocked(stfalconAlarmApiService.getAlerts).mockRejectedValue(new Error('API error'));
+
+        const result = await service.getStates();
+
+        expect(result.states).toEqual([]);
+      });
+    });
+
+    it('should return empty states without calling API when DISABLE_ALARM_API is true', async () => {
+      const { stfalconAlarmApiService } = await import('@services/stfalcon-alarm-api.service');
+      const { environmentConfig } = await import('@shared/config');
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const config = environmentConfig as { DISABLE_ALARM_API: boolean };
+
+      config.DISABLE_ALARM_API = true;
+
+      const result = await service.getStates();
+
+      config.DISABLE_ALARM_API = false;
+
+      expect(result.states).toEqual([]);
+      expect(stfalconAlarmApiService.getAlerts).not.toHaveBeenCalled();
     });
   });
 
   describe('enable', () => {
     describe('positive cases', () => {
-      it('should not throw when called', () => {
-        expect(() => service.enable('test')).not.toThrow();
+      it('should create a Redis subscriber and emit connect event', async () => {
+        const emitSpy = vi.spyOn(service.updatesEmitter, 'emit');
+
+        await service.enable('startup');
+
+        expect(createAlarmSubscriberMock).toHaveBeenCalledOnce();
+        expect(emitSpy).toHaveBeenCalledWith(ALARM_CONNECT_KEY, 'startup');
       });
-    });
-  });
 
-  describe('restart', () => {
-    describe('positive cases', () => {
-      it('should call enable internally', () => {
-        const enableSpy = vi.spyOn(service, 'enable');
+      it('should not create subscriber when DISABLE_ALARM_API is true', async () => {
+        const { environmentConfig } = await import('@shared/config');
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const config = environmentConfig as { DISABLE_ALARM_API: boolean };
 
-        service.restart();
+        config.DISABLE_ALARM_API = true;
+        await service.enable('test');
+        config.DISABLE_ALARM_API = false;
 
-        expect(enableSpy).toHaveBeenCalledWith('restart');
+        expect(createAlarmSubscriberMock).not.toHaveBeenCalled();
       });
     });
   });
 
   describe('disable', () => {
     describe('positive cases', () => {
-      it('should not throw when source is undefined', () => {
-        expect(() => service.disable('test')).not.toThrow();
-      });
-
-      it('should emit close event when source is set', () => {
-        service.source = { close: vi.fn() } as any;
+      it('should disconnect subscriber and emit close event when subscriber is set', async () => {
+        await service.enable('startup');
         const emitSpy = vi.spyOn(service.updatesEmitter, 'emit');
 
-        service.disable('test reason');
+        await service.disable('test reason');
 
+        expect(mockSubscriber.disconnect).toHaveBeenCalled();
         expect(emitSpy).toHaveBeenCalledWith(ALARM_CLOSE_KEY, 'test reason');
-        expect((service.source as any).close).toHaveBeenCalled();
       });
 
-      it('should enter the reconnectInterval branch without throwing when interval is set', () => {
-        service.reconnectInterval = setInterval(() => {}, 10_000) as any;
-
-        expect(() => service.disable('with-interval')).not.toThrow();
-
-        clearInterval(service.reconnectInterval as any);
+      it('should not throw when no subscriber is set', async () => {
+        await expect(service.disable('test')).resolves.not.toThrow();
       });
 
-      it('should enter the testAlarmInterval branch without throwing when interval is set', () => {
-        service.testAlarmInterval = setInterval(() => {}, 10_000) as any;
+      it('should clear testAlarmInterval when set', async () => {
+        service.testAlarmInterval = setInterval(() => {}, 10_000);
 
-        expect(() => service.disable('with-test-interval')).not.toThrow();
+        await service.disable('test');
 
-        clearInterval(service.testAlarmInterval as any);
+        expect(service.testAlarmInterval).toBeUndefined();
       });
     });
   });
 
-  describe('subscribeOnNotifications', () => {
+  describe('restart', () => {
     describe('positive cases', () => {
-      it('should return early when DISABLE_ALARM_API is true', () => {
-        const disableSpy = vi.spyOn(service, 'disable');
+      it('should call disable then enable', async () => {
+        const disableSpy = vi.spyOn(service, 'disable').mockResolvedValue();
+        const enableSpy = vi.spyOn(service, 'enable').mockResolvedValue();
 
-        service.subscribeOnNotifications('test');
+        await service.restart();
 
-        expect(disableSpy).not.toHaveBeenCalled();
+        expect(disableSpy).toHaveBeenCalledWith('restart');
+        expect(enableSpy).toHaveBeenCalledWith('restart');
       });
     });
+  });
 
-    describe('when DISABLE_ALARM_API is false', () => {
-      beforeEach(() => {
-        (environmentConfig as any).DISABLE_ALARM_API = false;
-        createMockEventSource.mockClear();
-      });
+  describe('subscribeToRedisChannel', () => {
+    describe('positive cases', () => {
+      it('should emit update event when a valid pub/sub message is received', async () => {
+        await service.subscribeToRedisChannel('test');
 
-      afterEach(() => {
-        (environmentConfig as any).DISABLE_ALARM_API = true;
-      });
-
-      it('should call disable and create an EventSource', () => {
-        const disableSpy = vi.spyOn(service, 'disable');
-
-        service.subscribeOnNotifications('init');
-
-        expect(disableSpy).toHaveBeenCalledWith('init');
-        expect(createMockEventSource).toHaveBeenCalledOnce();
-        expect(service.source).toBeDefined();
-      });
-
-      it('should emit connect event on first "hello" event', () => {
+        const handler = captureSubscriberHandler();
         const emitSpy = vi.spyOn(service.updatesEmitter, 'emit');
 
-        service.subscribeOnNotifications('init');
-        const es = getLastMockEsInstance();
-
-        es._trigger('hello');
-
-        expect(emitSpy).toHaveBeenCalledWith(ALARM_CONNECT_KEY, 'init');
-      });
-
-      it('should NOT emit connect event on subsequent "hello" events', () => {
-        const emitSpy = vi.spyOn(service.updatesEmitter, 'emit');
-
-        service.subscribeOnNotifications('init');
-        const es = getLastMockEsInstance();
-
-        es._trigger('hello');
-        emitSpy.mockClear();
-        es._trigger('hello');
-
-        expect(emitSpy).not.toHaveBeenCalledWith(ALARM_CONNECT_KEY, expect.anything());
-      });
-
-      it('should emit update event with parsed data when "update" event fires with valid data', () => {
-        const emitSpy = vi.spyOn(service.updatesEmitter, 'emit');
-
-        const notification = {
-          state: { alert: true, id: 1, name: 'Kyiv', name_en: 'Kyiv', changed: '2024-01-01T00:00:00.000Z' },
-          notification_id: 'n1',
+        const message: AlarmPubSubMessage = {
+          regionId: '4',
+          regionName: 'Львівська область',
+          alert: true,
+          alertType: 'AIR',
+          lastUpdate: '2024-01-01T12:00:00Z',
         };
 
-        service.subscribeOnNotifications('init');
-        const es = getLastMockEsInstance();
+        handler!(JSON.stringify(message));
 
-        es._trigger('update', { data: JSON.stringify(notification) });
-
-        expect(emitSpy).toHaveBeenCalledWith(ALARM_EVENT_KEY, notification);
+        expect(emitSpy).toHaveBeenCalledWith(
+          ALARM_EVENT_KEY,
+          expect.objectContaining({
+            state: expect.objectContaining({
+              id: 4,
+              name: 'Львівська область',
+              alert: true,
+            }),
+          }),
+        );
       });
 
-      it('should NOT emit update when "update" event fires with null data', () => {
-        const emitSpy = vi.spyOn(service.updatesEmitter, 'emit');
+      it('should not throw when the pub/sub message is invalid JSON', async () => {
+        await service.subscribeToRedisChannel('test');
 
-        service.subscribeOnNotifications('init');
-        const es = getLastMockEsInstance();
+        const handler = captureSubscriberHandler();
 
-        es._trigger('update', { data: JSON.stringify(null) });
-
-        expect(emitSpy).not.toHaveBeenCalledWith(ALARM_EVENT_KEY, expect.anything());
+        expect(() => handler!('invalid json')).not.toThrow();
       });
 
-      it('should register "error" and "open" event listeners without throwing', () => {
-        service.subscribeOnNotifications('init');
-        const es = getLastMockEsInstance();
+      it('should disconnect previous subscriber before creating a new one', async () => {
+        await service.subscribeToRedisChannel('first');
+        await service.subscribeToRedisChannel('second');
 
-        expect(() => es._trigger('error', { message: 'connection error' })).not.toThrow();
-        expect(() => es._trigger('open')).not.toThrow();
+        expect(mockSubscriber.disconnect).toHaveBeenCalledOnce();
       });
     });
   });
@@ -238,8 +267,8 @@ describe('AlarmService', () => {
         );
       });
 
-      it('should toggle isAlert on each tick', () => {
-        const emissions: any[] = [];
+      it('should toggle alert on each tick', () => {
+        const emissions: boolean[] = [];
 
         service.updatesEmitter.on(ALARM_EVENT_KEY, (event) => {
           emissions.push(event.state.alert);

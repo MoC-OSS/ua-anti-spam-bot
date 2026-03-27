@@ -33,14 +33,32 @@ vi.mock('../../src/services/redis.service', () => ({
   },
 }));
 
+vi.mock('@services/stfalcon-alarm-api.service', () => ({
+  stfalconAlarmApiService: {
+    getAlerts: vi.fn().mockResolvedValue([]),
+  },
+}));
+
+vi.mock('@db/redis-pubsub', () => ({
+  createAlarmSubscriber: vi.fn().mockResolvedValue({ disconnect: vi.fn() }),
+  ALARM_CHANNEL: 'alarm:updates',
+}));
+
+vi.mock('@shared/config', () => ({
+  environmentConfig: {
+    DISABLE_ALARM_API: false,
+    ALARM_KEY: 'test-key',
+    ENV: 'test',
+    REDIS_URL: 'redis://localhost:6379',
+  },
+}));
+
 describe('AlarmChatService', () => {
   beforeAll(async () => {
     alarmChatService.processChatAlarm = vi.fn(alarmChatService.processChatAlarm);
 
+    // init() now calls subscribeToAlarms() internally.
     await alarmChatService.init(apiMock as GrammyBot['api']);
-    // subscribeToAlarms is no longer called from init() while the feature is disabled.
-    // Call it explicitly here so the subscription tests can verify its behaviour.
-    alarmChatService.subscribeToAlarms();
   });
 
   // eslint-disable-next-line no-secrets/no-secrets
