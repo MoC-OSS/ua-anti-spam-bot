@@ -39,7 +39,8 @@ export class AlarmChatService {
     });
 
     await this.getChatsWithAlarm();
-    this.subscribeToAlarms();
+    // NOTE: Air raid alert API is disabled. Subscription is skipped until a replacement API is integrated.
+    // this.subscribeToAlarms();
   }
 
   /**

@@ -30,6 +30,14 @@ vi.mock('@services/swindlers-google.service', () => ({
   swindlersGoogleService: {},
 }));
 
+// Ensure tests are not affected by the developer's local DEBUG=true in .env
+vi.mock('@shared/config', () => ({
+  environmentConfig: {
+    DEBUG: false,
+    UNIT_TESTING: true,
+  },
+}));
+
 const mockMessageHandler = {
   sanitizeMessage: vi.fn((context: GrammyContext, message: string) => message),
   getTensorRank: vi.fn().mockResolvedValue({ isSpam: false, rate: 0, tensor: 0.3, deleteRank: 0.9 }),

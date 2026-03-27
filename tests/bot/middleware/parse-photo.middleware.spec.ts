@@ -279,7 +279,7 @@ describe('parsePhoto middleware', () => {
       expect(next).toHaveBeenCalledOnce();
     });
 
-    it('should use sticker file_id when video sticker has no thumbnail', async () => {
+    it('should skip download and set file=null when video sticker has no thumbnail', async () => {
       const context = createMockContext({
         sticker: {
           file_id: 'vsticker-id',
@@ -293,8 +293,12 @@ describe('parsePhoto middleware', () => {
 
       await parsePhoto(context, next as unknown as NextFunction);
 
-      // videoStickerMeta.thumbnail is undefined, so falls back to imageMeta.file_id (the sticker itself)
-      expect(context.api.getFile).toHaveBeenCalledWith('vsticker-id');
+      // No thumbnail → no download → no Sharp call → file is null (avoids "unsupported image format" crash)
+      expect(context.api.getFile).not.toHaveBeenCalled();
+      expect((context.state.photo as any).file).toBeNull();
+      expect((context.state.photo as any).type).toBe(ImageType.VIDEO_STICKER);
+      // meta should still be the Sticker object for getVideoMeta to work
+      expect((context.state.photo as any).meta).toMatchObject({ file_id: 'vsticker-id' });
       expect(next).toHaveBeenCalledOnce();
     });
   });

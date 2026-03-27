@@ -9,8 +9,6 @@ import { Bot } from 'grammy';
 
 import ms from 'ms';
 
-import { alarmService } from '@services/alarm.service';
-
 import { environmentConfig } from '@shared/config';
 
 import * as tf from '@tensorflow/tfjs-node';
@@ -20,8 +18,10 @@ import type { GrammyContext } from '@app-types/context';
 import { sleep } from '@utils/generic.util';
 import { logger } from '@utils/logger.util';
 
+import { version } from '../../package.json';
+
 import { getBot } from './bot';
-import { runBotExpressServer } from './bot-server';
+import { attachBotApiRoutes, startHealthCheckServer } from './bot-server';
 import { logsChat } from './creator';
 
 (async () => {
@@ -33,6 +33,9 @@ import { logsChat } from './creator';
     tf.enableProdMode();
   }
 
+  // Start health-check server immediately so ALB probes pass during model loading.
+  const healthApp = startHealthCheckServer();
+
   logger.info('Waiting for the old instance to down...');
   await sleep(environmentConfig.ENV === 'local' ? 0 : ms('5s'));
   logger.info('Starting a new instance...');
@@ -40,7 +43,7 @@ import { logsChat } from './creator';
   const initialBot = new Bot<GrammyContext>(environmentConfig?.BOT_TOKEN);
   const bot = await getBot(initialBot);
 
-  runBotExpressServer(bot);
+  attachBotApiRoutes(healthApp, bot);
 
   const runner = run(bot, {
     runner: {
@@ -77,30 +80,13 @@ import { logsChat } from './creator';
 
   if (environmentConfig.ENV !== 'local') {
     bot.api
-      .sendMessage(logsChat, `🎉 <b>Bot @${bot.botInfo.username} has been started!</b>\n<i>${new Date().toString()}</i>`, {
+      .sendMessage(logsChat, `🎉 <b>Bot @${bot.botInfo.username} has been started!</b> v${version}\n<i>${new Date().toString()}</i>`, {
         parse_mode: 'HTML',
       })
       .catch(() => {
         logger.error('This bot is not authorized in this LOGS chat!');
       });
-
-    /**
-     * Enable alarm service only after bot is started
-     */
-    alarmService.updatesEmitter.on('connect', (reason) => {
-      bot.api.sendMessage(logsChat, `🎉 Air Raid Alarm API has been started by ${reason} reason!`).catch(() => {
-        logger.error('This bot is not authorized in this LOGS chat!');
-      });
-    });
-
-    alarmService.updatesEmitter.on('close', (reason) => {
-      bot.api.sendMessage(logsChat, `⛔️ Air Raid Alarm API has been stopped by ${reason} reason!`).catch(() => {
-        logger.error('This bot is not authorized in this LOGS chat!');
-      });
-    });
   }
-
-  alarmService.enable('bot_start');
 
   // Enable graceful stop
   const stopRunner = () => runner.isRunning() && runner.stop();

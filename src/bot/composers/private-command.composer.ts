@@ -7,8 +7,6 @@ import { StatisticsCommand } from '@bot/commands/private/statistics.command';
 import { SwindlersUpdateCommand } from '@bot/commands/private/swindlers-update.command';
 import { onlyWhitelistedFilter } from '@bot/filters/only-whitelisted.filter';
 
-import { getAlarmMock } from '@services/_mocks/alarm.mocks';
-import { ALARM_EVENT_KEY, alarmService } from '@services/alarm.service';
 import type { DynamicStorageService } from '@services/dynamic-storage.service';
 
 import type { TensorService } from '@tensor/tensor.service';
@@ -46,10 +44,6 @@ export const getPrivateCommandsComposer = ({ bot, commandSetter, dynamicStorageS
     ['swindlers_update', 'Update swindlers database'],
     ['session', 'Get bot session data'],
     ['statistics', 'Get bot statistics'],
-    ['start_alarm', 'Start test alarm'],
-    ['end_alarm', 'End test alarm'],
-    ['restart_alarm', 'Restart alarm logic'],
-    ['disable_alarm', 'Disable alarm logic at all'],
     ['restart', 'Kills the bot process and deletes it'],
     ['video_note', 'Send a video with /video_note caption to convert it into video note'],
   ]);
@@ -66,22 +60,6 @@ export const getPrivateCommandsComposer = ({ bot, commandSetter, dynamicStorageS
   composer.command('swindlers_update', swindlersUpdateMiddleware.middleware());
   composer.command('session', sessionMiddleware.middleware());
   composer.command('statistics', statisticsMiddleware.middleware());
-
-  composer.command('start_alarm', () => {
-    alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(true));
-  });
-
-  composer.command('end_alarm', () => {
-    alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(false));
-  });
-
-  composer.command('restart_alarm', () => {
-    alarmService.restart();
-  });
-
-  composer.command('disable_alarm', () => {
-    alarmService.disable('disable_command');
-  });
 
   composer.command('restart', async (context) => {
     await context.reply('Restarting...');

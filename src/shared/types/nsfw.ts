@@ -14,3 +14,11 @@ export interface NsfwTensorPositiveResult {
 }
 
 export type NsfwTensorResult = NsfwTensorNegativeResult | NsfwTensorPositiveResult;
+
+/**
+ * Minimal interface required by the NSFW filter composer and any
+ * NSFW predictor implementation (direct or worker-based).
+ */
+export interface NsfwPredictor {
+  predictVideo(imageArray: Buffer[]): Promise<NsfwTensorResult>;
+}
