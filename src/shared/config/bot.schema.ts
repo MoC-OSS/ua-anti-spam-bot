@@ -8,6 +8,7 @@
 import * as z from 'zod';
 
 import type { EnvironmentConfig } from './env.schema';
+import { validateGoogleCredentials } from './validate-google-credentials';
 
 /**
  * Validates that the given parsed config satisfies all bot-process requirements.
@@ -28,7 +29,9 @@ export function validateBotEnvironment(config: EnvironmentConfig): void {
 
     // ── Google API (conditional) ────────────────────────────────────────
     if (!config.DISABLE_GOOGLE_API) {
-      if (!config.GOOGLE_CREDITS) {
+      if (config.GOOGLE_CREDITS) {
+        validateGoogleCredentials(config.GOOGLE_CREDITS, context);
+      } else {
         context.addIssue({
           code: 'custom',
           path: ['GOOGLE_CREDITS'],

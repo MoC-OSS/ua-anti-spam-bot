@@ -4,6 +4,24 @@ import type { EnvironmentConfig } from '@shared/config/env.schema';
 import { environmentSchema } from '@shared/config/env.schema';
 import { validateServerEnvironment } from '@shared/config/server.schema';
 
+const { testPrivateKeyPem } = vi.hoisted(() => {
+  type GenerateKeyPairSyncFunction = (
+    type: 'rsa',
+    options: { modulusLength: number; publicKeyEncoding: object; privateKeyEncoding: object },
+  ) => { privateKey: string; publicKey: string };
+
+  // eslint-disable-next-line global-require
+  const { generateKeyPairSync } = require('node:crypto') as { generateKeyPairSync: GenerateKeyPairSyncFunction };
+
+  const { privateKey } = generateKeyPairSync('rsa', {
+    modulusLength: 2048,
+    publicKeyEncoding: { type: 'spki', format: 'pem' },
+    privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+  });
+
+  return { testPrivateKeyPem: privateKey };
+});
+
 /**
  * Creates a test config with defaults for disabled integrations.
  * @param overrides - Env var overrides to merge into the defaults.
@@ -17,10 +35,23 @@ function makeConfig(overrides: Partial<Record<string, unknown>> = {}): Environme
   });
 }
 
+/** Valid GOOGLE_CREDENTIALS JSON string with a real PEM private key. */
+const validGoogleCredentials = JSON.stringify({ private_key: testPrivateKeyPem, client_email: 'test@example.com' });
+
 describe('validateServerEnvironment', () => {
   describe('positive cases', () => {
     it('should pass when all required vars are set and integrations are disabled', () => {
       const config = makeConfig();
+
+      expect(() => validateServerEnvironment(config)).not.toThrow();
+    });
+
+    it('should pass when Google API is enabled with valid credentials', () => {
+      const config = makeConfig({
+        DISABLE_GOOGLE_API: 'false',
+        GOOGLE_CREDITS: validGoogleCredentials,
+        GOOGLE_SPREADSHEET_ID: 'abc123',
+      });
 
       expect(() => validateServerEnvironment(config)).not.toThrow();
     });
@@ -53,6 +84,22 @@ describe('validateServerEnvironment', () => {
         DISABLE_ALARM_API: 'false',
         ALARM_KEY: 'test-key',
         ALARM_WEBHOOK_PUBLIC_KEY_PEM: 'not-a-valid-pem-key',
+      });
+
+      expect(() => validateServerEnvironment(config)).toThrow(z.ZodError);
+    });
+
+    it('should fail when GOOGLE_CREDITS contains invalid JSON', () => {
+      const config = makeConfig({ DISABLE_GOOGLE_API: 'false', GOOGLE_CREDITS: 'not-json', GOOGLE_SPREADSHEET_ID: 'abc' });
+
+      expect(() => validateServerEnvironment(config)).toThrow(z.ZodError);
+    });
+
+    it('should fail when GOOGLE_CREDITS has invalid private_key PEM', () => {
+      const config = makeConfig({
+        DISABLE_GOOGLE_API: 'false',
+        GOOGLE_CREDITS: JSON.stringify({ private_key: 'bad-key' }),
+        GOOGLE_SPREADSHEET_ID: 'abc',
       });
 
       expect(() => validateServerEnvironment(config)).toThrow(z.ZodError);
