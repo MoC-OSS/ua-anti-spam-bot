@@ -2,18 +2,19 @@
  * @module stfalcon-alarm
  * @description Type definitions for the Stfalcon Ukraine Alarm API (api.ukrainealarm.com).
  * These types represent the webhook payload and REST API response structures.
+ * @see https://api.ukrainealarm.com/swagger/index.html
  */
 
 /**
  * The type of alert issued by the Stfalcon API.
  * AIR represents an air-raid alert; other types cover additional threat categories.
  */
-export type StfalconAlertType = 'AIR' | 'ARTILLERY' | 'CHEMICAL' | 'NUCLEAR' | 'UNKNOWN' | 'URBAN_FIGHTS';
+export type StfalconAlertType = 'AIR' | 'ARTILLERY' | 'CHEMICAL' | 'CUSTOM' | 'INFO' | 'NUCLEAR' | 'UNKNOWN' | 'URBAN_FIGHTS';
 
 /**
  * The administrative region type within the Ukrainian territorial hierarchy.
  */
-export type StfalconRegionType = 'City' | 'Community' | 'District' | 'State';
+export type StfalconRegionType = 'City' | 'CityDistrict' | 'CityOrVillage' | 'Community' | 'District' | 'Null' | 'State';
 
 /**
  * A single active alert within a region, as returned in the `activeAlerts` array.
@@ -32,6 +33,7 @@ export interface StfalconActiveAlert {
 export interface StfalconRegionAlert {
   regionId: string;
   regionName: string;
+  regionEngName: string;
   regionType: StfalconRegionType;
   lastUpdate: string;
   activeAlerts: StfalconActiveAlert[];
@@ -39,12 +41,21 @@ export interface StfalconRegionAlert {
 
 /**
  * A region definition as returned by `GET /api/v3/regions`.
+ * The structure is hierarchical: states contain districts, districts contain communities, etc.
  */
 export interface StfalconRegion {
   regionId: string;
   regionName: string;
   regionType: StfalconRegionType;
-  regionChildIds: string[];
+  /** Child regions in the hierarchy (e.g. districts within a state). */
+  regionChildIds: StfalconRegion[];
+}
+
+/**
+ * Response wrapper for `GET /api/v3/regions`.
+ */
+export interface StfalconRegionsResponse {
+  states: StfalconRegion[];
 }
 
 /**

@@ -8,8 +8,8 @@ import type { MessageEntity } from '@grammyjs/types/message';
 
 import type { Chat } from 'typegram/manage';
 
-import type { State } from './alarm';
 import type { GrammyContext } from './context';
+import type { StfalconRegion, StfalconRegionAlert } from './stfalcon-alarm';
 
 export interface ChatSessionFlavor<TSession> {
   /**
@@ -43,8 +43,11 @@ export interface SessionData extends Partial<UpdatesSessionData> {
 }
 
 export interface AirRaidAlertSettings {
-  pageNumber: number;
-  state: string | null;
+  /**
+   * Stfalcon region identifiers the chat is subscribed to.
+   * Currently supports a single region; the array shape enables future multi-region support.
+   */
+  regionIds: string[];
   notificationMessage: boolean;
 }
 
@@ -141,5 +144,8 @@ export interface ChatDetails {
 export interface ChatData {
   chat: ChatDetails;
   settings: ChatSettings;
-  states: State[];
+  /** Hierarchical list of all Ukrainian regions (states, districts, communities). */
+  regions: StfalconRegion[];
+  /** Current alert status per region (only regions with recent activity). */
+  alerts: StfalconRegionAlert[];
 }
