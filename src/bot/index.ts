@@ -10,6 +10,7 @@ import { Bot } from 'grammy';
 import ms from 'ms';
 
 import { environmentConfig } from '@shared/config';
+import { validateBotEnvironment } from '@shared/config/bot.schema';
 
 import * as tf from '@tensorflow/tfjs-node';
 
@@ -25,6 +26,8 @@ import { attachBotApiRoutes, startHealthCheckServer } from './bot-server';
 import { logsChat } from './creator';
 
 (async () => {
+  validateBotEnvironment(environmentConfig);
+
   /**
    * Tensorflow.js offers two flags, enableProdMode and enableDebugMode.
    * If you're going to use any TF model in production, be sure to enable prod mode before loading models.
