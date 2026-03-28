@@ -21,7 +21,7 @@ import { realSwindlerMessage } from './__mocks__/bot.mocks';
 /**
  * Enable unit testing
  */
-Object.assign(environmentConfig, { UNIT_TESTING: true, DISABLE_LOGS_CHAT: false, DEBUG: false });
+Object.assign(environmentConfig, { UNIT_TESTING: true, DISABLE_LOGS_CHAT: false, DEBUG: false, AWS_REGION: 'us-east-1' });
 
 let outgoingRequests: OutgoingRequests;
 let bot: Bot<GrammyContext>;

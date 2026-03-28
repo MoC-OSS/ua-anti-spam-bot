@@ -1,6 +1,7 @@
 import express from 'express';
 import type { RouteParameters } from 'express-serve-static-core';
 import multer from 'multer';
+import type * as z from 'zod';
 
 import { createAlarmPublisher } from '@db/redis-pubsub';
 
@@ -9,6 +10,7 @@ import { stfalconAlarmApiService } from '@services/stfalcon-alarm-api.service';
 import { initSwindlersContainer } from '@services/swindlers.container';
 
 import { environmentConfig } from '@shared/config';
+import { formatEnvironmentErrors } from '@shared/config/format-errors';
 import { validateServerEnvironment } from '@shared/config/server.schema';
 
 import { initNsfwTensor } from '@tensor/nsfw-tensor.service';
@@ -38,7 +40,13 @@ const uploadMemoryStorage = multer.memoryStorage();
 const uploadMiddleware = multer({ storage: uploadMemoryStorage });
 
 (async () => {
-  validateServerEnvironment(environmentConfig);
+  try {
+    validateServerEnvironment(environmentConfig);
+  } catch (error) {
+    logger.error(formatEnvironmentErrors(error as z.ZodError));
+    // eslint-disable-next-line unicorn/no-process-exit
+    process.exit(1);
+  }
 
   /**
    * Tensorflow.js offers two flags, enableProdMode and enableDebugMode.
