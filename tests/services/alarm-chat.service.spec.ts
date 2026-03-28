@@ -5,9 +5,10 @@ import {
   generateChat,
   generateChatSessionData,
   generateMockSessions,
-  getAlarmMock,
+  getAlarmEventMock,
   testId,
-  testState,
+  testRegionId,
+  testRegionName,
 } from '@services/_mocks/alarm.mocks';
 import { ALARM_EVENT_KEY, alarmService } from '@services/alarm.service';
 import { alarmChatService } from '@services/alarm-chat.service';
@@ -84,11 +85,9 @@ describe('AlarmChatService', () => {
     it('should update current chat', () => {
       const updateChatId = alarmChatService.chats[0].id;
       const lengthBefore = alarmChatService.chats.length;
-      // console.log(alarmChatService.chats);
       const chat = generateChatSessionData();
 
       alarmChatService.updateChat(chat, updateChatId);
-      // console.log(alarmChatService.chats);
       expect(alarmChatService.chats.length).toEqual(lengthBefore);
       expect(alarmChatService.chats[0]).toEqual({ id: updateChatId, payload: chat });
     });
@@ -96,7 +95,7 @@ describe('AlarmChatService', () => {
     it('delete existing chat', () => {
       const updateChatId = alarmChatService.chats[0].id;
       const lengthBefore = alarmChatService.chats.length;
-      const chat = generateChatSessionData('', false, false);
+      const chat = generateChatSessionData([], false, false);
 
       alarmChatService.updateChat(chat, updateChatId);
       expect(alarmChatService.chats.length).toEqual(lengthBefore - 1);
@@ -105,46 +104,58 @@ describe('AlarmChatService', () => {
   });
 
   describe('isAlarmNow', () => {
-    it('should return true when state has an active alarm', () => {
-      alarmChatService.alarms = new Set([testState]);
-      expect(alarmChatService.isAlarmNow(testState)).toBe(true);
+    it('should return true when regionId has an active alarm', () => {
+      alarmChatService.activeAlarmRegionIds = new Set([testRegionId]);
+      expect(alarmChatService.isAlarmNow(testRegionId)).toBe(true);
     });
 
-    it('should return false when state has no active alarm', () => {
-      alarmChatService.alarms = new Set();
-      expect(alarmChatService.isAlarmNow(testState)).toBe(false);
+    it('should return false when regionId has no active alarm', () => {
+      alarmChatService.activeAlarmRegionIds = new Set();
+      expect(alarmChatService.isAlarmNow(testRegionId)).toBe(false);
     });
   });
 
-  describe('getChatsWithAlarm', () => {
+  describe('syncActiveAlarms', () => {
     afterEach(() => {
       vi.restoreAllMocks();
     });
 
-    it('should add state to alarms set when alert is true', async () => {
-      vi.spyOn(alarmService, 'getStates').mockResolvedValue({
-        states: [{ id: 1, name: testState, name_en: 'Test Region', alert: true, changed: new Date() }],
-        last_update: new Date().toISOString(),
-      });
+    it('should add regionId to active set when alert is active', async () => {
+      vi.spyOn(alarmService, 'getAlerts').mockResolvedValue([
+        {
+          regionId: testRegionId,
+          regionName: testRegionName,
+          regionEngName: 'Lviv Oblast',
+          regionType: 'State',
+          lastUpdate: new Date().toISOString(),
+          activeAlerts: [{ regionId: testRegionId, regionType: 'State', type: 'AIR', lastUpdate: new Date().toISOString() }],
+        },
+      ]);
 
-      alarmChatService.alarms = new Set();
+      alarmChatService.activeAlarmRegionIds = new Set();
 
-      await alarmChatService.getChatsWithAlarm();
+      await alarmChatService.syncActiveAlarms();
 
-      expect(alarmChatService.alarms?.has(testState)).toBe(true);
+      expect(alarmChatService.activeAlarmRegionIds?.has(testRegionId)).toBe(true);
     });
 
-    it('should remove state from alarms set when alert is false', async () => {
-      vi.spyOn(alarmService, 'getStates').mockResolvedValue({
-        states: [{ id: 1, name: testState, name_en: 'Test Region', alert: false, changed: new Date() }],
-        last_update: new Date().toISOString(),
-      });
+    it('should remove regionId from active set when alert is not active', async () => {
+      vi.spyOn(alarmService, 'getAlerts').mockResolvedValue([
+        {
+          regionId: testRegionId,
+          regionName: testRegionName,
+          regionEngName: 'Lviv Oblast',
+          regionType: 'State',
+          lastUpdate: new Date().toISOString(),
+          activeAlerts: [],
+        },
+      ]);
 
-      alarmChatService.alarms = new Set([testState]);
+      alarmChatService.activeAlarmRegionIds = new Set([testRegionId]);
 
-      await alarmChatService.getChatsWithAlarm();
+      await alarmChatService.syncActiveAlarms();
 
-      expect(alarmChatService.alarms?.has(testState)).toBe(false);
+      expect(alarmChatService.activeAlarmRegionIds?.has(testRegionId)).toBe(false);
     });
   });
 
@@ -155,12 +166,12 @@ describe('AlarmChatService', () => {
     });
 
     it('should mute chat and send message when alarm=true, disableChatWhileAirRaidAlert=true, isBotAdmin=true', async () => {
-      const chatData = generateChatSessionData(testState, true, false);
+      const chatData = generateChatSessionData([testRegionId], true, false);
 
       chatData.isBotAdmin = true;
       const chat = generateChat(testId, chatData);
 
-      await alarmChatService.processChatAlarm(chat, true, false);
+      await alarmChatService.processChatAlarm(chat, true, testRegionName, false);
 
       expect(updateChatSessionMock).toHaveBeenCalled();
       expect(apiMock.setChatPermissions).toHaveBeenCalledWith(chat.id, {});
@@ -168,12 +179,12 @@ describe('AlarmChatService', () => {
     });
 
     it('should not mute chat when alarm=true and isRepeatedAlarm=true', async () => {
-      const chatData = generateChatSessionData(testState, true, false);
+      const chatData = generateChatSessionData([testRegionId], true, false);
 
       chatData.isBotAdmin = true;
       const chat = generateChat(testId, chatData);
 
-      await alarmChatService.processChatAlarm(chat, true, true);
+      await alarmChatService.processChatAlarm(chat, true, testRegionName, true);
 
       expect(updateChatSessionMock).not.toHaveBeenCalled();
       expect(apiMock.setChatPermissions).not.toHaveBeenCalled();
@@ -181,12 +192,12 @@ describe('AlarmChatService', () => {
     });
 
     it('should not mute chat when alarm=true and disableChatWhileAirRaidAlert=false', async () => {
-      const chatData = generateChatSessionData(testState, false, true);
+      const chatData = generateChatSessionData([testRegionId], false, true);
 
       chatData.isBotAdmin = true;
       const chat = generateChat(testId, chatData);
 
-      await alarmChatService.processChatAlarm(chat, true, false);
+      await alarmChatService.processChatAlarm(chat, true, testRegionName, false);
 
       expect(updateChatSessionMock).not.toHaveBeenCalled();
       expect(apiMock.setChatPermissions).not.toHaveBeenCalled();
@@ -194,26 +205,26 @@ describe('AlarmChatService', () => {
     });
 
     it('should not set chat permissions when alarm=true and isBotAdmin=false', async () => {
-      const chatData = generateChatSessionData(testState, true, false);
+      const chatData = generateChatSessionData([testRegionId], true, false);
 
       chatData.isBotAdmin = false;
       const chat = generateChat(testId, chatData);
 
-      await alarmChatService.processChatAlarm(chat, true, false);
+      await alarmChatService.processChatAlarm(chat, true, testRegionName, false);
 
       expect(updateChatSessionMock).toHaveBeenCalled();
       expect(apiMock.setChatPermissions).not.toHaveBeenCalled();
     });
 
     it('should unmute chat and send message when alarm=false, disableChatWhileAirRaidAlert=true, isBotAdmin=true', async () => {
-      const chatData = generateChatSessionData(testState, true, false);
+      const chatData = generateChatSessionData([testRegionId], true, false);
 
       chatData.isBotAdmin = true;
       const chat = generateChat(testId, chatData);
 
       getChatSessionMock.mockResolvedValue({ chatPermissions: { can_send_messages: true } } as any);
 
-      await alarmChatService.processChatAlarm(chat, false);
+      await alarmChatService.processChatAlarm(chat, false, testRegionName);
 
       expect(getChatSessionMock).toHaveBeenCalledWith(chat.id);
       expect(apiMock.setChatPermissions).toHaveBeenCalledWith(chat.id, { can_send_messages: true });
@@ -221,24 +232,24 @@ describe('AlarmChatService', () => {
     });
 
     it('should not restore permissions when alarm=false and isBotAdmin=false', async () => {
-      const chatData = generateChatSessionData(testState, true, false);
+      const chatData = generateChatSessionData([testRegionId], true, false);
 
       chatData.isBotAdmin = false;
       const chat = generateChat(testId, chatData);
 
-      await alarmChatService.processChatAlarm(chat, false);
+      await alarmChatService.processChatAlarm(chat, false, testRegionName);
 
       expect(getChatSessionMock).toHaveBeenCalledWith(chat.id);
       expect(apiMock.setChatPermissions).not.toHaveBeenCalled();
     });
 
     it('should not get session or set permissions when alarm=false and disableChatWhileAirRaidAlert=false', async () => {
-      const chatData = generateChatSessionData(testState, false, true);
+      const chatData = generateChatSessionData([testRegionId], false, true);
 
       chatData.isBotAdmin = true;
       const chat = generateChat(testId, chatData);
 
-      await alarmChatService.processChatAlarm(chat, false);
+      await alarmChatService.processChatAlarm(chat, false, testRegionName);
 
       expect(getChatSessionMock).not.toHaveBeenCalled();
       expect(apiMock.setChatPermissions).not.toHaveBeenCalled();
@@ -260,7 +271,7 @@ describe('AlarmChatService', () => {
       } as typeof alarmChatService.limiter;
 
       alarmChatService.processChatAlarm = vi.fn(() => Promise.resolve());
-      alarmChatService.alarms = new Set();
+      alarmChatService.activeAlarmRegionIds = new Set();
     });
 
     afterEach(() => {
@@ -268,65 +279,65 @@ describe('AlarmChatService', () => {
       alarmChatService.processChatAlarm = originalProcessChatAlarm;
     });
 
-    it('should call processChatAlarm for a chat whose state matches the alarm event', async () => {
-      const chatData = generateChatSessionData(testState, true, true);
+    it('should call processChatAlarm for a chat whose regionIds match the alarm event', async () => {
+      const chatData = generateChatSessionData([testRegionId], true, true);
       const chat = generateChat(testId, chatData);
 
       alarmChatService.chats = [chat];
 
-      alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(true, testState));
+      alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmEventMock(true, testRegionId, testRegionName));
 
       await vi.waitFor(() => {
-        expect(alarmChatService.processChatAlarm).toHaveBeenCalledWith(chat, true, false);
+        expect(alarmChatService.processChatAlarm).toHaveBeenCalledWith(chat, true, testRegionName, false);
       });
     });
 
-    it('should pass isRepeatedAlarm=true when the state was already active', async () => {
-      alarmChatService.alarms = new Set([testState]);
-      const chatData = generateChatSessionData(testState, true, true);
+    it('should pass isRepeatedAlarm=true when the regionId was already active', async () => {
+      alarmChatService.activeAlarmRegionIds = new Set([testRegionId]);
+      const chatData = generateChatSessionData([testRegionId], true, true);
       const chat = generateChat(testId, chatData);
 
       alarmChatService.chats = [chat];
 
-      alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(true, testState));
+      alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmEventMock(true, testRegionId, testRegionName));
 
       await vi.waitFor(() => {
-        expect(alarmChatService.processChatAlarm).toHaveBeenCalledWith(chat, true, true);
+        expect(alarmChatService.processChatAlarm).toHaveBeenCalledWith(chat, true, testRegionName, true);
       });
     });
 
-    it('should add state to alarms set when alert=true event is emitted', async () => {
+    it('should add regionId to active set when alert=true event is emitted', async () => {
       alarmChatService.chats = [];
 
-      alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(true, testState));
+      alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmEventMock(true, testRegionId, testRegionName));
 
       await new Promise<void>((resolve) => {
         setTimeout(resolve, 50);
       });
 
-      expect(alarmChatService.alarms?.has(testState)).toBe(true);
+      expect(alarmChatService.activeAlarmRegionIds?.has(testRegionId)).toBe(true);
     });
 
-    it('should remove state from alarms set when alert=false event is emitted', async () => {
-      alarmChatService.alarms = new Set([testState]);
+    it('should remove regionId from active set when alert=false event is emitted', async () => {
+      alarmChatService.activeAlarmRegionIds = new Set([testRegionId]);
       alarmChatService.chats = [];
 
-      alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(false, testState));
+      alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmEventMock(false, testRegionId, testRegionName));
 
       await new Promise<void>((resolve) => {
         setTimeout(resolve, 50);
       });
 
-      expect(alarmChatService.alarms?.has(testState)).toBe(false);
+      expect(alarmChatService.activeAlarmRegionIds?.has(testRegionId)).toBe(false);
     });
 
-    it('should not call processChatAlarm for a chat whose state does not match the event', async () => {
-      const chatData = generateChatSessionData('differentState', true, true);
+    it('should not call processChatAlarm for a chat whose regionIds do not match the event', async () => {
+      const chatData = generateChatSessionData(['999'], true, true);
       const chat = generateChat(testId, chatData);
 
       alarmChatService.chats = [chat];
 
-      alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(true, testState));
+      alarmService.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmEventMock(true, testRegionId, testRegionName));
 
       await new Promise<void>((resolve) => {
         setTimeout(resolve, 100);

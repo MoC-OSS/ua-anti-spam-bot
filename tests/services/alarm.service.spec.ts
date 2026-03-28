@@ -1,4 +1,4 @@
-import { ALARM_CLOSE_KEY, ALARM_CONNECT_KEY, ALARM_EVENT_KEY, AlarmService, TEST_ALARM_STATE } from '@services/alarm.service';
+import { ALARM_CLOSE_KEY, ALARM_CONNECT_KEY, ALARM_EVENT_KEY, AlarmService, TEST_ALARM_REGION_NAME } from '@services/alarm.service';
 
 import type { AlarmPubSubMessage } from '@app-types/stfalcon-alarm';
 
@@ -56,74 +56,73 @@ describe('AlarmService', () => {
     vi.clearAllMocks();
   });
 
-  describe('getStates', () => {
+  describe('getAlerts', () => {
     describe('positive cases', () => {
-      it('should return mapped states when API returns regions', async () => {
+      it('should return alerts from API', async () => {
         const { stfalconAlarmApiService } = await import('@services/stfalcon-alarm-api.service');
 
         vi.mocked(stfalconAlarmApiService.getAlerts).mockResolvedValue([
           {
             regionId: '4',
             regionName: 'Львівська область',
+            regionEngName: 'Lviv Oblast',
             regionType: 'State',
             lastUpdate: '2024-01-01T12:00:00Z',
             activeAlerts: [{ regionId: '4', regionType: 'State', type: 'AIR', lastUpdate: '2024-01-01T12:00:00Z' }],
           },
         ]);
 
-        const result = await service.getStates();
+        const result = await service.getAlerts();
 
-        expect(result.states).toHaveLength(1);
+        expect(result).toHaveLength(1);
 
-        expect(result.states[0]).toMatchObject({
-          id: 4,
-          name: 'Львівська область',
-          alert: true,
+        expect(result[0]).toMatchObject({
+          regionId: '4',
+          regionName: 'Львівська область',
         });
-
-        expect(result.last_update).toBeDefined();
       });
 
-      it('should return empty states when API returns no regions', async () => {
+      it('should return empty array when API returns no regions', async () => {
         const { stfalconAlarmApiService } = await import('@services/stfalcon-alarm-api.service');
 
         vi.mocked(stfalconAlarmApiService.getAlerts).mockResolvedValue([]);
 
-        const result = await service.getStates();
+        const result = await service.getAlerts();
 
-        expect(result.states).toEqual([]);
+        expect(result).toEqual([]);
       });
 
-      it('should return alert=false when region has no active alerts', async () => {
+      it('should return region with no active alerts', async () => {
         const { stfalconAlarmApiService } = await import('@services/stfalcon-alarm-api.service');
 
         vi.mocked(stfalconAlarmApiService.getAlerts).mockResolvedValue([
           {
             regionId: '5',
             regionName: 'Київська область',
+            regionEngName: 'Kyiv Oblast',
             regionType: 'State',
             lastUpdate: '2024-01-01T10:00:00Z',
             activeAlerts: [],
           },
         ]);
 
-        const result = await service.getStates();
+        const result = await service.getAlerts();
 
-        expect(result.states[0]).toMatchObject({ id: 5, name: 'Київська область', alert: false });
+        expect(result[0]).toMatchObject({ regionId: '5', activeAlerts: [] });
       });
 
-      it('should return empty states and log error when API throws', async () => {
+      it('should return empty array and log error when API throws', async () => {
         const { stfalconAlarmApiService } = await import('@services/stfalcon-alarm-api.service');
 
         vi.mocked(stfalconAlarmApiService.getAlerts).mockRejectedValue(new Error('API error'));
 
-        const result = await service.getStates();
+        const result = await service.getAlerts();
 
-        expect(result.states).toEqual([]);
+        expect(result).toEqual([]);
       });
     });
 
-    it('should return empty states without calling API when DISABLE_ALARM_API is true', async () => {
+    it('should return empty array without calling API when DISABLE_ALARM_API is true', async () => {
       const { stfalconAlarmApiService } = await import('@services/stfalcon-alarm-api.service');
       const { environmentConfig } = await import('@shared/config');
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -131,11 +130,11 @@ describe('AlarmService', () => {
 
       config.DISABLE_ALARM_API = true;
 
-      const result = await service.getStates();
+      const result = await service.getAlerts();
 
       config.DISABLE_ALARM_API = false;
 
-      expect(result.states).toEqual([]);
+      expect(result).toEqual([]);
       expect(stfalconAlarmApiService.getAlerts).not.toHaveBeenCalled();
     });
   });
@@ -226,11 +225,9 @@ describe('AlarmService', () => {
         expect(emitSpy).toHaveBeenCalledWith(
           ALARM_EVENT_KEY,
           expect.objectContaining({
-            state: expect.objectContaining({
-              id: 4,
-              name: 'Львівська область',
-              alert: true,
-            }),
+            regionId: '4',
+            regionName: 'Львівська область',
+            alert: true,
           }),
         );
       });
@@ -261,17 +258,14 @@ describe('AlarmService', () => {
 
         vi.advanceTimersByTime(30_000);
 
-        expect(emitSpy).toHaveBeenCalledWith(
-          ALARM_EVENT_KEY,
-          expect.objectContaining({ state: expect.objectContaining({ name: TEST_ALARM_STATE }) }),
-        );
+        expect(emitSpy).toHaveBeenCalledWith(ALARM_EVENT_KEY, expect.objectContaining({ regionName: TEST_ALARM_REGION_NAME }));
       });
 
       it('should toggle alert on each tick', () => {
         const emissions: boolean[] = [];
 
         service.updatesEmitter.on(ALARM_EVENT_KEY, (event) => {
-          emissions.push(event.state.alert);
+          emissions.push(event.alert);
         });
 
         service.initTestAlarms();
@@ -298,8 +292,8 @@ describe('AlarmService', () => {
       expect(ALARM_EVENT_KEY).toBe('update');
     });
 
-    it('should export TEST_ALARM_STATE', () => {
-      expect(TEST_ALARM_STATE).toBe('Московська область');
+    it('should export TEST_ALARM_REGION_NAME', () => {
+      expect(TEST_ALARM_REGION_NAME).toBe('Московська область');
     });
   });
 });

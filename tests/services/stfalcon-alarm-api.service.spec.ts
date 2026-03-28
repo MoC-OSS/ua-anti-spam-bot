@@ -109,6 +109,7 @@ describe('StfalconAlarmApiService', () => {
           {
             regionId: '4',
             regionName: 'Львівська область',
+            regionEngName: 'Lviv Oblast',
             regionType: 'State',
             lastUpdate: '2024-01-01T12:00:00Z',
             activeAlerts: [{ regionId: '4', regionType: 'State', type: 'AIR', lastUpdate: '2024-01-01T12:00:00Z' }],
@@ -147,10 +148,10 @@ describe('StfalconAlarmApiService', () => {
 
   describe('getRegions', () => {
     describe('positive cases', () => {
-      it('should GET /api/v3/regions and return the parsed array', async () => {
+      it('should GET /api/v3/regions and return the states array from the response wrapper', async () => {
         const regions = [{ regionId: '4', regionName: 'Львівська область', regionType: 'State', regionChildIds: [] }];
 
-        mockFetch.mockResolvedValue(mockResponse(200, regions));
+        mockFetch.mockResolvedValue(mockResponse(200, { states: regions }));
 
         const result = await service.getRegions();
 

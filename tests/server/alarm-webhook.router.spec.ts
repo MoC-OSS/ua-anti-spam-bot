@@ -96,6 +96,7 @@ describe('createAlarmWebhookRouter', () => {
           {
             regionId: '4',
             regionName: 'Львівська область',
+            regionEngName: 'Lviv Oblast',
             regionType: 'State',
             lastUpdate: '2024-01-01T12:00:00Z',
             activeAlerts: [{ regionId: '4', regionType: 'State', type: 'AIR', lastUpdate: '2024-01-01T12:00:00Z' }],
@@ -136,6 +137,7 @@ describe('createAlarmWebhookRouter', () => {
           {
             regionId: '4',
             regionName: 'Львівська область',
+            regionEngName: 'Lviv Oblast',
             regionType: 'State',
             lastUpdate: '2024-01-01T14:00:00Z',
             activeAlerts: [],
@@ -174,6 +176,7 @@ describe('createAlarmWebhookRouter', () => {
           {
             regionId: '4',
             regionName: 'Львівська область',
+            regionEngName: 'Lviv Oblast',
             regionType: 'State',
             lastUpdate: '2024-01-01T12:00:00Z',
             activeAlerts: [{ regionId: '4', regionType: 'State', type: 'AIR', lastUpdate: '2024-01-01T12:00:00Z' }],
@@ -181,6 +184,7 @@ describe('createAlarmWebhookRouter', () => {
           {
             regionId: '5',
             regionName: 'Київська область',
+            regionEngName: 'Kyiv Oblast',
             regionType: 'State',
             lastUpdate: '2024-01-01T12:05:00Z',
             activeAlerts: [],
