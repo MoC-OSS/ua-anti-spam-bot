@@ -1,3 +1,5 @@
+import crypto from 'node:crypto';
+
 import express from 'express';
 import type { RouteParameters } from 'express-serve-static-core';
 import multer from 'multer';
@@ -36,7 +38,37 @@ const uploadMemoryStorage = multer.memoryStorage();
 // eslint-disable-next-line sonarjs/content-length
 const uploadMiddleware = multer({ storage: uploadMemoryStorage });
 
+/**
+ * Validates server startup configuration and logs actionable errors for any
+ * misconfigured values that would cause silent runtime failures.
+ * @param config - The loaded environment configuration object.
+ *
+ * TODO: Replace manual checks here with a Zod schema (e.g. `serverConfigSchema.parse(config)`)
+ * once the project migrates to Zod for env validation. Each check below maps directly to a
+ * schema field: string fields become `z.string()`, PEM fields add `.refine(validatePem)`, etc.
+ */
+function validateServerConfig(config: typeof environmentConfig): void {
+  const publicKeyPem = config.ALARM_WEBHOOK_PUBLIC_KEY_PEM;
+
+  if (publicKeyPem) {
+    try {
+      crypto.createPublicKey(publicKeyPem);
+      logger.info('Server config: ALARM_WEBHOOK_PUBLIC_KEY_PEM is valid.');
+    } catch {
+      logger.error(
+        'Server config: ALARM_WEBHOOK_PUBLIC_KEY_PEM is set but invalid ' +
+          '(malformed PEM or newlines replaced with spaces in the secrets store). ' +
+          'All POST /webhook/alarm requests will be rejected with 401.',
+      );
+    }
+  } else if (!config.DISABLE_ALARM_API) {
+    logger.warn('Server config: ALARM_WEBHOOK_PUBLIC_KEY_PEM is not set — webhook signature verification will reject all requests.');
+  }
+}
+
 (async () => {
+  validateServerConfig(environmentConfig);
+
   /**
    * Tensorflow.js offers two flags, enableProdMode and enableDebugMode.
    * If you're going to use any TF model in production, be sure to enable prod mode before loading models.
