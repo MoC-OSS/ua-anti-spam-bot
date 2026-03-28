@@ -35,7 +35,7 @@ const sharedSchema = z.object({
   DEBUG: booleanStringSchema.default(false),
   DEBUG_MIDDLEWARE: booleanStringSchema.default(false),
   TENSOR_RANK: z.coerce.number().default(0.9),
-  /** @deprecated — kept for backward compatibility. */
+  // Note: TEST_TENSOR is legacy — kept for backward compatibility.
   TEST_TENSOR: booleanStringSchema.default(false),
 });
 
@@ -82,7 +82,7 @@ const awsVariablesSchema = z.object({
   AWS_REGION: z.string().trim().default(''),
 });
 
-/** @deprecated PostgreSQL variables — kept only for backward compat. */
+/** PostgreSQL variables — legacy, kept only for backward compat. */
 const postgresVariablesSchema = z.object({
   POSTGRES_PASSWORD: z.string().trim().default('secret'),
   PGHOST: z.string().trim().default('postgres'),
@@ -117,7 +117,6 @@ export const environmentSchema = z.object({
   ...alarmVariablesSchema.shape,
   ...googleVariablesSchema.shape,
   ...awsVariablesSchema.shape,
-  // eslint-disable-next-line sonarjs/deprecation
   ...postgresVariablesSchema.shape,
   ...userbotVariablesSchema.shape,
 });
