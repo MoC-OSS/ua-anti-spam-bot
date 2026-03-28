@@ -5,7 +5,7 @@
  *
  * The server process receives alarm webhooks from the Stfalcon API and publishes
  * {@link AlarmPubSubMessage} objects to the Redis channel. This service subscribes to
- * that channel and re-emits notifications as {@link AlarmNotification} objects so that
+ * that channel and re-emits notifications as {@link AlarmEvent} objects so that
  * {@link AlarmChatService} (and any other listener) can react to alarm state changes
  * without being coupled to the transport mechanism.
  */
@@ -19,12 +19,12 @@ import { createAlarmSubscriber } from '@db/redis-pubsub';
 
 import { environmentConfig } from '@shared/config';
 
-import type { AlarmNotification, AlarmStates } from '@app-types/alarm';
-import type { AlarmPubSubMessage } from '@app-types/stfalcon-alarm';
+import type { AlarmEvent } from '@app-types/alarm';
+import type { AlarmPubSubMessage, StfalconRegionAlert } from '@app-types/stfalcon-alarm';
 
 import { logger } from '@utils/logger.util';
 
-import { getAlarmMock } from './_mocks/alarm.mocks';
+import { getAlarmEventMock } from './_mocks/alarm.mocks';
 import { stfalconAlarmApiService } from './stfalcon-alarm-api.service';
 
 export const ALARM_CONNECT_KEY = 'connect';
@@ -33,30 +33,29 @@ export const ALARM_CLOSE_KEY = 'close';
 
 export const ALARM_EVENT_KEY = 'update';
 
-export const TEST_ALARM_STATE = 'Московська область';
+export const TEST_ALARM_REGION_ID = '0';
+
+export const TEST_ALARM_REGION_NAME = 'Московська область';
 
 export interface UpdatesEvents {
   connect: (reason: string) => void;
   close: (reason: string) => void;
-  update: (body: AlarmNotification) => void;
+  update: (body: AlarmEvent) => void;
 }
 
 /**
  * Maps a {@link AlarmPubSubMessage} from the Redis channel to the internal
- * {@link AlarmNotification} shape consumed by {@link AlarmChatService}.
+ * {@link AlarmEvent} shape consumed by {@link AlarmChatService}.
  * @param message - The raw pub/sub message received from Redis.
- * @returns The corresponding {@link AlarmNotification}.
+ * @returns The corresponding {@link AlarmEvent}.
  */
-function mapPubSubMessageToNotification(message: AlarmPubSubMessage): AlarmNotification {
+function mapPubSubMessageToAlarmEvent(message: AlarmPubSubMessage): AlarmEvent {
   return {
-    state: {
-      alert: message.alert,
-      id: Number.parseInt(message.regionId, 10),
-      name: message.regionName,
-      name_en: message.regionName,
-      changed: new Date(message.lastUpdate),
-    },
-    notification_id: `${message.regionId}-${message.lastUpdate}`,
+    regionId: message.regionId,
+    regionName: message.regionName,
+    alert: message.alert,
+    alertType: message.alertType,
+    lastUpdate: message.lastUpdate,
   };
 }
 
@@ -70,38 +69,26 @@ export class AlarmService {
   private redisSubscriber?: Awaited<ReturnType<typeof createAlarmSubscriber>>;
 
   /**
-   * Fetches the current alarm states from the Stfalcon REST API.
-   * Maps the Stfalcon response to the existing {@link AlarmStates} shape used by
-   * the web UI and {@link AlarmChatService}.
-   * @returns An {@link AlarmStates} object with the latest alert status for every region.
+   * Fetches the current alert status for all regions from the Stfalcon REST API.
+   * @returns Array of {@link StfalconRegionAlert} objects with current alert status.
    */
-  async getStates(): Promise<AlarmStates> {
+  async getAlerts(): Promise<StfalconRegionAlert[]> {
     if (environmentConfig.DISABLE_ALARM_API) {
-      return { states: [], last_update: new Date().toISOString() };
+      return [];
     }
 
     try {
-      const regions = await stfalconAlarmApiService.getAlerts();
-
-      const states = regions.map((region) => ({
-        alert: region.activeAlerts.length > 0,
-        id: Number.parseInt(region.regionId, 10),
-        name: region.regionName,
-        name_en: region.regionName,
-        changed: new Date(region.lastUpdate),
-      }));
-
-      return { states, last_update: new Date().toISOString() };
+      return await stfalconAlarmApiService.getAlerts();
     } catch (error) {
       logger.error(error, 'Failed to fetch alarm states from Stfalcon API');
 
-      return { states: [], last_update: new Date().toISOString() };
+      return [];
     }
   }
 
   /**
    * Starts listening for alarm events on the Redis pub/sub channel.
-   * Each received message is mapped to an {@link AlarmNotification} and emitted on
+   * Each received message is mapped to an {@link AlarmEvent} and emitted on
    * {@link updatesEmitter} so that downstream listeners (e.g. {@link AlarmChatService})
    * are notified.
    * @param reason - Human-readable reason for enabling (used for logging).
@@ -164,9 +151,9 @@ export class AlarmService {
     this.redisSubscriber = await createAlarmSubscriber((rawMessage) => {
       try {
         const message = JSON.parse(rawMessage) as AlarmPubSubMessage;
-        const notification = mapPubSubMessageToNotification(message);
+        const event = mapPubSubMessageToAlarmEvent(message);
 
-        this.updatesEmitter.emit(ALARM_EVENT_KEY, notification);
+        this.updatesEmitter.emit(ALARM_EVENT_KEY, event);
       } catch (error) {
         logger.error(error, 'Alarm service: failed to parse pub/sub message');
       }
@@ -183,7 +170,7 @@ export class AlarmService {
     let isAlert = true;
 
     this.testAlarmInterval = setInterval(() => {
-      this.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(isAlert, TEST_ALARM_STATE));
+      this.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmEventMock(isAlert, TEST_ALARM_REGION_ID, TEST_ALARM_REGION_NAME));
       isAlert = !isAlert;
     }, ms('0.5m'));
   }

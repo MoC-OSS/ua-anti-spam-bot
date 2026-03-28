@@ -5,7 +5,7 @@ import { ALARM_END_DAY_COUNT, ALARM_END_GENERIC_COUNT, ALARM_END_NIGHT_COUNT, AL
 import type { GrammyContext } from '@app-types/context';
 import type { ChatSessionData } from '@app-types/session';
 
-import { formatStateIntoAccusative, getRandomItem } from '@utils/generic.util';
+import { formatRegionNameToLocative, getRandomItem } from '@utils/generic.util';
 
 /**
  * Checks whether current time is night-time (between 20:00 and 05:00).
@@ -89,28 +89,28 @@ const getRandomAlarmEndText = (): string => {
 };
 
 /**
- * Returns the air-raid alarm start notification message for a given chat.
- * @param settings - Chat settings containing alert state.
+ * Returns the air-raid alarm start notification message.
+ * @param regionName - The Ukrainian region name for display in the notification.
  * @param isRepeatedAlarm - Whether this is a repeated alarm notification.
  * @returns The formatted alarm start notification string.
  */
-export const getAlarmStartNotificationMessage = (settings: ChatSessionData['chatSettings'], isRepeatedAlarm = false) =>
+export const getAlarmStartNotificationMessage = (regionName: string, isRepeatedAlarm = false) =>
   i18n.t('uk', 'alarm-start-notification', {
     time: getCurrentTime(),
     repeated: isRepeatedAlarm ? 'yes' : 'no',
-    state: formatStateIntoAccusative(settings.airRaidAlertSettings.state || ''),
+    state: formatRegionNameToLocative(regionName),
     text: getRandomAlarmStartText(),
   });
 
 /**
- * Returns the air-raid alarm end notification message for a given chat.
- * @param settings - Chat settings containing alert state.
+ * Returns the air-raid alarm end notification message.
+ * @param regionName - The Ukrainian region name for display in the notification.
  * @returns The formatted alarm end notification string.
  */
-export const alarmEndNotificationMessage = (settings: ChatSessionData['chatSettings']) =>
+export const alarmEndNotificationMessage = (regionName: string) =>
   i18n.t('uk', 'alarm-end-notification', {
     time: getCurrentTime(),
-    state: formatStateIntoAccusative(settings.airRaidAlertSettings.state || ''),
+    state: formatRegionNameToLocative(regionName),
     text: getRandomAlarmEndText(),
   });
 
@@ -130,16 +130,24 @@ export const chatIsUnmutedMessage = () => i18n.t('uk', 'alarm-chat-unmuted');
  * Returns the air-raid alarm settings message for a given chat.
  * @param context - Grammy bot context.
  * @param settings - Chat settings containing alert configuration.
+ * @param regionName - Resolved Ukrainian region name for display, or null if no region is selected.
  * @returns The formatted alarm settings message string.
  */
-export const getAirRaidAlarmSettingsMessage = (context: GrammyContext, settings: ChatSessionData['chatSettings']) =>
-  [
+export const getAirRaidAlarmSettingsMessage = (
+  context: GrammyContext,
+  settings: ChatSessionData['chatSettings'],
+  regionName: string | null,
+) => {
+  const regionLine = regionName
+    ? `🏰 ${context.t('alarm-settings-state-set', { state: regionName })}`
+    : `🏰 ${context.t('alarm-settings-state-not-set')}`;
+
+  return [
     context.t('alarm-settings-title'),
     context.t('alarm-settings-description'),
     '',
-    settings.airRaidAlertSettings.state
-      ? `🏰 ${context.t('alarm-settings-state-set', { state: settings.airRaidAlertSettings.state })}`
-      : `🏰 ${context.t('alarm-settings-state-not-set')}`,
+    regionLine,
     '',
     context.t('alarm-settings-change-hint'),
   ].join('\n');
+};

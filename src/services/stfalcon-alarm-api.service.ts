@@ -7,7 +7,7 @@
 
 import { environmentConfig } from '@shared/config';
 
-import type { StfalconRegion, StfalconRegionAlert } from '@app-types/stfalcon-alarm';
+import type { StfalconRegion, StfalconRegionAlert, StfalconRegionsResponse } from '@app-types/stfalcon-alarm';
 
 import { logger } from '@utils/logger.util';
 
@@ -112,8 +112,9 @@ export class StfalconAlarmApiService {
 
   /**
    * Returns all Ukrainian administrative regions (oblasts, districts, communities, cities).
-   * Used to populate the location selection menu in the bot's web UI.
-   * @returns Array of {@link StfalconRegion} objects.
+   * The response is hierarchical: states contain districts, districts contain communities.
+   * Used to populate the location selection UI in the bot's web dashboard and inline menu.
+   * @returns Array of top-level {@link StfalconRegion} objects (states).
    */
   async getRegions(): Promise<StfalconRegion[]> {
     const response = await fetch(`${this.baseUrl}/api/v3/regions`, {
@@ -128,7 +129,9 @@ export class StfalconAlarmApiService {
       throw new Error(`Stfalcon getRegions failed with status ${response.status}`);
     }
 
-    return (await response.json()) as StfalconRegion[];
+    const regionsResponse = (await response.json()) as StfalconRegionsResponse;
+
+    return regionsResponse.states;
   }
 
   private getHeaders(): Record<string, string> {

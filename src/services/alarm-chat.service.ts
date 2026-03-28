@@ -10,6 +10,7 @@ import type { Chat } from 'typegram/manage';
 
 import { alarmEndNotificationMessage, chatIsMutedMessage, chatIsUnmutedMessage, getAlarmStartNotificationMessage } from '@message';
 
+import type { AlarmEvent } from '@app-types/alarm';
 import type { GrammyBot } from '@app-types/context';
 import type { ChatSession, ChatSessionData } from '@app-types/session';
 
@@ -24,31 +25,41 @@ export class AlarmChatService {
 
   chats: ChatSession[] = [];
 
-  alarms: Set<string> | undefined;
+  /** Set of regionIds that currently have active alarms. */
+  activeAlarmRegionIds: Set<string> | undefined;
 
   limiter!: Bottleneck;
 
   async init(api: GrammyBot['api']) {
     this.api = api;
     this.chats = await this.getChatsWithAlarmModeOn();
-    this.alarms = new Set();
+    this.activeAlarmRegionIds = new Set();
 
     this.limiter = new Bottleneck({
       maxConcurrent: 1,
       minTime: 2000,
     });
 
-    await this.getChatsWithAlarm();
+    await this.syncActiveAlarms();
     this.subscribeToAlarms();
   }
 
   /**
    * Checks whether the given region currently has an active alarm.
-   * @param state - the region/state name to check
-   * @returns true if the region is currently under alarm, undefined otherwise
+   * @param regionId - the Stfalcon region identifier to check
+   * @returns true if the region is currently under alarm
    */
-  isAlarmNow(state: string) {
-    return this.alarms?.has(state);
+  isAlarmNow(regionId: string): boolean {
+    return this.activeAlarmRegionIds?.has(regionId) ?? false;
+  }
+
+  /**
+   * Checks whether any of the given region IDs currently have an active alarm.
+   * @param regionIds - array of Stfalcon region identifiers to check
+   * @returns true if any of the regions are currently under alarm
+   */
+  isAnyAlarmNow(regionIds: string[]): boolean {
+    return regionIds.some((id) => this.isAlarmNow(id));
   }
 
   /**
@@ -89,34 +100,42 @@ export class AlarmChatService {
     );
   }
 
-  async getChatsWithAlarm() {
-    const airRaidAlarmStates = await alarmService.getStates();
+  /**
+   * Synchronizes the active alarm state from the Stfalcon REST API.
+   * Called once on startup to populate the initial alarm state.
+   */
+  async syncActiveAlarms() {
+    const alerts = await alarmService.getAlerts();
 
-    airRaidAlarmStates.states.forEach((state) => {
-      if (state.alert) {
-        this.alarms?.add(state.name);
+    for (const region of alerts) {
+      if (region.activeAlerts.length > 0) {
+        this.activeAlarmRegionIds?.add(region.regionId);
       } else {
-        this.alarms?.delete(state.name);
+        this.activeAlarmRegionIds?.delete(region.regionId);
       }
-    });
+    }
   }
 
   subscribeToAlarms() {
-    alarmService.updatesEmitter.on(ALARM_EVENT_KEY, (event) => {
-      const isRepeatedAlarm = this.isAlarmNow(event.state.name);
+    alarmService.updatesEmitter.on(ALARM_EVENT_KEY, (event: AlarmEvent) => {
+      const isRepeatedAlarm = this.isAlarmNow(event.regionId);
 
-      if (event.state.alert) {
-        this.alarms?.add(event.state.name);
+      if (event.alert) {
+        this.activeAlarmRegionIds?.add(event.regionId);
       } else {
-        this.alarms?.delete(event.state.name);
+        this.activeAlarmRegionIds?.delete(event.regionId);
       }
 
       if (this.chats) {
         pIteration
           // eslint-disable-next-line unicorn/no-array-method-this-argument,unicorn/no-array-callback-reference
           .forEach(this.chats, async (chat) => {
-            if (chat.payload.chatSettings.airRaidAlertSettings.state === event.state.name) {
-              await this.limiter.schedule(() => this.processChatAlarm(chat, event.state.alert, isRepeatedAlarm).catch(handleError));
+            const subscribedRegionIds = chat.payload.chatSettings.airRaidAlertSettings.regionIds;
+
+            if (subscribedRegionIds.includes(event.regionId)) {
+              await this.limiter.schedule(() =>
+                this.processChatAlarm(chat, event.alert, event.regionName, isRepeatedAlarm).catch(handleError),
+              );
             }
           })
           .catch((error) => {
@@ -130,16 +149,17 @@ export class AlarmChatService {
    * Processes an alarm event for a chat, sending notifications and toggling chat permissions.
    * @param chat - the chat session to process the alarm for
    * @param isAlarm - true if alarm started, false if alarm ended
-   * @param isRepeatedAlarm - true if this is a repeated alarm for the same state
+   * @param regionName - the Ukrainian region name for display in notifications
+   * @param isRepeatedAlarm - true if this is a repeated alarm for the same region
    */
-  async processChatAlarm(chat: ChatSession, isAlarm: boolean, isRepeatedAlarm = false) {
+  async processChatAlarm(chat: ChatSession, isAlarm: boolean, regionName: string, isRepeatedAlarm = false) {
     const chatInfo = await this.api?.getChat(chat.id);
     let startAlarmMessage = '';
     let endAlarmMessage = '';
 
     if (chat.payload.chatSettings.airRaidAlertSettings.notificationMessage) {
-      startAlarmMessage += getAlarmStartNotificationMessage(chat.payload.chatSettings, isRepeatedAlarm);
-      endAlarmMessage += alarmEndNotificationMessage(chat.payload.chatSettings);
+      startAlarmMessage += getAlarmStartNotificationMessage(regionName, isRepeatedAlarm);
+      endAlarmMessage += alarmEndNotificationMessage(regionName);
     }
 
     if (chat.payload.chatSettings.disableChatWhileAirRaidAlert) {
