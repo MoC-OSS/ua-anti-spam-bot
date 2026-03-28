@@ -2,6 +2,7 @@ import { defineConfig } from 'eslint/config';
 
 import nodeConfigs from './.eslint/node.eslint.mjs';
 import vitestEslint from './.eslint/vitest.eslint.mjs';
+import zodEslint from './.eslint/zod.eslint.mjs';
 
 export default defineConfig([
   // Apply this config to js and ts files only
@@ -17,4 +18,6 @@ export default defineConfig([
   ...nodeConfigs,
   // Vitest rules for testing
   ...vitestEslint,
+  // Zod rules
+  ...zodEslint,
 ]);
