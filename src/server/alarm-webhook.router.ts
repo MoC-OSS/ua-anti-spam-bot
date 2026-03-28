@@ -3,10 +3,15 @@
  * @description Express router that receives alarm webhook payloads from the Stfalcon API
  * and publishes them to the Redis alarm channel for the bot process to consume.
  *
- * Security: every incoming request is verified against the `X-Alarm-Secret` header.
- * In local development (ENV=local) the check is skipped so ngrok testing works without
- * configuring the secret.
+ * Security: every incoming request is verified using RSA-SHA256 signature validation.
+ * The signature is transmitted in the `X-Webhook-Signature` header and is computed over
+ * the string `${X-Webhook-Timestamp}.${rawBody}`.
+ *
+ * In local development (ENV=local) the signature check is skipped so ngrok testing works
+ * without a valid key pair.
  */
+
+import crypto from 'node:crypto';
 
 import type { Request, Response } from 'express';
 import { Router } from 'express';
@@ -24,13 +29,55 @@ export interface AlarmPublisher {
   publish(channel: string, message: string): Promise<number>;
 }
 
-/** Header name used to authenticate incoming webhook calls. */
-const WEBHOOK_SECRET_HEADER = 'x-alarm-secret';
+/** Expected value of the `X-Webhook-Signature-Alg` header. */
+const EXPECTED_ALGORITHM = 'rsa-sha256';
 
 /**
- * Returns true if the incoming request carries a valid webhook secret.
+ * Verifies the RSA-SHA256 signature of an incoming Stfalcon webhook request.
+ *
+ * The signed payload is `${timestamp}.${rawBody}` as described in the Stfalcon docs.
+ * @param headers - The incoming request headers object.
+ * @param rawBody - The raw UTF-8 request body string (must be captured before JSON parsing).
+ * @param publicKeyPem - The RSA public key in PEM format.
+ * @returns `true` when the signature is valid; `false` otherwise.
+ */
+function verifyWebhookSignature(headers: Request['headers'], rawBody: string, publicKeyPem: string): boolean {
+  const signature = headers['x-webhook-signature'];
+  const timestamp = headers['x-webhook-timestamp'];
+  const algorithm = (headers['x-webhook-signature-alg'] ?? '').toString().toLowerCase();
+
+  if (!signature || !timestamp) {
+    logger.warn('Alarm webhook: missing required signature headers.');
+
+    return false;
+  }
+
+  if (algorithm && algorithm !== EXPECTED_ALGORITHM) {
+    logger.warn(`Alarm webhook: unsupported signature algorithm "${algorithm}".`);
+
+    return false;
+  }
+
+  const payload = `${timestamp}.${rawBody}`;
+
+  try {
+    const verifier = crypto.createVerify('RSA-SHA256');
+
+    verifier.update(payload, 'utf8');
+    verifier.end();
+
+    return verifier.verify(publicKeyPem, Buffer.from(signature.toString(), 'base64'));
+  } catch (error) {
+    logger.error(error, 'Alarm webhook: error during signature verification.');
+
+    return false;
+  }
+}
+
+/**
+ * Returns true if the incoming request passes authentication.
  * In local development the check is bypassed to simplify ngrok testing.
- * @param request - The incoming Express request.
+ * @param request - The incoming Express request (must have `rawBody` populated by the json verify callback).
  * @returns `true` when the request is allowed to proceed; `false` otherwise.
  */
 function isAuthorized(request: Request): boolean {
@@ -38,15 +85,17 @@ function isAuthorized(request: Request): boolean {
     return true;
   }
 
-  const secret = environmentConfig.ALARM_WEBHOOK_SECRET;
+  const publicKeyPem = environmentConfig.ALARM_WEBHOOK_PUBLIC_KEY_PEM;
 
-  if (!secret) {
-    logger.warn('Alarm webhook: ALARM_WEBHOOK_SECRET is not configured — requests will be rejected.');
+  if (!publicKeyPem) {
+    logger.warn('Alarm webhook: ALARM_WEBHOOK_PUBLIC_KEY_PEM is not configured — requests will be rejected.');
 
     return false;
   }
 
-  return request.headers[WEBHOOK_SECRET_HEADER] === secret;
+  const rawBody = request.rawBody ?? '';
+
+  return verifyWebhookSignature(request.headers, rawBody, publicKeyPem);
 }
 
 /**
@@ -78,6 +127,10 @@ async function processWebhookPayload(publisher: AlarmPublisher, regions: Stfalco
 
 /**
  * Builds the alarm webhook Express router.
+ *
+ * **Important:** this router relies on `request.rawBody` being pre-populated by the
+ * `express.json({ verify })` callback configured in `server/index.ts`. The raw body
+ * is required for RSA-SHA256 signature verification.
  * @param publisher - A connected Redis client used to publish alarm events.
  * @returns An Express router mounted at `/webhook/alarm` (POST).
  */

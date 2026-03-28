@@ -49,7 +49,16 @@ const uploadMiddleware = multer({ storage: uploadMemoryStorage });
   // eslint-disable-next-line sonarjs/x-powered-by
   const app = express();
 
-  app.use(express.json());
+  // Capture raw body before JSON parsing — required for RSA webhook signature verification.
+  app.use(
+    express.json({
+      verify: (incomingRequest, _response, rawBuffer) => {
+        // eslint-disable-next-line no-param-reassign
+        incomingRequest.rawBody = rawBuffer.toString('utf8');
+      },
+    }),
+  );
+
   app.get('/healthcheck', (request, response) => response.json({ status: 'ok' }));
 
   app.listen(environmentConfig.PORT, environmentConfig.HOST, () => {

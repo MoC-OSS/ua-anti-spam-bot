@@ -15,8 +15,8 @@ export interface ServerEnvironmentConfig {
   readonly WEB_VIEW_URL: string;
   /** Public base URL of the ML server (e.g. the ALB DNS). Used to register the alarm webhook with Stfalcon. */
   readonly ALARM_WEBHOOK_BASE_URL?: string | null;
-  /** Shared secret sent in the `X-Alarm-Secret` header to authenticate incoming webhook calls. */
-  readonly ALARM_WEBHOOK_SECRET?: string | null;
+  /** RSA public key PEM string used to verify the `X-Webhook-Signature` header on incoming alarm webhooks. */
+  readonly ALARM_WEBHOOK_PUBLIC_KEY_PEM?: string | null;
 }
 
 export interface MiscellaneousEnvironmentConfig {
