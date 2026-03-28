@@ -10,6 +10,7 @@ import asyncHandler from 'express-async-handler';
 import { alarmService } from '@services/alarm.service';
 import { alarmChatService } from '@services/alarm-chat.service';
 import { redisService } from '@services/redis.service';
+import { stfalconAlarmApiService } from '@services/stfalcon-alarm-api.service';
 
 import type { GrammyContext } from '@app-types/context';
 import type { ChatData, ChatSettings, Session } from '@app-types/session';
@@ -69,20 +70,23 @@ export const apiRouter = (bot: Bot<GrammyContext>) => {
         enableAdminCheck: false,
         enableDeleteChannelMessages: false,
         airRaidAlertSettings: {
-          pageNumber: 0,
-          state: '',
+          regionIds: [],
           notificationMessage: false,
         },
       };
 
-      const airRaidAlarmStates = await alarmService.getStates();
-      const chatInfo = await bot.api.getChat(id as string);
-      const chatMembers = await bot.api.getChatMemberCount(id as string);
-      const chatSession = await redisService.getChatSession(id as string);
+      const [alerts, regions, chatInfo, chatMembers, chatSession] = await Promise.all([
+        alarmService.getAlerts(),
+        stfalconAlarmApiService.getRegions().catch(() => []),
+        bot.api.getChat(id as string),
+        bot.api.getChatMemberCount(id as string),
+        redisService.getChatSession(id as string),
+      ]);
+
       const avatar = await getChatAvatar(bot, chatInfo.photo?.small_file_id ?? '');
       const title = 'title' in chatInfo ? chatInfo.title : '';
-      const state = chatSession?.chatSettings?.airRaidAlertSettings?.state ?? '';
-      const isAirAlarmNow = alarmChatService.isAlarmNow(state) || false;
+      const regionIds = chatSession?.chatSettings?.airRaidAlertSettings?.regionIds ?? [];
+      const isAirAlarmNow = alarmChatService.isAnyAlarmNow(regionIds);
 
       const responseData: Required<ChatData> = {
         chat: {
@@ -93,7 +97,8 @@ export const apiRouter = (bot: Bot<GrammyContext>) => {
           airAlarm: isAirAlarmNow,
         },
         settings: { ...defaultSettings, ...chatSession?.chatSettings },
-        states: airRaidAlarmStates.states,
+        regions,
+        alerts,
       };
 
       response.status(200).json({ ...responseData });
