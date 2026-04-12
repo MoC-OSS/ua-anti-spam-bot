@@ -44,7 +44,7 @@
     "@tensorflow/tfjs": "^4.22.0",
     "@tensorflow/tfjs-node": "^4.22.0",
     "@types/fuzzyset": "^1.0.7",
-    "axios": "^1.13.6",
+    "axios": "^1.15.0",
     "bottleneck": "^2.19.5",
     "cors": "^2.8.6",
     "crypto-js": "^4.2.0",
