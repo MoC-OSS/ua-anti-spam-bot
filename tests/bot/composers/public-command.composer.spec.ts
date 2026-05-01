@@ -1,3 +1,5 @@
+import type { Chats, Supergroup, User } from '@grammyjs/testing';
+import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
 
 import { getBeforeAnyComposer } from '@bot/composers/before-any.composer';
@@ -6,15 +8,14 @@ import { i18n } from '@bot/i18n';
 import { stateMiddleware } from '@bot/middleware/state.middleware';
 import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
 
-import type { OutgoingRequests } from '@testing/outgoing-requests';
-import type { ApiResponses } from '@testing/prepare';
-import { prepareBotForTesting } from '@testing/prepare';
-import { mockChatSession, mockSession } from '@testing/testing-main';
-import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
-
 import type { GrammyContext } from '@app-types/context';
 
-let outgoingRequests: OutgoingRequests;
+import { mockChatSession, mockSession } from '@test-helpers/session-mocks';
+
+let chats: Chats<GrammyContext>;
+let user: User<GrammyContext>;
+let group: Supergroup<GrammyContext>;
+
 const bot = new Bot<GrammyContext>('mock');
 
 const { chatSession, mockChatSessionMiddleware } = mockChatSession({});
@@ -22,26 +23,6 @@ const { chatSession, mockChatSessionMiddleware } = mockChatSession({});
 const { session, mockSessionMiddleware } = mockSession({
   isCurrentUserAdmin: false,
 });
-
-const apiResponses: ApiResponses = {
-  getChatMember: { status: 'creator' },
-  getChatAdministrators: [new MessageMockUpdate('').genericOwner, new MessageMockUpdate('').genericAdmin],
-};
-
-/**
- * Builds a command update for the provided text.
- * @param text - Command text to send.
- * @returns Telegram update payload.
- */
-function getCommandUpdate(text: string) {
-  const command = text.split(' ')[0] ?? text;
-
-  return new MessageMockUpdate(text).buildOverwrite({
-    message: {
-      entities: [{ offset: 0, length: command.length, type: 'bot_command' }],
-    },
-  });
-}
 
 describe('PublicCommandsComposer', () => {
   beforeAll(async () => {
@@ -56,46 +37,88 @@ describe('PublicCommandsComposer', () => {
     bot.use(mockChatSessionMiddleware);
     bot.use(publicCommandsComposer);
 
-    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot, apiResponses);
+    ({ chats } = await prepareBot<GrammyContext>(bot, {
+      responses: {
+        getChatMember: { status: 'creator' },
+        getChatAdministrators: [
+          {
+            status: 'creator',
+            user: {
+              id: 1_111_111,
+              first_name: 'GrammyMock FirstName',
+              last_name: 'GrammyMock LastName',
+              username: 'GrammyMock_Username',
+              is_bot: false,
+            },
+            custom_title: 'Super Creator Title',
+            is_anonymous: false,
+          },
+          {
+            status: 'administrator',
+            user: {
+              id: 1_111_112,
+              first_name: 'GrammyMock FirstName2',
+              last_name: 'GrammyMock LastName2',
+              username: 'GrammyMock_Username2',
+              is_bot: false,
+            },
+            custom_title: 'Super Admin Title',
+            is_anonymous: true,
+            can_be_edited: true,
+            can_change_info: true,
+            can_delete_messages: true,
+            can_edit_messages: true,
+            can_invite_users: true,
+            can_manage_chat: true,
+            can_manage_video_chats: true,
+            can_promote_members: true,
+            can_restrict_members: true,
+            can_post_stories: true,
+            can_edit_stories: true,
+            can_delete_stories: true,
+          },
+        ],
+      },
+    }));
+
+    user = chats.newUser();
+    group = chats.newSupergroup();
   }, 5000);
 
   beforeEach(() => {
-    outgoingRequests.clear();
+    chats.outgoing.clear();
+    user.replies.clear();
     chatSession.isBotAdmin = true;
     chatSession.language = undefined;
     delete session.roleMode;
     session.isCurrentUserAdmin = false;
-
-    if (apiResponses.getChatMember) {
-      apiResponses.getChatMember.status = 'creator';
-    }
   });
 
   describe('handled commands', () => {
     it('should delete the incoming /language command before replying', async () => {
-      await bot.handleUpdate(getCommandUpdate('/language'));
+      await user.sendCommand('/language', undefined, { chat: group });
 
-      expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']));
+      expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']));
     });
 
     it('should delete the incoming /status command before replying', async () => {
-      await bot.handleUpdate(getCommandUpdate('/status'));
+      await user.sendCommand('/status', undefined, { chat: group });
 
-      expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']));
+      expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']));
     });
 
     it('should delete the incoming /role command before replying', async () => {
-      await bot.handleUpdate(getCommandUpdate('/role'));
+      await user.sendCommand('/role', undefined, { chat: group });
 
-      expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']));
+      expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']));
     });
   });
 
   describe('non-command messages', () => {
     it('should not delete plain user messages that are not handled by the public commands composer', async () => {
-      await bot.handleUpdate(new MessageMockUpdate('hello').build());
+      await user.sendText('hello', { chat: group });
 
-      expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember']));
+      expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember']));
     });
   });
 });

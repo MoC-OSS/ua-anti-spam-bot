@@ -1,3 +1,5 @@
+import type { Chats, Supergroup, User } from '@grammyjs/testing';
+import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
 
 import { getDenylistComposer } from '@bot/composers/messages/denylist.composer';
@@ -6,14 +8,14 @@ import { parseText } from '@bot/middleware/parse-text.middleware';
 import { stateMiddleware } from '@bot/middleware/state.middleware';
 import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
 
-import type { OutgoingRequests } from '@testing/outgoing-requests';
-import { prepareBotForTesting } from '@testing/prepare';
-import { mockChatSession } from '@testing/testing-main';
-import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
-
 import type { GrammyContext } from '@app-types/context';
 
-let outgoingRequests: OutgoingRequests;
+import { mockChatSession } from '@test-helpers/session-mocks';
+
+let chats: Chats<GrammyContext>;
+let user: User<GrammyContext>;
+let group: Supergroup<GrammyContext>;
+
 const { denylistComposer } = getDenylistComposer();
 const bot = new Bot<GrammyContext>('mock');
 
@@ -36,11 +38,16 @@ describe('denylistComposer', () => {
     bot.use(mockChatSessionMiddleware);
     bot.use(denylistComposer);
 
-    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot, {
-      getChat: {
-        invite_link: '',
+    ({ chats } = await prepareBot<GrammyContext>(bot, {
+      responses: {
+        getChat: {
+          invite_link: '',
+        },
       },
-    });
+    }));
+
+    user = chats.newUser();
+    group = chats.newSupergroup();
   }, 5000);
 
   describe('enabled feature', () => {
@@ -51,61 +58,57 @@ describe('denylistComposer', () => {
     });
 
     beforeEach(() => {
-      outgoingRequests.clear();
+      chats.outgoing.clear();
+      user.replies.clear();
+      chats.deletionsFor(group).clear();
     });
 
     it('should delete if denylist word is used', async () => {
-      const update = new MessageMockUpdate(testWord).build();
+      await user.sendText(testWord, { chat: group });
 
-      await bot.handleUpdate(update);
-
-      const expectedMethods = outgoingRequests.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']);
-      const actualMethods = outgoingRequests.getMethods();
+      const expectedMethods = chats.outgoing.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']);
+      const actualMethods = chats.outgoing.getMethods();
 
       expect(actualMethods).toEqual(expectedMethods);
+      expect(chats.deletionsFor(group).length).toEqual(1);
     });
 
     it('should delete if denylist word is part of a larger message', async () => {
-      const update = new MessageMockUpdate(`Larger message ${testWord} wrapped word is part of another string`).build();
+      await user.sendText(`Larger message ${testWord} wrapped word is part of another string`, { chat: group });
 
-      await bot.handleUpdate(update);
-
-      const expectedMethods = outgoingRequests.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']);
-      const actualMethods = outgoingRequests.getMethods();
+      const expectedMethods = chats.outgoing.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']);
+      const actualMethods = chats.outgoing.getMethods();
 
       expect(actualMethods).toEqual(expectedMethods);
+      expect(chats.deletionsFor(group).length).toEqual(1);
     });
 
     it('should delete case-insensitively', async () => {
-      const update = new MessageMockUpdate(testWord.toUpperCase()).build();
+      await user.sendText(testWord.toUpperCase(), { chat: group });
 
-      await bot.handleUpdate(update);
-
-      const expectedMethods = outgoingRequests.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']);
-      const actualMethods = outgoingRequests.getMethods();
+      const expectedMethods = chats.outgoing.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']);
+      const actualMethods = chats.outgoing.getMethods();
 
       expect(actualMethods).toEqual(expectedMethods);
+      expect(chats.deletionsFor(group).length).toEqual(1);
     });
 
     it('should delete and skip user notification when disableDeleteMessage is true', async () => {
       chatSession.chatSettings.disableDeleteMessage = true;
-      const update = new MessageMockUpdate(testWord).build();
+      await user.sendText(testWord, { chat: group });
 
-      await bot.handleUpdate(update);
-
-      const expectedMethods = outgoingRequests.buildMethods(['deleteMessage', 'getChat', 'sendMessage']);
-      const actualMethods = outgoingRequests.getMethods();
+      const expectedMethods = chats.outgoing.buildMethods(['deleteMessage', 'getChat', 'sendMessage']);
+      const actualMethods = chats.outgoing.getMethods();
 
       expect(actualMethods).toEqual(expectedMethods);
+      expect(chats.deletionsFor(group).length).toEqual(1);
       chatSession.chatSettings.disableDeleteMessage = false;
     });
 
     it('should not delete if word is not in denylist', async () => {
-      const update = new MessageMockUpdate('not a banned word').build();
+      await user.sendText('not a banned word', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.length).toEqual(0);
+      expect(chats.outgoing.length).toEqual(0);
     });
   });
 
@@ -116,23 +119,21 @@ describe('denylistComposer', () => {
     });
 
     beforeEach(() => {
-      outgoingRequests.clear();
+      chats.outgoing.clear();
+      user.replies.clear();
+      chats.deletionsFor(group).clear();
     });
 
     it('should not delete if enableDeleteDenylist is false even when denylist has words', async () => {
-      const update = new MessageMockUpdate(testWord).build();
-
-      await bot.handleUpdate(update);
-      expect(outgoingRequests.length).toEqual(0);
+      await user.sendText(testWord, { chat: group });
+      expect(chats.outgoing.length).toEqual(0);
     });
 
     it('should not delete if denylist is empty', async () => {
       chatSession.chatSettings.enableDeleteDenylist = true;
       chatSession.chatSettings.denylist = [];
-      const update = new MessageMockUpdate(testWord).build();
-
-      await bot.handleUpdate(update);
-      expect(outgoingRequests.length).toEqual(0);
+      await user.sendText(testWord, { chat: group });
+      expect(chats.outgoing.length).toEqual(0);
     });
   });
 });

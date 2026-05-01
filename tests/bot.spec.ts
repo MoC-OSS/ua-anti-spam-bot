@@ -1,3 +1,5 @@
+import type { Chats, Supergroup, User } from '@grammyjs/testing';
+import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
 
 import { getBot } from '@bot';
@@ -5,25 +7,20 @@ import { logsChat, secondLogsChat } from '@bot/creator';
 
 import { environmentConfig } from '@shared/config';
 
-import type { OutgoingRequests } from '@testing/outgoing-requests';
-import { prepareBotForTesting } from '@testing/prepare';
-import { mockChatSession, mockSession } from '@testing/testing-main';
-import { LeftMemberMockUpdate } from '@testing/updates/left-member-mock.update';
-import { MessagePrivateMockUpdate } from '@testing/updates/message-private-mock.update';
-import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
-import { NewMemberMockUpdate } from '@testing/updates/new-member-mock.update';
-
 import type { GrammyContext } from '@app-types/context';
 
 // eslint-disable-next-line vitest/no-mocks-import
 import { realSwindlerMessage } from './__mocks__/bot.mocks';
+import { mockChatSession, mockSession } from './helpers/session-mocks';
 
 /**
  * Enable unit testing
  */
 Object.assign(environmentConfig, { UNIT_TESTING: true, DISABLE_LOGS_CHAT: false, DEBUG: false, AWS_REGION: 'us-east-1' });
 
-let outgoingRequests: OutgoingRequests;
+let chats: Chats<GrammyContext>;
+let user: User<GrammyContext>;
+let group: Supergroup<GrammyContext>;
 let bot: Bot<GrammyContext>;
 
 const { session, mockSessionMiddleware } = mockSession({});
@@ -44,35 +41,21 @@ const baseIsolatedSettings = {
   disableStrategicInfo: true,
 };
 
-/**
- * Builds a private command update.
- * @param text - Command text.
- * @returns Telegram private message update with command entity.
- */
-function getPrivateCommandUpdate(text: string) {
-  const command = text.split(' ')[0] ?? text;
+const genericUser = {
+  id: 1_111_111,
+  first_name: 'GrammyMock FirstName',
+  last_name: 'GrammyMock LastName',
+  username: 'GrammyMock_Username',
+  is_bot: false,
+};
 
-  return new MessagePrivateMockUpdate(text).buildOverwrite({
-    message: {
-      entities: [{ offset: 0, length: command.length, type: 'bot_command' }],
-    },
-  });
-}
-
-/**
- * Builds a group command update.
- * @param text - Command text.
- * @returns Telegram group message update with command entity.
- */
-function getGroupCommandUpdate(text: string) {
-  const command = text.split(' ')[0] ?? text;
-
-  return new MessageMockUpdate(text).buildOverwrite({
-    message: {
-      entities: [{ offset: 0, length: command.length, type: 'bot_command' }],
-    },
-  });
-}
+const genericUser2 = {
+  id: 1_111_112,
+  first_name: 'GrammyMock FirstName2',
+  last_name: 'GrammyMock LastName2',
+  username: 'GrammyMock_Username2',
+  is_bot: false,
+};
 
 describe('e2e bot testing', () => {
   beforeAll(async () => {
@@ -84,55 +67,58 @@ describe('e2e bot testing', () => {
 
     bot = await getBot(initialBot);
 
-    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot, {
-      getChat: {},
-    });
+    ({ chats } = await prepareBot<GrammyContext>(bot, {
+      responses: {
+        getChat: {},
+      },
+    }));
+
+    user = chats.newUser();
+    group = chats.newSupergroup();
   }, 15_000);
 
   describe('private flow', () => {
     describe('public commands', () => {
       beforeEach(() => {
-        outgoingRequests.clear();
+        chats.outgoing.clear();
+        user.replies.clear();
         chatSession.language = undefined;
         delete session.roleMode;
       });
 
       it('should handle /language in private chat', async () => {
-        await bot.handleUpdate(getPrivateCommandUpdate('/language'));
+        await user.sendCommand('/language');
 
         expect(chatSession.language).toBe('en');
-        expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['deleteMessage', 'sendMessage']));
+        expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['deleteMessage', 'sendMessage']));
       });
 
       it('should handle /role in private chat', async () => {
-        await bot.handleUpdate(getPrivateCommandUpdate('/role'));
+        await user.sendCommand('/role');
 
         expect(session.roleMode).toBeUndefined();
-        expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['deleteMessage', 'sendMessage']));
+        expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['deleteMessage', 'sendMessage']));
       });
     });
 
     describe('check regular message', () => {
       beforeEach(() => {
-        outgoingRequests.clear();
+        chats.outgoing.clear();
+        user.replies.clear();
       });
 
       it('should not remove a regular message and have 0 api calls', async () => {
-        const update = new MessagePrivateMockUpdate('regular message').build();
+        await user.sendText('regular message');
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.requests).toHaveLength(0);
+        expect(chats.outgoing.requests).toHaveLength(0);
       });
 
       it('should remove a swindler message and notify for first swindler in several hours', async () => {
-        const update = new MessagePrivateMockUpdate(realSwindlerMessage).build();
+        await user.sendText(realSwindlerMessage);
 
-        await bot.handleUpdate(update);
+        const expectedMethods = chats.outgoing.buildMethods(['getChat', 'sendMessage', 'sendMessage', 'sendMessage', 'deleteMessage']);
 
-        const expectedMethods = outgoingRequests.buildMethods(['getChat', 'sendMessage', 'sendMessage', 'sendMessage', 'deleteMessage']);
-
-        const [, sendLogsMessageRequest, sendSecondLogsMessageRequest] = outgoingRequests.getAll<
+        const [, sendLogsMessageRequest, sendSecondLogsMessageRequest] = chats.outgoing.getAll<
           'getChat',
           'sendMessage',
           'sendMessage',
@@ -140,34 +126,32 @@ describe('e2e bot testing', () => {
           'deleteMessage'
         >();
 
-        const actualMethods = outgoingRequests.getMethods();
+        const actualMethods = chats.outgoing.getMethods();
 
         expect(expectedMethods).toEqual(actualMethods);
         expect(sendLogsMessageRequest?.payload.chat_id).toEqual(logsChat);
         expect(sendSecondLogsMessageRequest?.payload.chat_id).toEqual(secondLogsChat);
-        expect(outgoingRequests.requests).toHaveLength(5);
+        expect(chats.outgoing.requests).toHaveLength(5);
       });
 
       it('should remove a swindler message and dont notify after already notified', async () => {
-        const update = new MessagePrivateMockUpdate(realSwindlerMessage).build();
+        await user.sendText(realSwindlerMessage);
 
-        await bot.handleUpdate(update);
+        const expectedMethods = chats.outgoing.buildMethods(['getChat', 'sendMessage', 'sendMessage', 'deleteMessage']);
 
-        const expectedMethods = outgoingRequests.buildMethods(['getChat', 'sendMessage', 'sendMessage', 'deleteMessage']);
-
-        const [, sendLogsMessageRequest, sendSecondLogsMessageRequest] = outgoingRequests.getAll<
+        const [, sendLogsMessageRequest, sendSecondLogsMessageRequest] = chats.outgoing.getAll<
           'getChat',
           'sendMessage',
           'sendMessage',
           'deleteMessage'
         >();
 
-        const actualMethods = outgoingRequests.getMethods();
+        const actualMethods = chats.outgoing.getMethods();
 
         expect(expectedMethods).toEqual(actualMethods);
         expect(sendLogsMessageRequest?.payload.chat_id).toEqual(logsChat);
         expect(sendSecondLogsMessageRequest?.payload.chat_id).toEqual(secondLogsChat);
-        expect(outgoingRequests.requests).toHaveLength(4);
+        expect(chats.outgoing.requests).toHaveLength(4);
       });
     });
   });
@@ -175,42 +159,42 @@ describe('e2e bot testing', () => {
   describe('group or super group flow', () => {
     describe('public commands', () => {
       beforeEach(() => {
-        outgoingRequests.clear();
+        chats.outgoing.clear();
+        user.replies.clear();
         chatSession.language = undefined;
         chatSession.isBotAdmin = true;
         delete session.roleMode;
       });
 
       it('should reject /language in a group for a non-admin user', async () => {
-        await bot.handleUpdate(getGroupCommandUpdate('/language'));
+        await user.sendCommand('/language', undefined, { chat: group });
 
         expect(chatSession.language).toBeUndefined();
-        expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']));
+        expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']));
       });
 
       it('should reject /role in a group for a non-admin user', async () => {
-        await bot.handleUpdate(getGroupCommandUpdate('/role'));
+        await user.sendCommand('/role', undefined, { chat: group });
 
         expect(session.roleMode).toBeUndefined();
-        expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']));
+        expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']));
       });
     });
 
     describe('check regular message', () => {
       beforeEach(() => {
-        outgoingRequests.clear();
+        chats.outgoing.clear();
+        user.replies.clear();
       });
 
       it('should check is bot admin if isAdmin is empty', async () => {
         chatSession.isBotAdmin = undefined;
-        const update = new MessageMockUpdate('regular message').build();
-
-        await bot.handleUpdate(update);
-        const [getChatAdminsRequest, getChatMemberRequest] = outgoingRequests.getTwoLast<'getChatAdministrators', 'getChatMember'>();
+        await user.sendText('regular message', { chat: group });
+        const [getChatAdminsRequest, getChatMemberRequest] = chats.outgoing.getTwoLast<'getChatAdministrators', 'getChatMember'>();
 
         expect(getChatAdminsRequest?.method).toEqual('getChatAdministrators');
         expect(getChatMemberRequest?.method).toEqual('getChatMember');
-        expect(outgoingRequests.length).toEqual(2);
+        expect(chats.outgoing.length).toEqual(2);
       });
 
       // eslint-disable-next-line vitest/max-nested-describe
@@ -224,14 +208,12 @@ describe('e2e bot testing', () => {
         });
 
         it('should check current user if its an admin to skip them', async () => {
-          const update = new MessageMockUpdate('regular message').build();
+          await user.sendText('regular message', { chat: group });
 
-          await bot.handleUpdate(update);
-
-          const getChatMemberRequest = outgoingRequests.getFirst<'getChatMember'>();
+          const getChatMemberRequest = chats.outgoing.getFirst<'getChatMember'>();
 
           expect(getChatMemberRequest?.method).toEqual('getChatMember');
-          expect(getChatMemberRequest?.payload.user_id).toEqual(update.message.from.id);
+          expect(getChatMemberRequest?.payload.user_id).toEqual(user.id);
         });
 
         it('should request chat info if no is removed info', async () => {
@@ -241,32 +223,26 @@ describe('e2e bot testing', () => {
             delete chatSession.botRemoved;
           }
 
-          const update = new MessageMockUpdate('regular message').build();
+          await user.sendText('regular message', { chat: group });
 
-          await bot.handleUpdate(update);
+          const [getChatRequest, getChatMemberRequest] = chats.outgoing.getTwoLast<'getChat', 'getChatMember'>();
 
-          const [getChatRequest, getChatMemberRequest] = outgoingRequests.getTwoLast<'getChat', 'getChatMember'>();
-
-          expect(outgoingRequests.requests).toHaveLength(2);
+          expect(chats.outgoing.requests).toHaveLength(2);
           expect(getChatRequest?.method).toEqual('getChat');
           expect(getChatMemberRequest?.method).toEqual('getChatMember');
         });
 
         it('should not remove a super group message', async () => {
-          const update = new MessageMockUpdate('regular message').build();
+          await user.sendText('regular message', { chat: group });
 
-          await bot.handleUpdate(update);
-
-          expect(outgoingRequests.requests).toHaveLength(1);
+          expect(chats.outgoing.requests).toHaveLength(1);
         });
 
         it('should remove a swindler message and notify for first swindler in several hours', async () => {
           chatSession.lastWarningDate = new Date(0);
-          const update = new MessageMockUpdate(realSwindlerMessage).build();
+          await user.sendText(realSwindlerMessage, { chat: group });
 
-          await bot.handleUpdate(update);
-
-          const expectedMethods = outgoingRequests.buildMethods([
+          const expectedMethods = chats.outgoing.buildMethods([
             'getChatMember',
             'getChat',
             'sendMessage',
@@ -275,7 +251,7 @@ describe('e2e bot testing', () => {
             'deleteMessage',
           ]);
 
-          const requests = outgoingRequests.getAll<
+          const requests = chats.outgoing.getAll<
             'getChatMember',
             'getChat',
             'sendMessage',
@@ -287,7 +263,7 @@ describe('e2e bot testing', () => {
           const sendLogsMessageRequest = requests[2];
           const sendSecondLogsMessageRequest = requests[3];
 
-          const actualMethods = outgoingRequests.getMethods();
+          const actualMethods = chats.outgoing.getMethods();
 
           expect(expectedMethods).toEqual(actualMethods);
           expect(sendLogsMessageRequest?.payload.chat_id).toEqual(logsChat);
@@ -296,23 +272,15 @@ describe('e2e bot testing', () => {
 
         it('should remove a swindler message and dont notify after already notified', async () => {
           chatSession.lastWarningDate = new Date();
-          const update = new MessageMockUpdate(realSwindlerMessage).build();
+          await user.sendText(realSwindlerMessage, { chat: group });
 
-          await bot.handleUpdate(update);
+          const expectedMethods = chats.outgoing.buildMethods(['getChatMember', 'getChat', 'sendMessage', 'sendMessage', 'deleteMessage']);
 
-          const expectedMethods = outgoingRequests.buildMethods([
-            'getChatMember',
-            'getChat',
-            'sendMessage',
-            'sendMessage',
-            'deleteMessage',
-          ]);
-
-          const requests = outgoingRequests.getAll<'getChatMember', 'getChat', 'sendMessage', 'sendMessage', 'deleteMessage'>();
+          const requests = chats.outgoing.getAll<'getChatMember', 'getChat', 'sendMessage', 'sendMessage', 'deleteMessage'>();
           const sendLogsMessageRequest = requests[2];
           const sendSecondLogsMessageRequest = requests[3];
 
-          const actualMethods = outgoingRequests.getMethods();
+          const actualMethods = chats.outgoing.getMethods();
 
           expect(expectedMethods).toEqual(actualMethods);
           expect(sendLogsMessageRequest?.payload.chat_id).toEqual(logsChat);
@@ -320,23 +288,46 @@ describe('e2e bot testing', () => {
         });
 
         it('should delete swindler message if they are send in media group', async () => {
-          const updateCaption = new MessageMockUpdate('').buildOverwrite({
-            message: { media_group_id: '1', photo: [], caption: realSwindlerMessage },
+          await bot.handleUpdate({
+            update_id: 1,
+            message: {
+              message_id: 1,
+              date: Math.floor(Date.now() / 1000),
+              chat: { id: group.id, type: 'supergroup' as const, title: group.title },
+              from: genericUser,
+              media_group_id: '1',
+              photo: [],
+              caption: realSwindlerMessage,
+            },
           });
 
-          const updatePhoto2 = new MessageMockUpdate('').buildOverwrite({
-            message: { media_group_id: '1', photo: [] },
+          await bot.handleUpdate({
+            update_id: 2,
+            message: {
+              message_id: 2,
+              date: Math.floor(Date.now() / 1000),
+              chat: { id: group.id, type: 'supergroup' as const, title: group.title },
+              from: genericUser,
+              media_group_id: '1',
+              photo: [],
+              text: '',
+            },
           });
 
-          const updatePhoto3 = new MessageMockUpdate('').buildOverwrite({
-            message: { media_group_id: '1', photo: [] },
+          await bot.handleUpdate({
+            update_id: 3,
+            message: {
+              message_id: 3,
+              date: Math.floor(Date.now() / 1000),
+              chat: { id: group.id, type: 'supergroup' as const, title: group.title },
+              from: genericUser,
+              media_group_id: '1',
+              photo: [],
+              text: '',
+            },
           });
 
-          await bot.handleUpdate(updateCaption);
-          await bot.handleUpdate(updatePhoto2);
-          await bot.handleUpdate(updatePhoto3);
-
-          const expectedMethods = outgoingRequests.buildMethods([
+          const expectedMethods = chats.outgoing.buildMethods([
             'getChatMember',
             'getChat',
             'sendMessage',
@@ -349,35 +340,66 @@ describe('e2e bot testing', () => {
             'deleteMessage',
           ]);
 
-          const actualMethods = outgoingRequests.getMethods();
+          const actualMethods = chats.outgoing.getMethods();
 
           expect(actualMethods.filter((method) => method === 'deleteMessage')).toHaveLength(3);
           expect(expectedMethods).toEqual(actualMethods);
         });
 
         it('should delete swindler message if they are send in media group but dont delete another group', async () => {
-          const updateCaption = new MessageMockUpdate('').buildOverwrite({
-            message: { media_group_id: '1', photo: [], caption: realSwindlerMessage },
+          await bot.handleUpdate({
+            update_id: 1,
+            message: {
+              message_id: 1,
+              date: Math.floor(Date.now() / 1000),
+              chat: { id: group.id, type: 'supergroup' as const, title: group.title },
+              from: genericUser,
+              media_group_id: '1',
+              photo: [],
+              caption: realSwindlerMessage,
+            },
           });
 
-          const updatePhoto2 = new MessageMockUpdate('').buildOverwrite({
-            message: { media_group_id: '1', photo: [] },
+          await bot.handleUpdate({
+            update_id: 2,
+            message: {
+              message_id: 2,
+              date: Math.floor(Date.now() / 1000),
+              chat: { id: group.id, type: 'supergroup' as const, title: group.title },
+              from: genericUser,
+              media_group_id: '1',
+              photo: [],
+              text: '',
+            },
           });
 
-          const updateCaption2 = new MessageMockUpdate('').buildOverwrite({
-            message: { media_group_id: '2', photo: [], caption: 'just a regular message' },
+          await bot.handleUpdate({
+            update_id: 3,
+            message: {
+              message_id: 3,
+              date: Math.floor(Date.now() / 1000),
+              chat: { id: group.id, type: 'supergroup' as const, title: group.title },
+              from: genericUser,
+              media_group_id: '2',
+              photo: [],
+              caption: 'just a regular message',
+            },
           });
 
-          const updatePhoto22 = new MessageMockUpdate('').buildOverwrite({
-            message: { media_group_id: '2', photo: [] },
+          await bot.handleUpdate({
+            update_id: 4,
+            message: {
+              message_id: 4,
+              date: Math.floor(Date.now() / 1000),
+              chat: { id: group.id, type: 'supergroup' as const, title: group.title },
+              from: genericUser,
+              media_group_id: '2',
+              photo: [],
+              text: '',
+            },
           });
 
-          await bot.handleUpdate(updateCaption);
-          await bot.handleUpdate(updatePhoto2);
-          await bot.handleUpdate(updateCaption2);
-          await bot.handleUpdate(updatePhoto22);
-
-          const actualMethods = outgoingRequests.getMethods();
+          const actualMethods = chats.outgoing.getMethods();
 
           expect(actualMethods.filter((method) => method === 'deleteMessage')).toHaveLength(2);
         });
@@ -392,7 +414,8 @@ describe('e2e bot testing', () => {
     });
 
     beforeEach(() => {
-      outgoingRequests.clear();
+      chats.outgoing.clear();
+      user.replies.clear();
     });
 
     describe('no-russian feature', () => {
@@ -401,21 +424,17 @@ describe('e2e bot testing', () => {
       });
 
       it('should delete a russian language message', async () => {
-        const update = new MessageMockUpdate('съешь еще этих французских булок').build();
+        await user.sendText('съешь еще этих французских булок', { chat: group });
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.getMethods()).toEqual(
-          outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'getChat', 'sendMessage', 'sendMessage']),
+        expect(chats.outgoing.getMethods()).toEqual(
+          chats.outgoing.buildMethods(['getChatMember', 'deleteMessage', 'getChat', 'sendMessage', 'sendMessage']),
         );
       });
 
       it('should not delete a ukrainian language message', async () => {
-        const update = new MessageMockUpdate('Привіт, як справи сьогодні?').build();
+        await user.sendText('Привіт, як справи сьогодні?', { chat: group });
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember']));
+        expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember']));
       });
     });
 
@@ -425,22 +444,18 @@ describe('e2e bot testing', () => {
       });
 
       it('should warn without deleting a russian language message', async () => {
-        const update = new MessageMockUpdate('съешь еще этих французских булок').build();
+        await user.sendText('съешь еще этих французских булок', { chat: group });
 
-        await bot.handleUpdate(update);
+        const methods = chats.outgoing.getMethods();
 
-        const methods = outgoingRequests.getMethods();
-
-        expect(methods).toEqual(outgoingRequests.buildMethods(['getChatMember', 'getChat', 'sendMessage', 'sendMessage']));
+        expect(methods).toEqual(chats.outgoing.buildMethods(['getChatMember', 'getChat', 'sendMessage', 'sendMessage']));
         expect(methods).not.toContain('deleteMessage');
       });
 
       it('should not warn for a ukrainian language message', async () => {
-        const update = new MessageMockUpdate('Привіт, як справи сьогодні?').build();
+        await user.sendText('Привіт, як справи сьогодні?', { chat: group });
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember']));
+        expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember']));
       });
     });
 
@@ -450,21 +465,17 @@ describe('e2e bot testing', () => {
       });
 
       it('should delete a message containing obscene language', async () => {
-        const update = new MessageMockUpdate('він сказав дебіл').build();
+        await user.sendText('він сказав дебіл', { chat: group });
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.getMethods()).toEqual(
-          outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'getChat', 'sendMessage', 'sendMessage']),
+        expect(chats.outgoing.getMethods()).toEqual(
+          chats.outgoing.buildMethods(['getChatMember', 'deleteMessage', 'getChat', 'sendMessage', 'sendMessage']),
         );
       });
 
       it('should not delete a clean message', async () => {
-        const update = new MessageMockUpdate('Привіт, як справи сьогодні?').build();
+        await user.sendText('Привіт, як справи сьогодні?', { chat: group });
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember']));
+        expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember']));
       });
     });
 
@@ -474,22 +485,18 @@ describe('e2e bot testing', () => {
       });
 
       it('should warn without deleting a message with obscene language', async () => {
-        const update = new MessageMockUpdate('він сказав дебіл').build();
+        await user.sendText('він сказав дебіл', { chat: group });
 
-        await bot.handleUpdate(update);
+        const methods = chats.outgoing.getMethods();
 
-        const methods = outgoingRequests.getMethods();
-
-        expect(methods).toEqual(outgoingRequests.buildMethods(['getChatMember', 'getChat', 'sendMessage', 'sendMessage']));
+        expect(methods).toEqual(chats.outgoing.buildMethods(['getChatMember', 'getChat', 'sendMessage', 'sendMessage']));
         expect(methods).not.toContain('deleteMessage');
       });
 
       it('should not warn for a clean message', async () => {
-        const update = new MessageMockUpdate('Привіт, як справи сьогодні?').build();
+        await user.sendText('Привіт, як справи сьогодні?', { chat: group });
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember']));
+        expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember']));
       });
     });
 
@@ -502,21 +509,17 @@ describe('e2e bot testing', () => {
       });
 
       it('should delete a message containing antisemitism', async () => {
-        const update = new MessageMockUpdate('этих евреев нужно сжигать. по другому никак').build();
+        await user.sendText('этих евреев нужно сжигать. по другому никак', { chat: group });
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.getMethods()).toEqual(
-          outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'getChat', 'sendMessage', 'sendMessage']),
+        expect(chats.outgoing.getMethods()).toEqual(
+          chats.outgoing.buildMethods(['getChatMember', 'deleteMessage', 'getChat', 'sendMessage', 'sendMessage']),
         );
       });
 
       it('should not delete a clean message', async () => {
-        const update = new MessageMockUpdate('Привіт, як справи сьогодні?').build();
+        await user.sendText('Привіт, як справи сьогодні?', { chat: group });
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember']));
+        expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember']));
       });
     });
 
@@ -533,11 +536,9 @@ describe('e2e bot testing', () => {
         // In unit-testing mode that data is not available, so only the pipeline
         // routing (chatSettings gate, getChatMember admin check) is verified here.
         // The actual NSFW detection is covered by the nsfw-message-filter unit spec.
-        const update = new MessageMockUpdate('Я додам нові фотографії зими з новорічної події').build();
+        await user.sendText('Я додам нові фотографії зими з новорічної події', { chat: group });
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember']));
+        expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember']));
       });
     });
 
@@ -554,11 +555,9 @@ describe('e2e bot testing', () => {
         // Sheets. In unit-testing mode those triggers are empty, so only the pipeline routing
         // (chatSettings gate, getChatMember admin check) is verified here.
         // The actual counteroffensive detection is covered by the no-counteroffensive unit spec.
-        const update = new MessageMockUpdate('Привіт, як справи сьогодні?').build();
+        await user.sendText('Привіт, як справи сьогодні?', { chat: group });
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember']));
+        expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember']));
       });
     });
 
@@ -571,33 +570,33 @@ describe('e2e bot testing', () => {
       });
 
       it('should delete a message sent by a channel (Channel_Bot with different sender and parent)', async () => {
-        const update = new MessageMockUpdate('Channel announcement').buildOverwrite({
+        await bot.handleUpdate({
+          update_id: 1,
           message: {
+            message_id: 1365,
+            date: Math.floor(Date.now() / 1000),
+            chat: { id: group.id, type: 'supergroup' as const, title: group.title },
             from: { id: 136_817_688, username: 'Channel_Bot', is_bot: false, first_name: '' },
-            sender_chat: { id: 12_345, type: 'channel', title: 'Another Channel' },
+            text: 'Channel announcement',
+            sender_chat: { id: 12_345, type: 'channel' as const, title: 'Another Channel' },
             reply_to_message: {
               message_id: 1,
               date: 0,
-              chat: { id: 202_212, type: 'supergroup', title: 'GrammyMock' },
-              sender_chat: { id: 54_321, type: 'channel', title: 'Main Channel' },
-              reply_to_message: undefined,
-            },
+              chat: { id: group.id, type: 'supergroup' as const, title: group.title },
+              sender_chat: { id: 54_321, type: 'channel' as const, title: 'Main Channel' },
+            } as any,
           },
         });
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.getMethods()).toEqual(
-          outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'getChat', 'sendMessage', 'sendMessage']),
+        expect(chats.outgoing.getMethods()).toEqual(
+          chats.outgoing.buildMethods(['getChatMember', 'deleteMessage', 'getChat', 'sendMessage', 'sendMessage']),
         );
       });
 
       it('should not delete a regular user message', async () => {
-        const update = new MessageMockUpdate('Regular user message').build();
+        await user.sendText('Regular user message', { chat: group });
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember']));
+        expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember']));
       });
     });
 
@@ -611,21 +610,17 @@ describe('e2e bot testing', () => {
       });
 
       it('should delete a message containing a denylisted word', async () => {
-        const update = new MessageMockUpdate('This contains badword in the text').build();
+        await user.sendText('This contains badword in the text', { chat: group });
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.getMethods()).toEqual(
-          outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'getChat', 'sendMessage', 'sendMessage']),
+        expect(chats.outgoing.getMethods()).toEqual(
+          chats.outgoing.buildMethods(['getChatMember', 'deleteMessage', 'getChat', 'sendMessage', 'sendMessage']),
         );
       });
 
       it('should not delete a message without a denylisted word', async () => {
-        const update = new MessageMockUpdate('Привіт, як справи сьогодні?').build();
+        await user.sendText('Привіт, як справи сьогодні?', { chat: group });
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember']));
+        expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember']));
       });
     });
 
@@ -638,21 +633,17 @@ describe('e2e bot testing', () => {
       });
 
       it('should delete a message containing a location hint', async () => {
-        const update = new MessageMockUpdate('Тут ТеРемкИ без сВітла').build();
+        await user.sendText('Тут ТеРемкИ без сВітла', { chat: group });
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.getMethods()).toEqual(
-          outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'getChat', 'sendMessage', 'sendMessage']),
+        expect(chats.outgoing.getMethods()).toEqual(
+          chats.outgoing.buildMethods(['getChatMember', 'deleteMessage', 'getChat', 'sendMessage', 'sendMessage']),
         );
       });
 
       it('should not delete a message without a location', async () => {
-        const update = new MessageMockUpdate('Привіт, як справи сьогодні?').build();
+        await user.sendText('Привіт, як справи сьогодні?', { chat: group });
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember']));
+        expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember']));
       });
     });
 
@@ -665,27 +656,18 @@ describe('e2e bot testing', () => {
       });
 
       it('should delete a forwarded message', async () => {
-        const update = new MessageMockUpdate('Forwarded content').buildOverwrite({
-          message: {
-            forward_origin: {
-              type: 'user',
-              sender_user: { id: 12_345, first_name: 'Test', is_bot: false },
-              date: 1_000_000,
-            },
-          },
+        await user.sendForwarded('Forwarded content', {
+          forwardOrigin: { type: 'user', sender_user: { id: 12_345, first_name: 'Test', is_bot: false }, date: 1_000_000 },
+          chat: group,
         });
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']));
+        expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember', 'deleteMessage', 'sendMessage']));
       });
 
       it('should not delete a non-forwarded message', async () => {
-        const update = new MessageMockUpdate('Привіт, як справи сьогодні?').build();
+        await user.sendText('Привіт, як справи сьогодні?', { chat: group });
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember']));
+        expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember']));
       });
     });
 
@@ -698,21 +680,17 @@ describe('e2e bot testing', () => {
       });
 
       it('should delete a message containing a URL', async () => {
-        const update = new MessageMockUpdate('Перейдіть на https://example.com для деталей').build();
+        await user.sendText('Перейдіть на https://example.com для деталей', { chat: group });
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.getMethods()).toEqual(
-          outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'getChat', 'sendMessage', 'sendMessage']),
+        expect(chats.outgoing.getMethods()).toEqual(
+          chats.outgoing.buildMethods(['getChatMember', 'deleteMessage', 'getChat', 'sendMessage', 'sendMessage']),
         );
       });
 
       it('should not delete a message without URLs', async () => {
-        const update = new MessageMockUpdate('Привіт, як справи сьогодні?').build();
+        await user.sendText('Привіт, як справи сьогодні?', { chat: group });
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember']));
+        expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember']));
       });
     });
 
@@ -725,21 +703,17 @@ describe('e2e bot testing', () => {
       });
 
       it('should delete a message containing a @mention', async () => {
-        const update = new MessageMockUpdate('Привіт @testuser чи зможеш допомогти?').build();
+        await user.sendText('Привіт @testuser чи зможеш допомогти?', { chat: group });
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.getMethods()).toEqual(
-          outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'getChat', 'sendMessage', 'sendMessage']),
+        expect(chats.outgoing.getMethods()).toEqual(
+          chats.outgoing.buildMethods(['getChatMember', 'deleteMessage', 'getChat', 'sendMessage', 'sendMessage']),
         );
       });
 
       it('should not delete a message without mentions', async () => {
-        const update = new MessageMockUpdate('Привіт, як справи сьогодні?').build();
+        await user.sendText('Привіт, як справи сьогодні?', { chat: group });
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember']));
+        expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember']));
       });
     });
   });
@@ -756,25 +730,40 @@ describe('e2e bot testing', () => {
     });
 
     beforeEach(() => {
-      outgoingRequests.clear();
+      chats.outgoing.clear();
+      user.replies.clear();
     });
 
     it('should delete new member service message when bot is admin', async () => {
-      const update = new NewMemberMockUpdate().build();
-
-      await bot.handleUpdate(update);
+      await bot.handleUpdate({
+        update_id: 1,
+        message: {
+          message_id: 230,
+          from: genericUser2,
+          date: Math.floor(Date.now() / 1000),
+          chat: { id: group.id, type: 'supergroup' as const, title: group.title },
+          new_chat_members: [genericUser],
+        },
+      });
 
       // beforeAnyComposer calls getChatMember for all message types; joinLeaveComposer then deletes
-      expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'deleteMessage']));
+      expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember', 'deleteMessage']));
     });
 
     it('should delete left member service message when bot is admin', async () => {
-      const update = new LeftMemberMockUpdate().build();
-
-      await bot.handleUpdate(update);
+      await bot.handleUpdate({
+        update_id: 1,
+        message: {
+          message_id: 230,
+          from: genericUser2,
+          date: Math.floor(Date.now() / 1000),
+          chat: { id: group.id, type: 'supergroup' as const, title: group.title },
+          left_chat_member: genericUser,
+        },
+      });
 
       // beforeAnyComposer calls getChatMember for all message types; joinLeaveComposer then deletes
-      expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'deleteMessage']));
+      expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember', 'deleteMessage']));
     });
   });
 });

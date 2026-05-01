@@ -3,8 +3,6 @@ import type { Payload } from 'grammy/out/core/client';
 
 import { logsChat, secondLogsChat } from '@bot/creator';
 
-import type { RealApiMethodKeys } from '@testing/outgoing-requests';
-
 import { logger } from '@utils/logger.util';
 
 /**
@@ -17,7 +15,7 @@ import { logger } from '@utils/logger.util';
  * @returns A resolved promise with an ok result if suppressed, otherwise delegates to previous.
  */
 export const disableLogsChatTransformer: Transformer = (previous, method, payload, signal) => {
-  const sendMethods = new Set<RealApiMethodKeys>([
+  const sendMethods = new Set<keyof RawApi>([
     'sendMessage',
     'sendAudio',
     'sendDice',

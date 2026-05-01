@@ -1,3 +1,5 @@
+import type { Chats, Supergroup, User } from '@grammyjs/testing';
+import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
 
 import { LanguageCommand } from '@bot/commands/public/language.command';
@@ -6,38 +8,18 @@ import { i18n } from '@bot/i18n';
 import { stateMiddleware } from '@bot/middleware/state.middleware';
 import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
 
-import type { OutgoingRequests } from '@testing/outgoing-requests';
-import type { ApiResponses } from '@testing/prepare';
-import { prepareBotForTesting } from '@testing/prepare';
-import { mockChatSession } from '@testing/testing-main';
-import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
-
 import type { GrammyContext } from '@app-types/context';
 
-let outgoingRequests: OutgoingRequests;
+import { mockChatSession } from '@test-helpers/session-mocks';
+
+let chats: Chats<GrammyContext>;
+let user: User<GrammyContext>;
+let group: Supergroup<GrammyContext>;
+
 const bot = new Bot<GrammyContext>('mock');
 const languageMiddleware = new LanguageCommand();
 
 const { chatSession, mockChatSessionMiddleware } = mockChatSession({});
-
-const apiResponses: ApiResponses = {
-  getChatMember: { status: 'creator' },
-};
-
-/**
- * Builds a /language command update with an optional argument.
- * @param argument - Optional language argument appended after the command.
- * @returns A MessageMockUpdate representing the /language command.
- */
-function getLanguageCommandUpdate(argument = '') {
-  const commandText = argument ? `/language ${argument}` : '/language';
-
-  return new MessageMockUpdate(commandText).buildOverwrite({
-    message: {
-      entities: [{ offset: 0, length: '/language'.length, type: 'bot_command' }],
-    },
-  });
-}
 
 describe('LanguageCommand', () => {
   beforeAll(async () => {
@@ -51,84 +33,84 @@ describe('LanguageCommand', () => {
 
     bot.command('language', languageMiddleware.middleware());
 
-    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot, apiResponses);
+    ({ chats } = await prepareBot<GrammyContext>(bot, {
+      responses: {
+        getChatMember: { status: 'creator' },
+      },
+    }));
+
+    user = chats.newUser();
+    group = chats.newSupergroup();
   }, 5000);
 
   beforeEach(() => {
-    outgoingRequests.clear();
+    chats.outgoing.clear();
+    user.replies.clear();
     chatSession.language = undefined;
-
-    if (apiResponses.getChatMember) {
-      apiResponses.getChatMember.status = 'creator';
-    }
   });
 
   describe('middleware', () => {
     it('should not allow a regular group member to change the language', async () => {
-      if (apiResponses.getChatMember) {
-        apiResponses.getChatMember.status = 'member';
-      }
-
-      await bot.handleUpdate(getLanguageCommandUpdate('en'));
+      chats.outgoing.respondNext('getChatMember', { status: 'member' });
+      await user.sendCommand('/language', 'en', { chat: group });
 
       expect(chatSession.language).toBeUndefined();
-      expect(outgoingRequests.getMethods()).toEqual(outgoingRequests.buildMethods(['getChatMember', 'sendMessage']));
+      expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember', 'sendMessage']));
     });
 
     describe('toggle - no argument', () => {
       it('should toggle from Ukrainian (default) to English', async () => {
         chatSession.language = 'uk';
 
-        await bot.handleUpdate(getLanguageCommandUpdate());
+        await user.sendCommand('/language', undefined, { chat: group });
 
         expect(chatSession.language).toBe('en');
-        expect(outgoingRequests.getMethods()).toContain('sendMessage');
+        expect(chats.outgoing.getMethods()).toContain('sendMessage');
       });
 
       it('should toggle from English back to Ukrainian', async () => {
         chatSession.language = 'en';
 
-        await bot.handleUpdate(getLanguageCommandUpdate());
+        await user.sendCommand('/language', undefined, { chat: group });
 
         expect(chatSession.language).toBe('uk');
-        expect(outgoingRequests.getMethods()).toContain('sendMessage');
+        expect(chats.outgoing.getMethods()).toContain('sendMessage');
       });
 
       it('should default to Ukrainian when language is not set in session', async () => {
-        // language is undefined → should treat as 'uk' and toggle to 'en'
-        await bot.handleUpdate(getLanguageCommandUpdate());
+        await user.sendCommand('/language', undefined, { chat: group });
 
         expect(chatSession.language).toBe('en');
-        expect(outgoingRequests.getMethods()).toContain('sendMessage');
+        expect(chats.outgoing.getMethods()).toContain('sendMessage');
       });
     });
 
     describe('explicit language argument', () => {
       it('should set language to Ukrainian when "uk" is provided', async () => {
-        await bot.handleUpdate(getLanguageCommandUpdate('uk'));
+        await user.sendCommand('/language', 'uk', { chat: group });
 
         expect(chatSession.language).toBe('uk');
-        expect(outgoingRequests.getMethods()).toContain('sendMessage');
+        expect(chats.outgoing.getMethods()).toContain('sendMessage');
       });
 
       it('should set language to English when "en" is provided', async () => {
-        await bot.handleUpdate(getLanguageCommandUpdate('en'));
+        await user.sendCommand('/language', 'en', { chat: group });
 
         expect(chatSession.language).toBe('en');
-        expect(outgoingRequests.getMethods()).toContain('sendMessage');
+        expect(chats.outgoing.getMethods()).toContain('sendMessage');
       });
 
       it('should reply with an error for an unsupported language code', async () => {
-        await bot.handleUpdate(getLanguageCommandUpdate('fr'));
+        await user.sendCommand('/language', 'fr', { chat: group });
 
         expect(chatSession.language).toBeUndefined();
-        expect(outgoingRequests.getMethods()).toContain('sendMessage');
+        expect(chats.outgoing.getMethods()).toContain('sendMessage');
       });
 
       it('should not change the session language for an invalid argument', async () => {
         chatSession.language = 'uk';
 
-        await bot.handleUpdate(getLanguageCommandUpdate('invalid'));
+        await user.sendCommand('/language', 'invalid', { chat: group });
 
         expect(chatSession.language).toBe('uk');
       });

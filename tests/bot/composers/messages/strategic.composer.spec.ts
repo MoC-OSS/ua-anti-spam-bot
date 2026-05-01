@@ -1,3 +1,5 @@
+import type { Chats, Supergroup, User } from '@grammyjs/testing';
+import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
 
 import { getStrategicComposer } from '@bot/composers/messages/strategic.composer';
@@ -7,12 +9,9 @@ import { parseText } from '@bot/middleware/parse-text.middleware';
 import { stateMiddleware } from '@bot/middleware/state.middleware';
 import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
 
-import type { OutgoingRequests } from '@testing/outgoing-requests';
-import { prepareBotForTesting } from '@testing/prepare';
-import { mockChatSession, mockState } from '@testing/testing-main';
-import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
-
 import type { GrammyContext } from '@app-types/context';
+
+import { mockChatSession, mockState } from '@test-helpers/session-mocks';
 
 const { mockGetTrainingStartRank, mockGetTrainingChatWhitelist } = vi.hoisted(() => ({
   mockGetTrainingStartRank: vi.fn().mockResolvedValue(0.6),
@@ -60,7 +59,9 @@ const { state, mockStateMiddleware } = mockState({
 const onTextListener = new OnTextListener(bot, new Date(), mockMessageHandler as any);
 const { strategicComposer } = getStrategicComposer({ onTextListener });
 
-let outgoingRequests: OutgoingRequests;
+let chats: Chats<GrammyContext>;
+let user: User<GrammyContext>;
+let group: Supergroup<GrammyContext>;
 
 describe('strategicComposer', () => {
   beforeAll(async () => {
@@ -72,14 +73,20 @@ describe('strategicComposer', () => {
     bot.use(mockChatSessionMiddleware);
     bot.use(strategicComposer);
 
-    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot, {
-      getChat: { invite_link: '' },
-      getChatAdministrators: [],
-    });
+    ({ chats } = await prepareBot<GrammyContext>(bot, {
+      responses: {
+        getChat: { invite_link: '' },
+        getChatAdministrators: [],
+      },
+    }));
+
+    user = chats.newUser();
+    group = chats.newSupergroup();
   }, 10_000);
 
   beforeEach(() => {
-    outgoingRequests.clear();
+    chats.outgoing.clear();
+    user.replies.clear();
     mockMessageHandler.getTensorRank.mockResolvedValue({ isSpam: false, tensor: 0.3, deleteRank: 0.9 });
     mockGetTrainingStartRank.mockResolvedValue(0.6);
     mockGetTrainingChatWhitelist.mockResolvedValue([]);
@@ -91,11 +98,9 @@ describe('strategicComposer', () => {
 
   describe('no spam detected', () => {
     it('should call next() without any API calls when message is not spam', async () => {
-      const update = new MessageMockUpdate('hello world').build();
+      await user.sendText('hello world', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.length).toEqual(0);
+      expect(chats.outgoing.length).toEqual(0);
     });
   });
 
@@ -103,14 +108,12 @@ describe('strategicComposer', () => {
     it('should call next() without processing when user is admin and DEBUG is false', async () => {
       state.isUserAdmin = true;
 
-      const update = new MessageMockUpdate('spam message').build();
-
       mockMessageHandler.getTensorRank.mockResolvedValue({ isSpam: true, tensor: 0.95, deleteRank: 0.5 });
 
-      await bot.handleUpdate(update);
+      await user.sendText('spam message', { chat: group });
 
       // Admin bypass means no delete/reply
-      expect(outgoingRequests.length).toEqual(0);
+      expect(chats.outgoing.length).toEqual(0);
     });
   });
 
@@ -120,11 +123,9 @@ describe('strategicComposer', () => {
       mockMessageHandler.getTensorRank.mockResolvedValue({ isSpam: false, tensor: 0.7, deleteRank: 0.9 });
       mockGetTrainingStartRank.mockResolvedValue(0.6);
 
-      const update = new MessageMockUpdate('possibly spam text').build();
+      await user.sendText('possibly spam text', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      const methods = outgoingRequests.getMethods();
+      const methods = chats.outgoing.getMethods();
 
       expect(methods).toContain('sendMessage');
     });
@@ -133,33 +134,27 @@ describe('strategicComposer', () => {
       mockMessageHandler.getTensorRank.mockResolvedValue({ isSpam: false, tensor: 0.4, deleteRank: 0.9 });
       mockGetTrainingStartRank.mockResolvedValue(0.6);
 
-      const update = new MessageMockUpdate('clean message').build();
+      await user.sendText('clean message', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.length).toEqual(0);
+      expect(chats.outgoing.length).toEqual(0);
     });
 
     it('should NOT send to training chat when tensor equals deleteRank', async () => {
       mockMessageHandler.getTensorRank.mockResolvedValue({ isSpam: false, tensor: 0.9, deleteRank: 0.9 });
       mockGetTrainingStartRank.mockResolvedValue(0.6);
 
-      const update = new MessageMockUpdate('clean message').build();
+      await user.sendText('clean message', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.length).toEqual(0);
+      expect(chats.outgoing.length).toEqual(0);
     });
 
     it('should NOT send to training chat when tensor is undefined', async () => {
       mockMessageHandler.getTensorRank.mockResolvedValue({ isSpam: false, tensor: undefined, deleteRank: 0.9 });
       mockGetTrainingStartRank.mockResolvedValue(0.6);
 
-      const update = new MessageMockUpdate('clean message').build();
+      await user.sendText('clean message', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.length).toEqual(0);
+      expect(chats.outgoing.length).toEqual(0);
     });
   });
 
@@ -169,11 +164,9 @@ describe('strategicComposer', () => {
     });
 
     it('should delete message and send reply notification when delete succeeds', async () => {
-      const update = new MessageMockUpdate('spam message').build();
+      await user.sendText('spam message', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      const methods = outgoingRequests.getMethods();
+      const methods = chats.outgoing.getMethods();
 
       expect(methods).toContain('deleteMessage');
       expect(methods).toContain('sendMessage');
@@ -182,11 +175,9 @@ describe('strategicComposer', () => {
     it('should delete message but NOT send reply when disableDeleteMessage is true', async () => {
       chatSession.chatSettings.disableDeleteMessage = true;
 
-      const update = new MessageMockUpdate('spam message').build();
+      await user.sendText('spam message', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      const methods = outgoingRequests.getMethods();
+      const methods = chats.outgoing.getMethods();
 
       expect(methods).toContain('deleteMessage');
       // No self-destructed reply
@@ -194,14 +185,12 @@ describe('strategicComposer', () => {
     });
 
     it('should send to training chat when chat is in trainingChatWhitelist', async () => {
-      // The mock update uses genericSuperGroup.id = 202_212
-      mockGetTrainingChatWhitelist.mockResolvedValue(['202212']);
+      // The mock update uses the registered group.id — pass it as a string
+      mockGetTrainingChatWhitelist.mockResolvedValue([String(group.id)]);
 
-      const update = new MessageMockUpdate('spam message').build();
+      await user.sendText('spam message', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      const methods = outgoingRequests.getMethods();
+      const methods = chats.outgoing.getMethods();
 
       // Should have: sendMessage (to training chat) + deleteMessage + sendMessage (reply)
       expect(methods).toContain('deleteMessage');
@@ -213,11 +202,9 @@ describe('strategicComposer', () => {
     it('should NOT send to training chat when chat is not in trainingChatWhitelist', async () => {
       mockGetTrainingChatWhitelist.mockResolvedValue(['999999']);
 
-      const update = new MessageMockUpdate('spam message').build();
+      await user.sendText('spam message', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      const methods = outgoingRequests.getMethods();
+      const methods = chats.outgoing.getMethods();
 
       expect(methods).toContain('deleteMessage');
     });
@@ -225,11 +212,9 @@ describe('strategicComposer', () => {
     it('should NOT send to training chat when trainingChatWhitelist is null', async () => {
       mockGetTrainingChatWhitelist.mockResolvedValue(null);
 
-      const update = new MessageMockUpdate('spam message').build();
+      await user.sendText('spam message', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      const methods = outgoingRequests.getMethods();
+      const methods = chats.outgoing.getMethods();
 
       expect(methods).toContain('deleteMessage');
     });
@@ -241,7 +226,6 @@ describe('strategicComposer', () => {
     });
 
     it('should send cannot-delete notice when delete fails and isLimitedDeletion is false', async () => {
-      // Make deleteMessage fail
       const failBot = new Bot<GrammyContext>('mock-fail');
 
       const { chatSession: failChatSession, mockChatSessionMiddleware: failChatMiddleware } = mockChatSession({
@@ -263,17 +247,22 @@ describe('strategicComposer', () => {
       failBot.use(failChatMiddleware);
       failBot.use(failComposer);
 
-      const failRequests = await prepareBotForTesting<GrammyContext>(failBot, {
-        getChat: { invite_link: '' },
-        getChatAdministrators: [
-          {
-            status: 'creator',
-            user: { id: 1, is_bot: false, first_name: 'Admin', username: 'admin' },
-            custom_title: '',
-            is_anonymous: false,
-          },
-        ],
+      const { chats: failChats } = await prepareBot<GrammyContext>(failBot, {
+        responses: {
+          getChat: { invite_link: '' },
+          getChatAdministrators: [
+            {
+              status: 'creator',
+              user: { id: 1, is_bot: false, first_name: 'Admin', username: 'admin' },
+              custom_title: '',
+              is_anonymous: false,
+            },
+          ],
+        },
       });
+
+      const failUser = failChats.newUser();
+      const failGroup = failChats.newSupergroup();
 
       // Override the API transformer to fail deleteMessage
       failBot.api.config.use((previous, method, payload, signal) => {
@@ -286,12 +275,10 @@ describe('strategicComposer', () => {
 
       failChatSession.isLimitedDeletion = false;
 
-      const update = new MessageMockUpdate('spam message').build();
-
-      await failBot.handleUpdate(update);
+      await failUser.sendText('spam message', { chat: failGroup });
 
       // getChatAdministrators + reply + sendMessage (logs) should be called
-      const methods = failRequests.getMethods();
+      const methods = failChats.outgoing.getMethods();
 
       expect(methods).toContain('getChatAdministrators');
     });
@@ -319,9 +306,14 @@ describe('strategicComposer', () => {
       limitedBot.use(limitedChatMiddleware);
       limitedBot.use(limitedComposer);
 
-      const limitedRequests = await prepareBotForTesting<GrammyContext>(limitedBot, {
-        getChat: { invite_link: '' },
+      const { chats: limitedChats } = await prepareBot<GrammyContext>(limitedBot, {
+        responses: {
+          getChat: { invite_link: '' },
+        },
       });
+
+      const limitedUser = limitedChats.newUser();
+      const limitedGroup = limitedChats.newSupergroup();
 
       // Override to fail deleteMessage
       limitedBot.api.config.use((previous, method, payload, signal) => {
@@ -335,11 +327,9 @@ describe('strategicComposer', () => {
       limitedChatSession.isLimitedDeletion = true;
       limitedChatSession.lastLimitedDeletionDate = new Date(); // very recent
 
-      const update = new MessageMockUpdate('spam message').build();
+      await limitedUser.sendText('spam message', { chat: limitedGroup });
 
-      await limitedBot.handleUpdate(update);
-
-      const methods = limitedRequests.getMethods();
+      const methods = limitedChats.outgoing.getMethods();
 
       // Should NOT call getChatAdministrators since we're still in the limited window
       expect(methods).not.toContain('getChatAdministrators');
@@ -367,10 +357,15 @@ describe('strategicComposer', () => {
       expiredBot.use(expiredChatMiddleware);
       expiredBot.use(expiredComposer);
 
-      const expiredRequests = await prepareBotForTesting<GrammyContext>(expiredBot, {
-        getChat: { invite_link: '' },
-        getChatAdministrators: [],
+      const { chats: expiredChats } = await prepareBot<GrammyContext>(expiredBot, {
+        responses: {
+          getChat: { invite_link: '' },
+          getChatAdministrators: [],
+        },
       });
+
+      const expiredUser = expiredChats.newUser();
+      const expiredGroup = expiredChats.newSupergroup();
 
       expiredBot.api.config.use((previous, method, payload, signal) => {
         if (method === 'deleteMessage') {
@@ -383,11 +378,9 @@ describe('strategicComposer', () => {
       expiredChatSession.isLimitedDeletion = true;
       expiredChatSession.lastLimitedDeletionDate = new Date(0);
 
-      const update = new MessageMockUpdate('spam message').build();
+      await expiredUser.sendText('spam message', { chat: expiredGroup });
 
-      await expiredBot.handleUpdate(update);
-
-      const methods = expiredRequests.getMethods();
+      const methods = expiredChats.outgoing.getMethods();
 
       expect(methods).toContain('getChatAdministrators');
     });

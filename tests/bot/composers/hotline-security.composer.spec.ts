@@ -1,3 +1,5 @@
+import type { Chats, Supergroup, User } from '@grammyjs/testing';
+import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
 
 import { getBeforeAnyComposer } from '@bot/composers/before-any.composer';
@@ -6,42 +8,17 @@ import { i18n } from '@bot/i18n';
 import { stateMiddleware } from '@bot/middleware/state.middleware';
 import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
 
-import type { OutgoingRequests } from '@testing/outgoing-requests';
-import { prepareBotForTesting } from '@testing/prepare';
-import { mockChatSession } from '@testing/testing-main';
-import { MessagePrivateMockUpdate } from '@testing/updates/message-private-mock.update';
-import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
-
 import type { GrammyContext } from '@app-types/context';
 
-let outgoingRequests: OutgoingRequests;
+import { mockChatSession } from '@test-helpers/session-mocks';
+
+let chats: Chats<GrammyContext>;
+let user: User<GrammyContext>;
+let group: Supergroup<GrammyContext>;
+
 const bot = new Bot<GrammyContext>('mock');
 const { hotlineSecurityComposer } = getHotlineSecurityComposer();
 const { chatSession, mockChatSessionMiddleware } = mockChatSession({ isBotAdmin: true });
-
-const commandText = '/hotline_security';
-
-/**
- *
- */
-function getHotlineUpdate() {
-  return new MessageMockUpdate(commandText).buildOverwrite({
-    message: {
-      entities: [{ offset: 0, length: commandText.length, type: 'bot_command' }],
-    },
-  });
-}
-
-/**
- *
- */
-function getPrivateHotlineUpdate() {
-  return new MessagePrivateMockUpdate(commandText).buildOverwrite({
-    message: {
-      entities: [{ offset: 0, length: commandText.length, type: 'bot_command' }],
-    },
-  });
-}
 
 describe('hotlineSecurityComposer', () => {
   beforeAll(async () => {
@@ -54,29 +31,33 @@ describe('hotlineSecurityComposer', () => {
     bot.use(mockChatSessionMiddleware);
     bot.use(hotlineSecurityComposer);
 
-    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot);
+    ({ chats } = await prepareBot<GrammyContext>(bot));
+    user = chats.newUser();
+    group = chats.newSupergroup();
   }, 5000);
 
   beforeEach(() => {
-    outgoingRequests.clear();
+    chats.outgoing.clear();
+    user.replies.clear();
+    chats.deletionsFor(group).clear();
     chatSession.isBotAdmin = true;
   });
 
   describe('/hotline_security command', () => {
     describe('positive cases', () => {
       it('should delete the command message and send help message', async () => {
-        await bot.handleUpdate(getHotlineUpdate());
+        await user.sendCommand('/hotline_security', undefined, { chat: group });
 
-        const methods = outgoingRequests.getMethods();
+        const methods = chats.outgoing.getMethods();
 
         expect(methods).toContain('deleteMessage');
         expect(methods).toContain('sendMessage');
       });
 
       it('should handle the command in private chat too', async () => {
-        await bot.handleUpdate(getPrivateHotlineUpdate());
+        await user.sendCommand('/hotline_security');
 
-        expect(outgoingRequests.getMethods()).toContain('sendMessage');
+        expect(chats.outgoing.getMethods()).toContain('sendMessage');
       });
     });
   });

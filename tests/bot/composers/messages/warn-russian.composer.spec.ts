@@ -1,3 +1,5 @@
+import type { Chats, Supergroup, User } from '@grammyjs/testing';
+import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
 
 import { getWarnRussianComposer } from '@bot/composers/messages/warn-russian.composer';
@@ -8,14 +10,14 @@ import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
 
 import { mockDynamicStorageService } from '@services/_mocks/index.mocks';
 
-import type { OutgoingRequests } from '@testing/outgoing-requests';
-import { prepareBotForTesting } from '@testing/prepare';
-import { mockChatSession } from '@testing/testing-main';
-import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
-
 import type { GrammyContext } from '@app-types/context';
 
-let outgoingRequests: OutgoingRequests;
+import { mockChatSession } from '@test-helpers/session-mocks';
+
+let chats: Chats<GrammyContext>;
+let user: User<GrammyContext>;
+let group: Supergroup<GrammyContext>;
+
 const { warnRussianComposer } = getWarnRussianComposer({ dynamicStorageService: mockDynamicStorageService });
 const bot = new Bot<GrammyContext>('mock');
 
@@ -37,11 +39,16 @@ describe('warnRussianComposer', () => {
 
     bot.use(warnRussianComposer);
 
-    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot, {
-      getChat: {
-        invite_link: '',
+    ({ chats } = await prepareBot<GrammyContext>(bot, {
+      responses: {
+        getChat: {
+          invite_link: '',
+        },
       },
-    });
+    }));
+
+    user = chats.newUser();
+    group = chats.newSupergroup();
   }, 5000);
 
   describe('enabled feature', () => {
@@ -50,21 +57,16 @@ describe('warnRussianComposer', () => {
     });
 
     beforeEach(() => {
-      outgoingRequests.clear();
+      chats.outgoing.clear();
+      user.replies.clear();
     });
 
     it('should warn if russian is used', async () => {
-      const update = new MessageMockUpdate('съешь еще этих французских булок').build();
+      await user.sendText('съешь еще этих французских булок', { chat: group });
 
-      await bot.handleUpdate(update);
+      const [getChatRequest, sendLogsMessageRequest, sendMessageRequest] = chats.outgoing.getAll<'getChat', 'sendMessage', 'sendMessage'>();
 
-      const [getChatRequest, sendLogsMessageRequest, sendMessageRequest] = outgoingRequests.getAll<
-        'getChat',
-        'sendMessage',
-        'sendMessage'
-      >();
-
-      expect(outgoingRequests.length).toEqual(3);
+      expect(chats.outgoing.length).toEqual(3);
       expect(getChatRequest?.method).toEqual('getChat');
       expect(sendLogsMessageRequest?.method).toEqual('sendMessage');
       expect(sendMessageRequest?.method).toEqual('sendMessage');
@@ -72,30 +74,23 @@ describe('warnRussianComposer', () => {
 
     it('should warn if russian is used and do still notify if disableDeleteMessage is true', async () => {
       chatSession.chatSettings.disableDeleteMessage = true;
-      const update = new MessageMockUpdate('съешь еще этих французских булок').build();
+      await user.sendText('съешь еще этих французских булок', { chat: group });
 
-      await bot.handleUpdate(update);
+      const [getChatRequest, sendLogsMessageRequest, sendMessageRequest] = chats.outgoing.getAll<'getChat', 'sendMessage', 'sendMessage'>();
 
-      const [getChatRequest, sendLogsMessageRequest, sendMessageRequest] = outgoingRequests.getAll<
-        'getChat',
-        'sendMessage',
-        'sendMessage'
-      >();
-
-      expect(outgoingRequests.length).toEqual(3);
+      expect(chats.outgoing.length).toEqual(3);
       expect(getChatRequest?.method).toEqual('getChat');
       expect(sendLogsMessageRequest?.method).toEqual('sendMessage');
       expect(sendMessageRequest?.method).toEqual('sendMessage');
     });
 
     it('should not warn if not russian', async () => {
-      const update = new MessageMockUpdate(
+      await user.sendText(
         'Інтерактивна мапа дозволяє швидко і зручно дізнатися погоду в містах України. На ній відображаються погодні умови в найбільших містах України з можливістю перегляду прогнозу погоди на тиждень. Щоб дізнатися докладний прогноз погоди в вашому місті досить натиснути на назву населеного пункту на мапі.',
-      ).build();
+        { chat: group },
+      );
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.length).toEqual(0);
+      expect(chats.outgoing.length).toEqual(0);
     });
   });
 
@@ -105,25 +100,23 @@ describe('warnRussianComposer', () => {
     });
 
     beforeEach(() => {
-      outgoingRequests.clear();
+      chats.outgoing.clear();
+      user.replies.clear();
     });
 
     it('should not warn if russian is used', async () => {
-      const update = new MessageMockUpdate('съешь еще этих французских булок').build();
+      await user.sendText('съешь еще этих французских булок', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.length).toEqual(0);
+      expect(chats.outgoing.length).toEqual(0);
     });
 
     it('should not warn if not russian is used', async () => {
-      const update = new MessageMockUpdate(
+      await user.sendText(
         'Інтерактивна мапа дозволяє швидко і зручно дізнатися погоду в містах України. На ній відображаються погодні умови в найбільших містах України з можливістю перегляду прогнозу погоди на тиждень. Щоб дізнатися докладний прогноз погоди в вашому місті досить натиснути на назву населеного пункту на мапі.',
-      ).build();
+        { chat: group },
+      );
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.length).toEqual(0);
+      expect(chats.outgoing.length).toEqual(0);
     });
   });
 });

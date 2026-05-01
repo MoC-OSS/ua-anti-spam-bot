@@ -1,15 +1,13 @@
+import type { Chats } from '@grammyjs/testing';
+import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
 
 import { logsChat } from '@bot/creator';
 import { disableLogsChatTransformer } from '@bot/transformers/disable-logs-chat.transformer';
 
-import type { OutgoingRequests } from '@testing/outgoing-requests';
-import { prepareBotForTesting } from '@testing/prepare';
-import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
-
 import type { GrammyContext } from '@app-types/context';
 
-let outgoingRequests: OutgoingRequests;
+let chats: Chats<GrammyContext>;
 const bot = new Bot<GrammyContext>('mock');
 
 let isEnabled = true;
@@ -26,7 +24,7 @@ describe('disableLogsChatTransformer', () => {
 
     bot.on('message', (context) => context.api.sendMessage(logsChat, context.msg.text || 'test'));
 
-    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot);
+    ({ chats } = await prepareBot<GrammyContext>(bot));
   }, 5000);
 
   describe('enabled feature', () => {
@@ -35,17 +33,18 @@ describe('disableLogsChatTransformer', () => {
     });
 
     it('should not send request if it has been sent into logs chat', async () => {
-      const updateConstructor = new MessageMockUpdate('test');
-
-      const update = updateConstructor.buildOverwrite({
+      await bot.handleUpdate({
+        update_id: 1,
         message: {
-          chat: { ...updateConstructor.genericSuperGroup, id: logsChat },
+          message_id: 1365,
+          date: Math.floor(Date.now() / 1000),
+          chat: { id: logsChat, type: 'supergroup' as const, title: 'GrammyMock' },
+          from: { id: 1_111_111, first_name: 'GrammyMock FirstName', is_bot: false },
+          text: 'test',
         },
       });
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.length).toEqual(0);
+      expect(chats.outgoing.length).toEqual(0);
     });
   });
 
@@ -55,19 +54,20 @@ describe('disableLogsChatTransformer', () => {
     });
 
     it('should not send request if it has been sent into logs chat', async () => {
-      const updateConstructor = new MessageMockUpdate('test');
-
-      const update = updateConstructor.buildOverwrite({
+      await bot.handleUpdate({
+        update_id: 1,
         message: {
-          chat: { ...updateConstructor.genericSuperGroup, id: logsChat },
+          message_id: 1365,
+          date: Math.floor(Date.now() / 1000),
+          chat: { id: logsChat, type: 'supergroup' as const, title: 'GrammyMock' },
+          from: { id: 1_111_111, first_name: 'GrammyMock FirstName', is_bot: false },
+          text: 'test',
         },
       });
 
-      await bot.handleUpdate(update);
+      const apiCall = chats.outgoing.getLast<'sendMessage'>();
 
-      const apiCall = outgoingRequests.getLast<'sendMessage'>();
-
-      expect(outgoingRequests.length).toEqual(1);
+      expect(chats.outgoing.length).toEqual(1);
       expect(apiCall?.method).toEqual('sendMessage');
     });
   });

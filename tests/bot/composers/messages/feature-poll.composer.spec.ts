@@ -1,13 +1,12 @@
+import type { Chats, Supergroup, User } from '@grammyjs/testing';
+import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
 
 import { featurePollComposer } from '@bot/composers/feature-poll.composer';
 
-import type { OutgoingRequests } from '@testing/outgoing-requests';
-import { prepareBotForTesting } from '@testing/prepare';
-import { mockChatSession } from '@testing/testing-main';
-import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
-
 import type { GrammyContext } from '@app-types/context';
+
+import { mockChatSession } from '@test-helpers/session-mocks';
 
 const { mockGetChatSessions } = vi.hoisted(() => ({
   mockGetChatSessions: vi.fn().mockResolvedValue([]),
@@ -32,19 +31,6 @@ vi.mock('@utils/logger.util', () => ({
   logger: { info: vi.fn(), error: vi.fn() },
 }));
 
-const commandText = '/feature_poll';
-
-/**
- *
- */
-function getFeaturePollUpdate() {
-  return new MessageMockUpdate(commandText).buildOverwrite({
-    message: {
-      entities: [{ offset: 0, length: commandText.length, type: 'bot_command' }],
-    },
-  });
-}
-
 /**
  *
  * @param id
@@ -61,7 +47,10 @@ function createSuperGroupSession(id: number, membersCount: number) {
   };
 }
 
-let outgoingRequests: OutgoingRequests;
+let chats: Chats<GrammyContext>;
+let user: User<GrammyContext>;
+let group: Supergroup<GrammyContext>;
+
 const bot = new Bot<GrammyContext>('mock');
 const { mockChatSessionMiddleware } = mockChatSession({});
 
@@ -70,29 +59,35 @@ describe('featurePollComposer', () => {
     bot.use(mockChatSessionMiddleware);
     bot.use(featurePollComposer);
 
-    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot, {
-      getChat: {} as any,
-    });
+    ({ chats } = await prepareBot<GrammyContext>(bot, {
+      responses: {
+        getChat: {} as any,
+      },
+    }));
+
+    user = chats.newUser();
+    group = chats.newSupergroup();
   }, 15_000);
 
   beforeEach(() => {
-    outgoingRequests.clear();
+    chats.outgoing.clear();
+    user.replies.clear();
     mockGetChatSessions.mockResolvedValue([]);
   });
 
   describe('/feature_poll command', () => {
     describe('when there are no qualifying sessions', () => {
       it('should always check access to support group', async () => {
-        await bot.handleUpdate(getFeaturePollUpdate());
+        await user.sendCommand('/feature_poll', undefined, { chat: group });
 
-        expect(outgoingRequests.getMethods()).toContain('getChat');
+        expect(chats.outgoing.getMethods()).toContain('getChat');
       });
 
       it('should reply "There are no sessions" when sessions list is empty', async () => {
         mockGetChatSessions.mockResolvedValue([]);
-        await bot.handleUpdate(getFeaturePollUpdate());
+        await user.sendCommand('/feature_poll', undefined, { chat: group });
 
-        const replyTexts = outgoingRequests.getAll<'sendMessage'>().map((request) => request?.payload?.text as string | undefined);
+        const replyTexts = chats.outgoing.getAll<'sendMessage'>().map((request) => request?.payload?.text as string | undefined);
 
         expect(replyTexts.some((textValue) => textValue?.includes('There are no sessions'))).toBe(true);
       });
@@ -103,22 +98,21 @@ describe('featurePollComposer', () => {
           { id: '-1002', payload: { chatType: 'channel', botRemoved: false, chatMembersCount: 200 } },
         ]);
 
-        await bot.handleUpdate(getFeaturePollUpdate());
+        await user.sendCommand('/feature_poll', undefined, { chat: group });
 
-        const replyTexts = outgoingRequests.getAll<'sendMessage'>().map((request) => request?.payload?.text as string | undefined);
+        const replyTexts = chats.outgoing.getAll<'sendMessage'>().map((request) => request?.payload?.text as string | undefined);
 
         expect(replyTexts.some((textValue) => textValue?.includes('There are no sessions'))).toBe(true);
       });
 
       it('should reply "There are no sessions" when fewer than 11 qualifying sessions (slice is empty)', async () => {
-        // 5 qualifying sessions → after slice(10,60) → empty
         mockGetChatSessions.mockResolvedValue(
           Array.from({ length: 5 }, (_, index) => createSuperGroupSession(-(1_001_000_000 + index), 100 + index)),
         );
 
-        await bot.handleUpdate(getFeaturePollUpdate());
+        await user.sendCommand('/feature_poll', undefined, { chat: group });
 
-        const replyTexts = outgoingRequests.getAll<'sendMessage'>().map((request) => request?.payload?.text as string | undefined);
+        const replyTexts = chats.outgoing.getAll<'sendMessage'>().map((request) => request?.payload?.text as string | undefined);
 
         expect(replyTexts.some((textValue) => textValue?.includes('There are no sessions'))).toBe(true);
       });
@@ -128,9 +122,9 @@ describe('featurePollComposer', () => {
           { id: '-1001', payload: { chatType: 'supergroup', botRemoved: true, chatMembersCount: 100 } },
         ]);
 
-        await bot.handleUpdate(getFeaturePollUpdate());
+        await user.sendCommand('/feature_poll', undefined, { chat: group });
 
-        const replyTexts = outgoingRequests.getAll<'sendMessage'>().map((request) => request?.payload?.text as string | undefined);
+        const replyTexts = chats.outgoing.getAll<'sendMessage'>().map((request) => request?.payload?.text as string | undefined);
 
         expect(replyTexts.some((textValue) => textValue?.includes('There are no sessions'))).toBe(true);
       });
@@ -138,19 +132,18 @@ describe('featurePollComposer', () => {
 
     describe('when there are qualifying sessions (more than 10)', () => {
       it('should reply "Started feature poll" and eventually "Ended feature poll"', async () => {
-        // 15 supergroup sessions → slice(10,60) gives 5 sessions
         const sessions = Array.from({ length: 15 }, (_, index) => createSuperGroupSession(-(1_001_000_000 + index), 100 + index));
 
         mockGetChatSessions.mockResolvedValue(sessions);
 
         vi.useFakeTimers();
-        const promise = bot.handleUpdate(getFeaturePollUpdate());
+        const promise = user.sendCommand('/feature_poll', undefined, { chat: group });
 
         await vi.runAllTimersAsync();
         await promise;
         vi.useRealTimers();
 
-        const replyTexts = outgoingRequests.getAll<'sendMessage'>().map((request) => request?.payload?.text as string | undefined);
+        const replyTexts = chats.outgoing.getAll<'sendMessage'>().map((request) => request?.payload?.text as string | undefined);
 
         expect(replyTexts.some((textValue) => textValue?.includes('Started feature poll'))).toBe(true);
         expect(replyTexts.some((textValue) => textValue?.includes('Ended feature poll'))).toBe(true);

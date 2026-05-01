@@ -1,16 +1,15 @@
+import type { Chats, Supergroup, User } from '@grammyjs/testing';
+import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
-import type { Update } from 'grammy/out/types';
 
 import { autoCommentReply } from '@bot/plugins/auto-comment-reply.plugin';
-
-import type { OutgoingRequests } from '@testing/outgoing-requests';
-import { prepareBotForTesting } from '@testing/prepare';
-import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
 
 import type { GrammyContext } from '@app-types/context';
 
 describe('autoCommentReply', () => {
-  let outgoingRequests: OutgoingRequests;
+  let chats: Chats<GrammyContext>;
+  let user: User<GrammyContext>;
+  let group: Supergroup<GrammyContext>;
   let bot: Bot<GrammyContext>;
 
   beforeEach(async () => {
@@ -18,19 +17,20 @@ describe('autoCommentReply', () => {
     bot.use(autoCommentReply());
     bot.on(':text', (context) => context.reply('test'));
 
-    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot);
+    ({ chats } = await prepareBot<GrammyContext>(bot));
+    user = chats.newUser();
+    group = chats.newSupergroup();
   });
 
   afterEach(() => {
-    outgoingRequests.clear();
+    chats.outgoing.clear();
+    user.replies.clear();
   });
 
   it('should call next and NOT add reply_to_message_id when message is not a reply to channel', async () => {
-    const update = new MessageMockUpdate('test').build();
+    await user.sendText('test', { chat: group });
 
-    await bot.handleUpdate(update);
-
-    const lastRequest = outgoingRequests.getLast<'sendMessage'>();
+    const lastRequest = chats.outgoing.getLast<'sendMessage'>();
 
     expect(lastRequest?.method).toBe('sendMessage');
     // eslint-disable-next-line sonarjs/deprecation
@@ -38,21 +38,25 @@ describe('autoCommentReply', () => {
   });
 
   it('should call next and add reply_to_message_id when message is a reply to channel (from.id === 777000)', async () => {
-    const update = new MessageMockUpdate('test').buildOverwrite({
+    await bot.handleUpdate({
+      update_id: 1,
       message: {
+        message_id: 1365,
+        date: Math.floor(Date.now() / 1000),
+        chat: { id: group.id, type: 'supergroup' as const, title: group.title },
+        from: { id: 1_111_111, first_name: 'GrammyMock FirstName', is_bot: false },
+        text: 'test',
         reply_to_message: {
           message_id: 100,
           from: { id: 777_000, is_bot: true, first_name: 'Telegram', username: 'telegram' },
-          chat: { id: 202_212, type: 'supergroup', title: 'GrammyMock' },
+          chat: { id: group.id, type: 'supergroup' as const, title: group.title },
           date: Math.floor(Date.now() / 1000),
           text: 'channel post',
         } as any,
       },
-    }) as unknown as Update;
+    });
 
-    await bot.handleUpdate(update);
-
-    const lastRequest = outgoingRequests.getLast<'sendMessage'>();
+    const lastRequest = chats.outgoing.getLast<'sendMessage'>();
 
     expect(lastRequest?.method).toBe('sendMessage');
     // eslint-disable-next-line sonarjs/deprecation

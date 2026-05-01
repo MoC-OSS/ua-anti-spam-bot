@@ -1,3 +1,5 @@
+import type { Chats, Supergroup, User } from '@grammyjs/testing';
+import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
 
 import { getNoLocationsComposer } from '@bot/composers/messages/no-locations.composer';
@@ -8,14 +10,14 @@ import { parseText } from '@bot/middleware/parse-text.middleware';
 import { stateMiddleware } from '@bot/middleware/state.middleware';
 import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
 
-import type { OutgoingRequests } from '@testing/outgoing-requests';
-import { prepareBotForTesting } from '@testing/prepare';
-import { mockChatSession } from '@testing/testing-main';
-import { MessagePrivateMockUpdate } from '@testing/updates/message-private-mock.update';
-
 import type { GrammyContext } from '@app-types/context';
 
-let outgoingRequests: OutgoingRequests;
+import { mockChatSession } from '@test-helpers/session-mocks';
+
+let chats: Chats<GrammyContext>;
+let user: User<GrammyContext>;
+let group: Supergroup<GrammyContext>;
+
 const { noLocationsComposer } = getNoLocationsComposer();
 const bot = new Bot<GrammyContext>('mock');
 
@@ -39,11 +41,16 @@ describe('noLocationsComposer', () => {
 
     bot.use(noLocationsComposer);
 
-    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot, {
-      getChat: {
-        invite_link: '',
+    ({ chats } = await prepareBot<GrammyContext>(bot, {
+      responses: {
+        getChat: {
+          invite_link: '',
+        },
       },
-    });
+    }));
+
+    user = chats.newUser();
+    group = chats.newSupergroup();
   }, 5000);
 
   describe('enabled feature', () => {
@@ -52,54 +59,53 @@ describe('noLocationsComposer', () => {
     });
 
     beforeEach(() => {
-      outgoingRequests.clear();
+      chats.outgoing.clear();
+      user.replies.clear();
+      chats.deletionsFor(group).clear();
     });
 
     it('should delete location in any case', async () => {
-      const update = new MessagePrivateMockUpdate('Тут ТеРемкИ без сВітла').build();
+      await user.sendText('Тут ТеРемкИ без сВітла', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest, sendMessageRequest] = outgoingRequests.getAll<
+      const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest, sendMessageRequest] = chats.outgoing.getAll<
         'deleteMessage',
         'getChat',
         'sendMessage',
         'sendMessage'
       >();
 
-      expect(outgoingRequests.length).toEqual(4);
+      expect(chats.outgoing.length).toEqual(4);
       expect(deleteMessageRequest?.method).toEqual('deleteMessage');
       expect(getChatRequest?.method).toEqual('getChat');
       expect(sendLogsMessageRequest?.method).toEqual('sendMessage');
       expect(sendMessageRequest?.method).toEqual('sendMessage');
+      expect(chats.deletionsFor(group).length).toEqual(1);
     });
 
     it('should delete location message and do not notify if disableDeleteMessage is true', async () => {
       chatSession.chatSettings.disableDeleteMessage = true;
-      const update = new MessagePrivateMockUpdate('Тут ТеРемкИ без сВітла').build();
+      await user.sendText('Тут ТеРемкИ без сВітла', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest] = outgoingRequests.getAll<
+      const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest] = chats.outgoing.getAll<
         'deleteMessage',
         'getChat',
         'sendMessage'
       >();
 
-      expect(outgoingRequests.length).toEqual(3);
+      expect(chats.outgoing.length).toEqual(3);
       expect(deleteMessageRequest?.method).toEqual('deleteMessage');
       expect(getChatRequest?.method).toEqual('getChat');
       expect(sendLogsMessageRequest?.method).toEqual('sendMessage');
+      expect(chats.deletionsFor(group).length).toEqual(1);
     });
 
     it('should not delete message without a location', async () => {
-      const update = new MessagePrivateMockUpdate(
+      await user.sendText(
         'Інтерактивна мапа дозволяє швидко і зручно дізнатися погоду в містах України. На ній відображаються погодні умови в найбільших містах України з можливістю перегляду прогнозу погоди на тиждень. Щоб дізнатися докладний прогноз погоди в вашому місті досить натиснути на назву населеного пункту на мапі.',
-      ).build();
+        { chat: group },
+      );
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.length).toEqual(0);
+      expect(chats.outgoing.length).toEqual(0);
     });
   });
 
@@ -109,25 +115,24 @@ describe('noLocationsComposer', () => {
     });
 
     beforeEach(() => {
-      outgoingRequests.clear();
+      chats.outgoing.clear();
+      user.replies.clear();
+      chats.deletionsFor(group).clear();
     });
 
     it('should delete location in any case', async () => {
-      const update = new MessagePrivateMockUpdate('Тут ТеРемкИ без сВітла').build();
+      await user.sendText('Тут ТеРемкИ без сВітла', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.length).toEqual(0);
+      expect(chats.outgoing.length).toEqual(0);
     });
 
     it('should not delete message without a location', async () => {
-      const update = new MessagePrivateMockUpdate(
+      await user.sendText(
         'Інтерактивна мапа дозволяє швидко і зручно дізнатися погоду в містах України. На ній відображаються погодні умови в найбільших містах України з можливістю перегляду прогнозу погоди на тиждень. Щоб дізнатися докладний прогноз погоди в вашому місті досить натиснути на назву населеного пункту на мапі.',
-      ).build();
+        { chat: group },
+      );
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.length).toEqual(0);
+      expect(chats.outgoing.length).toEqual(0);
     });
   });
 });
