@@ -1,4 +1,4 @@
-import type { Chats, Supergroup, User } from '@grammyjs/testing';
+import type { Channel, Chats, Supergroup, User } from '@grammyjs/testing';
 import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
 
@@ -10,14 +10,12 @@ import type { GrammyContext } from '@app-types/context';
 
 import { mockChatSession } from '@test-helpers/session-mocks';
 
-// Channel doesn't support changeMemberStatus in grammy-testing — used for the channel promote test only
-const genericChannelChat = { type: 'channel' as const, id: 202_212, title: 'GrammyMockChannel' };
-
 let chats: Chats<GrammyContext>;
 let triggerUser: User<GrammyContext>;
 let owner: User<GrammyContext>;
 let admin2: User<GrammyContext>;
 let group: Supergroup<GrammyContext>;
+let channel: Channel<GrammyContext>;
 
 const bot = new Bot<GrammyContext>('mock');
 const { chatSession, mockChatSessionMiddleware } = mockChatSession({});
@@ -52,6 +50,8 @@ describe('bot queries', () => {
     group = chats.newSupergroup();
     group.own(owner);
     group.promote(admin2);
+
+    channel = chats.newChannel('GrammyMockChannel');
   }, 10_000);
 
   beforeEach(() => {
@@ -128,34 +128,7 @@ describe('bot queries', () => {
       });
 
       it('should send channel start message when promoted in a channel', async () => {
-        // Channel doesn't have changeMemberStatus in grammy-testing — dispatch manually
-        const botUser = { id: bot.botInfo.id, is_bot: true as const, first_name: 'MockBot' };
-
-        await bot.handleUpdate({
-          update_id: 10_000,
-          my_chat_member: {
-            chat: genericChannelChat,
-            from: { id: triggerUser.id, first_name: 'Test', is_bot: false },
-            date: Math.floor(Date.now() / 1000),
-            old_chat_member: { status: 'member', user: botUser },
-            new_chat_member: {
-              status: 'administrator',
-              user: botUser,
-              is_anonymous: false,
-              can_be_edited: false,
-              can_manage_chat: true,
-              can_change_info: true,
-              can_delete_messages: false,
-              can_invite_users: true,
-              can_restrict_members: true,
-              can_promote_members: false,
-              can_manage_video_chats: true,
-              can_post_stories: false,
-              can_edit_stories: false,
-              can_delete_stories: false,
-            },
-          },
-        });
+        await channel.changeMemberStatus(triggerUser, { from: 'member', to: 'administrator' });
 
         expect(chats.outgoing.getMethods()).toContain('sendMessage');
       });
