@@ -2,11 +2,11 @@
 
 The bot's `src/testing/` directory contains 6 files that duplicate patterns now shipped by `grammy-testing`:
 
-| Bot utility | Library equivalent |
-|---|---|
-| `prepareBotForTesting(bot, { getChat })` | `prepareBot(bot, { responses: { getChat } })` |
-| `OutgoingRequests` | `chats.outgoing` (same interface) |
-| `mockSession / mockChatSession / mockState` | Identical API — import path only |
+| Bot utility                                    | Library equivalent                                                 |
+| ---------------------------------------------- | ------------------------------------------------------------------ |
+| `prepareBotForTesting(bot, { getChat })`       | `prepareBot(bot, { responses: { getChat } })`                      |
+| `OutgoingRequests`                             | `chats.outgoing` (same interface)                                  |
+| `mockSession / mockChatSession / mockState`    | Identical API — import path only                                   |
 | `GenericMockUpdate / MessageMockUpdate / etc.` | Actor verbs (`user.sendText`, `user.sendCommand`, `user.joinChat`) |
 
 `grammy-testing@0.10.0` also provides capabilities the bot cannot currently test at all: `chats.deletionsFor(chat)` (which message was deleted), `chats.editsFor(user)`, `reply.clickButton()`, and back-references from `Deletion.reply` to the original message.
@@ -16,11 +16,13 @@ The library is installed from a local tarball (`grammyjs-testing-0.10.0.tgz`) bu
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Remove `src/testing/` entirely (no dead code, no dual maintenance)
 - All 101 spec files pass against `grammy-testing` imports with equivalent or stronger assertions
 - Deletion-heavy composer tests upgraded to `chats.deletionsFor(chat)` assertions
 
 **Non-Goals:**
+
 - No production code changes (`src/bot/`, `src/services/`, `src/server/`)
 - No new test coverage — existing scenarios only; new scenarios are a separate task
 - No changes to `vi.mock(...)` service-mocking patterns (outside grammy-testing scope)
@@ -43,14 +45,14 @@ _Alternative considered_: Wrap grammy-testing utilities in a thin local adapter.
 
 Replace every `bot.handleUpdate(new XxxMockUpdate(...).build())` call with the appropriate actor verb. Mapping:
 
-| Before | After |
-|---|---|
-| `new MessageMockUpdate('text').build()` | `user.sendText('text', { chat: group })` |
-| `new MessagePrivateMockUpdate('text').build()` | `user.sendText('text')` _(private is default)_ |
-| `new MessageMockUpdate('/cmd').buildOverwrite({ entities })` | `user.sendCommand('/cmd')` |
-| `new NewMemberMockUpdate().build()` | `user.joinChat(group)` |
-| `new LeftMemberMockUpdate().build()` | `user.leaveChat(group)` |
-| `new MyChatMemberMockUpdate().build()` | `group.addBot()` / `group.removeBot()` _(or low-level export)_ |
+| Before                                                       | After                                                          |
+| ------------------------------------------------------------ | -------------------------------------------------------------- |
+| `new MessageMockUpdate('text').build()`                      | `user.sendText('text', { chat: group })`                       |
+| `new MessagePrivateMockUpdate('text').build()`               | `user.sendText('text')` _(private is default)_                 |
+| `new MessageMockUpdate('/cmd').buildOverwrite({ entities })` | `user.sendCommand('/cmd')`                                     |
+| `new NewMemberMockUpdate().build()`                          | `user.joinChat(group)`                                         |
+| `new LeftMemberMockUpdate().build()`                         | `user.leaveChat(group)`                                        |
+| `new MyChatMemberMockUpdate().build()`                       | `group.addBot()` / `group.removeBot()` _(or low-level export)_ |
 
 `buildOverwrite` for non-command entity scenarios (rare) falls back to `user.sendText(text, { entities })`.
 
@@ -79,9 +81,9 @@ This order means any pattern issues surface early at low cost.
 
 ## Risks / Trade-offs
 
-| Risk | Mitigation |
-|---|---|
-| Detached async tests silently pass without waiting | Identify during composer spike; add `vi.waitFor` before marking done |
-| `buildOverwrite` edge cases with no actor-verb equivalent | Keep raw `bot.handleUpdate()` for those specific cases; actor verbs not mandatory everywhere |
-| Library tarball path breaks if file moves | Pin to absolute path in devDependencies; update when published to npm |
-| 101 files is a large surface — regressions from mechanical rewrites | Run `npm test` after each group of files; never merge a batch with failing tests |
+| Risk                                                                | Mitigation                                                                                   |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Detached async tests silently pass without waiting                  | Identify during composer spike; add `vi.waitFor` before marking done                         |
+| `buildOverwrite` edge cases with no actor-verb equivalent           | Keep raw `bot.handleUpdate()` for those specific cases; actor verbs not mandatory everywhere |
+| Library tarball path breaks if file moves                           | Pin to absolute path in devDependencies; update when published to npm                        |
+| 101 files is a large surface — regressions from mechanical rewrites | Run `npm test` after each group of files; never merge a batch with failing tests             |

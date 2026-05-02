@@ -13,11 +13,13 @@ Before v0.12.0, tests had to provide these via `responses:` in `prepareBot`. 26 
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Remove all `responses:` blocks that are pure infrastructure noise — i.e. mocking methods whose return values don't affect the test's specific assertions
 - Express user role/membership via actor methods (`group.own`, `group.promote`, `group.join`) rather than static response overrides
 - Keep `responses:` only for tests that genuinely need a non-default value
 
 **Non-Goals:**
+
 - Changing any test assertions or test logic
 - Touching `bot-queries.spec.ts` (chat not registered with orchestrator — auto-derivation can't reach it)
 - Changing `self-destructed.plugin.spec.ts` (intentional `sendMessage` mock)

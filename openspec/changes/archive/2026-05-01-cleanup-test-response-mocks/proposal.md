@@ -14,7 +14,7 @@ grammy-testing v0.12.0 added auto-derivation of `getChatMember`, `getChatAdminis
 
 ### New Capabilities
 
-*(none — this is a test-infrastructure cleanup)*
+_(none — this is a test-infrastructure cleanup)_
 
 ### Modified Capabilities
 
