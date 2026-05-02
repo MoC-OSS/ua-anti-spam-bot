@@ -49,15 +49,11 @@ describe('admin-check-notify', () => {
     bot.use(onlyNotAdmin);
     bot.use(noCardsComposer);
 
-    ({ chats } = await prepareBot<GrammyContext>(bot, {
-      responses: {
-        getChatMember: { status: 'creator' },
-        getChat: { invite_link: '' },
-      },
-    }));
+    ({ chats } = await prepareBot<GrammyContext>(bot));
 
     user = chats.newUser();
     group = chats.newSupergroup();
+    group.own(user);
   }, 5000);
 
   beforeEach(() => {

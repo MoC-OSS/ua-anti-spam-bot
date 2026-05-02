@@ -73,12 +73,7 @@ describe('strategicComposer', () => {
     bot.use(mockChatSessionMiddleware);
     bot.use(strategicComposer);
 
-    ({ chats } = await prepareBot<GrammyContext>(bot, {
-      responses: {
-        getChat: { invite_link: '' },
-        getChatAdministrators: [],
-      },
-    }));
+    ({ chats } = await prepareBot<GrammyContext>(bot));
 
     user = chats.newUser();
     group = chats.newSupergroup();
@@ -247,22 +242,13 @@ describe('strategicComposer', () => {
       failBot.use(failChatMiddleware);
       failBot.use(failComposer);
 
-      const { chats: failChats } = await prepareBot<GrammyContext>(failBot, {
-        responses: {
-          getChat: { invite_link: '' },
-          getChatAdministrators: [
-            {
-              status: 'creator',
-              user: { id: 1, is_bot: false, first_name: 'Admin', username: 'admin' },
-              custom_title: '',
-              is_anonymous: false,
-            },
-          ],
-        },
-      });
+      const { chats: failChats } = await prepareBot<GrammyContext>(failBot);
 
+      const failAdmin = failChats.newUser({ id: 1, first_name: 'Admin', username: 'admin' });
       const failUser = failChats.newUser();
       const failGroup = failChats.newSupergroup();
+
+      failGroup.own(failAdmin);
 
       // Override the API transformer to fail deleteMessage
       failBot.api.config.use((previous, method, payload, signal) => {
@@ -306,11 +292,7 @@ describe('strategicComposer', () => {
       limitedBot.use(limitedChatMiddleware);
       limitedBot.use(limitedComposer);
 
-      const { chats: limitedChats } = await prepareBot<GrammyContext>(limitedBot, {
-        responses: {
-          getChat: { invite_link: '' },
-        },
-      });
+      const { chats: limitedChats } = await prepareBot<GrammyContext>(limitedBot);
 
       const limitedUser = limitedChats.newUser();
       const limitedGroup = limitedChats.newSupergroup();
@@ -357,12 +339,7 @@ describe('strategicComposer', () => {
       expiredBot.use(expiredChatMiddleware);
       expiredBot.use(expiredComposer);
 
-      const { chats: expiredChats } = await prepareBot<GrammyContext>(expiredBot, {
-        responses: {
-          getChat: { invite_link: '' },
-          getChatAdministrators: [],
-        },
-      });
+      const { chats: expiredChats } = await prepareBot<GrammyContext>(expiredBot);
 
       const expiredUser = expiredChats.newUser();
       const expiredGroup = expiredChats.newSupergroup();

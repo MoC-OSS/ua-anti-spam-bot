@@ -67,11 +67,7 @@ describe('e2e bot testing', () => {
 
     bot = await getBot(initialBot);
 
-    ({ chats } = await prepareBot<GrammyContext>(bot, {
-      responses: {
-        getChat: {},
-      },
-    }));
+    ({ chats } = await prepareBot<GrammyContext>(bot));
 
     user = chats.newUser();
     group = chats.newSupergroup();

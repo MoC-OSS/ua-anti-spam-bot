@@ -37,14 +37,11 @@ describe('beforeAnyComposer', () => {
       return next();
     });
 
-    ({ chats } = await prepareBot<GrammyContext>(bot, {
-      responses: {
-        getChatMember: { status: 'creator' },
-      },
-    }));
+    ({ chats } = await prepareBot<GrammyContext>(bot));
 
     user = chats.newUser();
     group = chats.newSupergroup();
+    group.own(user);
   }, 5000);
 
   beforeEach(() => {

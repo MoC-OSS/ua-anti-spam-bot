@@ -43,13 +43,7 @@ describe('noCounteroffensiveComposer', () => {
 
     bot.use(noCounterOffensiveComposer);
 
-    ({ chats } = await prepareBot<GrammyContext>(bot, {
-      responses: {
-        getChat: {
-          invite_link: '',
-        },
-      },
-    }));
+    ({ chats } = await prepareBot<GrammyContext>(bot));
 
     user = chats.newUser();
     group = chats.newSupergroup();

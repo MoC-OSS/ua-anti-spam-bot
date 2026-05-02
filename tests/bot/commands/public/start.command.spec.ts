@@ -21,45 +21,6 @@ const startMiddleware = new StartCommand();
 
 const { chatSession, mockChatSessionMiddleware } = mockChatSession({});
 
-const chatAdmins = [
-  {
-    status: 'creator' as const,
-    user: {
-      id: 1_111_111,
-      first_name: 'GrammyMock FirstName',
-      last_name: 'GrammyMock LastName',
-      username: 'GrammyMock_Username',
-      is_bot: false,
-    },
-    custom_title: 'Super Creator Title',
-    is_anonymous: false,
-  },
-  {
-    status: 'administrator' as const,
-    user: {
-      id: 1_111_112,
-      first_name: 'GrammyMock FirstName2',
-      last_name: 'GrammyMock LastName2',
-      username: 'GrammyMock_Username2',
-      is_bot: false,
-    },
-    custom_title: 'Super Admin Title',
-    is_anonymous: true,
-    can_be_edited: true,
-    can_change_info: true,
-    can_delete_messages: true,
-    can_edit_messages: true,
-    can_invite_users: true,
-    can_manage_chat: true,
-    can_manage_video_chats: true,
-    can_promote_members: true,
-    can_restrict_members: true,
-    can_post_stories: true,
-    can_edit_stories: true,
-    can_delete_stories: true,
-  },
-];
-
 describe('StartCommand', () => {
   beforeAll(async () => {
     const { beforeAnyComposer } = getBeforeAnyComposer();
@@ -72,15 +33,11 @@ describe('StartCommand', () => {
 
     bot.command('start', startMiddleware.middleware());
 
-    ({ chats } = await prepareBot<GrammyContext>(bot, {
-      responses: {
-        getChatMember: { status: 'creator' },
-        getChatAdministrators: chatAdmins,
-      },
-    }));
+    ({ chats } = await prepareBot<GrammyContext>(bot));
 
     user = chats.newUser();
     group = chats.newSupergroup();
+    group.own(user);
   }, 5000);
 
   beforeEach(() => {

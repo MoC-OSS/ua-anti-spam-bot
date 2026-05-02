@@ -59,11 +59,7 @@ describe('featurePollComposer', () => {
     bot.use(mockChatSessionMiddleware);
     bot.use(featurePollComposer);
 
-    ({ chats } = await prepareBot<GrammyContext>(bot, {
-      responses: {
-        getChat: {} as any,
-      },
-    }));
+    ({ chats } = await prepareBot<GrammyContext>(bot));
 
     user = chats.newUser();
     group = chats.newSupergroup();

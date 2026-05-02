@@ -37,11 +37,7 @@ describe('edit message test', () => {
     bot.use(mockChatSessionMiddleware);
     bot.use(messagesComposer);
 
-    ({ chats } = await prepareBot<GrammyContext>(bot, {
-      responses: {
-        getChat: { invite_link: '' },
-      },
-    }));
+    ({ chats } = await prepareBot<GrammyContext>(bot));
 
     user = chats.newUser();
   }, 5000);
@@ -81,6 +77,9 @@ describe('edit message test', () => {
     };
 
     await bot.handleUpdate({ update_id: 1, message: { ...baseMessage, text: 'not a card' } });
+
+    // Raw handleUpdate uses an unregistered chat ID, so auto-derivation can't resolve getChat.
+    chats.outgoing.respondNext('getChat', { id: chatId, type: 'private', first_name: 'Test' });
 
     await bot.handleUpdate({
       update_id: 2,

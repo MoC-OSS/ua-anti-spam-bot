@@ -16,51 +16,14 @@ import { mockChatSession } from '@test-helpers/session-mocks';
 
 let chats: Chats<GrammyContext>;
 let user: User<GrammyContext>;
+let owner: User<GrammyContext>;
+let admin2: User<GrammyContext>;
 let group: Supergroup<GrammyContext>;
 
 const bot = new Bot<GrammyContext>('mock');
 const settingsMiddleware = new SettingsCommand(mockRedisService);
 
 const { chatSession, mockChatSessionMiddleware } = mockChatSession({});
-
-const chatAdmins = [
-  {
-    status: 'creator' as const,
-    user: {
-      id: 1_111_111,
-      first_name: 'GrammyMock FirstName',
-      last_name: 'GrammyMock LastName',
-      username: 'GrammyMock_Username',
-      is_bot: false,
-    },
-    custom_title: 'Super Creator Title',
-    is_anonymous: false,
-  },
-  {
-    status: 'administrator' as const,
-    user: {
-      id: 1_111_112,
-      first_name: 'GrammyMock FirstName2',
-      last_name: 'GrammyMock LastName2',
-      username: 'GrammyMock_Username2',
-      is_bot: false,
-    },
-    custom_title: 'Super Admin Title',
-    is_anonymous: true,
-    can_be_edited: true,
-    can_change_info: true,
-    can_delete_messages: true,
-    can_edit_messages: true,
-    can_invite_users: true,
-    can_manage_chat: true,
-    can_manage_video_chats: true,
-    can_promote_members: true,
-    can_restrict_members: true,
-    can_post_stories: true,
-    can_edit_stories: true,
-    can_delete_stories: true,
-  },
-];
 
 const getUserSessionSpy = vi.spyOn(mockRedisService, 'getUserSession');
 const setUserSessionSpy = vi.spyOn(mockRedisService, 'setUserSession');
@@ -77,15 +40,26 @@ describe('SettingsCommand', () => {
 
     bot.command('settings', settingsMiddleware.middleware());
 
-    ({ chats } = await prepareBot<GrammyContext>(bot, {
-      responses: {
-        getChatMember: { status: 'creator' },
-        getChatAdministrators: chatAdmins,
-      },
-    }));
+    ({ chats } = await prepareBot<GrammyContext>(bot));
 
-    user = chats.newUser();
+    owner = chats.newUser({
+      id: 1_111_111,
+      first_name: 'GrammyMock FirstName',
+      last_name: 'GrammyMock LastName',
+      username: 'GrammyMock_Username',
+    });
+
+    admin2 = chats.newUser({
+      id: 1_111_112,
+      first_name: 'GrammyMock FirstName2',
+      last_name: 'GrammyMock LastName2',
+      username: 'GrammyMock_Username2',
+    });
+
+    user = owner;
     group = chats.newSupergroup();
+    group.own(owner);
+    group.promote(admin2);
   }, 5000);
 
   beforeEach(() => {
@@ -166,17 +140,17 @@ describe('SettingsCommand', () => {
       const actualMethods = chats.outgoing.getMethods();
 
       expect(expectedMethods).toEqual(actualMethods);
-      expect(setUserSessionSpy).toHaveBeenCalledTimes(chatAdmins.length);
+      expect(setUserSessionSpy).toHaveBeenCalledTimes(2);
 
-      expect(setUserSessionSpy).toHaveBeenNthCalledWith(1, chatAdmins[0].user.id.toString(), {
+      expect(setUserSessionSpy).toHaveBeenNthCalledWith(1, owner.id.toString(), {
         payload: { isCurrentUserAdmin: false },
-        id: chatAdmins[0].user.id.toString(),
+        id: owner.id.toString(),
         linkedChats: [{ id: group.id.toString(), name: group.title }],
       });
 
-      expect(setUserSessionSpy).toHaveBeenNthCalledWith(2, chatAdmins[1].user.id.toString(), {
+      expect(setUserSessionSpy).toHaveBeenNthCalledWith(2, admin2.id.toString(), {
         payload: { isCurrentUserAdmin: false },
-        id: chatAdmins[1].user.id.toString(),
+        id: admin2.id.toString(),
         linkedChats: [{ id: group.id.toString(), name: group.title }],
       });
     });
