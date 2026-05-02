@@ -8,6 +8,5 @@ import type { GrammyContext } from '@app-types/context';
  * @returns True if the sender is the bot creator, false otherwise
  */
 export function onlyCreatorFilter(context: GrammyContext) {
-  // eslint-disable-next-line sonarjs/different-types-comparison
   return context.from?.id === creatorId;
 }
