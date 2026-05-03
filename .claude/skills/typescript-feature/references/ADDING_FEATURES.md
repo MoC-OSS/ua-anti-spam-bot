@@ -546,27 +546,36 @@ describe('MyFeatureService', () => {
 
 ### Integration Tests (e2e)
 
-Test the full flow in `tests/bot.spec.ts` using mock updates:
+Tests use `@grammyjs/testing`. The project-wide setup in `tests/bot.spec.ts` calls `prepareBot`
+once in `beforeAll` and exposes `chats`, `user`, and `group` to all nested `describe` blocks.
+Individual `beforeEach` blocks call `chats.outgoing.clear()` and `user.replies.clear()` to
+reset state between tests.
+
+**Dispatching updates** — always use actor verbs, never `bot.handleUpdate` with hand-built payloads:
+
+```typescript
+await user.sendText('message with problematic content', { chat: group });
+await user.sendCommand('/mycommand', 'args');
+await user.sendPhoto();
+```
+
+**Asserting API calls** — use `chats.outgoing.getMethods()` for call ordering and
+`chats.deletionsFor(group)` for deletion assertions:
 
 ```typescript
 it('should delete message and notify user when my feature detected', async () => {
-  const mockMessage = new MessageMockUpdate({
-    text: 'message with problematic content',
-  });
+  await user.sendText('message with problematic content', { chat: group });
 
-  await bot.handleUpdate(mockMessage.update);
-
-  // Assertions on outgoingRequests
-  expect(outgoingRequests.deleteMessage).toHaveBeenCalledWith(
-    expect.any(Number), // chat_id
-    expect.any(Number), // message_id
+  expect(chats.outgoing.getMethods()).toEqual(
+    chats.outgoing.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']),
   );
+  expect(chats.deletionsFor(group).length).toEqual(1);
+});
 
-  expect(outgoingRequests.sendMessage).toHaveBeenCalledWith(
-    expect.any(Number),
-    expect.stringContaining('Your message was removed'),
-    expect.any(Object),
-  );
+it('should not delete safe content', async () => {
+  await user.sendText('normal message', { chat: group });
+
+  expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods([]));
 });
 ```
 
