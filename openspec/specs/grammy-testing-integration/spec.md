@@ -69,7 +69,12 @@ hand-crafted update payloads SHALL remain in any `.spec.ts` file.
 #### Scenario: Channel-authored message dispatched via actor
 
 - **WHEN** a test needs to simulate a message posted by a channel into a group
-- **THEN** it calls `channel.postMessageTo(group, text)` instead of `bot.handleUpdate({ message: { sender_chat } })`
+- **THEN** it calls `channel.postMessageTo(group, text, options?)` instead of `bot.handleUpdate({ message: { sender_chat } })` and uses the returned `Message` when a follow-up verb depends on the message ID
+
+#### Scenario: Same-channel reply dispatched via actor
+
+- **WHEN** a test needs to simulate a channel posting a message that replies to an earlier post from the same channel (i.e. `message.sender_chat.id === message.reply_to_message.sender_chat.id`)
+- **THEN** it calls `channel.postMessageTo(group, text, { reply_to_message: { sender_chat: channel.toTelegramChat(), message_id } })` instead of constructing a raw `handleUpdate` payload
 
 #### Scenario: Anonymous admin message dispatched via actor
 
@@ -100,11 +105,11 @@ hand-crafted update payloads SHALL remain in any `.spec.ts` file.
 
 ### Requirement: Actor verb sends return the dispatched Message
 
-`user.sendText()`, `user.sendCommand()`, `user.sendPhoto()`, and other actor verb sends that
-produce a single message update SHALL return `Promise<Message>`. `user.sendMediaGroup()` SHALL
-return `Promise<Message[]>`. Tests SHALL use the returned `message_id` instead of hardcoded IDs
-or private field access when a subsequent operation (such as `user.editMessage`) requires the ID
-of a previously sent message.
+`user.sendText()`, `user.sendCommand()`, `user.sendPhoto()`, `channel.postMessageTo()`, and other
+actor verb sends that produce a single message update SHALL return `Promise<Message>`.
+`user.sendMediaGroup()` SHALL return `Promise<Message[]>`. Tests SHALL use the returned `message_id`
+instead of hardcoded IDs or private field access when a subsequent operation (such as
+`user.editMessage`) requires the ID of a previously sent message.
 
 #### Scenario: editMessage uses returned message_id
 
