@@ -66,25 +66,8 @@ describe('edit message test', () => {
   });
 
   it('should remove the message if it has been edited', async () => {
-    const messageId = 1365;
-    const chatId = 1_111_111;
-
-    const baseMessage = {
-      message_id: messageId,
-      date: Math.floor(Date.now() / 1000),
-      chat: { id: chatId, type: 'private' as const, first_name: 'Test' },
-      from: { id: chatId, first_name: 'Test', is_bot: false },
-    };
-
-    await bot.handleUpdate({ update_id: 1, message: { ...baseMessage, text: 'not a card' } });
-
-    // Raw handleUpdate uses an unregistered chat ID, so auto-derivation can't resolve getChat.
-    chats.outgoing.respondNext('getChat', { id: chatId, type: 'private', first_name: 'Test' });
-
-    await bot.handleUpdate({
-      update_id: 2,
-      edited_message: { ...baseMessage, text: '4111 1111 1111 1111', edit_date: Math.floor(Date.now() / 1000) },
-    });
+    await user.sendText('not a card');
+    await user.editMessage(1, '4111 1111 1111 1111');
 
     const expectedMethods = chats.outgoing.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']);
     const actualMethods = chats.outgoing.getMethods();

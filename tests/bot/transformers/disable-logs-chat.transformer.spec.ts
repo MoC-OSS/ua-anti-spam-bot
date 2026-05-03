@@ -1,4 +1,4 @@
-import type { Chats } from '@grammyjs/testing';
+import type { Chats, Supergroup, User } from '@grammyjs/testing';
 import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
 
@@ -8,6 +8,8 @@ import { disableLogsChatTransformer } from '@bot/transformers/disable-logs-chat.
 import type { GrammyContext } from '@app-types/context';
 
 let chats: Chats<GrammyContext>;
+let user: User<GrammyContext>;
+let logsGroup: Supergroup<GrammyContext>;
 const bot = new Bot<GrammyContext>('mock');
 
 let isEnabled = true;
@@ -25,6 +27,9 @@ describe('disableLogsChatTransformer', () => {
     bot.on('message', (context) => context.api.sendMessage(logsChat, context.msg.text || 'test'));
 
     ({ chats } = await prepareBot<GrammyContext>(bot));
+
+    logsGroup = chats.newSupergroup({ id: logsChat });
+    user = chats.newUser();
   }, 5000);
 
   describe('enabled feature', () => {
@@ -33,16 +38,7 @@ describe('disableLogsChatTransformer', () => {
     });
 
     it('should not send request if it has been sent into logs chat', async () => {
-      await bot.handleUpdate({
-        update_id: 1,
-        message: {
-          message_id: 1365,
-          date: Math.floor(Date.now() / 1000),
-          chat: { id: logsChat, type: 'supergroup' as const, title: 'GrammyMock' },
-          from: { id: 1_111_111, first_name: 'GrammyMock FirstName', is_bot: false },
-          text: 'test',
-        },
-      });
+      await user.sendText('test', { chat: logsGroup });
 
       expect(chats.outgoing.length).toEqual(0);
     });
@@ -54,16 +50,7 @@ describe('disableLogsChatTransformer', () => {
     });
 
     it('should not send request if it has been sent into logs chat', async () => {
-      await bot.handleUpdate({
-        update_id: 1,
-        message: {
-          message_id: 1365,
-          date: Math.floor(Date.now() / 1000),
-          chat: { id: logsChat, type: 'supergroup' as const, title: 'GrammyMock' },
-          from: { id: 1_111_111, first_name: 'GrammyMock FirstName', is_bot: false },
-          text: 'test',
-        },
-      });
+      await user.sendText('test', { chat: logsGroup });
 
       const apiCall = chats.outgoing.getLast<'sendMessage'>();
 

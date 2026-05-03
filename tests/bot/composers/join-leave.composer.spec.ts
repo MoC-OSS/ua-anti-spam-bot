@@ -22,20 +22,13 @@ const { chatSession, mockChatSessionMiddleware } = mockChatSession({
   },
 });
 
-// Reusable user/bot objects matching the original generic fixtures
+// kept for the one test that requires a combined my_chat_member + message update
+// (grammy-testing does not support combined updates with my_chat_member)
 const genericUser = {
   id: 1_111_111,
   first_name: 'GrammyMock FirstName',
   last_name: 'GrammyMock LastName',
   username: 'GrammyMock_Username',
-  is_bot: false,
-};
-
-const genericUser2 = {
-  id: 1_111_112,
-  first_name: 'GrammyMock FirstName2',
-  last_name: 'GrammyMock LastName2',
-  username: 'GrammyMock_Username2',
   is_bot: false,
 };
 
@@ -76,16 +69,7 @@ describe('joinLeaveComposer main', () => {
       });
 
       it('should delete new user service message', async () => {
-        await bot.handleUpdate({
-          update_id: 1,
-          message: {
-            message_id: 230,
-            from: genericUser2,
-            date: Math.floor(Date.now() / 1000),
-            chat: { id: group.id, type: 'supergroup' as const, title: 'GrammyMock' },
-            new_chat_members: [genericUser],
-          },
-        });
+        await user.joinChat(group);
 
         const apiCall = chats.outgoing.getLast<'deleteMessage'>();
 
@@ -94,16 +78,7 @@ describe('joinLeaveComposer main', () => {
       });
 
       it('should delete left user service message', async () => {
-        await bot.handleUpdate({
-          update_id: 1,
-          message: {
-            message_id: 230,
-            from: genericUser2,
-            date: Math.floor(Date.now() / 1000),
-            chat: { id: group.id, type: 'supergroup' as const, title: 'GrammyMock' },
-            left_chat_member: genericUser,
-          },
-        });
+        await user.leaveChat(group);
 
         const apiCall = chats.outgoing.getLast<'deleteMessage'>();
 
@@ -112,6 +87,8 @@ describe('joinLeaveComposer main', () => {
       });
 
       it('should not delete left bot service message', async () => {
+        // grammy-testing does not support combined my_chat_member + message updates;
+        // the my_chat_member with status 'kicked' is what triggers the skip-deletion filter
         await bot.handleUpdate({
           update_id: 1,
           my_chat_member: {
@@ -123,7 +100,7 @@ describe('joinLeaveComposer main', () => {
           },
           message: {
             message_id: 230,
-            from: genericUser2,
+            from: genericUser,
             date: Math.floor(Date.now() / 1000),
             chat: { id: group.id, type: 'supergroup' as const, title: 'GrammyMock' },
             left_chat_member: genericUserBot,
@@ -134,23 +111,7 @@ describe('joinLeaveComposer main', () => {
       });
 
       it('should delete new bot service message', async () => {
-        await bot.handleUpdate({
-          update_id: 1,
-          my_chat_member: {
-            chat: { id: group.id, type: 'supergroup' as const, title: 'GrammyMock' },
-            from: genericUser,
-            date: Math.floor(Date.now() / 1000),
-            old_chat_member: { status: 'member', user: genericUserBot },
-            new_chat_member: { status: 'member', user: genericUserBot, until_date: Math.floor(Date.now() / 1000) },
-          },
-          message: {
-            message_id: 230,
-            from: genericUser2,
-            date: Math.floor(Date.now() / 1000),
-            chat: { id: group.id, type: 'supergroup' as const, title: 'GrammyMock' },
-            new_chat_members: [genericUserBot],
-          },
-        });
+        await user.joinChat(group);
 
         const apiCall = chats.outgoing.getLast<'deleteMessage'>();
 
@@ -171,31 +132,13 @@ describe('joinLeaveComposer main', () => {
       });
 
       it('should not delete new user service message', async () => {
-        await bot.handleUpdate({
-          update_id: 1,
-          message: {
-            message_id: 230,
-            from: genericUser2,
-            date: Math.floor(Date.now() / 1000),
-            chat: { id: group.id, type: 'supergroup' as const, title: 'GrammyMock' },
-            new_chat_members: [genericUser],
-          },
-        });
+        await user.joinChat(group);
 
         expect(chats.outgoing.length).toEqual(0);
       });
 
       it('should not delete left user service message', async () => {
-        await bot.handleUpdate({
-          update_id: 1,
-          message: {
-            message_id: 230,
-            from: genericUser2,
-            date: Math.floor(Date.now() / 1000),
-            chat: { id: group.id, type: 'supergroup' as const, title: 'GrammyMock' },
-            left_chat_member: genericUser,
-          },
-        });
+        await user.leaveChat(group);
 
         expect(chats.outgoing.length).toEqual(0);
       });
@@ -214,31 +157,13 @@ describe('joinLeaveComposer main', () => {
     });
 
     it('should not delete new user service message', async () => {
-      await bot.handleUpdate({
-        update_id: 1,
-        message: {
-          message_id: 230,
-          from: genericUser2,
-          date: Math.floor(Date.now() / 1000),
-          chat: { id: group.id, type: 'supergroup' as const, title: 'GrammyMock' },
-          new_chat_members: [genericUser],
-        },
-      });
+      await user.joinChat(group);
 
       expect(chats.outgoing.length).toEqual(0);
     });
 
     it('should not delete left user service message', async () => {
-      await bot.handleUpdate({
-        update_id: 1,
-        message: {
-          message_id: 230,
-          from: genericUser2,
-          date: Math.floor(Date.now() / 1000),
-          chat: { id: group.id, type: 'supergroup' as const, title: 'GrammyMock' },
-          left_chat_member: genericUser,
-        },
-      });
+      await user.leaveChat(group);
 
       expect(chats.outgoing.length).toEqual(0);
     });

@@ -1,4 +1,4 @@
-import type { Chats, Supergroup, User } from '@grammyjs/testing';
+import type { Channel, Chats, Supergroup, User } from '@grammyjs/testing';
 import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
 
@@ -16,6 +16,7 @@ import { mockChatSession } from '@test-helpers/session-mocks';
 let chats: Chats<GrammyContext>;
 let user: User<GrammyContext>;
 let group: Supergroup<GrammyContext>;
+let senderChannel: Channel<GrammyContext>;
 
 const { noChannelMessagesComposer } = getNoChannelMessagesComposer();
 const bot = new Bot<GrammyContext>('mock');
@@ -91,6 +92,7 @@ describe('noChannelMessagesComposer', () => {
 
     user = chats.newUser();
     group = chats.newSupergroup();
+    senderChannel = chats.newChannel();
   }, 5000);
 
   describe('enabled feature', () => {
@@ -105,13 +107,7 @@ describe('noChannelMessagesComposer', () => {
     });
 
     it('should delete message from a channel', async () => {
-      await bot.handleUpdate(
-        buildChannelUpdate(group.id, {
-          from: { id: 136_817_688, username: 'Channel_Bot' },
-          senderChatId: 12_345,
-          replySenderChatId: 54_321,
-        }),
-      );
+      await senderChannel.postMessageTo(group, 'Test');
 
       const [deleteMessageRequest, getChatRequest, sendMessageRequest] = chats.outgoing.getAll<
         'deleteMessage',
@@ -142,13 +138,7 @@ describe('noChannelMessagesComposer', () => {
     it('should delete message but not notify if disableDeleteMessage is true', async () => {
       chatSession.chatSettings.disableDeleteMessage = true;
 
-      await bot.handleUpdate(
-        buildChannelUpdate(group.id, {
-          from: { id: 136_817_688, username: 'Channel_Bot' },
-          senderChatId: 12_345,
-          replySenderChatId: 54_321,
-        }),
-      );
+      await senderChannel.postMessageTo(group, 'Test');
 
       const [deleteMessageRequest, getChatRequest] = chats.outgoing.getAll<'deleteMessage', 'getChat', 'sendMessage'>();
 
@@ -194,13 +184,7 @@ describe('noChannelMessagesComposer', () => {
     });
 
     it('should not delete message from a channel when feature is disabled', async () => {
-      await bot.handleUpdate(
-        buildChannelUpdate(group.id, {
-          from: { id: 136_817_688, username: 'Channel_Bot' },
-          senderChatId: 12_345,
-          replySenderChatId: 54_321,
-        }),
-      );
+      await senderChannel.postMessageTo(group, 'Test');
 
       expect(chats.outgoing).toHaveLength(0);
     });

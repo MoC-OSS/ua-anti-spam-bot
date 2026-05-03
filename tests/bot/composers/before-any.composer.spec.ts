@@ -89,16 +89,7 @@ describe('beforeAnyComposer', () => {
     });
 
     it('should call next immediately when from.id is absent', async () => {
-      await bot.handleUpdate({
-        update_id: 1,
-
-        message: {
-          message_id: 1,
-          date: Math.floor(Date.now() / 1000),
-          text: 'no sender',
-          chat: { id: group.id, type: 'supergroup' as const, title: 'Test Group' },
-        } as any,
-      });
+      await group.sendSystemMessage('no sender');
 
       // No getChatMember call expected because fromId guard returns next() early
       expect(chats.outgoing.getMethods()).not.toContain('getChatMember');

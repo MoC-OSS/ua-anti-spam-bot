@@ -1,4 +1,4 @@
-import type { Chats, Supergroup, User } from '@grammyjs/testing';
+import type { Channel, Chats, Supergroup, User } from '@grammyjs/testing';
 import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
 
@@ -21,6 +21,7 @@ Object.assign(environmentConfig, { UNIT_TESTING: true, DISABLE_LOGS_CHAT: false,
 let chats: Chats<GrammyContext>;
 let user: User<GrammyContext>;
 let group: Supergroup<GrammyContext>;
+let channel: Channel<GrammyContext>;
 let bot: Bot<GrammyContext>;
 
 const { session, mockSessionMiddleware } = mockSession({});
@@ -41,22 +42,6 @@ const baseIsolatedSettings = {
   disableStrategicInfo: true,
 };
 
-const genericUser = {
-  id: 1_111_111,
-  first_name: 'GrammyMock FirstName',
-  last_name: 'GrammyMock LastName',
-  username: 'GrammyMock_Username',
-  is_bot: false,
-};
-
-const genericUser2 = {
-  id: 1_111_112,
-  first_name: 'GrammyMock FirstName2',
-  last_name: 'GrammyMock LastName2',
-  username: 'GrammyMock_Username2',
-  is_bot: false,
-};
-
 describe('e2e bot testing', () => {
   beforeAll(async () => {
     const initialBot = new Bot<GrammyContext>(environmentConfig?.BOT_TOKEN || 'test');
@@ -71,6 +56,7 @@ describe('e2e bot testing', () => {
 
     user = chats.newUser();
     group = chats.newSupergroup();
+    channel = chats.newChannel();
   }, 15_000);
 
   describe('private flow', () => {
@@ -284,44 +270,7 @@ describe('e2e bot testing', () => {
         });
 
         it('should delete swindler message if they are send in media group', async () => {
-          await bot.handleUpdate({
-            update_id: 1,
-            message: {
-              message_id: 1,
-              date: Math.floor(Date.now() / 1000),
-              chat: { id: group.id, type: 'supergroup' as const, title: group.title },
-              from: genericUser,
-              media_group_id: '1',
-              photo: [],
-              caption: realSwindlerMessage,
-            },
-          });
-
-          await bot.handleUpdate({
-            update_id: 2,
-            message: {
-              message_id: 2,
-              date: Math.floor(Date.now() / 1000),
-              chat: { id: group.id, type: 'supergroup' as const, title: group.title },
-              from: genericUser,
-              media_group_id: '1',
-              photo: [],
-              text: '',
-            },
-          });
-
-          await bot.handleUpdate({
-            update_id: 3,
-            message: {
-              message_id: 3,
-              date: Math.floor(Date.now() / 1000),
-              chat: { id: group.id, type: 'supergroup' as const, title: group.title },
-              from: genericUser,
-              media_group_id: '1',
-              photo: [],
-              text: '',
-            },
-          });
+          await user.sendMediaGroup([{ caption: realSwindlerMessage }, {}, {}], { chat: group });
 
           const expectedMethods = chats.outgoing.buildMethods([
             'getChatMember',
@@ -343,57 +292,8 @@ describe('e2e bot testing', () => {
         });
 
         it('should delete swindler message if they are send in media group but dont delete another group', async () => {
-          await bot.handleUpdate({
-            update_id: 1,
-            message: {
-              message_id: 1,
-              date: Math.floor(Date.now() / 1000),
-              chat: { id: group.id, type: 'supergroup' as const, title: group.title },
-              from: genericUser,
-              media_group_id: '1',
-              photo: [],
-              caption: realSwindlerMessage,
-            },
-          });
-
-          await bot.handleUpdate({
-            update_id: 2,
-            message: {
-              message_id: 2,
-              date: Math.floor(Date.now() / 1000),
-              chat: { id: group.id, type: 'supergroup' as const, title: group.title },
-              from: genericUser,
-              media_group_id: '1',
-              photo: [],
-              text: '',
-            },
-          });
-
-          await bot.handleUpdate({
-            update_id: 3,
-            message: {
-              message_id: 3,
-              date: Math.floor(Date.now() / 1000),
-              chat: { id: group.id, type: 'supergroup' as const, title: group.title },
-              from: genericUser,
-              media_group_id: '2',
-              photo: [],
-              caption: 'just a regular message',
-            },
-          });
-
-          await bot.handleUpdate({
-            update_id: 4,
-            message: {
-              message_id: 4,
-              date: Math.floor(Date.now() / 1000),
-              chat: { id: group.id, type: 'supergroup' as const, title: group.title },
-              from: genericUser,
-              media_group_id: '2',
-              photo: [],
-              text: '',
-            },
-          });
+          await user.sendMediaGroup([{ caption: realSwindlerMessage }, {}], { chat: group });
+          await user.sendMediaGroup([{ caption: 'just a regular message' }, {}], { chat: group });
 
           const actualMethods = chats.outgoing.getMethods();
 
@@ -566,23 +466,7 @@ describe('e2e bot testing', () => {
       });
 
       it('should delete a message sent by a channel (Channel_Bot with different sender and parent)', async () => {
-        await bot.handleUpdate({
-          update_id: 1,
-          message: {
-            message_id: 1365,
-            date: Math.floor(Date.now() / 1000),
-            chat: { id: group.id, type: 'supergroup' as const, title: group.title },
-            from: { id: 136_817_688, username: 'Channel_Bot', is_bot: false, first_name: '' },
-            text: 'Channel announcement',
-            sender_chat: { id: 12_345, type: 'channel' as const, title: 'Another Channel' },
-            reply_to_message: {
-              message_id: 1,
-              date: 0,
-              chat: { id: group.id, type: 'supergroup' as const, title: group.title },
-              sender_chat: { id: 54_321, type: 'channel' as const, title: 'Main Channel' },
-            } as any,
-          },
-        });
+        await channel.postMessageTo(group, 'Channel announcement');
 
         expect(chats.outgoing.getMethods()).toEqual(
           chats.outgoing.buildMethods(['getChatMember', 'deleteMessage', 'getChat', 'sendMessage', 'sendMessage']),
@@ -731,32 +615,14 @@ describe('e2e bot testing', () => {
     });
 
     it('should delete new member service message when bot is admin', async () => {
-      await bot.handleUpdate({
-        update_id: 1,
-        message: {
-          message_id: 230,
-          from: genericUser2,
-          date: Math.floor(Date.now() / 1000),
-          chat: { id: group.id, type: 'supergroup' as const, title: group.title },
-          new_chat_members: [genericUser],
-        },
-      });
+      await user.joinChat(group);
 
       // beforeAnyComposer calls getChatMember for all message types; joinLeaveComposer then deletes
       expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember', 'deleteMessage']));
     });
 
     it('should delete left member service message when bot is admin', async () => {
-      await bot.handleUpdate({
-        update_id: 1,
-        message: {
-          message_id: 230,
-          from: genericUser2,
-          date: Math.floor(Date.now() / 1000),
-          chat: { id: group.id, type: 'supergroup' as const, title: group.title },
-          left_chat_member: genericUser,
-        },
-      });
+      await user.leaveChat(group);
 
       // beforeAnyComposer calls getChatMember for all message types; joinLeaveComposer then deletes
       expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember', 'deleteMessage']));

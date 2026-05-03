@@ -103,23 +103,7 @@ describe('RoleCommand', () => {
   });
 
   it('should reject anonymous admins because Telegram sends the command as GroupAnonymousBot', async () => {
-    await bot.handleUpdate({
-      update_id: 1,
-      message: {
-        message_id: 1365,
-        date: Math.floor(Date.now() / 1000),
-        chat: { id: group.id, type: 'supergroup' as const, title: group.title },
-        from: {
-          id: 1_111_111,
-          first_name: 'GrammyMock FirstName',
-          last_name: 'GrammyMock LastName',
-          username: 'GroupAnonymousBot',
-          is_bot: false,
-        },
-        text: '/role user',
-        entities: [{ offset: 0, length: '/role'.length, type: 'bot_command' as const }],
-      },
-    });
+    await user.sendCommand('/role', 'user', { chat: group, anonymous: true });
 
     expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember', 'sendMessage']));
     expect(session.roleMode).toBeUndefined();

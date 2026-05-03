@@ -38,22 +38,15 @@ describe('autoCommentReply', () => {
   });
 
   it('should call next and add reply_to_message_id when message is a reply to channel (from.id === 777000)', async () => {
-    await bot.handleUpdate({
-      update_id: 1,
-      message: {
-        message_id: 1365,
-        date: Math.floor(Date.now() / 1000),
+    await user.sendText('test', {
+      chat: group,
+      reply_to_message: {
+        message_id: 100,
+        from: { id: 777_000, is_bot: true, first_name: 'Telegram', username: 'telegram' },
         chat: { id: group.id, type: 'supergroup' as const, title: group.title },
-        from: { id: 1_111_111, first_name: 'GrammyMock FirstName', is_bot: false },
-        text: 'test',
-        reply_to_message: {
-          message_id: 100,
-          from: { id: 777_000, is_bot: true, first_name: 'Telegram', username: 'telegram' },
-          chat: { id: group.id, type: 'supergroup' as const, title: group.title },
-          date: Math.floor(Date.now() / 1000),
-          text: 'channel post',
-        } as any,
-      },
+        date: Math.floor(Date.now() / 1000),
+        text: 'channel post',
+      } as any,
     });
 
     const lastRequest = chats.outgoing.getLast<'sendMessage'>();
