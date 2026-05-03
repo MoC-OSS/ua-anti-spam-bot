@@ -12,6 +12,8 @@ import { alarmChatService } from '@services/alarm-chat.service';
 import { redisService } from '@services/redis.service';
 import { stfalconAlarmApiService } from '@services/stfalcon-alarm-api.service';
 
+import { environmentConfig } from '@shared/config';
+
 import type { GrammyContext } from '@app-types/context';
 import type { ChatData, ChatSettings, Session } from '@app-types/session';
 
@@ -77,7 +79,7 @@ export const apiRouter = (bot: Bot<GrammyContext>) => {
 
       const [alerts, regions, chatInfo, chatMembers, chatSession] = await Promise.all([
         alarmService.getAlerts(),
-        stfalconAlarmApiService.getRegions().catch(() => []),
+        environmentConfig.DISABLE_ALARM_API ? Promise.resolve([]) : stfalconAlarmApiService.getRegions().catch(() => []),
         bot.api.getChat(id as string),
         bot.api.getChatMemberCount(id as string),
         redisService.getChatSession(id as string),

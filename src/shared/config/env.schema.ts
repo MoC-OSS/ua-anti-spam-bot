@@ -62,7 +62,7 @@ const serverVariablesSchema = z.object({
 
 /** Alarm / air-raid API variables. Conditional on DISABLE_ALARM_API. */
 const alarmVariablesSchema = z.object({
-  DISABLE_ALARM_API: booleanStringSchema.default(false),
+  DISABLE_ALARM_API: booleanStringSchema.default(true),
   ALARM_KEY: z.string().trim().default(''),
   ALARM_WEBHOOK_BASE_URL: z.string().trim().default(''),
   ALARM_WEBHOOK_PUBLIC_KEY_PEM: z.string().trim().default(''),
