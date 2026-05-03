@@ -368,9 +368,7 @@ e2e tests (`tests/bot.spec.ts`) — `chats`, `user`, and `group` are already set
 it('should delete and notify on violation', async () => {
   await user.sendText('violating content', { chat: group });
 
-  expect(chats.outgoing.getMethods()).toEqual(
-    chats.outgoing.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']),
-  );
+  expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']));
   expect(chats.deletionsFor(group).length).toEqual(1);
 });
 ```

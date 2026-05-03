@@ -7,12 +7,14 @@ All changes are test-only. No production code is affected.
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Upgrade vendor package to v0.14.0
 - Eliminate all remaining `bot.handleUpdate` calls in `tests/`
 - Remove helper fixtures and builder functions that exist only to paper over missing actor verbs
 - Keep all tests passing with identical semantics
 
 **Non-Goals:**
+
 - Changing test assertions or test coverage
 - Modifying production source code
 - Adding new test cases beyond what migration requires
@@ -52,7 +54,7 @@ Start with the vendor upgrade (task 1), then migrate files from simplest to most
 ### `getChat` responses override in `no-channel-messages.composer.spec.ts`
 
 ```ts
-await prepareBot(bot, { responses: { getChat: { invite_link: '' } } })
+await prepareBot(bot, { responses: { getChat: { invite_link: '' } } });
 ```
 
 With #24 resolved, `chats.newSupergroup()` registers the chat and auto-derives `getChat`. Investigate whether this override can be removed during migration, following the spec requirement to not manually override auto-derivable responses.

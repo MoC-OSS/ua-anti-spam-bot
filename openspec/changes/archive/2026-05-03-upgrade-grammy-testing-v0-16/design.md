@@ -15,12 +15,14 @@ dispatches the relay update and returns a properly-typed `Message`.
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Upgrade vendor to v0.16.0 and confirm all 938 tests still pass
 - Replace the magic `1` in `editMessage` with the actual returned `message_id`
 - Replace the `as any` relay block with `postRelayMessage` + typed `reply_to_message`
 - Update the grammy-testing-integration spec to document the new canonical patterns
 
 **Non-Goals:**
+
 - Migrating any other test patterns not directly unlocked by v0.16.0
 - Changing bot behavior or non-test source files
 

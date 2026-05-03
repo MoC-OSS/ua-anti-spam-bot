@@ -566,9 +566,7 @@ await user.sendPhoto();
 it('should delete message and notify user when my feature detected', async () => {
   await user.sendText('message with problematic content', { chat: group });
 
-  expect(chats.outgoing.getMethods()).toEqual(
-    chats.outgoing.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']),
-  );
+  expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']));
   expect(chats.deletionsFor(group).length).toEqual(1);
 });
 
