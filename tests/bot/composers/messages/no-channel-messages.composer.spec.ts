@@ -17,6 +17,7 @@ let chats: Chats<GrammyContext>;
 let user: User<GrammyContext>;
 let group: Supergroup<GrammyContext>;
 let senderChannel: Channel<GrammyContext>;
+let sameChannel: Channel<GrammyContext>;
 
 const { noChannelMessagesComposer } = getNoChannelMessagesComposer();
 const bot = new Bot<GrammyContext>('mock');
@@ -27,48 +28,6 @@ const { chatSession, mockChatSessionMiddleware } = mockChatSession({
     disableDeleteMessage: false,
   },
 });
-
-interface BuildChannelUpdateOverridesFrom {
-  id: number;
-  username?: string;
-}
-
-interface BuildChannelUpdateOverrides {
-  from: BuildChannelUpdateOverridesFrom;
-  senderChatId: number;
-  replySenderChatId: number;
-}
-
-/**
- * Builds a raw update using the registered group's chat ID so deletions route correctly.
- * @param groupId
- * @param overrides
- * @param overrides.from
- * @param overrides.from.id
- * @param overrides.from.username
- * @param overrides.senderChatId
- * @param overrides.replySenderChatId
- */
-function buildChannelUpdate(groupId: number, overrides: BuildChannelUpdateOverrides) {
-  return {
-    update_id: 1,
-    message: {
-      message_id: 1,
-      date: Math.floor(Date.now() / 1000),
-      text: 'Test',
-      chat: { id: groupId, type: 'supergroup' as const, title: 'Test Group' },
-      from: { id: overrides.from.id, is_bot: false, first_name: '', username: overrides.from.username },
-      sender_chat: { id: overrides.senderChatId, type: 'channel' as const, title: 'Another Channel' },
-      reply_to_message: {
-        sender_chat: { id: overrides.replySenderChatId, type: 'channel' as const, title: 'Main Channel' },
-        message_id: 123,
-        date: Math.floor(Date.now() / 1000),
-        chat: { id: groupId, type: 'supergroup' as const, title: 'Test Group' },
-        reply_to_message: undefined,
-      },
-    },
-  };
-}
 
 describe('noChannelMessagesComposer', () => {
   beforeAll(async () => {
@@ -82,17 +41,12 @@ describe('noChannelMessagesComposer', () => {
 
     bot.use(noChannelMessagesComposer);
 
-    ({ chats } = await prepareBot<GrammyContext>(bot, {
-      responses: {
-        getChat: {
-          invite_link: '',
-        },
-      },
-    }));
+    ({ chats } = await prepareBot<GrammyContext>(bot));
 
     user = chats.newUser();
     group = chats.newSupergroup();
     senderChannel = chats.newChannel();
+    sameChannel = chats.newChannel({ id: 54_321, title: 'Same Channel' });
   }, 5000);
 
   describe('enabled feature', () => {
@@ -124,13 +78,9 @@ describe('noChannelMessagesComposer', () => {
     });
 
     it('should not delete message from the same channel', async () => {
-      await bot.handleUpdate(
-        buildChannelUpdate(group.id, {
-          from: { id: 136_817_688, username: 'Channel_Bot' },
-          senderChatId: 54_321,
-          replySenderChatId: 54_321,
-        }),
-      );
+      await sameChannel.postMessageTo(group, 'Test', {
+        reply_to_message: { sender_chat: sameChannel.toTelegramChat(), message_id: 123 },
+      });
 
       expect(chats.outgoing).toHaveLength(0);
     });
@@ -148,19 +98,12 @@ describe('noChannelMessagesComposer', () => {
       expect(chats.deletionsFor(group).length).toEqual(1);
     });
 
-    it('should not delete message if sent by GroupAnonymousBot', async () => {
-      // GroupAnonymousBot (from.id === CHANNEL_BOT_ID) with no sender_chat → senderChatId and parentChannelId
+    it('should not delete message if sent by Channel_Bot without sender_chat', async () => {
+      // Channel_Bot (from.id === 136_817_688) with no sender_chat → senderChatId and parentChannelId
       // are both undefined, so senderChatId === parentChannelId is true → next() is called, no deletion
-      await bot.handleUpdate({
-        update_id: 1,
-        message: {
-          message_id: 1,
-          date: Math.floor(Date.now() / 1000),
-          text: 'Test',
-          chat: { id: group.id, type: 'supergroup' as const, title: 'Test Group' },
-          from: { id: 136_817_688, username: 'GroupAnonymousBot', is_bot: false, first_name: '' },
-        },
-      });
+      const channelBotUser = chats.newUser({ id: 136_817_688, username: 'Channel_Bot' });
+
+      await channelBotUser.sendText('Test', { chat: group });
 
       expect(chats.outgoing).toHaveLength(0);
     });
@@ -190,13 +133,9 @@ describe('noChannelMessagesComposer', () => {
     });
 
     it('should not delete message from the same channel', async () => {
-      await bot.handleUpdate(
-        buildChannelUpdate(group.id, {
-          from: { id: 136_817_688, username: 'Channel_Bot' },
-          senderChatId: 54_321,
-          replySenderChatId: 54_321,
-        }),
-      );
+      await sameChannel.postMessageTo(group, 'Test', {
+        reply_to_message: { sender_chat: sameChannel.toTelegramChat(), message_id: 123 },
+      });
 
       expect(chats.outgoing).toHaveLength(0);
     });
