@@ -92,7 +92,7 @@
     "@eslint/compat": "^2.0.3",
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^10.0.1",
-    "@grammyjs/testing": "file:vendor/grammyjs-testing-0.13.0.tgz",
+    "@grammyjs/testing": "file:vendor/grammyjs-testing-0.14.0.tgz",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@types/cors": "^2.8.19",
     "@types/crypto-js": "^4.2.2",
