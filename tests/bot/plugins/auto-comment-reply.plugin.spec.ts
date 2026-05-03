@@ -38,21 +38,16 @@ describe('autoCommentReply', () => {
   });
 
   it('should call next and add reply_to_message_id when message is a reply to channel (from.id === 777000)', async () => {
-    await user.sendText('test', {
-      chat: group,
-      reply_to_message: {
-        message_id: 100,
-        from: { id: 777_000, is_bot: true, first_name: 'Telegram', username: 'telegram' },
-        chat: { id: group.id, type: 'supergroup' as const, title: group.title },
-        date: Math.floor(Date.now() / 1000),
-        text: 'channel post',
-      } as any,
-    });
+    const relay = await group.postRelayMessage('channel post');
+
+    chats.outgoing.clear();
+
+    await user.sendText('test', { chat: group, reply_to_message: relay });
 
     const lastRequest = chats.outgoing.getLast<'sendMessage'>();
 
     expect(lastRequest?.method).toBe('sendMessage');
     // eslint-disable-next-line sonarjs/deprecation
-    expect(lastRequest?.payload?.reply_to_message_id).toBe(100);
+    expect(lastRequest?.payload?.reply_to_message_id).toBe(relay.message_id);
   });
 });
