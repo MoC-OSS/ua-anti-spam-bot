@@ -66,8 +66,9 @@ describe('edit message test', () => {
   });
 
   it('should remove the message if it has been edited', async () => {
-    await user.sendText('not a card');
-    await user.editMessage(1, '4111 1111 1111 1111');
+    const message = await user.sendText('not a card');
+
+    await user.editMessage(message.message_id, '4111 1111 1111 1111');
 
     const expectedMethods = chats.outgoing.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']);
     const actualMethods = chats.outgoing.getMethods();
