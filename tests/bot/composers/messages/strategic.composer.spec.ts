@@ -80,8 +80,7 @@ describe('strategicComposer', () => {
   }, 10_000);
 
   beforeEach(() => {
-    chats.outgoing.clear();
-    user.replies.clear();
+    chats.clear();
     mockMessageHandler.getTensorRank.mockResolvedValue({ isSpam: false, tensor: 0.3, deleteRank: 0.9 });
     mockGetTrainingStartRank.mockResolvedValue(0.6);
     mockGetTrainingChatWhitelist.mockResolvedValue([]);

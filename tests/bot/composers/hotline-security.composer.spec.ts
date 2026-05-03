@@ -37,9 +37,7 @@ describe('hotlineSecurityComposer', () => {
   }, 5000);
 
   beforeEach(() => {
-    chats.outgoing.clear();
-    user.replies.clear();
-    chats.deletionsFor(group).clear();
+    chats.clear();
     chatSession.isBotAdmin = true;
   });
 

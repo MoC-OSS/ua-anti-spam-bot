@@ -55,25 +55,13 @@ describe('noChannelMessagesComposer', () => {
     });
 
     beforeEach(() => {
-      chats.outgoing.clear();
-      user.replies.clear();
-      chats.deletionsFor(group).clear();
+      chats.clear();
     });
 
     it('should delete message from a channel', async () => {
       await senderChannel.postMessageTo(group, 'Test');
 
-      const [deleteMessageRequest, getChatRequest, sendMessageRequest] = chats.outgoing.getAll<
-        'deleteMessage',
-        'getChat',
-        'sendMessage',
-        'sendMessage'
-      >();
-
-      expect(chats.outgoing).toHaveLength(4);
-      expect(getChatRequest?.method).toEqual('getChat');
-      expect(deleteMessageRequest?.method).toEqual('deleteMessage');
-      expect(sendMessageRequest?.method).toEqual('sendMessage');
+      expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']));
       expect(chats.deletionsFor(group).length).toEqual(1);
     });
 
@@ -90,11 +78,7 @@ describe('noChannelMessagesComposer', () => {
 
       await senderChannel.postMessageTo(group, 'Test');
 
-      const [deleteMessageRequest, getChatRequest] = chats.outgoing.getAll<'deleteMessage', 'getChat', 'sendMessage'>();
-
-      expect(chats.outgoing).toHaveLength(3);
-      expect(deleteMessageRequest?.method).toEqual('deleteMessage');
-      expect(getChatRequest?.method).toEqual('getChat');
+      expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['deleteMessage', 'getChat', 'sendMessage']));
       expect(chats.deletionsFor(group).length).toEqual(1);
     });
 
@@ -121,9 +105,7 @@ describe('noChannelMessagesComposer', () => {
     });
 
     beforeEach(() => {
-      chats.outgoing.clear();
-      user.replies.clear();
-      chats.deletionsFor(group).clear();
+      chats.clear();
     });
 
     it('should not delete message from a channel when feature is disabled', async () => {

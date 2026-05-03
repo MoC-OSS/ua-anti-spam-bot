@@ -63,9 +63,7 @@ describe('joinLeaveComposer main', () => {
       });
 
       beforeEach(() => {
-        chats.outgoing.clear();
-        user.replies.clear();
-        chats.deletionsFor(group).clear();
+        chats.clear();
       });
 
       it('should delete new user service message', async () => {
@@ -126,9 +124,7 @@ describe('joinLeaveComposer main', () => {
       });
 
       beforeEach(() => {
-        chats.outgoing.clear();
-        user.replies.clear();
-        chats.deletionsFor(group).clear();
+        chats.clear();
       });
 
       it('should not delete new user service message', async () => {
@@ -151,9 +147,7 @@ describe('joinLeaveComposer main', () => {
     });
 
     beforeEach(() => {
-      chats.outgoing.clear();
-      user.replies.clear();
-      chats.deletionsFor(group).clear();
+      chats.clear();
     });
 
     it('should not delete new user service message', async () => {

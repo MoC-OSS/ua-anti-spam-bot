@@ -52,9 +52,7 @@ describe('denylistComposer', () => {
     });
 
     beforeEach(() => {
-      chats.outgoing.clear();
-      user.replies.clear();
-      chats.deletionsFor(group).clear();
+      chats.clear();
     });
 
     it('should delete if denylist word is used', async () => {
@@ -113,9 +111,7 @@ describe('denylistComposer', () => {
     });
 
     beforeEach(() => {
-      chats.outgoing.clear();
-      user.replies.clear();
-      chats.deletionsFor(group).clear();
+      chats.clear();
     });
 
     it('should not delete if enableDeleteDenylist is false even when denylist has words', async () => {

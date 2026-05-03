@@ -55,7 +55,7 @@ describe('bot queries', () => {
   }, 10_000);
 
   beforeEach(() => {
-    chats.outgoing.clear();
+    chats.clear();
     chatSession.botRemoved = false;
     chatSession.isBotAdmin = false;
     delete chatSession.botAdminDate;

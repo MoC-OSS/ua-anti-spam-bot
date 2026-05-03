@@ -57,9 +57,9 @@ describe('admin-check-notify', () => {
   }, 5000);
 
   beforeEach(() => {
-    chats.outgoing.clear();
-    user.replies.clear();
-    chats.deletionsFor(group).clear();
+    chats.clear();
+    state.isDeleted = false;
+    chatSession.chatSettings.enableAdminCheck = false;
   });
 
   it('should remove a card message for admin if admin check enabled', async () => {

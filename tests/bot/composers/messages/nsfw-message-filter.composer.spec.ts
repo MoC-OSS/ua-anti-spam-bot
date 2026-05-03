@@ -53,9 +53,7 @@ describe('nsfwMessageFilterComposer', () => {
     });
 
     beforeEach(() => {
-      chats.outgoing.clear();
-      user.replies.clear();
-      chats.deletionsFor(group).clear();
+      chats.clear();
     });
 
     it('should delete if nsfw message is used', async () => {
@@ -106,9 +104,7 @@ describe('nsfwMessageFilterComposer', () => {
     });
 
     beforeEach(() => {
-      chats.outgoing.clear();
-      user.replies.clear();
-      chats.deletionsFor(group).clear();
+      chats.clear();
     });
 
     it('should not delete if nsfw message is used', async () => {

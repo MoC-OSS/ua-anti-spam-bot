@@ -38,8 +38,7 @@ describe('selfDestructedReply', () => {
     }, 5000);
 
     beforeEach(() => {
-      chats.outgoing.clear();
-      user.replies.clear();
+      chats.clear();
     });
 
     it('should delete message after specified time', async () => {

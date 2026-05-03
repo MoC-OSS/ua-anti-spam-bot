@@ -14,6 +14,7 @@ import { mockSession } from '@test-helpers/session-mocks';
 
 let chats: Chats<GrammyContext>;
 let user: User<GrammyContext>;
+let regularUser: User<GrammyContext>;
 let group: Supergroup<GrammyContext>;
 
 const bot = new Bot<GrammyContext>('mock');
@@ -40,11 +41,12 @@ describe('RoleCommand', () => {
     user = chats.newUser();
     group = chats.newSupergroup();
     group.own(user);
+    regularUser = chats.newUser();
+    group.join(regularUser);
   }, 5000);
 
   beforeEach(() => {
-    chats.outgoing.clear();
-    user.replies.clear();
+    chats.clear();
     delete session.roleMode;
     session.isCurrentUserAdmin = false;
   });
@@ -66,8 +68,7 @@ describe('RoleCommand', () => {
   });
 
   it('should reject the command for regular users', async () => {
-    chats.outgoing.respondNext('getChatMember', { status: 'member' });
-    await user.sendCommand('/role', 'user', { chat: group });
+    await regularUser.sendCommand('/role', 'user', { chat: group });
 
     expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['getChatMember', 'sendMessage']));
     expect(session.roleMode).toBeUndefined();

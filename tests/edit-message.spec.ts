@@ -43,8 +43,7 @@ describe('edit message test', () => {
   }, 5000);
 
   beforeEach(() => {
-    chats.outgoing.clear();
-    user.replies.clear();
+    chats.clear();
   });
 
   it('should remove a card message', async () => {

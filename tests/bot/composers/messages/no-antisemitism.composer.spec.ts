@@ -49,9 +49,7 @@ describe('noAntisemitismComposer', () => {
     });
 
     beforeEach(() => {
-      chats.outgoing.clear();
-      user.replies.clear();
-      chats.deletionsFor(group).clear();
+      chats.clear();
     });
 
     it('should delete if antisemitism is used', async () => {
@@ -88,9 +86,7 @@ describe('noAntisemitismComposer', () => {
     });
 
     beforeEach(() => {
-      chats.outgoing.clear();
-      user.replies.clear();
-      chats.deletionsFor(group).clear();
+      chats.clear();
     });
 
     it('should not delete if antisemitism is used', async () => {

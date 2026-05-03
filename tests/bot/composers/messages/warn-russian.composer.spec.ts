@@ -51,8 +51,7 @@ describe('warnRussianComposer', () => {
     });
 
     beforeEach(() => {
-      chats.outgoing.clear();
-      user.replies.clear();
+      chats.clear();
     });
 
     it('should warn if russian is used', async () => {
@@ -94,8 +93,7 @@ describe('warnRussianComposer', () => {
     });
 
     beforeEach(() => {
-      chats.outgoing.clear();
-      user.replies.clear();
+      chats.clear();
     });
 
     it('should not warn if russian is used', async () => {

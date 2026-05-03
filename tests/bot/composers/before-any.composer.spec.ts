@@ -45,8 +45,7 @@ describe('beforeAnyComposer', () => {
   }, 5000);
 
   beforeEach(() => {
-    chats.outgoing.clear();
-    user.replies.clear();
+    chats.clear();
     isActualUserAdmin = undefined;
     isEffectiveUserAdmin = undefined;
     isStoredUserAdmin = undefined;

@@ -66,8 +66,7 @@ describe('featurePollComposer', () => {
   }, 15_000);
 
   beforeEach(() => {
-    chats.outgoing.clear();
-    user.replies.clear();
+    chats.clear();
     mockGetChatSessions.mockResolvedValue([]);
   });
 

@@ -63,8 +63,7 @@ describe('RankCommand', () => {
   }, 5000);
 
   beforeEach(() => {
-    chats.outgoing.clear();
-    user.replies.clear();
+    chats.clear();
     vi.clearAllMocks();
     mockGetBotTensorPercent.mockResolvedValue(50);
     mockGetTrainingStartRank.mockResolvedValue(30);

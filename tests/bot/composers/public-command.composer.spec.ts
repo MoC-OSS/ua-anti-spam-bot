@@ -45,8 +45,7 @@ describe('PublicCommandsComposer', () => {
   }, 5000);
 
   beforeEach(() => {
-    chats.outgoing.clear();
-    user.replies.clear();
+    chats.clear();
     chatSession.isBotAdmin = true;
     chatSession.language = undefined;
     delete session.roleMode;

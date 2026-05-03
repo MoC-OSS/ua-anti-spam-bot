@@ -18,6 +18,7 @@ let chats: Chats<GrammyContext>;
 let user: User<GrammyContext>;
 let owner: User<GrammyContext>;
 let admin2: User<GrammyContext>;
+let regularUser: User<GrammyContext>;
 let group: Supergroup<GrammyContext>;
 
 const bot = new Bot<GrammyContext>('mock');
@@ -60,11 +61,12 @@ describe('SettingsCommand', () => {
     group = chats.newSupergroup();
     group.own(owner);
     group.promote(admin2);
+    regularUser = chats.newUser();
+    group.join(regularUser);
   }, 5000);
 
   beforeEach(() => {
-    chats.outgoing.clear();
-    user.replies.clear();
+    chats.clear();
     chatSession.isBotAdmin = true;
     setUserSessionSpy.mockClear();
   });
@@ -113,8 +115,7 @@ describe('SettingsCommand', () => {
 
   describe('group flow', () => {
     it('should not allow to call settings for a regular user', async () => {
-      chats.outgoing.respondNext('getChatMember', { status: 'member' });
-      await user.sendCommand('/settings', undefined, { chat: group });
+      await regularUser.sendCommand('/settings', undefined, { chat: group });
 
       const expectedMethods = chats.outgoing.buildMethods(['getChatMember', 'sendMessage']);
       const actualMethods = chats.outgoing.getMethods();

@@ -49,8 +49,7 @@ describe('warnObsceneComposer', () => {
     });
 
     beforeEach(() => {
-      chats.outgoing.clear();
-      user.replies.clear();
+      chats.clear();
     });
 
     it('should warn if obscene is used', async () => {
@@ -88,8 +87,7 @@ describe('warnObsceneComposer', () => {
     });
 
     beforeEach(() => {
-      chats.outgoing.clear();
-      user.replies.clear();
+      chats.clear();
     });
 
     it('should not warn if obscene is used', async () => {

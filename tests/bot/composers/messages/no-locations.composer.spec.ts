@@ -53,9 +53,7 @@ describe('noLocationsComposer', () => {
     });
 
     beforeEach(() => {
-      chats.outgoing.clear();
-      user.replies.clear();
-      chats.deletionsFor(group).clear();
+      chats.clear();
     });
 
     it('should delete location in any case', async () => {
@@ -109,9 +107,7 @@ describe('noLocationsComposer', () => {
     });
 
     beforeEach(() => {
-      chats.outgoing.clear();
-      user.replies.clear();
-      chats.deletionsFor(group).clear();
+      chats.clear();
     });
 
     it('should delete location in any case', async () => {

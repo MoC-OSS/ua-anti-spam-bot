@@ -62,8 +62,7 @@ describe('e2e bot testing', () => {
   describe('private flow', () => {
     describe('public commands', () => {
       beforeEach(() => {
-        chats.outgoing.clear();
-        user.replies.clear();
+        chats.clear();
         chatSession.language = undefined;
         delete session.roleMode;
       });
@@ -85,14 +84,13 @@ describe('e2e bot testing', () => {
 
     describe('check regular message', () => {
       beforeEach(() => {
-        chats.outgoing.clear();
-        user.replies.clear();
+        chats.clear();
       });
 
       it('should not remove a regular message and have 0 api calls', async () => {
         await user.sendText('regular message');
 
-        expect(chats.outgoing.requests).toHaveLength(0);
+        expect(chats.outgoing).toHaveLength(0);
       });
 
       it('should remove a swindler message and notify for first swindler in several hours', async () => {
@@ -113,7 +111,7 @@ describe('e2e bot testing', () => {
         expect(expectedMethods).toEqual(actualMethods);
         expect(sendLogsMessageRequest?.payload.chat_id).toEqual(logsChat);
         expect(sendSecondLogsMessageRequest?.payload.chat_id).toEqual(secondLogsChat);
-        expect(chats.outgoing.requests).toHaveLength(5);
+        expect(chats.outgoing).toHaveLength(5);
       });
 
       it('should remove a swindler message and dont notify after already notified', async () => {
@@ -133,7 +131,7 @@ describe('e2e bot testing', () => {
         expect(expectedMethods).toEqual(actualMethods);
         expect(sendLogsMessageRequest?.payload.chat_id).toEqual(logsChat);
         expect(sendSecondLogsMessageRequest?.payload.chat_id).toEqual(secondLogsChat);
-        expect(chats.outgoing.requests).toHaveLength(4);
+        expect(chats.outgoing).toHaveLength(4);
       });
     });
   });
@@ -141,8 +139,7 @@ describe('e2e bot testing', () => {
   describe('group or super group flow', () => {
     describe('public commands', () => {
       beforeEach(() => {
-        chats.outgoing.clear();
-        user.replies.clear();
+        chats.clear();
         chatSession.language = undefined;
         chatSession.isBotAdmin = true;
         delete session.roleMode;
@@ -165,8 +162,7 @@ describe('e2e bot testing', () => {
 
     describe('check regular message', () => {
       beforeEach(() => {
-        chats.outgoing.clear();
-        user.replies.clear();
+        chats.clear();
       });
 
       it('should check is bot admin if isAdmin is empty', async () => {
@@ -209,7 +205,7 @@ describe('e2e bot testing', () => {
 
           const [getChatRequest, getChatMemberRequest] = chats.outgoing.getTwoLast<'getChat', 'getChatMember'>();
 
-          expect(chats.outgoing.requests).toHaveLength(2);
+          expect(chats.outgoing).toHaveLength(2);
           expect(getChatRequest?.method).toEqual('getChat');
           expect(getChatMemberRequest?.method).toEqual('getChatMember');
         });
@@ -217,7 +213,7 @@ describe('e2e bot testing', () => {
         it('should not remove a super group message', async () => {
           await user.sendText('regular message', { chat: group });
 
-          expect(chats.outgoing.requests).toHaveLength(1);
+          expect(chats.outgoing).toHaveLength(1);
         });
 
         it('should remove a swindler message and notify for first swindler in several hours', async () => {
@@ -310,8 +306,7 @@ describe('e2e bot testing', () => {
     });
 
     beforeEach(() => {
-      chats.outgoing.clear();
-      user.replies.clear();
+      chats.clear();
     });
 
     describe('no-russian feature', () => {
@@ -610,8 +605,7 @@ describe('e2e bot testing', () => {
     });
 
     beforeEach(() => {
-      chats.outgoing.clear();
-      user.replies.clear();
+      chats.clear();
     });
 
     it('should delete new member service message when bot is admin', async () => {

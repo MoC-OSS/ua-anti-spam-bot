@@ -110,8 +110,7 @@ describe('StatisticsCommand', () => {
   }, 5000);
 
   beforeEach(() => {
-    chats.outgoing.clear();
-    user.replies.clear();
+    chats.clear();
     vi.clearAllMocks();
     mockGetChatSessions.mockResolvedValue(mockChatSessions);
     // eslint-disable-next-line unicorn/no-useless-undefined

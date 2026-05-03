@@ -55,9 +55,7 @@ describe('noCounteroffensiveComposer', () => {
     });
 
     beforeEach(() => {
-      chats.outgoing.clear();
-      user.replies.clear();
-      chats.deletionsFor(group).clear();
+      chats.clear();
     });
 
     it('should delete if counteroffensive is used', async () => {
@@ -129,9 +127,7 @@ describe('noCounteroffensiveComposer', () => {
     });
 
     beforeEach(() => {
-      chats.outgoing.clear();
-      user.replies.clear();
-      chats.deletionsFor(group).clear();
+      chats.clear();
     });
 
     it('should not delete if counteroffensive is used', async () => {

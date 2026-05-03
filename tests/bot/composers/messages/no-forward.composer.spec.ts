@@ -50,9 +50,7 @@ describe('noForwardsComposer', () => {
     });
 
     beforeEach(() => {
-      chats.outgoing.clear();
-      user.replies.clear();
-      chats.deletionsFor(group).clear();
+      chats.clear();
     });
 
     it('should delete a forwarded message and send reply when disableDeleteMessage is false', async () => {
@@ -86,9 +84,7 @@ describe('noForwardsComposer', () => {
     });
 
     beforeEach(() => {
-      chats.outgoing.clear();
-      user.replies.clear();
-      chats.deletionsFor(group).clear();
+      chats.clear();
     });
 
     it('should not delete a forwarded message', async () => {

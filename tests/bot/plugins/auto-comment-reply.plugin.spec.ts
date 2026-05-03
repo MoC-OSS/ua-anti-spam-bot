@@ -23,8 +23,7 @@ describe('autoCommentReply', () => {
   });
 
   afterEach(() => {
-    chats.outgoing.clear();
-    user.replies.clear();
+    chats.clear();
   });
 
   it('should call next and NOT add reply_to_message_id when message is not a reply to channel', async () => {
@@ -40,7 +39,7 @@ describe('autoCommentReply', () => {
   it('should call next and add reply_to_message_id when message is a reply to channel (from.id === 777000)', async () => {
     const relay = await group.postRelayMessage('channel post');
 
-    chats.outgoing.clear();
+    chats.clear();
 
     await user.sendText('test', { chat: group, reply_to_message: relay });
 

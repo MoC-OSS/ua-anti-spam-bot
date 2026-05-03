@@ -213,8 +213,7 @@ describe('nsfwFilterComposer', () => {
   }, 5000);
 
   beforeEach(() => {
-    chats.outgoing.clear();
-    user.replies.clear();
+    chats.clear();
     mockPredictVideo.mockClear();
     mockPredictVideo.mockResolvedValue({ isSpam: false, predictions: [] });
     vi.mocked(handleError).mockClear();
