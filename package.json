@@ -1,6 +1,6 @@
 {
   "name": "ua-anti-spam-bot",
-  "version": "1.5.1",
+  "version": "1.8.2",
   "private": true,
   "engines": {
     "node": ">=20.x"
@@ -51,8 +51,8 @@
     "cyrillic-to-translit-js": "^3.2.1",
     "deepmerge": "^4.3.1",
     "diff": "^8.0.3",
+    "dotenv": "^17.3.1",
     "escape-html": "^1.0.3",
-    "eventsource": "^4.1.0",
     "express": "^5.2.1",
     "express-async-handler": "^1.2.0",
     "ffmpeg-static": "^5.3.0",
@@ -81,10 +81,10 @@
     "string-similarity": "^4.0.4",
     "tinyld": "^1.3.4",
     "tsx": "^4.21.0",
-    "typed-dotenv": "^10.0.2",
     "typegram": "^5.2.0",
     "ukrainian-ml-optimizer": "^3.0.0",
-    "validator": "^13.15.26"
+    "validator": "^13.15.26",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^20.4.4",
@@ -92,6 +92,7 @@
     "@eslint/compat": "^2.0.3",
     "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^10.0.1",
+    "@grammyjs/testing": "file:vendor/grammyjs-testing-0.22.0.tgz",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@types/cors": "^2.8.19",
     "@types/crypto-js": "^4.2.2",
@@ -103,6 +104,7 @@
     "@types/multer": "^2.1.0",
     "@types/node": "^24.12.0",
     "@types/string-similarity": "^4.0.2",
+    "@types/supertest": "^7.2.0",
     "@types/validator": "^13.15.10",
     "@vitest/coverage-v8": "^4.1.0",
     "@vitest/eslint-plugin": "^1.6.12",
@@ -114,6 +116,7 @@
     "eslint-config-naming": "^1.9.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-import-zod": "^1.2.1",
     "eslint-plugin-jsdoc": "^62.8.0",
     "eslint-plugin-lintlord": "^1.1.0",
     "eslint-plugin-n": "^17.24.0",
@@ -126,6 +129,7 @@
     "eslint-plugin-sonarjs": "^4.0.2",
     "eslint-plugin-unicorn": "^63.0.0",
     "eslint-plugin-unused-imports": "^4.4.1",
+    "eslint-plugin-zod": "^3.5.0",
     "globals": "^17.4.0",
     "input": "^1.0.1",
     "json5": "^2.2.3",
@@ -135,6 +139,7 @@
     "prettier": "^3.8.1",
     "queue": "^7.0.0",
     "smile-track": "^0.17.0",
+    "supertest": "^7.2.2",
     "type-fest": "^5.4.4",
     "typed-emitter": "^2.1.0",
     "typescript": "^5.9.3",

@@ -1,4 +1,4 @@
 import { defineConfig } from 'eslint/config';
-import eslintPluginZodX from 'eslint-plugin-zod-x';
+import eslintPluginZod from 'eslint-plugin-zod';
 
-export default defineConfig(eslintPluginZodX.configs.recommended);
+export default defineConfig(eslintPluginZod.configs.recommended);

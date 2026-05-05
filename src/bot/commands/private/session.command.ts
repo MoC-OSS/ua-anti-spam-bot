@@ -27,7 +27,6 @@ export class SessionCommand {
     return async (context) => {
       const chatId = context?.update?.message?.chat?.id;
 
-      // eslint-disable-next-line sonarjs/different-types-comparison
       if (chatId === creatorId) {
         const sessions = await redisClient.getAllChatRecords();
 

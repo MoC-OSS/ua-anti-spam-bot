@@ -59,11 +59,11 @@
       "@tensor/*": [
         "./src/tensor/*"
       ],
-      "@testing/*": [
-        "./src/testing/*"
-      ],
       "@app-types/*": [
         "./src/shared/types/*"
+      ],
+      "@test-helpers/*": [
+        "./tests/helpers/*"
       ],
       "@userbot/*": [
         "./src/userbot/*"

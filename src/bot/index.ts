@@ -8,8 +8,11 @@ import { run } from '@grammyjs/runner';
 import { Bot } from 'grammy';
 
 import ms from 'ms';
+import type * as z from 'zod';
 
 import { environmentConfig } from '@shared/config';
+import { validateBotEnvironment } from '@shared/config/bot.schema';
+import { formatEnvironmentErrors } from '@shared/config/format-errors';
 
 import * as tf from '@tensorflow/tfjs-node';
 
@@ -25,6 +28,14 @@ import { attachBotApiRoutes, startHealthCheckServer } from './bot-server';
 import { logsChat } from './creator';
 
 (async () => {
+  try {
+    validateBotEnvironment(environmentConfig);
+  } catch (error) {
+    logger.error(formatEnvironmentErrors(error as z.ZodError));
+    // eslint-disable-next-line unicorn/no-process-exit
+    process.exit(1);
+  }
+
   /**
    * Tensorflow.js offers two flags, enableProdMode and enableDebugMode.
    * If you're going to use any TF model in production, be sure to enable prod mode before loading models.

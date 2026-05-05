@@ -1,3 +1,5 @@
+import type { Chats, Supergroup, User } from '@grammyjs/testing';
+import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
 
 import { getNsfwMessageFilterComposer } from '@bot/composers/messages/nsfw-message-filter.composer';
@@ -9,14 +11,14 @@ import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
 import { mockDynamicStorageService } from '@services/_mocks/index.mocks';
 import { NsfwDetectService } from '@services/nsfw-detect.service';
 
-import type { OutgoingRequests } from '@testing/outgoing-requests';
-import { prepareBotForTesting } from '@testing/prepare';
-import { mockChatSession } from '@testing/testing-main';
-import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
-
 import type { GrammyContext } from '@app-types/context';
 
-let outgoingRequests: OutgoingRequests;
+import { mockChatSession } from '@test-helpers/session-mocks';
+
+let chats: Chats<GrammyContext>;
+let user: User<GrammyContext>;
+let group: Supergroup<GrammyContext>;
+
 const nsfwDetectService = new NsfwDetectService(mockDynamicStorageService, 0.6);
 const { nsfwMessageFilterComposer } = getNsfwMessageFilterComposer({ nsfwDetectService });
 const bot = new Bot<GrammyContext>('mock');
@@ -39,11 +41,10 @@ describe('nsfwMessageFilterComposer', () => {
 
     bot.use(nsfwMessageFilterComposer);
 
-    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot, {
-      getChat: {
-        invite_link: '',
-      },
-    });
+    ({ chats } = await prepareBot<GrammyContext>(bot));
+
+    user = chats.newUser();
+    group = chats.newSupergroup();
   }, 5000);
 
   describe('enabled feature', () => {
@@ -52,52 +53,48 @@ describe('nsfwMessageFilterComposer', () => {
     });
 
     beforeEach(() => {
-      outgoingRequests.clear();
+      chats.clear();
     });
 
     it('should delete if nsfw message is used', async () => {
-      const update = new MessageMockUpdate('Радую голой фоточкой всіх нових в каналі').build();
+      await user.sendText('Радую голой фоточкой всіх нових в каналі', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest, sendMessageRequest] = outgoingRequests.getAll<
+      const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest, sendMessageRequest] = chats.outgoing.getAll<
         'deleteMessage',
         'getChat',
         'sendMessage',
         'sendMessage'
       >();
 
-      expect(outgoingRequests.length).toEqual(4);
+      expect(chats.outgoing.length).toEqual(4);
       expect(deleteMessageRequest?.method).toEqual('deleteMessage');
       expect(getChatRequest?.method).toEqual('getChat');
       expect(sendLogsMessageRequest?.method).toEqual('sendMessage');
       expect(sendMessageRequest?.method).toEqual('sendMessage');
+      expect(chats.deletionsFor(group).length).toEqual(1);
     });
 
     it('should delete if nsfw message is used and do not notify if disableDeleteMessage is true', async () => {
       chatSession.chatSettings.disableDeleteMessage = true;
-      const update = new MessageMockUpdate('Радую голой фоточкой всіх нових в каналі').build();
+      await user.sendText('Радую голой фоточкой всіх нових в каналі', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest] = outgoingRequests.getAll<
+      const [deleteMessageRequest, getChatRequest, sendLogsMessageRequest] = chats.outgoing.getAll<
         'deleteMessage',
         'getChat',
         'sendMessage'
       >();
 
-      expect(outgoingRequests.length).toEqual(3);
+      expect(chats.outgoing.length).toEqual(3);
       expect(deleteMessageRequest?.method).toEqual('deleteMessage');
       expect(getChatRequest?.method).toEqual('getChat');
       expect(sendLogsMessageRequest?.method).toEqual('sendMessage');
+      expect(chats.deletionsFor(group).length).toEqual(1);
     });
 
     it('should not delete if not nsfw message', async () => {
-      const update = new MessageMockUpdate('Я додам нові фотографії зими з новорічної події').build();
+      await user.sendText('Я додам нові фотографії зими з новорічної події', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.length).toEqual(0);
+      expect(chats.outgoing.length).toEqual(0);
     });
   });
 
@@ -107,23 +104,19 @@ describe('nsfwMessageFilterComposer', () => {
     });
 
     beforeEach(() => {
-      outgoingRequests.clear();
+      chats.clear();
     });
 
     it('should not delete if nsfw message is used', async () => {
-      const update = new MessageMockUpdate('Радую голой фоточкой всіх нових в каналі').build();
+      await user.sendText('Радую голой фоточкой всіх нових в каналі', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.length).toEqual(0);
+      expect(chats.outgoing.length).toEqual(0);
     });
 
     it('should not delete if not nsfw message is used', async () => {
-      const update = new MessageMockUpdate('Я додам нові фотографії зими з новорічної події').build();
+      await user.sendText('Я додам нові фотографії зими з новорічної події', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.length).toEqual(0);
+      expect(chats.outgoing.length).toEqual(0);
     });
   });
 });

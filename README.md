@@ -230,10 +230,24 @@ GOOGLE_SPREADSHEET_ID=
 
 ### 10. Set Alarm Credits (confidential)
 
-We use https://alerts.com.ua/ to obtain air raid alarms. You need to ask for a key from the API developer (or me if you from MOC).
+Air-raid alerts are received via the [Stfalcon Ukraine Alarm API](https://api.ukrainealarm.com).
+The ML server exposes a webhook endpoint (`POST /webhook/alarm`) that Stfalcon calls whenever
+alert status changes. The bot subscribes to the resulting Redis Pub/Sub channel.
 
 ```
-ALARM_KEY=
+ALARM_KEY=                    # Stfalcon API key (used to register the webhook and poll /alerts)
+ALARM_WEBHOOK_BASE_URL=       # Public HTTPS base URL of the ML server (e.g. https://alarm-webhook.example.com)
+ALARM_WEBHOOK_SECRET=         # Shared secret validated in X-Alarm-Secret header
+```
+
+Architecture:
+
+```
+Stfalcon API --POST--> ML Server (/webhook/alarm)
+                           |
+                       Redis PUBLISH (alarm:updates)
+                           |
+                       Bot SUBSCRIBE --> alarmService --> alarmChatService
 ```
 
 ### 11. Copy tensor files

@@ -1,3 +1,5 @@
+import type { Channel, Chats, Supergroup, User } from '@grammyjs/testing';
+import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
 
 import { getNoChannelMessagesComposer } from '@bot/composers/messages/no-channel-messages.composer';
@@ -7,18 +9,18 @@ import { parseText } from '@bot/middleware/parse-text.middleware';
 import { stateMiddleware } from '@bot/middleware/state.middleware';
 import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
 
-import type { OutgoingRequests } from '@testing/outgoing-requests';
-import { prepareBotForTesting } from '@testing/prepare';
-import { mockChatSession } from '@testing/testing-main';
-import { MessagePrivateMockUpdate } from '@testing/updates/message-private-mock.update';
-import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
-
 import type { GrammyContext } from '@app-types/context';
 
-let outgoingRequests: OutgoingRequests;
+import { mockChatSession } from '@test-helpers/session-mocks';
+
+let chats: Chats<GrammyContext>;
+let user: User<GrammyContext>;
+let group: Supergroup<GrammyContext>;
+let senderChannel: Channel<GrammyContext>;
+let sameChannel: Channel<GrammyContext>;
+
 const { noChannelMessagesComposer } = getNoChannelMessagesComposer();
 const bot = new Bot<GrammyContext>('mock');
-const superGroupMockUpdate = new MessageMockUpdate('test');
 
 const { chatSession, mockChatSessionMiddleware } = mockChatSession({
   chatSettings: {
@@ -39,11 +41,12 @@ describe('noChannelMessagesComposer', () => {
 
     bot.use(noChannelMessagesComposer);
 
-    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot, {
-      getChat: {
-        invite_link: '',
-      },
-    });
+    ({ chats } = await prepareBot<GrammyContext>(bot));
+
+    user = chats.newUser();
+    group = chats.newSupergroup();
+    senderChannel = chats.newChannel();
+    sameChannel = chats.newChannel({ id: 54_321, title: 'Same Channel' });
   }, 5000);
 
   describe('enabled feature', () => {
@@ -52,108 +55,47 @@ describe('noChannelMessagesComposer', () => {
     });
 
     beforeEach(() => {
-      outgoingRequests.clear();
+      chats.clear();
     });
 
     it('should delete message from a channel', async () => {
-      const update = new MessageMockUpdate('Test').buildOverwrite({
-        message: {
-          from: { id: 136_817_688, username: 'Channel_Bot', is_bot: false, first_name: '' },
-          sender_chat: { id: 12_345, type: 'channel', title: 'Another Channel' },
-          reply_to_message: {
-            sender_chat: { id: 54_321, type: 'channel', title: 'Main Channel' },
-            message_id: 123,
-            date: Date.now(),
-            chat: superGroupMockUpdate.genericSuperGroup,
-            reply_to_message: undefined,
-          },
-        },
-      });
+      await senderChannel.postMessageTo(group, 'Test');
 
-      await bot.handleUpdate(update);
-
-      const [deleteMessageRequest, getChatRequest, sendMessageRequest] = outgoingRequests.getAll<
-        'deleteMessage',
-        'getChat',
-        'sendMessage',
-        'sendMessage'
-      >();
-
-      expect(outgoingRequests).toHaveLength(4);
-      expect(getChatRequest?.method).toEqual('getChat');
-      expect(deleteMessageRequest?.method).toEqual('deleteMessage');
-      expect(sendMessageRequest?.method).toEqual('sendMessage');
+      expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']));
+      expect(chats.deletionsFor(group).length).toEqual(1);
     });
 
     it('should not delete message from the same channel', async () => {
-      const update = new MessageMockUpdate('Test').buildOverwrite({
-        message: {
-          from: { id: 136_817_688, username: 'Channel_Bot', is_bot: false, first_name: '' },
-          sender_chat: { id: 54_321, type: 'channel', title: 'Main Channel' },
-          reply_to_message: {
-            sender_chat: { id: 54_321, type: 'channel', title: 'Main Channel' },
-            message_id: 123,
-            date: Date.now(),
-            chat: superGroupMockUpdate.genericSuperGroup,
-            reply_to_message: undefined,
-          },
-        },
+      await sameChannel.postMessageTo(group, 'Test', {
+        reply_to_message: { sender_chat: sameChannel.toTelegramChat(), message_id: 123 },
       });
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests).toHaveLength(0);
+      expect(chats.outgoing).toHaveLength(0);
     });
 
     it('should delete message but not notify if disableDeleteMessage is true', async () => {
       chatSession.chatSettings.disableDeleteMessage = true;
 
-      const update = new MessageMockUpdate('Test').buildOverwrite({
-        message: {
-          from: { id: 136_817_688, username: 'Channel_Bot', is_bot: false, first_name: '' },
-          sender_chat: { id: 12_345, type: 'channel', title: 'Another Channel' },
-          reply_to_message: {
-            sender_chat: { id: 54_321, type: 'channel', title: 'Main Channel' },
-            message_id: 123,
-            date: Date.now(),
-            chat: superGroupMockUpdate.genericSuperGroup,
-            reply_to_message: undefined,
-          },
-        },
-      });
+      await senderChannel.postMessageTo(group, 'Test');
 
-      await bot.handleUpdate(update);
-
-      const [deleteMessageRequest, getChatRequest] = outgoingRequests.getAll<'deleteMessage', 'getChat', 'sendMessage'>();
-
-      expect(outgoingRequests).toHaveLength(3);
-      expect(deleteMessageRequest?.method).toEqual('deleteMessage');
-      expect(getChatRequest?.method).toEqual('getChat');
+      expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['deleteMessage', 'getChat', 'sendMessage']));
+      expect(chats.deletionsFor(group).length).toEqual(1);
     });
 
-    it('should not delete message if sent by GroupAnonymousBot', async () => {
-      const update = new MessageMockUpdate('Test').buildOverwrite({
-        message: {
-          from: { id: 136_817_688, username: 'GroupAnonymousBot', is_bot: false, first_name: '' },
-        },
-        sender_chat: { id: 12_345 },
-      });
+    it('should not delete message if sent by Channel_Bot without sender_chat', async () => {
+      // Channel_Bot (from.id === 136_817_688) with no sender_chat → senderChatId and parentChannelId
+      // are both undefined, so senderChatId === parentChannelId is true → next() is called, no deletion
+      const channelBotUser = chats.newUser({ id: 136_817_688, username: 'Channel_Bot' });
 
-      await bot.handleUpdate(update);
+      await channelBotUser.sendText('Test', { chat: group });
 
-      expect(outgoingRequests).toHaveLength(0);
+      expect(chats.outgoing).toHaveLength(0);
     });
 
     it('should not delete message from non-channel users', async () => {
-      const update = new MessageMockUpdate('Test').buildOverwrite({
-        message: {
-          from: { id: 123_456_789, username: 'RegularUser', is_bot: false, first_name: '' },
-        },
-      });
+      await user.sendText('Test', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests).toHaveLength(0);
+      expect(chats.outgoing).toHaveLength(0);
     });
   });
 
@@ -163,47 +105,21 @@ describe('noChannelMessagesComposer', () => {
     });
 
     beforeEach(() => {
-      outgoingRequests.clear();
+      chats.clear();
     });
 
     it('should not delete message from a channel when feature is disabled', async () => {
-      const update = new MessagePrivateMockUpdate('Test').buildOverwrite({
-        message: {
-          from: { id: 136_817_688, username: 'Channel_Bot', is_bot: false, first_name: '' },
-          sender_chat: { id: 12_345, type: 'channel', title: 'Another Channel' },
-          reply_to_message: {
-            sender_chat: { id: 54_321, type: 'channel', title: 'Main Channel' },
-            message_id: 123,
-            date: Date.now(),
-            chat: superGroupMockUpdate.genericSuperGroup,
-            reply_to_message: undefined,
-          },
-        },
-      });
+      await senderChannel.postMessageTo(group, 'Test');
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests).toHaveLength(0);
+      expect(chats.outgoing).toHaveLength(0);
     });
 
     it('should not delete message from the same channel', async () => {
-      const update = new MessageMockUpdate('Test').buildOverwrite({
-        message: {
-          from: { id: 136_817_688, username: 'Channel_Bot', is_bot: false, first_name: '' },
-          sender_chat: { id: 54_321, type: 'channel', title: 'Main Channel' },
-          reply_to_message: {
-            sender_chat: { id: 54_321, type: 'channel', title: 'Main Channel' },
-            message_id: 123,
-            date: Date.now(),
-            chat: superGroupMockUpdate.genericSuperGroup,
-            reply_to_message: undefined,
-          },
-        },
+      await sameChannel.postMessageTo(group, 'Test', {
+        reply_to_message: { sender_chat: sameChannel.toTelegramChat(), message_id: 123 },
       });
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests).toHaveLength(0);
+      expect(chats.outgoing).toHaveLength(0);
     });
   });
 });

@@ -6,7 +6,7 @@
  */
 
 // eslint-disable-next-line global-require
-const { config: dotenvConfig } = require('typed-dotenv') as { config: () => unknown };
+const { config: dotenvConfig } = require('dotenv') as { config: () => unknown };
 // eslint-disable-next-line global-require
 const utility = require('node:util') as Record<string, unknown>;
 

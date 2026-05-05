@@ -1,3 +1,5 @@
+import type { Chats, Supergroup, User } from '@grammyjs/testing';
+import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
 
 import { getBeforeAnyComposer } from '@bot/composers/before-any.composer';
@@ -10,18 +12,16 @@ import { parseText } from '@bot/middleware/parse-text.middleware';
 import { stateMiddleware } from '@bot/middleware/state.middleware';
 import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
 
-import type { OutgoingRequests } from '@testing/outgoing-requests';
-import type { ApiResponses } from '@testing/prepare';
-import { prepareBotForTesting } from '@testing/prepare';
-import { mockChatSession, mockState } from '@testing/testing-main';
-import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
-
 import type { GrammyContext } from '@app-types/context';
+
+import { mockChatSession, mockState } from '@test-helpers/session-mocks';
 
 // eslint-disable-next-line vitest/no-mocks-import
 import { realSwindlerMessage } from '../../__mocks__/bot.mocks';
 
-let outgoingRequests: OutgoingRequests;
+let chats: Chats<GrammyContext>;
+let user: User<GrammyContext>;
+let group: Supergroup<GrammyContext>;
 
 const { beforeAnyComposer } = getBeforeAnyComposer();
 const { noCardsComposer } = getNoCardsComposer();
@@ -35,20 +35,7 @@ const { chatSession, mockChatSessionMiddleware } = mockChatSession({
 
 const { state, mockStateMiddleware } = mockState({});
 
-const apiResponses: ApiResponses = {
-  getChatMember: {
-    status: 'creator',
-  },
-  getChat: {
-    invite_link: '',
-  },
-};
-
 describe('admin-check-notify', () => {
-  beforeEach(() => {
-    outgoingRequests.clear();
-  });
-
   beforeAll(async () => {
     bot.use(i18n);
     bot.use(mockChatSessionMiddleware);
@@ -61,43 +48,51 @@ describe('admin-check-notify', () => {
     bot.use(parseCards);
     bot.use(onlyNotAdmin);
     bot.use(noCardsComposer);
-    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot, apiResponses);
+
+    ({ chats } = await prepareBot<GrammyContext>(bot));
+
+    user = chats.newUser();
+    group = chats.newSupergroup();
+    group.own(user);
   }, 5000);
+
+  beforeEach(() => {
+    chats.clear();
+    state.isDeleted = false;
+    chatSession.chatSettings.enableAdminCheck = false;
+  });
 
   it('should remove a card message for admin if admin check enabled', async () => {
     chatSession.chatSettings.enableAdminCheck = true;
-    const update = new MessageMockUpdate('4111 1111 1111 1111').build();
+    await user.sendText('4111 1111 1111 1111', { chat: group });
 
-    await bot.handleUpdate(update);
-    const expectedMethods = outgoingRequests.buildMethods(['getChatMember', 'deleteMessage', 'getChat', 'sendMessage', 'sendMessage']);
-    const actualMethods = outgoingRequests.getMethods();
+    const expectedMethods = chats.outgoing.buildMethods(['getChatMember', 'deleteMessage', 'getChat', 'sendMessage', 'sendMessage']);
+    const actualMethods = chats.outgoing.getMethods();
 
     expect(expectedMethods).toEqual(actualMethods);
-    expect(outgoingRequests.length).toEqual(5);
+    expect(chats.outgoing.length).toEqual(5);
   });
 
   it('should not remove a card message for admin if admin check disabled', async () => {
     chatSession.chatSettings.enableAdminCheck = false;
-    const update = new MessageMockUpdate('4111 1111 1111 1111').build();
+    await user.sendText('4111 1111 1111 1111', { chat: group });
 
-    await bot.handleUpdate(update);
-    const expectedMethods = outgoingRequests.buildMethods(['getChatMember']);
-    const actualMethods = outgoingRequests.getMethods();
+    const expectedMethods = chats.outgoing.buildMethods(['getChatMember']);
+    const actualMethods = chats.outgoing.getMethods();
 
     expect(expectedMethods).toEqual(actualMethods);
-    expect(outgoingRequests.length).toEqual(1);
+    expect(chats.outgoing.length).toEqual(1);
   });
 
   it('should notify admin in case if admin swindler message deleted', async () => {
     chatSession.isCheckAdminNotified = false;
     state.isDeleted = true;
-    const update = new MessageMockUpdate(realSwindlerMessage).build();
+    await user.sendText(realSwindlerMessage, { chat: group });
 
-    await bot.handleUpdate(update);
-    const expectedMethods = outgoingRequests.buildMethods(['getChatMember', 'sendMessage']);
-    const actualMethods = outgoingRequests.getMethods();
+    const expectedMethods = chats.outgoing.buildMethods(['getChatMember', 'sendMessage']);
+    const actualMethods = chats.outgoing.getMethods();
 
     expect(actualMethods).toEqual(expectedMethods);
-    expect(outgoingRequests.length).toEqual(2);
+    expect(chats.outgoing.length).toEqual(2);
   });
 });

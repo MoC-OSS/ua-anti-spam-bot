@@ -1,18 +1,24 @@
+import type { Chats, User } from '@grammyjs/testing';
+import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
 
 import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
-
-import type { OutgoingRequests } from '@testing/outgoing-requests';
-import { prepareBotForTesting } from '@testing/prepare';
-import { MessagePrivateMockUpdate } from '@testing/updates/message-private-mock.update';
 
 import type { GrammyContext } from '@app-types/context';
 
 import { sleep } from '@utils/generic.util';
 
-let outgoingRequests: OutgoingRequests;
+let chats: Chats<GrammyContext>;
+let user: User<GrammyContext>;
 let bot: Bot<GrammyContext>;
+
 const customPluginCallback = vi.fn(() => Promise.resolve());
+
+const mockSendMessageResponse = {
+  message_id: 10_000,
+  date: Math.floor(Date.now() / 1000),
+  chat: { id: 1_111_111, type: 'private' as const, first_name: 'Mock' },
+};
 
 describe('selfDestructedReply', () => {
   describe('default plugin', () => {
@@ -22,46 +28,37 @@ describe('selfDestructedReply', () => {
 
       bot.on(':text', (context) => context.replyWithSelfDestructed('test'));
 
-      const update = new MessagePrivateMockUpdate('test');
-
-      outgoingRequests = await prepareBotForTesting<GrammyContext>(bot, {
-        sendMessage: {
-          chat: update.genericPrivateChat,
-          message_id: update.genericUpdateId,
+      ({ chats } = await prepareBot<GrammyContext>(bot, {
+        responses: {
+          sendMessage: mockSendMessageResponse,
         },
-      });
+      }));
+
+      user = chats.newUser();
     }, 5000);
 
     beforeEach(() => {
-      outgoingRequests.clear();
+      chats.clear();
     });
 
     it('should delete message after specified time', async () => {
-      const update = new MessagePrivateMockUpdate('test').build();
+      await user.sendText('test');
 
-      await bot.handleUpdate(update);
-
-      // We wait for event loop to resolve the previous request
       await sleep(0);
 
-      const [sendMessageRequest, deleteMessageRequest] = outgoingRequests.getTwoLast<'sendMessage', 'deleteMessage'>();
+      const [sendMessageRequest, deleteMessageRequest] = chats.outgoing.getTwoLast<'sendMessage', 'deleteMessage'>();
 
-      expect(outgoingRequests.length).toEqual(2);
+      expect(chats.outgoing.length).toEqual(2);
       expect(sendMessageRequest?.method).toEqual('sendMessage');
       expect(deleteMessageRequest?.method).toEqual('deleteMessage');
     });
 
     it('should not delete immediately', async () => {
-      const update = new MessagePrivateMockUpdate('test').build();
+      await user.sendText('test');
 
-      await bot.handleUpdate(update);
+      const sendMessageRequest = chats.outgoing.getLast<'sendMessage'>();
 
-      // We don't wait so there are only 1 request should be
-      // await sleep(0);
-
-      const sendMessageRequest = outgoingRequests.getLast<'sendMessage'>();
-
-      expect(outgoingRequests.length).toEqual(1);
+      expect(chats.outgoing.length).toEqual(1);
       expect(sendMessageRequest?.method).toEqual('sendMessage');
     });
   });
@@ -73,25 +70,22 @@ describe('selfDestructedReply', () => {
 
       bot.on(':text', (context) => context.replyWithSelfDestructed('test'));
 
-      const update = new MessagePrivateMockUpdate('test');
-
-      outgoingRequests = await prepareBotForTesting<GrammyContext>(bot, {
-        sendMessage: {
-          chat: update.genericPrivateChat,
-          message_id: update.genericUpdateId,
+      ({ chats } = await prepareBot<GrammyContext>(bot, {
+        responses: {
+          sendMessage: mockSendMessageResponse,
         },
-      });
+      }));
+
+      user = chats.newUser();
     }, 5000);
 
     it('should call custom callback if passed and dont call extra requests', async () => {
-      const update = new MessagePrivateMockUpdate('test').build();
-
-      await bot.handleUpdate(update);
+      await user.sendText('test');
       await sleep(0);
 
-      const sendMessageRequest = outgoingRequests.getLast<'sendMessage'>();
+      const sendMessageRequest = chats.outgoing.getLast<'sendMessage'>();
 
-      expect(outgoingRequests.length).toEqual(1);
+      expect(chats.outgoing.length).toEqual(1);
       expect(sendMessageRequest?.method).toEqual('sendMessage');
       expect(customPluginCallback).toHaveBeenCalled();
     });

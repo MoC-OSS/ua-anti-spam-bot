@@ -1,3 +1,5 @@
+import type { Chats, Supergroup, User } from '@grammyjs/testing';
+import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
 
 import axios from 'axios';
@@ -7,14 +9,11 @@ import { i18n } from '@bot/i18n';
 import { stateMiddleware } from '@bot/middleware/state.middleware';
 import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
 
-import type { OutgoingRequests } from '@testing/outgoing-requests';
-import { prepareBotForTesting } from '@testing/prepare';
-import { mockChatSession } from '@testing/testing-main';
-import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
-
 import type { GrammyContext } from '@app-types/context';
 import { ImageType } from '@app-types/image';
 import type { NsfwTensorPositiveResult } from '@app-types/nsfw';
+
+import { mockChatSession } from '@test-helpers/session-mocks';
 
 import { handleError } from '@utils/error-handler.util';
 
@@ -172,7 +171,9 @@ const testAnimationState = {
 // Bot setup
 // ---------------------------------------------------------------------------
 
-let outgoingRequests: OutgoingRequests;
+let chats: Chats<GrammyContext>;
+let user: User<GrammyContext>;
+let group: Supergroup<GrammyContext>;
 let photoState: unknown;
 
 const bot = new Bot<GrammyContext>('mock');
@@ -205,13 +206,14 @@ describe('nsfwFilterComposer', () => {
 
     bot.use(nsfwFilterComposer);
 
-    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot, {
-      getChat: { invite_link: '' },
-    });
+    ({ chats } = await prepareBot<GrammyContext>(bot));
+
+    user = chats.newUser();
+    group = chats.newSupergroup();
   }, 5000);
 
   beforeEach(() => {
-    outgoingRequests.clear();
+    chats.clear();
     mockPredictVideo.mockClear();
     mockPredictVideo.mockResolvedValue({ isSpam: false, predictions: [] });
     vi.mocked(handleError).mockClear();
@@ -226,11 +228,9 @@ describe('nsfwFilterComposer', () => {
   // -------------------------------------------------------------------------
 
   it('should call next() without any processing when photo state is undefined', async () => {
-    const update = new MessageMockUpdate('test').build();
+    await user.sendText('test', { chat: group });
 
-    await bot.handleUpdate(update);
-
-    expect(outgoingRequests.length).toEqual(0);
+    expect(chats.outgoing.length).toEqual(0);
     expect(mockPredictVideo).not.toHaveBeenCalled();
   });
 
@@ -244,11 +244,9 @@ describe('nsfwFilterComposer', () => {
     });
 
     it('should call next() without prediction when parsedPhoto.file is null', async () => {
-      const update = new MessageMockUpdate('test').build();
+      await user.sendText('test', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.length).toEqual(0);
+      expect(chats.outgoing.length).toEqual(0);
       expect(mockPredictVideo).not.toHaveBeenCalled();
     });
   });
@@ -264,11 +262,9 @@ describe('nsfwFilterComposer', () => {
     });
 
     it('should call next() without prediction when fileFrames is empty', async () => {
-      const update = new MessageMockUpdate('test').build();
+      await user.sendText('test', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.length).toEqual(0);
+      expect(chats.outgoing.length).toEqual(0);
       expect(mockPredictVideo).not.toHaveBeenCalled();
     });
   });
@@ -283,29 +279,23 @@ describe('nsfwFilterComposer', () => {
     });
 
     it('should call nsfwTensorService.predictVideo with the image buffer', async () => {
-      const update = new MessageMockUpdate('test').build();
-
-      await bot.handleUpdate(update);
+      await user.sendText('test', { chat: group });
 
       expect(mockPredictVideo).toHaveBeenCalledWith([testBuffer]);
     });
 
     it('should not trigger any API calls when isSpam is false', async () => {
-      const update = new MessageMockUpdate('test').build();
+      await user.sendText('test', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.length).toEqual(0);
+      expect(chats.outgoing.length).toEqual(0);
     });
 
     it('should deleteMessage, log photo, and reply when isSpam is true and disableDeleteMessage=false', async () => {
       mockPredictVideo.mockResolvedValueOnce(positiveResult);
 
-      const update = new MessageMockUpdate('test').build();
+      await user.sendText('test', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      const methods = outgoingRequests.getMethods();
+      const methods = chats.outgoing.getMethods();
 
       expect(methods).toContain('deleteMessage');
       expect(methods).toContain('sendPhoto'); // saveNsfwMessage: PHOTO type logs to logsChat
@@ -317,11 +307,9 @@ describe('nsfwFilterComposer', () => {
       chatSession.chatSettings.disableDeleteMessage = true;
       mockPredictVideo.mockResolvedValueOnce(positiveResult);
 
-      const update = new MessageMockUpdate('test').build();
+      await user.sendText('test', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      const methods = outgoingRequests.getMethods();
+      const methods = chats.outgoing.getMethods();
 
       expect(methods).toContain('deleteMessage');
       expect(methods).toContain('sendPhoto');
@@ -344,9 +332,7 @@ describe('nsfwFilterComposer', () => {
     });
 
     it('should call axios.post and NOT call nsfwTensorService when USE_SERVER is true', async () => {
-      const update = new MessageMockUpdate('test').build();
-
-      await bot.handleUpdate(update);
+      await user.sendText('test', { chat: group });
 
       expect(vi.mocked(axios.post)).toHaveBeenCalled();
       expect(mockPredictVideo).not.toHaveBeenCalled();
@@ -357,11 +343,9 @@ describe('nsfwFilterComposer', () => {
         data: { result: positiveResult },
       });
 
-      const update = new MessageMockUpdate('test').build();
+      await user.sendText('test', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.getMethods()).toContain('deleteMessage');
+      expect(chats.outgoing.getMethods()).toContain('deleteMessage');
     });
   });
 
@@ -380,9 +364,7 @@ describe('nsfwFilterComposer', () => {
       // First call (inside try) throws; second call (fallback in catch) returns non-spam
       mockPredictVideo.mockRejectedValueOnce(testError);
 
-      const update = new MessageMockUpdate('test').build();
-
-      await bot.handleUpdate(update);
+      await user.sendText('test', { chat: group });
 
       expect(vi.mocked(handleError)).toHaveBeenCalledWith(testError, 'API_DOWN');
       // predictVideo should have been called twice: once in try (throws) and once as fallback
@@ -395,12 +377,10 @@ describe('nsfwFilterComposer', () => {
       mockPredictVideo.mockRejectedValueOnce(testError);
       mockPredictVideo.mockResolvedValueOnce(positiveResult);
 
-      const update = new MessageMockUpdate('test').build();
-
-      await bot.handleUpdate(update);
+      await user.sendText('test', { chat: group });
 
       expect(vi.mocked(handleError)).toHaveBeenCalledWith(testError, 'API_DOWN');
-      expect(outgoingRequests.getMethods()).toContain('deleteMessage');
+      expect(chats.outgoing.getMethods()).toContain('deleteMessage');
     });
   });
 
@@ -414,9 +394,7 @@ describe('nsfwFilterComposer', () => {
     });
 
     it('should pass fileFrames as image buffers to nsfwTensorService.predictVideo', async () => {
-      const update = new MessageMockUpdate('test').build();
-
-      await bot.handleUpdate(update);
+      await user.sendText('test', { chat: group });
 
       expect(mockPredictVideo).toHaveBeenCalledWith(testVideoStateWithFrames.fileFrames);
     });
@@ -424,11 +402,9 @@ describe('nsfwFilterComposer', () => {
     it('should set nsfwResult.reason to "frame" and call sendVideo for VIDEO type when spam', async () => {
       mockPredictVideo.mockResolvedValueOnce(positiveResult);
 
-      const update = new MessageMockUpdate('test').build();
+      await user.sendText('test', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      const methods = outgoingRequests.getMethods();
+      const methods = chats.outgoing.getMethods();
 
       expect(methods).toContain('deleteMessage');
       // saveNsfwMessage sends VIDEO type → sendVideo
@@ -446,9 +422,7 @@ describe('nsfwFilterComposer', () => {
     });
 
     it('should pass single file buffer to nsfwTensorService.predictVideo', async () => {
-      const update = new MessageMockUpdate('test').build();
-
-      await bot.handleUpdate(update);
+      await user.sendText('test', { chat: group });
 
       expect(mockPredictVideo).toHaveBeenCalledWith([testBuffer]);
     });
@@ -456,11 +430,9 @@ describe('nsfwFilterComposer', () => {
     it('should call sendPhoto in saveNsfwMessage (PHOTO type, reason="preview")', async () => {
       mockPredictVideo.mockResolvedValueOnce(positiveResult);
 
-      const update = new MessageMockUpdate('test').build();
+      await user.sendText('test', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.getMethods()).toContain('sendPhoto');
+      expect(chats.outgoing.getMethods()).toContain('sendPhoto');
     });
   });
 
@@ -476,17 +448,17 @@ describe('nsfwFilterComposer', () => {
     it('PHOTO type → calls sendPhoto to logsChat', async () => {
       photoState = testPhotoState;
 
-      await bot.handleUpdate(new MessageMockUpdate('test').build());
+      await user.sendText('test', { chat: group });
 
-      expect(outgoingRequests.getMethods()).toContain('sendPhoto');
+      expect(chats.outgoing.getMethods()).toContain('sendPhoto');
     });
 
     it('STICKER type → calls sendSticker + sendMessage to logsChat', async () => {
       photoState = testStickerState;
 
-      await bot.handleUpdate(new MessageMockUpdate('test').build());
+      await user.sendText('test', { chat: group });
 
-      const methods = outgoingRequests.getMethods();
+      const methods = chats.outgoing.getMethods();
 
       expect(methods).toContain('sendSticker');
       expect(methods).toContain('sendMessage');
@@ -495,9 +467,9 @@ describe('nsfwFilterComposer', () => {
     it('VIDEO_STICKER type → calls sendSticker + sendMessage to logsChat', async () => {
       photoState = testVideoStickerState;
 
-      await bot.handleUpdate(new MessageMockUpdate('test').build());
+      await user.sendText('test', { chat: group });
 
-      const methods = outgoingRequests.getMethods();
+      const methods = chats.outgoing.getMethods();
 
       expect(methods).toContain('sendSticker');
       expect(methods).toContain('sendMessage');
@@ -506,25 +478,25 @@ describe('nsfwFilterComposer', () => {
     it('VIDEO type (with frames) → calls sendVideo to logsChat', async () => {
       photoState = testVideoStateWithFrames;
 
-      await bot.handleUpdate(new MessageMockUpdate('test').build());
+      await user.sendText('test', { chat: group });
 
-      expect(outgoingRequests.getMethods()).toContain('sendVideo');
+      expect(chats.outgoing.getMethods()).toContain('sendVideo');
     });
 
     it('ANIMATION type → calls sendVideo to logsChat', async () => {
       photoState = testAnimationState;
 
-      await bot.handleUpdate(new MessageMockUpdate('test').build());
+      await user.sendText('test', { chat: group });
 
-      expect(outgoingRequests.getMethods()).toContain('sendVideo');
+      expect(chats.outgoing.getMethods()).toContain('sendVideo');
     });
 
     it('VIDEO_NOTE type → calls sendVideoNote + sendMessage to logsChat', async () => {
       photoState = testVideoNoteState;
 
-      await bot.handleUpdate(new MessageMockUpdate('test').build());
+      await user.sendText('test', { chat: group });
 
-      const methods = outgoingRequests.getMethods();
+      const methods = chats.outgoing.getMethods();
 
       expect(methods).toContain('sendVideoNote');
       expect(methods).toContain('sendMessage');

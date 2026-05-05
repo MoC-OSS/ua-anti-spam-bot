@@ -1,3 +1,5 @@
+import type { Chats, User } from '@grammyjs/testing';
+import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
 
 import { getMessagesRegisterComposer } from '@bot/composers/messages.composer';
@@ -7,14 +9,13 @@ import { parseCards } from '@bot/middleware/parse-cards.middleware';
 import { stateMiddleware } from '@bot/middleware/state.middleware';
 import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
 
-import type { OutgoingRequests } from '@testing/outgoing-requests';
-import { prepareBotForTesting } from '@testing/prepare';
-import { mockChatSession } from '@testing/testing-main';
-import { MessagePrivateMockUpdate } from '@testing/updates/message-private-mock.update';
-
 import type { GrammyContext } from '@app-types/context';
 
-let outgoingRequests: OutgoingRequests;
+import { mockChatSession } from './helpers/session-mocks';
+
+let chats: Chats<GrammyContext>;
+let user: User<GrammyContext>;
+
 const bot = new Bot<GrammyContext>('mock');
 
 const { mockChatSessionMiddleware } = mockChatSession({
@@ -36,54 +37,40 @@ describe('edit message test', () => {
     bot.use(mockChatSessionMiddleware);
     bot.use(messagesComposer);
 
-    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot, {
-      getChat: {
-        invite_link: '',
-      },
-    });
+    ({ chats } = await prepareBot<GrammyContext>(bot));
+
+    user = chats.newUser();
   }, 5000);
 
   beforeEach(() => {
-    outgoingRequests.clear();
+    chats.clear();
   });
 
   it('should remove a card message', async () => {
-    const update = new MessagePrivateMockUpdate('4111 1111 1111 1111').build();
+    await user.sendText('4111 1111 1111 1111');
 
-    await bot.handleUpdate(update);
-
-    const expectedMethods = outgoingRequests.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']);
-
-    const actualMethods = outgoingRequests.getMethods();
+    const expectedMethods = chats.outgoing.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']);
+    const actualMethods = chats.outgoing.getMethods();
 
     expect(expectedMethods).toEqual(actualMethods);
   });
 
   it('should not remove a card message', async () => {
-    const update = new MessagePrivateMockUpdate('not a card').build();
+    await user.sendText('not a card');
 
-    await bot.handleUpdate(update);
-
-    const expectedMethods = outgoingRequests.buildMethods([]);
-
-    const actualMethods = outgoingRequests.getMethods();
+    const expectedMethods = chats.outgoing.buildMethods([]);
+    const actualMethods = chats.outgoing.getMethods();
 
     expect(expectedMethods).toEqual(actualMethods);
   });
 
   it('should remove the message if it has been edited', async () => {
-    const updateSendMessage = new MessagePrivateMockUpdate('not a card').build();
+    const message = await user.sendText('not a card');
 
-    const updateEditMessage = new MessagePrivateMockUpdate('').buildOverwrite({
-      edited_message: { ...updateSendMessage.message, text: '4111 1111 1111 1111', edit_date: Date.now() },
-    });
+    await user.editMessage(message.message_id, '4111 1111 1111 1111');
 
-    await bot.handleUpdate(updateSendMessage);
-    await bot.handleUpdate(updateEditMessage);
-
-    const expectedMethods = outgoingRequests.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']);
-
-    const actualMethods = outgoingRequests.getMethods();
+    const expectedMethods = chats.outgoing.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']);
+    const actualMethods = chats.outgoing.getMethods();
 
     expect(expectedMethods).toEqual(actualMethods);
   });

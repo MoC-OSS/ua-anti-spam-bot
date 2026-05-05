@@ -1,3 +1,5 @@
+import type { Chats, Supergroup, User } from '@grammyjs/testing';
+import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
 
 import { getNoForwardsComposer } from '@bot/composers/messages/no-forward.composer';
@@ -5,24 +7,20 @@ import { i18n } from '@bot/i18n';
 import { stateMiddleware } from '@bot/middleware/state.middleware';
 import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
 
-import type { OutgoingRequests } from '@testing/outgoing-requests';
-import { prepareBotForTesting } from '@testing/prepare';
-import { mockChatSession } from '@testing/testing-main';
-import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
-
 import type { GrammyContext } from '@app-types/context';
 
-const forwardedUpdateOverwrite = {
-  message: {
-    forward_origin: {
-      type: 'user' as const,
-      sender_user: { id: 99_999, first_name: 'Forwarder', is_bot: false },
-      date: 1_000_000,
-    },
-  },
+import { mockChatSession } from '@test-helpers/session-mocks';
+
+const forwardOrigin = {
+  type: 'user' as const,
+  sender_user: { id: 99_999, first_name: 'Forwarder', is_bot: false },
+  date: 1_000_000,
 };
 
-let outgoingRequests: OutgoingRequests;
+let chats: Chats<GrammyContext>;
+let user: User<GrammyContext>;
+let group: Supergroup<GrammyContext>;
+
 const { noForwardsComposer } = getNoForwardsComposer();
 const bot = new Bot<GrammyContext>('mock');
 
@@ -41,7 +39,9 @@ describe('noForwardsComposer', () => {
     bot.use(mockChatSessionMiddleware);
     bot.use(noForwardsComposer);
 
-    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot, { getChat: { invite_link: '' } });
+    ({ chats } = await prepareBot<GrammyContext>(bot));
+    user = chats.newUser();
+    group = chats.newSupergroup();
   }, 5000);
 
   describe('with enableDeleteForwards enabled', () => {
@@ -50,35 +50,31 @@ describe('noForwardsComposer', () => {
     });
 
     beforeEach(() => {
-      outgoingRequests.clear();
+      chats.clear();
     });
 
     it('should delete a forwarded message and send reply when disableDeleteMessage is false', async () => {
       chatSession.chatSettings.disableDeleteMessage = false;
-      const update = new MessageMockUpdate('Forwarded content').buildOverwrite(forwardedUpdateOverwrite);
+      await user.sendForwarded('Forwarded content', { forwardOrigin, chat: group });
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.getMethods()).toContain('deleteMessage');
-      expect(outgoingRequests.getMethods()).toContain('sendMessage');
+      expect(chats.outgoing.getMethods()).toContain('deleteMessage');
+      expect(chats.outgoing.getMethods()).toContain('sendMessage');
+      expect(chats.deletionsFor(group).length).toEqual(1);
     });
 
     it('should delete a forwarded message but NOT send reply when disableDeleteMessage is true', async () => {
       chatSession.chatSettings.disableDeleteMessage = true;
-      const update = new MessageMockUpdate('Forwarded content').buildOverwrite(forwardedUpdateOverwrite);
+      await user.sendForwarded('Forwarded content', { forwardOrigin, chat: group });
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.getMethods()).toContain('deleteMessage');
-      expect(outgoingRequests.getMethods()).not.toContain('sendMessage');
+      expect(chats.outgoing.getMethods()).toContain('deleteMessage');
+      expect(chats.outgoing.getMethods()).not.toContain('sendMessage');
+      expect(chats.deletionsFor(group).length).toEqual(1);
     });
 
     it('should not delete a non-forwarded message', async () => {
-      const update = new MessageMockUpdate('Normal message').build();
+      await user.sendText('Normal message', { chat: group });
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.getMethods()).not.toContain('deleteMessage');
+      expect(chats.outgoing.getMethods()).not.toContain('deleteMessage');
     });
   });
 
@@ -88,15 +84,13 @@ describe('noForwardsComposer', () => {
     });
 
     beforeEach(() => {
-      outgoingRequests.clear();
+      chats.clear();
     });
 
     it('should not delete a forwarded message', async () => {
-      const update = new MessageMockUpdate('Forwarded content').buildOverwrite(forwardedUpdateOverwrite);
+      await user.sendForwarded('Forwarded content', { forwardOrigin, chat: group });
 
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.getMethods()).not.toContain('deleteMessage');
+      expect(chats.outgoing.getMethods()).not.toContain('deleteMessage');
     });
   });
 });

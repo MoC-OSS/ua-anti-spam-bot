@@ -1,7 +1,7 @@
-import { formatStateIntoAccusative, joinUkrainianConjunctions } from '@utils/generic.util';
+import { formatRegionNameToLocative, joinUkrainianConjunctions } from '@utils/generic.util';
 
-describe('formatStateIntoAccusative', () => {
-  const states = [
+describe('formatRegionNameToLocative', () => {
+  const oblasts = [
     'Вінницька область',
     'Волинська область',
     'Дніпропетровська область',
@@ -29,7 +29,7 @@ describe('formatStateIntoAccusative', () => {
     'м. Київ',
   ];
 
-  const expectedStates = [
+  const expectedOblasts = [
     'Вінницькій області',
     'Волинській області',
     'Дніпропетровській області',
@@ -57,10 +57,22 @@ describe('formatStateIntoAccusative', () => {
     'м. Київ',
   ];
 
-  it('should format states right', () => {
-    const newStates = states.map((state) => formatStateIntoAccusative(state));
+  it('should format oblasts correctly', () => {
+    const result = oblasts.map((name) => formatRegionNameToLocative(name));
 
-    expect(newStates).toEqual(expectedStates);
+    expect(result).toEqual(expectedOblasts);
+  });
+
+  it('should format district names correctly', () => {
+    expect(formatRegionNameToLocative('Львівський район')).toBe('Львівському районі');
+  });
+
+  it('should format community names correctly', () => {
+    expect(formatRegionNameToLocative('Львівська громада')).toBe('Львівській громаді');
+  });
+
+  it('should return unrecognized names unchanged', () => {
+    expect(formatRegionNameToLocative('м. Київ')).toBe('м. Київ');
   });
 });
 

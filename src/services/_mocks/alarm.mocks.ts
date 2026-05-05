@@ -1,6 +1,6 @@
 import type { ChatFullInfo } from 'grammy/types';
 
-import type { AlarmNotification } from '@app-types/alarm';
+import type { AlarmEvent } from '@app-types/alarm';
 import type { ChatSessionData } from '@app-types/session';
 
 import { getRandomItem } from '@utils/generic.util';
@@ -9,25 +9,23 @@ import { generateRandomBoolean, generateRandomNumber, generateRandomString } fro
 
 export const testId = 1_234_567_890;
 
-export const testState = 'Львівська область';
+export const testRegionId = '15';
 
-export const generateTestState = (state = testState) => ({
-  id: generateRandomNumber(3),
-  name: state,
-  name_en: generateRandomBoolean(),
-  alert: false,
-  changed: generateRandomString(10),
-});
+export const testRegionName = 'Львівська область';
 
-export const getAlarmMock = (alert = false, state = testState): AlarmNotification => ({
-  state: {
-    alert,
-    id: generateRandomNumber(2),
-    name: state,
-    name_en: generateRandomString(10),
-    changed: new Date(),
-  },
-  notification_id: generateRandomString(10),
+/**
+ * Creates a mock {@link AlarmEvent} for testing.
+ * @param alert - Whether the alarm is active.
+ * @param regionId - The Stfalcon region identifier.
+ * @param regionName - The Ukrainian region name.
+ * @returns A mock alarm event object.
+ */
+export const getAlarmEventMock = (alert = false, regionId = testRegionId, regionName = testRegionName): AlarmEvent => ({
+  regionId,
+  regionName,
+  alert,
+  alertType: alert ? 'AIR' : null,
+  lastUpdate: new Date().toISOString(),
 });
 
 export const chartMock: ChatFullInfo = {
@@ -57,13 +55,13 @@ export const chartMock: ChatFullInfo = {
 
 /**
  * Generates a mock ChatSessionData object for testing alarm scenarios.
- * @param state - the region/state name for air-raid alert settings
+ * @param regionIds - the Stfalcon region identifiers for air-raid alert settings
  * @param disableChatWhileAirRaidAlert - whether to disable chat during alerts
  * @param notificationMessage - whether to send a notification message on alarm
  * @returns a mock ChatSessionData object
  */
 export function generateChatSessionData(
-  state = generateRandomString(10),
+  regionIds: string[] = [generateRandomString(3)],
   disableChatWhileAirRaidAlert = true,
   notificationMessage = true,
 ): ChatSessionData {
@@ -80,8 +78,7 @@ export function generateChatSessionData(
       disableChatWhileAirRaidAlert,
       airRaidAlertSettings: {
         notificationMessage,
-        state,
-        pageNumber: generateRandomNumber(1),
+        regionIds,
       },
     },
     chatPermissions: {
@@ -109,28 +106,28 @@ export function generateChat(id: number, payload: ChatSessionData) {
 
 /**
  * Generates an array of mock chat sessions for testing alarm notification scenarios.
- * @param state - the region/state name used in alarm settings
+ * @param regionIds - the Stfalcon region identifiers used in alarm settings
  * @param disableChatWhileAirRaidAlertOn - number of chats with disableChatWhileAirRaidAlert enabled
  * @param notificationMessageOn - number of chats with notificationMessage enabled
  * @param bothOff - number of chats with both options disabled
  * @returns array of mock chat records covering all alarm setting combinations
  */
 export function generateMockSessions(
-  state = generateRandomString(10),
+  regionIds: string[] = [generateRandomString(3)],
   disableChatWhileAirRaidAlertOn = 3,
   notificationMessageOn = 3,
   bothOff = 3,
 ) {
   const disableChatWhileAirRaidAlertOnArray = Array.from({ length: disableChatWhileAirRaidAlertOn }, () =>
-    generateChat(generateRandomNumber(10), generateChatSessionData(state, true, false)),
+    generateChat(generateRandomNumber(10), generateChatSessionData(regionIds, true, false)),
   );
 
   const notificationMessageOnArray = Array.from({ length: notificationMessageOn }, () =>
-    generateChat(generateRandomNumber(10), generateChatSessionData(state, false, true)),
+    generateChat(generateRandomNumber(10), generateChatSessionData(regionIds, false, true)),
   );
 
   const bothOffArray = Array.from({ length: bothOff }, () =>
-    generateChat(generateRandomNumber(10), generateChatSessionData(state, false, false)),
+    generateChat(generateRandomNumber(10), generateChatSessionData(regionIds, false, false)),
   );
 
   return [...disableChatWhileAirRaidAlertOnArray, ...notificationMessageOnArray, ...bothOffArray];

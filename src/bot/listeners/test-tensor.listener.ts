@@ -434,7 +434,6 @@ export class TestTensorListener {
        */
       context.api.config.use(throttler);
 
-      // eslint-disable-next-line sonarjs/different-types-comparison
       if (context.from?.id !== creatorId) {
         if (context.chat?.type !== 'supergroup') {
           await context.reply('В особистих не працюю 😝');

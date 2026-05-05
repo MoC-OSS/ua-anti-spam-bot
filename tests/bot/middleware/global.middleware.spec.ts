@@ -197,8 +197,7 @@ describe('GlobalMiddleware', () => {
 
       await globalMiddleware.updateChatInfo(context);
       expect(context.chatSession.chatSettings.airRaidAlertSettings).toBeDefined();
-      expect(context.chatSession.chatSettings.airRaidAlertSettings.pageNumber).toBe(1);
-      expect(context.chatSession.chatSettings.airRaidAlertSettings.state).toBeNull();
+      expect(context.chatSession.chatSettings.airRaidAlertSettings.regionIds).toEqual([]);
       expect(context.chatSession.chatSettings.airRaidAlertSettings.notificationMessage).toBe(false);
     });
 

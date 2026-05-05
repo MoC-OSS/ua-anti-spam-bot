@@ -362,19 +362,14 @@ describe('MyFeatureService', () => {
 });
 ```
 
-e2e tests (`tests/bot.spec.ts`):
+e2e tests (`tests/bot.spec.ts`) — `chats`, `user`, and `group` are already set up in the outer `beforeAll` via `prepareBot`:
 
 ```typescript
 it('should delete and notify on violation', async () => {
-  const mockMessage = new MessageMockUpdate({ text: 'violating content' });
-  await bot.handleUpdate(mockMessage.update);
+  await user.sendText('violating content', { chat: group });
 
-  expect(outgoingRequests.deleteMessage).toHaveBeenCalled();
-  expect(outgoingRequests.sendMessage).toHaveBeenCalledWith(
-    expect.any(Number),
-    expect.stringContaining('Your message was removed'),
-    expect.any(Object),
-  );
+  expect(chats.outgoing.getMethods()).toEqual(chats.outgoing.buildMethods(['deleteMessage', 'getChat', 'sendMessage', 'sendMessage']));
+  expect(chats.deletionsFor(group).length).toEqual(1);
 });
 ```
 

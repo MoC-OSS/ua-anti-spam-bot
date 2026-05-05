@@ -58,8 +58,7 @@ export class GlobalMiddleware {
     context.chatSession.chatTitle = telegramUtility.getChatTitle(context.chat);
 
     const defaultAirRaidAlertSettings: AirRaidAlertSettings = {
-      pageNumber: 1,
-      state: null,
+      regionIds: [],
       notificationMessage: false,
     };
 

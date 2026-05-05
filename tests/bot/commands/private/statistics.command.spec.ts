@@ -1,3 +1,5 @@
+import type { Chats, User } from '@grammyjs/testing';
+import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
 
 import { StatisticsCommand } from '@bot/commands/private/statistics.command';
@@ -5,12 +7,9 @@ import { getBeforeAnyComposer } from '@bot/composers/before-any.composer';
 import { i18n } from '@bot/i18n';
 import { stateMiddleware } from '@bot/middleware/state.middleware';
 
-import type { OutgoingRequests } from '@testing/outgoing-requests';
-import { prepareBotForTesting } from '@testing/prepare';
-import { mockChatSession } from '@testing/testing-main';
-import { MessagePrivateMockUpdate } from '@testing/updates/message-private-mock.update';
-
 import type { GrammyContext } from '@app-types/context';
+
+import { mockChatSession } from '@test-helpers/session-mocks';
 
 const { mockGetChatSessions, mockAppendToSheet } = vi.hoisted(() => ({
   mockGetChatSessions: vi.fn(),
@@ -88,21 +87,12 @@ const mockChatSessions = [
   },
 ];
 
-let outgoingRequests: OutgoingRequests;
+let chats: Chats<GrammyContext>;
+let user: User<GrammyContext>;
+
 const bot = new Bot<GrammyContext>('mock');
 const statsCommand = new StatisticsCommand();
 const { mockChatSessionMiddleware } = mockChatSession({});
-
-/**
- *
- */
-function getStatisticsCommandUpdate() {
-  return new MessagePrivateMockUpdate('/statistics').buildOverwrite({
-    message: {
-      entities: [{ offset: 0, length: '/statistics'.length, type: 'bot_command' }],
-    },
-  });
-}
 
 describe('StatisticsCommand', () => {
   beforeAll(async () => {
@@ -115,11 +105,12 @@ describe('StatisticsCommand', () => {
 
     bot.command('statistics', statsCommand.middleware());
 
-    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot);
+    ({ chats } = await prepareBot<GrammyContext>(bot));
+    user = chats.newUser();
   }, 5000);
 
   beforeEach(() => {
-    outgoingRequests.clear();
+    chats.clear();
     vi.clearAllMocks();
     mockGetChatSessions.mockResolvedValue(mockChatSessions);
     // eslint-disable-next-line unicorn/no-useless-undefined
@@ -129,16 +120,16 @@ describe('StatisticsCommand', () => {
   describe('middleware', () => {
     describe('positive cases', () => {
       it('should reply with statistics messages', async () => {
-        await bot.handleUpdate(getStatisticsCommandUpdate());
+        await user.sendCommand('/statistics');
 
-        const methods = outgoingRequests.getMethods();
+        const methods = chats.outgoing.getMethods();
 
         expect(methods).toContain('sendChatAction');
         expect(methods.filter((method) => method === 'sendMessage').length).toBeGreaterThanOrEqual(2);
       });
 
       it('should call appendToSheet with statistics data', async () => {
-        await bot.handleUpdate(getStatisticsCommandUpdate());
+        await user.sendCommand('/statistics');
 
         expect(mockAppendToSheet).toHaveBeenCalledTimes(1);
         const callArguments = mockAppendToSheet.mock.calls[0][0];
@@ -150,9 +141,9 @@ describe('StatisticsCommand', () => {
       it('should handle empty chat sessions', async () => {
         mockGetChatSessions.mockResolvedValue([]);
 
-        await bot.handleUpdate(getStatisticsCommandUpdate());
+        await user.sendCommand('/statistics');
 
-        expect(outgoingRequests.getMethods()).toContain('sendMessage');
+        expect(chats.outgoing.getMethods()).toContain('sendMessage');
       });
     });
 
@@ -160,11 +151,10 @@ describe('StatisticsCommand', () => {
       it('should send error messages when getChatSessions fails', async () => {
         mockGetChatSessions.mockRejectedValueOnce(new Error('Redis error'));
 
-        await bot.handleUpdate(getStatisticsCommandUpdate());
+        await user.sendCommand('/statistics');
 
-        const methods = outgoingRequests.getMethods();
+        const methods = chats.outgoing.getMethods();
 
-        // Even on error, should try to send error info
         expect(methods.filter((method) => method === 'sendMessage').length).toBeGreaterThan(0);
       });
     });

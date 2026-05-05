@@ -1,28 +1,24 @@
+import type { Channel, Chats, Supergroup, User } from '@grammyjs/testing';
+import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
 
 import { getBeforeAnyComposer } from '@bot/composers/before-any.composer';
 import { i18n } from '@bot/i18n';
 import { stateMiddleware } from '@bot/middleware/state.middleware';
 
-import type { OutgoingRequests } from '@testing/outgoing-requests';
-import type { ApiResponses } from '@testing/prepare';
-import { prepareBotForTesting } from '@testing/prepare';
-import { mockChatSession } from '@testing/testing-main';
-import { MyChatMemberMockUpdate } from '@testing/updates/my-chat-member-mock.update';
-
 import type { GrammyContext } from '@app-types/context';
 
-let outgoingRequests: OutgoingRequests;
+import { mockChatSession } from '@test-helpers/session-mocks';
+
+let chats: Chats<GrammyContext>;
+let triggerUser: User<GrammyContext>;
+let owner: User<GrammyContext>;
+let admin2: User<GrammyContext>;
+let group: Supergroup<GrammyContext>;
+let channel: Channel<GrammyContext>;
 
 const bot = new Bot<GrammyContext>('mock');
 const { chatSession, mockChatSessionMiddleware } = mockChatSession({});
-const mockUpdate = new MyChatMemberMockUpdate({ oldStatus: 'left', newStatus: 'member' });
-
-const chatAdmins = [mockUpdate.genericOwner, mockUpdate.genericAdmin];
-
-const apiResponses: ApiResponses = {
-  getChatAdministrators: chatAdmins,
-};
 
 describe('bot queries', () => {
   beforeAll(async () => {
@@ -33,11 +29,33 @@ describe('bot queries', () => {
     bot.use(mockChatSessionMiddleware);
     bot.use(beforeAnyComposer);
 
-    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot, apiResponses);
+    ({ chats } = await prepareBot<GrammyContext>(bot));
+
+    triggerUser = chats.newUser();
+
+    owner = chats.newUser({
+      id: 1_111_111,
+      first_name: 'GrammyMock FirstName',
+      last_name: 'GrammyMock LastName',
+      username: 'GrammyMock_Username',
+    });
+
+    admin2 = chats.newUser({
+      id: 1_111_112,
+      first_name: 'GrammyMock FirstName2',
+      last_name: 'GrammyMock LastName2',
+      username: 'GrammyMock_Username2',
+    });
+
+    group = chats.newSupergroup();
+    group.own(owner);
+    group.promote(admin2);
+
+    channel = chats.newChannel('GrammyMockChannel');
   }, 10_000);
 
   beforeEach(() => {
-    outgoingRequests.clear();
+    chats.clear();
     chatSession.botRemoved = false;
     chatSession.isBotAdmin = false;
     delete chatSession.botAdminDate;
@@ -46,9 +64,7 @@ describe('bot queries', () => {
   describe('botKickQuery', () => {
     describe('positive cases', () => {
       it('should mark bot as removed when status becomes left', async () => {
-        const update = new MyChatMemberMockUpdate({ oldStatus: 'member', newStatus: 'left' }).build();
-
-        await bot.handleUpdate(update);
+        await group.changeMemberStatus(triggerUser, { from: 'member', to: 'left' });
 
         expect(chatSession.botRemoved).toBe(true);
         expect(chatSession.isBotAdmin).toBeUndefined();
@@ -56,9 +72,7 @@ describe('bot queries', () => {
       });
 
       it('should mark bot as removed when status becomes kicked', async () => {
-        const update = new MyChatMemberMockUpdate({ oldStatus: 'administrator', newStatus: 'kicked' }).build();
-
-        await bot.handleUpdate(update);
+        await group.changeMemberStatus(triggerUser, { from: 'administrator', to: 'kicked' });
 
         expect(chatSession.botRemoved).toBe(true);
       });
@@ -66,9 +80,7 @@ describe('bot queries', () => {
 
     describe('negative cases', () => {
       it('should not mark as removed when new status is not left or kicked', async () => {
-        const update = new MyChatMemberMockUpdate({ oldStatus: 'left', newStatus: 'member' }).build();
-
-        await bot.handleUpdate(update);
+        await group.changeMemberStatus(triggerUser, { from: 'left', to: 'member' });
 
         expect(chatSession.botRemoved).toBe(false);
       });
@@ -79,34 +91,27 @@ describe('bot queries', () => {
     describe('positive cases', () => {
       it('should reset botRemoved and send a join message when bot is invited as member', async () => {
         chatSession.botRemoved = true;
-        const update = new MyChatMemberMockUpdate({ oldStatus: 'left', newStatus: 'member' }).build();
-
-        await bot.handleUpdate(update);
+        await group.changeMemberStatus(triggerUser, { from: 'left', to: 'member' });
 
         expect(chatSession.botRemoved).toBe(false);
-        expect(outgoingRequests.getMethods()).toContain('sendMessage');
+        expect(chats.outgoing.getMethods()).toContain('sendMessage');
       });
 
       it('should reset botRemoved and send a join message when bot is invited as admin', async () => {
         chatSession.botRemoved = true;
-        const update = new MyChatMemberMockUpdate({ oldStatus: 'kicked', newStatus: 'administrator', canDeleteMessages: true }).build();
-
-        await bot.handleUpdate(update);
+        await group.changeMemberStatus(triggerUser, { from: 'kicked', to: 'administrator', permissions: { can_delete_messages: true } });
 
         expect(chatSession.botRemoved).toBe(false);
-        expect(outgoingRequests.getMethods()).toContain('sendMessage');
+        expect(chats.outgoing.getMethods()).toContain('sendMessage');
       });
     });
 
     describe('negative cases', () => {
       it('should not send message when status did not change from left/kicked', async () => {
-        const update = new MyChatMemberMockUpdate({ oldStatus: 'member', newStatus: 'administrator' }).build();
+        await group.changeMemberStatus(triggerUser, { from: 'member', to: 'administrator' });
 
-        await bot.handleUpdate(update);
-
-        // botPromoteQuery fires when new status is administrator - may still send
+        // botPromoteQuery fires when new status is administrator — may still send
         // but botInviteQuery branch is NOT triggered (old status is not left/kicked)
-        // The invite path requires old = left/kicked AND new = member/administrator
         expect(chatSession.botRemoved).toBe(false);
       });
     });
@@ -115,37 +120,29 @@ describe('bot queries', () => {
   describe('botPromoteQuery', () => {
     describe('positive cases', () => {
       it('should set isBotAdmin and botAdminDate when promoted in a group', async () => {
-        const update = new MyChatMemberMockUpdate({ oldStatus: 'member', newStatus: 'administrator', canDeleteMessages: true }).build();
-
-        await bot.handleUpdate(update);
+        await group.changeMemberStatus(triggerUser, { from: 'member', to: 'administrator', permissions: { can_delete_messages: true } });
 
         expect(chatSession.isBotAdmin).toBe(true);
         expect(chatSession.botAdminDate).toBeDefined();
-        expect(outgoingRequests.getMethods()).toContain('sendMessage');
+        expect(chats.outgoing.getMethods()).toContain('sendMessage');
       });
 
       it('should send channel start message when promoted in a channel', async () => {
-        const update = new MyChatMemberMockUpdate({ oldStatus: 'member', newStatus: 'administrator', chatType: 'channel' }).build();
+        await channel.changeMemberStatus(triggerUser, { from: 'member', to: 'administrator' });
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.getMethods()).toContain('sendMessage');
+        expect(chats.outgoing.getMethods()).toContain('sendMessage');
       });
 
       it('should send no-delete message when promoted without delete permission', async () => {
-        const update = new MyChatMemberMockUpdate({ oldStatus: 'member', newStatus: 'administrator', canDeleteMessages: false }).build();
+        await group.changeMemberStatus(triggerUser, { from: 'member', to: 'administrator', permissions: { can_delete_messages: false } });
 
-        await bot.handleUpdate(update);
-
-        expect(outgoingRequests.getMethods()).toContain('sendMessage');
+        expect(chats.outgoing.getMethods()).toContain('sendMessage');
       });
     });
 
     describe('negative cases', () => {
       it('should not change session when new status is not administrator', async () => {
-        const update = new MyChatMemberMockUpdate({ oldStatus: 'left', newStatus: 'member' }).build();
-
-        await bot.handleUpdate(update);
+        await group.changeMemberStatus(triggerUser, { from: 'left', to: 'member' });
 
         expect(chatSession.isBotAdmin).toBe(false);
         expect(chatSession.botAdminDate).toBeUndefined();
@@ -158,22 +155,18 @@ describe('bot queries', () => {
       it('should clear admin session when demoted from administrator to member', async () => {
         chatSession.isBotAdmin = true;
         chatSession.botAdminDate = new Date();
-        const update = new MyChatMemberMockUpdate({ oldStatus: 'administrator', newStatus: 'member' }).build();
-
-        await bot.handleUpdate(update);
+        await group.changeMemberStatus(triggerUser, { from: 'administrator', to: 'member' });
 
         expect(chatSession.isBotAdmin).toBe(false);
         expect(chatSession.botAdminDate).toBeUndefined();
-        expect(outgoingRequests.getMethods()).toContain('sendMessage');
+        expect(chats.outgoing.getMethods()).toContain('sendMessage');
       });
     });
 
     describe('negative cases', () => {
       it('should not modify session when old status was not administrator', async () => {
         chatSession.isBotAdmin = true;
-        const update = new MyChatMemberMockUpdate({ oldStatus: 'member', newStatus: 'member' }).build();
-
-        await bot.handleUpdate(update);
+        await group.changeMemberStatus(triggerUser, { from: 'member', to: 'member' });
 
         expect(chatSession.isBotAdmin).toBe(true);
       });

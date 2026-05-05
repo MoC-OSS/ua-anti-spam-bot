@@ -54,20 +54,35 @@ export function truncateString(inputString: string, inputNumber: number) {
 }
 
 /**
- * Converts a Ukrainian oblast name from nominative to accusative grammatical case.
- * @param state - The oblast name in nominative case (e.g. "Київська область")
- * @returns The oblast name in accusative case, or the original string if not an oblast
+ * Converts a Ukrainian region name from nominative to locative grammatical case.
+ * Handles oblasts ("область" → "області"), districts ("район" → "районі"),
+ * and communities ("громада" → "громаді"). Other names are returned unchanged.
+ * @param regionName - The region name in nominative case (e.g. "Київська область")
+ * @returns The region name in locative case, or the original string if unrecognized
  */
-export function formatStateIntoAccusative(state: string) {
-  if (!state.includes('область')) {
-    return state;
+export function formatRegionNameToLocative(regionName: string) {
+  if (regionName.includes('область')) {
+    const [name] = regionName.split(' ');
+    const locativeName = name.replace('ька', 'ькій');
+
+    return `${locativeName} області`;
   }
 
-  const [stateName] = state.split(' ');
-  const accusativeStateName = stateName.replace('ька', 'ькій');
-  const accusativeStateType = 'області';
+  if (regionName.includes('район')) {
+    const [name] = regionName.split(' ');
+    const locativeName = name.replace('ький', 'ькому').replace('ський', 'ському');
 
-  return `${accusativeStateName} ${accusativeStateType}`;
+    return `${locativeName} районі`;
+  }
+
+  if (regionName.includes('громада')) {
+    const [name] = regionName.split(' ');
+    const locativeName = name.replace('ька', 'ькій').replace('ська', 'ській');
+
+    return `${locativeName} громаді`;
+  }
+
+  return regionName;
 }
 
 /**

@@ -39,12 +39,14 @@ vi.mock('@bot/i18n', () => ({
 
 vi.mock('@utils/generic.util', () => ({
   getRandomItem: vi.fn((array: unknown[]) => array[0]),
-  formatStateIntoAccusative: vi.fn((state: string) => `acc:${state}`),
+  formatRegionNameToLocative: vi.fn((regionName: string) => `loc:${regionName}`),
 }));
+
+const testRegionName = 'Київська область';
 
 const mockSettings = {
   airRaidAlertSettings: {
-    state: 'Київська',
+    regionIds: ['9'],
     notificationMessage: false,
   },
 } as any;
@@ -71,20 +73,20 @@ describe('alarm.message', () => {
   describe('getAlarmStartNotificationMessage', () => {
     describe('positive cases', () => {
       it('should return formatted start notification', () => {
-        const result = getAlarmStartNotificationMessage(mockSettings);
+        const result = getAlarmStartNotificationMessage(testRegionName);
 
         expect(typeof result).toBe('string');
         expect(result.length).toBeGreaterThan(0);
       });
 
       it('should include repeated flag when isRepeatedAlarm is true', () => {
-        const result = getAlarmStartNotificationMessage(mockSettings, true);
+        const result = getAlarmStartNotificationMessage(testRegionName, true);
 
         expect(result).toContain('yes');
       });
 
       it('should mark non-repeated alarm', () => {
-        const result = getAlarmStartNotificationMessage(mockSettings, false);
+        const result = getAlarmStartNotificationMessage(testRegionName, false);
 
         expect(result).toContain('no');
       });
@@ -96,7 +98,7 @@ describe('alarm.message', () => {
       it('should return formatted end notification (day, generic key)', () => {
         // Math.random = 0.1 → index = 1 ≤ ALARM_END_GENERIC_COUNT=4 → covers lines 68-70
         const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.1);
-        const result = alarmEndNotificationMessage(mockSettings);
+        const result = alarmEndNotificationMessage(testRegionName);
 
         randomSpy.mockRestore();
         expect(typeof result).toBe('string');
@@ -106,7 +108,7 @@ describe('alarm.message', () => {
       it('should return formatted end notification (day, day key)', () => {
         // Math.random = 0.9 → index = 6 > ALARM_END_GENERIC_COUNT=4 → covers lines 73-75
         const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.9);
-        const result = alarmEndNotificationMessage(mockSettings);
+        const result = alarmEndNotificationMessage(testRegionName);
 
         randomSpy.mockRestore();
         expect(typeof result).toBe('string');
@@ -139,19 +141,17 @@ describe('alarm.message', () => {
 
   describe('getAirRaidAlarmSettingsMessage', () => {
     describe('positive cases', () => {
-      it('should return settings message with state', () => {
+      it('should return settings message with region name', () => {
         const mockContext = { t: vi.fn((key: string) => key) } as any;
-        const result = getAirRaidAlarmSettingsMessage(mockContext, mockSettings);
+        const result = getAirRaidAlarmSettingsMessage(mockContext, mockSettings, testRegionName);
 
         expect(typeof result).toBe('string');
-        // state is embedded within the i18n key call, not directly visible
         expect(result).toContain('alarm-settings-title');
       });
 
-      it('should return settings message without state', () => {
+      it('should return settings message without region name', () => {
         const mockContext = { t: vi.fn((key: string) => key) } as any;
-        const noStateSettings = { airRaidAlertSettings: { state: '' } } as any;
-        const result = getAirRaidAlarmSettingsMessage(mockContext, noStateSettings);
+        const result = getAirRaidAlarmSettingsMessage(mockContext, mockSettings, null);
 
         expect(typeof result).toBe('string');
       });
@@ -203,7 +203,7 @@ describe('alarm.message', () => {
       it('should return a night-time end notification (generic key)', () => {
         // Math.random = 0.1 → index = 1 ≤ ALARM_END_GENERIC_COUNT=4 → covers lines 52-56
         const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.1);
-        const result = alarmEndNotificationMessage(mockSettings);
+        const result = alarmEndNotificationMessage(testRegionName);
 
         randomSpy.mockRestore();
         expect(typeof result).toBe('string');
@@ -213,7 +213,7 @@ describe('alarm.message', () => {
       it('should return a night-time end notification (night key)', () => {
         // Math.random = 0.9 → index = 6 > ALARM_END_GENERIC_COUNT=4 → covers lines 58-60
         const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.9);
-        const result = alarmEndNotificationMessage(mockSettings);
+        const result = alarmEndNotificationMessage(testRegionName);
 
         randomSpy.mockRestore();
         expect(typeof result).toBe('string');
@@ -223,7 +223,7 @@ describe('alarm.message', () => {
 
     describe('getAlarmStartNotificationMessage', () => {
       it('should return a night-time start notification', () => {
-        const result = getAlarmStartNotificationMessage(mockSettings);
+        const result = getAlarmStartNotificationMessage(testRegionName);
 
         expect(typeof result).toBe('string');
         expect(result.length).toBeGreaterThan(0);

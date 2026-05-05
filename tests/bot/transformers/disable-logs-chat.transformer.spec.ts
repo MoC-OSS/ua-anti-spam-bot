@@ -1,15 +1,15 @@
+import type { Chats, Supergroup, User } from '@grammyjs/testing';
+import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
 
 import { logsChat } from '@bot/creator';
 import { disableLogsChatTransformer } from '@bot/transformers/disable-logs-chat.transformer';
 
-import type { OutgoingRequests } from '@testing/outgoing-requests';
-import { prepareBotForTesting } from '@testing/prepare';
-import { MessageMockUpdate } from '@testing/updates/message-super-group-mock.update';
-
 import type { GrammyContext } from '@app-types/context';
 
-let outgoingRequests: OutgoingRequests;
+let chats: Chats<GrammyContext>;
+let user: User<GrammyContext>;
+let logsGroup: Supergroup<GrammyContext>;
 const bot = new Bot<GrammyContext>('mock');
 
 let isEnabled = true;
@@ -26,7 +26,10 @@ describe('disableLogsChatTransformer', () => {
 
     bot.on('message', (context) => context.api.sendMessage(logsChat, context.msg.text || 'test'));
 
-    outgoingRequests = await prepareBotForTesting<GrammyContext>(bot);
+    ({ chats } = await prepareBot<GrammyContext>(bot));
+
+    logsGroup = chats.newSupergroup({ id: logsChat });
+    user = chats.newUser();
   }, 5000);
 
   describe('enabled feature', () => {
@@ -35,17 +38,9 @@ describe('disableLogsChatTransformer', () => {
     });
 
     it('should not send request if it has been sent into logs chat', async () => {
-      const updateConstructor = new MessageMockUpdate('test');
+      await user.sendText('test', { chat: logsGroup });
 
-      const update = updateConstructor.buildOverwrite({
-        message: {
-          chat: { ...updateConstructor.genericSuperGroup, id: logsChat },
-        },
-      });
-
-      await bot.handleUpdate(update);
-
-      expect(outgoingRequests.length).toEqual(0);
+      expect(chats.outgoing.length).toEqual(0);
     });
   });
 
@@ -55,19 +50,11 @@ describe('disableLogsChatTransformer', () => {
     });
 
     it('should not send request if it has been sent into logs chat', async () => {
-      const updateConstructor = new MessageMockUpdate('test');
+      await user.sendText('test', { chat: logsGroup });
 
-      const update = updateConstructor.buildOverwrite({
-        message: {
-          chat: { ...updateConstructor.genericSuperGroup, id: logsChat },
-        },
-      });
+      const apiCall = chats.outgoing.getLast<'sendMessage'>();
 
-      await bot.handleUpdate(update);
-
-      const apiCall = outgoingRequests.getLast<'sendMessage'>();
-
-      expect(outgoingRequests.length).toEqual(1);
+      expect(chats.outgoing.length).toEqual(1);
       expect(apiCall?.method).toEqual('sendMessage');
     });
   });

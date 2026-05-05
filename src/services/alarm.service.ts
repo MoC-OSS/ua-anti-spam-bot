@@ -1,24 +1,31 @@
 /**
  * @module alarm.service
- * @description Polls the Ukrainian air-raid alert API (alerts.com.ua) via SSE
- * and emits alarm start/end events for each region.
+ * @description Consumes air-raid alert events from the Redis pub/sub alarm channel and
+ * exposes them to the rest of the bot via a typed event emitter.
+ *
+ * The server process receives alarm webhooks from the Stfalcon API and publishes
+ * {@link AlarmPubSubMessage} objects to the Redis channel. This service subscribes to
+ * that channel and re-emits notifications as {@link AlarmEvent} objects so that
+ * {@link AlarmChatService} (and any other listener) can react to alarm state changes
+ * without being coupled to the transport mechanism.
  */
 
 import { EventEmitter } from 'node:events';
 
-import { EventSource } from 'eventsource';
 import ms from 'ms';
 import type TypedEmitter from 'typed-emitter';
 
+import { createAlarmSubscriber } from '@db/redis-pubsub';
+
 import { environmentConfig } from '@shared/config';
 
-import type { AlarmNotification, AlarmStates } from '@app-types/alarm';
+import type { AlarmEvent } from '@app-types/alarm';
+import type { AlarmPubSubMessage, StfalconRegionAlert } from '@app-types/stfalcon-alarm';
 
 import { logger } from '@utils/logger.util';
 
-import { getAlarmMock } from './_mocks/alarm.mocks';
-
-const apiUrl = 'https://alerts.com.ua/api/states';
+import { getAlarmEventMock } from './_mocks/alarm.mocks';
+import { stfalconAlarmApiService } from './stfalcon-alarm-api.service';
 
 export const ALARM_CONNECT_KEY = 'connect';
 
@@ -26,162 +33,147 @@ export const ALARM_CLOSE_KEY = 'close';
 
 export const ALARM_EVENT_KEY = 'update';
 
-export const TEST_ALARM_STATE = 'Московська область';
+export const TEST_ALARM_REGION_ID = '0';
+
+export const TEST_ALARM_REGION_NAME = 'Московська область';
 
 export interface UpdatesEvents {
   connect: (reason: string) => void;
   close: (reason: string) => void;
-  update: (body: AlarmNotification) => void;
+  update: (body: AlarmEvent) => void;
 }
 
 /**
- * @description Service for handling Alarm API
- * @deprecated
+ * Maps a {@link AlarmPubSubMessage} from the Redis channel to the internal
+ * {@link AlarmEvent} shape consumed by {@link AlarmChatService}.
+ * @param message - The raw pub/sub message received from Redis.
+ * @returns The corresponding {@link AlarmEvent}.
  */
-export class AlarmService {
-  // NOTE: replace with event target
+function mapPubSubMessageToAlarmEvent(message: AlarmPubSubMessage): AlarmEvent {
+  return {
+    regionId: message.regionId,
+    regionName: message.regionName,
+    alert: message.alert,
+    alertType: message.alertType,
+    lastUpdate: message.lastUpdate,
+  };
+}
 
-  // @ts-expect-error
+export class AlarmService {
+  // @ts-expect-error — EventEmitter lacks generic overload but TypedEmitter satisfies it at runtime.
   // eslint-disable-next-line unicorn/prefer-event-target
   updatesEmitter = new EventEmitter() as TypedEmitter<UpdatesEvents>;
 
-  source?: EventSource;
+  testAlarmInterval?: ReturnType<typeof setInterval>;
 
-  // eslint-disable-next-line sonarjs/deprecation
-  reconnectInterval?: NodeJS.Timer;
-
-  // eslint-disable-next-line sonarjs/deprecation
-  testAlarmInterval?: NodeJS.Timer;
-
-  getStates(): Promise<AlarmStates> {
-    // NOTE: replace this API with the new one
-    return Promise.resolve({
-      states: [],
-      last_update: new Date().toISOString(),
-    });
-    // return (
-    //   axios
-    //     .get<AlarmStates>(apiUrl, apiOptions)
-    //     .then((response) => response.data)
-    //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    //     .catch((error: Record<any, any>) => {
-    //       logger.info(`Alarm API is not responding:  ${JSON.stringify(error)}`);
-    //       return {
-    //         states: [],
-    //         last_update: new Date().toISOString(),
-    //       };
-    //     })
-    // );
-  }
+  private redisSubscriber?: Awaited<ReturnType<typeof createAlarmSubscriber>>;
 
   /**
-   * Restarts the connection
+   * Fetches the current alert status for all regions from the Stfalcon REST API.
+   * @returns Array of {@link StfalconRegionAlert} objects with current alert status.
    */
-  restart() {
-    // It will automatically disconnect and reconnect again.
-    // We don't need to call extra disable
-    this.enable('restart');
-  }
-
-  /**
-   * Starts the connection
-   * @param reason - reason for enabling the connection
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  enable(reason: string) {
-    // NOTE: replace this API with the new one
-    // this.subscribeOnNotifications(reason);
-    // this.initTestAlarms();
-    //
-    // if (environmentConfig.ENV === 'production') {
-    //   this.reconnectInterval = setInterval(() => {
-    //     this.subscribeOnNotifications('reconnect');
-    //   }, ms('1d'));
-    // }
-  }
-
-  /**
-   * Closes the connection
-   * @param reason - reason for disabling the connection
-   */
-  disable(reason: string) {
-    if (this.source) {
-      this.source.close();
-      this.updatesEmitter.emit(ALARM_CLOSE_KEY, reason);
-    }
-
-    if (this.reconnectInterval) {
-      // clearInterval(this.reconnectInterval);
-    }
-
-    if (this.testAlarmInterval) {
-      // clearInterval(this.testAlarmInterval);
-    }
-  }
-
-  /**
-   * Creates SSE subscription to Alarm API events
-   * @param reason - reason for creating the subscription (e.g. 'restart')
-   */
-  subscribeOnNotifications(reason: string) {
+  async getAlerts(): Promise<StfalconRegionAlert[]> {
     if (environmentConfig.DISABLE_ALARM_API) {
+      return [];
+    }
+
+    try {
+      return await stfalconAlarmApiService.getAlerts();
+    } catch (error) {
+      logger.error(error, 'Failed to fetch alarm states from Stfalcon API');
+
+      return [];
+    }
+  }
+
+  /**
+   * Starts listening for alarm events on the Redis pub/sub channel.
+   * Each received message is mapped to an {@link AlarmEvent} and emitted on
+   * {@link updatesEmitter} so that downstream listeners (e.g. {@link AlarmChatService})
+   * are notified.
+   * @param reason - Human-readable reason for enabling (used for logging).
+   */
+  async enable(reason: string): Promise<void> {
+    if (environmentConfig.DISABLE_ALARM_API) {
+      logger.info(`Alarm service: skipping enable (DISABLE_ALARM_API=true). Reason: ${reason}`);
+
       return;
     }
 
-    this.disable(reason);
-    let isConnected = false;
-
-    this.source = new EventSource(`${apiUrl}/live`, {
-      fetch: (url, init) =>
-        fetch(url, {
-          ...init,
-          headers: {
-            ...init.headers,
-            'X-API-Key': environmentConfig.ALARM_KEY,
-          },
-        }),
-    });
-
-    this.source.addEventListener('error', (event: MessageEvent & Record<string, any>) => {
-      logger.info(`Subscribe to Alarm API fail:  ${event.message as string}`);
-    });
-
-    this.source.addEventListener('open', () => {
-      logger.info('Opening a connection to Alarm API ...');
-    });
-
-    this.source.addEventListener('hello', () => {
-      logger.info('Connection to Alarm API opened successfully.');
-
-      // Hello pings every 1h
-      if (!isConnected) {
-        this.updatesEmitter.emit(ALARM_CONNECT_KEY, reason);
-        isConnected = true;
-      }
-    });
-
-    this.source.addEventListener('update', (event: MessageEvent) => {
-      /**
-       * SSE endpoint response
-       * @see https://alerts.com.ua/en
-       */
-      const responseData = JSON.parse(event.data) as AlarmNotification | null;
-
-      if (responseData) {
-        this.updatesEmitter.emit(ALARM_EVENT_KEY, responseData);
-      }
-    });
+    await this.subscribeToRedisChannel(reason);
+    this.updatesEmitter.emit(ALARM_CONNECT_KEY, reason);
   }
 
-  initTestAlarms() {
+  /**
+   * Closes the Redis pub/sub subscription and emits a close event.
+   * @param reason - Human-readable reason for disabling.
+   */
+  async disable(reason: string): Promise<void> {
+    if (this.redisSubscriber) {
+      // eslint-disable-next-line sonarjs/deprecation
+      await this.redisSubscriber.disconnect().catch((error: unknown) => {
+        logger.error(error, 'Error disconnecting alarm Redis subscriber');
+      });
+
+      this.redisSubscriber = undefined;
+      this.updatesEmitter.emit(ALARM_CLOSE_KEY, reason);
+    }
+
+    if (this.testAlarmInterval) {
+      clearInterval(this.testAlarmInterval);
+      this.testAlarmInterval = undefined;
+    }
+  }
+
+  /**
+   * Restarts the Redis subscription.
+   */
+  async restart(): Promise<void> {
+    await this.disable('restart');
+    await this.enable('restart');
+  }
+
+  /**
+   * Creates a Redis subscriber that listens on the alarm channel and emits events
+   * on {@link updatesEmitter} for each received message.
+   * @param reason - Passed to the connect event for observability.
+   */
+  async subscribeToRedisChannel(reason: string): Promise<void> {
+    if (this.redisSubscriber) {
+      // eslint-disable-next-line sonarjs/deprecation
+      await this.redisSubscriber.disconnect().catch((error: unknown) => {
+        logger.error(error, 'Error disconnecting previous alarm Redis subscriber');
+      });
+
+      this.redisSubscriber = undefined;
+    }
+
+    this.redisSubscriber = await createAlarmSubscriber((rawMessage) => {
+      try {
+        const message = JSON.parse(rawMessage) as AlarmPubSubMessage;
+        const event = mapPubSubMessageToAlarmEvent(message);
+
+        this.updatesEmitter.emit(ALARM_EVENT_KEY, event);
+      } catch (error) {
+        logger.error(error, 'Alarm service: failed to parse pub/sub message');
+      }
+    });
+
+    logger.info(`Alarm service: Redis subscription active. Reason: ${reason}`);
+  }
+
+  /**
+   * Emits simulated alarm toggle events every 30 seconds.
+   * Intended for local development and staging tests where a real webhook is unavailable.
+   */
+  initTestAlarms(): void {
     let isAlert = true;
 
     this.testAlarmInterval = setInterval(() => {
-      this.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmMock(isAlert, TEST_ALARM_STATE));
+      this.updatesEmitter.emit(ALARM_EVENT_KEY, getAlarmEventMock(isAlert, TEST_ALARM_REGION_ID, TEST_ALARM_REGION_NAME));
       isAlert = !isAlert;
     }, ms('0.5m'));
   }
 }
 
-// eslint-disable-next-line sonarjs/deprecation
 export const alarmService = new AlarmService();

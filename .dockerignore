@@ -1,4 +1,5 @@
 node_modules
+vendor
 npm-debug.log
 .env
 .DS_Store
