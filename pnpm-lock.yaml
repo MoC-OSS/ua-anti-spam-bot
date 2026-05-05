@@ -181,8 +181,8 @@ importers:
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.0.3(jiti@2.6.1))
       '@grammyjs/testing':
-        specifier: file:vendor/grammyjs-testing-0.12.0.tgz
-        version: file:vendor/grammyjs-testing-0.12.0.tgz(grammy@1.41.1)
+        specifier: file:vendor/grammyjs-testing-0.22.0.tgz
+        version: file:vendor/grammyjs-testing-0.22.0.tgz(grammy@1.41.1)
       '@stylistic/eslint-plugin':
         specifier: ^5.10.0
         version: 5.10.0(eslint@10.0.3(jiti@2.6.1))
@@ -939,9 +939,9 @@ packages:
     peerDependencies:
       grammy: ^1.13.1
 
-  '@grammyjs/testing@file:vendor/grammyjs-testing-0.12.0.tgz':
-    resolution: {integrity: sha512-ALmOaU2bAliF9JqyIHe53cWZ4ATdcsfO2PcH+Y5qUlHy7Wcm3K2LY/pq1OdFkYy6/bLBcYz8mfQGXJGgIXwY1g==, tarball: file:vendor/grammyjs-testing-0.12.0.tgz}
-    version: 0.12.0
+  '@grammyjs/testing@file:vendor/grammyjs-testing-0.22.0.tgz':
+    resolution: {integrity: sha512-nax2Uh7shFx5BaUael38UHpp45YjsbkE+8J6RHm1CGlurrlu91zBVw5e+7dD9IQ7h5jL0XymkD0e74AkRollJQ==, tarball: file:vendor/grammyjs-testing-0.22.0.tgz}
+    version: 0.22.0
     engines: {node: '>=20.0.0'}
     peerDependencies:
       grammy: ^1.42.0
@@ -6056,7 +6056,7 @@ snapshots:
       abort-controller: 3.0.0
       grammy: 1.41.1
 
-  '@grammyjs/testing@file:vendor/grammyjs-testing-0.12.0.tgz(grammy@1.41.1)':
+  '@grammyjs/testing@file:vendor/grammyjs-testing-0.22.0.tgz(grammy@1.41.1)':
     dependencies:
       deepmerge: 4.3.1
       grammy: 1.41.1
