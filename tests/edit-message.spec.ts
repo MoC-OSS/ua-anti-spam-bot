@@ -1,6 +1,6 @@
-import type { Chats, User } from '@grammyjs/testing';
-import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
+import type { Chats, User } from 'grammy-testing';
+import { prepareBot } from 'grammy-testing';
 
 import { getMessagesRegisterComposer } from '@bot/composers/messages.composer';
 import { getNoCardsComposer } from '@bot/composers/messages/no-cards.composer';

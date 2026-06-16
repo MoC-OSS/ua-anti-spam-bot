@@ -1,6 +1,6 @@
-import type { Chats, User } from '@grammyjs/testing';
-import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
+import type { Chats, User } from 'grammy-testing';
+import { prepareBot } from 'grammy-testing';
 
 import { StatisticsCommand } from '@bot/commands/private/statistics.command';
 import { getBeforeAnyComposer } from '@bot/composers/before-any.composer';

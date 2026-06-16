@@ -1,4 +1,4 @@
-import { mockChatSession as _mockChatSession, mockSession as _mockSession, mockState as _mockState } from '@grammyjs/testing';
+import { mockChatSession as _mockChatSession, mockSession as _mockSession, mockState as _mockState } from 'grammy-testing';
 
 import type { GrammyContext } from '@app-types/context';
 import type { ChatSessionData, ChatSettings, SessionData } from '@app-types/session';

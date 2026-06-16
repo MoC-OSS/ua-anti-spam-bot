@@ -1,6 +1,6 @@
-import type { Chats, Supergroup, User } from '@grammyjs/testing';
-import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
+import type { Chats, Supergroup, User } from 'grammy-testing';
+import { prepareBot } from 'grammy-testing';
 
 import { getWarnRussianComposer } from '@bot/composers/messages/warn-russian.composer';
 import { parseIsRussian } from '@bot/middleware/parse-is-russian.middleware';
