@@ -1,6 +1,6 @@
-import type { Chats, Supergroup, User } from '@grammyjs/testing';
-import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
+import type { Chats, Supergroup, User } from 'grammy-testing';
+import { prepareBot } from 'grammy-testing';
 
 import { getDenylistComposer } from '@bot/composers/messages/denylist.composer';
 import { i18n } from '@bot/i18n';

@@ -1,6 +1,6 @@
-import type { Chats, User } from '@grammyjs/testing';
-import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
+import type { Chats, User } from 'grammy-testing';
+import { prepareBot } from 'grammy-testing';
 
 import { selfDestructedReply } from '@bot/plugins/self-destructed.plugin';
 

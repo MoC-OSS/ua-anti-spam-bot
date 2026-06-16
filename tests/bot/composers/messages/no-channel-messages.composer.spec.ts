@@ -1,6 +1,6 @@
-import type { Channel, Chats, Supergroup, User } from '@grammyjs/testing';
-import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
+import type { Channel, Chats, Supergroup, User } from 'grammy-testing';
+import { prepareBot } from 'grammy-testing';
 
 import { getNoChannelMessagesComposer } from '@bot/composers/messages/no-channel-messages.composer';
 import { i18n } from '@bot/i18n';

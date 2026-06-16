@@ -1,6 +1,6 @@
-import type { Chats, Supergroup, User } from '@grammyjs/testing';
-import { prepareBot } from '@grammyjs/testing';
 import { Bot } from 'grammy';
+import type { Chats, Supergroup, User } from 'grammy-testing';
+import { prepareBot } from 'grammy-testing';
 
 import { getNoAntisemitismComposer } from '@bot/composers/messages/no-antisemitism.composer';
 import { i18n } from '@bot/i18n';
