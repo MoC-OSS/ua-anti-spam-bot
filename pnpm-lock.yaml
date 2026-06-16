@@ -180,9 +180,6 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.0.3(jiti@2.6.1))
-      '@grammyjs/testing':
-        specifier: file:vendor/grammyjs-testing-0.22.0.tgz
-        version: file:vendor/grammyjs-testing-0.22.0.tgz(grammy@1.41.1)
       '@stylistic/eslint-plugin':
         specifier: ^5.10.0
         version: 5.10.0(eslint@10.0.3(jiti@2.6.1))
@@ -294,6 +291,9 @@ importers:
       globals:
         specifier: ^17.4.0
         version: 17.4.0
+      grammy-testing:
+        specifier: ^0.26.0
+        version: 0.26.0(grammy@1.41.1)
       input:
         specifier: ^1.0.1
         version: 1.0.1
@@ -938,13 +938,6 @@ packages:
     engines: {node: '>=12.20.0 || >=14.13.1'}
     peerDependencies:
       grammy: ^1.13.1
-
-  '@grammyjs/testing@file:vendor/grammyjs-testing-0.22.0.tgz':
-    resolution: {integrity: sha512-nax2Uh7shFx5BaUael38UHpp45YjsbkE+8J6RHm1CGlurrlu91zBVw5e+7dD9IQ7h5jL0XymkD0e74AkRollJQ==, tarball: file:vendor/grammyjs-testing-0.22.0.tgz}
-    version: 0.22.0
-    engines: {node: '>=20.0.0'}
-    peerDependencies:
-      grammy: ^1.42.0
 
   '@grammyjs/transformer-throttler@1.2.1':
     resolution: {integrity: sha512-CpWB0F3rJdUiKsq7826QhQsxbZi4wqfz1ccKX+fr+AOC+o8K7ZvS+wqX0suSu1QCsyUq2MDpNiKhyL2ZOJUS4w==}
@@ -3179,6 +3172,12 @@ packages:
     resolution: {integrity: sha512-vGqrEJPpm5XnaTkklkb/luLdo+qNZX78Fr9CwLdPFEUymYByqlxU/h+NKEmzsNHzC9lc+rS8oR+xQo1Wo5Ogxg==}
     peerDependencies:
       grammy: ^1.10.0
+
+  grammy-testing@0.26.0:
+    resolution: {integrity: sha512-fTF4LIxw+MATKHw/T32GzlMx+KOpV9tAl5+DXD4AUnIUeDuRTIWiNPxvUBFb4hPlRiikVhl91nIMI/9XwHjuRQ==}
+    engines: {node: '>=20.0.0'}
+    peerDependencies:
+      grammy: ^1.44.0
 
   grammy@1.41.1:
     resolution: {integrity: sha512-wcHAQ1e7svL3fJMpDchcQVcWUmywhuepOOjHUHmMmWAwUJEIyK5ea5sbSjZd+Gy1aMpZeP8VYJa+4tP+j1YptQ==}
@@ -6056,12 +6055,6 @@ snapshots:
       abort-controller: 3.0.0
       grammy: 1.41.1
 
-  '@grammyjs/testing@file:vendor/grammyjs-testing-0.22.0.tgz(grammy@1.41.1)':
-    dependencies:
-      deepmerge: 4.3.1
-      grammy: 1.41.1
-      type-fest: 5.6.0
-
   '@grammyjs/transformer-throttler@1.2.1(grammy@1.41.1)':
     dependencies:
       bottleneck: 2.19.5
@@ -8607,6 +8600,12 @@ snapshots:
     dependencies:
       callback-data: 1.1.1
       grammy: 1.41.1
+
+  grammy-testing@0.26.0(grammy@1.41.1):
+    dependencies:
+      deepmerge: 4.3.1
+      grammy: 1.41.1
+      type-fest: 5.6.0
 
   grammy@1.41.1:
     dependencies:
